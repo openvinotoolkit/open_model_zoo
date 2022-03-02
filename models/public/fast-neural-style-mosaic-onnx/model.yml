@@ -25,9 +25,11 @@ files:
     original_source: https://media.githubusercontent.com/media/onnx/models/111fab38a5757c8fc8db0aa13e73fb330e516c42/vision/style_transfer/fast_neural_style/model/mosaic-9.onnx
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fast-neural-style-mosaic-onnx/mosaic-9.onnx
     size: 6728029
+input_info:
+  - name: input1
+    shape: [1, 3, 224, 224]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,224,224]
-  - --layout=NCHW
   - --input_model=$dl_dir/fast-neural-style-mosaic-onnx.onnx
   - --reverse_input_channels
 framework: onnx

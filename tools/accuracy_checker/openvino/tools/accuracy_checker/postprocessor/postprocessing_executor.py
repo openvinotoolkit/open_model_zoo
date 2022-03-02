@@ -67,7 +67,9 @@ class PostprocessingExecutor:
 
         return zipped_result[0:2]  # return changed annotations and predictions only
 
-    def deprocess_batch(self, annotations, predictions, metas=None):
+    def deprocess_batch(self, annotations, predictions, metas=None, allow_empty_annotation=False):
+        if allow_empty_annotation and not annotations:
+            annotations = [None] * len(predictions)
         if metas is None:
             zipped_result = zipped_transform(self.deprocess_image, annotations, predictions)
         else:

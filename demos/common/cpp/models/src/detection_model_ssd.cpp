@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,28 @@
 // limitations under the License.
 */
 
-#include "models/detection_model_ssd.h"
+#include <string>
+#include <vector>
+#include <openvino/openvino.hpp>
 #include <utils/common.hpp>
-#include <ngraph/ngraph.hpp>
+#include "models/detection_model_ssd.h"
+#include "models/results.h"
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
-    const std::vector<std::string>& labels) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+    const std::vector<std::string>& labels,
+    const std::string& layout) :
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels, layout) {
 }
 
-std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
     if (inputsNames.size() > 1) {
-        auto blob = request->GetBlob(inputsNames[1]);
-        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
-        auto data = blobMapped.as<float*>();
-        data[0] = static_cast<float>(netInputHeight);
-        data[1] = static_cast<float>(netInputWidth);
-        data[2] = 1;
+        const auto& imageInfoTensor = request.get_tensor(inputsNames[1]);
+        const auto info = imageInfoTensor.data<float>();
+        info[0] = static_cast<float>(netInputHeight);
+        info[1] = static_cast<float>(netInputWidth);
+        info[2] = 1;
+        request.set_tensor(inputsNames[1], imageInfoTensor);
     }
 
     return DetectionModel::preprocess(inputData, request);
@@ -44,15 +48,16 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
-    InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
-    const float *detections = outputMapped.as<float*>();
+    const ov::Tensor& detectionsTensor = infResult.getFirstOutputTensor();
+    size_t detectionsNum = detectionsTensor.get_shape()[detectionsNumId];
+    const float* detections = detectionsTensor.data<float>();
 
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    for (size_t i = 0; i < maxProposalCount; i++) {
+    for (size_t i = 0; i < detectionsNum; i++) {
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
@@ -85,14 +90,10 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
-    std::vector<InferenceEngine::LockedMemory<const void>> mappedMemoryAreas;
-    for (const auto& name : outputsNames) {
-        mappedMemoryAreas.push_back(infResult.outputsData[name]->rmap());
-    }
-
-    const float *boxes = mappedMemoryAreas[0].as<float*>();
-    const float *labels = mappedMemoryAreas[1].as<float*>();
-    const float *scores = mappedMemoryAreas.size() > 2 ? mappedMemoryAreas[2].as<float*>() : nullptr;
+    const float* boxes = infResult.outputsData[outputsNames[0]].data<float>();
+    size_t detectionsNum = infResult.outputsData[outputsNames[0]].get_shape()[detectionsNumId];
+    const float* labels = infResult.outputsData[outputsNames[1]].data<float>();
+    const float* scores = outputsNames.size() > 2 ? infResult.outputsData[outputsNames[2]].data<float>() : nullptr;
 
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
@@ -104,7 +105,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     float widthScale = ((float)internalData.inputImgWidth) / (scores ? 1 : netInputWidth);
     float heightScale = ((float)internalData.inputImgHeight) / (scores ? 1 : netInputHeight);
 
-    for (size_t i = 0; i < maxProposalCount; i++) {
+    for (size_t i = 0; i < detectionsNum; i++) {
         float confidence = scores ? scores[i] : boxes[i * objectSize + 4];
 
         /** Filtering out objects with confidence < confidence_threshold probability **/
@@ -131,112 +132,142 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     return retVal;
 }
 
-void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void ModelSSD::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    // --------------------------- Prepare input ------------------------------------------------------
+    ov::preprocess::PrePostProcessor ppp(model);
+    for (const auto& input : model->inputs()) {
+        auto inputTensorName = input.get_any_name();
+        const ov::Shape& shape = input.get_shape();
+        ov::Layout inputLayout = getInputLayout(input);
 
-    for (const auto& inputInfoItem : inputInfo) {
-        if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
+        if (shape.size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
-                inputsNames.push_back(inputInfoItem.first);
+                inputsNames.push_back(inputTensorName);
             }
             else {
-                inputsNames[0] = inputInfoItem.first;
+                inputsNames[0] = inputTensorName;
             }
-            inputTransform.setPrecision(inputInfoItem.second);
+
+            inputTransform.setPrecision(ppp, inputTensorName);
+            ppp.input(inputTensorName).tensor().
+                set_layout({ "NHWC" });
+
             if (useAutoResize) {
-                inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-                inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+                ppp.input(inputTensorName).tensor().
+                    set_spatial_dynamic_shape();
+
+                ppp.input(inputTensorName).preprocess().
+                    convert_element_type(ov::element::f32).
+                    resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             }
-            else {
-                inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-            }
-            const InferenceEngine::TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
-            netInputHeight = getTensorHeight(inputDesc);
-            netInputWidth = getTensorWidth(inputDesc);
+
+            ppp.input(inputTensorName).model().set_layout(inputLayout);
+
+            netInputWidth = shape[ov::layout::width_idx(inputLayout)];
+            netInputHeight = shape[ov::layout::height_idx(inputLayout)];
         }
-        else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
+        else if (shape.size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
-            inputsNames[1] = inputInfoItem.first;
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::FP32);
+            inputsNames[1] = inputTensorName;
+            ppp.input(inputTensorName).tensor().
+                set_element_type(ov::element::f32);
         }
         else {
             throw std::logic_error("Unsupported " +
-                std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
-                "input layer '" + inputInfoItem.first + "'. "
+                std::to_string(input.get_shape().size()) + "D "
+                "input layer '" + input.get_any_name() + "'. "
                 "Only 2D and 4D input layers are supported");
         }
     }
+    model = ppp.build();
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    if (outputInfo.size() == 1) {
-        prepareSingleOutput(outputInfo);
+    // --------------------------- Prepare output  -----------------------------------------------------
+    if (model->outputs().size() == 1) {
+        prepareSingleOutput(model);
     }
     else {
-        prepareMultipleOutputs(outputInfo);
+        prepareMultipleOutputs(model);
     }
 }
 
-void ModelSSD::prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo) {
-    InferenceEngine::DataPtr& output = outputInfo.begin()->second;
-    outputsNames.push_back(outputInfo.begin()->first);
+void ModelSSD::prepareSingleOutput(std::shared_ptr<ov::Model>& model) {
+    const auto& output = model->output();
+    outputsNames.push_back(output.get_any_name());
 
-    const InferenceEngine::SizeVector outputDims = output->getTensorDesc().getDims();
-
-    if (outputDims.size() != 4) {
-        throw std::logic_error("Incorrect output dimensions for SSD");
+    const ov::Shape& shape = output.get_shape();
+    const ov::Layout& layout("NCHW");
+    if (shape.size() != 4) {
+        throw std::logic_error("SSD single output must have 4 dimensions, but had " + std::to_string(shape.size()));
     }
-
-    maxProposalCount = outputDims[2];
-    objectSize = outputDims[3];
+    detectionsNumId = ov::layout::height_idx(layout);
+    objectSize = shape[ov::layout::width_idx(layout)];
     if (objectSize != 7) {
-        throw std::logic_error("Output should have 7 as a last dimension");
+        throw std::logic_error("SSD single output must have 7 as a last dimension, but had " + std::to_string(objectSize));
     }
-
-    output->setPrecision(InferenceEngine::Precision::FP32);
-    output->setLayout(InferenceEngine::Layout::NCHW);
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.output().tensor().
+        set_element_type(ov::element::f32).
+        set_layout(layout);
+    model = ppp.build();
 }
 
-void ModelSSD::prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo) {
-    if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
-        outputInfo.find("scores") != outputInfo.end()) {
-        outputsNames.push_back("bboxes");
-        outputsNames.push_back("labels");
-        outputsNames.push_back("scores");
+void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
+    const ov::OutputVector& outputs = model->outputs();
+    for (auto& output : outputs) {
+        const auto& tensorNames = output.get_names();
+        for (const auto& name : tensorNames) {
+            if (name.find("boxes") != std::string::npos) {
+                outputsNames.push_back(name);
+                break;
+            }
+            else if (name.find("labels") != std::string::npos) {
+                outputsNames.push_back(name);
+                break;
+            }
+            else if (name.find("scores") != std::string::npos) {
+                outputsNames.push_back(name);
+                break;
+            }
+        }
     }
-    else if (outputInfo.find("boxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end()) {
-        outputsNames.push_back("boxes");
-        outputsNames.push_back("labels");
+    if (outputsNames.size() != 2 && outputsNames.size() != 3) {
+        throw std::logic_error("SSD model wrapper must have 2 or 3 outputs, but had " + std::to_string(outputsNames.size()));
     }
-    else {
-        throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
-    }
+    std::sort(outputsNames.begin(), outputsNames.end());
 
-    const InferenceEngine::SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+    ov::preprocess::PrePostProcessor ppp(model);
+    const auto& boxesShape = model->output(outputsNames[0]).get_partial_shape().get_max_shape();
 
-    if (outputDims.size() == 2) {
-        maxProposalCount = outputDims[0];
-        objectSize = outputDims[1];
+    ov::Layout boxesLayout;
+    if (boxesShape.size() == 2) {
+        boxesLayout = "NC";
+        detectionsNumId = ov::layout::batch_idx(boxesLayout);
+        objectSize = boxesShape[ov::layout::channels_idx(boxesLayout)];
 
         if (objectSize != 5) {
             throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
         }
     }
-    else if (outputDims.size() == 3) {
-        maxProposalCount = outputDims[1];
-        objectSize = outputDims[2];
+    else if (boxesShape.size() == 3) {
+        boxesLayout = "CHW";
+        detectionsNumId = ov::layout::height_idx(boxesLayout);
+        objectSize = boxesShape[ov::layout::width_idx(boxesLayout)];
 
         if (objectSize != 4) {
-            throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required");
+            throw std::logic_error("Incorrect 'boxes' output shape, [b][n][4] shape is required");
         }
     }
     else {
-        throw std::logic_error("Incorrect number of 'boxes' output dimensions");
+        throw std::logic_error("Incorrect number of 'boxes' output dimensions, expected 2 or 3, but had " + boxesShape.size());
     }
 
-    for (const std::string& name : outputsNames) {
-        outputInfo[name]->setPrecision(InferenceEngine::Precision::FP32);
+    ppp.output(outputsNames[0]).tensor().
+        set_layout(boxesLayout);
+
+    for (const auto& outName : outputsNames) {
+        ppp.output(outName).tensor().
+            set_element_type(ov::element::f32);
     }
+    model = ppp.build();
 }

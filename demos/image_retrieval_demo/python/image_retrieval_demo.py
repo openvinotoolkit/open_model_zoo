@@ -70,10 +70,6 @@ def build_argparser():
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
-    args.add_argument("-l", "--cpu_extension",
-                      help="Optional. Required for CPU custom layers. Absolute path to "
-                           "a shared library with the kernels implementations.", type=str,
-                      default=None)
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
@@ -123,8 +119,7 @@ def main():
         raise RuntimeError("The input should be a video file or a numeric camera ID")
     frames = RoiDetectorOnVideo(cap)
 
-    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
-                                   args.cpu_extension)
+    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

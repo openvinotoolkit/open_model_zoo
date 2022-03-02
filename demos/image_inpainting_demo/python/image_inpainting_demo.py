@@ -130,7 +130,7 @@ def main():
         log.error("-ar and -ac options cannot be used together")
         return -1
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

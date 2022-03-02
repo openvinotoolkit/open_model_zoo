@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 import abc
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Set
 
 
 @dataclass
 class Metadata:
+    names: Set[str] = field(default_factory=set)
     shape: List[int] = field(default_factory=list)
+    layout: str = ''
     precision: str = ''
     type: str = ''
     meta: Dict = field(default_factory=dict)

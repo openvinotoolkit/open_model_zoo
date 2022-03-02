@@ -4,8 +4,8 @@
 
   This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/legendary111/mobilenet-yolo-v4-syg/>,
-  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
+  For details, see [the repository](https://github.com/legendary111/mobilenet-yolo-v4-syg/),
+  [paper of MobileNetV2](https://arxiv.org/abs/1801.04381) and [YOLOv4](https://arxiv.org/abs/2004.10934).
 
 ## Specification
 
@@ -23,7 +23,7 @@ which is our own made\* validation dataset for converted model.
 
 | Metric |  Value |
 | ------ | -------|
-| mAP    | 87.11% |
+| mAP    | 86.35% |
 
 ## Input
 
@@ -85,9 +85,9 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_4` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

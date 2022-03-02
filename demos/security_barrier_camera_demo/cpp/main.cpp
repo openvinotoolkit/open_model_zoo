@@ -496,7 +496,7 @@ void DetectionsProcessor::process() {
                         ov::InferRequest& attributesRequest,
                         cv::Rect rect,
                         Context& context) {
-                            attributesRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                            attributesRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
 
                             const std::pair<std::string, std::string>& attributes =
                                 context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
@@ -535,7 +535,7 @@ void DetectionsProcessor::process() {
                         ov::InferRequest& lprRequest,
                         cv::Rect rect,
                         Context& context) {
-                            lprRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                            lprRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
 
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
@@ -593,7 +593,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                    inferRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
                         std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
@@ -699,7 +699,7 @@ int main(int argc, char* argv[]) {
             inputChannels.push_back(InputChannel::create(inputSources[channelI]));
         }
 
-        // Init OpenVINO Core
+        // Load OpenVINO Runtime
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
@@ -712,7 +712,7 @@ int main(int argc, char* argv[]) {
                 devices.insert(device);
             }
         }
-        std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        std::map<std::string, int32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
             if ("CPU" == device) {
@@ -720,13 +720,13 @@ int main(int argc, char* argv[]) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
-                core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? device_nstreams.at("CPU") : ov::streams::AUTO)));
+                core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? ov::streams::Num(device_nstreams["CPU"]) : ov::streams::AUTO)));
 
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
             if ("GPU" == device) {
-                core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? device_nstreams.at("GPU") : ov::streams::AUTO));
+                core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? ov::streams::Num(device_nstreams["GPU"]) : ov::streams::AUTO));
 
                 device_nstreams["GPU"] = core.get_property("GPU", ov::streams::num);
                 if (devices.end() != devices.find("CPU")) {

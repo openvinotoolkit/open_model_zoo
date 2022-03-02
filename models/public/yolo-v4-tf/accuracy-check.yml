@@ -76,9 +76,9 @@ models:
           raw_output: True
           output_format: HWB
           outputs:
-            - conv2d_93/BiasAdd
-            - conv2d_101/BiasAdd
-            - conv2d_109/BiasAdd
+            - Func/StatefulPartitionedCall/output/_544
+            - Func/StatefulPartitionedCall/output/_542
+            - Func/StatefulPartitionedCall/output/_543
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:

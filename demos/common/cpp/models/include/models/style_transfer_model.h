@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,19 +15,21 @@
 */
 
 #pragma once
-
-#include "image_model.h"
+#include <openvino/openvino.hpp>
+#include "models/image_model.h"
+#include "models/results.h"
 
 class StyleTransferModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    StyleTransferModel(const std::string& modelFileName);
+    /// @param layout - model input layout
+    StyleTransferModel(const std::string& modelFileName, const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+        const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

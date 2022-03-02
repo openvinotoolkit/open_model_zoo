@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,23 +14,28 @@
 // limitations under the License.
 */
 
-#include "image_model.h"
+#pragma once
+#include <string>
+#include <openvino/openvino.hpp>
+#include "models/image_model.h"
+#include "models/results.h"
 
 #pragma once
 class SegmentationModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// @param useAutoResize - if true, image will be resized by IE.
+    /// @param useAutoResize - if true, image will be resized by openvino.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    SegmentationModel(const std::string& modelFileName, bool useAutoResize);
+    /// @param layout - model input layout
+    SegmentationModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout = "");
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 
     int outHeight = 0;
     int outWidth = 0;

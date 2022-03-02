@@ -65,8 +65,8 @@ The demo runs inference and shows results for each image captured from an input.
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
-The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 ### Supported Models
 
@@ -81,23 +81,18 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
+Running the demo with `-h` shows this help message:
 ```
-[ INFO ] InferenceEngine: <version>
-
 image_processing_demo_async [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer.
+    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
+    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
     -o "<path>"               Optional. Name of the output file(s) to save.
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -nthreads "<integer>"     Optional. Number of threads.
@@ -108,12 +103,6 @@ Options:
     -u                        Optional. List of monitors to show initially.
     -jc                       Optional. Flag of using compression for jpeg images. Default value if false. Only for jr architecture type.
 ```
-
-Running the application with the empty list of options yields an error message.
-
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/model_tools/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 You can use the following command to enhance the resolution of the images captured by a camera using a pre-trained single-image-super-resolution-1033 network:
 

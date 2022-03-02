@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
 */
 
 #pragma once
-#include <string>
+#include <condition_variable>
 #include <deque>
 #include <map>
-#include <condition_variable>
-#include "utils/config_factory.h"
-#include "pipelines/requests_pool.h"
-#include "models/results.h"
-#include "models/model_base.h"
+#include <string>
+#include <openvino/openvino.hpp>
+#include <models/results.h>
+#include <models/model_base.h>
+#include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
+#include "pipelines/requests_pool.h"
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
@@ -31,10 +32,10 @@ class AsyncPipeline {
 public:
     /// Loads model and performs required initialization
     /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.
-    /// @param cnnConfig - fine tuning configuration for CNN model
-    /// @param engine - reference to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core);
+    /// @param config - fine tuning configuration for model
+    /// @param core - reference to ov::Core instance to use.
+    /// If it is omitted, new instance of  ov::Core will be created inside.
+    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core);
     virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
@@ -50,7 +51,7 @@ public:
     ///
     void waitForTotalCompletion() { if (requestsPool) requestsPool->waitForTotalCompletion(); }
 
-    /// Submits data to the network for inference
+    /// Submits data to the model for inference
     /// @param inputData - input data to be submitted
     /// @param metaData - shared pointer to metadata container.
     /// Might be null. This pointer will be passed through pipeline and put to the final result structure.
@@ -77,7 +78,7 @@ protected:
     std::unique_ptr<RequestsPool> requestsPool;
     std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
 
-    InferenceEngine::ExecutableNetwork execNetwork;
+    ov::CompiledModel compiledModel;
 
     std::mutex mtx;
     std::condition_variable condVar;

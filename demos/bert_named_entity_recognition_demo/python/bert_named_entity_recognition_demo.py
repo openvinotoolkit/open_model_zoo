@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -56,6 +56,10 @@ def build_argparser():
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
+    args.add_argument('--layout',
+                      help='Optional. Model inputs layouts. '
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.',
+                      type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
                            "Default value is CPU", default="CPU", type=str)
@@ -108,7 +112,7 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
@@ -143,10 +147,10 @@ def main():
             pipeline.await_any()
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     for sentence_id in range(next_sentence_id_to_show, next_sentence_id):
         results = pipeline.get_result(sentence_id)
-        while results is None:
-            results = pipeline.get_result(sentence_id)
         (score, filtered_labels_id), meta = results
         print_raw_results(score, filtered_labels_id, meta)
 

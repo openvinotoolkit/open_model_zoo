@@ -123,9 +123,9 @@ class FeedbackMixin:
 
 class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.partial_shapes = {}
-        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):
@@ -178,9 +178,9 @@ class ModelDLSDKModel(BaseDLSDKModel, FeedbackMixin):
 
 class ModelOVModel(BaseOpenVINOModel, FeedbackMixin):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
         self.partial_shapes = {}
-        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):

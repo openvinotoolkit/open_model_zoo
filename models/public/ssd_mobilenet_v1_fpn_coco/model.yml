@@ -25,11 +25,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+input_info:
+  - name: image_tensor
+    shape: [1, 640, 640, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,640,640,3]
-  - --layout=image_tensor(NHWC)
-  - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
   - --transformations_config=$mo_ext_dir/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/pipeline.config

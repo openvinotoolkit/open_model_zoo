@@ -39,5 +39,18 @@ files:
     size: 41207566
     checksum: a50e0542d4f8af5fa089f60d55cc643e67281eeab35104b51ac9edfd1aaf3c3a501b07510f44dec7b032f068b9cf8c39
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-small-uncased-whole-word-masking-squad-int8-0002/FP16-INT8/bert-small-uncased-whole-word-masking-squad-int8-0002.bin
+input_info:
+  - name: input_ids
+    shape: [1, 384]
+    layout: NC
+  - name: attention_mask
+    shape: [1, 384]
+    layout: NC
+  - name: token_type_ids
+    shape: [1, 384]
+    layout: NC
+  - name: position_ids
+    shape: [1, 384]
+    layout: NC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -21,10 +21,11 @@ files:
     size: 63501195
     checksum: b25e5dfb0c140e06d97ac8c0cf8c44f167a6287f1d4a883d41897973643628efd41621389fb1a27dda7cb404400688e9
     source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v1/saved_model.pb
+input_info:
+  - name: input_1
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,416,416,3]
-  - --input=input_1
-  - --layout=input_1(NHWC)
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$mo_ext_dir/front/tf/yolo_v2_tiny_voc.json

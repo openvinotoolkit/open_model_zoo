@@ -473,17 +473,6 @@ bool Tracker::IsTrackForgotten(size_t id) const {
     return tracks_.at(id).lost > params_.forget_delay;
 }
 
-TrackedObjects Tracker::TrackedDetections() const {
-    TrackedObjects detections;
-    for (size_t idx : active_track_ids()) {
-        auto track = tracks().at(idx);
-        if (IsTrackValid(idx) && !track.lost) {
-            detections.emplace_back(track.objects.back());
-        }
-    }
-    return detections;
-}
-
 TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
     TrackedObjects detections;
     for (size_t idx : active_track_ids()) {

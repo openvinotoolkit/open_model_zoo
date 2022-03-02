@@ -187,12 +187,6 @@ public:
     void Process(const cv::Mat &frame, const TrackedObjects &detections);
 
     ///
-    /// \brief Get tracked detections.
-    /// \return Tracked detections.
-    ///
-    TrackedObjects TrackedDetections() const;
-
-    ///
     /// \brief Get tracked detections with labels.
     /// \return Tracked detections.
     ///

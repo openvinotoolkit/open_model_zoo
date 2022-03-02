@@ -17,7 +17,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_object_detection_demo_yolov3/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvino.ai/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvino.ai/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
 An example of using the Model Downloader:
 
@@ -41,7 +41,23 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
+```
+    [-h]              Print a usage message
+     -i               A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    [-loop]           Enable reading the inputs in a loop.
+    [-duplicate_num]  Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
+     -m <path>        Path to an .xml file with a trained model.
+    [-d <device>]     Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. Use "-d MULTI:<comma-separated_devices_list>" format to specify MULTI plugin. The application looks for a suitable plugin for the specified device.
+    [-n_iqs]          Frame queue size for input channels
+    [-fps_sp]         FPS measurement sampling period between timepoints in msec
+    [-n_sp]           Number of sampling periods
+    [-t]              Probability threshold for detections
+    [-no_show]        Don't show output.
+    [-show_stats]     Enable statistics report
+    [-real_input_fps] Disable input frames caching, for maximum throughput pipeline
+    [-u]              List of monitors to show initially.
+```
 
 To run the demo on CPU, with one single camera, use the following command:
 

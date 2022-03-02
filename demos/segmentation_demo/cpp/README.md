@@ -8,7 +8,7 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
@@ -16,7 +16,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -50,11 +50,8 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
-
+Running the demo with `-h` shows this help message:
 ```
-[ INFO ] InferenceEngine: <version>
-
 segmentation_demo [OPTION]
 Options:
 
@@ -63,11 +60,9 @@ Options:
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -labels "<path>"          Optional. Path to a file with labels mapping.
+    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
     -r                        Optional. Output inference results as mask histogram.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
@@ -79,8 +74,6 @@ Options:
     -u                        Optional. List of monitors to show initially.
     -only_masks               Optional. Display only masks. Could be switched by TAB key.
 ```
-
-Running the application with the empty list of options yields an error message.
 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 

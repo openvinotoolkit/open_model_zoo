@@ -40,5 +40,9 @@ files:
     size: 32406902
     checksum: 39c39751bf16f37cfa1388a1e0dabc31c3653696330cfd47382c83396714e55f1b62b24f7e053dba5aa4bed105044806
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-0302/FP16-INT8/person-detection-0302.bin
+input_info:
+  - name: image
+    shape: [1, 3, 720, 1280]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -33,6 +33,15 @@ class SSDAdapter(Adapter):
     __provider__ = 'ssd'
     prediction_types = (DetectionPrediction, )
 
+    def configure(self):
+        super().configure()
+        self.outputs_verified = False
+
+    def select_output_blob(self, outputs):
+        super().select_output_blob(outputs)
+        self.output_blob = self.check_output_name(self.output_blob, outputs)
+        self.outputs_verified = True
+
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
@@ -42,7 +51,8 @@ class SSDAdapter(Adapter):
             list of DetectionPrediction objects
         """
         prediction_batch = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(prediction_batch)
+        if not self.outputs_verified:
+            self.select_output_blob(prediction_batch)
         prediction_batch = prediction_batch[self.output_blob]
         prediction_batch = prediction_batch.reshape(-1, 7)
         prediction_batch = self.remove_empty_detections(prediction_batch)

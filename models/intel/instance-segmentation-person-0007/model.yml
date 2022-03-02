@@ -33,5 +33,9 @@ files:
     size: 14121852
     checksum: 95ee8c36a42dea006e3e9d2c609668343cbbafff175a7ba909161a72119c724ded25d160cd1c512a3e87663d099ded5c
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/instance-segmentation-person-0007/FP16/instance-segmentation-person-0007.bin
+input_info:
+  - name: image
+    shape: [1, 3, 320, 544]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,14 +1,17 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+
+#include <chrono>
+#include <fstream>
+#include <string>
+#include <vector>
+
+#include <opencv2/gapi/infer/ie.hpp>
 
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
-
-#include <opencv2/gapi/infer/ie.hpp>
-
-#include <fstream>
 
 #include "gesture_recognition_demo_gapi.hpp"
 #include "stream_source.hpp"
@@ -54,15 +57,12 @@ int main(int argc, char *argv[]) {
         const auto ar_net_shape = getNetShape(FLAGS_m_a);
 
         /** Get information about frame from cv::VideoCapture **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         /** Share runtime id with graph **/
@@ -129,11 +129,11 @@ int main(int argc, char *argv[]) {
         /** ---------------- The execution part ---------------- **/
         const float batch_constant_FPS = 15;
         auto drop_batch = std::make_shared<bool>(false);
-        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CustomCapSource>(cap,
-                                                                                    frame_size,
-                                                                                    int(ar_net_shape[1]),
-                                                                                    batch_constant_FPS,
-                                                                                    drop_batch),
+        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::GestRecCapSource>(cap,
+                                                                                     frame_size,
+                                                                                     int(ar_net_shape[1]),
+                                                                                     batch_constant_FPS,
+                                                                                     drop_batch),
                                    current_person_id_m));
 
         std::string gestureWindowName = "Gesture";

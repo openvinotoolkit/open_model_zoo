@@ -5,15 +5,14 @@ The demo is based on https://github.com/seungwonpark/melgan, https://github.com/
 
 ## How It Works
 
-On startup, the demo application reads command-line parameters and loads four or three networks to the
-Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
+On startup, the demo application reads command-line parameters and loads four or three models to OpenVINO™ Runtime plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/text_to_speech_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

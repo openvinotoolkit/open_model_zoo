@@ -33,5 +33,9 @@ files:
     size: 15119354
     checksum: dcf216af54725539aeeaddefd23d6511d475fecb472569377005e99ffd33f028ab7e98c0141a16f3704c5d0dae414e79
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/action-recognition-0001/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+input_info:
+  - name: '0'
+    shape: [1, 16, 512]
+    layout: NDC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

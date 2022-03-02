@@ -1,5 +1,5 @@
 # [OpenVINO™ Toolkit](https://docs.openvino.ai/latest/index.html) - Open Model Zoo repository
-[![Stable release](https://img.shields.io/badge/version-2021.4-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.1)
+[![Stable release](https://img.shields.io/badge/version-2022.1-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.1)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
 
@@ -11,7 +11,7 @@ Intel is committed to the respect of human rights and avoiding complicity in hum
 * [Intel Pre-Trained Models](models/intel/index.md)
 * [Public Pre-Trained Models](models/public/index.md)
 * [Model Downloader](tools/model_tools/README.md) and other automation tools
-* [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
+* [Demos](demos/README.md) that demonstrate models usage with OpenVINO™ Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
 
 ## License

@@ -493,6 +493,9 @@ AccuracyChecker supports following set of adapters:
   * `keep_top_k` - maximal number of boxes which should be kept during NMS (optional, default 200).
   * `diff_coord_order` - ordering convention of coordinates differs from the commonly used format [x0, y0, x1, y1]. If value is True, the format of coordinates is [y0, x0, y1, x1] (optional, default False).
   * `max_detections` - maximal number of boxes which should be kept (optional).
+* `background_matting_with_pha_and_fgr` - converts output of background matting models which predicts foreground and alpha to `BackgroundMattingPrediction`:
+  * `alpha_out` - name of output layer with alpha.
+  * `foreground_out` - name of output layer with foreground.
 * `nanodet` - converting output of NanoDet models family to `DetectionPrediction` representation.
   * `num_classes` - number of predicted classes (optional, default 80).
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).

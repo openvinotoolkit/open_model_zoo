@@ -31,7 +31,7 @@ private:
     std::mutex sourceLock;
 };
 
-class InputChannel: public std::enable_shared_from_this<InputChannel> {  // note: public inheritance
+class InputChannel: public std::enable_shared_from_this<InputChannel> { // note: public inheritance
 public:
     InputChannel(const InputChannel&) = delete;
     InputChannel& operator=(const InputChannel&) = delete;

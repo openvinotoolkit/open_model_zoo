@@ -33,5 +33,15 @@ files:
     size: 1354012
     checksum: 37790b19b5e50ee984b9e8f7ce5822809ffa6285b6fcb3046c9ce2887bc18802ec129eb063868d68c822928550f56bf9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
+input_info:
+  - name: prev_symbol
+    shape: [1]
+    layout: N
+  - name: encoder_outputs
+    shape: [1, 784, 256]
+    layout: NDC
+  - name: prev_hidden
+    shape: [1, 1, 256]
+    layout: DNC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

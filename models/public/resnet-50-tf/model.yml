@@ -24,11 +24,12 @@ files:
     checksum: d1097f41df917e56e927b38867bc0748a7b136b8a3441ce7d2002bbb6894b2bc167835146d0a9fc10b5c94b9d7f6f156
     original_source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-50-tf/resnet_v1-50.pb
+input_info:
+  - name: map/TensorArrayStack/TensorArrayGatherV3
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
   - --mean_values=[123.68,116.78,103.94]
-  - --layout=map/TensorArrayStack/TensorArrayGatherV3(NHWC)
-  - --input=map/TensorArrayStack/TensorArrayGatherV3
   - --output=softmax_tensor
   - --input_model=$dl_dir/resnet_v1-50.pb
   - --reverse_input_channels

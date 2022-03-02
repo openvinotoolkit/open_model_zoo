@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020-2021 Intel Corporation
+ Copyright (c) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ def build_argparser():
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
+    args.add_argument('--layout', type=str, default=None,
+                      help='Optional. Model inputs layouts. '
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("--output_names",
                       help="Optional. Outputs names for the network. "
                            "Default values are \"output_s,output_e\" ",
@@ -166,7 +169,7 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
@@ -227,16 +230,16 @@ def main():
             if pipeline.is_ready():
                 if source.is_over():
                     break
-                pipeline.submit_data(source.get_data(), next_window_id, None)
+                pipeline.submit_data(source.get_data(), next_window_id)
                 next_window_id += 1
             else:
                 pipeline.await_any()
 
         pipeline.await_all()
+        if pipeline.callback_exceptions:
+            raise pipeline.callback_exceptions[0]
         for window_id in range(next_window_id_to_show, next_window_id):
             results = pipeline.get_result(window_id)
-            while results is None:
-                results = pipeline.get_result(window_id)
             update_answers_list(answers, results[0])
 
         visualizer.show_answers(answers)

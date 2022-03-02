@@ -31,7 +31,7 @@ public:
     /// \return Optimal column index for each row. -1 means that there is no
     /// column for row.
     ///
-    std::vector<int> Solve(const cv::Mat &dissimilarity_matrix);
+    std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix);
 
 private:
     static constexpr int kStar = 1;

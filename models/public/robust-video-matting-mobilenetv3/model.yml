@@ -1,0 +1,51 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "robust-video-matting-mobilenetv3" model is a robust high-resolution human video matting
+  method that uses a recurrent architecture to exploit temporal information in videos
+  and achieves significant improvements in temporal coherence and matting quality.
+  This model is pre-trained in PyTorch* framework and converted to ONNX* format. More
+  details provided in the paper <https://arxiv.org/abs/2108.11515>. Backbone is MobileNetV3.
+  For details see the repository <https://github.com/PeterL1n/RobustVideoMatting>.
+  For details regarding export to ONNX see the instruction <https://github.com/DmitriySidnev/RobustVideoMatting#export-to-onnx>.
+task_type: background_matting
+files:
+  - name: robust_video_matting_mobilenetv3.onnx
+    size: 14981904
+    checksum: d6eeb320496d9a7de7d740806f1edf4c7144d97bffec0f279abd2eb3c6c8f3dd9b311eb48f8e70478a1d4e8c172ea720
+    source: https://github.com/DmitriySidnev/RobustVideoMatting/raw/master/onnx/robust_video_matting_mobilenetv3.onnx
+input_info:
+  - name: src
+    shape: [1, 3, 720, 1280]
+    layout: NCHW
+  - name: r1
+    shape: [1, 16, 144, 256]
+    layout: NCHW
+  - name: r2
+    shape: [1, 20, 72, 128]
+    layout: NCHW
+  - name: r3
+    shape: [1, 40, 36, 64]
+    layout: NCHW
+  - name: r4
+    shape: [1, 64, 18, 32]
+    layout: NCHW
+model_optimizer_args:
+  - --output=pha,fgr,rr1,rr2,rr3,rr4
+  - --scale_values=src[255,255,255]
+  - --reverse_input_channels
+  - --input_model=$dl_dir/robust_video_matting_mobilenetv3.onnx
+framework: onnx
+license: https://github.com/DmitriySidnev/RobustVideoMatting/blob/master/LICENSE

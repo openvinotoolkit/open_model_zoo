@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import re
 import numpy as np
 import logging as log
 from .model_adapter import ModelAdapter, Metadata
+from .utils import Layout
 
 
 class OVMSAdapter(ModelAdapter):
@@ -123,13 +124,14 @@ class OVMSAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for name, meta in self.metadata["inputs"].items():
-            inputs[name] = Metadata(meta["shape"], self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            input_layout = Layout.from_shape(meta["shape"])
+            inputs[name] = Metadata(set(name), meta["shape"], input_layout.layout, self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return inputs
 
     def get_output_layers(self):
         outputs = {}
         for name, meta in self.metadata["outputs"].items():
-            outputs[name] = Metadata(meta["shape"], self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            outputs[name] = Metadata(names=set(name), shape=meta["shape"], precision=self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return outputs
 
     def reshape_model(self, new_shape):
@@ -145,7 +147,7 @@ class OVMSAdapter(ModelAdapter):
             return {output_name: raw_result}
         return raw_result
 
-    def infer_async(self, dict_data, callback_fn, callback_data):
+    def infer_async(self, dict_data, callback_data):
         inputs = self._prepare_inputs(dict_data)
         raw_result = self.client.predict(inputs, model_name=self.model_name, model_version=self.model_version)
         # For models with single output ovmsclient returns ndarray with results,
@@ -153,7 +155,10 @@ class OVMSAdapter(ModelAdapter):
         if isinstance(raw_result, np.ndarray):
             output_name = list(self.metadata["outputs"].keys())[0]
             raw_result = {output_name: raw_result}
-        callback_fn(0, (lambda x: x, raw_result, callback_data))
+        self.callback_fn(raw_result, (lambda x: x, callback_data))
+
+    def set_callback(self, callback_fn):
+        self.callback_fn = callback_fn
 
     def is_ready(self):
         return True

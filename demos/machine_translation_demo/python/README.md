@@ -4,14 +4,14 @@ This README describes the Machine Translation demo application that uses a non-a
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 
 The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -29,8 +29,6 @@ omz_converter --list models.lst
 
 * machine-translation-nar-de-en-0002
 * machine-translation-nar-en-de-0002
-* machine-translation-nar-en-ru-0001
-* machine-translation-nar-ru-en-0001
 * machine-translation-nar-en-ru-0002
 * machine-translation-nar-ru-en-0002
 

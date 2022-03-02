@@ -26,8 +26,8 @@ Every step implements `PipelineStep` interface by creating a class derived from 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
 When two consequent steps occur in separate threads, they communicate via message queue (for example, deliver step result or stop signal).
 
-To ensure maximum performance, Inference Engine models are wrapped in `AsyncWrapper`
-that uses Inference Engine async API by scheduling infer requests in cyclical order
+To ensure maximum performance, models are wrapped in `AsyncWrapper`
+that uses Asynchronous Inference Request API by scheduling infer requests in cyclical order
 (inference on every new input is started asynchronously, result of the longest working infer request is returned).
 You can change the value of `num_requests` in `action_recognition_demo.py` to find an optimal number of parallel working infer requests for your inference accelerators
 (Intel(R) Neural Compute Stick devices and GPUs benefit from higher number of infer requests).
@@ -38,7 +38,7 @@ You can change the value of `num_requests` in `action_recognition_demo.py` to fi
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/action_recognition_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

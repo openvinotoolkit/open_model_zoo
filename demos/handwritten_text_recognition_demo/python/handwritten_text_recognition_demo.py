@@ -74,10 +74,12 @@ def main():
     args = build_argparser().parse_args()
 
     # Plugin initialization
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
-    core.set_property("GPU", {"GPU_ENABLE_LOOP_UNROLLING": "NO", "CACHE_DIR": "./"})
+
+    if 'GPU' in args.device:
+        core.set_property("GPU", {"GPU_ENABLE_LOOP_UNROLLING": "NO", "CACHE_DIR": "./"})
 
     # Read IR
     log.info('Reading model {}'.format(args.model))

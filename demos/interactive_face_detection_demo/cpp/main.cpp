@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        // --------------------------- 1. Loading Inference Engine -----------------------------
+        // --------------------------- 1. Loading OpenVINO runtime -----------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
@@ -70,9 +70,6 @@ int main(int argc, char *argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 

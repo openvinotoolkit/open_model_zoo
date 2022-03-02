@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -66,9 +66,11 @@ class Deblurring(ImageModel):
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
         dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, image.shape[1::-1]
+        meta = {'original_shape': image.shape[1::-1]}
+        return dict_inputs, meta
 
-    def postprocess(self, outputs, dsize):
+    def postprocess(self, outputs, meta):
+        dsize = meta['original_shape']
         prediction = outputs[self.output_blob_name].squeeze()
         prediction = prediction.transpose((1, 2, 0))
         if self.h - self.block_size < dsize[1] <= self.h and self.w - self.block_size < dsize[0] <= self.w:

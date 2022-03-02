@@ -26,10 +26,11 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: wavernn-upsampler.zip
+input_info:
+  - name: mels
+    shape: [1, 200, 80]
+    layout: NDC
 model_optimizer_args:
-  - --input_shape=[1, 200, 80]
-  - --input=mels
-  - --layout=mels(NDC)
   - --output=upsample_mels,aux
   - --input_model=$dl_dir/wavernn-upsampler/wavernn_upsampler.onnx
 framework: onnx

@@ -1,21 +1,19 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#include "core.hpp"
-#include "logging.hpp"
-
+#include <map>
+#include <deque>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <utility>
-#include <deque>
-#include <map>
-
+#include <opencv2/opencv.hpp>
 #include <utils/common.hpp>
+#include <core.hpp>
+#include "logging.hpp"
 
 ///
 /// \brief The DetectionLogEntry struct
@@ -137,8 +135,3 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
     os << "\n]";
     return os;
 }
-
-InferenceEngine::Core
-LoadInferenceEngine(const std::vector<std::string>& devices,
-                    const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels);

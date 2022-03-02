@@ -4,7 +4,7 @@ This README describes the Question Answering Embedding demo application that use
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads network(s) to the InferenceEngine.
+On startup the demo application reads command line parameters and loads model(s) to OpenVINO™ Runtime plugin.
 It also fetches data from the user-provided urls to populate the list of "contexts" with the text.
 Prior to the actual inference to answer user's questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
 This is done using the first ("emdbeddings-only") BERT model.
@@ -20,7 +20,7 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

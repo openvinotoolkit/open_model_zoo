@@ -16,10 +16,10 @@ import numpy as np
 
 
 class IEModel:
-    """Class for inference of models in the Inference Engine format"""
-    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
+    """Class for inference of models in the OpenVINO Runtime format"""
+    def __init__(self, core, model_path, labels_file, conf=.6, device='CPU'):
         self.confidence = conf
-        self.load_model(core, model_path, device, ext_path)
+        self.load_model(core, model_path, device)
         with open(labels_file, 'r') as f:
             self.labels = f.readlines()
         self.labels = {num: name.replace('\n', '') for num, name in enumerate(self.labels)}
@@ -36,15 +36,15 @@ class IEModel:
         return img
 
     def forward(self, img):
-        """Performs forward pass of the wrapped IE model"""
-        res = self.infer_request.infer(inputs={self.input_tensor_name: self._preprocess(img)})
-        return next(iter(res.values()))
+        """Performs forward pass of the wrapped model"""
+        input_data = {self.input_tensor_name: self._preprocess(img)}
+        return self.infer_request.infer(input_data)[self.output_tensor]
 
     def get_detections(self, input):
         raise NotImplementedError
 
     def get_input_shape(self):
-        """Returns an input shape of the wrapped IE model"""
+        """Returns an input shape of the wrapped model"""
         return self.model.inputs[0].shape
 
     def get_allowed_inputs_len(self):
@@ -53,12 +53,8 @@ class IEModel:
     def get_allowed_outputs_len(self):
         return (1, )
 
-    def load_model(self, core, model_path, device, cpu_extension=''):
-        """Loads a model in the Inference Engine format"""
-        # Plugin initialization for specified device and load extensions library if specified
-        if cpu_extension and 'CPU' in device:
-            core.add_extension(cpu_extension, 'CPU')
-        # Read IR
+    def load_model(self, core, model_path, device):
+        """Loads a model in the OpenVINO Runtime format"""
         self.model = core.read_model(model_path)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():
@@ -71,4 +67,5 @@ class IEModel:
         self.input_tensor_name = self.model.inputs[0].get_any_name()
         # Loading model to the plugin
         compiled_model = core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()

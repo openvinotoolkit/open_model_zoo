@@ -10,7 +10,7 @@
 
 KuhnMunkres::KuhnMunkres(bool greedy) : n_(), greedy_(greedy) {}
 
-std::vector<int> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
+std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
     CV_Assert(dissimilarity_matrix.type() == CV_32F);
     double min_val;
     cv::minMaxLoc(dissimilarity_matrix, &min_val);
@@ -28,12 +28,12 @@ std::vector<int> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
 
     Run();
 
-    std::vector<int> results(dissimilarity_matrix.rows, -1);
+    std::vector<size_t> results(dissimilarity_matrix.rows, -1);
     for (int i = 0; i < dissimilarity_matrix.rows; i++) {
         const auto ptr = marked_.ptr<char>(i);
         for (int j = 0; j < dissimilarity_matrix.cols; j++) {
             if (ptr[j] == kStar) {
-                results[i] = j;
+                results[i] = (size_t)j;
             }
         }
     }

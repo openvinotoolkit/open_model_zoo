@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
-
 #include <utils/common.hpp>
 #include <utils/kuhn_munkres.hpp>
-
 #include "models/associative_embedding_decoder.h"
 
 

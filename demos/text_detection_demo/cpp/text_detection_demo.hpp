@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,9 +7,9 @@
 
 #include <string>
 #include <vector>
-#include <gflags/gflags.h>
 
-#include <utils/default_flags.hpp>
+#include "gflags/gflags.h"
+#include "utils/default_flags.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -50,9 +50,7 @@ static const char text_detection_target_device_message[] = "Optional. Specify th
 static const char text_recognition_target_device_message[] = "Optional. Specify the target device for the Text Recognition model to infer on "
                                                              "(the list of available devices is shown below). "
                                                              "The demo will look for a suitable plugin for a specified device. By default, it is CPU.";
-static const char custom_cpu_library_message[] = "Optional. Absolute path to a shared library with the CPU kernels implementation "
-                                                 "for custom layers.";
-static const char custom_gpu_library_message[] = "Optional. Absolute path to the GPU kernels implementation for custom layers.";
+static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char no_show_message[] = "Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char input_data_type_message[] = "Required. Input data type: \"image\" (for a single image), "
@@ -87,8 +85,7 @@ DEFINE_double(link_pixel_thr, 0.8, pixel_linkage_threshold_message);
 DEFINE_int32(max_rect_num, -1, text_max_rectangles_number_message);
 DEFINE_string(d_td, "CPU", text_detection_target_device_message);
 DEFINE_string(d_tr, "CPU", text_recognition_target_device_message);
-DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_string(c, "", custom_gpu_library_message);
+DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -131,8 +128,7 @@ static void showUsage() {
     std::cout << "    -max_rect_num \"<value>\"        " << text_max_rectangles_number_message << std::endl;
     std::cout << "    -d_td \"<device>\"               " << text_detection_target_device_message << std::endl;
     std::cout << "    -d_tr \"<device>\"               " << text_recognition_target_device_message << std::endl;
-    std::cout << "    -l \"<absolute_path>\"           " << custom_cpu_library_message << std::endl;
-    std::cout << "    -c \"<absolute_path>\"           " << custom_gpu_library_message << std::endl;
+    std::cout << "    -auto_resize                   " << input_resizable_message << std::endl;
     std::cout << "    -no_show                       " << no_show_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;
     std::cout << "    -u                             " << utilization_monitors_message << std::endl;

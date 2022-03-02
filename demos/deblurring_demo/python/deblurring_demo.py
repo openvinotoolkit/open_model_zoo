@@ -1,5 +1,5 @@
 """
- Copyright (C) 2018-2021 Intel Corporation
+ Copyright (C) 2018-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -52,6 +52,9 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
+    args.add_argument('--layout', type=str, default=None,
+                      help='Optional. Model inputs layouts. '
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -92,7 +95,7 @@ def main():
     if args.adapter == 'openvino':
         plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests)
+                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
@@ -160,11 +163,11 @@ def main():
                 presenter.handleKey(key)
 
     pipeline.await_all()
+    if pipeline.callback_exceptions:
+        raise pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = pipeline.get_result(next_frame_id_to_show)
         result_frame, frame_meta = results
         input_frame = frame_meta['frame']
         start_time = frame_meta['start_time']

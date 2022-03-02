@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2020-2021 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -78,6 +78,9 @@ def build_argparser():
                                         'that for OpenPose-like nets image is resized to a predefined height, which is '
                                         'the target size in this case. For Associative Embedding-like nets target size '
                                         'is the length of a short first image side.')
+    common_model_args.add_argument('--layout', type=str, default=None,
+                                   help='Optional. Model inputs layouts. '
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -168,7 +171,7 @@ def main():
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
     model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                    max_num_requests=args.num_infer_requests)
+                                    max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
 
     start_time = perf_counter()
     frame = cap.read()
@@ -247,11 +250,11 @@ def main():
             hpe_pipeline.await_any()
 
     hpe_pipeline.await_all()
+    if hpe_pipeline.callback_exceptions:
+        raise hpe_pipeline.callback_exceptions[0]
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = hpe_pipeline.get_result(next_frame_id_to_show)
-        while results is None:
-            results = hpe_pipeline.get_result(next_frame_id_to_show)
         (poses, scores), frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']

@@ -177,11 +177,12 @@ conversion_to_onnx_args:
   - --input-names=image
   - --output-names=boxes
   - --output-file=$conv_dir/yolof.onnx
+input_info:
+  - name: image
+    shape: [1, 3, 608, 608]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,608,608]
-  - --layout=image(NCHW)
   - --mean_values=image[103.53,116.28,123.675]
-  - --input=image
   - --output=boxes
   - --input_model=$conv_dir/yolof.onnx
 framework: pytorch

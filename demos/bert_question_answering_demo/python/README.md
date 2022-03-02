@@ -4,14 +4,14 @@ This README describes the Question Answering demo application that uses a Squad-
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

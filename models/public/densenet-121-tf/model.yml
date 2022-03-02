@@ -24,11 +24,12 @@ files:
     checksum: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
     original_source: https://storage.googleapis.com/tensorflow/keras-applications/densenet/densenet121_weights_tf_dim_ordering_tf_kernels.h5
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/densenet-121-tf/densenet121_weights_tf_dim_ordering_tf_kernels.h5
+input_info:
+  - name: input_1
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
-  - --input=input_1
-  - --layout=input_1(NHWC)
   - --mean_values=input_1[123.68,116.78,103.94]
   - --scale_values=input_1[58.395,57.12,57.375]
   - --output=StatefulPartitionedCall/densenet121/predictions/Softmax

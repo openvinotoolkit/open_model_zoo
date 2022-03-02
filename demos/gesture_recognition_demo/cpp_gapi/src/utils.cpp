@@ -1,10 +1,11 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#define _USE_MATH_DEFINES
-
+#include <fstream>
+#include <inference_engine.hpp>
 #include "utils.hpp"
+#define _USE_MATH_DEFINES
 
 cv::Scalar getNetShape(const std::string& path) {
     const auto network = InferenceEngine::Core{}.ReadNetwork(path);

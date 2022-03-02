@@ -18,7 +18,7 @@ Other demo objectives are:
 
 ## How It Works
 
-1. The application reads command-line parameters and loads four networks to the Inference Engine
+1. The application reads command-line parameters and loads four models to OpenVINO™ Runtime plugin
 2. The application gets a frame from the OpenCV VideoCapture
 3. The application performs inference on auxiliary models to obtain head pose angles and images of eyes regions serving as an input for gaze estimation model
 4. The application performs inference on gaze estimation model using inference results of auxiliary models
@@ -30,7 +30,7 @@ Other demo objectives are:
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -63,10 +63,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 gaze_estimation_demo [OPTION]
 Options:
 

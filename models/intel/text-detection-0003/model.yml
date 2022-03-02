@@ -40,5 +40,9 @@ files:
     size: 7025656
     checksum: a426be0f528aeec20f27ad25c054888889543a3d1320de43b7a3b4b2f61926f23cdf739c084337fdc3df7f7ff288c263
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-detection-0003/FP16-INT8/text-detection-0003.bin
+input_info:
+  - name: Placeholder
+    shape: [1, 768, 1280, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -47,10 +47,11 @@ postprocessing:
     file: keras-YOLOv3-model-set/yolo4/models/layers.py
     pattern: '@wraps'
     replacement: '# \g<0>'
+input_info:
+  - name: image_input
+    shape: [1, 608, 608, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,608,608,3]
-  - --input=image_input
-  - --layout=image_input(NHWC)
   - --scale_values=image_input[255]
   - --reverse_input_channels
   - --saved_model_dir=$conv_dir/yolo-v4.savedmodel

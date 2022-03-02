@@ -52,5 +52,9 @@ files:
     size: 53281027
     checksum: 989da4d8c8e4ebed30a59d6b63177c293bf5d58099e9c59b10e6d8d0928c7297705e01a8e819287238edf2734151828b
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+input_info:
+  - name: image
+    shape: [1, 800, 1280, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

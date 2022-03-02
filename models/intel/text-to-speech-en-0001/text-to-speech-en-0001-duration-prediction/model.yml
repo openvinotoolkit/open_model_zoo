@@ -33,5 +33,15 @@ files:
     size: 27140488
     checksum: 5c956f7a35d4d4b28fbe842044702201826bf5e2083a9f0f1be94395f4628a6b4104097df68dde0131d3be0687056e00
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP16/text-to-speech-en-0001-duration-prediction.bin
+input_info:
+  - name: input_seq
+    shape: [1, 512]
+    layout: NC
+  - name: input_mask
+    shape: [1, 1, 512]
+    layout: NDC
+  - name: pos_mask
+    shape: [1, 1, 512, 512]
+    layout: NDCW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -32,5 +32,15 @@ files:
     size: 21152032
     checksum: 8cbdfcda1839ecd1c183dbd9355660db7b85f6e815a205d61d2b80b94270bea25660f391a73a80912e2c2b754a2b9f02
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-decoder/FP16/text-recognition-0016-decoder.bin
+input_info:
+  - name: hidden
+    shape: [1, 1, 1024]
+    layout: NCD
+  - name: features
+    shape: [1, 36, 1024]
+    layout: NCD
+  - name: decoder_input
+    shape: [1]
+    layout: N
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

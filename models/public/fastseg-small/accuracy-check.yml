@@ -8,6 +8,13 @@ models:
 
     datasets:
       - name: cityscapes
+        preprocessing:
+          - type: auto_resize
+        postprocessing:
+          - type: encode_segmentation_mask
+            apply_to: annotation
+          - type: resize_segmentation_mask
+            apply_to: prediction
         metrics:
           - type: mean_iou
             use_argmax: false

@@ -6,6 +6,7 @@
 | aclnet-int8 | YES | YES |    |
 | alexnet | YES | YES | YES |
 | anti-spoof-mn3 | YES | YES | YES |
+| background-matting-mobilenetv2 | YES |    |    |
 | bert-base-ner | YES | YES |    |
 | brain-tumor-segmentation-0001 | YES |    |    |
 | brain-tumor-segmentation-0002 | YES |    |    |
@@ -84,7 +85,7 @@
 | mtcnn-r | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
-| ocrnet-hrnet-w48-paddle | YES | YES | |
+| ocrnet-hrnet-w48-paddle | YES | YES |    |
 | octave-resnet-26-0.25 | YES | YES | YES |
 | open-closed-eye-0001 | YES | YES |    |
 | pelee-coco | YES | YES | YES |
@@ -103,6 +104,7 @@
 | retinanet-tf | YES | YES |    |
 | rexnet-v1-x1.0 | YES | YES |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
+| robust-video-matting-mobilenetv3 | YES |  |    |
 | se-inception | YES | YES | YES |
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |

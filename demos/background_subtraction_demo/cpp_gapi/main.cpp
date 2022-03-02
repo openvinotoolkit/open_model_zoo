@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
-#include <utils_gapi/stream_source.hpp>
-#include <utils/config_factory.h>
-#include <utils/ocv_common.hpp>
+#include <chrono>
+#include <string>
+#include <vector>
 
 #include <opencv2/gapi/streaming/cap.hpp>
 #include <opencv2/gapi/imgproc.hpp>
@@ -16,13 +14,19 @@
 #include <opencv2/gapi/fluid/imgproc.hpp>
 #include <opencv2/gapi/cpu/core.hpp>
 #include <opencv2/gapi/cpu/imgproc.hpp>
-
 #include <opencv2/highgui.hpp>
+
+#include <openvino/openvino.hpp>
+
+#include <monitors/presenter.h>
+#include <utils_gapi/stream_source.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/config_factory.h>
+#include <utils/ocv_common.hpp>
 
 #include "background_subtraction_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 
-#include <openvino/openvino.hpp>
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -62,7 +66,7 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        /** Print info about Inference Engine **/
+        /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
@@ -83,12 +87,9 @@ int main(int argc, char *argv[]) {
         }
 
         /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
 
         cv::GComputation comp([&]{
@@ -122,7 +123,7 @@ int main(int argc, char *argv[]) {
         });
 
         /** Configure network **/
-        auto config = ConfigFactory::getUserConfig(FLAGS_d, "", "", FLAGS_nireq,
+        auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq,
                                                    FLAGS_nstreams, FLAGS_nthreads);
         const auto net = cv::gapi::ie::Params<cv::gapi::Generic> {
             model->getName(),
@@ -130,7 +131,7 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m) + ".bin",   // path to weights
             FLAGS_d                            // device specifier
         }.cfgNumRequests(config.maxAsyncRequests)
-         .pluginConfig(config.execNetworkConfig);
+         .pluginConfig(config.getLegacyConfig());
         slog::info << "The background matting model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
         auto kernels = cv::gapi::combine(custom::kernels(),
@@ -142,14 +143,14 @@ int main(int argc, char *argv[]) {
         cv::Mat output;
 
         /** ---------------- The execution part ---------------- **/
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap));
         if (!is_blur && FLAGS_target_bgr.empty()) {
             cv::Scalar default_color(155, 255, 120);
             pipeline_inputs += cv::gin(cv::Mat(frame_size, CV_8UC3, default_color));
         } else if (!FLAGS_target_bgr.empty()) {
-            std::shared_ptr<ImagesCapture> target_bgr_cap = openImagesCapture(FLAGS_target_bgr, true, 0,
+            std::shared_ptr<ImagesCapture> target_bgr_cap = openImagesCapture(FLAGS_target_bgr, true, read_type::safe, 0,
                 std::numeric_limits<size_t>::max());
             pipeline_inputs += cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(target_bgr_cap));
         }

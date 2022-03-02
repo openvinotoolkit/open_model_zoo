@@ -3,7 +3,7 @@
 //
 
 /**
- * @brief The entry point for inference engine Mask RCNN demo application
+ * @brief The entry point for Mask RCNN demo application
  * @file mask_rcnn_demo/main.cpp
  * @example mask_rcnn_demo/main.cpp
  */
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     if (imagePaths.empty())
         throw std::runtime_error("No suitable images were found");
 
-    // Init OpenVINO runtime
+    // Load OpenVINO runtime
     slog::info << ov::get_openvino_version() << slog::endl;
     ov::Core core;
 
@@ -179,13 +179,9 @@ int main(int argc, char* argv[]) {
     ppp.input(image_tensor_name).model()
         .set_layout(image_tensor_layout);
 
-    // mask processing logic expect NCHW masks, so implicit conversion will apply when neded
-    ppp.output(masks_tensor_name).tensor().set_layout(masks_tensor_layout);
-    ppp.output(masks_tensor_name).model().set_layout(image_tensor_layout);
-
+    model = ppp.build();
     slog::info << "Preprocessor configuration: " << slog::endl;
     slog::info << ppp << slog::endl;
-    model = ppp.build();
 
     // set batch size
     ov::set_batch(model, modelBatchSize);

@@ -21,7 +21,7 @@ The application has two modes:
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 Don't forget to configure Model Optimizer, which is a requirement for Model Downloader, as described in its documentation.
 
 An example of using the Model Downloader:
@@ -75,7 +75,7 @@ optional arguments:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
+                        demo will look for a suitable OpenVINO Runtime plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
                         Required. Path to an .xml file with a trained model

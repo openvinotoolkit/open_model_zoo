@@ -87,4 +87,4 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter:  print_scalar
-            reference: 0.8711
+            reference: 0.8635

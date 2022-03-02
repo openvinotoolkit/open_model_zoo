@@ -20,9 +20,9 @@ from openvino.runtime import AsyncInferQueue
 
 
 class IEModel:
-    """Class for inference of models in the Inference Engine format"""
-    def __init__(self, core, model_path, device, model_type, num_reqs=1, cpu_extension=''):
-        self.load_model(core, model_path, device, model_type, num_reqs, cpu_extension)
+    """Class for inference of models in the OpenVINO Runtime format"""
+    def __init__(self, core, model_path, device, model_type, num_reqs=1):
+        self.load_model(core, model_path, device, model_type, num_reqs)
         self.outputs = {}
 
     def _preprocess(self, img):
@@ -34,7 +34,7 @@ class IEModel:
         self.outputs[id] = infer_request.get_tensor(self.output_tensor_name).data[:]
 
     def forward(self, img):
-        """Performs forward pass of the wrapped IE model"""
+        """Performs forward pass of the wrapped model"""
         self.forward_async(img, 0)
         self.infer_queue.wait_all()
         return self.outputs.pop(0)
@@ -54,15 +54,12 @@ class IEModel:
         return (1, 2, 3, 4, 5)
 
     def get_input_shape(self):
-        """Returns an input shape of the wrapped IE model"""
+        """Returns an input shape of the wrapped model"""
         return self.model.inputs[0].shape
 
-    def load_model(self, core, model_path, device, model_type, num_reqs=1, cpu_extension=''):
-        """Loads a model in the Inference Engine format"""
-        # Plugin initialization for specified device and load extensions library if specified
-        if cpu_extension and 'CPU' in device:
-            core.add_extension(cpu_extension, 'CPU')
-        # Read IR
+    def load_model(self, core, model_path, device, model_type, num_reqs=1):
+        """Loads a model in the OpenVINO Runtime format"""
+
         log.info('Reading {} model {}'.format(model_type, model_path))
         self.model = core.read_model(model_path)
 

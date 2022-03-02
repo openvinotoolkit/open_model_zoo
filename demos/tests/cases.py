@@ -38,6 +38,7 @@ class Demo:
         self.test_cases = test_cases
 
         self._exec_name = self.subdirectory.replace('/', '_')
+        self.parser = None
 
     def models_lst_path(self, source_dir):
         return source_dir / self.subdirectory / 'models.lst'
@@ -50,15 +51,49 @@ class Demo:
     def get_models(self, case):
         return ((case.options[key], key) for key in self.model_keys if key in case.options)
 
-    def update_case(self, case, updated_options, with_replace=False):
+    def update_case(self, case, updated_options, with_replacement=False):
         if not updated_options: return
         new_options = case.options.copy()
         for key, value in updated_options.items():
             new_options[key] = value
         new_case = case._replace(options=new_options)
-        if with_replace:
+        if with_replacement:
             self.test_cases.remove(case)
         self.test_cases.append(new_case)
+
+    def add_parser(self, parser):
+        self.parser = parser(self)
+        return self
+
+    def parse_output(self, output, test_case, device):
+        if self.parser:
+            self.parser(output, test_case, device)
+
+    def update_option(self, updated_options):
+        for case in self.test_cases[:]:
+            self.update_case(case, updated_options, with_replacement=True)
+        return self
+
+    def add_test_cases(self, *new_cases):
+        for test_case in new_cases:
+            self.test_cases = combine_cases(self.test_cases, test_case)
+        return self
+
+    def exclude_models(self, models):
+        for case in self.test_cases[:]:
+            for model, _ in self.get_models(case):
+                if not isinstance(model, ModelArg) or model.name in set(models):
+                    self.test_cases.remove(case)
+                    continue
+        return self
+
+    def only_models(self, models):
+        for case in self.test_cases[:]:
+            for model, _ in self.get_models(case):
+                if not isinstance(model, ModelArg) or model.name not in set(models):
+                    self.test_cases.remove(case)
+                    continue
+        return self
 
     def set_precisions(self, precisions, model_info):
         for case in self.test_cases[:]:
@@ -270,10 +305,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
-            #TODO
-            #TestCase(options={'-at': 'jr',
-            #    '-m': ModelArg('fbcnn')}
-            #)
+            TestCase(options={'-at': 'jr',
+               '-m': ModelArg('fbcnn')}
+            )
         ]
     )),
 
@@ -317,7 +351,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
+        TestCase(options={'-i': DataDirectoryArg('instance-segmentaion-mask-rcnn')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
@@ -406,11 +440,11 @@ NATIVE_DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        # ModelArg('face-detection-0205'),  # TODO
-                        # ModelArg('face-detection-0206'),  # TODO
+                        ModelArg('face-detection-0205'),
+                        ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
-                        # ModelArg('face-detection-retail-0005'),  # TODO: INT8
+                        ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
@@ -423,9 +457,9 @@ NATIVE_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        # ModelArg('person-vehicle-bike-detection-2003'),  # TODO
-                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
-                        # ModelArg('product-detection-0001'),  # TODO
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
+                        ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
                         ModelArg('retinanet-tf'),
                         ModelArg('ssd300'),
@@ -449,8 +483,7 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilenet-yolo-v4-syg'),
-                    # TODO: INT8: Attempt to get a name for a Tensor without names
-                    # ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-ava-0001'),
                     ModelArg('yolo-v2-ava-sparse-35-0001'),
@@ -488,10 +521,9 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            # ModelArg('person-reidentification-retail-0286'),  # TODO: INT8
-            # TODO
-            # ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')
         ),
     )),
 
@@ -720,8 +752,8 @@ PYTHON_DEMOS = [
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
-    #       ModelArg('robust-video-matting'),
-    #       ModelArg('background-matting-mobilenetv2'),
+            ModelArg('robust-video-matting-mobilenetv3'),
+            ModelArg('background-matting-mobilenetv2'),
             ModelArg('yolact-resnet50-fpn-pytorch')),
     )),
 
@@ -790,6 +822,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
+            '-nireq': '1', # launch demo in synchronous mode
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
             '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
@@ -971,20 +1004,19 @@ PYTHON_DEMOS = [
     #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     #)),
 
-    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
-            '--delay': '1',
-            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
-        single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0002'),
-            # TODO: Attempt to get a name for a Tensor without names
-            # ModelArg('instance-segmentation-security-0091'),
-            ModelArg('instance-segmentation-security-0228'),
-            ModelArg('instance-segmentation-security-1039'),
-            ModelArg('instance-segmentation-security-1040')),
-    )),
+    # TODO: enable tests when FP16-INT8 will work
+    # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('instance-segmentation'),
+    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
+    #     single_option_cases('-m',
+    #         ModelArg('instance-segmentation-security-0002'),
+    #         ModelArg('instance-segmentation-security-0091'),
+    #         ModelArg('instance-segmentation-security-0228'),
+    #         ModelArg('instance-segmentation-security-1039'),
+    #         ModelArg('instance-segmentation-security-1040')),
+    # )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
@@ -1172,13 +1204,13 @@ PYTHON_DEMOS = [
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'detr'}), # TODO detr-resnet50 model fails to convert on 2022.1 package
+                TestCase(options={'--architecture_type': 'detr'}),
                 [
-                    #TestCase(options={'-m': ModelArg('detr-resnet50')}),
-                    #TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
-                    #                 '--reverse_input_channels': None,
-                    #                  '--mean_values': ['123.675', '116.28', '103.53'],
-                    #                  '--scale_values': ['58.395', '57.12', '57.375']}),
+                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                                     '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
@@ -1244,6 +1276,21 @@ PYTHON_DEMOS = [
     #    ]
     #)),
 
+    PythonDemo(name='smartlab_demo', device_keys=['-d'],
+        model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
+        test_cases=combine_cases(
+        [
+            TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
+                '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
+                '-m_ta': ModelArg('smartlab-object-detection-0001'),
+                '-m_tm': ModelArg('smartlab-object-detection-0002'),
+                '-m_fa': ModelArg('smartlab-object-detection-0003'),
+                '-m_fm': ModelArg('smartlab-object-detection-0004'),
+                '-m_en': ModelArg('i3d-rgb-tf'),
+                '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
+        ],
+    )),
+
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
                           '-m': ModelArg('aclnet')}),
@@ -1285,20 +1332,19 @@ PYTHON_DEMOS = [
         single_option_cases('-m', ModelArg('wav2vec2-base'))
     )),
 
-    # TODO: Demo supports only topologies with the following input tensor name: image
-    # PythonDemo(name='text_spotting_demo', device_keys=['-d'],
-    #            model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
-    #                       '-i': DataPatternArg('text-detection')}),
-    #     [
-    #         TestCase(options={
-    #             '-m_m': ModelArg('text-spotting-0005-detector'),
-    #             '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
-    #             '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
-    #             '--no_track': None
-    #         }),
-    #     ]
-    # )),
+    PythonDemo(name='text_spotting_demo', device_keys=['-d'],
+               model_keys=['-m_m', '-m_te', '-m_td'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0005-detector'),
+                '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 
     PythonDemo(name='text_to_speech_demo', device_keys=['-d'],
                model_keys=['-m_duration', '-m_forward', '-m_upsample', '-m_rnn', '-m_melgan'], test_cases=combine_cases(
@@ -1326,6 +1372,9 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(name='time_series_forecasting_demo', device_keys=[],
+        model_keys=['-m'], test_cases=[TestCase(options={'-h': ''})]),
+
     PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'],
                model_keys=['-m_i', '-m_s'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
@@ -1344,3 +1393,5 @@ PYTHON_DEMOS = [
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
+
+BASE = { demo.subdirectory : demo for demo in DEMOS }

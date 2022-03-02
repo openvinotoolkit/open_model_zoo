@@ -28,10 +28,11 @@ files:
     size: 10966521
     checksum: 966d8b3e0eb46d7946b7b52baae2e38795a8b892bc9eb8ec6511c28c32caf6f230f0d32a1d4f3a5db97eac31475e990c
     source: https://storage.openvinotoolkit.org/models_contrib/sound_classification/aclnet/2021-02-04/aclnet_des_53_fp32.onnx
+input_info:
+  - name: input
+    shape: [1, 1, 1, 16000]
+    layout: NCWL
 model_optimizer_args:
-  - --input_shape=[1,1,1,16000]
-  - --input=input
-  - --layout=input(NCWL)
   - --output=output
   - --input_model=$dl_dir/aclnet_des_53.onnx
 framework: onnx

@@ -511,7 +511,7 @@ void DetectionsProcessor::process() {
                 reidRequest.set_callback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
                         ov::InferRequest& reidRequest, cv::Rect rect, Context& context) {
-                                    reidRequest.set_callback([](const std::exception_ptr& e) {}); // destroy the stored bind object
+                                    reidRequest.set_callback([](std::exception_ptr) {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
                                     classifiersAggregator->push(cv::Rect(rect));
@@ -568,7 +568,7 @@ void InferTask::process() {
             [](VideoFrame::Ptr sharedVideoFrame,
                 ov::InferRequest& inferRequest,
                 Context& context) {
-                    inferRequest.set_callback([](const std::exception_ptr& e) {});  // destroy the stored bind object
+                    inferRequest.set_callback([](std::exception_ptr) {});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
                             std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
                 }, sharedVideoFrame,
@@ -676,7 +676,7 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Inference Engine -------------------------------------
+        // --------------------------- 1. Load OpenVINO runtime -------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
@@ -689,7 +689,7 @@ int main(int argc, char* argv[]) {
                 devices.insert(device);
             }
         }
-        std::map<std::string, uint32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        std::map<std::string, int32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
             if ("CPU" == device) {
@@ -697,12 +697,12 @@ int main(int argc, char* argv[]) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
-                core.set_property("CPU", ov::streams::num((deviceNStreams.count("CPU") > 0 ? deviceNStreams.at("CPU") : ov::streams::AUTO)));
+                core.set_property("CPU", ov::streams::num((deviceNStreams.count("CPU") > 0 ? ov::streams::Num(deviceNStreams["CPU"]) : ov::streams::AUTO)));
                 deviceNStreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
             if ("GPU" == device) {
-                core.set_property("GPU", ov::streams::num(deviceNStreams.count("GPU") > 0 ? deviceNStreams.at("GPU") : ov::streams::AUTO));
+                core.set_property("GPU", ov::streams::num(deviceNStreams.count("GPU") > 0 ? ov::streams::Num(deviceNStreams["GPU"]) : ov::streams::AUTO));
 
                 deviceNStreams["GPU"] = core.get_property("GPU", ov::streams::num);
                 if (devices.end() != devices.find("CPU")) {

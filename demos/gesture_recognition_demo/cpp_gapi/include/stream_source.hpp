@@ -102,13 +102,13 @@ static void runBatchFill(const cv::Mat& frame,
     }
 }
 
-class CustomCapSource : public cv::gapi::wip::IStreamSource {
+class GestRecCapSource : public cv::gapi::wip::IStreamSource {
 public:
-    explicit CustomCapSource(const std::shared_ptr<ImagesCapture>& cap,
-                             const cv::Size& frame_size,
-                             const int batch_size,
-                             const float batch_fps,
-                             const std::shared_ptr<bool>& drop_batch)
+    explicit GestRecCapSource(const std::shared_ptr<ImagesCapture>& cap,
+                              const cv::Size& frame_size,
+                              const int batch_size,
+                              const float batch_fps,
+                              const std::shared_ptr<bool>& drop_batch)
         : cap(cap), producer(batch_size, batch_fps, drop_batch), source_fps(cap->fps()) {
         if (source_fps <= 0.) {
             source_fps = 30.;
@@ -116,16 +116,18 @@ public:
             slog::warn << "Got a non-positive value as FPS of the input. Interpret it as 30 FPS" << slog::endl;
         }
         /** Create and get first image for batch **/
-        GAPI_Assert(first_batch.empty());
+        if (!first_batch.empty()) {
+            throw std::runtime_error("first_batch must be empty before creation");
+        }
         if (batch_size == 0 || batch_size == 1) {
-            GAPI_Assert(false && "Batch must contain more than one image");
+            throw std::runtime_error("Batch must contain more than one image");
         }
 
         /** Reading of frame with ImagesCapture class **/
         read_time = std::chrono::steady_clock::now();
         cv::Mat fast_frame = cap->read();
         if (!fast_frame.data) {
-            GAPI_Assert(false && "Couldn't grab the frame");
+            throw std::runtime_error("Couldn't grab the frame");
         }
         producer.fillFastFrame(fast_frame);
         fast_frame.copyTo(thread_frame);
@@ -154,7 +156,9 @@ protected:
     virtual bool pull(cv::gapi::wip::Data& data) override {
         /** Is first already pulled **/
         if (!first_pulled) {
-            GAPI_Assert(!first_batch.empty());
+            if (first_batch.empty()) {
+                throw std::runtime_error("GestRecCapSource::pull() have got empty first_batch");
+            }
             first_pulled = true;
             cv::detail::VectorRef ref(std::move(first_batch));
             data = std::move(ref);
@@ -192,7 +196,9 @@ protected:
     }
 
     virtual cv::GMetaArg descr_of() const override {
-        GAPI_Assert(!first_batch.empty());
+        if (first_batch.empty()) {
+            throw std::runtime_error("GestRecCapSource::descr_of() have got empty first_batch");
+        }
         return cv::GMetaArg{ cv::empty_array_desc() };
     }
 };

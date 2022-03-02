@@ -62,7 +62,7 @@ def build_arg():
 def main(args):
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
@@ -80,6 +80,7 @@ def main(args):
     assert len(model.outputs) == 1, "Expected number of outputs is equal 1"
 
     compiled_model = core.compile_model(model, device_name=args.device)
+    output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
@@ -115,7 +116,7 @@ def main(args):
 
         inputs[input_tensor_name] = np.expand_dims(img_l_rs, axis=[0, 1])
 
-        res = next(iter(infer_request.infer(inputs).values()))
+        res = infer_request.infer(inputs)[output_tensor]
 
         update_res = np.squeeze(res)
 

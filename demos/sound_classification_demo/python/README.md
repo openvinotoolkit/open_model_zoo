@@ -4,13 +4,13 @@ Demo application for sound classification algorithm.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
 
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/sound_classification_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

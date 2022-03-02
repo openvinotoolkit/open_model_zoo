@@ -7,7 +7,7 @@ This demo showcases inference of Object Detection networks using Sync and Async 
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
 Specifically, this demo keeps the number of Infer Requests that you have set using `-nireq` flag.
-While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data
+While some of the Infer Requests are processed by OpenVINO™ Runtime, the other ones can be filled with new frame data
 and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
 This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously
@@ -31,8 +31,7 @@ Other demo objectives are:
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
@@ -49,7 +48,7 @@ The generalized interface of wrappers with its unified results representation pr
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
@@ -274,7 +273,7 @@ has to wait before being sent for inference.
 For higher FPS, it is recommended that you set `-nireq` to slightly exceed the `-nstreams` value,
 summed across all devices used.
 
-> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
+> **NOTE**: This demo is based on the callback functionality from the OpenVINO™ Runtime API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.

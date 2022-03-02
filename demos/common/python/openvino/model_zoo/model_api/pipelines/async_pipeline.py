@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -87,28 +87,27 @@ class AsyncPipeline:
 
         self.completed_results = {}
         self.callback_exceptions = []
+        self.model.model_adapter.set_callback(self.callback)
 
         self.preprocess_metrics = PerformanceMetrics()
         self.inference_metrics = PerformanceMetrics()
         self.postprocess_metrics = PerformanceMetrics()
 
-    def callback(self, status, callback_args):
+    def callback(self, request, callback_args):
         try:
-            get_result_fn, request, (id, meta, preprocessing_meta, start_time) = callback_args
-            if status != 0:
-                raise RuntimeError('Request has returned status code {}'.format(status))
+            get_result_fn, (id, meta, preprocessing_meta, start_time) = callback_args
             self.completed_results[id] = (get_result_fn(request), meta, preprocessing_meta, start_time)
         except Exception as e:
             self.callback_exceptions.append(e)
 
-    def submit_data(self, inputs, id, meta):
+    def submit_data(self, inputs, id, meta={}):
         preprocessing_start_time = perf_counter()
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         self.preprocess_metrics.update(preprocessing_start_time)
 
         infer_start_time = perf_counter()
         callback_data = id, meta, preprocessing_meta, infer_start_time
-        self.model.infer_async(inputs, self.callback, callback_data)
+        self.model.infer_async(inputs, callback_data)
 
     def get_raw_result(self, id):
         if id in self.completed_results:
@@ -122,7 +121,7 @@ class AsyncPipeline:
             self.inference_metrics.update(infer_start_time)
 
             postprocessing_start_time = perf_counter()
-            result = self.model.postprocess(raw_result, preprocess_meta), meta
+            result = self.model.postprocess(raw_result, preprocess_meta), {**meta, **preprocess_meta}
             self.postprocess_metrics.update(postprocessing_start_time)
             return result
         return None

@@ -139,6 +139,10 @@ class DLSDKLauncher(Launcher):
         return self._device
 
     @property
+    def lstm_inputs(self):
+        return self._lstm_inputs
+
+    @property
     def inputs(self):
         if self.network is None:
             has_info = hasattr(self.exec_network, 'input_info')

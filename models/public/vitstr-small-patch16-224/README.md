@@ -27,6 +27,8 @@ Alphanumeric subset of common scene text recognition benchmarks are used. For yo
 | SVT      | 85.47%   | 647          |
 | IIIT5K   | 87.07%   | 3000         |
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 ### Original model
@@ -75,9 +77,9 @@ Output tensor, name: `logits`, shape: `1, 25, 96` in the format `B, W, L`, where
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```

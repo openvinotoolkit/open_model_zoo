@@ -1,0 +1,54 @@
+models:
+  - name: background-matting-mobilenetv2
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: background_matting_with_pha_and_fgr
+          alpha_out: pha
+          foreground_out: fgr
+        inputs:
+          - name: src
+            type: INPUT
+            value: com*
+          - name: bgr
+            type: INPUT
+            value: bgr*
+
+    datasets:
+      - name: HumanMattingClips120
+        reader: pillow_imread
+
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            dst_width: 1280
+            dst_height: 720
+            use_pillow: True
+
+        metrics:
+          - name: alpha_MAD
+            type: mad
+            prediction_source: pha
+            process_type: alpha
+            reference: 4.35
+
+          - name: alpha_GRAD
+            type: spatial_gradient
+            prediction_source: pha
+            process_type: alpha
+            reference: 2.49
+
+          - name: alpha_MSE
+            type: mse_with_mask
+            prediction_source: pha
+            process_type: alpha
+            use_mask: False
+            reference: 1.0
+
+          - name: foreground_MSE
+            type: mse_with_mask
+            prediction_source: fgr
+            process_type: image
+            use_mask: True
+            reference: 2.69

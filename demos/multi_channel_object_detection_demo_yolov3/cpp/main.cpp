@@ -56,7 +56,7 @@ void parse(int argc, char *argv[]) {
                   << "\n    [-no_show]        " << no_show_message
                   << "\n    [-show_stats]     " << show_statistics
                   << "\n    [-real_input_fps] " << real_input_fps
-                  << "\n    [-u]              " << utilization_monitors_message;
+                  << "\n    [-u]              " << utilization_monitors_message << '\n';
         showAvailableDevices();
         std::exit(0);
     } if (FLAGS_m.empty()) {
@@ -237,7 +237,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      const DisplayParams& params,
                      const std::vector<cv::Scalar> &colors,
                      Presenter& presenter,
-                     PerformanceMetrics& metrics) {
+                     PerformanceMetrics& metrics,
+                     bool no_show) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -285,7 +286,9 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
         metrics.update(data[i]->timestamp);
     }
     metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-    cv::imshow(params.name, windowImage);
+    if (!no_show) {
+        cv::imshow(params.name, windowImage);
+    }
 }
 }  // namespace
 
@@ -398,7 +401,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, str, params, colors, presenter, metrics);
+            displayNSources(result, str, params, colors, presenter, metrics, FLAGS_no_show);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -428,9 +431,7 @@ int main(int argc, char* argv[]) {
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {
-                        if (!FLAGS_no_show) {
-                            output.push(std::move(batchRes));
-                        }
+                        output.push(std::move(batchRes));
                         batchRes.clear();
                         readData = false;
                     }

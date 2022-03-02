@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 */
 
 #pragma once
-#include <opencv2/core.hpp>
-#include <inference_engine.hpp>
 #include <map>
+#include <opencv2/core.hpp>
+#include <openvino/openvino.hpp>
 #include "internal_model_data.h"
 
 struct MetaData;
@@ -42,14 +42,15 @@ struct ResultBase {
 
 struct InferenceResult : public ResultBase {
     std::shared_ptr<InternalModelData> internalModelData;
-    std::map<std::string, InferenceEngine::MemoryBlob::Ptr> outputsData;
+    std::map<std::string, ov::Tensor> outputsData;
 
-    /// Returns pointer to first output blob
+    /// Returns the first output tensor
     /// This function is a useful addition to direct access to outputs list as many models have only one output
-    /// @returns pointer to first output blob
-    InferenceEngine::MemoryBlob::Ptr getFirstOutputBlob() {
-        if (outputsData.empty())
+    /// @returns first output tensor
+    ov::Tensor getFirstOutputTensor() {
+        if (outputsData.empty()) {
             throw std::out_of_range("Outputs map is empty.");
+        }
         return outputsData.begin()->second;
     }
 

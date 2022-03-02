@@ -19,7 +19,7 @@ Other demo objectives are:
 * Visualization of the resulting face bounding boxes from Face Detection network
 * Visualization of age/gender, spoof/real, head pose, emotion information, and facial landmarks positions for each detected face
 
-OpenCV is used to draw resulting bounding boxes, labels, and other information. You can copy and paste this code without pulling Inference Engine demo helpers into your application.
+OpenCV is used to draw resulting bounding boxes, labels, and other information.
 
 ## How It Works
 
@@ -37,7 +37,7 @@ Engine.
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/interactive_face_detection_demo/cpp_gapi/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 

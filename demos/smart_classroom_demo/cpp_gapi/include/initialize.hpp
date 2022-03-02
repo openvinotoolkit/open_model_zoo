@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <fstream>
+
+#include <inference_engine.hpp>
+#include <openvino/openvino.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/infer/parsers.hpp>
 
@@ -174,12 +178,11 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
 }
 
 void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string& top_id) {
-    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+    slog::info << ov::get_openvino_version() << slog::endl;
     if (!teacher_id.empty() && !top_id.empty()) {
         slog::err << "Cannot run simultaneously teacher action and top-k students recognition."
                   << slog::endl;
     }
-    InferenceEngine::Core ie;
 }
 
 void configNets(const NetsFlagsPack& flags,
@@ -254,8 +257,8 @@ void configNets(const NetsFlagsPack& flags,
         } else {
             slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
-        InferenceEngine::Core ie;
-        const auto layerData = ie.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
+        InferenceEngine::Core core;
+        const auto layerData = core.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
         const auto layerDims = layerData->getTensorDesc().getDims();
         reid_net_in_size =
             {double(layerDims[0]), double(layerDims[1]), double(layerDims[2]), double(layerDims[3])};

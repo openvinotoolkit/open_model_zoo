@@ -40,5 +40,9 @@ files:
     size: 2079902
     checksum: 5bb1c8fee6921a2af2d82152ada07520c5ccb05b1c4b65c4e5b9f761a62f0bd61b19ba02df4470891fedd32ce1e30df9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-0202/FP16-INT8/vehicle-detection-0202.bin
+input_info:
+  - name: image
+    shape: [1, 3, 512, 512]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

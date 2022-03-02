@@ -101,10 +101,11 @@ conversion_to_onnx_args:
   - --model-param=decoder_weights=r"$dl_dir/models/.nemo_tmp/JasperDecoderForCTC.pt"
   - --input-names=audio_signal
   - --output-names=output
+input_info:
+  - name: audio_signal
+    shape: [1, 64, 128]
+    layout: NCH
 model_optimizer_args:
-  - --input_shape=[1,64,128]
-  - --layout=audio_signal(NCH)
-  - --input=audio_signal
   - --output=output
   - --input_model=$conv_dir/quartznet.onnx
 framework: pytorch
