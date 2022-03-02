@@ -212,7 +212,7 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
-        if all(impl in Demo.IMPLEMETATION_TYPES for impl in names_of_demos_to_test):
+        if all(impl in Demo.IMPLEMENTATION_TYPES for impl in names_of_demos_to_test):
             impl_types = names_of_demos_to_test
             names_of_demos_to_test = set()
             for impl in impl_types:
@@ -226,7 +226,7 @@ def main():
         if args.demos:
             print("List of demos to test is empty.")
             print(f"Command line argument '--demos {args.demos}' was passed, check that you've specified correct value from the list below:")
-            print(*(list(Demo.IMPLEMETATION_TYPES) + [demo.subdirectory for demo in DEMOS]), sep=',')
+            print(*(list(Demo.IMPLEMENTATION_TYPES) + [demo.subdirectory for demo in DEMOS]), sep=',')
         raise RuntimeError("Not found demos to test!")
 
     print(f"{len(demos_to_test)} demos will be tested:")

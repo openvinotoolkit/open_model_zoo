@@ -29,7 +29,7 @@ TestCase.__new__.__defaults__ = [],
 
 
 class Demo:
-    IMPLEMETATION_TYPES = set()
+    IMPLEMENTATION_TYPES = set()
 
     def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None):
         self.implementation = implementation
@@ -42,7 +42,7 @@ class Demo:
         self._exec_name = self.subdirectory.replace('/', '_')
         self.parser = None
 
-        Demo.IMPLEMETATION_TYPES.add(implementation)
+        Demo.IMPLEMENTATION_TYPES.add(implementation)
 
     def models_lst_path(self, source_dir):
         return source_dir / self.subdirectory / 'models.lst'
