@@ -15,7 +15,6 @@ import cv2
 import math
 import numpy as np
 
-from .model import WrapperError
 from .image_model import ImageModel
 
 
@@ -46,7 +45,7 @@ class Deblurring(ImageModel):
         output_blob_name = next(iter(self.outputs))
         output_size = self.outputs[output_blob_name].shape
         if len(output_size) != 4:
-            raise WrapperError(self.__model__, "Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
+            self.raise_error("Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
 
         return output_blob_name
 
