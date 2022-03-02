@@ -93,7 +93,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
+The demo uses OpenCV to display the resulting images with a blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
 The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).

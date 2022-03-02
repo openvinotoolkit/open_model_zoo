@@ -106,7 +106,7 @@ Also, these hot keys are available:
 * **Tab** to show/hide original image
 * **Esc or Q** to quit
 
-If Backpace, C or R keys are pressed while demo is showing original image, demo will hide original image and return back to editing mode.
+If Backspace, C or R keys are pressed while demo is showing original image, demo will hide original image and return back to editing mode.
 
 ## Demo Output
 
