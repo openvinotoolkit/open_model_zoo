@@ -732,11 +732,8 @@ DEMOS = [
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
-    ))
+    )),
 
-]
-
-PYTHON_DEMOS = [
     PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
                           '-o': '.'}),
