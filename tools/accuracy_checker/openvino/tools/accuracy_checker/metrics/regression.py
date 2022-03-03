@@ -43,6 +43,8 @@ from ..representation import (
     BackgroundMattingAnnotation,
     BackgroundMattingPrediction,
     NiftiRegressionAnnotation,
+    HandLandmarksAnnotation,
+    HandLandmarksPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -407,7 +409,7 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         result = point_regression_differ(
             annotation.x_values, annotation.y_values, prediction.x_values, prediction.y_values
         )
-        result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
+        result /= np.maximum(annotation.normalization_coefficient, np.finfo(np.float64).eps)
         self.magnitude.append(result)
         if self.profiler:
             self.profiler.update(
@@ -445,11 +447,13 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         return meta
 
 
-class FacialLandmarksNormedError(PerImageEvaluationMetric):
+class LandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation,
+                        HandLandmarksAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction,
+                        HandLandmarksPrediction)
 
     @classmethod
     def parameters(cls):
@@ -481,7 +485,7 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             annotation.x_values, annotation.y_values, prediction.x_values, prediction.y_values
         )
         avg_result = np.sum(per_point_result) / len(per_point_result)
-        avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
+        avg_result /= np.maximum(annotation.normalization_coefficient, np.finfo(np.float64).eps)
         if self.profiler:
             self.profiler.update(
                 annotation.identifier,
@@ -530,8 +534,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation, HandLandmarksAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction, HandLandmarksPrediction)
 
     @classmethod
     def parameters(cls):
