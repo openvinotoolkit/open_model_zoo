@@ -70,7 +70,7 @@ def main():
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # create tokenizer
-    tokenizer = Tokenizer(BPE(str(args.vocab), str(args.merges)))
+    tokenizer = Tokenizer(BPE.from_file(str(args.vocab), str(args.merges)))
     tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
     tokenizer.decoder = decoders.ByteLevel()
 
