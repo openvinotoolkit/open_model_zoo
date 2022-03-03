@@ -717,23 +717,6 @@ DEMOS = [
         ]
     )),
 
-    CppDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        single_option_cases('-m',
-            ModelArg('noise-suppression-denseunet-ll-0001'),
-            ModelArg('noise-suppression-poconetlike-0001')),
-    )),
-
-    CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-at': 'maskrcnn',
-            **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
-        }),
-        single_option_cases('-m',
-            ModelArg('instance-segmentation-person-0007'),
-            ModelArg('instance-segmentation-security-0091')),
-    )),
-
     PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
                           '-o': '.'}),
