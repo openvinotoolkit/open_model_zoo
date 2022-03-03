@@ -45,6 +45,8 @@ class IEModel(): # pylint: disable=too-few-public-methods
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
+        if self.model.input(self.input_tensor_name).shape[1] == 3:
+            image = np.transpose(image, (0, 3, 1, 2))
         input_data = {self.input_tensor_name: image}
         return self.infer_request.infer(input_data)[self.output_tensor]
 
