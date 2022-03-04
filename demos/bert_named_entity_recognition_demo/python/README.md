@@ -70,6 +70,8 @@ Options:
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
+  --dynamic_shape       Run model with dynamic input sequence. If not
+                        provided, input sequence will be padded to max_seq_len
 ```
 
 ## Demo Inputs
@@ -118,7 +120,7 @@ Exemplary command:
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (text from the url) does not fit the model input
-(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
+(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context" and pad all input sequences to maximum sentence length if model executed with static shape.
 
 ## See Also
 
