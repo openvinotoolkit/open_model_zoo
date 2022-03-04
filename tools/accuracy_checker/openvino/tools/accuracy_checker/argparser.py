@@ -19,7 +19,7 @@ from functools import partial
 from pathlib import Path
 
 from . import __version__
-from .utils import get_path, cast_to_bool
+from .utils import get_path, cast_to_bool, ov_new_api_available
 
 
 def add_common_args(parser):
@@ -304,7 +304,7 @@ def add_openvino_specific_args(parser):
     )
     openvino_specific_args.add_argument(
         '--use_new_api', type=cast_to_bool, help='switch to processing using OpenVINO 2.0 API', required=False,
-        default=None
+        default=ov_new_api_available()
     )
 
 
