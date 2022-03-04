@@ -291,7 +291,7 @@ cmake -A x64 <open_model_zoo>/demos
 The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
 ```sh
-python -mpip install --user -r requirements.txt
+python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
 ### <a name="python_model_api"></a>Python\* model API package
