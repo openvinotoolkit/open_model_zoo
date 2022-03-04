@@ -26,14 +26,6 @@ and then for each detected object it extracts embeddings using re-identification
 
 ## Preparing to Run
 
-### Installation of Dependencies
-
-To install required dependencies, run
-
-```bash
-pip3 install -r requirements.txt
-```
-
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).

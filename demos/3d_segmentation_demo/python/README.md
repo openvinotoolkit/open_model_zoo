@@ -10,12 +10,6 @@ On startup, the demo reads command-line parameters and loads a model and images 
 
 ## Preparing to Run
 
-The demo dependencies should be installed before run. That can be achieved with the following command:
-
-```sh
-python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
-```
-
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/3d_segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).

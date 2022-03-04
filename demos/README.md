@@ -286,6 +286,14 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
+### <a name="python_requirements"></a>Dependencies for Python* Demos
+
+The dependencies for Python demos must be installed before running. It can be achieved with the following command:
+
+```sh
+python -mpip install --user -r <omz_dir>/demos/requirements.txt
+```
+
 ### <a name="python_model_api"></a>Python\* model API package
 
 To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
