@@ -56,8 +56,6 @@ Regardless of what mode is selected (interactive or non-interactive) the process
 
 ##### Requirements for rendering
 
-Sympy python package is used for rendering. To install it, please, run:
-`pip install -r requirements.txt`
 Sympy package needs LaTeX system installed in the operating system.
 For Windows you can use [MiKTeX\*](https://miktex.org/) (just download and install it), for Ubuntu/MacOS you can use TeX Live\*:
 Ubuntu:

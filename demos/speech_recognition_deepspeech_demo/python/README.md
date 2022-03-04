@@ -106,9 +106,6 @@ optional arguments:
 The typical command line for offline mode is:
 
 ```shell
-pip install -r requirements.txt
-source <openvino_dir>/bin/setupvars.sh
-
 python3 speech_recognition_deepspeech_demo.py \
     -p mds08x_en \
     -m <path_to_model>/mozilla-deepspeech-0.8.2.xml \
