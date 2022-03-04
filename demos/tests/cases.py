@@ -169,7 +169,7 @@ DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
         }),
         single_option_cases('-m',
-            # ModelArg('instance-segmentation-person-0007'),  # TODO
+            ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
     )),
 
@@ -200,8 +200,7 @@ DEMOS = [
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
                           '-m_d': ModelArg('person-detection-asl-0001')}),
         [
-            # TODO: nothing
-            # TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
                               '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
@@ -310,11 +309,10 @@ DEMOS = [
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
         single_option_cases('-m_reid',
             None,
-            # TODO
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')
         ),
     )),
 
@@ -397,10 +395,10 @@ DEMOS = [
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
-                # '-m_ag': ModelArg('age-gender-recognition-retail-0013'),  TODO wait for 77673: INT8: Attempt to get a name for a Tensor without names
+                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
                 '-m_am': ModelArg('anti-spoof-mn3'),
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                # '-m_hp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
@@ -441,8 +439,7 @@ DEMOS = [
             **MONITORS,
              '-i': DataPatternArg('object-detection-demo')}),
         [
-            # TODO: INT8: Attempt to get a name for a Tensor without names
-            # TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
+            TestCase(options={'-m':  ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020')}),
             TestCase(options={'-m':  ModelArg('yolo-v3-tf'), '-duplicate_num': '2',
                 '-n_iqs': '20', '-fps_sp': '1', '-n_sp': '1', '-show_stats': '', '-real_input_fps': ''}),
             TestCase(options={'-m':  ModelArg('yolo-v3-tiny-tf'), '-duplicate_num': '3',
@@ -587,8 +584,7 @@ DEMOS = [
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')
-        ),
+            ModelArg('person-reidentification-retail-0288')),
     )),
 
     CppDemo(name='security_barrier_camera_demo',
@@ -668,15 +664,14 @@ DEMOS = [
             **MONITORS,
             '-i': DataDirectoryArg('person-detection-retail')}),
         single_option_cases('-m_det',
-            # TODO
-            # ModelArg('person-detection-0200'),
-            # ModelArg('person-detection-0201'),
-            # ModelArg('person-detection-0202'),
+            ModelArg('person-detection-0200'),
+            ModelArg('person-detection-0201'),
+            ModelArg('person-detection-0202'),
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
-            # ModelArg('person-reidentification-retail-0277'),  # TODO
-            ModelArg('person-reidentification-retail-0286'),
-            # ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0277'),
+            # ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
         ),
     )),
@@ -707,11 +702,11 @@ DEMOS = [
                                       '-tr_o_blb_nm': 'logits',
                                       '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'},
                              extra_models=[ModelArg('text-recognition-0015-decoder')]),
-                    # TestCase(options={'-m_tr': ModelArg('text-recognition-0016-encoder'), #TODO
-                    #                    '-tr_pt_first': None, #TODO
-                    #                    '-tr_o_blb_nm': 'logits', #TODO
-                    #                    '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyz'}, #TODO
-                    #           extra_models=[ModelArg('text-recognition-0016-decoder')]), #TODO
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0016-encoder'),
+                                       '-tr_pt_first': None,
+                                       '-tr_o_blb_nm': 'logits',
+                                       '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyz'},
+                              extra_models=[ModelArg('text-recognition-0016-decoder')]),
                     TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                                       '-tr_pt_first': None}),
                     TestCase(options={'-m_tr': ModelArg('vitstr-small-patch16-224'),
@@ -736,20 +731,19 @@ DEMOS = [
             TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
-            #TODO
-            #*combine_cases(
-            #    TestCase(options={'--architecture_type': 'en-de'}),
-            #    [
-            #        TestCase(options={
-            #            '-m_en': ModelArg('action-recognition-0001-encoder'),
-            #            '-m_de': ModelArg('action-recognition-0001-decoder'),
-            #        }),
-            #        TestCase(options={
-            #            '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
-            #            '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
-            #        }),
-            #    ]
-            #),
+            *combine_cases(
+               TestCase(options={'--architecture_type': 'en-de'}),
+               [# TODO monitors_extension wasn't found
+                #    TestCase(options={
+                #        '-m_en': ModelArg('action-recognition-0001-encoder'),
+                #        '-m_de': ModelArg('action-recognition-0001-decoder'),
+                #    }),
+                   TestCase(options={
+                       '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+                       '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+                   }),
+               ]
+            ),
         ],
     )),
 
@@ -891,27 +885,25 @@ DEMOS = [
                           '-m_o': ModelArg('mtcnn-o')}),
     )),
 
-    # TODO: hang at 00:51:34  Test case #12/CPU: -d_fd CPU -d_lm CPU -d_reid CPU --no_show -fg /tmp/tmp9ybvhfxg/data_seq/face-recognition-gallery -i /tmp/tmp9ybvhfxg/data_seq/face-detection-adas/input-%04d.JPEG -m_fd /tmp/tmptb9srg1i/models/intel/face-detection-adas-0001/FP16/face-detection-adas-0001.xml -m_lm /tmp/tmptb9srg1i/models/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml -m_reid /tmp/tmptb9srg1i/models/public/Sphereface/FP16/Sphereface.xml -u cdm
-    # 00:51:34
-    # PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
-    #            model_keys=['-m_fd', '-m_lm', '-m_reid'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #                       **MONITORS,
-    #                       '-i': DataPatternArg('face-detection-adas'),
-    #                       '-fg': DataDirectoryArg('face-recognition-gallery')
-    #                       }),
-    #     single_option_cases('-m_fd',
-    #         ModelArg('face-detection-adas-0001'),
-    #         ModelArg('face-detection-retail-0004'),
-    #         ModelArg('face-detection-retail-0005'),
-    #         ModelArg('face-detection-retail-0044')),
-    #     single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
-    #     single_option_cases('-m_reid',
-    #         ModelArg('Sphereface'),
-    #         ModelArg('face-reidentification-retail-0095'),
-    #         # ModelArg('face-recognition-resnet100-arcface-onnx'), TODO
-    #         ModelArg('facenet-20180408-102900')),
-    # )),
+    PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
+               model_keys=['-m_fd', '-m_lm', '-m_reid'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          **MONITORS,
+                          '-i': DataPatternArg('face-detection-adas'),
+                          '-fg': DataDirectoryArg('face-recognition-gallery')
+                          }),
+        single_option_cases('-m_fd',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005'),
+            ModelArg('face-detection-retail-0044')),
+        single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
+        single_option_cases('-m_reid',
+            ModelArg('Sphereface'),
+            ModelArg('face-reidentification-retail-0095'),
+            ModelArg('face-recognition-resnet100-arcface-onnx'),
+            ModelArg('facenet-20180408-102900')),
+    )),
 
     PythonDemo(name='formula_recognition_demo', device_keys=['-d'],
                model_keys=['-m_encoder', '-m_decoder'], test_cases=combine_cases(
@@ -934,20 +926,19 @@ DEMOS = [
         ],
     )),
 
-    # TODO: Attempt to get a name for a Tensor without names
-    # PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
-    #            model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
-    #     [
-    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-    #     ],
-    # )),
+    PythonDemo(name='gesture_recognition_demo', device_keys=['-d'],
+               model_keys=['-m_d', '-m_a'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          '-m_d': ModelArg('person-detection-asl-0001')}),
+        [
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+        ],
+    )),
 
     PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={
@@ -973,13 +964,13 @@ DEMOS = [
         ],
     )),
 
-    #TODO
-    #PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+    # TODO ImportError: Module 'pose_extractor' not found.
+    # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
     #    TestCase(options={'--no_show': None,
     #                      **MONITORS,
     #                      '-i': DataPatternArg('human-pose-estimation')}),
     #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    #)),
+    # )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1012,19 +1003,18 @@ DEMOS = [
        single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     )),
 
-    # TODO: enable tests when FP16-INT8 will work
-    # PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #         **MONITORS,
-    #         '-i': DataPatternArg('instance-segmentation'),
-    #         '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
-    #     single_option_cases('-m',
-    #         ModelArg('instance-segmentation-security-0002'),
-    #         ModelArg('instance-segmentation-security-0091'),
-    #         ModelArg('instance-segmentation-security-0228'),
-    #         ModelArg('instance-segmentation-security-1039'),
-    #         ModelArg('instance-segmentation-security-1040')),
-    # )),
+    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('instance-segmentation'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-security-0002'),
+            ModelArg('instance-segmentation-security-0091'),
+            ModelArg('instance-segmentation-security-0228'),
+            ModelArg('instance-segmentation-security-1039'),
+            ModelArg('instance-segmentation-security-1040')),
+    )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
@@ -1067,9 +1057,8 @@ DEMOS = [
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
-            # TODO
-            # ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')
         ),
     )),
 
@@ -1128,8 +1117,8 @@ DEMOS = [
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
-                        # ModelArg('face-detection-0205'),  # TODO
-                        # ModelArg('face-detection-0206'),  # TODO
+                        ModelArg('face-detection-0205'),
+                        ModelArg('face-detection-0206'),
                         ModelArg('face-detection-adas-0001'),
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
@@ -1144,8 +1133,8 @@ DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
-                        # ModelArg('person-vehicle-bike-detection-2003'), # TODO
-                        # ModelArg('person-vehicle-bike-detection-2004'),  # TODO
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -1160,8 +1149,8 @@ DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
-                        ModelArg('vehicle-license-plate-detection-barrier-0106')),
-                        # ModelArg('person-detection-0106')),  # TODO
+                        ModelArg('vehicle-license-plate-detection-barrier-0106'),
+                        ModelArg('person-detection-0106')),
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
@@ -1206,8 +1195,8 @@ DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf')),
             ),
-            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),  # TODO
-            # TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),  # TODO
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-onnx')}),
+            TestCase(options={'-at': 'yolov3-onnx', '-m': ModelArg('yolo-v3-tiny-onnx')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
             TestCase(options={'-at': 'yolof', '-m': ModelArg('yolof')}),
@@ -1268,21 +1257,20 @@ DEMOS = [
         ],
     )),
 
-    #TODO
-    #PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
-    #           model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None, **MONITORS,
-    #                       '-i': DataPatternArg('human-pose-estimation'),
-    #                       '--person_label': '1'}),
-    #    [
-    #        *combine_cases(
-    #            TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
-    #            single_option_cases('-m_od',
-    #                ModelArg('mobilenet-ssd'),
-    #                ModelArg('person-detection-retail-0013'),
-    #                ModelArg('ssd_mobilenet_v1_coco'))),
-    #    ]
-    #)),
+    PythonDemo(name='single_human_pose_estimation_demo', device_keys=['-d'],
+              model_keys=['-m_od', '-m_hpe'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None, **MONITORS,
+                          '-i': DataPatternArg('human-pose-estimation'),
+                          '--person_label': '1'}),
+       [
+           *combine_cases(
+               TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
+               single_option_cases('-m_od',
+                   ModelArg('mobilenet-ssd'),
+                   ModelArg('person-detection-retail-0013'),
+                   ModelArg('ssd_mobilenet_v1_coco'))),
+       ]
+    )),
 
     PythonDemo(name='smartlab_demo', device_keys=['-d'],
         model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
