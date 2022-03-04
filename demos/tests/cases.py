@@ -670,10 +670,10 @@ DEMOS = [
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            # ModelArg('person-reidentification-retail-0286'), # TODO 
+            # ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
             # ModelArg('person-reidentification-retail-0288')
-            ),
+        ),
     )),
 
     CppDemo(name='text_detection_demo', model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
