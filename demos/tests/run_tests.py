@@ -321,6 +321,7 @@ def main():
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
+                            print(output)
                             demo.parse_output(output, test_case, device)
                         except subprocess.CalledProcessError as e:
                             print(e.output)
