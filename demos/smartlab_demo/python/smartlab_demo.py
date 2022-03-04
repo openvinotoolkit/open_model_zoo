@@ -53,17 +53,17 @@ def main():
     frame_counter = 0 # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
-    ie = Core()
+    core = Core()
 
     ''' Object Detection Variables'''
     detector = Detector(
-            ie,
+            core,
             args.device,
             [args.m_topall, args.m_topmove],
             [args.m_frontall, args.m_frontmove])
 
     '''Video Segmentation Variables'''
-    segmentor = SegmentorMstcn(ie, args.device, args.m_encoder, args.m_decoder)
+    segmentor = SegmentorMstcn(core, args.device, args.m_encoder, args.m_decoder)
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()

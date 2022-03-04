@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         using namespace gaze_estimation;
         PerformanceMetrics metrics;
 
-        /** Print info about OpenVINO **/
+        /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
@@ -174,20 +174,17 @@ int main(int argc, char *argv[]) {
         slog::info << "The Face Detection model " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
 
         /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         if (FLAGS_fd_reshape) {
-            InferenceEngine::Core ie;
-            const auto network = ie.ReadNetwork(FLAGS_m_fd);
+            InferenceEngine::Core core;
+            const auto network = core.ReadNetwork(FLAGS_m_fd);
             const auto layerName = network.getInputsInfo().begin()->first;
             const auto layerData = network.getInputsInfo().begin()->second;
                   auto layerDims = layerData->getTensorDesc().getDims();

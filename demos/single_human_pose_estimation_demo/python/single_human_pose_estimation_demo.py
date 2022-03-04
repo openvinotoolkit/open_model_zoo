@@ -48,7 +48,7 @@ def build_argparser():
 def run_demo(args):
     cap = open_images_capture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

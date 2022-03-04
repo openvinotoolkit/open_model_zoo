@@ -2,8 +2,8 @@
 
 This is the demo application with smartlab action recognition and smartlab object detection algorithms.
 This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
-Action recognition architecure uses two encoders for front-view and top-view respectively, and a single decoder.
-Object detection uses two models for each view to detect large object and small objects, respectively.
+Action recognition architecture uses two encoders for front-view and top-view respectively, and a single decoder.
+Object detection uses two models for each view to detect large and small objects, respectively.
 The following pre-trained models are delivered with the product:
 
 * `i3d-rgb-tf` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
@@ -46,7 +46,34 @@ omz_downloader --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields the usage message given above and an error message.
+Running the demo with `-h` shows this help message:
+```
+usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL
+                        -m_fm M_FRONTMOVE -m_en M_ENCODER -m_de M_DECODER
+
+Options:
+  -h, --help            Show this help message and exit.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target to infer on CPU or GPU.
+  -tv TOPVIEW, --topview TOPVIEW
+                        Required. Topview stream to be processed. The input must be a single image, a folder of images,
+                        video file or camera id.
+  -fv FRONTVIEW, --frontview FRONTVIEW
+                        Required. FrontView to be processed. The input must be a single image, a folder of images,
+                        video file or camera id.
+  -m_ta M_TOPALL, --m_topall M_TOPALL
+                        Required. Path to topview all class model.
+  -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
+                        Required. Path to topview moving class model.
+  -m_fa M_FRONTALL, --m_frontall M_FRONTALL
+                        Required. Path to frontview all class model.
+  -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
+                        Required. Path to frontview moving class model.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required. Path to encoder model.
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Required. Path to decoder model.
+```
 
 **For example**, to run the demo, please provide the model paths and two input streams:
 

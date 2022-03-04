@@ -75,7 +75,7 @@ optional arguments:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
+                        demo will look for a suitable OpenVINO Runtime plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
                         Required. Path to an .xml file with a trained model
@@ -106,9 +106,6 @@ optional arguments:
 The typical command line for offline mode is:
 
 ```shell
-pip install -r requirements.txt
-source <openvino_dir>/bin/setupvars.sh
-
 python3 speech_recognition_deepspeech_demo.py \
     -p mds08x_en \
     -m <path_to_model>/mozilla-deepspeech-0.8.2.xml \

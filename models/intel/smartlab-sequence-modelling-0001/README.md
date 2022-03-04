@@ -15,26 +15,24 @@ For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09
 
 ## Accuracy
 <table>
-    <thead>
-        <tr>
-            <th colspan="2">Accuracy</th>
-            <th>noise/background</th>
-            <th>remove_support_sleeve</th>
-            <th>adjust_rider</th>
-            <th>adjust_nut</th>
-            <th>adjust_balancing</th>
-            <th>open_box</th>
-            <th>close_box</th>
-            <th>choose_weight</th>
-            <th>put_left</th>
-            <th>put_right</th>
-            <th>take_left</th>
-            <th>take_right</th>
-            <th>install support_sleeve</th>
-            <th>mean</th>
-            <th>mPR (P+R)/2</th>
-        </tr>
-    </thead>
+    <tr>
+        <th colspan="2">Accuracy</th>
+        <th>noise/background</th>
+        <th>remove_support_sleeve</th>
+        <th>adjust_rider</th>
+        <th>adjust_nut</th>
+        <th>adjust_balancing</th>
+        <th>open_box</th>
+        <th>close_box</th>
+        <th>choose_weight</th>
+        <th>put_left</th>
+        <th>put_right</th>
+        <th>take_left</th>
+        <th>take_right</th>
+        <th>install support_sleeve</th>
+        <th>mean</th>
+        <th>mPR (P+R)/2</th>
+    </tr>
     <tbody>
         <tr>
             <td rowspan=2>frame-level</td>

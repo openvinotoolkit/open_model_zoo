@@ -120,9 +120,9 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-def read_net(model_path, ie, model_type):
+def read_net(model_path, core, model_type):
     log.info('Reading {} model {}'.format(model_type, model_path))
-    return ie.read_model(model_path)
+    return core.read_model(model_path)
 
 
 def change_layout(model_input):
@@ -147,14 +147,14 @@ class Model:
 
     def __init__(self, args, interactive_mode):
         self.args = args
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
-        self.ie = Core()
-        self.encoder = read_net(self.args.m_encoder, self.ie, 'Formula Recognition Encoder')
-        self.decoder = read_net(self.args.m_decoder, self.ie, 'Formula Recognition Decoder')
-        self.compiled_encoder = self.ie.compile_model(self.encoder, device_name=self.args.device)
+        self.core = Core()
+        self.encoder = read_net(self.args.m_encoder, self.core, 'Formula Recognition Encoder')
+        self.decoder = read_net(self.args.m_decoder, self.core, 'Formula Recognition Decoder')
+        self.compiled_encoder = self.core.compile_model(self.encoder, device_name=self.args.device)
         log.info('The Formula Recognition Encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
-        self.compiled_decoder = self.ie.compile_model(self.decoder, device_name=self.args.device)
+        self.compiled_decoder = self.core.compile_model(self.decoder, device_name=self.args.device)
         log.info('The Formula Recognition Decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)

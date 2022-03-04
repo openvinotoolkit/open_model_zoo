@@ -239,7 +239,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
 def main():
     args = parse_arguments()
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

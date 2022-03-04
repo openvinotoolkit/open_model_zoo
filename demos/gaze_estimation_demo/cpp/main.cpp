@@ -3,7 +3,7 @@
 //
 
 /**
-* \brief The entry point for the Inference Engine gaze_estimation_demo application
+* \brief The entry point for the gaze_estimation_demo application
 * \file gaze_estimation_demo/main.cpp
 * \example gaze_estimation_demo/main.cpp
 */
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        // Loading Inference Engine
+        // Load OpenVINO runtime
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
@@ -104,13 +104,10 @@ int main(int argc, char* argv[]) {
         std::string windowName = "Gaze estimation demo";
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(
-            FLAGS_i, FLAGS_loop, 0, std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+            FLAGS_i, FLAGS_loop, read_type::efficient, 0, std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         cv::Size graphSize{frame.cols / 4, 60};

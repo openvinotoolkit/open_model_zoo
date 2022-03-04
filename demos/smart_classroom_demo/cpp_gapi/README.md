@@ -29,7 +29,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files you may refer to the **Media Files Available for Demos** section in the [Open Model Zoo Demos](../../README.md) overview.
 The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp_gapi/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
@@ -65,10 +65,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 smart_classroom_demo_gapi [OPTION]
 Options:
 

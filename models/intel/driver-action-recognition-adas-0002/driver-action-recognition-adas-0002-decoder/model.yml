@@ -17,21 +17,29 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/driver-action-recognition-adas-0002-decoder.xml
-    size: 266459
-    checksum: 3c3f0b703f61767ac29ac35d582970b9f5e59857782912831783fa296b154bd7f911883a1e82577528252273e7ca29d8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 267570
+    checksum: f80c2d03bbc3f7d771715e11c066be8d1f9caf215fe1795731fd9f32a3fb2353c0c1678ba1ebc10591fbef57247605b1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
   - name: FP32/driver-action-recognition-adas-0002-decoder.bin
     size: 29436128
-    checksum: 9a463282e07d5985f515e1d17995d9c4a34bcfa11904e47e6b7498311771ed358934f7a5eeb6762902eaf4267746af12
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+    checksum: d390e94ca967e739e8ac18fc66623e921b2aba789e0797a15de6124e9ec4db64074d26ab1216ecc59d1c3a3dc061d173
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
   - name: FP16/driver-action-recognition-adas-0002-decoder.xml
-    size: 283531
-    checksum: b927fbe0e4ac71e74fe6370abd82e043497db9673d9576981200020466abeaffd8613e269fa9143ad5e786005ba3b9d9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 285311
+    checksum: 25d08a28957052d47894d101ce9bd403c553e870db0daa2e4592e5ed9b55b31d568424addbf8e90c2278f0cc0427b382
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
   - name: FP16/driver-action-recognition-adas-0002-decoder.bin
     size: 14718156
-    checksum: a4d71c8e317e94fd7f2bb888cfe6cffbbc5e90392344099dfe8ee56ad185dbd6f45f45f47bbdcd0e0ac4543eff17a2b0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+    checksum: d639c5820b71d7e9e791fc5144a9bf9062aecc64895836e21b1ab3d4d748c3cf407e17a94a0f21023ec6a89f3d6cec4e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+    size: 390059
+    checksum: 3540791e0c0a49b81a351179bb70e6586f3ac0f4e3384efd17b7141e76f063116aa132117edc50506b1764a9922381e2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
+    size: 7423791
+    checksum: 212acb9232fa8f06f39bbb07b35b4c9ada897a58ffed9b0a0e09a56230b9dfe43decfccb25a1341b2d2803835eb14ace
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
 input_info:
   - name: '0'
     shape: [1, 16, 512]

@@ -4,7 +4,7 @@ This README describes the Machine Translation demo application that uses a non-a
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 
 The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
@@ -29,8 +29,6 @@ omz_converter --list models.lst
 
 * machine-translation-nar-de-en-0002
 * machine-translation-nar-en-de-0002
-* machine-translation-nar-en-ru-0001
-* machine-translation-nar-ru-en-0001
 * machine-translation-nar-en-ru-0002
 * machine-translation-nar-ru-en-0002
 

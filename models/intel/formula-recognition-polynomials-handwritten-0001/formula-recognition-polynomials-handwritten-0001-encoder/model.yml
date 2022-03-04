@@ -19,23 +19,23 @@ files:
   - name: vocab.json
     size: 1747
     checksum: 2b2fcc77178a679975411af460e6fcc463779674568eeabfe35b8bc93c54bdd958f64c986efad8ea726c38ae29be74ae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/vocab.json
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 281563
-    checksum: 7d22ff1df12d12b5b6b8018530580b8c3fcbfc9a0bdb0aab6a76b4924c21c37e01828b304055e9ebbbaf27a916a0ad72
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 198162
+    checksum: 9c828b3ce875d9df31e308f731eb4defd6c5662d50a692af0bef1699646ce32e6254b6dd69d437efbdd98915e76ab9f1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 45367072
-    checksum: 74f2ac7265e01dab598e2c175ecbc238833a282280176af61a5e20afb64acef1b615e8d49b1be9421f41d06ba4162e1a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 45208864
+    checksum: 81a6c2be628339f561b0ba43d372827dee4300374090d05c39fb004d5f3a0f7265168b85afa224690750d70eb7ca43bc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 382738
-    checksum: 1cc1a0b19dddce498dea370f1714f549bfa288890cbfb873f7a573ceeabd57d4b97336721ebc58d99d1b12586d133532
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 251340
+    checksum: fee51fe55f82a42c82291ca962dfae15ca04f352bf9dd516c846ebd770bfc54d9b1fc1033f0d585b44d6fe9574788d41
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 22683680
-    checksum: 7c3f9b3703254e93a90675dc7c9577224ee2a0ccf54a581c2e2993177bc6bccd8bd099aec378b1847fdfe1f58ee5653b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 22604576
+    checksum: 92c891404feaceb0d785cf9513f8ab8b5f76f669e181c49e06da14af1481f2e0a550304cbef6e208bb012e9cbb7c81f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
 input_info:
   - name: imgs
     shape: [1, 3, 96, 990]

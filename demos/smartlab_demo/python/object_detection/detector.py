@@ -23,7 +23,7 @@ from .subdetectors import SubDetector
 
 class Detector:
     def __init__(self,
-        ie,
+        core,
         device,
         fp_top_models: list,
         fp_front_models: list,
@@ -52,7 +52,7 @@ class Detector:
             fp_model = fp_top_models[0],
             conf_thresh= 0.1,
             nms_thresh = 0.3,
-            ie=ie,
+            core=core,
             device=device)
 
         ###           topview.global_subdetector2          ###
@@ -65,7 +65,7 @@ class Detector:
             fp_model = fp_top_models[1],
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            ie=ie,
+            core=core,
             device=device)
 
         '''configure settings for 2 models in front view'''
@@ -82,7 +82,7 @@ class Detector:
             fp_model = fp_front_models[0],
             conf_thresh= 0.2,
             nms_thresh = 0.3,
-            ie=ie,
+            core=core,
             device=device)
 
         ###           frontview.global_subdetector2          ###
@@ -95,7 +95,7 @@ class Detector:
             fp_model = fp_front_models[1],
             conf_thresh= 0.1,
             nms_thresh = 0.2,
-            ie=ie,
+            core=core,
             device=device)
 
         ### concatenate list of class names for topview

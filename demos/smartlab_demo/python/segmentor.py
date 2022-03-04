@@ -22,7 +22,7 @@ from scipy.special import softmax
 from openvino.runtime import PartialShape
 
 class SegmentorMstcn:
-    def __init__(self, ie, device, i3d_path, mstcn_path):
+    def __init__(self, core, device, i3d_path, mstcn_path):
         self.ActionTerms = [
             "background",
             "noise_action",
@@ -53,19 +53,19 @@ class SegmentorMstcn:
         self.EmbedWindowAtrous = 3
         self.TemporalLogits = np.zeros((0, len(self.ActionTerms)))
 
-        net = ie.read_model(i3d_path)
+        net = core.read_model(i3d_path)
         net.reshape({net.inputs[0]: PartialShape(
             [self.EmbedBatchSize, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth, 3])})
         nodes = net.get_ops()
         net.add_outputs(nodes[13].output(0))
-        self.i3d = ie.compile_model(model=net, device_name=device)
+        self.i3d = core.compile_model(model=net, device_name=device)
 
-        self.mstcn_net = ie.read_model(mstcn_path)
-        self.mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
+        self.mstcn_net = core.read_model(mstcn_path)
+        self.mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_input_keys = self.mstcn.inputs
         self.mstcn_output_key = self.mstcn.outputs
         self.mstcn_net.reshape({'input': PartialShape([1, 2048, 1])})
-        self.reshape_mstcn = ie.compile_model(model=self.mstcn_net, device_name=device)
+        self.reshape_mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         file_path = Path(__file__).parent / 'init_his.npz'
         init_his_feature = np.load(file_path)
         self.his_fea = {f'fhis_in_{i}': init_his_feature[f'arr_{i}'] for i in range(4)}

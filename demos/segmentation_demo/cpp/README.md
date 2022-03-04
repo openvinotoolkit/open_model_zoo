@@ -8,7 +8,7 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximizes utilization of the device and overall processing performance.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
@@ -50,7 +50,30 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
+```
+segmentation_demo [OPTION]
+Options:
+
+    -h                        Print a usage message.
+    -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+    -m "<path>"               Required. Path to an .xml file with a trained model.
+    -o "<path>"               Optional. Name of the output file(s) to save.
+    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -labels "<path>"          Optional. Path to a file with labels mapping.
+    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
+    -r                        Optional. Output inference results as mask histogram.
+    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
+    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -nthreads "<integer>"     Optional. Number of threads.
+    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -loop                     Optional. Enable reading the input in a loop.
+    -no_show                  Optional. Don't show output.
+    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
+    -u                        Optional. List of monitors to show initially.
+    -only_masks               Optional. Display only masks. Could be switched by TAB key.
+```
 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 
@@ -70,7 +93,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
+The demo uses OpenCV to display the resulting images with a blended segmentation mask. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
 The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).

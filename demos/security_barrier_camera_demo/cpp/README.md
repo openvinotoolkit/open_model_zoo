@@ -70,9 +70,7 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-[ INFO ] InferenceEngine: <version>
-
-interactive_vehicle_detection [OPTION]
+security_barrier_camera_demo [OPTION]
 Options:
 
     -h                         Print a usage message.
@@ -80,9 +78,6 @@ Options:
     -m "<path>"                Required. Path to the Vehicle and License Plate Detection model .xml file.
     -m_va "<path>"             Optional. Path to the Vehicle Attributes model .xml file.
     -m_lpr "<path>"            Optional. Path to the License Plate Recognition model .xml file.
-      -l "<absolute_path>"     Required for CPU custom layers. Absolute path to a shared library with the kernels implementation.
-          Or
-      -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
     -d "<device>"              Optional. Specify the target device for Vehicle Detection (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_va "<device>"           Optional. Specify the target device for Vehicle Attributes (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_lpr "<device>"          Optional. Specify the target device for License Plate Recognition (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.

@@ -1,5 +1,6 @@
 # Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -18,6 +19,7 @@
    omz_models_model_asl_recognition_0004
    omz_models_model_common_sign_language_0002
    omz_models_model_driver_action_recognition_adas_0002
+   omz_models_model_smartlab_sequence_modelling_0001
    omz_models_model_weld_porosity_detection_0001
 
 .. toctree::
@@ -28,13 +30,6 @@
    omz_models_model_resnet18_xnor_binary_onnx_0001
    omz_models_model_resnet50_binary_0001
 
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Face Recognition Models
-
-   omz_models_model_face_reidentification_retail_0095
 
 .. toctree::
    :maxdepth: 1
@@ -68,6 +63,7 @@
    :hidden:
    :caption: Instance Segmentation Models
 
+   omz_models_model_instance_segmentation_person_0007
    omz_models_model_instance_segmentation_security_0002
    omz_models_model_instance_segmentation_security_0091
    omz_models_model_instance_segmentation_security_0228
@@ -81,8 +77,8 @@
 
    omz_models_model_machine_translation_nar_de_en_0002
    omz_models_model_machine_translation_nar_en_de_0002
-   omz_models_model_machine_translation_nar_en_ru_0001
-   omz_models_model_machine_translation_nar_ru_en_0001
+   omz_models_model_machine_translation_nar_en_ru_0002
+   omz_models_model_machine_translation_nar_ru_en_0002
 
 .. toctree::
    :maxdepth: 1
@@ -90,25 +86,22 @@
    :caption: Noise Suppression Models
 
    omz_models_model_noise_suppression_poconetlike_0001
+   omz_models_model_noise_suppression_denseunet_ll_0001
 
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Object Attribute Estimation Models
+   :caption: Object Attribute Recognition Models
 
    omz_models_model_age_gender_recognition_retail_0013
    omz_models_model_emotions_recognition_retail_0003
    omz_models_model_facial_landmarks_35_adas_0002
+   omz_models_model_facial_landmarks_98_detection_0001
    omz_models_model_gaze_estimation_adas_0002
-   omz_models_model_image_retrieval_0001
    omz_models_model_landmarks_regression_retail_0009
    omz_models_model_person_attributes_recognition_crossroad_0230
    omz_models_model_person_attributes_recognition_crossroad_0234
    omz_models_model_person_attributes_recognition_crossroad_0238
-   omz_models_model_person_reidentification_retail_0277
-   omz_models_model_person_reidentification_retail_0286
-   omz_models_model_person_reidentification_retail_0287
-   omz_models_model_person_reidentification_retail_0288
    omz_models_model_vehicle_attributes_recognition_barrier_0039
    omz_models_model_vehicle_attributes_recognition_barrier_0042
 
@@ -126,7 +119,6 @@
    omz_models_model_face_detection_retail_0004
    omz_models_model_face_detection_retail_0005
    omz_models_model_faster_rcnn_resnet101_coco_sparse_60_0001
-   omz_models_model_horizontal_text_detection_0001
    omz_models_model_pedestrian_and_vehicle_detector_adas_0001
    omz_models_model_pedestrian_detection_adas_0002
    omz_models_model_person_detection_0106
@@ -134,6 +126,9 @@
    omz_models_model_person_detection_0201
    omz_models_model_person_detection_0202
    omz_models_model_person_detection_0203
+   omz_models_model_person_detection_0301
+   omz_models_model_person_detection_0302
+   omz_models_model_person_detection_0303
    omz_models_model_person_detection_action_recognition_0005
    omz_models_model_person_detection_action_recognition_0006
    omz_models_model_person_detection_action_recognition_teacher_0002
@@ -150,8 +145,10 @@
    omz_models_model_person_vehicle_bike_detection_crossroad_1016
    omz_models_model_person_vehicle_bike_detection_crossroad_yolov3_1020
    omz_models_model_product_detection_0001
-   omz_models_model_text_detection_0003
-   omz_models_model_text_detection_0004
+   omz_models_model_smartlab_object_detection_0001
+   omz_models_model_smartlab_object_detection_0002
+   omz_models_model_smartlab_object_detection_0003
+   omz_models_model_smartlab_object_detection_0004
    omz_models_model_vehicle_detection_0200
    omz_models_model_vehicle_detection_0201
    omz_models_model_vehicle_detection_0202
@@ -168,15 +165,14 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Optical Character Recognition Models
+   :caption: Reidentification Models
 
-   omz_models_model_handwritten_japanese_recognition_0001
-   omz_models_model_handwritten_score_recognition_0003
-   omz_models_model_handwritten_simplified_chinese_recognition_0001
-   omz_models_model_license_plate_recognition_barrier_0001
-   omz_models_model_text_recognition_0012
-   omz_models_model_text_recognition_0014
-   omz_models_model_text_spotting_0005
+   omz_models_model_face_reidentification_retail_0095
+   omz_models_model_person_reidentification_retail_0277
+   omz_models_model_person_reidentification_retail_0286
+   omz_models_model_person_reidentification_retail_0287
+   omz_models_model_person_reidentification_retail_0288
+   omz_models_model_image_retrieval_0001
 
 .. toctree::
    :maxdepth: 1
@@ -221,12 +217,35 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Token Recognition Models
+   :caption: Text Detection Models
+
+   omz_models_model_horizontal_text_detection_0001
+   omz_models_model_text_detection_0003
+   omz_models_model_text_detection_0004
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text Recognition Models
 
    omz_models_model_formula_recognition_medium_scan_0001
    omz_models_model_formula_recognition_polynomials_handwritten_0001
+   omz_models_model_handwritten_english_recognition_0001
+   omz_models_model_handwritten_japanese_recognition_0001
+   omz_models_model_handwritten_score_recognition_0003
+   omz_models_model_handwritten_simplified_chinese_recognition_0001
+   omz_models_model_license_plate_recognition_barrier_0001
+   omz_models_model_text_recognition_0012
+   omz_models_model_text_recognition_0014
    omz_models_model_text_recognition_0015
+   omz_models_model_text_recognition_0016
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text Spotting Models
+
+   omz_models_model_text_spotting_0005
 
 .. raw:: html
 
@@ -235,6 +254,7 @@
    </script>
 
 @endsphinxdirective
+-->
 
 OpenVINO&trade; toolkit provides a set of Intel's pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
@@ -517,8 +537,6 @@ Deep Learning compressed models
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md) | 23.17 | 69.29 |
-| [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-ru-0002](./machine-translation-nar-en-ru-0002/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0002](./machine-translation-nar-ru-en-0002/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |

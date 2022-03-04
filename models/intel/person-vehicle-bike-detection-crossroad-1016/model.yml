@@ -18,29 +18,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 383308
-    checksum: 14af3bb912aae18dfa95cae3f486098889336ab2e80dece495d1a7189a61fb9d367a571b9165f7f8ee22d2e0b8d152f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 246263
+    checksum: b6257f11d6a7f7fd90e9f7642641e8959e5cc8e8c70fddf43ee906905e0b3ad6caad5765f2f02753c816b6f3f65700c2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 11749496
-    checksum: e70fa64ad870c80357bd2148c843e8ff738a8a495bcd821c0e267a1bae22aa8ab9d2167fd9955f8ba384e46f93d8e0b0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 11548012
+    checksum: 41a29418a66c99b711c399a9e764217db8403ce827d181b5cfcd233695503c99220f5ba4bdb49ecf71903c23b3c800c2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 531855
-    checksum: f64f3469f98f21cf8d6070f40b6ba5c4723e682c2b70b210a440054327f260437e0e8d385d53af061aff74f907795d7a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 324138
+    checksum: f7c295a84007a30d0ccaea221bf5badd2e1db9274a5941ef5b92a5c7273dc99e279a170efc963c6772b0576ed4e0c156
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 5874804
-    checksum: 4d8b2913a84deff43242ba4c198c96a8dc1027d4f3a21a2af8722f5edeaf4dcf52ced9fabe542f78b2044a4c971b9b55
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 5774062
+    checksum: 49cd6831f5b23c129aba3672fd90a4be14fa95b92e34d9650d2663c5bcbf4a37032c0e5d979c74fbc169f291ac5bb85c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 945679
-    checksum: cb4d5004eb098a23cbf110b098ae8e62f3896b45a17329b95288779c43bbb8a1afa2d338a569cf617b5aa35ef066fa9a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 603672
+    checksum: 336f317f0e899aa82e3b667787c8a6c16d3f0bc84de8bb6d7bc455889040df3e1bb93cb7b9ed19eeab80fb4c58a1ffee
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 3248037
-    checksum: 10455dc40c3a28f01fd9f71073b8bb77a4a07a5fe83f9dc5258956401b3719d6431fc2e3bb17cc2db72f58e3a2d63c92
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 3139338
+    checksum: 809d5ad711798f4f93fac8e753cf61f76fd4723e95c816f2676a4db4101bdfc92644640df54538281412bf6b3f06d53b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
 input_info:
   - name: input.1
     shape: [1, 3, 512, 512]

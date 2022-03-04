@@ -109,7 +109,7 @@ def build_argparser():
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
-                             "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
+                             "The demo will look for a suitable OpenVINO Runtime plugin for this device. Default value is CPU.")
     return parser
 
 
@@ -127,7 +127,7 @@ def main():
 
     log_melspectrum = QuartzNet.audio_to_melspectrum(audio.flatten(), sampling_rate)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

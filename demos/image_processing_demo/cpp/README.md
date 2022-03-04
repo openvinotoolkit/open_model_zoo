@@ -15,7 +15,7 @@ All images on result frame will be marked one of these flags:
 * 'R' - result image.
 * 'D' - difference image (|result - original|).
 
-1. Exmaple for deblurring type (left - source image, right - image after deblurring):
+1. Example for deblurring type (left - source image, right - image after deblurring):
 
 ![](./assets/image_processing_deblurred_image.png)
 
@@ -37,7 +37,7 @@ Super resolution:
 
 ![](./assets/parrots_restoration.png)
 
-For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (usefull when user want to test model on high quality jpeg images).
+For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (useful when user wants to test model on high quality jpeg images).
 
 4. Example for style_transfer:
 
@@ -65,7 +65,7 @@ The demo runs inference and shows results for each image captured from an input.
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
-The list of models supported by the demo is in `<omz_dir>/demos/segmentation_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 ### Supported Models
@@ -81,11 +81,28 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
+```
+image_processing_demo [OPTION]
+Options:
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/model_tools/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+    -h                        Print a usage message.
+    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
+    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+    -m "<path>"               Required. Path to an .xml file with a trained model.
+    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
+    -o "<path>"               Optional. Name of the output file(s) to save.
+    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
+    -nthreads "<integer>"     Optional. Number of threads.
+    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -loop                     Optional. Enable reading the input in a loop.
+    -no_show                  Optional. Do not show processed video.
+    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
+    -u                        Optional. List of monitors to show initially.
+    -jc                       Optional. Flag of using compression for jpeg images. Default value if false. Only for jr architecture type.
+```
 
 You can use the following command to enhance the resolution of the images captured by a camera using a pre-trained single-image-super-resolution-1033 network:
 

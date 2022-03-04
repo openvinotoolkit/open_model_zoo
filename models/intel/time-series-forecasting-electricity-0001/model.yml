@@ -18,21 +18,21 @@ description: >-
 task_type: time_series
 files:
   - name: FP32/time-series-forecasting-electricity-0001.xml
-    size: 466490
-    checksum: 52b775fe7924f3e429be1b0f53da21bd0165f5c02663e2176991f8d6f48a1a7cbf164838372b63fbaa92946c1d7d6637
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.xml
+    size: 452153
+    checksum: d7cf0d8492612f6dc14a6f3a28d3b6f152ea9dffa64bbfbfb574255a2793aa9bf8c4c783e6fb9a2f6ca50823e0c65ab6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.xml
   - name: FP32/time-series-forecasting-electricity-0001.bin
     size: 10054720
-    checksum: ba9220ea318619c88bc21fc752dc37c5c962ae56619219a8f513be40546c1acfd3c005de1d0dce4dee7968f50b27fd0c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.bin
+    checksum: c1f78c6dfbb2bd023a0e634bebe87276040ced34b761202a75aa1f08382eed8af0dec00193cc3c7f3c2bb2ef281e4bb7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.bin
   - name: FP16/time-series-forecasting-electricity-0001.xml
-    size: 573181
-    checksum: 652c53324fc41dc4196d6a1e704dcc10435cbd9263f4d90c01bc85334ccf83b2466b3cc6e9852bc6dd0fc15ee3c66f83
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.xml
+    size: 566039
+    checksum: adf44c00a88fd54e639812b1235fef0e3f3ecb457ca16a595d839b1ed95f4f6dcb60d370f6d27ee0e9c718952de81b6b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.xml
   - name: FP16/time-series-forecasting-electricity-0001.bin
     size: 5045996
-    checksum: e1347a6d63e6f29087fc71972332bbe199e93603e19f2ba585c7e0e54e600e3134b994a7e9248cc06897f188fcd64b4a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.bin
+    checksum: 86a8c709218f3563766f64954c44447feb3d075ce574f26ad2790d844bda34055e431c1dad0aaba0bdad31b65248a8f9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.bin
 input_info:
   - name: timestamps
     shape: [1, 192, 5]

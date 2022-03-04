@@ -17,29 +17,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/gaze-estimation-adas-0002.xml
-    size: 94135
-    checksum: cbcf31155fc03407e1cd6fd7ddce854dc056ff680abf8812fa0f62f52ac3b44dcaa555102e3dd7bd5a3b210fd8d50102
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+    size: 81861
+    checksum: d823de72434442ca650c6cd12a00e6e164c9572554f31b74f507a478fc4a5503fb91be2483b07e697f6fdc2fdcf0a055
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
   - name: FP32/gaze-estimation-adas-0002.bin
-    size: 7536380
-    checksum: 8460f07abc0498fdcd1f384c19cba261a98c8b010b6862a03eebcef800209c9234463c94a3c0d44fb59b0fc4876916b5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+    size: 7529380
+    checksum: 044e39075331a7e5b3a7da7a39ccc40defda03326375295aa091b273e7395b3ab92db076d7828b9a68795fd496b572c8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
   - name: FP16/gaze-estimation-adas-0002.xml
-    size: 131242
-    checksum: 65daedc5b4e2e09cc56d463526fbc145879d3d9f698185ea2896f0eac879b06cfb7c3db58d96158e2560eab552285993
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+    size: 111481
+    checksum: 0a52150dfbf79bae3efc8d5789a7dd2ac013cfb8c95faa07700feb4f2807bb97528350df8ee776d31673d4346f37eb4e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
   - name: FP16/gaze-estimation-adas-0002.bin
-    size: 3768242
-    checksum: 0e363fdf788d4706e47ace68013fb74fb8d76145922fa912a098f4f30f9ea93a98768afa9cb94604086fbaaecf40960e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+    size: 3764742
+    checksum: cbb7c2732fb0e6a4dd74ef081c1b92338c881831120b62b36828ed9b12f5563e00e4436755641c64abe91a3ed2648534
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
   - name: FP16-INT8/gaze-estimation-adas-0002.xml
-    size: 215383
-    checksum: a8bdc1ced113f6463d8084b6048135839c97d4c454bfcafeced701e2905c8b1156a1097da84bfc0fc982187437f28257
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
+    size: 174630
+    checksum: c73f7f7b4d3360b263b8a2981333ed74648bc09461d86c767baa22f8f21d50c1f87beec3989190daa22424ce226c95b3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
   - name: FP16-INT8/gaze-estimation-adas-0002.bin
-    size: 1904337
-    checksum: 4b6ee9dcd6cc6cc50b12f80db7b5e776e85f4585caf60a090c582b83c6625d62d7959bdd40fefc463669336f44a6d423
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
+    size: 1900734
+    checksum: 15f0469b3dfc6c7c4928d36a10877ba90211f697d8c588d032507fd31efdf2ace556db2937b8621738b3a2b0fac4ef19
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
 input_info:
   - name: left_eye_image
     shape: [1, 3, 60, 60]

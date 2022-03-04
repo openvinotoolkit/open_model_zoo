@@ -32,7 +32,7 @@ def create_core():
     if openvino_absent:
         raise ImportError('The OpenVINO package is not installed')
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     return Core()
 

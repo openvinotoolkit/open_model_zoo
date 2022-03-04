@@ -3,7 +3,7 @@
 //
 
 /**
-* \brief The entry point for the G-API/Inference Engine interactive_face_detection_gapi demo application
+* \brief The entry point for the G-API interactive_face_detection_gapi demo application
 * \file interactive_face_detection_demo_gapi/main.cpp
 * \example interactive_face_detection_demo_gapi/main.cpp
 */
@@ -431,10 +431,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0, FLAGS_limit);
         /** ---------------- The execution part ---------------- **/
         stream.setSource<custom::CommonCapSrc>(cap);
 

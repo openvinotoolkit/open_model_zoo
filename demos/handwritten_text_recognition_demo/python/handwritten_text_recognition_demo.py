@@ -74,7 +74,7 @@ def main():
     args = build_argparser().parse_args()
 
     # Plugin initialization
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
 
-        // 1. Load inference engine
+        // 1. Load OpenVINO runtime
         slog::info << ov::get_openvino_version() << slog::endl;
 
         ov::Core core;
@@ -84,9 +84,6 @@ int main(int argc, char* argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
-        if (!frame.data) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         cv::Size graphSize{frame.cols / 4, 60};

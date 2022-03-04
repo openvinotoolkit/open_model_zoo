@@ -32,19 +32,6 @@ omz_converter --list models.lst
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
-### Installation and Dependencies
-
-The demo depends on:
-
-* opencv-python
-* numpy
-
-To install all the required Python modules you can use:
-
-``` sh
-pip install -r requirements.txt
-```
-
 ## Running
 
 Running the application with the `-h` option yields the following usage message:

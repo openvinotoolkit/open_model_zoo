@@ -27,10 +27,6 @@ static const char target_device_message_person_reid[] = "Optional. Specify the t
                                                         "The list of available devices is shown below. Default value is CPU. "
                                                         "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                         "The application looks for a suitable plugin for the specified device.";
-static const char custom_cldnn_message[] = "Optional. For clDNN (GPU)-targeted custom kernels, if any. "
-                                           "Absolute path to the xml file with the kernels desc.";
-static const char custom_cpu_library_message[] = "Optional. For MKLDNN (CPU)-targeted custom layers, if any. "
-                                                 "Absolute path to a shared library with the kernels impl.";
 static const char threshold_output_message[] = "Optional. Probability threshold for person/vehicle/bike crossroad detections.";
 static const char threshold_output_message_person_reid[] = "Optional. Cosine similarity threshold between two vectors for person reidentification.";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
@@ -49,8 +45,6 @@ DEFINE_string(m_reid, "", person_reid_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_pa, "CPU", target_device_message_person_attribs);
 DEFINE_string(d_reid, "CPU", target_device_message_person_reid);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, threshold_output_message);
 DEFINE_double(t_reid, 0.7, threshold_output_message_person_reid);
@@ -76,9 +70,6 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"                  " << person_vehicle_bike_detection_model_message<< std::endl;
     std::cout << "    -m_pa \"<path>\"               " << person_attribs_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << person_reid_model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -d_pa \"<device>\"             " << target_device_message_person_attribs << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_message_person_reid << std::endl;

@@ -6,7 +6,7 @@ The demo has a post-processing part that gathers mask arrays corresponding to bo
 
 ## How It Works
 
-On startup, the demo application reads command line parameters and loads a network and an image to the Inference Engine plugin. When inference is done, the application creates an output image.
+On startup, the demo application reads command line parameters and loads a model and an image to OpenVINO™ Runtime plugin. When inference is done, the application creates an output image.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
@@ -40,19 +40,12 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 mask_rcnn_demo [OPTION]
 Options:
 
     -h                                Print a usage message.
     -i "<path>"                       Required. Path to a .bmp image.
     -m "<path>"                       Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"            Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
-          Or
-      -c "<absolute_path>"            Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
     -d "<device>"                     Optional. Specify the target device to infer on (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device (CPU by default)
     -detection_output_name "<string>" Optional. The name of detection output layer. Default value is "reshape_do_2d"
     -masks_name "<string>"            Optional. The name of masks layer. Default value is "masks"

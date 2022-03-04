@@ -120,7 +120,7 @@ class FrameProcessor:
     def __init__(self, args):
         self.allow_grow = args.allow_grow and not args.no_show
 
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
 
