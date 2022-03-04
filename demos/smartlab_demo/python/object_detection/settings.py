@@ -44,7 +44,7 @@ mw_scale1cls4 = [
 
 # global setting of obj-det
 class MwGlobalExp:
-    def __init__(self, ie, device, num_classes, model_path,
+    def __init__(self, core, device, num_classes, model_path,
         nms_thresh, conf_thresh, parent_obj=''):
 
         self.parent_cat = parent_obj
@@ -72,12 +72,12 @@ class MwGlobalExp:
         self.conf_thresh = conf_thresh
         self.nms_thresh = nms_thresh
         self.num_classes = num_classes
-        self.ie = ie
+        self.core = core
         self.device = device
 
     def get_openvino_model(self):
-        net = self.ie.read_model(self.model_path )
-        compiled_model = self.ie.compile_model(model=net, device_name=self.device)
+        net = self.core.read_model(self.model_path)
+        compiled_model = self.core.compile_model(model=net, device_name=self.device)
         input_name = compiled_model.inputs[0]
         output_name = compiled_model.outputs[0]
 

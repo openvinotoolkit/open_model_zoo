@@ -22,7 +22,7 @@ from .subdetectors import SubDetector, CascadedSubDetector
 
 class Detector:
     def __init__(self,
-        ie,
+        core,
         device,
         top_models: list,
         side_models: list,
@@ -46,8 +46,8 @@ class Detector:
         #     "hand", 2;
         #  other conditions:
         #     conf 0.1; nms 0.3
-        self.top1_exp = MwGlobalExp(
-            ie=ie,
+        self.top_glb_exp = MwGlobalExp(
+            core=core,
             device=device,
             num_classes = 10,
             model_path  = top_models[0],
@@ -59,8 +59,8 @@ class Detector:
         #     "weights", 6; "tweezers", 1; "battery", 1;
         #  other conditions:
         #     conf 0.1; nms 0.2
-        self.top2_exp = MwGlobalExp(
-            ie=ie,
+        self.top_loc_exp = MwGlobalExp(
+            core=core,
             device=device,
             num_classes = 4,
             model_path  = top_models[1],
@@ -77,8 +77,8 @@ class Detector:
         #     "hand", 2;
         #  other conditions:
         #     conf 0.2; nms 0.3
-        self.front1_exp = MwGlobalExp(
-            ie=ie,
+        self.side_glb_exp = MwGlobalExp(
+            core=core,
             device=device,
             num_classes = 10,
             model_path  = side_models[0],
@@ -90,8 +90,8 @@ class Detector:
         #     "weights", 6; "tweezers", 1; "battery", 1;
         #  other conditions:
         #     conf 0.1; nms 0.3
-        self.front2_exp = MwGlobalExp(
-            ie=ie,
+        self.side_loc_exp = MwGlobalExp(
+            core=core,
             device=device,
             num_classes = 3,
             model_path  = side_models[1],
@@ -136,33 +136,40 @@ class Detector:
             glb_subdet = self.side_glb_subdetector
             loc_subdet = self.side_ruler_subdetector
 
-        all_preds = []
-        for i, sub_detector in enumerate([glb_subdet, loc_subdet]):
-            if not hasattr(sub_detector, 'is_cascaded'):
-                outputs = sub_detector.inference(img)
-            else:
-                if len(all_preds) == 0:
-                    continue
+        # global detector inference
+        outputs = glb_subdet.inference(img)
+        if len(outputs) == 0: return None, None, None
+        all_preds = outputs[0][0]
 
-                parent_cat = sub_detector.parent_cat
-                parent_id = glb_subdet.detcls2id[parent_cat]
-                parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
+        # # local detector inference
+        # parent_cat = loc_subdet.parent_cat
+        # parent_id = glb_subdet.detcls2id[parent_cat]
+        # parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
+        # if parent_roi is not None: outputs = loc_subdet.inference_in(img, parent_roi)
+        # else: outputs[0] = None
+        # all_preds.append(outputs[0])
 
-                if parent_roi is not None:
-                    outputs = sub_detector.inference_in(img, parent_roi)
-                else:
-                    outputs[0] = None
+        # for i, sub_detector in enumerate([glb_subdet, loc_subdet]):
+        #     if not hasattr(sub_detector, 'is_cascaded'):
+        #         outputs = sub_detector.inference(img)
+        #     else:
+        #         if len(all_preds) == 0:
+        #             continue
 
-            if outputs[0] is not None:
-                preds = outputs[0] # work if bsize = 1
-            else:
-                continue
-            all_preds.append(preds)
+        #         parent_cat = sub_detector.parent_cat
+        #         parent_id = glb_subdet.detcls2id[parent_cat]
+        #         parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
 
-        if len(all_preds) > 0:
-            all_preds = np.concatenate(all_preds)
-        else:
-            all_preds = np.zeros((1, 7))
+        #         if parent_roi is not None:
+        #             outputs = sub_detector.inference_in(img, parent_roi)
+        #         else:
+        #             outputs[0] = None
+
+        #     if outputs[0] is not None:
+        #         preds = outputs[0] # work if bsize = 1
+        #     else:
+        #         continue
+        #     all_preds.append(preds)
 
         for r, pred in enumerate(all_preds):
             cls_id = int(pred[-1])

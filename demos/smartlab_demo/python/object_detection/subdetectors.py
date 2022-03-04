@@ -22,10 +22,23 @@ from .deploy_util import demo_postprocess
 from .postprocess import postprocess, crop_pad_resize, reverse_crop_pad_resize
 
 class SubDetector:
-    def __init__(self, exp: MwGlobalExp, backend: str='openvino'):
+    def __init__(self, exp: MwGlobalExp, all_classes: list):
         self.inode, self.onode, self.input_shape, self.model = exp.get_openvino_model()
 
-        self.cls_names = exp.mw_classes
+        ### create bi-directional dictionary on all classes
+        self.all_classes = all_classes # class list in detector
+        self.detcls2id = {c: i+1 for i, c in enumerate(all_classes)} # detector class mapper: cls -> glb_id
+        ### create bi-directional dictionary on sub classes
+        self.sub_classes = list(exp.mw_classes) # class list in sub-detector
+        self.subdetcls2id = {c: i+1 for i, c in enumerate(self.sub_classes)} # sub-detector class mapper: cls -> loc_id
+        ### create subdet_id -> det_id dictionary
+        self.subdetid2detid = {} # class idx mapper: subdet_id -> det_id
+        for i, c in enumerate(self.sub_classes):
+            subdet_id = i + 1
+            det_id = self.detcls2id[c]
+            self.subdetid2detid[subdet_id] = det_id
+
+        self.n_sub_classes = exp.num_classes
         self.num_classes = exp.num_classes
         self.conf_thresh = exp.conf_thresh
         self.nms_thresh = exp.nms_thresh
@@ -36,17 +49,18 @@ class SubDetector:
         height, width = img.shape[:2]
         img_info["height"] = height
         img_info["width"] = width
-
         img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
-        res = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode]
-        outputs = demo_postprocess(res, self.input_shape, p6=False)
+        res_numpy = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode] # return (1, 3549, 15) of np.array
 
-        outputs = postprocess(
-            outputs, self.num_classes, self.conf_thresh,
+        # streching bboxes to acctual size.
+        outputs_numpy = demo_postprocess(res_numpy, self.input_shape, p6=False)
+        # filtering bboxes.
+        outputs_list = postprocess(
+            outputs_numpy, self.num_classes, self.conf_thresh,
             self.nms_thresh, class_agnostic=True)
 
-        return outputs, img_info
+        return outputs_list, img_info
 
     def pseudolabel(self, output, img_info, idx_offset, cls_conf=0.35):
         ratio = img_info["ratio"]
