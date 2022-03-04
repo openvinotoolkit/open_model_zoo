@@ -17,7 +17,6 @@
    omz_tools_accuracy_checker_onnx_runtime_launcher
    omz_tools_accuracy_checker_opencv_launcher
    omz_tools_accuracy_checker_openvino_launcher
-   omz_tools_accuracy_checker_dlsdk_launcher
    omz_tools_accuracy_checker_pdpd_launcher
    omz_tools_accuracy_checker_pytorch_launcher
    omz_tools_accuracy_checker_tf2_launcher
@@ -202,7 +201,7 @@ Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_run
 Launcher description can have differences.
 
 - [How to configure Caffe launcher](openvino/tools/accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/openvino_launcher_readme.md)
 - [How to configure OpenCV launcher](openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md)
 - [How to configure G-API launcher](openvino/tools/accuracy_checker/launcher/gapi_launcher_readme.md)
 - [How to configure MXNet Launcher](openvino/tools/accuracy_checker/launcher/mxnet_launcher_readme.md)
