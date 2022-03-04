@@ -82,25 +82,25 @@ void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
         std::cout <<   "\t[ -h]                 " << h_msg
-                << "\n\t  -i <INPUT>            " << i_msg
-                << "\n\t --labels <LABELS>     " << labels_msg
-                << "\n\t  -m <MODEL FILE>       " << m_msg
-                << "\n\t[--auto_resize]         " << res_msg
-                << "\n\t[ -d <DEVICE>]          " << d_msg
-                << "\n\t[--gt <STRING>]       " << gt_msg
-                << "\n\t[--layout <STRING>] " << layout_msg
-                << "\n\t[--nireq <NUMBER>]      " << nireq_msg
-                << "\n\t[--nstreams <NUMBER>]   " << nstreams_msg
-                << "\n\t[--nt <NUMBER>]         " << nt_msg
-                << "\n\t[--nthreads <NUMBER>]   " << nthreads_msg
-                << "\n\t[--res <STRING>]       " << res_msg
-                << "\n\t[--show] ([--noshow])   " << show_msg
-                << "\n\t[--time <NUMBER>]       " << time_msg
-                << "\n\t[ -u]                   " << u_msg
-                << "\n\tKey bindings:"
-                    "\n\t\tQ, q, Esc - Quit"
-                    "\n\t\tR, r, SpaceBar - Restart testing"
-                    "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
+                  << "\n\t  -i <INPUT>          " << i_msg
+                  << "\n\t --labels <LABELS>    " << labels_msg
+                  << "\n\t  -m <MODEL FILE>     " << m_msg
+                  << "\n\t[--auto_resize]       " << res_msg
+                  << "\n\t[ -d <DEVICE>]        " << d_msg
+                  << "\n\t[--gt <STRING>]       " << gt_msg
+                  << "\n\t[--layout <STRING>]   " << layout_msg
+                  << "\n\t[--nireq <NUMBER>]    " << nireq_msg
+                  << "\n\t[--nstreams <NUMBER>] " << nstreams_msg
+                  << "\n\t[--nt <NUMBER>]       " << nt_msg
+                  << "\n\t[--nthreads <NUMBER>] " << nthreads_msg
+                  << "\n\t[--res <STRING>]      " << res_msg
+                  << "\n\t[--show] ([--noshow]) " << show_msg
+                  << "\n\t[--time <NUMBER>]     " << time_msg
+                  << "\n\t[ -u]                 " << u_msg
+                  << "\n\tKey bindings:"
+                     "\n\t\tQ, q, Esc - Quit"
+                     "\n\t\tR, r, SpaceBar - Restart testing"
+                     "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
 
         showAvailableDevices();
         slog::info << ov::get_openvino_version() << slog::endl;
