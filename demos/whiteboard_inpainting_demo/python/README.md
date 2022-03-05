@@ -49,14 +49,6 @@ omz_converter --list models.lst
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
-### Install Dependencies
-
-To install required dependencies, open a terminal and run the following:
-
-```bash
-pip3 install -r requirements.txt
-```
-
 ## Running
 
 Run the application with the `-h` option to see the following usage message:

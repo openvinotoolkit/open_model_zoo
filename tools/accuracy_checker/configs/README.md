@@ -1,5 +1,8 @@
 # How to use predefined configuration files
 
+**Note**: Since 2022.1 all provided Open Model Zoo configuration files switched to work with OpenVINO™ API 2.0. For launching models with API 1.0, additional actions may be required,, see [config migration guide](../openvino/launchers/../tools/accuracy_checker/launcher/openvino_launcher_readme.md#migrate-accuracy-checker-configuration-from-openvino-api-10-to-20)
+
+
 ## Structure
 
 Configuration file declares validation process. Every model has to have entry in `models` list. Each entry has to contain distinct `name`, `launchers` and `datasets` sections.
