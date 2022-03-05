@@ -72,7 +72,8 @@ def build_argparser():
                       default='', type=str)
     args.add_argument('-nthreads', '--num_threads', default=None, type=int,
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
-    args.add_argument('--dynamic_shape', action='store_true', help='Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
+    args.add_argument('--dynamic_shape', action='store_true',
+                      help='Optional. Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
     return parser
 
 
