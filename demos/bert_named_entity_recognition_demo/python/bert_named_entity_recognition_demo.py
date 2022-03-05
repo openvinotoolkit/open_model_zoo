@@ -73,7 +73,7 @@ def build_argparser():
     args.add_argument('-nthreads', '--num_threads', default=None, type=int,
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
     args.add_argument('--dynamic_shape', action='store_true',
-                      help='Optional. Run model with dynamic input sequence. If not provided, input sequence will be padded to max_seq_len')
+                      help='Optional. Run model with dynamic input sequence. If not provided, input sequence is padded to max_seq_len')
     return parser
 
 
@@ -121,7 +121,7 @@ def main():
     enable_padding = not args.dynamic_shape
     model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names, 'enable_padding': enable_padding})
     if max_sentence_length > model.max_length:
-        model.reshape(max_sentence_length if not args.dynamic_shape else (1, max_sentence_length))
+        model.reshape(max_sentence_length if enable_padding else (1, max_sentence_length))
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)
