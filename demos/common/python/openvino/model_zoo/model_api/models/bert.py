@@ -14,7 +14,7 @@
 import numpy as np
 
 from .model import Model, WrapperError
-from .types import DictValue, NumericalValue, StringValue
+from .types import DictValue, NumericalValue, StringValue, BooleanValue
 
 
 class Bert(Model):
@@ -37,13 +37,15 @@ class Bert(Model):
         parameters.update({
             'vocab': DictValue(),
             'input_names': StringValue(description='Comma-separated names of input layers'),
+            'enable_padding': BooleanValue(
+                description='Should be input sequence padded to max sequence len or not', default_value=True
+            )
         })
         return parameters
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
-
-        pad_len = self.pad_input(input_ids, attention_mask, token_type_ids)
+        pad_len = self.pad_input(input_ids, attention_mask, token_type_ids) if self.enable_padding else 0
         meta = {'pad_len': pad_len, 'inputs': inputs}
 
         return self.create_input_dict(input_ids, attention_mask, token_type_ids), meta
@@ -79,7 +81,7 @@ class Bert(Model):
         default_input_shape = input_info.shape
         super().reshape(new_shapes)
         self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
-        self.max_length = new_length
+        self.max_length = new_length if not isinstance(new_length, tuple) else new_length[1]
 
 
 class BertNamedEntityRecognition(Bert):
@@ -106,7 +108,7 @@ class BertNamedEntityRecognition(Bert):
 
         filtered_labels_id = [
             (i, label_i) for i, label_i in enumerate(labels_id)
-            if label_i != 0 and 0 < i < self.max_length - meta['pad_len']
+            if label_i != 0 and 0 < i < self.max_length - meta['pad_len'] - 1
         ]
         return score, filtered_labels_id
 
