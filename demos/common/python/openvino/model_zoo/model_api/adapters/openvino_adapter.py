@@ -91,7 +91,7 @@ class OpenvinoAdapter(ModelAdapter):
         for input in self.model.inputs:
             input_shape = get_input_shape(input)
             input_layout = self.get_layout_for_input(input, input_shape)
-            inputs[input.get_any_name()] = Metadata(input.get_names(), get_input_shape(input), input_layout, input.get_element_type().get_type_name())
+            inputs[input.get_any_name()] = Metadata(input.get_names(), input_shape, input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
