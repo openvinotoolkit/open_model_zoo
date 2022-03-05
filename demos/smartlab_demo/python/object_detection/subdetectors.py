@@ -53,14 +53,24 @@ class SubDetector:
         img_info["ratio"] = ratio
         res_numpy = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode] # return (1, 3549, 15) of np.array
 
-        # streching bboxes to acctual size.
+        # streching bboxes to 416x416 input image.
         outputs_numpy = demo_postprocess(res_numpy, self.input_shape, p6=False)
+
         # filtering bboxes.
         outputs_list = postprocess(
             outputs_numpy, self.num_classes, self.conf_thresh,
             self.nms_thresh, class_agnostic=True)
 
-        return outputs_list, img_info
+        # streching bboxes to actual image.
+        outputs = outputs_list[0]
+        if outputs is None:
+            return None, None
+        subdet_ids = [int(v+1) for v in outputs[:, -1]]
+        det_ids = [self.subdetid2detid[i] for i in subdet_ids]
+        outputs[:, -1] = np.array(det_ids, dtype = outputs.dtype)
+        outputs[:, :4] /= ratio
+
+        return outputs, img_info
 
     def pseudolabel(self, output, img_info, idx_offset, cls_conf=0.35):
         ratio = img_info["ratio"]
@@ -111,10 +121,9 @@ class CascadedSubDetector(SubDetector):
         roi_xyxy = roi_xyxy.astype(int)
         img_resize, img_pad_size, pad_left, pad_top = \
             crop_pad_resize(img, roi_xyxy, self.dsize)
-        outputs = self.inference(img_resize)
-        outputs = outputs[0]
+        outputs, _ = self.inference(img_resize)
         if outputs is None:
-            return [None]
+            return None
 
         ### map bbox coords back to raw image
         bboxes_xyxy = outputs[:, : 4]
@@ -126,4 +135,4 @@ class CascadedSubDetector(SubDetector):
             pad_top,
             roi_xyxy)
 
-        return [outputs]
+        return outputs

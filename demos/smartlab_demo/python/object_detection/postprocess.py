@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import cv2
 import numpy as np
 from .deploy_util import nms, multiclass_nms
 

@@ -123,7 +123,7 @@ class Detector:
 
     def _get_parent_roi(self, preds, parent_id):
         for pred in preds:
-            if parent_id == pred[-1]:
+            if parent_id == int(pred[-1]):
                 res = pred[: 4]
                 return res
         return None
@@ -137,43 +137,23 @@ class Detector:
             loc_subdet = self.side_ruler_subdetector
 
         # global detector inference
-        outputs = glb_subdet.inference(img)
-        if len(outputs) == 0: return None, None, None
-        all_preds = outputs[0][0]
+        preds, _ = glb_subdet.inference(img)
+        if len(preds) == 0: return None, None, None
+        all_preds = preds
 
-        # # local detector inference
-        # parent_cat = loc_subdet.parent_cat
-        # parent_id = glb_subdet.detcls2id[parent_cat]
-        # parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
-        # if parent_roi is not None: outputs = loc_subdet.inference_in(img, parent_roi)
-        # else: outputs[0] = None
-        # all_preds.append(outputs[0])
+        # local detector inference
+        parent_cat = loc_subdet.parent_cat
+        parent_id = glb_subdet.detcls2id[parent_cat]
+        parent_roi = self._get_parent_roi(all_preds, parent_id)
+        if parent_roi is not None:
+            preds = loc_subdet.inference_in(img, parent_roi)
+            if preds is not None: np.vstack((all_preds, preds))
 
-        # for i, sub_detector in enumerate([glb_subdet, loc_subdet]):
-        #     if not hasattr(sub_detector, 'is_cascaded'):
-        #         outputs = sub_detector.inference(img)
-        #     else:
-        #         if len(all_preds) == 0:
-        #             continue
+        print(all_preds)
 
-        #         parent_cat = sub_detector.parent_cat
-        #         parent_id = glb_subdet.detcls2id[parent_cat]
-        #         parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
-
-        #         if parent_roi is not None:
-        #             outputs = sub_detector.inference_in(img, parent_roi)
-        #         else:
-        #             outputs[0] = None
-
-        #     if outputs[0] is not None:
-        #         preds = outputs[0] # work if bsize = 1
-        #     else:
-        #         continue
-        #     all_preds.append(preds)
-
+        # cast class id integer
         for r, pred in enumerate(all_preds):
-            cls_id = int(pred[-1])
-            all_preds[r, -1] = cls_id
+            all_preds[r, -1] = int(pred[-1])
 
         # remap to original image scale
         bboxes = all_preds[:, :4]

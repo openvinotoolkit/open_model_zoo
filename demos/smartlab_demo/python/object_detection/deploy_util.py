@@ -61,8 +61,8 @@ def demo_postprocess(outputs, img_size, p6=False):
     else:
         strides = [8, 16, 32, 64]
 
-    hsizes = [img_size[0] // stride for stride in strides]
-    wsizes = [img_size[1] // stride for stride in strides]
+    hsizes = [img_size[0] // stride for stride in strides] # [52, 26, 13]
+    wsizes = [img_size[1] // stride for stride in strides] # [52, 26, 13]
 
     for hsize, wsize, stride in zip(hsizes, wsizes, strides):
         xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))

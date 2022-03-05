@@ -101,10 +101,12 @@ def main():
         if not ret_top or not ret_side:
             break
         else:
+            detector_result = detector.inference(frame_top, frame_side)
+            top_det_results, side_det_results = detector_result[0], detector_result[1]
             # creat detector thread and segmentor thread
-            tdetector = ThreadWithReturnValue(
-                target = detector.inference_multithread,
-                args = (frame_top, frame_side,))
+            # tdetector = ThreadWithReturnValue(
+            #     target = detector.inference_multithread,
+            #     args = (frame_top, frame_side,))
             # if(args.mode == "multiview"): # mobilenet
             #     tsegmentor = ThreadWithReturnValue(
             #         target = segmentor.inference_async,
@@ -116,11 +118,11 @@ def main():
             #         target = segmentor.inference,
             #         args = (buffer1, buffer2, frame_counter,))
             # start()
-            tdetector.start()
+            # tdetector.start()
             # tsegmentor.start()
-            # join()
-            detector_result = tdetector.join()
-            top_det_results, side_det_results = detector_result[0], detector_result[1]
+            # # join()
+            # detector_result = tdetector.join()
+            # top_det_results, side_det_results = detector_result[0], detector_result[1]
             # segmentor_result = tsegmentor.join()
             # if(args.mode == "multiview"):
             #     top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
