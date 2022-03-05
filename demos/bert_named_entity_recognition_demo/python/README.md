@@ -70,8 +70,8 @@ Options:
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
-  --dynamic_shape       Run model with dynamic input sequence. If not
-                        provided, input sequence will be padded to max_seq_len
+  --dynamic_shape       Optional. Run model with dynamic input sequence. If
+                        not provided, input sequence is padded to max_seq_len
 ```
 
 ## Demo Inputs

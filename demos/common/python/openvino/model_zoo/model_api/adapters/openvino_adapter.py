@@ -164,10 +164,7 @@ class OpenvinoAdapter(ModelAdapter):
 
 def get_input_shape(input_tensor):
     def string_to_tuple(string, casting_type=int):
-        processed = string.replace(' ', '')
-        processed = processed.replace('(', '')
-        processed = processed.replace(')', '')
-        processed = processed.split(',')
+        processed = string.replace(' ', '').replace('(', '').replace(')', '').split(',')
         processed = filter(lambda x: x, processed)
         return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
     if not input_tensor.partial_shape.is_dynamic:
