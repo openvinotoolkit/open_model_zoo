@@ -108,7 +108,7 @@ class BertNamedEntityRecognition(Bert):
 
         filtered_labels_id = [
             (i, label_i) for i, label_i in enumerate(labels_id)
-            if label_i != 0 and 0 < i < self.max_length - meta['pad_len']
+            if label_i != 0 and 0 < i < self.max_length - meta['pad_len'] - 1
         ]
         return score, filtered_labels_id
 
