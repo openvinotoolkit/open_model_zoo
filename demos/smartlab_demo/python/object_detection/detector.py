@@ -149,8 +149,6 @@ class Detector:
             preds = loc_subdet.inference_in(img, parent_roi)
             if preds is not None: np.vstack((all_preds, preds))
 
-        print(all_preds)
-
         # cast class id integer
         for r, pred in enumerate(all_preds):
             all_preds[r, -1] = int(pred[-1])

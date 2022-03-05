@@ -97,41 +97,36 @@ def main():
         ret_side, frame_side = cap_side.read()
 
         frame_counter += 1
-        print(frame_counter)
         if not ret_top or not ret_side:
             break
         else:
-            detector_result = detector.inference(frame_top, frame_side)
-            top_det_results, side_det_results = detector_result[0], detector_result[1]
             # creat detector thread and segmentor thread
-            # tdetector = ThreadWithReturnValue(
-            #     target = detector.inference_multithread,
-            #     args = (frame_top, frame_side,))
-            # if(args.mode == "multiview"): # mobilenet
-            #     tsegmentor = ThreadWithReturnValue(
-            #         target = segmentor.inference_async,
-            #         args = (frame_top, frame_side, frame_counter,))
-            # else: # mstcn
-            #     buffer1.append(frame_top)
-            #     buffer2.append(frame_side)
-            #     tsegmentor = ThreadWithReturnValue(
-            #         target = segmentor.inference,
-            #         args = (buffer1, buffer2, frame_counter,))
+            tdetector = ThreadWithReturnValue(
+                target = detector.inference_multithread,
+                args = (frame_top, frame_side,))
+            if(args.mode == "multiview"): # mobilenet
+                tsegmentor = ThreadWithReturnValue(
+                    target = segmentor.inference_async,
+                    args = (frame_top, frame_side, frame_counter,))
+            else: # mstcn
+                buffer1.append(frame_top)
+                buffer2.append(frame_side)
+                tsegmentor = ThreadWithReturnValue(
+                    target = segmentor.inference,
+                    args = (buffer1, buffer2, frame_counter,))
             # start()
-            # tdetector.start()
-            # tsegmentor.start()
-            # # join()
-            # detector_result = tdetector.join()
-            # top_det_results, side_det_results = detector_result[0], detector_result[1]
-            # segmentor_result = tsegmentor.join()
-            # if(args.mode == "multiview"):
-            #     top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
-            #     print(top_seg_results)
-            # else:
-            #     if(len(segmentor_result) == 0):
-            #         continue
-            #     top_seg_results, side_seg_results = segmentor_result, segmentor_result
-            top_seg_results = side_seg_results = "noise"
+            tdetector.start()
+            tsegmentor.start()
+            # join()
+            detector_result = tdetector.join()
+            top_det_results, side_det_results = detector_result[0], detector_result[1]
+            segmentor_result = tsegmentor.join()
+            if(args.mode == "multiview"):
+                top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
+            else:
+                if(len(segmentor_result) == 0):
+                    continue
+                top_seg_results, side_seg_results = segmentor_result, segmentor_result
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             state, scoring, keyframe = evaluator.inference(
@@ -149,7 +144,6 @@ def main():
                 fps = total_frame_processed_in_interval / (current_time - old_time)
                 interval_start_frame = current_frame
                 old_time = current_time
-            print(fps)
 
             display.display_result(
                     frame_top = frame_top,
