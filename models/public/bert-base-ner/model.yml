@@ -86,6 +86,7 @@ conversion_to_onnx_args:
   - --input-shapes=[1,128],[1,128],[1,128]
   - --output-file=$conv_dir/bert-base-ner.onnx
   - --inputs-dtype=long
+  - '--conversion-param=dynamic_axes={"input_ids": {0: "batch_size", 1: "sequence_len"},"attention_mask": {0: "batch_size", 1: "sequence_len"}, "token_type_ids": {0: "batch_size", 1: "sequence_len"}, "output": {0: "batch_size", 1: "sequence_len"}}'
 input_info:
   - name: input_ids
     shape: [1, 128]
