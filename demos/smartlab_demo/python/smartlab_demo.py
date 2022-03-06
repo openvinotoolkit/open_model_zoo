@@ -78,20 +78,22 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             if frame_counter % 10 == 0:
                 future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
 
-            if(args.mode == "multiview"): # mobilenet
-                future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
-            else: # mstcn
-                buffer1.append(frame_top)
-                buffer2.append(frame_side)
-                future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
+                if(args.mode == "multiview"): # mobilenet
+                    future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
+                else: # mstcn
+                    buffer1.append(frame_top)
+                    buffer2.append(frame_side)
+                    future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
 
             if future_detector is not None and future_detector.done():
                 print("detection done")
                 detector_result = future_detector.result()
-                segmentor_result = future_segmentor.result()
                 future_detector = None
+
+            if future_segmentor is not None and future_segmentor.done():
+                print("segmentor done")
+                segmentor_result = future_segmentor.result()
                 future_segmentor = None
-                
                 if(args.mode == "multiview"):
                     top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
                 else:
@@ -107,7 +109,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             print(fps)
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-            if detector_result is not None:
+            if detector_result is not None and segmentor_result is not None:
                 top_det_results, side_det_results = detector_result[0], detector_result[1]
                 state, scoring, keyframe = evaluator.inference(
                         top_det_results = top_det_results,
