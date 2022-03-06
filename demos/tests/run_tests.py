@@ -34,7 +34,6 @@ import contextlib
 import csv
 import json
 import os
-import platform
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
@@ -238,14 +237,13 @@ def main():
 
         num_failures = 0
 
-        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         try:
-            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+            pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
         except KeyError:
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{os.pathsep}{os.path.join(args.demo_build_dir, 'ctcdecode_numpy')}",
         }
 
         for demo in demos_to_test:
@@ -320,6 +318,7 @@ def main():
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
+                            print(output)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
                         except subprocess.CalledProcessError as e:
