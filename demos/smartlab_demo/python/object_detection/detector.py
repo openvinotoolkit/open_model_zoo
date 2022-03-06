@@ -14,7 +14,9 @@
  limitations under the License.
 """
 
+import asyncio
 import numpy as np
+
 from .settings import MwGlobalExp
 from thread_argument import ThreadWithReturnValue
 from .subdetectors import SubDetector, CascadedSubDetector
@@ -207,3 +209,6 @@ class Detector:
         side_labels = [self.all_classes[int(i)-1] for i in side_cls_ids]
 
         return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
+
+    async def inference_async(self, img_top, img_side):
+        return await self.inference_multithread(img_top, img_side)

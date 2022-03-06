@@ -26,6 +26,8 @@ from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
 from thread_argument import ThreadWithReturnValue
 
+import concurrent.futures
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -50,10 +52,91 @@ def build_argparser():
 
     return parser
 
+def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display, buffer1, buffer2):
+    old_time = time.time()
+    frame_counter = 0 # Frame index counter
+    fps = 0.0
+    interval_second = 1
+    interval_start_frame = 0
+    total_frame_processed_in_interval = 0.0
+    detector_result = None
+    segmentor_result = None
+
+    executor  = concurrent.futures.ThreadPoolExecutor()
+    future_detector = None
+    future_segmentor = None
+
+    while cap_top.isOpened() and cap_side.isOpened():
+        ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
+        ret_side, frame_side = cap_side.read()
+
+        frame_counter += 1
+        if not ret_top or not ret_side:
+            break
+        else:
+            # dector with new thread
+            if frame_counter % 10 == 0:
+                future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
+
+            if(args.mode == "multiview"): # mobilenet
+                future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
+            else: # mstcn
+                buffer1.append(frame_top)
+                buffer2.append(frame_side)
+                future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
+
+            if future_detector is not None and future_detector.done():
+                print("detection done")
+                detector_result = future_detector.result()
+                segmentor_result = future_segmentor.result()
+                future_detector = None
+                future_segmentor = None
+                
+                if(args.mode == "multiview"):
+                    top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
+                else:
+                    top_seg_results, side_seg_results = segmentor_result, segmentor_result
+
+            current_time=time.time()
+            current_frame = frame_counter
+            if (current_time - old_time > interval_second):
+                total_frame_processed_in_interval = current_frame - interval_start_frame
+                fps = total_frame_processed_in_interval / (current_time - old_time)
+                interval_start_frame = current_frame
+                old_time = current_time
+            print(fps)
+
+            ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
+            if detector_result is not None:
+                top_det_results, side_det_results = detector_result[0], detector_result[1]
+                state, scoring, keyframe = evaluator.inference(
+                        top_det_results = top_det_results,
+                        side_det_results = side_det_results,
+                        action_seg_results = top_seg_results,
+                        frame_top = frame_top,
+                        frame_side = frame_side,
+                        frame_counter = frame_counter)
+
+                display.display_result(
+                        frame_top = frame_top,
+                        frame_side = frame_side,
+                        side_seg_results = side_seg_results,
+                        top_seg_results = top_seg_results,
+                        top_det_results = top_det_results,
+                        side_det_results = side_det_results,
+                        scoring = scoring,
+                        state = state,
+                        keyframe = keyframe,
+                        frame_counter = frame_counter,
+                        fps = fps)
+
+        if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
+            break
+
+
 def main():
     args = build_argparser().parse_args()
 
-    frame_counter = 0 # Frame index counter
     buffer1 = deque(maxlen=1000)  # Array buffer
     buffer2 = deque(maxlen=1000)
     core = Core()
@@ -87,79 +170,8 @@ def main():
     if not cap_side.isOpened():
         raise ValueError(f"Can't read an video or frame from {args.sideview}")
 
-    old_time = time.time()
-    fps = 0.0
-    interval_second = 1
-    interval_start_frame = 0
-    total_frame_processed_in_interval = 0.0
-    while cap_top.isOpened() and cap_side.isOpened():
-        ret_top, frame_top = cap_top.read()  # frame:480 x 640 x 3
-        ret_side, frame_side = cap_side.read()
-
-        frame_counter += 1
-        if not ret_top or not ret_side:
-            break
-        else:
-            # creat detector thread and segmentor thread
-            tdetector = ThreadWithReturnValue(
-                target = detector.inference_multithread,
-                args = (frame_top, frame_side,))
-            if(args.mode == "multiview"): # mobilenet
-                tsegmentor = ThreadWithReturnValue(
-                    target = segmentor.inference_async,
-                    args = (frame_top, frame_side, frame_counter,))
-            else: # mstcn
-                buffer1.append(frame_top)
-                buffer2.append(frame_side)
-                tsegmentor = ThreadWithReturnValue(
-                    target = segmentor.inference,
-                    args = (buffer1, buffer2, frame_counter,))
-            # start()
-            tdetector.start()
-            tsegmentor.start()
-            # join()
-            detector_result = tdetector.join()
-            top_det_results, side_det_results = detector_result[0], detector_result[1]
-            segmentor_result = tsegmentor.join()
-            if(args.mode == "multiview"):
-                top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
-            else:
-                if(len(segmentor_result) == 0):
-                    continue
-                top_seg_results, side_seg_results = segmentor_result, segmentor_result
-
-            ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-            state, scoring, keyframe = evaluator.inference(
-                    top_det_results = top_det_results,
-                    side_det_results = side_det_results,
-                    action_seg_results = top_seg_results,
-                    frame_top = frame_top,
-                    frame_side = frame_side,
-                    frame_counter = frame_counter)
-
-            current_time=time.time()
-            current_frame = frame_counter
-            if (current_time - old_time > interval_second):
-                total_frame_processed_in_interval = current_frame - interval_start_frame
-                fps = total_frame_processed_in_interval / (current_time - old_time)
-                interval_start_frame = current_frame
-                old_time = current_time
-
-            display.display_result(
-                    frame_top = frame_top,
-                    frame_side = frame_side,
-                    side_seg_results = side_seg_results,
-                    top_seg_results = top_seg_results,
-                    top_det_results = top_det_results,
-                    side_det_results = side_det_results,
-                    scoring = scoring,
-                    state = state,
-                    keyframe = keyframe,
-                    frame_counter = frame_counter,
-                    fps = fps)
-
-        if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
-            break
+    video_loop(
+        args, cap_top, cap_side, detector, segmentor, evaluator, display, buffer1, buffer2)
 
 if __name__ == "__main__":
     main()
