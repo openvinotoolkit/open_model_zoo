@@ -744,7 +744,6 @@ int main(int argc, char* argv[]) {
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
-<<<<<<< HEAD
             if ("GPU" == device) {
                 core.set_property("GPU", ov::streams::num(device_nstreams.count("GPU") > 0 ? ov::streams::Num(device_nstreams["GPU"]) : ov::streams::AUTO));
 
@@ -755,23 +754,6 @@ int main(int argc, char* argv[]) {
                     core.set_property("GPU", ov::intel_gpu::hint::queue_throttle(ov::intel_gpu::hint::ThrottleLevel(1)));
                 }
             }
-=======
-            //if ("GPU" == device) {
-            //    // Load any user-specified clDNN Extensions
-            //    if (!FLAGS_c.empty()) {
-            //        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
-            //    }
-            //    ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-            //                    (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
-            //                                                        CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
-            //    device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
-            //    if (devices.end() != devices.find("CPU")) {
-            //        // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
-            //        // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-            //        ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
-            //    }
-            //}
->>>>>>> Add some debug info in security_barrier_camera_demo.
         }
 
         // Graph tagging via config options

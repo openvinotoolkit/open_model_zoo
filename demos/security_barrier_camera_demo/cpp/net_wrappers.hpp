@@ -139,12 +139,7 @@ public:
         std::list<Result> results;
         ov::Tensor output_tensor = inferRequest.get_tensor(m_detectorOutputName);
         const float* const detections = output_tensor.data<float>();
-        slog::debug << "------- Channel #" << channelID << " - Frame #" << frameID << " ----- blob size #---"<< blob->size() << slog::endl;
-        for (size_t i = 0; i < blob->size(); i++)
-        {
-            std::cout << detections[i] << " "; 
-        }
-        std::cout << std::endl; 
+        slog::debug << "------- Channel #" << channelID << " - Frame #" << frameID << slog::endl;
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0]; // in case of batch
