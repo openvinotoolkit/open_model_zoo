@@ -17,21 +17,21 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-recognition-0016-encoder.xml
-    size: 461979
-    checksum: e1300c72c56bba1076a00469bae69ad938cc1aca305cfb4f1334c4336a3967f23558f0b1b854ddf3f82f8ef5ec5f4b90
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.xml
+    size: 463023
+    checksum: d3cae708f49be7f59858cc4e9a8f90c8e77c6264c8bed531f6a92817e968973f525030cec737d8d983a20b6a825301f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.xml
   - name: FP32/text-recognition-0016-encoder.bin
     size: 352511968
     checksum: 5d4ce6bf1922e6d0f632f41d2e48c236c506f56bf745a9d50abb114c8ca829752dea7f17525f6755fc32638338104978
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.bin
   - name: FP16/text-recognition-0016-encoder.xml
-    size: 580943
-    checksum: 0bacb4fcdf9e1b06953d250f1e0e84cf1adeb98a63ec43107e02f64ac9be7391524546b222b720c5bf85a4f6dda4a359
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.xml
+    size: 582710
+    checksum: 0d7160b46b77d56f47a00e5b6483ebacaf65188349c01113b99ca98ce0c0d9bfccbbfcf48f378de96f28c506e10fb03b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.xml
   - name: FP16/text-recognition-0016-encoder.bin
     size: 176256104
     checksum: 1f8b4b813461d2fcc55f5fc7e1449a7c1e49845299f514860758b0e4ba007a5c388aecb7976f96510ff13e28041946e1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
 input_info:
   - name: imgs
     shape: [1, 1, 64, 256]

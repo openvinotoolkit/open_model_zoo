@@ -26,10 +26,10 @@ from openvino.runtime import Core, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
-    """ Class that allows working with Inference Engine model. """
+    """ Class that allows working with OpenVINO Runtime model. """
 
     def __init__(self, model_path, device):
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
 

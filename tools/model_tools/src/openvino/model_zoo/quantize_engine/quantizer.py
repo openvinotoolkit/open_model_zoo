@@ -164,7 +164,7 @@ class Quantizer:
 
         return True
 
-    def bulk_quantize(self, reporter, models, target_device) -> List[str]:
+    def bulk_quantize(self, reporter, models, target_device, datasets_definition_fp=None) -> List[str]:
         failed_models = []
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -172,6 +172,9 @@ class Quantizer:
 
             annotation_dir = Path(temp_dir) / 'annotations'
             annotation_dir.mkdir()
+
+            datasets_definition_fp = _common.DATASET_DEFINITIONS if datasets_definition_fp is None \
+                else datasets_definition_fp
 
             pot_env = {
                 'ANNOTATIONS_DIR': str(annotation_dir),

@@ -18,21 +18,21 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-spotting-0005-recognizer-encoder.xml
-    size: 11862
-    checksum: 73c7131c2713fd54071b085d73922b9766ccf347a842edca87b639c004bdb8481f6f0b58f26a80d2dc8e011b36aa68d8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.xml
+    size: 11953
+    checksum: 3bb55341d28c80b8fb3ee6a367dfc365de154fb67321597c323bfc370c2160da7c3a5f4921d42f5520fb62e3c92ea7c4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.xml
   - name: FP32/text-spotting-0005-recognizer-encoder.bin
     size: 5311488
     checksum: c39b30d4c4ab709a183104daff4d033d003be3f71f33404ef66b948cb5a60b19d1e1028909f4bf197ab48d68ccc48bc0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP32/text-spotting-0005-recognizer-encoder.bin
   - name: FP16/text-spotting-0005-recognizer-encoder.xml
-    size: 15179
-    checksum: 64ebd3be0b8eda00b15139627ab696157ffff31e6a1f22105a56bddacc5eade55ec1fc09adcd318999ab64a3b74f4629
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.xml
+    size: 15271
+    checksum: 71d4f0b0b0d829e459eff938b91342fecaec3ffc5e2fa7effd60cfd5aaf8d549e6bfb9e33acefd9974e76895ac7cf7aa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.xml
   - name: FP16/text-spotting-0005-recognizer-encoder.bin
     size: 2655744
     checksum: 814811b3b95e8da8b95bf3aaf8db7061faa356023130e125eed7fa942f8cca2e752c30d401a96e6e9ce006ef29d17e4f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-encoder/FP16/text-spotting-0005-recognizer-encoder.bin
 input_info:
   - name: input
     shape: [1, 64, 28, 28]

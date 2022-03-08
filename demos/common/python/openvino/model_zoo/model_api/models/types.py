@@ -34,7 +34,7 @@ class BaseValue:
     def get_value(self, value):
         errors = self.validate(value)
         if len(errors) == 0:
-            return value if value else self.default_value
+            return value if value is not None else self.default_value
 
     def build_error():
         pass

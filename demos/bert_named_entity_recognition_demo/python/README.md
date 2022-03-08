@@ -4,8 +4,8 @@ This README describes the Named Entity Recognition (NER) demo application that u
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine.
-It also fetch data from the user-provided url to populate the "context" text.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
+It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
 ## Preparing to Run
@@ -70,6 +70,8 @@ Options:
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
+  --dynamic_shape       Optional. Run model with dynamic input sequence. If
+                        not provided, input sequence is padded to max_seq_len
 ```
 
 ## Demo Inputs
@@ -117,8 +119,8 @@ Exemplary command:
 
 ## Classifying Documents with Long Texts
 
-Notice that when the original "context" (text from the url) do not fit the model input
-(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
+Notice that when the original "context" (text from the url) does not fit the model input
+(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context" and pad all input sequences to maximum sentence length if model executed with static shape.
 
 ## See Also
 

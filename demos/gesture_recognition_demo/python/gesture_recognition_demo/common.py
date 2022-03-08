@@ -19,13 +19,13 @@ from openvino.runtime import Core, get_version, AsyncInferQueue
 
 
 def load_core():
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     return Core()
 
 
 class IEModel:  # pylint: disable=too-few-public-methods
-    """ Class that allows worknig with Inference Engine model. """
+    """ Class that allows worknig with OpenVINO Runtime model. """
 
     def __init__(self, model_path, device, core, num_requests, model_type, output_shape=None):
         log.info('Reading {} model {}'.format(model_type, model_path))

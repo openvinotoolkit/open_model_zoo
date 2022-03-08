@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import asyncio
 import numpy as np
 
 from .settings import MwGlobalExp

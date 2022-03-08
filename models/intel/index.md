@@ -1,5 +1,6 @@
 # Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -62,6 +63,7 @@
    :hidden:
    :caption: Instance Segmentation Models
 
+   omz_models_model_instance_segmentation_person_0007
    omz_models_model_instance_segmentation_security_0002
    omz_models_model_instance_segmentation_security_0091
    omz_models_model_instance_segmentation_security_0228
@@ -94,6 +96,7 @@
    omz_models_model_age_gender_recognition_retail_0013
    omz_models_model_emotions_recognition_retail_0003
    omz_models_model_facial_landmarks_35_adas_0002
+   omz_models_model_facial_landmarks_98_detection_0001
    omz_models_model_gaze_estimation_adas_0002
    omz_models_model_landmarks_regression_retail_0009
    omz_models_model_person_attributes_recognition_crossroad_0230
@@ -227,6 +230,7 @@
 
    omz_models_model_formula_recognition_medium_scan_0001
    omz_models_model_formula_recognition_polynomials_handwritten_0001
+   omz_models_model_handwritten_english_recognition_0001
    omz_models_model_handwritten_japanese_recognition_0001
    omz_models_model_handwritten_score_recognition_0003
    omz_models_model_handwritten_simplified_chinese_recognition_0001
@@ -250,6 +254,7 @@
    </script>
 
 @endsphinxdirective
+-->
 
 OpenVINO&trade; toolkit provides a set of Intel's pre-trained models
 that you can use for learning and demo purposes or for developing deep learning

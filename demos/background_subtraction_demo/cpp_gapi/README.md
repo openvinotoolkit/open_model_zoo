@@ -59,9 +59,8 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-[ INFO ] OpenVINO Inference Engine
-[ INFO ]        version: <version>
-[ INFO ]        build: <number>
+[ INFO ] OpenVINO Runtime version ......... <version>
+[ INFO ] Build ........... <build>
 
 background_subtraction_demo_gapi [OPTION]
 Options:

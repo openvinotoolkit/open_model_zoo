@@ -1,5 +1,6 @@
 # Open Model Zoo Demos
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -9,19 +10,25 @@
    omz_demos_human_pose_estimation_3d_demo_python
    omz_demos_3d_segmentation_demo_python
    omz_demos_action_recognition_demo_python
+   omz_demos_background_subtraction_demo_cpp_gapi
+   omz_demos_background_subtraction_demo_python
    omz_demos_bert_named_entity_recognition_demo_python
    omz_demos_bert_question_answering_embedding_demo_python
    omz_demos_bert_question_answering_demo_python
-   omz_demos_classification_demo_cpp
+   omz_demos_classification_benchmark_demo_cpp
+   omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
+   omz_demos_face_detection_mtcnn_demo_cpp_gapi
    omz_demos_face_detection_mtcnn_demo_python
    omz_demos_face_recognition_demo_python
    omz_demos_formula_recognition_demo_python
    omz_demos_gaze_estimation_demo_cpp_gapi
    omz_demos_interactive_face_detection_demo_cpp_gapi
    omz_demos_gaze_estimation_demo_cpp
+   omz_demos_gesture_recognition_demo_cpp_gapi
    omz_demos_gesture_recognition_demo_python
+   omz_demos_gpt2_text_prediction_demo_python
    omz_demos_handwritten_text_recognition_demo_python
    omz_demos_human_pose_estimation_demo_cpp
    omz_demos_human_pose_estimation_demo_python
@@ -36,10 +43,13 @@
    omz_demos_interactive_face_detection_demo_cpp
    omz_demos_machine_translation_demo_python
    omz_demos_monodepth_demo_python
+   omz_demos_mri_reconstruction_demo_cpp
+   omz_demos_mri_reconstruction_demo_python
    omz_demos_multi_camera_multi_target_tracking_demo_python
    omz_demos_multi_channel_face_detection_demo_cpp
    omz_demos_multi_channel_human_pose_estimation_demo_cpp
    omz_demos_multi_channel_object_detection_demo_yolov3_cpp
+   omz_demos_noise_suppression_demo_cpp
    omz_demos_noise_suppression_demo_python
    omz_demos_object_detection_demo_cpp
    omz_demos_object_detection_demo_python
@@ -47,11 +57,14 @@
    omz_demos_place_recognition_demo_python
    omz_demos_security_barrier_camera_demo_cpp
    omz_demos_single_human_pose_estimation_demo_python
+   omz_demos_smartlab_demo_python
    omz_demos_smart_classroom_demo_cpp
+   omz_demos_smart_classroom_demo_cpp_gapi
    omz_demos_social_distance_demo_cpp
    omz_demos_sound_classification_demo_python
    omz_demos_speech_recognition_deepspeech_demo_python
    omz_demos_speech_recognition_quartznet_demo_python
+   omz_demos_speech_recognition_wav2vec_demo_python
    omz_demos_mask_rcnn_demo_cpp
    omz_demos_text_detection_demo_cpp
    omz_demos_text_spotting_demo_python
@@ -60,6 +73,7 @@
    omz_demos_whiteboard_inpainting_demo_python
 
 @endsphinxdirective
+-->
 
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 
@@ -137,7 +151,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
-- [Time Series Forecasting Python\* Demo](./time_series_forecasting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to time series forecastig.
+- [Time Series Forecasting Python\* Demo](./time_series_forecasting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to time series forecasting.
 - [Whiteboard Inpainting Python\* Demo](./whiteboard_inpainting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to detect and hide a person on a video so that all text on a whiteboard is visible.
 
 ## Media Files Available for Demos
@@ -272,37 +286,17 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="model_api_installation"></a>Python\* model API installation
+### <a name="python_requirements"></a>Dependencies for Python* Demos
 
-Python Model API with model wrappers and pipelines can be installed as a part of OpenVINO&trade; toolkit or from source.
-Installation from source is as follows:
-
-1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
-
-2. Build the wheel with the following command:
+The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
 ```sh
-python <omz_dir>/demos/common/python/setup.py bdist_wheel
-```
-The built wheel should appear in the dist folder;
-Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
-
-3. Install the package in the clean environment with `--force-reinstall` key:
-```sh
-python -m pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
-```
-Alternatively, instead of building the wheel you can use the following command inside  `<omz_dir>/demos/common/python/` directory to build and install the package:
-```sh
-python -m pip install .
+python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-When the model API package is installed, you can import it as follows:
-```sh
-python -c "from openvino.model_zoo import model_api"
-```
+### <a name="python_model_api"></a>Python\* model API package
 
-> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
-> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
+To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 

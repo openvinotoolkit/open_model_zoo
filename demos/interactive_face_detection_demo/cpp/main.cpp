@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        // --------------------------- 1. Loading Inference Engine -----------------------------
+        // --------------------------- 1. Loading OpenVINO runtime -----------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 

@@ -56,8 +56,6 @@ Regardless of what mode is selected (interactive or non-interactive) the process
 
 ##### Requirements for rendering
 
-Sympy python package is used for rendering. To install it, please, run:
-`pip install -r requirements.txt`
 Sympy package needs LaTeX system installed in the operating system.
 For Windows you can use [MiKTeX\*](https://miktex.org/) (just download and install it), for Ubuntu/MacOS you can use TeX Live\*:
 Ubuntu:
@@ -76,7 +74,7 @@ You might also face the missing `standalone.cls` file problem, which could be fi
 
 The example of the interface:
 ![interactive example](./interactive_interface.png)
-When User runs demo application with the `-i` option and passes video or number of the webcam device as an argument (typically 0), window with the image simillar to above should pop up.
+When User runs demo application with the `-i` option and passes video or number of the webcam device as an argument (typically 0), window with the image similar to above should pop up.
 
 Example of usage of the interactive mode:
 
@@ -103,7 +101,7 @@ Navigation keys:
 * Use `o` to decrease the size of the input (red) window
 * Use `p` to increase the size of the input window
 
-The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
+The overall process is similar to the Non-interactive mode with the exception that it runs asynchronously.
 This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).

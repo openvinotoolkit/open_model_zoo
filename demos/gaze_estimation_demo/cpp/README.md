@@ -18,7 +18,7 @@ Other demo objectives are:
 
 ## How It Works
 
-1. The application reads command-line parameters and loads four networks to the Inference Engine
+1. The application reads command-line parameters and loads four models to OpenVINO™ Runtime plugin
 2. The application gets a frame from the OpenCV VideoCapture
 3. The application performs inference on auxiliary models to obtain head pose angles and images of eyes regions serving as an input for gaze estimation model
 4. The application performs inference on gaze estimation model using inference results of auxiliary models
@@ -63,10 +63,6 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
-
 gaze_estimation_demo [OPTION]
 Options:
 

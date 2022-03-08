@@ -3,14 +3,13 @@
 This topic demonstrates how to run the MonoDepth demo application, which produces a disparity map for a given input image.
 To this end, the code uses the network described in [Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer](https://arxiv.org/abs/1907.01341).
 
-Below is the `midasnet` model inference result for `<openvino_dir>/deployment_tools/demo/car_1.bmp` sample image
+Below is the `midasnet` model inference result:
 
 ![example](./disp.png)
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
@@ -110,7 +109,7 @@ has to wait before being sent for inference.
 For higher FPS, it is recommended that you set `-nireq` to slightly exceed the `-nstreams` value,
 summed across all devices used.
 
-> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
+> **NOTE**: This demo is based on the callback functionality from the OpenVINO™ Runtime API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to a decrease in FPS.

@@ -58,7 +58,7 @@ def build_argparser():
     args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                       help='Optional. Probability threshold for detections filtering.')
     args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
-                      help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
+                      help='Optional. A resize type for model preprocess. By default used model predefined type.')
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')

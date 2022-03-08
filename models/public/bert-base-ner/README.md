@@ -7,7 +7,7 @@
 Specifically, this model is a bert-base-cased model that was fine-tuned on the English version of the standard [CoNLL-2003 Named Entity Recognition](https://www.aclweb.org/anthology/W03-0419) dataset.
 For details about the original model, check out
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805),
-[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers and [repository](https://github.com/huggingface/transformers).
+[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers, [repository](https://github.com/huggingface/transformers) and [model card](https://huggingface.co/dslim/bert-base-NER).
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file.
 

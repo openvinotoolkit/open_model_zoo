@@ -2,15 +2,15 @@
 
 ![](./classification_benchmark.gif)
 
-The demo visualize OpenVINO performance on inference of neural networks for image classification.
+The demo visualizes OpenVINO performance on inference of neural networks for image classification.
 
 ## How It Works
 
-On startup, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
+On startup, the application reads command line parameters and loads a classification model to OpenVINO™ Runtime plugin for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
 
 The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance. You can repeat testing by pressing "Space" or "R" button.
 
-When "ground truth" data applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
+When "ground truth" data is applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
 
 You can stop the demo by pressing "Esc" or "Q" button. After that, the average metrics values will be printed to the console.
 
@@ -119,7 +119,28 @@ and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all othe
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
+```
+classification_benchmark_demo [OPTION]
+Options:
+
+    -h                        Print a usage message.
+    -i "<path>"               Required. Path to a folder with images or path to an image file.
+    -m "<path>"               Required. Path to an .xml file with a trained model.
+    -auto_resize              Optional. Enables resizable input.
+    -labels "<path>"          Required. Path to .txt file with labels.
+    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
+    -gt "<path>"              Optional. Path to ground truth .txt file.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
+    -nthreads "<integer>"     Optional. Specify count of threads.
+    -nstreams "<integer>"     Optional. Specify count of streams.
+    -nireq "<integer>"        Optional. Number of infer requests.
+    -nt "<integer>"           Optional. Number of top results. Default value is 5. Must be >= 1.
+    -res "<WxH>"              Optional. Set image grid resolution in format WxH. Default value is 1280x720.
+    -no_show                  Optional. Disable showing of processed images.
+    -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
+    -u                        Optional. List of monitors to show initially.
+```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
 

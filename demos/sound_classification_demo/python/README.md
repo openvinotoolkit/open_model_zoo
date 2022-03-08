@@ -4,7 +4,7 @@ Demo application for sound classification algorithm.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
 
 ## Preparing to Run
 
@@ -36,9 +36,9 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the usage message:
 
 ```
-usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
-                                    [-d DEVICE] [--labels LABELS]
-                                    [-sr SAMPLE_RATE] [-ol OVERLAP]
+usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-d DEVICE]
+                                    [--labels LABELS] [-sr SAMPLE_RATE]
+                                    [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -46,10 +46,6 @@ Options:
                         Required. Input to process
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo

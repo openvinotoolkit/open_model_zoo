@@ -16,6 +16,7 @@
 
 import cv2
 import time
+import concurrent.futures
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 
@@ -26,7 +27,7 @@ from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
 from thread_argument import ThreadWithReturnValue
 
-import concurrent.futures
+
 
 
 def build_argparser():

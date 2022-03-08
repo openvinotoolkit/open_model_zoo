@@ -17,29 +17,21 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0004.xml
-    size: 372287
-    checksum: 0837ccfb5b291100a1ec8ac267e669c56015eff8a749de09431a937b093cd78dadb8b0c6b8fbe12d1ef07fb8dc9710b5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.xml
+    size: 259473
+    checksum: e7a6f96e477fe84a0353686b0ab5082871bff275775cb60b7a3483b84ef4844619d03e9db5d00f02ef5f6b6474bb16cc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/asl-recognition-0004/FP32/asl-recognition-0004.xml
   - name: FP32/asl-recognition-0004.bin
-    size: 16629492
-    checksum: 3585a7e570050c2d0c5f7c2c9d11154cc90ff25000c7312d9fb3deca84d8cb21f19c50566fcbcb4de5c02700551fe47e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.bin
+    size: 16530580
+    checksum: b1912c0f8d9a655b10be57b44169d43f364f32ceacf2fc4f156bb557055296b936058b45d22fa52a529f5a56d690b399
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/asl-recognition-0004/FP32/asl-recognition-0004.bin
   - name: FP16/asl-recognition-0004.xml
-    size: 525463
-    checksum: 3c4226c228ec7285826113a8bf7b8981778ccdcbc3da1d7f202cf1e619e7d0cf22e815273395c9c293e7a8d39f22cad8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.xml
+    size: 348017
+    checksum: dfff5b6026f2af98469ecd84564e8a642788906b4e3716b76b3bae28d8b3ec947e51b56bae9441f252e225ac7133ef75
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/asl-recognition-0004/FP16/asl-recognition-0004.xml
   - name: FP16/asl-recognition-0004.bin
-    size: 8314754
-    checksum: c1f0d5950b8cecd10df6a153f99284e68395642c12e9c5795b748a2dfb9f764e35280b12bf4716702f3fba4a9061c228
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.bin
-  - name: FP16-INT8/asl-recognition-0004.xml
-    size: 1016844
-    checksum: 977f19d1235801b2f34808aeca2d21e0e0d683299bce8db9debca9a275e5b79085d7ccfd8f15b9ebb70e0d66625571fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
-  - name: FP16-INT8/asl-recognition-0004.bin
-    size: 4391006
-    checksum: 6c64454d66ad7505b7702e230758f880b793712921897f5d0338c974b1a8b0d4e6b39dc6c00bb5d1bd95ee612b6e59f2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
+    size: 8265302
+    checksum: 0eb81d592d75064fbc2a164e8e83cbf5ab88f2644b04d02b529cef534c11cd6754bb56494ffc507b8bf6542e32c143d7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/asl-recognition-0004/FP16/asl-recognition-0004.bin
 input_info:
   - name: input
     shape: [1, 3, 16, 224, 224]

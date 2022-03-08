@@ -6,7 +6,7 @@ This demo showcases inference of Classification networks using Python\* Model AP
 
 ## How It Works
 
-On startup, the application reads command line parameters and loads a classification network to the Inference Engine for execution. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
+On startup, the application reads command line parameters and loads a classification model to OpenVINO™ Runtime plugin for execution. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 You can stop the demo by pressing "Esc" or "Q" button. After that, the average metrics values will be printed to the console.
 

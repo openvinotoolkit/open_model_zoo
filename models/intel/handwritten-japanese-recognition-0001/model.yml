@@ -17,29 +17,29 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-japanese-recognition-0001.xml
-    size: 92006
-    checksum: e096c3dc7d62a295c624fe67af1f5226bc30e14acdfe0f187cca0a6114df66416afa975466509e56feac5a62b8251944
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.xml
+    size: 50547
+    checksum: 261b81e645b5895d343abbc9c3f9e208b87c852d5b2f98608c2436d32d21aeea8dfddd3e1e26dd9f8f4176527c464bca
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.xml
   - name: FP32/handwritten-japanese-recognition-0001.bin
-    size: 68019892
-    checksum: c9388952f210442dbdf47e7852b060a380eadc0db1a24d31e87d137f7179f5960984733ce0a414443a8295d67c450085
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.bin
+    size: 67969204
+    checksum: 2980169f8e91312577533b5b5a6cf3ce450e9f2232f04ee71be81f4518cf15e14821f32079bc389ea8039ee4d72b9664
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.bin
   - name: FP16/handwritten-japanese-recognition-0001.xml
-    size: 129447
-    checksum: 85d77bea99bb0506a7b96d83603746c356f0963e52864c0296154f6911ab40cbb457e32818da462660beba8fcbb00e78
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.xml
+    size: 66790
+    checksum: d0f3a3b8f8e5e98c4e9cef3ad0d28eeb0b5e390ac61e8ac8ede90089927a96bded88cbf6a4f06762d1bff4c0ad5e77d4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.xml
   - name: FP16/handwritten-japanese-recognition-0001.bin
-    size: 34009982
-    checksum: f0846de736c3d45b7de5d5c75c349e1cac196b954bdfb30fcd987d264f9d6df35a68e551ba08098af4c08ec6c739a7b1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.bin
+    size: 33984638
+    checksum: e0ee63f7b23d0d2efd09c46fad8a6b02a08acd6e75c2eceac78bc3bc65f2b21719a5e94937bdf31756ed1f75e559dafb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.bin
   - name: FP16-INT8/handwritten-japanese-recognition-0001.xml
-    size: 198437
-    checksum: a0d29cfae8d2dff88b4fd45fbc43a2ddd5ece558f3c30a1131b318883aeaf0c04c9bbd27580b1c392f7a5b206f88aecd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.xml
+    size: 117593
+    checksum: 2b294702a101c5277211c96228fc97089779490f9f794c2bb1c942f3946a591f2b9b36b0e812168a28e3346af4be4cc0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.xml
   - name: FP16-INT8/handwritten-japanese-recognition-0001.bin
-    size: 17095869
-    checksum: 6ddfab1e71b7563dc6e188cc1b6d5ca5ecbc2f1acc4b3c98b7da17a895cf2a63b7379e06316584db1c12ce16437f3fce
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
+    size: 17070414
+    checksum: 0b92c98e029650edccbf667ce78f28b5d723b17730ed681d571e206fa7a1cd649e684c93998853c5d325b32e8196c349
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
 input_info:
   - name: actual_input
     shape: [1, 1, 96, 2000]

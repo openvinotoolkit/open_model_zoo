@@ -20,23 +20,23 @@ files:
   - name: vocab.txt
     size: 231508
     checksum: ef26234c552cb23207a4bed2376a06eecf1d09ed00018519755df0e57551c2e55bc97e1877b0029e08b0cebdc65b0c82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
-    size: 961349
-    checksum: b3143858c0d6132be5b5975d38689fd1b15c4e2754b15f5d9b6c0da349e84f64da380f480a88e3a3957a754414e491db
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
+    size: 945190
+    checksum: 4c7ec739efce1125364fb63743001554cfd07e0012e80ffb720005bed4f033dad5c26d1e7f3f9f53a0f13156e89ceeb1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 1336380612
-    checksum: 3cf043ad43fe6a4d5b36f89928f7521b6781185ecdd0f65bcf744de3b5a2fdb2855766a9c801942b32f34cb1ee5292d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
+    checksum: 28e3c139ac5a4f84f18ddb12d0842a62983e4c1b32adbdbeb38e05b20d3b477d9464a096c9406606357bcedfbb60aa6e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP32/bert-large-uncased-whole-word-masking-squad-0001.bin
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
-    size: 1157242
-    checksum: 8e1970636649ed20fe7d93ca5db374b91fcf8ea4e38c8e1e838cbd78c9d7903126a4e0b53bcd1c5400ea9f1f846826da
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
+    size: 1159290
+    checksum: 246267a595543d98935771633cd50a77e883f173a2334e0ce3ebcad5cb93a133020e353f2d7522339d07956d29c97c7a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.xml
   - name: FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
     size: 668191930
-    checksum: ec2365f5f3937b69b1a8424fe3b5e3db2389bcd6e31f4857f66cd385dccc23432a5c9d722f4ee278d2ba4b7b4f3b7a7d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
+    checksum: 034f6cfa824221d53b1a47ca9af6b7180c39b42e729b2b7f8365f833fe6f0f8793cbdb0b7faf60ace844905f0d7f0da6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/bert-large-uncased-whole-word-masking-squad-0001/FP16/bert-large-uncased-whole-word-masking-squad-0001.bin
 input_info:
   - name: input_ids
     shape: [1, 384]

@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         using namespace gaze_estimation;
         PerformanceMetrics metrics;
 
-        /** Print info about OpenVINO **/
+        /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
@@ -183,8 +183,8 @@ int main(int argc, char *argv[]) {
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         if (FLAGS_fd_reshape) {
-            InferenceEngine::Core ie;
-            const auto network = ie.ReadNetwork(FLAGS_m_fd);
+            InferenceEngine::Core core;
+            const auto network = core.ReadNetwork(FLAGS_m_fd);
             const auto layerName = network.getInputsInfo().begin()->first;
             const auto layerData = network.getInputsInfo().begin()->second;
                   auto layerDims = layerData->getTensorDesc().getDims();

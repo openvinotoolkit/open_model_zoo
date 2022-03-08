@@ -42,9 +42,8 @@ python3 <omz_dir>/tools/model_tools/converter.py --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
+[ INFO ] OpenVINO Runtime version ......... <version>
+[ INFO ] Build ........... <build>
 
 face_detection_mtcnn_demo_gapi [OPTION]
 Options:

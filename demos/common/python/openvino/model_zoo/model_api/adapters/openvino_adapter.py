@@ -18,7 +18,7 @@ import logging as log
 from pathlib import Path
 
 try:
-    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version
+    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version, Dimension
     openvino_absent = False
 except ImportError:
     openvino_absent = True
@@ -32,7 +32,7 @@ def create_core():
     if openvino_absent:
         raise ImportError('The OpenVINO package is not installed')
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     return Core()
 
@@ -89,12 +89,13 @@ class OpenvinoAdapter(ModelAdapter):
     def get_input_layers(self):
         inputs = {}
         for input in self.model.inputs:
-            input_layout = self.get_layout_for_input(input)
-            inputs[input.get_any_name()] = Metadata(input.get_names(), list(input.shape), input_layout, input.get_element_type().get_type_name())
+            input_shape = get_input_shape(input)
+            input_layout = self.get_layout_for_input(input, input_shape)
+            inputs[input.get_any_name()] = Metadata(input.get_names(), input_shape, input_layout, input.get_element_type().get_type_name())
         inputs = self._get_meta_from_ngraph(inputs)
         return inputs
 
-    def get_layout_for_input(self, input) -> str:
+    def get_layout_for_input(self, input, shape=None) -> str:
         input_layout = ''
         if self.model_parameters['input_layouts']:
             input_layout = Layout.from_user_layouts(input.get_names(), self.model_parameters['input_layouts'])
@@ -102,7 +103,7 @@ class OpenvinoAdapter(ModelAdapter):
             if not layout_helpers.get_layout(input).empty:
                 input_layout = Layout.from_openvino(input)
             else:
-                input_layout = Layout.from_shape(input.shape)
+                input_layout = Layout.from_shape(shape if shape is not None else input.shape)
         return input_layout
 
     def get_output_layers(self):
@@ -114,7 +115,9 @@ class OpenvinoAdapter(ModelAdapter):
         return outputs
 
     def reshape_model(self, new_shape):
-        new_shape = {k: PartialShape(v) for k, v in new_shape.items()}
+        new_shape = {name: PartialShape(
+            [Dimension(dim) if not isinstance(dim, tuple) else Dimension(dim[0], dim[1])
+            for dim in shape]) for name, shape in new_shape.items()}
         self.model.reshape(new_shape)
 
     def get_raw_result(self, request):
@@ -157,3 +160,24 @@ class OpenvinoAdapter(ModelAdapter):
                 layer_name = node.get_friendly_name()
                 layers_info[layer_name] = Metadata(type=node.get_type_name(), meta=node.get_attributes())
         return layers_info
+
+
+def get_input_shape(input_tensor):
+    def string_to_tuple(string, casting_type=int):
+        processed = string.replace(' ', '').replace('(', '').replace(')', '').split(',')
+        processed = filter(lambda x: x, processed)
+        return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
+    if not input_tensor.partial_shape.is_dynamic:
+        return list(input_tensor.shape)
+    ps = str(input_tensor.partial_shape)
+    preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
+    preprocessed = preprocessed.replace('(', '').replace(')', '')
+    if '..' in preprocessed:
+        shape_list = []
+        for dim in preprocessed.split(','):
+            if '..' in dim:
+                shape_list.append(string_to_tuple(dim.replace('..', ',')))
+            else:
+                shape_list.append(int(dim))
+        return shape_list
+    return string_to_tuple(preprocessed)

@@ -19,7 +19,7 @@ class DeepSpeechSeqPipeline:
             Args:
         profile (dict), a dict with pre/post-processing parameters, see profiles.py
         core (Core or None), Core object for model loading/compilation/inference
-        model (str), filename of IE IR .xml file of the network
+        model (str), filename of IR .xml model file
         lm (str), filename of LM (language model)
         beam_width (int), the number of prefix candidates to retain during decoding in beam search (default 500)
         max_candidates (int), limit the number of returned candidates; None = do not limit (default None)

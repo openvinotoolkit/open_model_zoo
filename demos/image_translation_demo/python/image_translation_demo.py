@@ -81,7 +81,7 @@ def get_mask_from_image(image, model):
 def main():
     args = build_argparser().parse_args()
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

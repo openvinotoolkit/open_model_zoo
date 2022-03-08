@@ -217,7 +217,10 @@ AccuracyChecker supports following set of adapters:
   * `u_output` - U channel output layer.
   * `v_output` - V channel output layer.
   * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
-* `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
+* `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction` or `HandLandmarksPrediction`.
+  * `landmarks_out` - landmarks output layer.
+  * `landmarks_step` - number of coordinates per landmark (optional, default `2`).
+  * `is_hand_landmarks` - allows conversion to `HandLandmarksPrediction` instead of `FacialLandmarksPrediction` (optional, default `False`).
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
   * `pixel_link_out` - name of layer containing information related to linkage between pixels and their neighbors.
@@ -504,3 +507,26 @@ AccuracyChecker supports following set of adapters:
   * `reg_max` - maximal value of integral set (optional, default 7).
   * `strides` - strides of input multi-level feature maps (optional, default [8, 16, 32]).
   * `is_legacy` - using a legacy NanoDet model (optional, default False).
+* `palm_detection` - converting output of palm detection model to `DetectionPrediction` representation.
+  * `scores_out` - name of `scores` model output.
+  * `boxes_out` - name of `boxes` model output.
+  * `num_anchor_layers` - number of layers for anchors calculation (optional, default `4`).
+  * `strides` - strides of input multi-level feature maps (optional, default `[8, 16, 16, 16]`).
+  * `min_scale` - minimal scale for anchors calculation (optional, default `0.1484375`).
+  * `max_scale` - maximal scale for anchors calculation (optional, default `0.75`).
+  * `input_size_width` - width of a model input image (optional, default `128`).
+  * `input_size_height` - height of a model input image (optional, default `128`).
+  * `reduce_boxes_in_lowest_layer` - reduce size of anchors in lowest layer (optional, default `False`).
+  * `aspect_ratios` - Aspect ratios for multi-level feature maps (optional, default `[1]`).
+  * `inteprolated_scale_aspect_ratio` - aspect ratio for interpolated scale (optional, default `1`).
+  * `fixed_anchor_size` - produces anchors with fixed size (optional, default 'True').
+  * `sigmoid_score` - score output is sigmoid (optional, default 'True').
+  * `score_clipping_thresh` - score clipping threshold (optional, default `100`).
+  * `reverse_output_order` - `boxes` output data order is (x,y) instead of (y,x) (optional, default `True`).
+  * `keypoint_coord_offset` - offset of keypoints coordinates in `boxes` output (optional, default `4`).
+  * `num_keypoints` - Number of keypoints in `boxes` output(optional, default `7`).
+  * `num_values_per_keypoint` - Number of coordinates per keypoint (optional, default `2`).
+  * `scales` - detection box scales for x,y,w,h. (optional, default `[128, 128, 128, 128]`).
+  * `min_score_thresh` - lower bound for valid boxes scores (optional, default `0.5`).
+  * `apply_exp_on_box_size` - box sizes is argument of exponent (optional, default `False`).
+  * `num_classes` - number of detection classes (optional, default `1`).
