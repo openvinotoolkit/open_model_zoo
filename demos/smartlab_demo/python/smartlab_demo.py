@@ -51,7 +51,7 @@ def build_argparser():
 
     return parser
 
-def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display, buffer1, buffer2):
+def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display):
     old_time = time.time()
     frame_counter = 0 # Frame index counter
     fps = 0.0
@@ -76,12 +76,9 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             # dector with new thread
             if frame_counter % 20 == 0:
                 future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
-
                 if(args.mode == "multiview"): # mobilenet
                     future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
                 else: # mstcn
-                    buffer1.append(frame_top)
-                    buffer2.append(frame_side)
                     future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
 
             if future_detector is not None and future_detector.done():
@@ -92,7 +89,6 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             if future_segmentor is not None and future_segmentor.done():
                 print("segmentor done")
                 segmentor_result = future_segmentor.result()
-                future_segmentor = None
                 if(args.mode == "multiview"):
                     top_seg_results, side_seg_results = segmentor_result[0], segmentor_result[1]
                 else:
@@ -137,9 +133,6 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
 
 def main():
     args = build_argparser().parse_args()
-
-    buffer1 = deque(maxlen=1000)  # Array buffer
-    buffer2 = deque(maxlen=1000)
     core = Core()
 
     ''' Object Detection Variables'''
@@ -174,7 +167,7 @@ def main():
         raise ValueError(f"Can't read an video or frame from {args.sideview}")
 
     video_loop(
-        args, cap_top, cap_side, detector, segmentor, evaluator, display, buffer1, buffer2)
+        args, cap_top, cap_side, detector, segmentor, evaluator, display)
 
 if __name__ == "__main__":
     main()
