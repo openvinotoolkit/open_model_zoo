@@ -25,9 +25,6 @@ from evaluator import Evaluator
 from openvino.runtime import Core
 from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
-from thread_argument import ThreadWithReturnValue
-
-
 
 
 def build_argparser():
@@ -50,6 +47,7 @@ def build_argparser():
     args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
+    args.add_argument('-m_en_ext', '--m_encoder_extra', help='Optional. Path to encoder model.', required=True, type=str)
 
     return parser
 
@@ -63,7 +61,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
     detector_result = None
     segmentor_result = None
 
-    executor  = concurrent.futures.ThreadPoolExecutor()
+    executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
     future_segmentor = None
 
@@ -76,7 +74,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             break
         else:
             # dector with new thread
-            if frame_counter % 10 == 0:
+            if frame_counter % 20 == 0:
                 future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
 
                 if(args.mode == "multiview"): # mobilenet
@@ -110,7 +108,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
             print(fps)
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
-            if detector_result is not None and segmentor_result is not None:
+            # if detector_result is not None and segmentor_result is not None:
+            if detector_result is not None:
                 top_det_results, side_det_results = detector_result[0], detector_result[1]
                 state, scoring, keyframe = evaluator.inference(
                         top_det_results = top_det_results,
@@ -136,7 +135,6 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display,
         if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}: # Esc
             break
 
-
 def main():
     args = build_argparser().parse_args()
 
@@ -153,9 +151,11 @@ def main():
 
     '''Video Segmentation Variables'''
     if(args.mode == "multiview"):
-        segmentor = Segmentor(core, args.device, args.m_encoder, args.m_encoder, args.m_decoder)
+        segmentor = Segmentor(core, args.device, args.m_encoder, args.m_encoder_extra, args.m_decoder)
     elif(args.mode == "mstcn"):
         segmentor = SegmentorMstcn(core, args.device, args.m_encoder, args.m_decoder)
+    else:
+        ValueError(f"Not supported mode: {args.sideview}")
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
