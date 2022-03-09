@@ -59,6 +59,7 @@ pip install .
 To convert models from certain frameworks, you may also need to install
 additional dependencies.
 
+<!--
 @sphinxdirective
 
 .. tab:: PyTorch
@@ -80,6 +81,7 @@ additional dependencies.
     python -mpip install --user -r ./requirements-paddle.in
 
 @endsphinxdirective
+-->
 
 ## Model Downloader Usage
 
@@ -95,6 +97,7 @@ section.
 
 ### Model Downloader Starting Parameters
 
+<!--
 @sphinxdirective
 
 +---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
@@ -113,7 +116,7 @@ section.
 | ``--progress_format``     | By default, the script outputs progress information as unstructured, human-readable text. You can also set this option to `text` to explicitly request the default text format. When this option is set to `json`, the script's standard output is replaced by a machine-readable progress report, whose format is documented in the "JSON progress report format" section. This option does not affect errors and warnings, which will still be printed to the standard error stream in a human-readable format. Use this option, if you want to consume progress information programmatically.                                                                                                                                                                                                                         | ``omz_downloader --all --progress_format=json``                                    |
 +---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 @endsphinxdirective
-
+-->
 
 See the "Shared options" section for information on other options accepted by
 the script.
@@ -130,6 +133,7 @@ additional members it contains.
 
 The following event types are currently defined:
 
+<!--
 @sphinxdirective
 
 +------------------------------------+-------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -150,7 +154,7 @@ The following event types are currently defined:
 | ``model_postprocessing_end``       | ``model``                                                               | The script stopped post-download processing on the model named by ``model``.                                                                                                                                                                                                                                                                   |
 +------------------------------------+-------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 @endsphinxdirective
-
+-->
 
 Additional event types and members may be added in the future.
 
@@ -182,6 +186,7 @@ a subset of models. See the "Shared options" section.
 
 ### Model Converter Starting Parameters
 
+<!--
 @sphinxdirective
 
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
@@ -202,7 +207,7 @@ a subset of models. See the "Shared options" section.
 | ``-p``/``--python``         | By default, the script will run Model Optimizer using the same Python executable that was used to run the script itself. Apply this parameter to use a different Python executable.                                                                              | ``omz_converter --all --python my/python``                                                      |
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 @endsphinxdirective
-
+-->
 
 The script will attempt to locate Model Optimizer using several methods:
 
@@ -242,6 +247,7 @@ are ignored.
 The `--all` option can be replaced with other filter options to quantize only
 a subset of models. See the "Shared options" section.
 
+<!--
 @sphinxdirective
 
 +---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
@@ -260,7 +266,7 @@ a subset of models. See the "Shared options" section.
 | ``-p``/``--python``       | By default, the script will run Model Optimizer using the same Python executable that was used to run the script itself. Apply this parameter to use a different Python executable.                                                                                                                                 | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --python my/python``                 |
 +---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
 @endsphinxdirective
-
+-->
 
 The script will attempt to locate Post-Training Optimization Toolkit using several methods:
 
@@ -295,6 +301,7 @@ This will print to standard output information about all models. The script's ou
 describing a single model. Each such object has the following keys:
 
 
+<!--
 @sphinxdirective
 
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -365,7 +372,7 @@ describing a single model. Each such object has the following keys:
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 @endsphinxdirective
-
+-->
 
 ## Shared Options
 
@@ -379,6 +386,7 @@ omz_TOOL --help
 There are several mutually exclusive filter options that select the models the
 tool will process:
 
+<!--
 @sphinxdirective
 
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
@@ -391,7 +399,7 @@ tool will process:
 | ``--list``   | takes a path to a file that must contain a list of patterns and selects models that match at least one of those patterns. For composite models, the name of composite model is accepted, as well as the names of individual models it consists of                                 | ``omz_TOOL --list my.lst``                |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
 @endsphinxdirective
-
+-->
 
 
 To see the available models, you can use the `--print_all` option. When this
