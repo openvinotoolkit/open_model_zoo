@@ -220,8 +220,8 @@ public:
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (FLAGS_r && !rawDetections.empty()) {
-            //slog::debug << "--Channel #" << sharedVideoFrame->sourceID <<"--Frame #" << sharedVideoFrame->frameId << "-----" << slog::endl;
-            slog::debug << rawDetections;
+            for (const std::string& rawDetection : rawDetections)
+                slog::debug << rawDetection << slog::endl;
             // destructor assures that none uses the container
             for (const std::string& rawAttribute : rawAttributes.container) {
                 slog::debug << rawAttribute << slog::endl;
@@ -431,6 +431,7 @@ bool DetectionsProcessor::isReady() {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<Detector::Result> results;
         results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->sourceID, sharedVideoFrame->frameId, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
+
         for (Detector::Result result : results) {
             switch (result.label) {
                 case 1:
@@ -833,7 +834,6 @@ int main(int argc, char* argv[]) {
                 readerCount++;
             }
         }
-        slog::debug << "Reader Count: " << readerCount << slog::endl;
 
         // Running
         worker->runThreads();

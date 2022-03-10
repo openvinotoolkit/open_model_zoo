@@ -66,10 +66,8 @@ public:
     }
     void runThreads() {
         running = true;
-        slog::debug << "thread pool size: " << threadPool.size() << slog::endl;
         for (std::thread& t : threadPool) {
             t = std::thread(&Worker::threadFunc, this);
-            slog::debug << "thread is pushing now." << slog::endl;
         }
     }
     void push(std::shared_ptr<Task> task) {
@@ -79,7 +77,6 @@ public:
         tasksCondVar.notify_one();
     }
     void threadFunc() {
-        slog::debug << "thread is running now." << slog::endl;
         while (running) {
             std::unique_lock<std::mutex> lk(tasksMutex);
             while (running && tasks.empty()) {

@@ -33,6 +33,7 @@ import argparse
 import contextlib
 import csv
 import json
+from operator import contains
 import os
 import platform
 import shlex
@@ -321,13 +322,13 @@ def main():
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
-                            demo.parse_output(output, test_case, device)
+                            demo.parse_output(output, device, test_case_index)
                         except subprocess.CalledProcessError as e:
                             print(e.output)
                             print('Exit code:', e.returncode)
                             num_failures += 1
                             execution_time = -1
-
+                        
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
 
