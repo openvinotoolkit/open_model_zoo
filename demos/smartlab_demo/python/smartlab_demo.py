@@ -44,10 +44,10 @@ def build_argparser():
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True, type=str)
     args.add_argument('-m_sa', '--m_sideall', help='Required. Path to sidetview all class model.', required=True, type=str)
     args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.', required=True, type=str)
-    args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn', type=str)
-    args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
+    args.add_argument('--mode', default='multiview', help='Optional. Action recognition mode: multiview', type=str)
+    args.add_argument('-m_en_t', '--m_encoder_top', help='Required. Path to encoder model.', required=True, type=str)
+    args.add_argument('-m_en_s', '--m_encoder_side', help='Required. Path to encoder model.', required=True, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.', required=True, type=str)
-    args.add_argument('-m_en_ext', '--m_encoder_extra', help='Optional. Path to encoder model.', required=True, type=str)
 
     return parser
 
@@ -136,7 +136,7 @@ def main():
 
     '''Video Segmentation Variables'''
     if(args.mode == "multiview"):
-        segmentor = Segmentor(core, args.device, args.m_encoder, args.m_encoder_extra, args.m_decoder)
+        segmentor = Segmentor(core, args.device, args.m_encoder_top, args.m_encoder_side, args.m_decoder)
     else:
         ValueError(f"Not supported mode: {args.sideview}")
 
