@@ -8,9 +8,9 @@ from openvino.model_zoo.model_api.models import Classification
 
 from openvino.runtime import Core
 
-class TestModel(unittest.TestCase):
+class TestOMZModel(unittest.TestCase):
     def test_load_intel(self):
-        face_detection = omz.Model.download('face-detection-0200', precision='FP16-INT8')
+        face_detection = omz.OMZModel.download('face-detection-0200', precision='FP16-INT8')
         xml_path = face_detection.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -22,7 +22,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(list(ie_model.outputs[0].shape), [1, 1, 200, 7])
 
     def test_load_public(self):
-        model = omz.Model.download('colorization-v2', precision='FP32')
+        model = omz.OMZModel.download('colorization-v2', precision='FP32')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -34,7 +34,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(list(ie_model.outputs[0].shape), [1, 2, 256, 256])
 
     def test_load_from_pretrained(self):
-        model = omz.Model.from_pretrained('models/intel/face-detection-0200/FP16-INT8/face-detection-0200.xml')
+        model = omz.OMZModel.from_pretrained('models/intel/face-detection-0200/FP16-INT8/face-detection-0200.xml')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -46,16 +46,16 @@ class TestModel(unittest.TestCase):
         self.assertEqual(list(ie_model.outputs[0].shape), [1, 1, 200, 7])
 
     def test_get_accuracy_checker_config(self):
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.accuracy_checker_config(), dict)
 
     def test_get_model_config(self):
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.model_config(), dict)
 
     def test_infer_model(self):
         ie = Core()
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
+        model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
 
         ie_model = ie.read_model(model.model_path)
         input_name = ie_model.inputs[0].get_any_name()
@@ -66,7 +66,7 @@ class TestModel(unittest.TestCase):
 
     def test_infer_non_vision_model(self):
         ie = Core()
-        model = omz.Model.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16', ie=ie)
+        model = omz.OMZModel.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16', ie=ie)
 
         ie_model = ie.read_model(model.model_path)
         input_names = [input.get_any_name() for input in ie_model.inputs]
@@ -86,7 +86,7 @@ class TestModel(unittest.TestCase):
             self.assertEqual(output.shape, expected_shapes[name.get_any_name()])
 
     def test_load_public_composite(self):
-        model = omz.Model.download('mtcnn-p', precision='FP32')
+        model = omz.OMZModel.download('mtcnn-p', precision='FP32')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))
@@ -105,16 +105,16 @@ class TestModel(unittest.TestCase):
             self.assertEqual(list(output.shape), expected_shapes[output_name])
 
     def test_preferable_input_shape(self):
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertEqual(model.preferable_input_shape('data_l'), [1, 1, 256, 256])
 
     def test_input_layout(self):
-        model = omz.Model.download('colorization-v2', cache_dir='models/public/colorization-v2/')
+        model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertEqual(model.layout('data_l'), 'NCHW')
 
     def test_model_api_inference(self):
         ie = Core()
-        model = omz.Model.download('densenet-121', cache_dir='models/public/densenet-121/', ie=ie)
+        model = omz.OMZModel.download('densenet-121', cache_dir='models/public/densenet-121/', ie=ie)
 
         input = np.zeros((224, 224, 3))
         result = model.model_api_inference(input, model_creator=Classification, configuration={'topk': 1})
@@ -123,7 +123,7 @@ class TestModel(unittest.TestCase):
 
     def test_model_api_auto_model_creation(self):
         ie = Core()
-        model = omz.Model.download('pspnet-pytorch', cache_dir='models/public/pspnet-pytorch/', ie=ie)
+        model = omz.OMZModel.download('pspnet-pytorch', cache_dir='models/public/pspnet-pytorch/', ie=ie)
 
         input = np.random.randint(0, 256, (512, 512, 3))
         result = model.model_api_inference(input)
@@ -131,7 +131,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(result.shape, (512, 512))
 
     def test_vocab_loading(self):
-        model = omz.Model.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16')
+        model = omz.OMZModel.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16')
         self.assertIsInstance(model.vocab(), dict)
 
 if __name__ == '__main__':

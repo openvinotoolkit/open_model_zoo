@@ -29,7 +29,7 @@ from openvino.model_zoo.model_api.models import Model, Classification
 from openvino.model_zoo.model_api.pipelines import get_user_config
 
 
-class Model:
+class OMZModel:
     def __init__(
         self, name=None, model_path=None, description=None, task_type=None,
         subdirectory=None, architecture_type=None, ie=None, download_dir=None
