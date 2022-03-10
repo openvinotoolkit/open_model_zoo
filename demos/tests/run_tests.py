@@ -243,8 +243,10 @@ def main():
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{os.pathsep}{os.path.join(args.demo_build_dir, 'ctcdecode_numpy')}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}",
         }
+
+        print('Demo Environment: {}'.format(demo_environment))
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
@@ -318,7 +320,6 @@ def main():
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
-                            print(output)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
                         except subprocess.CalledProcessError as e:
