@@ -30,7 +30,7 @@ TestCase.__new__.__defaults__ = [],
 class Demo:
     IMPLEMENTATION_TYPES = set()
 
-    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None, parser=None):
+    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None, parser=None, correctness_checker=None):
         self.implementation = implementation
         self.subdirectory = name + '/' + implementation
         self.device_keys = device_keys
@@ -40,6 +40,7 @@ class Demo:
 
         self._exec_name = self.subdirectory.replace('/', '_')
         self.parser = parser
+        self.correctness_checker = correctness_checker
         self.results = {}
 
         Demo.IMPLEMENTATION_TYPES.add(implementation)
@@ -76,6 +77,15 @@ class Demo:
                 self.results[device] = {}
             self.results[device][test_case_index] = tmp
             print (self.results)
+
+    def add_correctness_check(self, correctness_check):
+        self.correctness_checker = correctness_check
+        return self
+
+    def results_correctness_check(self):
+        if not self.correctness_checker:
+            return True
+        return self.correctness_checker()
 
     def update_option(self, updated_options):
         for case in self.test_cases[:]:

@@ -331,6 +331,13 @@ def main():
                         
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                if not demo.results_correctness_check():
+                    print ('Results Correct check failed for Demo: ', demo.subdirectory)
+                else:
+                    print ('Results Correct check Passed')
+
+
+
 
             print()
 
