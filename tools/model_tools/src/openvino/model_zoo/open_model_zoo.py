@@ -24,6 +24,10 @@ from  openvino.model_zoo import (
 )
 from openvino.model_zoo.download_engine import validation
 
+from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter
+from openvino.model_zoo.model_api.models import Model, Classification
+from openvino.model_zoo.model_api.pipelines import get_user_config
+
 
 class Model:
     def __init__(
@@ -261,8 +265,8 @@ class Model:
     def _create_model_api_instance(
         self, model_creator, num_streams='', num_threads=None, max_num_requests=1, configuration=None
     ):
-        plugin_config = _common.get_user_config(self.device, num_streams, num_threads)
-        model_adapter = _common.OpenvinoAdapter(_common.create_core(), self.model_path, device=self.device,
+        plugin_config = get_user_config(self.device, num_streams, num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), self.model_path, device=self.device,
                             plugin_config=plugin_config, max_num_requests=max_num_requests)
         self.model_api = model_creator(model_adapter, configuration)
 
@@ -284,11 +288,11 @@ class Model:
     def model_creator(self, model_adapter, configuration):
         try:
             if self.task_type == 'classification' and self.architecture_type is None:
-                return _common.Classification(model_adapter, configuration)
+                return Classification(model_adapter, configuration)
             elif self.architecture_type is None:
                 raise TypeError('architecture_type is not set or model is usupported by Model API.')
             else:
-                return _common.Model.create_model(self.architecture_type, model_adapter, configuration)
+                return Model.create_model(self.architecture_type, model_adapter, configuration)
         except Exception as exc:
             raise RuntimeError('Unable to create model class, please check configuration parameters.'
                                'Errors occured: ' + str(exc))

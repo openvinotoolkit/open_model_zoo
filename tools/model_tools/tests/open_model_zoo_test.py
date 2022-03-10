@@ -4,7 +4,7 @@ import os
 
 import openvino.model_zoo.open_model_zoo as omz
 
-from model_api.models import Classification
+from openvino.model_zoo.model_api.models import Classification
 
 from openvino.runtime import Core
 
