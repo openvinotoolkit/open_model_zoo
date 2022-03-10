@@ -56,7 +56,7 @@ class Bert(Model):
     def pad_input(self, input_ids, attention_mask, token_type_ids):
         pad_len = self.max_length - len(input_ids)
         if pad_len < 0:
-            raise ValueError("The input request is longer than max number of tokens ({})"
+            self.raise_error("The input request is longer than max number of tokens ({})"
                              " processed by model".format(self.max_length))
         input_ids += self.token_pad * pad_len
         token_type_ids += [0] * pad_len
