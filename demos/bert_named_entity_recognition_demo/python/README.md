@@ -8,6 +8,12 @@ On startup the demo application reads command line parameters and loads a model 
 It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different named entity recognition model topologies in one demo.
+
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst` file.

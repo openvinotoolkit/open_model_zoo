@@ -19,8 +19,7 @@ import logging as log
 
 class WrapperError(RuntimeError):
     def __init__(self, wrapper_name, message):
-        self.message = f"{wrapper_name}: {message}"
-        super().__init__(self.message)
+        super().__init__(f"{wrapper_name}: {message}")
 
 
 class Model:
@@ -61,8 +60,8 @@ class Model:
         for subclass in subclasses:
             if name.lower() == subclass.__model__.lower():
                 return subclass
-        raise WrapperError(cls.__model__, 'There is no model with name "{}" in list: {}'.
-                         format(name, ', '.join([subclass.__model__ for subclass in subclasses])))
+        cls.raise_error('There is no model with name "{}" in list: {}'.format(
+            name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
     def create_model(cls, name, model_adapter, configuration=None, preload=False):
@@ -94,14 +93,21 @@ class Model:
             if name in parameters:
                 errors = parameters[name].validate(value)
                 if errors:
-                    log.error(f'Error with "{name}" parameter:')
+                    self.logger.error(f'Error with "{name}" parameter:')
                     for error in errors:
-                        log.error(f"\t{error}")
-                    raise WrapperError(self.__model__, 'Incorrect user configuration')
+                        self.logger.error(f"\t{error}")
+                    self.raise_error('Incorrect user configuration')
                 value = parameters[name].get_value(value)
                 self.__setattr__(name, value)
             else:
-                log.warning(f'The parameter "{name}" not found in {self.__model__} wrapper, will be omitted')
+                self.logger.warning(f'The parameter "{name}" not found in {self.__model__} wrapper, will be omitted')
+
+    def raise_error(self, message):
+        '''Raises the WrapperError
+        Args:
+            message: error message
+        '''
+        raise WrapperError(self.__model__, message)
 
     def preprocess(self, inputs):
         '''Interface for preprocess method
@@ -131,30 +137,30 @@ class Model:
             number_of_outputs(int, Tuple(int)): number of output blobs, supported by wrapper. Use -1 to omit check
 
         Raises:
-            RuntimeError: if loaded model has unsupported number of input or output blob
+            WrapperError: if loaded model has unsupported number of input or output blob
         '''
         if not isinstance(number_of_inputs, tuple):
             if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
-                raise WrapperError(self.__model__, "Expected {} input blob{}, but {} found: {}".format(
+                self.raise_error("Expected {} input blob{}, but {} found: {}".format(
                     number_of_inputs, 's' if number_of_inputs !=1 else '',
                     len(self.inputs), ', '.join(self.inputs)
                 ))
         else:
             if not len(self.inputs) in number_of_inputs:
-                raise WrapperError(self.__model__, "Expected {} or {} input blobs, but {} found: {}".format(
+                self.raise_error("Expected {} or {} input blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_inputs[:-1]), int(number_of_inputs[-1]),
                     len(self.inputs), ', '.join(self.inputs)
                 ))
 
         if not isinstance(number_of_outputs, tuple):
             if len(self.outputs) != number_of_outputs and number_of_outputs != -1:
-                raise WrapperError(self.__model__, "Expected {} output blob{}, but {} found: {}".format(
+                self.raise_error("Expected {} output blob{}, but {} found: {}".format(
                     number_of_outputs, 's' if number_of_outputs !=1 else '',
                     len(self.outputs), ', '.join(self.outputs)
                 ))
         else:
             if not len(self.outputs) in number_of_outputs:
-                raise WrapperError(self.__model__, "Expected {} or {} output blobs, but {} found: {}".format(
+                self.raise_error("Expected {} or {} output blobs, but {} found: {}".format(
                     ', '.join(str(n) for n in number_of_outputs[:-1]), int(number_of_outputs[-1]),
                     len(self.outputs), ', '.join(self.outputs)
                 ))
@@ -174,16 +180,23 @@ class Model:
 
     def reshape(self, new_shape):
         if self.model_loaded:
-            log.warning(f'{self.__model__}: the model already loaded to device, should be reloaded after reshaping.')
+            self.logger.warning(f'{self.__model__}: the model already loaded to device, ',
+                                'should be reloaded after reshaping.')
             self.model_loaded = False
         self.model_adapter.reshape_model(new_shape)
         self.inputs = self.model_adapter.get_input_layers()
         self.outputs = self.model_adapter.get_output_layers()
 
     def infer_sync(self, dict_data):
+        if not self.model_loaded:
+            self.raise_error("The model is not loaded to the device. Please, create the wrapper "
+                "with preload=True option or call load() method before infer_sync()")
         return self.model_adapter.infer_sync(dict_data)
 
     def infer_async(self, dict_data, callback_data):
+        if not self.model_loaded:
+            self.raise_error("The model is not loaded to the device. Please, create the wrapper "
+                "with preload=True option or call load() method before infer_async()")
         self.model_adapter.infer_async(dict_data, callback_data)
 
     def is_ready(self):
@@ -197,8 +210,8 @@ class Model:
 
     def log_layers_info(self):
         for name, metadata in self.inputs.items():
-            log.info('\tInput layer: {}, shape: {}, precision: {}, layout: {}'.format(name, metadata.shape,
-                                                                                      metadata.precision, metadata.layout))
+            self.logger.info('\tInput layer: {}, shape: {}, precision: {}, layout: {}'.format(
+                name, metadata.shape, metadata.precision, metadata.layout))
         for name, metadata in self.outputs.items():
-            log.info('\tOutput layer: {}, shape: {}, precision: {}, layout: {}'.format(name, metadata.shape,
-                                                                                       metadata.precision, metadata.layout))
+            self.logger.info('\tOutput layer: {}, shape: {}, precision: {}, layout: {}'.format(
+                name, metadata.shape, metadata.precision, metadata.layout))

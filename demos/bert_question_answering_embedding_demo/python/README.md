@@ -17,6 +17,12 @@ Notice that question is usually much shorter than the contexts, so calculating t
 
 If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displayed to the user.
 
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different question answering model topologies in one demo.
+
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst` file.
