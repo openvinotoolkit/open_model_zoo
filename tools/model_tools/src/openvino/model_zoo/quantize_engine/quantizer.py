@@ -92,10 +92,11 @@ class Quantizer:
         return pot_cmd_prefix
 
 
-    def quantize(self, reporter, model, precision, target_device, pot_cmd_prefix, pot_env) -> bool:
+    def quantize(self, reporter, model, precision, target_device, pot_cmd_prefix, pot_env, model_root=None) -> bool:
         input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
-        pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
+        model_root = _common.MODEL_ROOT if model_root is None else model_root
+        pot_config_base_path = model_root / model.subdirectory / 'quantization.yml'
 
         try:
             with pot_config_base_path.open('rb') as pot_config_base_file:
@@ -105,7 +106,7 @@ class Quantizer:
 
         pot_config_paths = {
             'engine': {
-                'config': str(_common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
+                'config': str(model_root/ model.subdirectory / 'accuracy-check.yml'),
             },
             'model': {
                 'model': str(self.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
@@ -164,7 +165,7 @@ class Quantizer:
 
         return True
 
-    def bulk_quantize(self, reporter, models, target_device, datasets_definition_fp=None) -> List[str]:
+    def bulk_quantize(self, reporter, models, target_device, datasets_definition_fp=None, model_root=None) -> List[str]:
         failed_models = []
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -179,7 +180,7 @@ class Quantizer:
             pot_env = {
                 'ANNOTATIONS_DIR': str(annotation_dir),
                 'DATA_DIR': str(self.dataset_dir),
-                'DEFINITIONS_FILE': str(_common.DATASET_DEFINITIONS),
+                'DEFINITIONS_FILE': str(datasets_definition_fp),
             }
 
             for model in models:
@@ -200,7 +201,8 @@ class Quantizer:
                 })
 
                 for precision in sorted(model_precisions):
-                    if not self.quantize(reporter, model, precision, target_device, pot_cmd_prefix, pot_env):
+                    if not self.quantize(reporter, model, precision, target_device, pot_cmd_prefix, pot_env,
+                                         model_root):
                         failed_models.append(model.name)
                         break
         return failed_models
