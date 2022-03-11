@@ -204,18 +204,37 @@ class SequentialModel(BaseCascadeModel):
         )
         self.adapter.outputs_verified = False
         if hasattr(self.detector, 'outputs'):
-            self.detector.text_feats_out = postprocess_output_name(
+            text_feats_out = postprocess_output_name(
                 self.detector.text_feats_out, self.detector.outputs,
                 additional_mapping=self.detector.additional_output_mapping, raise_error=False)
-            self.recognizer_encoder.output = postprocess_output_name(
+            if text_feats_out not in self.detector.outputs:
+                text_feats_out = postprocess_output_name(
+                generate_layer_name(self.detector.text_feats_out, 'detector_', with_prefix), 
+                self.detector.outputs,
+                additional_mapping=self.detector.additional_output_mapping, raise_error=False)
+            self.detector.text_feats_out = text_feats_out
+            encoder_output = postprocess_output_name(
                 self.recognizer_encoder.output, self.recognizer_encoder.outputs,
                 additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
             )
+            if encoder_output not in self.recognizer_encoder.outputs:
+                encoder_output = postprocess_output_name(
+                generate_layer_name(self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix), self.recognizer_encoder.outputs,
+                additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
+            )
+            self.recognizer_encoder.output = encoder_output
             for out, out_value in self.recognizer_decoder.model_outputs.items():
-                self.recognizer_decoder.model_outputs[out] = postprocess_output_name(
+                output = postprocess_output_name(
                     out_value, self.recognizer_decoder.outputs,
                     additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
                 )
+                if output not in self.recognizer_decoder.outputs:
+                    output = postprocess_output_name(
+                    generate_layer_name(out_value, 'recognizer_decoder_', with_prefix),
+                    self.recognizer_decoder.outputs,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
+                )
+                self.recognizer_decoder.model_outputs[out] = output
         if with_prefix != self.with_prefix:
             self.recognizer_encoder.input = generate_layer_name(
                 self.recognizer_encoder.input, 'recognizer_encoder_', with_prefix
