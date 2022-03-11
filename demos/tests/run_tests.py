@@ -34,7 +34,6 @@ import contextlib
 import csv
 import json
 import os
-import platform
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
@@ -238,15 +237,16 @@ def main():
 
         num_failures = 0
 
-        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         try:
-            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+            pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
         except KeyError:
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}",
         }
+
+        print('Demo Environment: {}'.format(demo_environment))
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
