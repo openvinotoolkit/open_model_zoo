@@ -19,31 +19,31 @@ files:
   - name: parameters.yml
     size: 225
     checksum: 6705b45c13795f83815879c7746275baa4494b05ce7ae06817b2860a0d1c02a2783aee95e5f159a289b5fe47b6eea426
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/parameters.yml
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/parameters.yml
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 43837
-    checksum: 73d1a3b4462a45b030d71431060e75fa40ab34b01a10e0cafc7cd1af4f6491b64fd848e4b9e72737502ebf9b1000e145
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 43922
+    checksum: 455222cc736b1bcbb1242d5375a281fb92c065f35c75702a58785b41a18ec8dea507287f121a5457b0377f35085af65a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 44918088
     checksum: 817d130d18adf6aac65fc888325981bf6fffb54b5176d57801ac4d625268bd4a8ca0c73ea84c2778eff6c65fd4bde624
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 57480
-    checksum: 6a167ccc652314f8f6f6e1ee9aeabe6999aa94b2e309834e90063acd8aacb722632397261e7bda9f18db0577e068c9d6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 57565
+    checksum: 7928fece546f99694f9065f55c9d1ab41f7c9406217aab5a730cfe86718a9f38c9ffb7a27ba89431c72c608366e48b5c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 22459060
     checksum: 27d152cc3ee970dc4aa3b869ae5b69216afa89f1600f4734e054731904cce456cf61c0076b9e5a0faadfd42ae67a84d5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 87460
-    checksum: d4872c5bbc5e3b91e734410aed643e6639e8d001d5a45934ff1dda508522419f358e3441b0dda2fc44de88f23fa32d7b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 90450
+    checksum: f8983f7018ac55b7f17f63abf5f58d814c93509dc09cfbae13d1448095c467a895934675d1704a3259de25189d3044d8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 11256340
     checksum: 1c8e2fe5c20ee2c53aadf1ccc648df2afc3a4bb3ce4ff6028b55c9f2740d31ef2ff42ff53d1f3bb3735b86560fba07de
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
 input_info:
   - name: image_input
     shape: [1, 416, 416, 3]

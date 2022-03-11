@@ -18,29 +18,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml
-    size: 61647
-    checksum: 03517b1c8221632785e128b5ac6823647cf72ea5d3c49510ef5c70431a6692d45feca891f7f1003e76fa1b59ebf473bf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    size: 51883
+    checksum: dc270c6e8019a7a7cd51f9e279c24f76b58275e46a66211292536b5526fa32658878d535d8eb5a43defbae52cdd85b45
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
   - name: FP32/landmarks-regression-retail-0009.bin
-    size: 765248
-    checksum: 56a2cf1235bbb7aab99b95da3d999132d9a20784912fcce08b2078395f2724fdf9a1e8f699f8ee4af0f29a0989254ff8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    size: 762464
+    checksum: ea8afdd4f0eec7273b21bd55c439d3255dd476411175675646e75349241ff81e50bf8f30fbced3f9d683bdc32bfa3db2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
   - name: FP16/landmarks-regression-retail-0009.xml
-    size: 88741
-    checksum: f2855865304ec3fb0ee819028bc3820f9f5448dd85728325f49ba3f9cff02a72285ff71634d59aac4aaf39a5d66630ea
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    size: 73873
+    checksum: d39a98cd182ecb72b7b2cc578325a8f310c2b4f0b5041ecb0ae003866db97d7f479abf1e358fce6352680a849073d3bd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
   - name: FP16/landmarks-regression-retail-0009.bin
-    size: 382632
-    checksum: 1abaed78540e16b20d20b13aaac9f5ed35600ce03b55b6a219b0d0cd564ec9d1401774558b6d42e0d0cef126cb13d07c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    size: 381232
+    checksum: 295b2defa639a0ecc21caa506733cb0507c18fb885495a4b88691b1c7d54bc7d78f7aa503e02611080f6368814d9d05c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
   - name: FP16-INT8/landmarks-regression-retail-0009.xml
-    size: 132098
-    checksum: e3b0b2cc47e1c5f7d942c468bb206d8e8507d22c365231c8ded4a89c3d8dc3135bd07a529a7aea7ae3133f3b65d2e067
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
+    size: 113273
+    checksum: 202f2903300320525e1622e81c3a38c497cbf6d7ad26d87c6798882a6b5343171af851618f224ef4f100ebf34473c048
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
   - name: FP16-INT8/landmarks-regression-retail-0009.bin
-    size: 223672
-    checksum: 7c310d0e163a04e27e9cf6a4423e438c84d1ea419f699969a1a7eff980527b3576cf8414ffd1d2fa37a0d8d4868ea862
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
+    size: 200012
+    checksum: d6b5de49c9445ffd94625df89d7d60bf3f6e9339ef731bc28c2e3eaf18eb716ea3d6dd53e7a1926c6b79a2a173adcaea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
 input_info:
   - name: '0'
     shape: [1, 3, 48, 48]

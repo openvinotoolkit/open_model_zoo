@@ -17,29 +17,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-2001.xml
-    size: 339088
-    checksum: 31d9ebb475ef5514bd874d07e0e86229090505073a56f18c8cdd1d8335d75b04105af5491792c83ac30179d9806d30fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP32/person-vehicle-bike-detection-2001.xml
+    size: 231067
+    checksum: a38b261e12228c12b771c4f15c56d655cc2c628562cacb1335b4e07472c78154ec872e163618e3e8a682f5dadc389253
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP32/person-vehicle-bike-detection-2001.xml
   - name: FP32/person-vehicle-bike-detection-2001.bin
-    size: 7421588
-    checksum: 9753902ddfb99116e23e652a4c405084fe4254d24a9296033350a22a44eb8e351df81e7a1e86da2ba27e97072e670312
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP32/person-vehicle-bike-detection-2001.bin
+    size: 7285140
+    checksum: ee4cd931592dccfa374e6df7b16e46c9733e38e6161797062677b497cf5358e469d66171bc09d1882c2c57d1a667e722
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP32/person-vehicle-bike-detection-2001.bin
   - name: FP16/person-vehicle-bike-detection-2001.xml
-    size: 473063
-    checksum: 8fa93203be6bb83e7a25bab580f738674649340ca45dd242c80a004d51f443cb230237ec5ac49a285419c713e361e2fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP16/person-vehicle-bike-detection-2001.xml
+    size: 300043
+    checksum: 6f03fc96daa45691713030a3610b27c28e5cdea343e2059457ca664fb04b4e4a2578f9633e281f0d860f294ed7b17ab4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP16/person-vehicle-bike-detection-2001.xml
   - name: FP16/person-vehicle-bike-detection-2001.bin
-    size: 3710850
-    checksum: a5b78ab0ffc124769862f71105c0fe4d6307060dfb9a8c0e22c0e517aaa901a6515d3c1db794d4be575882b7cfed5ad3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP16/person-vehicle-bike-detection-2001.bin
+    size: 3642626
+    checksum: aaedcef1be99a9fb5bf30b57870fefc0b61c184a88297953f1a9ab26910aa5ed958190f3e991fc018a8ffda745c9f3e2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP16/person-vehicle-bike-detection-2001.bin
   - name: FP16-INT8/person-vehicle-bike-detection-2001.xml
-    size: 844292
-    checksum: 4bdd7a1c7ad0cf1db9267e8e6a067c6f66b1c8c0d73e972604aef77570a99ef8e64e57187a706ee4f0d25b20bd0d6717
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.xml
+    size: 538714
+    checksum: ccc1a826d5fff543b7367512166afb8c60d8e6c417724c5d747952987b5e14f5a782cb796f61bcf13d7d6247157821a0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.xml
   - name: FP16-INT8/person-vehicle-bike-detection-2001.bin
-    size: 2084050
-    checksum: de6b529cfd4d756e5834fae0e072a63a96bc2fa1396780261cdcd63f6db0a0616e33fe89ef520fba8be8fe9dfea47c05
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.bin
+    size: 2013006
+    checksum: 5c330df209b5e8f09e303790947c2c299a4805de75473a29ddf581c30f96ae5cf239e7681d70d15e38df516f88734161
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.bin
 input_info:
   - name: image
     shape: [1, 3, 384, 384]

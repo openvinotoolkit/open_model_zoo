@@ -17,29 +17,29 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/unet-camvid-onnx-0001.xml
-    size: 135319
-    checksum: e13beb5200458d79bdfc06ff832478f98363111682a29646eb27a90692caff738ec02b267d5ae94ab7871583074b4eb2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
+    size: 80769
+    checksum: 1c0ce269a848669903fb51205eac0f81540c65a471fcf0438dbc7538ad20b43a0a5ce4fb971dca6f48416294583badba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
   - name: FP32/unet-camvid-onnx-0001.bin
-    size: 124200516
-    checksum: 10eedcb579f073de03860c3e131b5b3f1c1900536ec81eb9e156bd28dc578dd229343eca856c71a7e6869656d1f56c94
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
+    size: 124129860
+    checksum: b598ba1a5e5191c824362a2e4fa12454dccf81ad9b4cbefcb9c63f8ff053d2cd5f0fb66bca156afd69060a5ba67762a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
   - name: FP16/unet-camvid-onnx-0001.xml
-    size: 191837
-    checksum: ac471c5df87931c163a524839af051d82e035b411434118331d4d84a91909e2c74fea415399e4981aa159a688461a001
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
+    size: 107200
+    checksum: 6900a0f0da2679760913c986099a052ba8a7127ea26ce90419eb97fdd9cf163006aa49e7bbdb9451f08881eefc049a84
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
   - name: FP16/unet-camvid-onnx-0001.bin
-    size: 62100262
-    checksum: fff1b69db26ff872f6380af5d6df054a079a3ebd7a3cabeef40500f51c3413d048c5928d25075121b247c6710cc17893
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
+    size: 62064934
+    checksum: 6288a955d2758130a610f317e88c1a3f51d730f5d51c459fbef133587219839b9093af3c25b0c8c95fab678b852098f6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
   - name: FP16-INT8/unet-camvid-onnx-0001.xml
-    size: 298348
-    checksum: b627344028e6d7000c2aef0d74eebe63eb1cb40ae65e5a388660fc40292ef40808bbc59355fc5bf609422c40b848882a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
+    size: 189904
+    checksum: e371be7f826cef0f950df100f4b453613a3d4d53e56cd34cadef2a291086e90524d234dca0cf0704356702fb800e6866
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
   - name: FP16-INT8/unet-camvid-onnx-0001.bin
-    size: 31129799
-    checksum: b917e07ee92ef4d1a3e62325d1aa576102be2263121056bf48bf24528f9bb0b6e806294802fb95ede844b31ad5fee5fc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
+    size: 31094314
+    checksum: 8d0ae3339da7e231db0cc5184d7a4fc94046392dde443c3869e44acd80f4586f22c0247d008d4e371bad00c98f7f971a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
 input_info:
   - name: input.1
     shape: [1, 3, 368, 480]

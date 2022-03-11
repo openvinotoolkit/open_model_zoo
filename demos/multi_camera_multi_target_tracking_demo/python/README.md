@@ -26,14 +26,6 @@ and then for each detected object it extracts embeddings using re-identification
 
 ## Preparing to Run
 
-### Installation of Dependencies
-
-To install required dependencies, run
-
-```bash
-pip3 install -r requirements.txt
-```
-
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
@@ -85,7 +77,6 @@ usage: multi_camera_multi_target_tracking_demo.py [-h] -i INPUT [INPUT ...]
                                                   [--history_file HISTORY_FILE]
                                                   [--save_detections SAVE_DETECTIONS]
                                                   [--no_show] [-d DEVICE]
-                                                  [-l CPU_EXTENSION]
                                                   [-u UTILIZATION_MONITORS]
 
 Multi camera multi object tracking live demo script
@@ -118,9 +109,6 @@ optional arguments:
                         boxes
   --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        MKLDNN (CPU)-targeted custom layers.Absolute path to a
-                        shared library with the kernels impl.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

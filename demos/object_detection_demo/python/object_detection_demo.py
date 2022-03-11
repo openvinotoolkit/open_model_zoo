@@ -63,7 +63,7 @@ def build_argparser():
     common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
-                                   help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
+                                   help='Optional. A resize type for model preprocess. By default used model predefined type.')
     common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
                                    help='Optional. The first image size used for CTPN model reshaping. '
                                         'Default: 600 600. Note that submitted images should have the same resolution, '

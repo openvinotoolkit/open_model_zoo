@@ -30,6 +30,7 @@ protected:
     const std::string m_deviceName;
     ov::Core& m_core;
     cv::Size m_new_input_resolution;
+    bool use_auto_resize;
     int m_channels;
     cv::Size m_input_size;
     std::string m_input_name;
@@ -40,5 +41,4 @@ protected:
 
     double m_time_elapsed;
     size_t m_ncalls;
-    bool use_auto_resize;
 };

@@ -19,31 +19,31 @@ files:
   - name: person-reidentification-retail-0267.onnx
     size: 3571437
     checksum: c650c97722d597efd65fe041d67e17658d776c45d56736b817264ec544d8a9b5a5e8cdc1a0920cc2aada61151c1a9191
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/person-reidentification-retail-0267.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/person-reidentification-retail-0267.onnx
   - name: FP32/person-reidentification-retail-0287.xml
-    size: 680154
-    checksum: 483edfc32faab14528cef39d5e273066e02d6925d06dc7c52e6df127648a57dc0c301120f43bb07cdd44f24da06b5cd0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP32/person-reidentification-retail-0287.xml
+    size: 530922
+    checksum: a33474520d37975a157d064e915e843e555108d4b3fa4f7eacb2ff2fd6db0d3d54801f2b334d55d5fe407fca5440f124
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP32/person-reidentification-retail-0287.xml
   - name: FP32/person-reidentification-retail-0287.bin
-    size: 2404608
-    checksum: 44e8c8458b4fa6eac7222969b22215b55a3c1a0bd0adc57d83ebc19a41e38465fc5f966bf144dbebabc07f892b633559
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP32/person-reidentification-retail-0287.bin
+    size: 2362112
+    checksum: 13ea45bb2158f6c180ed77550ccda8527e5ae24fa0ee54400d41a8aa3683431147f22a6ed23843a77378314b1374e6c1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP32/person-reidentification-retail-0287.bin
   - name: FP16/person-reidentification-retail-0287.xml
-    size: 928057
-    checksum: 84d66db991552d08fba41ca14c03bb760d21a11a57e98ad01ec66c9b7534411e8115308ba0b065e1e262ecba7ac6c68d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP16/person-reidentification-retail-0287.xml
+    size: 691937
+    checksum: 1f45217580e0642f7bf12a7ccd048390a258d7688d50e6a02dac76905336d8b0ec84c783986987af33c672cddffe2315
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP16/person-reidentification-retail-0287.xml
   - name: FP16/person-reidentification-retail-0287.bin
-    size: 1202356
-    checksum: 9686dd771ce31eca9e2e59cb4629591bde047ff8118e56c3ac154af8358bc8751828e03fc633d6526a415118978ee275
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP16/person-reidentification-retail-0287.bin
+    size: 1181108
+    checksum: 40d898cfd0b7fed75168ea6976bb5252018ab83674c157373508bb1d959ed36bd2f9e68f91b3729f8a28c86be39ca8c1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP16/person-reidentification-retail-0287.bin
   - name: FP16-INT8/person-reidentification-retail-0287.xml
-    size: 1910121
-    checksum: 7609fcbfa38931f05e28b7bae315d7a3488c2fd11d71382aecda1053f385f6a2ecb8406f43e0bdcf7b429bd7996f5888
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP16-INT8/person-reidentification-retail-0287.xml
+    size: 1501549
+    checksum: d50c9428ddbae1cec1715455d17886efe1d6b376a0edec930757f2bf14509b7313b657716d1e2b771307b35b83e8a981
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP16-INT8/person-reidentification-retail-0287.xml
   - name: FP16-INT8/person-reidentification-retail-0287.bin
-    size: 719286
-    checksum: 68116a70618afc0155cbe1c8f2569a9ec2c3bbdbb0af977533471783198a3a80c403bf0bd1e2efe204302ccf030c5423
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-reidentification-retail-0287/FP16-INT8/person-reidentification-retail-0287.bin
+    size: 696390
+    checksum: 1270df25b0e92a41dead44a2e4e4a6fa90568aa5c1d9faa70c87a2966709462762823b8e7f79a5605e7ccb3f5f49c504
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0287/FP16-INT8/person-reidentification-retail-0287.bin
 input_info:
   - name: data
     shape: [1, 3, 256, 128]

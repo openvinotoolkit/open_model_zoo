@@ -34,8 +34,8 @@ except ImportError as import_error:
 class MaskRCNNAdapter(Adapter):
     __provider__ = 'mask_rcnn'
 
-    def __init__(self, launcher_config, label_map=None, output_blob=None):
-        super().__init__(launcher_config, label_map, output_blob)
+    def __init__(self, launcher_config, label_map=None, output_blob=None, additional_output_mapping=None):
+        super().__init__(launcher_config, label_map, output_blob, additional_output_mapping)
         if isinstance(mask_util, UnsupportedPackage):
             mask_util.raise_error(self.__provider__)
         self.encoder = mask_util.encode

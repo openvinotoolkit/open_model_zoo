@@ -52,42 +52,33 @@ def get_path(entry: Union[str, Path], is_directory=False, check_exists=True, fil
         path = Path(entry)
     except TypeError as type_err:
         raise TypeError('"{}" is expected to be a path-like'.format(entry)) from type_err
-
     if not check_exists:
         return path
-
     # pathlib.Path.exists throws an exception in case of broken symlink
     if not os.path.exists(str(path)):
         raise FileNotFoundError('{}: {}'.format(os.strerror(errno.ENOENT), path))
-
     if not file_or_directory:
         if is_directory and not path.is_dir():
             raise NotADirectoryError('{}: {}'.format(os.strerror(errno.ENOTDIR), path))
-
         # if it exists it is either file (or valid symlink to file) or directory (or valid symlink to directory)
         if not is_directory and not path.is_file():
             raise IsADirectoryError('{}: {}'.format(os.strerror(errno.EISDIR), path))
-
     return path
 
 
 def contains_all(container, *args):
     sequence = set(container)
-
     for arg in args:
         if sequence.intersection(arg) != set(arg):
             return False
-
     return True
 
 
 def contains_any(container, *args):
     sequence = set(container)
-
     for arg in args:
         if sequence.intersection(arg):
             return True
-
     return False
 
 
@@ -97,7 +88,6 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
     processed = filter(lambda x: x, processed)
-
     return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
 
 
@@ -106,7 +96,6 @@ def string_to_list(string):
     processed = processed.replace('[', '')
     processed = processed.replace(']', '')
     processed = processed.split(',')
-
     return processed
 
 
@@ -155,20 +144,16 @@ def zipped_transform(fn, *iterables, inplace=False):
         iter_res = fn(*values)
         if not iter_res:
             continue
-
         for dst, res in zip(result, iter_res):
             updater(dst, idx, res)
-
     return result
 
 
 def overrides(obj, attribute_name, base=None):
     cls = obj if isinstance(obj, type) else obj.__class__
-
     base = base or cls.__bases__[0]
     obj_attr = getattr(cls, attribute_name, None)
     base_attr = getattr(base, attribute_name, None)
-
     return obj_attr and obj_attr != base_attr
 
 
@@ -214,7 +199,6 @@ def parse_inputs(inputs_entry):
             new_input['value'] = np.array(value) if isinstance(value, list) else value
         if shape is not None:
             new_input['shape'] = shape
-
         inputs.append(new_input)
     return inputs
 
@@ -222,10 +206,8 @@ def parse_inputs(inputs_entry):
 def in_interval(value, interval):
     minimum = interval[0]
     maximum = interval[1] if len(interval) >= 2 else None
-
     if not maximum:
         return minimum <= value
-
     return minimum <= value < maximum
 
 
@@ -241,10 +223,8 @@ def finalize_metric_result(values, names):
     for value, name in zip(values, names):
         if np.isnan(value):
             continue
-
         result_values.append(value)
         result_names.append(name)
-
     return result_values, result_names
 
 
@@ -255,7 +235,6 @@ def get_representations(values, representation_source):
 def get_supported_representations(container, supported_types):
     if np.shape(container) == ():
         container = [container]
-
     return list(filter(lambda rep: check_representation_type(rep, supported_types), container))
 
 
@@ -269,7 +248,6 @@ def check_representation_type(representation, representation_types):
 def is_single_metric_source(source):
     if not source:
         return False
-
     return np.size(source.split(',')) == 1
 
 
@@ -282,13 +260,11 @@ def read_txt(file: Union[str, Path], sep='\n', ignore_space=False, **kwargs):
         emptyness = not string
         if not ignore_space:
             emptyness = emptyness or string.isspace()
-
         return emptyness
 
     with get_path(file).open(**kwargs) as content:
         content = content.read().split(sep)
         content = list(filter(lambda string: not is_empty(string), content))
-
         if not ignore_space:
             content = list(map(str.strip, content))
         return content
@@ -352,7 +328,6 @@ def extract_image_representations(image_representations, meta_only=False):
     if meta_only:
         return meta
     images = [rep.data for rep in image_representations]
-
     return images, meta
 
 
@@ -365,7 +340,6 @@ def get_or_parse_value(item, supported_values=None, default=None, casting_type=f
         item = item.lower()
         if supported_values and item in supported_values:
             return supported_values[item]
-
         try:
             return string_to_tuple(item, casting_type=casting_type)
         except ValueError as value_err:
@@ -374,13 +348,10 @@ def get_or_parse_value(item, supported_values=None, default=None, casting_type=f
                 'one of precomputed: ({}) or '.format(', '.join(supported_values.keys())) if supported_values else ''
             )
             raise ValueError(message) from value_err
-
     if isinstance(item, (float, int)):
         return (casting_type(item), )
-
     if isinstance(item, list):
         return item
-
     return default
 
 
@@ -394,7 +365,6 @@ def get_key_by_value(container, target):
     for key, value in container.items():
         if value == target:
             return key
-
     return None
 
 
@@ -424,7 +394,6 @@ def remove_difficult(difficult, indexes):
         else:
             decrementor += 1
             id_removed += 1
-
     return new_difficult
 
 
@@ -434,7 +403,6 @@ def convert_to_range(entry):
         entry_range = string_to_tuple(entry_range)
     elif not isinstance(entry_range, tuple) and not isinstance(entry_range, list):
         entry_range = [entry_range]
-
     return entry_range
 
 
@@ -446,7 +414,6 @@ def add_input_shape_to_meta(meta, shape):
 def set_image_metadata(annotation, images):
     image_sizes = get_data_shapes(images)
     annotation.set_image_size(image_sizes)
-
     return annotation, images
 
 
@@ -670,7 +637,6 @@ class MatlabDataReader():
             if dcor.flush() != b'':
                 raise ParseError('Error in compressed data.')
             mtpn, num_bytes = self._unpack(endian, 'II', fd.read(8))
-
         if mtpn != self.etypes['miMATRIX']['n']:
             raise ParseError('Expecting miMATRIX type number {}, '
                              'got {}'.format(self.etypes['miMATRIX']['n'], mtpn))
@@ -679,7 +645,6 @@ class MatlabDataReader():
 
     def read_var_array(self, fd, endian, header):
         mc = self.inv_mclasses[header['mclass']]
-
         if mc == 'mxSPARSE_CLASS':
             raise ParseError('Sparse matrices not supported')
         if mc == 'mxOBJECT_CLASS':
@@ -688,7 +653,6 @@ class MatlabDataReader():
             raise ParseError('Function classes not supported')
         if mc == 'mxOPAQUE_CLASS':
             raise ParseError('Anonymous function classes not supported')
-
         if mc in self.numeric_class_etypes:
             return self._read_numeric_array(
                 fd, endian, header,
@@ -700,7 +664,6 @@ class MatlabDataReader():
             return self._read_cell_array(fd, endian, header)
         if mc == 'mxSTRUCT_CLASS':
             return self._read_struct_array(fd, endian, header)
-
         return None
 
     def _read_element_tag(self, fd, endian):
@@ -729,7 +692,6 @@ class MatlabDataReader():
             mod8 = num_bytes % 8
             if mod8:
                 fd.seek(8 - mod8, 1)
-
         if is_name:
             fmt = 's'
             val = [self._unpack(endian, fmt, s)
@@ -849,7 +811,6 @@ def loadmat(filename):
         return end
 
     fd = open(filename, 'rb') # pylint: disable=R1732
-
     fd.seek(124)
     tst_str = fd.read(4)
     little_endian = (tst_str[2:4] == b'IM')
@@ -996,3 +957,15 @@ def postprocess_output_name(
     if raise_error:
         raise ValueError('Output name: {} not found'.format(output_name))
     return output_name
+
+# pylint:disable=C0415,W0611
+def ov_new_api_available():
+    try:
+        import openvino # noqa: F401
+    except ImportError:
+        return None
+    try:
+        from openvino.runtime import Core # noqa: F401
+        return True
+    except ImportError:
+        return False

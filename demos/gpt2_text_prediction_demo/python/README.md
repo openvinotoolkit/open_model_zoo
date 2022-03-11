@@ -72,7 +72,7 @@ The application reads and encodes text from input string, then performs transfor
 
 ## Demo Outputs
 
-The application outputs predicted text, continuing input string for each input strings.
+The application outputs predicted text, continuing input string for each input string.
 
 ## Example Demo Cmd-Line
 

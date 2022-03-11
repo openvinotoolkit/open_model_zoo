@@ -2,8 +2,8 @@
 
 This is the demo application with smartlab action recognition and smartlab object detection algorithms.
 This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
-Action recognition architecure uses two encoders for front-view and top-view respectively, and a single decoder.
-Object detection uses two models for each view to detect large object and small objects, respectively.
+Action recognition architecture uses two encoders for front-view and top-view respectively, and a single decoder.
+Object detection uses two models for each view to detect large and small objects, respectively.
 The following pre-trained models are delivered with the product:
 
 * `i3d-rgb-tf` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).

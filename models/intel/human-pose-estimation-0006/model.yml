@@ -17,21 +17,21 @@ description: >-
 task_type: human_pose_estimation
 files:
   - name: FP32/human-pose-estimation-0006.xml
-    size: 1461854
-    checksum: 733b2b11a6c9ec456e9c33f860014e3d213cf2e3d09399a82a75be9fa76fe26de601eb74cdbabc3c0539a88be634f383
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/human-pose-estimation-0006/FP32/human-pose-estimation-0006.xml
+    size: 1113143
+    checksum: fb0c882c732bde0db8ae472f0afc0b938cd9a66e5694d1ea4ebb227e62417137d23243b518abfcefc4e6b909129af2bf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/human-pose-estimation-0006/FP32/human-pose-estimation-0006.xml
   - name: FP32/human-pose-estimation-0006.bin
-    size: 32780636
-    checksum: d8d3edfbd129d20bf7045746b2f3858a349bc9c85b2a69e252217616f70cd24c4b95f65f199298263fee6c382254b856
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/human-pose-estimation-0006/FP32/human-pose-estimation-0006.bin
+    size: 32601724
+    checksum: 5fe3e40f6550e7e1da834cd0a42796b8de907e9284a96c2b46dc515c1cef17290005a283415732b018ff3f6fe48561cd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/human-pose-estimation-0006/FP32/human-pose-estimation-0006.bin
   - name: FP16/human-pose-estimation-0006.xml
-    size: 1917076
-    checksum: 243308f8c0316e95ba661111b2c77274a0fcf9aab8e3740b2382b8734dc08c469f3c41ed7381e84256ed43a44e2f6da7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/human-pose-estimation-0006/FP16/human-pose-estimation-0006.xml
+    size: 1360890
+    checksum: adc1480aa6b024674c6971bc6dfcc8aa76b7fa4673148f8f826289565b0658c5e9dc1ab408e9f28f0c2f43fadcd4ab7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/human-pose-estimation-0006/FP16/human-pose-estimation-0006.xml
   - name: FP16/human-pose-estimation-0006.bin
-    size: 16389034
-    checksum: 0faee3c20cfeec5af03d138f5f0405920bb43a31ce53adf12fbe7f6f7d361ef9e1620fb0dd75cff73f300f4f983a875a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/human-pose-estimation-0006/FP16/human-pose-estimation-0006.bin
+    size: 16300900
+    checksum: a95a12b1793629a9f5f2db73858690db3b996a17b660e1204c568e0336e281b868f5b7da99529678a566813ced0d662c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/human-pose-estimation-0006/FP16/human-pose-estimation-0006.bin
 input_info:
   - name: image
     shape: [1, 3, 352, 352]

@@ -18,21 +18,21 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-spotting-0005-recognizer-decoder.xml
-    size: 48869
-    checksum: a468b8f448746a2d57b57fbb3e69749d194f490086694620ac4d87a4cde9ad43b89918fb0eb034ea1b459a9ddaac0ef3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
+    size: 49038
+    checksum: 262f53a3b9c40bb7e4f99883ffd3d85ad032570ed5ae5683258ffb518dfc6b30c85b03b457175607727362b2ee71e8bd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
   - name: FP32/text-spotting-0005-recognizer-decoder.bin
     size: 2707816
-    checksum: c6aaa39203a8999cfd35154e825d28136e5f217dff5aed277e9713647004a21491f32b20d3e7c35fa85b1e55743a54a6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
+    checksum: b444e81badce4e77d918dc105665132f6a08a2e8bbb7675d36af65952c90397635185c00c0b5bfa7a0d4fed460778d59
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
   - name: FP16/text-spotting-0005-recognizer-decoder.xml
-    size: 55048
-    checksum: 9acb77d827e5f0d278efbb4c745f0e9203997919826d93848e76c00b65aeb88cb507c62c13d9e5d3b895aa682ec1a345
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
+    size: 55442
+    checksum: f89418cc607a470bac19ca0b0418f52abde7c09bf6adb71b5d92154a5e1a3207407141a00b780f1df8ee094d4a6b855e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
   - name: FP16/text-spotting-0005-recognizer-decoder.bin
     size: 1354012
-    checksum: 37790b19b5e50ee984b9e8f7ce5822809ffa6285b6fcb3046c9ce2887bc18802ec129eb063868d68c822928550f56bf9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
+    checksum: 8c78648851b5bc03811f54c2b4e415f313bb279c161894a2ea5587a424d9c730317c58cb8e8d8a428925fd635d6d217f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
 input_info:
   - name: prev_symbol
     shape: [1]

@@ -59,7 +59,7 @@ class FacialLandmarksRepresentation(BaseRepresentation):
 
 class FacialLandmarksAnnotation(FacialLandmarksRepresentation):
     @property
-    def interocular_distance(self):
+    def normalization_coefficient(self):
         left_eye = [
             np.mean(self.x_values[self.metadata['left_eye']]),
             np.mean(self.y_values[self.metadata['left_eye']])
@@ -158,3 +158,26 @@ class NiftiRegressionAnnotation(BaseRepresentation):
     @value.setter
     def value(self, value):
         self._value = value
+
+class HandLandmarksRepresentation(BaseRepresentation):
+    def __init__(self, identifier='', x_values=None, y_values=None):
+        super().__init__(identifier)
+        self.x_values = x_values if x_values is not None else []
+        self.y_values = y_values if y_values is not None else []
+
+
+class HandLandmarksAnnotation(HandLandmarksRepresentation):
+    @property
+    def normalization_coefficient(self):
+        return self.normalization_coef(True)
+
+    def normalization_coef(self, is_2d=False):
+        wrist_id = self.metadata['dataset_meta']['wrist_id']
+        mf_mcp_id = self.metadata['dataset_meta']['mf_mcp_id']
+        wrist = [self.x_values[wrist_id], self.y_values[wrist_id]]
+        mcp = [self.x_values[mf_mcp_id], self.y_values[mf_mcp_id]]
+        return np.linalg.norm(np.subtract(wrist, mcp))
+
+
+class HandLandmarksPrediction(HandLandmarksRepresentation):
+    pass
