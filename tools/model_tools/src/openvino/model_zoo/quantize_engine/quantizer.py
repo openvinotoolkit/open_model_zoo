@@ -101,7 +101,10 @@ class Quantizer:
         try:
             with pot_config_base_path.open('rb') as pot_config_base_file:
                 pot_config_base = yaml.safe_load(pot_config_base_file)
+
         except FileNotFoundError:
+            reporter.log_warning(f"Unable to locate quantization.yml in {pot_config_base_path}, " +
+                                     f"loading default POT config")
             pot_config_base = DEFAULT_POT_CONFIG_BASE
 
         pot_config_paths = {
