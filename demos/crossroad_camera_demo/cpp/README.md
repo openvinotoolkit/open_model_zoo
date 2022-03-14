@@ -72,27 +72,30 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-crossroad_camera_demo [OPTION]
-Options:
+    [ -h]                                         show the help message and exit
+    [--help]                                           print help on all arguments
+      -m <MODEL FILE>                             path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file
+    [ -i <INPUT>]                                 an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
+    [--auto_resize]                               enables resizable input with support of ROI crop & auto resize
+    [ -d <DEVICE>]                                specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+    [--dpa <DEVICE>]                              specify the target device for Person Attributes Recognition. Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Default is CPU
+    [--dpr <DEVICE>]                              specify the target device for Person Reidentification Retail. Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Default is CPU
+    [--lim <NUMBER>]                              number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
+    [--loop]                                      enable reading the input in a loop
+    [--mpa <MODEL FILE>]                          path to the Person Attributes Recognition Crossroad model (.xml) file
+    [--mpr <MODEL FILE>]                          path to the Person Reidentification Retail model (.xml) file
+    [ -o <OUTPUT>]                                name of the output file(s) to save
+    [--person_label <NUMBER>]                     the integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). Default is 1
+    [ -r]                                         output inference results as raw values
+    [--show] ([--noshow])                         (don't) show output
+    [ -t <NUMBER>]                                probability threshold for detections. Default is 0.5
+    [--tpr <NUMBER>]                              cosine similarity threshold between two vectors for person reidentification. Default is 0.7
+    [ -u <DEVICE>]                                resource utilization graphs. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
+    Key bindings:
+        Q, q, Esc - Quit
+        P, p, 0, spacebar - Pause
+        C - average CPU load, D - load distribution over cores, M - memory usage, H - hide
 
-    -h                           Print a usage message.
-    -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                        Optional. Enable reading the input in a loop.
-    -o "<path>"                  Optional. Name of the output file(s) to save.
-    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m "<path>"                  Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
-    -m_pa "<path>"               Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
-    -m_reid "<path>"             Optional. Path to the Person Reidentification Retail model (.xml) file.
-    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -r                           Optional. Output Inference results as raw values.
-    -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
-    -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
-    -no_show                     Optional. Don't show output.
-    -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
-    -u                           Optional. List of monitors to show initially.
-    -person_label                Optional. The integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). The default value is 1.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
@@ -100,7 +103,7 @@ Running the application with an empty list of options yields the usage message g
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-vehicle-bike-detection-crossroad-0078.xml -m_pa <path_to_model>/person-attributes-recognition-crossroad-0230.xml -m_reid <path_to_model>/person-reidentification-retail-0079.xml -d GPU
+./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-vehicle-bike-detection-crossroad-0078.xml --mpa <path_to_model>/person-attributes-recognition-crossroad-0230.xml --mpr <path_to_model>/person-reidentification-retail-0079.xml -d GPU
 ```
 
 > **NOTE**: The detection network returns as the result a set of detected objects, where each detected object consists of a bounding box and an index of the object's category (person/vehicle/bike). The demo runs Person Attributes Recognition and Person Reidentification networks only for the bounding boxes that have the category "person".
@@ -115,7 +118,7 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
 * To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `lim` option. The default value is 1000. To change it, you can apply the `--lim N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
