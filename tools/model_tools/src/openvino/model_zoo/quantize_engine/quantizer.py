@@ -103,7 +103,7 @@ class Quantizer:
                 pot_config_base = yaml.safe_load(pot_config_base_file)
 
         except FileNotFoundError:
-            reporter.log_warning(f"Unable to locate quantization.yml in {pot_config_base_path}, " +
+            reporter.print(f"Unable to locate quantization.yml in {pot_config_base_path}, " +
                                      "loading default POT config")
             pot_config_base = DEFAULT_POT_CONFIG_BASE
 
