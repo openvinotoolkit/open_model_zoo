@@ -17,7 +17,7 @@ struct PersonAttribsDetection : BaseDetection {
     bool hasTopBottomColor;
 
 
-    PersonAttribsDetection() : BaseDetection(FLAGS_m_pa, "Person Attributes Recognition"), hasTopBottomColor(false) {}
+    PersonAttribsDetection() : BaseDetection(FLAGS_mpa, "Person Attributes Recognition"), hasTopBottomColor(false) {}
 
     struct AttributesAndColorPoints {
         std::vector<std::string> attributes_strings;
@@ -127,8 +127,8 @@ struct PersonAttribsDetection : BaseDetection {
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override {
         // Read network model
-        slog::info << "Reading model: " << FLAGS_m_pa << slog::endl;
-        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_pa);
+        slog::info << "Reading model: " << FLAGS_mpa << slog::endl;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_mpa);
         logBasicModelInfo(model);
 
         // set batch size 1
