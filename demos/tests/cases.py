@@ -18,7 +18,7 @@ import sys
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
-    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg
+    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg  #, image_retrieval_arg
 )
 from data_sequences import DATA_SEQUENCES
 
@@ -994,13 +994,14 @@ DEMOS = [
                           '-ar': None})
     )),
 
-    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-       TestCase(options={'--no_show': None,
-                         **MONITORS,
-                         '-m': ModelArg('image-retrieval-0001')}),
-       single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-       single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    )),
+    # TODO: enable after @VoronovaIntern resolves it for new nodes
+    # PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
+    #    TestCase(options={'--no_show': None,
+    #                      **MONITORS,
+    #                      '-m': ModelArg('image-retrieval-0001')}),
+    #    single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
+    #    single_option_cases('-g', image_retrieval_arg('gallery.txt')),
+    # )),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
