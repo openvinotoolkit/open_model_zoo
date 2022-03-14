@@ -9,7 +9,6 @@
 #include "gflags/gflags.h"
 #include "utils/slog.hpp"
 #include "detection_base.hpp"
-#include "crossroad_camera_demo.hpp"
 
 struct PersonDetection : BaseDetection {
     size_t maxProposalCount;

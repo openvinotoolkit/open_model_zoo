@@ -24,7 +24,6 @@
 #include "detection_person.hpp"
 #include "detection_person_attr.hpp"
 #include "detection_person_reid.hpp"
-#include "crossroad_camera_demo.hpp"
 
 namespace {
 constexpr char h_msg[] = "show the help message and exit";
