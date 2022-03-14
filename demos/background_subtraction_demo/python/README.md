@@ -55,6 +55,12 @@ The demo workflow is the following:
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different background subtraction model topologies in one demo.
+
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
@@ -126,7 +132,7 @@ Options:
                         filtering.
   --resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}
                         Optional. A resize type for model preprocess. By
-                        defauld used model predefined type.
+                        default used model predefined type.
   --labels LABELS       Optional. Labels mapping file.
   --target_bgr TARGET_BGR
                         Optional. Background onto which to composite the
@@ -215,7 +221,14 @@ The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

@@ -81,7 +81,7 @@ DEFINE_bool(jc, false, jc_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "image_processing_demo_async [OPTION]" << std::endl;
+    std::cout << "image_processing_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;

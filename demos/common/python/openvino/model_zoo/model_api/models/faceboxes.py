@@ -18,7 +18,6 @@ import math
 import numpy as np
 
 from .types import NumericalValue
-from .model import WrapperError
 from .detection_model import DetectionModel
 from .utils import Detection, nms
 
@@ -38,8 +37,8 @@ class FaceBoxes(DetectionModel):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise WrapperError(self.__model__, "Expected the same second dimension for boxes and scores, but got {} and {}"
-                               .format(bboxes_layer.shape, scores_layer.shape))
+            self.raise_error("Expected the same second dimension for boxes and scores, but got {} and {}".format(
+                bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
             return bboxes_blob_name, scores_blob_name

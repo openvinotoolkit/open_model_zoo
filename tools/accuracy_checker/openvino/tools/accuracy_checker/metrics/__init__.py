@@ -65,7 +65,7 @@ from .regression import (
     RootMeanSquaredError,
 
     FacialLandmarksPerPointNormedError,
-    FacialLandmarksNormedError,
+    LandmarksNormedError,
 
     AngleError,
 
@@ -170,7 +170,7 @@ __all__ = [
     'RootMeanSquaredError',
     'RootMeanSquaredErrorOnInterval',
     'FacialLandmarksPerPointNormedError',
-    'FacialLandmarksNormedError',
+    'LandmarksNormedError',
     'AngleError',
     'MeanAbsolutePercentageError',
     'Log10Error',

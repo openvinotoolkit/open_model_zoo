@@ -125,7 +125,7 @@ class OVMSAdapter(ModelAdapter):
         inputs = {}
         for name, meta in self.metadata["inputs"].items():
             input_layout = Layout.from_shape(meta["shape"])
-            inputs[name] = Metadata(set(name), meta["shape"], input_layout.layout, self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
+            inputs[name] = Metadata(set(name), meta["shape"], input_layout, self.tf2ov_precision.get(meta["dtype"], meta["dtype"]))
         return inputs
 
     def get_output_layers(self):

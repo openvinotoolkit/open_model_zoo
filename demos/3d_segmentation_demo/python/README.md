@@ -10,12 +10,6 @@ On startup, the demo reads command-line parameters and loads a model and images 
 
 ## Preparing to Run
 
-The demo dependencies should be installed before run. That can be achieved with the following command:
-
-```sh
-python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
-```
-
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/3d_segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
@@ -45,11 +39,10 @@ Run the application with the `-h` or `--help` option to see the usage message:
 
 ```
 usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
-                               PATH_TO_OUTPUT [-d TARGET_DEVICE]
-                               [-l PATH_TO_EXTENSION] [-nii]
+                               PATH_TO_OUTPUT [-d TARGET_DEVICE] [-nii]
                                [-nthreads NUMBER_THREADS]
-                               [-s [SHAPE [SHAPE ...]]]
-                               [-c PATH_TO_CLDNN_CONFIG]
+                               [-s [SHAPE [SHAPE ...]]] [-ms N1,N2,N3,N4]
+                               [--full_intensities_range]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -65,18 +58,12 @@ Options:
                         Optional. Specify a target device to infer on: CPU, GPU.
                         Use "-d HETERO:<comma separated devices list>" format
                         to specify HETERO plugin.
-  -l PATH_TO_EXTENSION, --path_to_extension PATH_TO_EXTENSION
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementations.
   -nii, --output_nifti  Show output inference results as raw values
   -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
   -s [SHAPE [SHAPE ...]], --shape [SHAPE [SHAPE ...]]
                         Optional. Specify shape for a network
-  -c PATH_TO_CLDNN_CONFIG, --path_to_cldnn_config PATH_TO_CLDNN_CONFIG
-                        Required for GPU custom kernels. Absolute path to an
-                        .xml file with the kernels description.
   -ms N1,N2,N3,N4, --mri_sequence N1,N2,N3,N4
                         Optional. Transfer MRI-sequence from dataset order to the network order.
   --full_intensities_range

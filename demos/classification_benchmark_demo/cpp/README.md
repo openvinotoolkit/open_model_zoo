@@ -2,7 +2,7 @@
 
 ![](./classification_benchmark.gif)
 
-The demo visualize OpenVINO performance on inference of neural networks for image classification.
+The demo visualizes OpenVINO performance on inference of neural networks for image classification.
 
 ## How It Works
 
@@ -10,7 +10,7 @@ On startup, the application reads command line parameters and loads a classifica
 
 The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance. You can repeat testing by pressing "Space" or "R" button.
 
-When "ground truth" data applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
+When "ground truth" data is applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
 
 You can stop the demo by pressing "Esc" or "Q" button. After that, the average metrics values will be printed to the console.
 

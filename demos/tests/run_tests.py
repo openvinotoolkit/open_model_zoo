@@ -34,7 +34,6 @@ import contextlib
 import csv
 import json
 import os
-import platform
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
@@ -45,6 +44,7 @@ import importlib
 from pathlib import Path
 
 from args import ArgContext, Arg, ModelArg
+from cases import Demo
 from data_sequences import DATA_SEQUENCES
 
 scopes = {
@@ -68,7 +68,8 @@ def parse_args():
     parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
-        help='list of demos to run tests for (by default, every demo is tested)')
+        help='list of demos to run tests for (by default, every demo is tested). '
+        'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
     parser.add_argument('--scope', default='base',
         help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -210,9 +211,22 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
+        if all(impl in Demo.IMPLEMENTATION_TYPES for impl in names_of_demos_to_test):
+            names_of_demos_to_test = {demo.subdirectory for demo in DEMOS if demo.implementation in names_of_demos_to_test}
+
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
+
+    if len(demos_to_test) == 0:
+        if args.demos:
+            print("List of demos to test is empty.")
+            print(f"Command line argument '--demos {args.demos}' was passed, check that you've specified correct value from the list below:")
+            print(*(list(Demo.IMPLEMENTATION_TYPES) + [demo.subdirectory for demo in DEMOS]), sep=',')
+        raise RuntimeError("Not found demos to test!")
+
+    print(f"{len(demos_to_test)} demos will be tested:")
+    print(*[demo.subdirectory for demo in demos_to_test], sep =',')
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
@@ -223,15 +237,16 @@ def main():
 
         num_failures = 0
 
-        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         try:
-            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+            pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
         except KeyError:
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}",
         }
+
+        print('Demo Environment: {}'.format(demo_environment))
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))

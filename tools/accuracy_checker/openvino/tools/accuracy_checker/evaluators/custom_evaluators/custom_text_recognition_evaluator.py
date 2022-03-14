@@ -135,12 +135,14 @@ class BaseSequentialModel(BaseCascadeModel):
             outputs_mapping = self.recognizer_encoder.outputs
             for output_k in self.recognizer_encoder.outputs_mapping:
                 self.recognizer_encoder.outputs_mapping[output_k] = postprocess_output_name(
-                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping,
+                    additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
                 )
             outputs_mapping = self.recognizer_decoder.outputs
             for output_k in self.recognizer_decoder.outputs_mapping:
                 self.recognizer_decoder.outputs_mapping[output_k] = postprocess_output_name(
-                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
                 )
 
     def predict(self, identifiers, input_data):
@@ -181,8 +183,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
 
         if callback:
             callback(enc_raw_res)
-        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res)
-        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res)
+        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res,
+                                            additional_mapping=self.recognizer_encoder.additional_output_mapping)
+        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res,
+                                             additional_mapping=self.recognizer_encoder.additional_output_mapping)
         features = enc_res[feats_out]
         dec_state = enc_res[hidden_out]
 
@@ -202,8 +206,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             else:
                 dec_raw_res = dec_res
 
-            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res)
-            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res)
+            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res,
+                                                 additional_mapping=self.recognizer_decoder.additional_output_mapping)
+            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res,
+                                                 additional_mapping=self.recognizer_decoder.additional_output_mapping)
             dec_state = dec_res[hidden_out]
             logit = dec_res[logits_out]
             tgt = np.argmax(logit, axis=1)

@@ -15,6 +15,7 @@
 import os
 import re
 from args import DataPatternArg
+from copy import deepcopy
 
 from cases import BASE, single_option_cases
 
@@ -60,9 +61,9 @@ class PerformanceParser:
 
 
 DEMOS = [
-    BASE['interactive_face_detection_demo/cpp'].add_parser(PerformanceParser),
+    deepcopy(BASE['interactive_face_detection_demo/cpp']).add_parser(PerformanceParser),
 
-    BASE['object_detection_demo/python']
+    deepcopy(BASE['object_detection_demo/python'])
         .only_models(['person-detection-0200', 'yolo-v2-tf'])
         .update_option({'-i': DataPatternArg('action-recognition')})
         .add_test_cases(single_option_cases('-nireq', '3', '5'),

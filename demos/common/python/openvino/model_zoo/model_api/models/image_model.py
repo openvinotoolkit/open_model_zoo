@@ -82,9 +82,9 @@ class ImageModel(Model):
             elif len(metadata.shape) == 2:
                 image_info_blob_names.append(name)
             else:
-                raise RuntimeError('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
+                self.raise_error('Failed to identify the input for ImageModel: only 2D and 4D input layer supported')
         if not image_blob_names:
-            raise RuntimeError('Failed to identify the input for the image: no 4D input layer found')
+            self.raise_error('Failed to identify the input for the image: no 4D input layer found')
         return image_blob_names, image_info_blob_names
 
     def preprocess(self, inputs):
