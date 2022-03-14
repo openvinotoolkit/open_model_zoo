@@ -99,7 +99,6 @@ Running the demo with the `-h` option yields a usage message.
         Q, q, Esc - Quit
         P, p, 0, spacebar - Pause
         C - average CPU load, D - load distribution over cores, M - memory usage, H - hide
-
 ```
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
