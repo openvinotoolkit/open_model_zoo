@@ -85,7 +85,7 @@ class Demo:
     def results_correctness_check(self):
         if not self.correctness_checker:
             return True
-        return self.correctness_checker()
+        return self.correctness_checker(self.results)
 
     def update_option(self, updated_options):
         for case in self.test_cases[:]:
@@ -136,8 +136,8 @@ class Demo:
 
 
 class CppDemo(Demo):
-    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None, parser=None):
-        super().__init__(name, implementation, model_keys, device_keys, test_cases, parser)
+    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None, parser=None, correctness_checker=None):
+        super().__init__(name, implementation, model_keys, device_keys, test_cases, parser, correctness_checker)
 
         self._exec_name = self._exec_name.replace('_cpp', '')
 
@@ -172,6 +172,22 @@ def combine_cases(*args):
 
 def single_option_cases(key, *args):
     return [TestCase(options={} if arg is None else {key: arg}) for arg in args]
+
+def security_barrier_camera_damo_correctness_checker(results):
+    flag = False
+    if "CPU" in results and "AUTO:CPU" in results:
+        if results['CPU'] == results['AUTO:CPU']:
+            flag = True
+        else:
+            print ("CPU vs AUTO:CPU have inconsistent results")
+
+    if "GPU" in results and "AUTO:GPU" in results:
+        if results['GPU'] == results['AUTO:GPU']:
+            flag = True
+        else:
+            print ("GPU vs AUTO:GPU have inconsistent results")
+
+    return flag
 
 def security_barrier_camera_damo_parser(output):
     output = output.split('\n')
@@ -632,6 +648,7 @@ DEMOS = [
     CppDemo(name='security_barrier_camera_demo',
             model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
+            correctness_checker=security_barrier_camera_damo_correctness_checker,
             parser=security_barrier_camera_damo_parser,
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
