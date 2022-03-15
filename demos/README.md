@@ -167,7 +167,7 @@ You can download the [Intel pre-trained models](../models/intel/index.md) or [pu
 ## Build the Demo Applications
 
 To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
-For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download OpenCV and set environment variables before building the demos:
+For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download prebuilt OpenCV and set environment variables before building the demos:
 
 ```sh
 <INSTALL_DIR>/extras/scripts/download_opencv.sh
@@ -236,10 +236,8 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 
 - Microsoft Windows* 10
-- Microsoft Visual Studio* 2017, or 2019
-- CMake* version 3.10 or higher
-
-> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
+- Microsoft Visual Studio* 2019
+- CMake* version 3.14 or higher
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:
@@ -250,13 +248,19 @@ build_demos_msvc.bat
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
 a solution for a demo code. Optionally, you can also specify the preferred Microsoft Visual Studio version to be used by the script. Supported
-versions are: `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
+version is: `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2019, use the following command:
 
 ```bat
 build_demos_msvc.bat VS2019
 ```
 
-The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+By default, the demo applications binaries are build into the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+The default build folder can be changed with `-b` option. For example, following command will buid Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
+
+```bat
+build_demos_msvc.bat -b c:\temp\omz-demos-build
+```
+
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the
