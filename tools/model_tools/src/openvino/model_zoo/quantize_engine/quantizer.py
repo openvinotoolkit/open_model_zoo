@@ -98,6 +98,9 @@ class Quantizer:
         model_root = _common.MODEL_ROOT if model_root is None else model_root
         pot_config_base_path = model_root / model.subdirectory / 'quantization.yml'
 
+        reporter.print_section_heading('{}Quantizing {} from {} to {}',
+            '(DRY RUN) ' if self.dry_run else '', model.name, input_precision, precision)
+
         try:
             with pot_config_base_path.open('rb') as pot_config_base_file:
                 pot_config_base = yaml.safe_load(pot_config_base_file)
@@ -126,9 +129,6 @@ class Quantizer:
 
         if target_device:
             pot_config['compression']['target_device'] = target_device
-
-        reporter.print_section_heading('{}Quantizing {} from {} to {}',
-            '(DRY RUN) ' if self.dry_run else '', model.name, input_precision, precision)
 
         model_output_dir = self.output_dir / model.subdirectory / precision
         pot_config_path = model_output_dir / 'pot-config.json'
