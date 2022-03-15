@@ -103,13 +103,13 @@ class Quantizer:
                 pot_config_base = yaml.safe_load(pot_config_base_file)
 
         except FileNotFoundError:
-            reporter.print(f"Unable to locate quantization.yml in {pot_config_base_path}, " +
-                                     "loading default POT config")
+            reporter.print('Unable to locate quantization.yml in {}, loading default POT config',
+                           pot_config_base_path)
             pot_config_base = DEFAULT_POT_CONFIG_BASE
 
         accuracy_check_config = model_root/ model.subdirectory / 'accuracy-check.yml'
         if not accuracy_check_config.exists():
-            reporter.error(f"Unable to locate accuracy-check.yml in {accuracy_check_config}")
+            reporter.error('Unable to locate accuracy-check.yml in {}', accuracy_check_config)
 
         pot_config_paths = {
             'engine': {
