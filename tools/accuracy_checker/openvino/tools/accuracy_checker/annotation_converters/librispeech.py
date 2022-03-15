@@ -36,7 +36,8 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
             'annotation_file': PathField(optional=True),
             'top_n': NumberField(optional=True, value_type=int),
             'max_duration': NumberField(optional=True, value_type=float, default=0),
-            'use_numpy': BoolField(optional=True, default=False)
+            'use_numpy': BoolField(optional=True, default=False),
+            'use_flac': BoolField(optional=True, default=False)
         })
         return params
 
@@ -46,6 +47,13 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         self.top_n = self.get_value_from_config('top_n')
         self.max_duration = self.get_value_from_config('max_duration')
         self.numpy_files = self.get_value_from_config('use_numpy')
+        self.flac_files = self.get_value_from_config('use_flac')
+        self.default_suffix = '.wav'
+        self.suffix = self.default_suffix
+        if self.numpy_files:
+            self.suffix = '.npy'
+        if self.flac_files:
+            self.suffix = '.flac'
 
     def convert(self, check_content=False, **kwargs):
         _, file_list = self.create_annotation_list()
@@ -61,7 +69,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     name = res.group(1)
                     transcript = res.group(2)
                     fname = txt.parent / name
-                    fname = fname.with_suffix('.wav' if not self.numpy_files else '.npy')
+                    fname = fname.with_suffix(self.suffix)
                     if file_list and fname.name not in file_list:
                         continue
 
@@ -93,8 +101,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                 durations.append(duration)
 
                 filename = Path(record["audio_filepath"]).name
-                if self.numpy_files:
-                    filename = filename.replace('wav', 'npy')
+                filename = filename.replace(self.default_suffix, self.suffix)
                 file_names.append(filename)
 
         if self.top_n:
