@@ -159,7 +159,13 @@ class EncoderModel:
             self.input_mapping[input_id] = generate_layer_name(input_name, 'encoder_', with_prefix)
         if hasattr(self, 'outputs'):
             for out_id, out_name in self.output_mapping.items():
-                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
+                o_name = postprocess_output_name(
+                    out_name, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                if o_name not in self.outputs:
+                    o_name = postprocess_output_name(
+                    generate_layer_name(out_name, 'encoder_', with_prefix),
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                self.output_mapping[out_id] = o_name
 
 
 class DecoderModel:
@@ -185,7 +191,13 @@ class DecoderModel:
             self.input_mapping[input_id] = generate_layer_name(input_name, 'decoder_', with_prefix)
         if hasattr(self, 'outputs'):
             for out_id, out_name in self.output_mapping.items():
-                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
+                o_name = postprocess_output_name(
+                    out_name, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                if o_name not in self.outputs:
+                    o_name = postprocess_output_name(
+                        generate_layer_name(o_name, 'decoder_', with_prefix),
+                        self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                self.output_mapping[out_id] = o_name
 
     def init_feed_dict(self, encoder_output):
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
@@ -219,7 +231,13 @@ class PostNetModel:
             self.input_mapping[input_id] = generate_layer_name(input_name, 'postnet_', with_prefix)
         if hasattr(self, 'outputs'):
             for out_id, out_name in self.output_mapping.items():
-                self.output_mapping[out_id] = postprocess_output_name(out_name, self.outputs, raise_error=False)
+                o_name = postprocess_output_name(
+                    out_name, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                if o_name not in self.outputs:
+                    o_name = postprocess_output_name(
+                    generate_layer_name(out_name, 'postnet_', with_prefix),
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+                self.output_mapping[out_id] = o_name
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):

@@ -261,7 +261,7 @@ class DecoderModel:
                 self.rnn_output2, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
             if self.rnn_output2 not in self.outputs:
                 self.rnn_output2 = postprocess_output_name(
-                    generate_layer_name(self.rnn_output2, self.default_model_suffix + '_', with_prefix), 
+                    generate_layer_name(self.rnn_output2, self.default_model_suffix + '_', with_prefix),
                     self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
 
 

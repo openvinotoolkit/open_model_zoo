@@ -142,7 +142,7 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
             self.output_blob, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
         if self.output_blob not in self.outputs:
             self.output_blob = postprocess_output_name(
-            generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix), 
+            generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix),
             self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
 
         self.with_prefix = with_prefix

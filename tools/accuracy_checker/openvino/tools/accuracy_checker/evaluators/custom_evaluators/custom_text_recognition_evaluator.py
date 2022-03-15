@@ -139,12 +139,12 @@ class BaseSequentialModel(BaseCascadeModel):
                     additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
                 )
                 if postprocessed_name not in outputs_mapping:
-                   postprocessed_name = postprocess_output_name(
+                    postprocessed_name = postprocess_output_name(
                     generate_layer_name(self.recognizer_encoder.outputs_mapping[output_k], 'encoder_', with_prefix),
                     outputs_mapping,
                     additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
                 )
-                self.recognizer_encoder.outputs_mapping[output_k] = postprocessed_name 
+                self.recognizer_encoder.outputs_mapping[output_k] = postprocessed_name
 
             outputs_mapping = self.recognizer_decoder.outputs
             for output_k in self.recognizer_decoder.outputs_mapping:

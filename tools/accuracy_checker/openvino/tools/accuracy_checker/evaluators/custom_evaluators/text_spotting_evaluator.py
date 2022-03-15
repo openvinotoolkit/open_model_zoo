@@ -209,7 +209,7 @@ class SequentialModel(BaseCascadeModel):
                 additional_mapping=self.detector.additional_output_mapping, raise_error=False)
             if text_feats_out not in self.detector.outputs:
                 text_feats_out = postprocess_output_name(
-                generate_layer_name(self.detector.text_feats_out, 'detector_', with_prefix), 
+                generate_layer_name(self.detector.text_feats_out, 'detector_', with_prefix),
                 self.detector.outputs,
                 additional_mapping=self.detector.additional_output_mapping, raise_error=False)
             self.detector.text_feats_out = text_feats_out
@@ -219,7 +219,8 @@ class SequentialModel(BaseCascadeModel):
             )
             if encoder_output not in self.recognizer_encoder.outputs:
                 encoder_output = postprocess_output_name(
-                generate_layer_name(self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix), self.recognizer_encoder.outputs,
+                generate_layer_name(self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix),
+                self.recognizer_encoder.outputs,
                 additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
             )
             self.recognizer_encoder.output = encoder_output
