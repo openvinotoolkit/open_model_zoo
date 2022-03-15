@@ -219,26 +219,6 @@ DEMOS = [
                           '-m_o': ModelArg('mtcnn-o')}),
     )),
 
-    CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('375x500')}),
-        [
-            TestCase(options={
-                '-m': ModelArg('face-detection-retail-0004'),
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-            }),
-            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
-        ]
-    )),
-
     CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
