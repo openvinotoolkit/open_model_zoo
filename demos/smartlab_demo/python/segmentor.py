@@ -26,18 +26,23 @@ class Segmentor:
             "adjust_rider",
         ]
 
+        # side encoder
         net = core.read_model(encoder_side_path)
         self.encoder_side = core.compile_model(model=net, device_name=device)
-        self.encoder_side_input_keys = self.encoder_side.inputs
-        self.encoder_side_output_key = self.encoder_side.outputs
+        self.encoder_side_input_keys = {list(item.get_names())[0]: item for item in self.encoder_side.inputs}
+        self.encoder_side_output_keys = {list(item.get_names())[0]: item for item in self.encoder_side.outputs}
+
+        # top encoder
         net = core.read_model(encoder_top_path)
         self.encoder_top = core.compile_model(model=net, device_name=device)
-        self.encoder_top_input_keys = self.encoder_top.inputs
-        self.encoder_top_output_key = self.encoder_top.outputs
+        self.encoder_top_input_keys = {list(item.get_names())[0]: item for item in self.encoder_top.inputs}
+        self.encoder_top_output_keys = {list(item.get_names())[0]: item for item in self.encoder_top.outputs}
+
+        # dencoder
         net = core.read_model(decoder_path)
         self.decoder = core.compile_model(model=net, device_name=device)
-        self.decoder_input_keys = self.decoder.inputs
-        self.decoder_output_key = self.decoder.outputs
+        self.decoder_input_keys = {list(item.get_names())[0]: item for item in self.decoder.inputs}
+        self.decoder_output_key = {list(item.get_names())[0]: item for item in self.decoder.outputs}
 
         self.shifted_tesor_side = np.zeros(85066)
         self.shifted_tesor_top = np.zeros(85066)
@@ -69,14 +74,28 @@ class Segmentor:
         buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run ###
-        feature_vector_side = self.infer_encoder_side_request.infer(
-            inputs={self.encoder_side_input_keys[0]: buffer_side})[self.encoder_side_output_key[0]]
-        feature_vector_top = self.infer_encoder_top_request.infer(
-            inputs={self.encoder_top_input_keys[0]: buffer_top})[self.encoder_top_output_key[0]]
+        self.infer_encoder_side_request.infer(inputs=
+            {self.encoder_side_input_keys['input_image']: buffer_side,
+            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
+
+        self.infer_encoder_top_request.infer(inputs=
+            {self.encoder_top_input_keys['input_image']: buffer_top,
+            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
+
+        ### get tensors ###
+        feature_vector_side = self.infer_encoder_side_request.get_tensor(
+            self.encoder_side_output_keys['output_feature'])
+        self.shifted_tesor_side = self.infer_encoder_side_request.get_tensor(
+            self.encoder_side_output_keys['shifted_output']).data
+
+        feature_vector_top = self.infer_encoder_top_request.get_tensor(
+            self.encoder_top_output_keys['output_feature'])
+        self.shifted_tesor_top = self.infer_encoder_top_request.get_tensor(
+            self.encoder_top_output_keys['shifted_output']).data
+
         output = self.infer_decoder_request.infer(inputs={
-            self.decoder_input_keys[0]: feature_vector_side,
-            self.decoder_input_keys[1]: feature_vector_top}
-        )[self.decoder_output_key[0]]
+            self.decoder_input_keys['input_feature_1']: feature_vector_side.data,
+            self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[self.decoder_output_key['output']]
 
         ### yoclo classifier ###
         isAction = (output.squeeze()[0] >= .5).astype(int)
@@ -97,27 +116,27 @@ class Segmentor:
         buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         self.infer_encoder_side_request.start_async(inputs=
-            {self.encoder_side_input_keys[0]: buffer_side,
-            self.encoder_side_input_keys[1]: self.shifted_tesor_side})
+            {self.encoder_side_input_keys['input_image']: buffer_side,
+            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
         self.infer_encoder_top_request.start_async(inputs=
-            {self.encoder_top_input_keys[0]: buffer_top,
-            self.encoder_top_input_keys[1]: self.shifted_tesor_top})
+            {self.encoder_top_input_keys['input_image']: buffer_top,
+            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):
                 feature_vector_side = self.infer_encoder_side_request.get_tensor(
-                    self.encoder_side_output_key[0])
+                    self.encoder_side_output_key['output_feature'])
                 self.shifted_tesor_side = self.infer_encoder_side_request.get_tensor(
-                    self.encoder_side_output_key[1]).data
+                    self.encoder_side_output_key['shifted_output']).data
                 feature_vector_top = self.infer_encoder_top_request.get_tensor(
-                    self.encoder_top_output_key[0])
+                    self.encoder_top_output_key['output_feature'])
                 self.shifted_tesor_top = self.infer_encoder_top_request.get_tensor(
-                    self.encoder_top_output_key[1]).data
+                    self.encoder_top_output_key['shifted_output']).data
 
                 output = self.infer_decoder_request.infer(inputs={
-                    self.decoder_input_keys[0]: feature_vector_side.data,
-                    self.decoder_input_keys[1]: feature_vector_top.data})[self.decoder_output_key[0]]
+                    self.decoder_input_keys['input_feature_1']: feature_vector_side.data,
+                    self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[self.decoder_output_key['output']]
 
                 ### yoclo classifier ###
                 isAction = (output.squeeze()[0] >= .5).astype(int)
