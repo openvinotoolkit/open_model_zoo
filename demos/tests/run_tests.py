@@ -24,7 +24,7 @@ For the tests to work, the test data directory must contain:
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
-* a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
+* a file how_are_you_doing.wav from (https://storage.openvinotoolkit.org/data/test_data/)
 * a file stream_8_high.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_high.mp4
 * a file stream_8_top.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_top.mp4
 """

@@ -253,7 +253,7 @@ a solution for a demo code. Optionally, you can also specify the preferred Micro
 versions are: `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
 
 ```bat
-build_demos_msvc.bat VS2017
+build_demos_msvc.bat VS2019
 ```
 
 The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
@@ -415,7 +415,7 @@ For example, for the **Debug** configuration, go to the project's
 variable in the **Environment** field to the following:
 
 ```
-PATH=<INSTALL_DIR>\deployment_tools\inference_engine\bin\intel64\Debug;<INSTALL_DIR>\opencv\bin;%PATH%
+PATH=<INSTALL_DIR>\runtime\bin\intel64\Debug;<INSTALL_DIR>\extras\opencv\bin;%PATH%
 ```
 
 where `<INSTALL_DIR>` is the directory in which the OpenVINO toolkit is installed.

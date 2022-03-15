@@ -118,7 +118,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 ./social_distance_demo -i <path_to_video>/inputVideo.mp4 -m_det <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml  -d_det HDDL -d_reid HDDL -n_iqs 10 -n_wt 4 -nireq 10
 ```
 
-> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
+> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/runtime/3rdparty/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Person Detection network
 > * `tagReId` for the Person Re-Identification network
 >
