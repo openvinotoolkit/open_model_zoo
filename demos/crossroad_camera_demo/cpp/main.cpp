@@ -21,9 +21,6 @@
 #include <openvino/openvino.hpp>
 
 #include "detection_base.hpp"
-#include "detection_person.hpp"
-#include "detection_person_attr.hpp"
-#include "detection_person_reid.hpp"
 
 namespace {
 constexpr char h_msg[] = "show the help message and exit";
@@ -129,6 +126,10 @@ void parse(int argc, char *argv[]) {
     slog::info << ov::get_openvino_version() << slog::endl;
 }
 } // namespace
+
+#include "detection_person.hpp"
+#include "detection_person_attr.hpp"
+#include "detection_person_reid.hpp"
 
 int main(int argc, char* argv[]) {
     std::set_terminate(catcher);
