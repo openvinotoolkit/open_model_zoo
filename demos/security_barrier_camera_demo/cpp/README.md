@@ -125,7 +125,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
 ```
 
-> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
+> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/runtime/3rdparty/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
