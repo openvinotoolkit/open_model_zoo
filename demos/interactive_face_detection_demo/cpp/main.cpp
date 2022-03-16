@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 
     Visualizer visualizer{frame.size()};
     if (FLAGS_show_emotion_bar && emotionsDetector.enabled()) {
-            visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
+        visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
     }
 
     LazyVideoWriter videoWriter{FLAGS_o, FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), FLAGS_lim};
