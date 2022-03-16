@@ -89,7 +89,7 @@ void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
         std::cout <<   "\t[ -h]                                         " << h_msg
-                  << "\n\t[--help]                                           print help on all arguments"
+                  << "\n\t[--help]                                      print help on all arguments"
                   << "\n\t  -m <MODEL FILE>                             " << m_msg
                   << "\n\t[ -i <INPUT>]                                 " << i_msg
                   << "\n\t[--bb_enlarge_coef <NUMBER>]                  " << bb_enlarge_coef_msg
