@@ -58,7 +58,7 @@ python3 speech_recognition_wav2vec_demo.py -m wav2vec2-base.xml -i audio.wav
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
+An example audio file can be taken from OpenVINO [test data](https://storage.openvinotoolkit.org/data/test_data/) folder.
 
 ## Demo Output
 
