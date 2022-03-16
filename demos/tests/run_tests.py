@@ -197,7 +197,7 @@ def get_models(case, keys):
 
 
 def main():
-    args = parse_args()
+    args = parse_args()  # test
 
     DEMOS = scopes[args.scope]
     suppressed_devices = parse_supported_device_list(args.supported_devices)
