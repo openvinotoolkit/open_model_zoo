@@ -78,9 +78,9 @@ See how to evaluate model with using predefined configuration file for [densenet
     ```sh
     OMZ_ROOT/tools/model_tools/downloader.py --name densenet-121-tf --output_dir MODEL_DIR
     ```
-3. Convert model in the Inference Engine IR format using Model Optimizer via [Model Converter](../../../tools/model_tools/README.md)
+3. Convert model in the OpenVINO IR format using Model Optimizer via [Model Converter](../../../tools/model_tools/README.md)
     ```sh
-    OMZ_ROOT/tools/model_tools/converter.py --name densenet-121-tf --download_dir MODEL_DIR --mo OPENVINO_DIR/deployment_tools/model_optimizer/mo.py
+    omz_converter --name densenet-121-tf --download_dir MODEL_DIR
     ```
 4. Run evaluation for model in FP32 precision using [Accuracy Checker](../README.md)
     ```sh
