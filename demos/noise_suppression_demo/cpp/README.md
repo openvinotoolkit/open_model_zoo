@@ -34,7 +34,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
 
 For example, to do inference on a CPU, run the following command:
 
