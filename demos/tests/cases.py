@@ -282,7 +282,7 @@ DEMOS = [
             model_keys=['-m', '--mpa', '--mpr'],
             device_keys=['-d', '--dpa', '--dpr'],
             test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
+        TestCase(options={'--noshow': None,
             **MONITORS,
             '-i': DataPatternArg('person-vehicle-bike-detection-crossroad')}),
         TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
