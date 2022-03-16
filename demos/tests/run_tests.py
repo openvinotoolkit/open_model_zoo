@@ -253,7 +253,12 @@ def main():
             print('Testing {}...'.format(demo.subdirectory))
             print()
             demo.set_precisions(args.precisions, model_info)
-
+            filename = '/tmp/' + demo.subdirectory
+            os.makedirs(filename, exist_ok=True)
+            fo = open(filename + '/results.log', 'w+')
+            print("Save to {}".format(filename))
+            content = '' 
+            content += 'Testing {}...'.format(demo.subdirectory) + '\n'
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
@@ -316,30 +321,34 @@ def main():
                         print('Test case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
+                        content += "Device:{}\nCaseId:{}\n".format(device, test_case_index)
+                        rawResults = '' 
+                        execution_time = -1 
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
+                            for line in output.split('\n'):
+                                if "DEBUG" in line:
+                                    rawResults += line
+                                    rawResults += '\n'
                             demo.parse_output(output, device, test_case_index)
                         except subprocess.CalledProcessError as e:
                             print(e.output)
                             print('Exit code:', e.returncode)
                             num_failures += 1
                             execution_time = -1
+                            rawResults = {}
                         
+                        content += "Execution_time:{}\n".format(execution_time)
+                        content += "{}\n".format(rawResults)
+                        fo.write(content)
+                        content = ''
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
-                if not demo.results_correctness_check():
-                    print ('Results Correctness checking failed for Demo: ', demo.subdirectory)
-                else:
-                    print ('Results Correctness checking Passed')
-
-
-
-
-            print()
+            fo.close()
 
     print("Failures: {}".format(num_failures))
 

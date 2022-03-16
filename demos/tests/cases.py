@@ -27,10 +27,11 @@ TestCase = collections.namedtuple('TestCase', ['options', 'extra_models'])
 # TODO with Python3.7 use namedtuple defaults instead
 TestCase.__new__.__defaults__ = [],
 
+
 class Demo:
     IMPLEMENTATION_TYPES = set()
 
-    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None, parser=None, correctness_checker=None):
+    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None):
         self.implementation = implementation
         self.subdirectory = name + '/' + implementation
         self.device_keys = device_keys
@@ -39,9 +40,7 @@ class Demo:
         self.test_cases = test_cases
 
         self._exec_name = self.subdirectory.replace('/', '_')
-        self.parser = parser
-        self.correctness_checker = correctness_checker
-        self.results = {}
+        self.parser = None
 
         Demo.IMPLEMENTATION_TYPES.add(implementation)
 
@@ -70,22 +69,9 @@ class Demo:
         self.parser = parser(self)
         return self
 
-    def parse_output(self, output, device, test_case_index):
+    def parse_output(self, output, test_case, device):
         if self.parser:
-            tmp = self.parser(output)
-            if device not in self.results:
-                self.results[device] = {}
-            self.results[device][test_case_index] = tmp
-            print (self.results)
-
-    def add_correctness_check(self, correctness_check):
-        self.correctness_checker = correctness_check
-        return self
-
-    def results_correctness_check(self):
-        if not self.correctness_checker:
-            return True
-        return self.correctness_checker(self.results)
+            self.parser(output, test_case, device)
 
     def update_option(self, updated_options):
         for case in self.test_cases[:]:
@@ -136,8 +122,8 @@ class Demo:
 
 
 class CppDemo(Demo):
-    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None, parser=None, correctness_checker=None):
-        super().__init__(name, implementation, model_keys, device_keys, test_cases, parser, correctness_checker)
+    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None):
+        super().__init__(name, implementation, model_keys, device_keys, test_cases)
 
         self._exec_name = self._exec_name.replace('_cpp', '')
 
@@ -165,6 +151,7 @@ def join_cases(*args):
     for case in args: extra_models.update(case.extra_models)
     return TestCase(options=options, extra_models=list(case.extra_models))
 
+
 def combine_cases(*args):
     return [join_cases(*combination)
         for combination in itertools.product(*[[arg] if isinstance(arg, TestCase) else arg for arg in args])]
@@ -173,51 +160,6 @@ def combine_cases(*args):
 def single_option_cases(key, *args):
     return [TestCase(options={} if arg is None else {key: arg}) for arg in args]
 
-def security_barrier_camera_damo_correctness_checker(results):
-    flag = False
-    if "CPU" in results and "AUTO:CPU" in results:
-        if results['CPU'] == results['AUTO:CPU']:
-            flag = True
-        else:
-            print ("CPU vs AUTO:CPU have inconsistent results")
-
-    if "GPU" in results and "AUTO:GPU" in results:
-        if results['GPU'] == results['AUTO:GPU']:
-            flag = True
-        else:
-            print ("GPU vs AUTO:GPU have inconsistent results")
-
-    return flag
-
-def security_barrier_camera_damo_parser(output):
-    output = output.split('\n')
-    channel_results = {}
-    for line in output:
-        if "ChannelID" in line:
-            print (line)
-        if "DEBUG" not in line:
-            continue
-        item = line[line.find('Channel') : ].split(',')
-        # Channel ID
-        frame_results = {}
-        channel = item[0].split(':')
-        if channel[1] not in channel_results:
-            channel_results[channel[1]] = frame_results
-        
-        # Frame ID
-        object_results = {}
-        frame = item[1].split(':')
-        if frame[1] not in channel_results[channel[1]]:
-            channel_results[channel[1]][frame[1]] = object_results
-
-        # Object ID
-        label_prob_pos_results = []
-        objid = item[2].split(':')
-        if objid[1] not in channel_results[channel[1]][frame[1]]:
-            channel_results[channel[1]][frame[1]][objid[1]] = label_prob_pos_results
-        channel_results[channel[1]][frame[1]][objid[1]] = item[3:]
-
-    return channel_results
 
 
 DEMOS = [
@@ -648,12 +590,9 @@ DEMOS = [
     CppDemo(name='security_barrier_camera_demo',
             model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
-            correctness_checker=security_barrier_camera_damo_correctness_checker,
-            parser=security_barrier_camera_damo_parser,
             test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={'-no_show': None, '-r' : None,
             **MONITORS,
-            '-r': None,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
         single_option_cases('-m_lpr',
