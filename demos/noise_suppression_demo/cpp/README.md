@@ -37,7 +37,7 @@ omz_converter --list models.lst
 Running the demo with `-h` shows this help message:
 ```
   [ -h]               show this help message and exit
-  [--help]            print help on all arguments"
+  [--help]            print help on all arguments
     -m <MODEL FILE>   path to an .xml file with a trained model
     -i <WAV>          path to an input WAV file
   [ -d <DEVICE>]      specify a device to infer on (the list of available devices is shown below). Default is CPU
