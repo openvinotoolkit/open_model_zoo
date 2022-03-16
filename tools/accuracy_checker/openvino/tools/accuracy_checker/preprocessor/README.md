@@ -43,8 +43,11 @@ Accuracy Checker supports following set of preprocessors:
       2. if `dst_height` * ratio larger then `dst_width`, then `dst_width` = 32 * ratio
       3. Otherwise `dst_width` = `dst_height` * ratio
     - `ppocr_max_ratio` - calculate scales in the following way:
-      1. Maximim between provided destination size used as `max_limit` for image ddimensions.
-      2. If maximum image size befire resize greater max limit, ratio calculated as `max_limit` / `max_size`, otherwise ratio is equal 1.
+      1. Maximum between provided destination size used as `max_limit` for image ddimensions.
+      2. If maximum image size before resize greater max limit, ratio calculated as `max_limit` / `max_size`, otherwise ratio is equal 1.
+    - `ppocr_cls_ratio` - calculate scales in following way:
+      1. ratio calculated as `image_width`/`image_height`, destination size for height used as constant
+      2. if ratio multiplied on `dst_height` greater then `dst_width`, then `dst_width` used for width resize, otherwise resized width is `dst_height` * `ratio`.
 * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
   Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
@@ -145,9 +148,9 @@ Accuracy Checker supports following set of preprocessors:
   * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
   * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
   * `add_symbols` - add sos/eos symbols to sentence (default=True).
-*  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
-  * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
-  *  `sequence_len` - length of sequence after supplement.
+* `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
+* `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
+* `sequence_len` - length of sequence after supplement.
 * `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
   * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
   * `scale` - scale factor for image (default is 1).
