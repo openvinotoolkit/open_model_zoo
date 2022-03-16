@@ -73,7 +73,7 @@ Running the demo with `-h` shows this help message:
 
 ```
     [ -h]                                         show the help message and exit
-    [--help]                                           print help on all arguments
+    [--help]                                      print help on all arguments
       -m <MODEL FILE>                             path to an .xml file with a trained Face Detection model
     [ -i <INPUT>]                                 an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
     [--bb_enlarge_coef <NUMBER>]                  coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2
