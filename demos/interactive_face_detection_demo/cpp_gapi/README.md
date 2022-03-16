@@ -67,7 +67,7 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
 
 ```sh
     [ -h]                                         show the help message and exit
