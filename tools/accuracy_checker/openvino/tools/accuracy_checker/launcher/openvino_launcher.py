@@ -576,10 +576,11 @@ class OpenVINOLauncher(Launcher):
     def _get_model_batch_size(self):
         input_nodes = self.network.inputs if self.network else self.exec_network.inputs
         input_info = input_nodes[0]
-        if '...' in str(input_info.get_node().layout):
+        layout = input_info.get_node().layout
+        if '...' in str(layout) or layout is None:
             layout = self.get_layout_from_config(input_info.get_node().friendly_name)
         else:
-            layout = str(input_info.get_node().layout).replace('[', '').replace(']', '').replace(',', '')
+            layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]
@@ -674,7 +675,7 @@ class OpenVINOLauncher(Launcher):
                 if num_undef > 1:
                     return False
             layout = self.inputs[input_name].layout
-            if '...' in str(layout):
+            if '...' in str(layout) or layout is None:
                 layout = self.get_layout_from_config(input_name)
             else:
                 layout = str(layout).replace('[', '').replace(']', '').replace(',', '')

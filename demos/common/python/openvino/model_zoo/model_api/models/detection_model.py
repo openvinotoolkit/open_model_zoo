@@ -14,7 +14,6 @@
  limitations under the License.
 """
 from .types import ListValue, NumericalValue, StringValue
-from .model import WrapperError
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
 
@@ -42,13 +41,13 @@ class DetectionModel(ImageModel):
             iou_threshold(float): threshold for NMS filtering
 
         Raises:
-            RuntimeError: If loaded model has more than one image inputs
+            WrapperError: If loaded model has more than one image inputs
         '''
         super().__init__(model_adapter, configuration, preload)
 
         if not self.image_blob_name:
-            raise WrapperError(self.__model__, "The Wrapper supports only one image input, but {} found"
-                               .format(len(self.image_blob_names)))
+            self.raise_error("The Wrapper supports only one image input, but {} found".format(
+                len(self.image_blob_names)))
 
         if self.path_to_labels:
             self.labels = load_labels(self.path_to_labels)
@@ -80,7 +79,7 @@ class DetectionModel(ImageModel):
             List of detections fit to initial image (resized and clipped)
 
         Raises:
-            RuntimeError: If model uses custom resize or `resize_type` not set
+            WrapperError: If model uses custom resize or `resize_type` not set
         '''
         resized_shape = meta['resized_shape']
         original_shape = meta['original_shape']
@@ -92,7 +91,7 @@ class DetectionModel(ImageModel):
         elif self.resize_type == 'standard':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
-            raise WrapperError(self.__model__, 'Unknown resize type {}'.format(self.resize_type))
+            self.raise_error('Unknown resize type {}'.format(self.resize_type))
         return clip_detections(detections, original_shape)
 
 

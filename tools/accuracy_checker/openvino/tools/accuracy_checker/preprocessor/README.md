@@ -149,8 +149,8 @@ Accuracy Checker supports following set of preprocessors:
   * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
   * `add_symbols` - add sos/eos symbols to sentence (default=True).
 * `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
-* `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
-* `sequence_len` - length of sequence after supplement.
+  * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
+  * `sequence_len` - length of sequence after supplement.
 * `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
   * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
   * `scale` - scale factor for image (default is 1).
@@ -206,6 +206,9 @@ Accuracy Checker supports following set of preprocessors:
     * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
     * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
   * `dither` - dithering value
+  * `stft_padded` - enables padding at the end of input signal for Short Time Fourier Transform (STFT)
+  * `stft_boundary` - specifies how to generate boundary values for Short Time Fourier Transform (STFT)
+  * `do_transpose` - enables input transpose
 * `audio_patches` - split audio signal on patches with specified `size` for multi inference processing. If input signal can not be divided by size without remainder, signal will be padded by zeros left side.
   * `size` - patch size.
 * `context_window` - add context window padding to input signal.
