@@ -378,7 +378,7 @@ DEMOS = [
                 '--mag': ModelArg('age-gender-recognition-retail-0013'),
                 '--mam': ModelArg('anti-spoof-mn3'),
                 '--mem': ModelArg('emotions-recognition-retail-0003'),
-                # '--mhp': ModelArg('head-pose-estimation-adas-0001'),  TODO wait for 77686: INT8: Function doesn't have output with name angle_r_fc
+                '--mhp': ModelArg('head-pose-estimation-adas-0001'),
                 '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
