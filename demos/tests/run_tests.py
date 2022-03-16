@@ -78,6 +78,8 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--log-file', type=Path,
+        help='path to log file')
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
         help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
@@ -95,6 +97,11 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
         if first_time:
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
+
+
+def write_log(test_log, log_file):
+    with log_file.open('a+', newline='') as txtfile:
+        txtfile.write(test_log + '\n')
 
 
 @contextlib.contextmanager
@@ -248,8 +255,10 @@ def main():
 
         print('Demo Environment: {}'.format(demo_environment))
 
+        failed_tests = []
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.subdirectory))
+            header = 'Testing {}'.format(demo.subdirectory)
+            print(header)
             print()
             demo.set_precisions(args.precisions, model_info)
 
@@ -312,28 +321,42 @@ def main():
                                 print(flush=True)
                                 skip = True
                         if skip: continue
-                        print('Test case #{}/{}:'.format(test_case_index, device),
-                            ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                        test_descr = 'Test case #{}/{}:\n{}'.format(test_case_index, device, ' '.join(shlex.quote(str(arg))
+                            for arg in fixed_args + dev_arg + case_args))
+                        print(test_descr)
                         print(flush=True)
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment)
+                                env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
-                        except subprocess.CalledProcessError as e:
-                            print(e.output)
-                            print('Exit code:', e.returncode)
+                        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                            output = e.output
+                            if isinstance(e, subprocess.CalledProcessError):
+                                exit_msg = f'Exit code: {e.returncode}\n'
+                            elif isinstance(e, subprocess.TimeoutExpired):
+                                exit_msg = f'Command timed out after {e.timeout} seconds\n'
+                            output += exit_msg
+                            print(output)
+                            failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
                             execution_time = -1
 
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                        if args.log_file:
+                            if test_case_index == 0:
+                                write_log(header, args.log_file)
+                            write_log(test_descr, args.log_file)
+                            write_log(output, args.log_file)
 
             print()
 
-    print("Failures: {}".format(num_failures))
+    print("{} failures:".format(num_failures))
+    for test in failed_tests:
+        print(test)
 
     sys.exit(0 if num_failures == 0 else 1)
 
