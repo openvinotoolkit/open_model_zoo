@@ -126,13 +126,13 @@ class Segmentor:
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):
                 feature_vector_side = self.infer_encoder_side_request.get_tensor(
-                    self.encoder_side_output_key['output_feature'])
+                    self.encoder_side_output_keys['output_feature'])
                 self.shifted_tesor_side = self.infer_encoder_side_request.get_tensor(
-                    self.encoder_side_output_key['shifted_output']).data
+                    self.encoder_side_output_keys['shifted_output']).data
                 feature_vector_top = self.infer_encoder_top_request.get_tensor(
-                    self.encoder_top_output_key['output_feature'])
+                    self.encoder_top_output_keys['output_feature'])
                 self.shifted_tesor_top = self.infer_encoder_top_request.get_tensor(
-                    self.encoder_top_output_key['shifted_output']).data
+                    self.encoder_top_output_keys['shifted_output']).data
 
                 output = self.infer_decoder_request.infer(inputs={
                     self.decoder_input_keys['input_feature_1']: feature_vector_side.data,
