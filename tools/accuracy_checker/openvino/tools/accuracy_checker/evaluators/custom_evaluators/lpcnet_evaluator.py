@@ -123,11 +123,12 @@ class EncoderModel:
         self.feature_input = generate_layer_name(self.feature_input, self.default_model_suffix+'_', with_prefix)
         self.periods_input = generate_layer_name(self.periods_input, self.default_model_suffix+'_', with_prefix)
         if hasattr(self, 'outputs'):
-            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            self.output = postprocess_output_name(
+                self.output, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
             if self.output not in self.outputs:
                 self.output = postprocess_output_name(
                     generate_layer_name(self.output, self.default_model_suffix+'_', with_prefix),
-                    self.outputs, raise_error=False)
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
 
 
 class EncoderDLSDKModel(EncoderModel, TTSDLSDKModel):
@@ -244,21 +245,24 @@ class DecoderModel:
         self.rnn_input1 = generate_layer_name(self.rnn_input1, prefix, with_prefix)
         self.rnn_input2 = generate_layer_name(self.rnn_input2, prefix, with_prefix)
         if hasattr(self, 'outputs'):
-            self.output = postprocess_output_name(self.output, self.outputs, raise_error=False)
+            self.output = postprocess_output_name(
+                self.output, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
             if self.output not in self.outputs:
                 self.output = postprocess_output_name(
                     generate_layer_name(self.output, self.default_model_suffix + '_', with_prefix),
-                    self.outputs, raise_error=False)
-            self.rnn_output1 = postprocess_output_name(self.rnn_output1, self.outputs, raise_error=False)
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+            self.rnn_output1 = postprocess_output_name(
+                self.rnn_output1, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
             if self.rnn_output1 not in self.outputs:
                 self.rnn_output1 = postprocess_output_name(
                     generate_layer_name(self.rnn_output1, self.default_model_suffix + '_', with_prefix),
-                    self.outputs, raise_error=False)
-            self.rnn_output2 = postprocess_output_name(self.rnn_output2, self.outputs, raise_error=False)
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+            self.rnn_output2 = postprocess_output_name(
+                self.rnn_output2, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
             if self.rnn_output2 not in self.outputs:
                 self.rnn_output2 = postprocess_output_name(
                     generate_layer_name(self.rnn_output2, self.default_model_suffix + '_', with_prefix),
-                    self.outputs, raise_error=False)
+                    self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
 
 
 class DecoderONNXModel(BaseONNXModel, DecoderModel):
