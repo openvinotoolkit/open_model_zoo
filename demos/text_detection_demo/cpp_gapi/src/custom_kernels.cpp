@@ -313,16 +313,16 @@ GAPI_OCV_KERNEL(OCVCropLabels, custom::CropLabels) {
                                                 { image.cols - 1.0f, 0.0f              },
                                                 { image.cols - 1.0f, image.rows - 1.0f },
                                                 { 0.0f,              image.rows - 1.0f } };
+        auto nRrs = rrs.size();
         out.clear();
-        out.reserve(rrs.size());
+        out.reserve(nRrs);
         pts.clear();
-        pts.reserve(rrs.size());
-        cv::Mat crop(outSize,   CV_8UC3,  cv::Scalar(0));
-        cv::Mat blob(blobShape, CV_32FC1, cv::Scalar(0));
+        pts.reserve(nRrs);
+        cv::Mat crop(outSize, CV_8UC3);
         std::vector<cv::Point2f> points(4);
-        for (auto& rr : rrs) {
-            if (rr.size != cv::Size2f(0, 0)) {
-                rr.points(points.data());
+        for (size_t i = 0; i < nRrs; i++) {
+            if (rrs[i].size != cv::Size2f(0, 0)) {
+                rrs[i].points(points.data());
                 cropImage(image, points, outSize, crop);
             } else {
                 if (centralCrop) {
@@ -334,8 +334,8 @@ GAPI_OCV_KERNEL(OCVCropLabels, custom::CropLabels) {
                     cv::resize(image, crop, outSize);
                 }
             }
-            crop.reshape(1, blobShape).convertTo(blob, CV_32F);
-            out.emplace_back(blob.clone());
+            out.emplace_back(blobShape, CV_32FC1);
+            crop.reshape(1, blobShape).convertTo(out[i], CV_32F);
             pts.push_back(points);
         }
     }
