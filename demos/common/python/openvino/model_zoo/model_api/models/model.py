@@ -28,7 +28,7 @@ class Model:
 
     The abstract model wrapper is free from any executor dependencies.
     It sets the `ModelAdapter` instance with the model read from disk or other place
-    and defines model input/output layers.
+    and defines model inputs/outputs.
 
     Next, it loads the provided configuration variables and sets it as wrapper attributes.
     The keys of the configuration dictionary should be presented in the `parameters` method.
@@ -44,8 +44,8 @@ class Model:
     Attributes:
         logger (Logger): instance of the Logger
         model_adapter (ModelAdapter): allows working with the specified executor
-        inputs (dict): keeps the model input layers names and `Metadata` structure for each one
-        outputs (dict): keeps the model output layers names and `Metadata` structure for each one
+        inputs (dict): keeps the model inputs names and `Metadata` structure for each one
+        outputs (dict): keeps the model outputs names and `Metadata` structure for each one
         model_loaded (bool): a flag whether the model is loaded to device
     '''
 
@@ -57,8 +57,8 @@ class Model:
         Args:
             model_adapter (ModelAdapter): allows working with the specified executor
             configuration (dict, optional): it contains values for parameters accepted by specific
-              wrapper (`confidence_threshold`, `labels` etc.) which are set as wrapper attributes
-            preload (bool, optional): a flag whether the model is loaded to device while wrapper
+              wrapper (`confidence_threshold`, `labels` etc.) which are set as data attributes
+            preload (bool, optional): a flag whether the model is loaded to device while
               initialization. If `preload=False`, the model must be loaded via `load` method before inference
 
         Raises:
@@ -205,17 +205,16 @@ class Model:
         raise NotImplementedError
 
     def _check_io_number(self, number_of_inputs, number_of_outputs):
-        '''Checks whether the number of input/output model layers is matched
-           with supported one by wrapper.
+        '''Checks whether the number of model inputs/outputs is supported.
 
         Args:
-            number_of_inputs (int, Tuple(int)): number of input layers supported by wrapper.
+            number_of_inputs (int, Tuple(int)): number of inputs supported by wrapper.
               Use -1 to omit the check
-            number_of_outputs (int, Tuple(int)): number of output layers supported by wrapper.
+            number_of_outputs (int, Tuple(int)): number of outputs supported by wrapper.
               Use -1 to omit the check
 
         Raises:
-            WrapperError: if the model has unsupported by wrapper number of input/output layers
+            WrapperError: if the model has unsupported number of inputs/outputs
         '''
         if not isinstance(number_of_inputs, tuple):
             if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
@@ -294,7 +293,7 @@ class Model:
         self.model_adapter.await_any()
 
     def log_layers_info(self):
-        '''Prints the shape, precision and layout for all model input/output layers.
+        '''Prints the shape, precision and layout for all model inputs/outputs.
         '''
         for name, metadata in self.inputs.items():
             self.logger.info('\tInput layer: {}, shape: {}, precision: {}, layout: {}'.format(

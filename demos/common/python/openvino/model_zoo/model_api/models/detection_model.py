@@ -36,8 +36,8 @@ class DetectionModel(ImageModel):
         Args:
             model_adapter (ModelAdapter): allows working with the specified executor
             configuration (dict, optional): it contains values for parameters accepted by specific
-              wrapper (`confidence_threshold`, `labels` etc.) which are set as wrapper attributes
-            preload (bool, optional): a flag whether the model is loaded to device while wrapper
+              wrapper (`confidence_threshold`, `labels` etc.) which are set as data attributes
+            preload (bool, optional): a flag whether the model is loaded to device while
               initialization. If `preload=False`, the model must be loaded via `load` method before inference
 
         Raises:

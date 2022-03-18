@@ -48,12 +48,12 @@ class ImageModel(Model):
         Args:
             model_adapter (ModelAdapter): allows working with the specified executor
             configuration (dict, optional): it contains values for parameters accepted by specific
-              wrapper (`confidence_threshold`, `labels` etc.) which are set as wrapper attributes
-            preload (bool, optional): a flag whether the model is loaded to device while wrapper
+              wrapper (`confidence_threshold`, `labels` etc.) which are set as data attributes
+            preload (bool, optional): a flag whether the model is loaded to device while
               initialization. If `preload=False`, the model must be loaded via `load` method before inference
 
         Raises:
-            WrapperError: if the wrapper failed to define appropriate model input layers for images
+            WrapperError: if the wrapper failed to define appropriate inputs for images
         '''
         super().__init__(model_adapter, configuration, preload)
         self.image_blob_names, self.image_info_blob_names = self._get_inputs()
@@ -88,14 +88,14 @@ class ImageModel(Model):
         return parameters
 
     def _get_inputs(self):
-        '''Defines the model input layers for images and additional info.
+        '''Defines the model inputs for images and additional info.
 
         Raises:
-            WrapperError: if the wrapper failed to define appropriate model input layers for images
+            WrapperError: if the wrapper failed to define appropriate inputs for images
 
         Returns:
-            - list of input layers names for images
-            - list of input layers names for additional info
+            - list of inputs names for images
+            - list of inputs names for additional info
         '''
         image_blob_names, image_info_blob_names = [], []
         for name, metadata in self.inputs.items():
@@ -122,7 +122,7 @@ class ImageModel(Model):
 
         Note:
             It supports only models with single image input. If the model has more image inputs or has
-            additional supported inputs, the `preprocess` should be overloaded in a specific model wrapper.
+            additional supported inputs, the `preprocess` should be overloaded in a specific wrapper.
 
         Args:
             inputs (ndarray): a single image as 3D array in HWC layout
@@ -155,7 +155,7 @@ class ImageModel(Model):
             - the image with layout aligned with the model layout
         '''
         if self.nchw_layout:
-            image = image.transpose((2, 0, 1))  # Change layout from HWC to CHW
+            image = image.transpose((2, 0, 1))  # HWC->CHW
             image = image.reshape((1, self.c, self.h, self.w))
         else:
             image = image.reshape((1, self.h, self.w, self.c))
