@@ -123,7 +123,6 @@ void parse(int argc, char *argv[]) {
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    return;
 }
 } // namespace
 
@@ -133,7 +132,6 @@ int main(int argc, char *argv[]) {
     PerformanceMetrics metrics;
 
     // --------------------------- 1. Loading Inference Engine -----------------------------
-    slog::info << ov::get_openvino_version() << slog::endl;
     ov::Core core;
 
     FaceDetection faceDetector(FLAGS_m, FLAGS_t, FLAGS_r,

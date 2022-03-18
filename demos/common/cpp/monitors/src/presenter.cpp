@@ -19,6 +19,9 @@ const std::map<int, MonitorType> keyToMonitorType{
 
 std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
     std::set<MonitorType> enabledMonitors;
+    if (keys == "h") {
+        return enabledMonitors;
+    }
     for (unsigned char key: keys) {
         auto iter = keyToMonitorType.find(std::toupper(key));
         if (keyToMonitorType.end() == iter) {

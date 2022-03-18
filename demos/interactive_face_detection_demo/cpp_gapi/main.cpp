@@ -159,7 +159,6 @@ void parse(int argc, char *argv[]) {
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    return;
 }
 
 static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
