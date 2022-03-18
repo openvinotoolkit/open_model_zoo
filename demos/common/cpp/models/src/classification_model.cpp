@@ -139,7 +139,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     }
     if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "\tInserted 'other' label as first." << slog::endl;
+        slog::warn << "Inserted 'other' label as first." << slog::endl;
     }
     else if (classesNum != labels.size()) {
         throw std::logic_error("Model's number of classes and parsed labels must match ("
