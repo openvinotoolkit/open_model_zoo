@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
             if (FLAGS_show) {
                 cv::imshow("classification_demo", gridMat.outImg);
                 //--- Processing keyboard events
-                int key = cv::waitKey(1);
+                int key = cv::pollKey();
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                     keepRunning = false;
                 }
@@ -314,6 +314,14 @@ int main(int argc, char *argv[]) {
                     accuracy = 0;
                     elapsedSeconds = std::chrono::steady_clock::duration(0);
                     startTime = std::chrono::steady_clock::now();
+                }
+                else if ('p' == key || 'P' == key) {
+                    while (true) {
+                        cv::waitKey(0);
+                        if ('p' == key || 'P' == key) {
+                            break;
+                        }
+                    }
                 }
                 else {
                     presenter.handleKey(key);
