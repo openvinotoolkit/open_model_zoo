@@ -254,9 +254,9 @@ class Model:
             - post-processed data in the format defined by wrapper
             - the input metadata obtained from `preprocess` method
         '''
-        dict_data, meta = self.preprocess(inputs)
+        dict_data, input_meta = self.preprocess(inputs)
         raw_result = self.infer_sync(dict_data)
-        return self.postprocess(raw_result, meta), meta
+        return self.postprocess(raw_result, input_meta), input_meta
 
     def load(self, force=False):
         if not self.model_loaded or force:
@@ -294,7 +294,7 @@ class Model:
         self.model_adapter.await_any()
 
     def log_layers_info(self):
-        '''Prints for all model input/output layers the shape, precision and layout.
+        '''Prints the shape, precision and layout for all model input/output layers.
         '''
         for name, metadata in self.inputs.items():
             self.logger.info('\tInput layer: {}, shape: {}, precision: {}, layout: {}'.format(

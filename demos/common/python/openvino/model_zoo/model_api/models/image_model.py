@@ -122,7 +122,7 @@ class ImageModel(Model):
 
         Note:
             It supports only models with single image input. If the model has more image inputs or has
-            additional supported inputs, the `preprocess` should be overloaded in a specific model wrapper
+            additional supported inputs, the `preprocess` should be overloaded in a specific model wrapper.
 
         Args:
             inputs (ndarray): a single image as 3D array in HWC layout
