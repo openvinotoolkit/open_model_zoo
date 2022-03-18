@@ -19,7 +19,7 @@
 #include <opencv2/core.hpp>
 #include <openvino/runtime/allocator.hpp>
 
-class SharedTensorAllocator : public ov::AllocatorImpl {
+class SharedTensorAllocator final : public ov::AllocatorImpl {
 public:
     SharedTensorAllocator(const cv::Mat& img) : img(img) {}
 

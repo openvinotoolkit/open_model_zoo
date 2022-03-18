@@ -33,6 +33,8 @@ G_API_OP(GCalculateMaskRCNNBGMask,
 
 class NNBGReplacer {
 public:
+    NNBGReplacer() = default;
+    virtual ~NNBGReplacer() = default;
     NNBGReplacer(const std::string& model_path);
     virtual cv::GMat replace(cv::GMat, const cv::Size&, cv::GMat) = 0;
     const std::string& getName() { return m_tag; }

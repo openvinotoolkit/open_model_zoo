@@ -37,7 +37,6 @@ private:
     double opacity;
     double textScale;
     int textThickness;
-    int internalPadding;
 };
 
 // Drawing a photo frame around detected face
