@@ -38,9 +38,9 @@ def create_core():
 
 
 class OpenvinoAdapter(ModelAdapter):
-    """
+    '''
     Works with OpenVINO model
-    """
+    '''
 
     def __init__(self, core, model_path, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
         self.core = core

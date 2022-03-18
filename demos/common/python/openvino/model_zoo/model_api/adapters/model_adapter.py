@@ -81,11 +81,11 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         Reshapes the model input layers to fit the new input shape.
 
         Args:
-            - new_shape(dict): the dictionary with input layers as keys and
+            - new_shape (dict): the dictionary with input layers names as keys and
                 list of new shape as values in the following format:
                 {
-                    'input_layer_1': [1, 128, 128, 3],
-                    'input_layer_2': [1, 128, 128, 3],
+                    'input_layer_name_1': [1, 128, 128, 3],
+                    'input_layer_name_2': [1, 128, 128, 3],
                     ...
                 }
         '''
@@ -98,16 +98,16 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         Args:
             - dict_data: it's submitted to the model for inference and has the following format:
                 {
-                    'input_layer_1': data_1,
-                    'input_layer_2': data_2,
+                    'input_layer_name_1': data_1,
+                    'input_layer_name_2': data_2,
                     ...
                 }
 
         Returns:
-            - raw result(dict) - model raw output in the following format:
+            - raw result (dict) - model raw output in the following format:
                 {
-                    'output_layer_1': raw_result_1,
-                    'output_layer_2': raw_result_2,
+                    'output_layer_name_1': raw_result_1,
+                    'output_layer_name_2': raw_result_2,
                     ...
                 }
         '''
@@ -123,8 +123,8 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         Args:
             - dict_data: it's submitted to the model for inference and has the following format:
                 {
-                    'input_layer_1': data_1,
-                    'input_layer_2': data_2,
+                    'input_layer_name_1': data_1,
+                    'input_layer_name_2': data_2,
                     ...
                 }
             - callback_fn: the callback function, which is defined outside the adapter

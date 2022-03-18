@@ -18,6 +18,7 @@ import logging as log
 
 
 class WrapperError(RuntimeError):
+    '''Special class for errors occurred in Model API wrappers'''
     def __init__(self, wrapper_name, message):
         super().__init__(f"{wrapper_name}: {message}")
 
@@ -25,12 +26,27 @@ class WrapperError(RuntimeError):
 class Model:
     '''An abstract model wrapper
 
-    An abstract model wrapper can only load model from the disk.
-    The ``preprocess`` and ``postprocess`` methods should be implemented in a concrete class
+    The abstract model wrapper is free from any executor dependencies.
+    It sets the `ModelAdapter` instance with the model read from disk or other place
+    and defines model input/output layers.
+
+    Next, it loads the provided configuration variables and sets it as wrapper attributes.
+    The keys of the configuration dictionary should be presented in the `parameters` method.
+
+    Also, it decorates the following adapter interface:
+        - Loading the model to the device
+        - The model reshaping
+        - Synchronous model inference
+        - Asynchronous model inference
+
+    The `preprocess` and `postprocess` methods must be implemented in a specific inherited wrapper.
 
     Attributes:
-        model_adapter(ModelAdapter): allows working with the specified executor
-        logger(Logger): instance of the logger
+        logger (Logger): instance of the Logger
+        model_adapter (ModelAdapter): allows working with the specified executor
+        inputs (dict): keeps the model input layers names and `Metadata` structure for each one
+        outputs (dict): keeps the model output layers names and `Metadata` structure for each one
+        model_loaded (bool): a flag whether the model is loaded to device
     '''
 
     __model__ = None # Abstract wrapper has no name
@@ -39,7 +55,14 @@ class Model:
         '''Model constructor
 
         Args:
-            model_adapter(ModelAdapter): allows working with the specified executor
+            model_adapter (ModelAdapter): allows working with the specified executor
+            configuration (dict, optional): it contains values for parameters accepted by specific
+              wrapper (`confidence_threshold`, `labels` etc.) which are set as wrapper attributes
+            preload (bool, optional): a flag whether the model is loaded to device while wrapper
+              initialization. If `preload=False`, the model must be loaded via `load` method before inference
+
+        Raises:
+            WrapperError: if the wrapper configuration is incorrect
         '''
         self.logger = log.getLogger()
         self.model_adapter = model_adapter
@@ -47,7 +70,7 @@ class Model:
         self.outputs = self.model_adapter.get_output_layers()
         for name, parameter in self.parameters().items():
             self.__setattr__(name, parameter.default_value)
-        self.load_config(configuration if configuration else {})
+        self._load_config(configuration)
         self.model_loaded = False
         if preload:
             self.load()
@@ -84,10 +107,45 @@ class Model:
 
     @classmethod
     def parameters(cls):
+        '''Defines the description and type of configurable data parameters for the wrapper.
+
+        See `types.py` to observe available types of the data parameter. For each parameter
+        the type, default value and description must be provided.
+
+        The example of possible data parameter:
+            'confidence_threshold': NumericalValue(
+                default_value=0.5, description="Threshold value for detection box confidence"
+            )
+
+        The method must be implemented in each specific inherited wrapper.
+
+        Returns:
+            - the dictionary with defined wrapper data parameters
+        '''
         parameters = {}
         return parameters
 
-    def load_config(self, config):
+    def _load_config(self, config):
+        '''Reads the configuration and creates data attributes
+           by filling the wrapper parameters by values from configuration.
+
+        Args:
+            config (dict): the dictionary with keys to be set as data attributes
+              and its values. The example of the config is the following:
+              {
+                  'confidence_threshold': 0.5,
+                  'resize_type': 'fit_to_window',
+              }
+
+        Note:
+            The config keys should be provided in `parameters` method for each wrapper,
+            then the default value of the parameter will be updated. If some key presented
+            in the config is not introduced in `parameters`, it will be omitted.
+
+         Raises:
+            WrapperError: if the configuration is incorrect
+        '''
+        if config is None: return
         parameters = self.parameters()
         for name, value in config.items():
             if name in parameters:
@@ -103,41 +161,61 @@ class Model:
                 self.logger.warning(f'The parameter "{name}" not found in {self.__model__} wrapper, will be omitted')
 
     def raise_error(self, message):
-        '''Raises the WrapperError
+        '''Raises the WrapperError.
+
         Args:
-            message: error message
+            message (str): error message to be shown in the following format:
+              "WrapperName: message"
         '''
         raise WrapperError(self.__model__, message)
 
     def preprocess(self, inputs):
-        '''Interface for preprocess method
+        '''Interface for preprocess method.
+
         Args:
-            inputs: raw input data, data types are defined by concrete model
+            inputs: raw input data, the data type is defined by wrapper
+
         Returns:
-            - The preprocessed data ready for inference
-            - The metadata, which could be used in postprocessing
+            - the preprocessed data which is submitted to the model for inference
+                and has the following format:
+                {
+                    'input_layer_name_1': data_1,
+                    'input_layer_name_2': data_2,
+                    ...
+                }
+            - the input metadata, which might be used in `postprocess` method
         '''
         raise NotImplementedError
 
     def postprocess(self, outputs, meta):
-        '''Interface for postrpocess metod
+        '''Interface for postprocess method.
+
         Args:
-            outputs: the model outputs  as dict with `name: tensor` data
-            meta: the metadata from the `preprocess` method results
+            outputs (dict): model raw output in the following format:
+                {
+                    'output_layer_name_1': raw_result_1,
+                    'output_layer_name_2': raw_result_2,
+                    ...
+                }
+            meta (dict): the input metadata obtained from `preprocess` method
+
         Returns:
-            Postrocessed data in format accoding to conrete model
+            - post-processed data in the format defined by wrapper
         '''
         raise NotImplementedError
 
     def _check_io_number(self, number_of_inputs, number_of_outputs):
-        '''Checking actual number of input/output blobs with supported by model wrapper
+        '''Checks whether the number of input/output model layers is matched
+           with supported one by wrapper.
 
         Args:
-            number_of_inputs(int, Tuple(int)): number of input blobs, supported by wrapper. Use -1 to omit check
-            number_of_outputs(int, Tuple(int)): number of output blobs, supported by wrapper. Use -1 to omit check
+            number_of_inputs (int, Tuple(int)): number of input layers supported by wrapper.
+              Use -1 to omit the check
+            number_of_outputs (int, Tuple(int)): number of output layers supported by wrapper.
+              Use -1 to omit the check
 
         Raises:
-            WrapperError: if loaded model has unsupported number of input or output blob
+            WrapperError: if the model has unsupported by wrapper number of input/output layers
         '''
         if not isinstance(number_of_inputs, tuple):
             if len(self.inputs) != number_of_inputs and number_of_inputs != -1:
@@ -165,13 +243,20 @@ class Model:
                     len(self.outputs), ', '.join(self.outputs)
                 ))
 
-    def __call__(self, input_data):
+    def __call__(self, inputs):
         '''
-        Applies the preprocessing, synchronous inference and postprocessing method of model wrapper
+        Applies preprocessing, synchronous inference, postprocessing routines while one call.
+
+        Args:
+            inputs: raw input data, the data type is defined by wrapper
+
+        Returns:
+            - post-processed data in the format defined by wrapper
+            - the input metadata obtained from `preprocess` method
         '''
-        dict_data, input_meta = self.preprocess(input_data)
+        dict_data, meta = self.preprocess(inputs)
         raw_result = self.infer_sync(dict_data)
-        return self.postprocess(raw_result, input_meta), input_meta
+        return self.postprocess(raw_result, meta), meta
 
     def load(self, force=False):
         if not self.model_loaded or force:
@@ -209,6 +294,8 @@ class Model:
         self.model_adapter.await_any()
 
     def log_layers_info(self):
+        '''Prints for all model input/output layers the shape, precision and layout.
+        '''
         for name, metadata in self.inputs.items():
             self.logger.info('\tInput layer: {}, shape: {}, precision: {}, layout: {}'.format(
                 name, metadata.shape, metadata.precision, metadata.layout))
