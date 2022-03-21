@@ -19,6 +19,12 @@
 #include <opencv2/core.hpp>
 #include <openvino/runtime/allocator.hpp>
 
+// To prevent false-positive clang compiler warning
+// (https://github.com/openvinotoolkit/openvino/pull/11092#issuecomment-1073846256):
+// warning: destructor called on non-final 'SharedTensorAllocator' that has virtual functions
+// but non-virtual destructor [-Wdelete-non-abstract-non-virtual-dtor]
+// SharedTensorAllocator class declared as final
+
 class SharedTensorAllocator final : public ov::AllocatorImpl {
 public:
     SharedTensorAllocator(const cv::Mat& img) : img(img) {}
