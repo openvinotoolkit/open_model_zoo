@@ -27,7 +27,7 @@ class Model:
     '''An abstract model wrapper
 
     The abstract model wrapper is free from any executor dependencies.
-    It sets the `ModelAdapter` instance with the model read from disk or other place
+    It sets the `ModelAdapter` instance with the provided model
     and defines model inputs/outputs.
 
     Next, it loads the provided configuration variables and sets it as wrapper attributes.
@@ -109,7 +109,7 @@ class Model:
     def parameters(cls):
         '''Defines the description and type of configurable data parameters for the wrapper.
 
-        See `types.py` to observe available types of the data parameter. For each parameter
+        See `types.py` to find available types of the data parameter. For each parameter
         the type, default value and description must be provided.
 
         The example of possible data parameter:
@@ -127,7 +127,7 @@ class Model:
 
     def _load_config(self, config):
         '''Reads the configuration and creates data attributes
-           by filling the wrapper parameters by values from configuration.
+           by setting the wrapper parameters with values from configuration.
 
         Args:
             config (dict): the dictionary with keys to be set as data attributes
@@ -200,7 +200,7 @@ class Model:
             meta (dict): the input metadata obtained from `preprocess` method
 
         Returns:
-            - post-processed data in the format defined by wrapper
+            - postprocessed data in the format defined by wrapper
         '''
         raise NotImplementedError
 
@@ -250,7 +250,7 @@ class Model:
             inputs: raw input data, the data type is defined by wrapper
 
         Returns:
-            - post-processed data in the format defined by wrapper
+            - postprocessed data in the format defined by wrapper
             - the input metadata obtained from `preprocess` method
         '''
         dict_data, input_meta = self.preprocess(inputs)
