@@ -25,7 +25,7 @@ from ..utils import contains_any, UnsupportedPackage
 
 try:
     import soundfile as sf
-except ImportError as import_error:
+except (ImportError, OSError) as import_error:
     sf = UnsupportedPackage('soundfile', import_error.msg)
 
 
