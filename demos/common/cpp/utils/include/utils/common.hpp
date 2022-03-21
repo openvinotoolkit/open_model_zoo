@@ -172,7 +172,7 @@ inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     ov::OutputVector outputs = model->outputs();
 
     slog::info << "\tInputs: " << slog::endl;
-    for (const ov::Output<ov::Node> input : inputs) {
+    for (const ov::Output<ov::Node>& input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();

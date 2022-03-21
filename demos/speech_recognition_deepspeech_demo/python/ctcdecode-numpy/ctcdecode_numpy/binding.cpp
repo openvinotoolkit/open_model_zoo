@@ -34,7 +34,7 @@ void CtcDecoderStateNumpy::decode_numpy(
     int ** symbols_lengths, size_t * symbols_lengths_dim  // shape (cand_size,)
 ) {
   // Get candidates
-  std::vector<std::pair<float, Output>> cands = std::move(decode(limit_candidates, finalize));
+  std::vector<std::pair<float, Output>> cands = decode(limit_candidates, finalize);
 
   // Compute output sizes (NB: total_len can be 0)
   size_t total_len = 0;

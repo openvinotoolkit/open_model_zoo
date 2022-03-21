@@ -17,7 +17,6 @@ private:
     std::stringstream act_stat_log_stream_;
     std::stringstream act_det_log_stream_;
     std::stringstream log_stream_;
-    const int default_action_index = -1; // Unknown action class
 public:
     DetectionsLogger();
     DetectionsLogger(bool enabled);

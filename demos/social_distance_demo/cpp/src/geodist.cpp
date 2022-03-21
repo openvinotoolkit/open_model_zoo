@@ -250,7 +250,7 @@ std::tuple<bool, bool, double> socialDistance(std::tuple<int, int>& frameShape,
     if (E.y - C.y < 1) {
         if (bdinf > 0) {
             Line2d EPF = getLine(E, PF);
-            const cv::Point2d& newC = cut(EPF, lineLength(CD))[0].second;
+            const cv::Point2d newC = cut(EPF, lineLength(CD))[0].second;
             if (A.y < newC.y) {
                 initIter += 1;
                 C = cv::Point2d(newC.x, newC.y);
@@ -259,7 +259,7 @@ std::tuple<bool, bool, double> socialDistance(std::tuple<int, int>& frameShape,
             }
         } else {
             Line2d FPF = getLine(F, PF);
-            const cv::Point2d& newD = cut(FPF, lineLength(CD))[0].second;
+            const cv::Point2d newD = cut(FPF, lineLength(CD))[0].second;
             if (B.y < newD.y) {
                 initIter += 1;
                 D = cv::Point2d(newD.x, newD.y);
