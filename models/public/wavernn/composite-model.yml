@@ -6,4 +6,7 @@ description: >-
   repository <https://github.com/as-ideas/ForwardTacotron>.
 task_type: text_to_speech
 framework: onnx
+stages_order:
+  - wavernn-upsampler
+  - wavernn-rnn
 license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt
