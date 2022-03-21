@@ -180,9 +180,7 @@ source <INSTALL_DIR>/setupvars.sh
 > ```
 
 For the open-source version of OpenVINO, set the following variables:
-* `InferenceEngine_DIR` pointing to a folder containing `InferenceEngineConfig.cmake`
 * `OpenVINO_DIR` pointing to a folder containing `OpenVINOConfig.cmake`
-* `ngraph_DIR` pointing to a folder containing `ngraphConfig.cmake`.
 * `OpenCV_DIR` pointing to OpenCV. The same OpenCV version should be used both for OpenVINO and demos build.
 
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
@@ -192,8 +190,8 @@ Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PAT
 
 The officially supported Linux* build environment is the following:
 
-- Ubuntu* 18.04 LTS 64-bit or CentOS* 7.6 64-bit
-- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 4.8.5 (for CentOS* 7.6)
+- Ubuntu* 18.04 LTS 64-bit or Ubuntu* 20.04 LTS 64-bit
+- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 9.3.0 (for Ubuntu* 20.04)
 - CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
