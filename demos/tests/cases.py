@@ -594,7 +594,7 @@ DEMOS = [
         TestCase(options={'-no_show': None, '-r' : None,
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
-        TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
+        TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0123')}),
         single_option_cases('-m_lpr',
             None,
             ModelArg('license-plate-recognition-barrier-0001'),

@@ -292,6 +292,8 @@ ReborningVideoFrame::~ReborningVideoFrame() {
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].lock();
         const auto frameId = ++context.videoFramesContext.lastframeIds[sourceID];
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].unlock();
+        if (!context.isVideo && frameId >= FLAGS_n_iqs)
+            return;
         std::shared_ptr<ReborningVideoFrame> reborn = std::make_shared<ReborningVideoFrame>(context, sourceID, frameId, frame);
         worker->push(std::make_shared<Reader>(reborn));
     } catch (const std::bad_weak_ptr&) {}
@@ -635,7 +637,6 @@ bool Reader::isReady() {
 }
 
 void Reader::process() {
-    //slog::debug <<"Reader::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     unsigned sourceID = sharedVideoFrame->sourceID;
     sharedVideoFrame->timestamp = std::chrono::steady_clock::now();
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
