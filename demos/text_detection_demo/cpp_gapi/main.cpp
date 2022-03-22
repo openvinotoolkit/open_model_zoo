@@ -267,15 +267,14 @@ int main(int argc, char* argv[]) {
                     const float *outputDataPtr = text.ptr<float>();
                     std::vector<float> outputData(outputDataPtr, outputDataPtr + text.total());
                     if (FLAGS_dt == "simple") {
-                        res = SimpleDecoder(outputData, config.trAlphabet, kPadSymbol, &conf,
+                        res = SimpleDecoder(outputData, config.trAlphabet, kPadSymbol, conf,
                                             FLAGS_start_index);
                     } else if (FLAGS_dt == "ctc") {
                         if (FLAGS_b == 0) {
-                            res = CTCGreedyDecoder(outputData, config.trAlphabet, kPadSymbol,
-                                                   &conf);
+                            res = CTCGreedyDecoder(outputData, config.trAlphabet, kPadSymbol, conf);
                         } else {
                             res = CTCBeamSearchDecoder(outputData, config.trAlphabet, kPadSymbol,
-                                                       &conf, FLAGS_b);
+                                                       conf, FLAGS_b);
                         }
                     } else {
                         slog::err << "No decoder type or invalid decoder type (-dt) provided: " <<

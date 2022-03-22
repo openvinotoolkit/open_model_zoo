@@ -175,7 +175,7 @@ cv::Mat decodeImageByJoin(const std::vector<float>& segmData,
     for (size_t i = 0; i < linkMask.size(); i++) {
         linkMask[i] = linkData[i] >= linkConfThreshold;
     }
-    size_t neighbours = size_t(linkDataShape[3]);
+    size_t neighbours = size_t(linkDataShape[0]);
     for (const auto& point : points) {
         size_t neighbour = 0;
         for (int ny = point.y - 1; ny <= point.y + 1; ny++) {
@@ -197,13 +197,14 @@ cv::Mat decodeImageByJoin(const std::vector<float>& segmData,
     return getAll(points, w, h, groupMask);
 }
 
-void processData(const float* ptr, const size_t dataTotal, const cv::MatSize& dataShape,
-                 std::vector<float>& out, std::vector<int>& newShape) {
-    std::vector<float> inData(ptr, ptr + dataTotal);
+void processData(const cv::Mat& data, std::vector<float>& out, std::vector<int>& newShape) {
+    auto ptr = data.ptr<float>();
+    auto dataShape = data.size;
+    std::vector<float> inData(ptr, ptr + data.total());
     inData = transpose4d(inData, dimsToShape(dataShape), {0, 2, 3, 1});
     softmax(inData);
     out = sliceAndGetSecondChannel(inData);
-    newShape = { dataShape[0], dataShape[2], dataShape[3], dataShape[1] / 2 };
+    newShape = { dataShape[1] / 2, dataShape[2], dataShape[3] };
 }
 
 GAPI_OCV_KERNEL(OCVDetectionPostProcess, custom::DetectionPostProcess) {
@@ -221,8 +222,8 @@ GAPI_OCV_KERNEL(OCVDetectionPostProcess, custom::DetectionPostProcess) {
         if (det1.size[1] == tdLinkLayerChannels) {
             std::vector<float> linkData{}, segmData{};
             std::vector<int> linkNewShape{}, segmNewShape{};
-            processData(det1.ptr<float>(), det1.total(), det1.size, linkData, linkNewShape);
-            processData(det2.ptr<float>(), det2.total(), det2.size, segmData, segmNewShape);
+            processData(det1, linkData, linkNewShape);
+            processData(det2, segmData, segmNewShape);
             auto mask = decodeImageByJoin(segmData, segmNewShape, linkData, linkNewShape,
                                           segmThr, linkThr);
             out = maskToBoxes(mask, kMinArea, kMinHeight, imgSize);
@@ -363,34 +364,36 @@ GAPI_OCV_KERNEL_ST(OCVCompositeTRDecode, custom::CompositeTRDecode, cv::GCompile
                                          cv::GMetaArg(descrs.second) },
                           cv::compile_args(nets)));
     }
-    static void run(const std::vector<cv::Mat>&  hiddens_,
-                    const std::vector<cv::Mat>&  features,
-                    const size_t                 numClasses,
-                    const size_t                 endToken,
-                          std::vector<cv::Mat>&  res,
+    static void run(const std::vector<cv::Mat>& hiddens_,
+                    const std::vector<cv::Mat>& features,
+                    const size_t                numClasses,
+                    const size_t                endToken,
+                          std::vector<cv::Mat>& results,
                           cv::GCompiled& compiled) {
         constexpr int maxDecodedSymbols = 20;
         GAPI_DbgAssert(hiddens_.size() == features.size());
         const size_t numDetectedLabels = features.size();
 
+        results.clear();
         if (0 == numDetectedLabels) {
-            res.clear();
             return;
         }
+        results.reserve(numDetectedLabels);
 
-        std::vector<cv::Mat> states(numDetectedLabels, cv::Mat(stateDims, stateType));
-        std::for_each(states.begin(), states.end(),
-                      [](cv::Mat& m){ m.dims = 1; *(m.begin<float>()) = 0; });
-        std::vector<cv::Mat> hiddens(hiddens_);
-
-        res.reserve(numDetectedLabels);
-        for (auto i = 0U; i < numDetectedLabels; i++) {
-            res.emplace_back(std::vector<int>{ maxDecodedSymbols, 1, static_cast<int>(numClasses) },
-                             CV_32FC1);
+        std::vector<cv::Mat> states;
+        states.reserve(numDetectedLabels);
+        for (size_t i = 0; i < numDetectedLabels; i++) {
+            cv::Mat m(stateDims, stateType);
+            m.dims = 1;
+            *(m.begin<float>()) = 0;
+            states.push_back(m);
         }
+        std::vector<cv::Mat> hiddens(hiddens_);
 
         cv::Mat hidden, out;
         for (size_t nLabel = 0; nLabel < numDetectedLabels; nLabel++) {
+            cv::Mat result(std::vector<int> { maxDecodedSymbols, 1, static_cast<int>(numClasses) },
+                           CV_32FC1);
             for (int nSymbol = 0; nSymbol < maxDecodedSymbols; nSymbol++) {
                 compiled(cv::gin(states[nLabel], hiddens[nLabel], features[nLabel]),
                          cv::gout(hidden, out));
@@ -398,7 +401,7 @@ GAPI_OCV_KERNEL_ST(OCVCompositeTRDecode, custom::CompositeTRDecode, cv::GCompile
                                                 out.begin<float>() + numClasses);
                 auto argmax = static_cast<size_t>(std::distance(out.begin<float>(), maxElem));
                 for (size_t i = 0; i < numClasses; i++) {
-                    res[nLabel].begin<float>()[nSymbol * numClasses + i] = out.begin<float>()[i];
+                    result.begin<float>()[nSymbol * numClasses + i] = out.begin<float>()[i];
                 }
                 if (endToken == argmax) {
                     break;
@@ -406,6 +409,7 @@ GAPI_OCV_KERNEL_ST(OCVCompositeTRDecode, custom::CompositeTRDecode, cv::GCompile
                 *(states[nLabel].begin<float>()) = float(argmax);
                 hiddens[nLabel] = hidden;
             }
+            results.push_back(result);
         }
     }
 };

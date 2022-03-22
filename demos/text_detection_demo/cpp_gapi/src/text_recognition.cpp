@@ -31,9 +31,8 @@ bool tryReadVocabFile(const std::string& filename, std::string& alphabet) {
             throw std::logic_error("File is empty: " + filename);
         }
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void softmaxAndChoose(const std::vector<float>::const_iterator& begin,
@@ -57,8 +56,9 @@ std::vector<float> softmax(const std::vector<float>::const_iterator& begin,
     std::vector<float> prob(end - begin, 0.f);
     std::transform(begin, end, prob.begin(), [](float x) { return std::exp(x); });
     float sum = std::accumulate(prob.begin(), prob.end(), 0.0f);
-    for (int i = 0; i < static_cast<int>(prob.size()); i++)
-        prob[i] /= sum;
+    for (auto& el : prob) {
+        el /= sum;
+    }
     return prob;
 }
 
@@ -75,17 +75,17 @@ struct BeamElement {
 };
 
 std::string SimpleDecoder(const std::vector<float>& data, const std::string& alphabet,
-                          char padSymbol, double *conf, int startIdx) {
+                          char padSymbol, double& conf, int startIdx) {
     std::string result = "";
     const int numClasses = alphabet.length();
-    *conf = 1;
+    conf = 1.;
 
     for (auto it = data.begin() + startIdx * numClasses; it != data.end(); it += numClasses) {
         int argmax;
         float prob;
 
         softmaxAndChoose(it, it + numClasses, &argmax, &prob);
-        (*conf) *= prob;
+        conf *= prob;
         auto symbol = alphabet[argmax];
         if (symbol != padSymbol)
             result += symbol;
@@ -97,42 +97,42 @@ std::string SimpleDecoder(const std::vector<float>& data, const std::string& alp
 }
 
 std::string CTCGreedyDecoder(const std::vector<float>& data, const std::string& alphabet,
-                             char padSymbol, double *conf) {
+                             char padSymbol, double& conf) {
     std::string result = "";
     bool padPrev = false;
-    *conf = 1;
+    conf = 1.;
 
     const int numClasses = alphabet.length();
     for (auto it = data.begin(); it != data.end(); it += numClasses) {
-      int argmax;
-      float prob;
+        int argmax;
+        float prob;
 
-      softmaxAndChoose(it, it + numClasses, &argmax, &prob);
+        softmaxAndChoose(it, it + numClasses, &argmax, &prob);
 
-      (*conf) *= prob;
+        conf *= prob;
 
-      auto symbol = alphabet[argmax];
-      if (symbol != padSymbol) {
-          if (result.empty() || padPrev || (!result.empty() && symbol != result.back())) {
-            padPrev = false;
-            result += symbol;
-          }
-      } else {
-        padPrev = true;
-      }
+        auto symbol = alphabet[argmax];
+        if (symbol != padSymbol) {
+            if (result.empty() || padPrev || (!result.empty() && symbol != result.back())) {
+                padPrev = false;
+                result += symbol;
+            }
+        } else {
+            padPrev = true;
+        }
     }
 
     return result;
 }
 
 std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::string& alphabet,
-                                 char padSymbol, double *conf, int bandwidth) {
+                                 char padSymbol, double& conf, int bandwidth) {
     const int numClasses = alphabet.length();
 
     std::vector<BeamElement> curr;
     std::vector<BeamElement> last;
 
-    last.push_back(BeamElement{std::vector<int>(), 1.f, 0.f});
+    last.push_back({ std::vector<int>(), 1.f, 0.f });
 
     for (auto it = data.begin(); it != data.end(); it += numClasses) {
         curr.clear();
@@ -153,7 +153,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::stri
             };
             auto checkRes = std::find_if(curr.begin(), curr.end(), cmp);
             if (checkRes == std::end(curr)) {
-                curr.push_back(BeamElement{candidate.sentence, probBlank, probNotBlank});
+                curr.push_back({ candidate.sentence, probBlank, probNotBlank });
             } else {
                 checkRes->probNotBlank  += probNotBlank;
                 if (checkRes->probBlank != 0.f) {
@@ -180,7 +180,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::stri
                 });
 
                 if (checkRes == std::end(curr)) {
-                    curr.push_back(BeamElement{extend, 0.f, probNotBlank});
+                    curr.push_back({ extend, 0.f, probNotBlank });
                 } else {
                     checkRes->probNotBlank += probNotBlank;
                 }
@@ -198,7 +198,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float>& data, const std::stri
         }
     }
 
-    *conf = last[0].prob();
+    conf = last[0].prob();
     std::string result = "";
     for (const auto& idx: last[0].sentence) {
         result += alphabet[idx];
