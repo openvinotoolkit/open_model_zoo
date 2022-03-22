@@ -124,6 +124,8 @@ class SequentialModel(BaseCascadeModel):
             'recognizer_encoder': self.recognizer_encoder,
             'recognizer_decoder': self.recognizer_decoder
         }
+        if not delayed_model_loading:
+            self.update_inputs_outputs_info()
 
     @property
     def adapter(self):
@@ -344,9 +346,9 @@ class DetectorOVModel(BaseOpenVINOModel):
         ]
         if self.im_info_name:
             self.im_info_name = self.im_info_name[0]
-            self.text_feats_out = 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features'
         else:
-            self.text_feats_out = 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features'
         self.adapter = create_adapter(self.adapter_info, additional_output_mapping=self.additional_output_mapping)
 
 
