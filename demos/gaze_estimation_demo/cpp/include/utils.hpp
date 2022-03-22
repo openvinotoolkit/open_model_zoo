@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <opencv2/core/types.hpp>
 #include "utils/ocv_common.hpp"
 
 namespace gaze_estimation {
