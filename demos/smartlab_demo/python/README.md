@@ -56,20 +56,23 @@ Options:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target to infer on CPU or GPU.
   -tv TOPVIEW, --topview TOPVIEW
-                        Required. Topview stream to be processed. The input must be a single image, a folder of images,
-                        video file or camera id.
-  -fv FRONTVIEW, --frontview FRONTVIEW
-                        Required. FrontView to be processed. The input must be a single image, a folder of images,
-                        video file or camera id.
+                        Required. Topview stream to be processed. The input must be a single image, a folder of images, video file or
+                        camera id.
+  -sv SIDEVIEW, --sideview SIDEVIEW
+                        Required. SideView to be processed. The input must be a single image, a folder of images, video file or camera
+                        id.
   -m_ta M_TOPALL, --m_topall M_TOPALL
                         Required. Path to topview all class model.
   -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
                         Required. Path to topview moving class model.
-  -m_fa M_FRONTALL, --m_frontall M_FRONTALL
-                        Required. Path to frontview all class model.
-  -m_fm M_FRONTMOVE, --m_frontmove M_FRONTMOVE
-                        Required. Path to frontview moving class model.
-  -m_en M_ENCODER, --m_encoder M_ENCODER
+  -m_sa M_SIDEALL, --m_sideall M_SIDEALL
+                        Required. Path to sidetview all class model.
+  -m_sm M_SIDEMOVE, --m_sidemove M_SIDEMOVE
+                        Required. Path to sidetview moving class model.
+  --mode MODE           Optional. Action recognition mode: multiview
+  -m_en_t M_ENCODER_TOP, --m_encoder_top M_ENCODER_TOP
+                        Required. Path to encoder model.
+  -m_en_s M_ENCODER_SIDE, --m_encoder_side M_ENCODER_SIDE
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
                         Required. Path to decoder model.
@@ -85,8 +88,9 @@ python3 smartlab_demo.py
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
-    -m_en "./public/i3d-rgb-tf/FP32/i3d-rgb-tf.xml"
-    -m_de "./intel/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.xml"
+    -m_en_t "./intel/smartlab-action-recognition-0002-encoder-top/FP32/smartlab-action-recognition-0002-encoder-top.xml"
+    -m_en_s "./intel/smartlab-action-recognition-0002-encoder-side/FP32/smartlab-action-recognition-0002-encoder-side.xml"
+    -m_de "./intel/smartlab-action-recognition-0002-decoder/FP32/smartlab-action-recognition-0002-decoder.xml"
 ```
 
 ## Demo Output
