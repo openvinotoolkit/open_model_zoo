@@ -328,8 +328,7 @@ def main():
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment, timeout=600)
+                                universal_newlines=True, encoding='utf-8', env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
