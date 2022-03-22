@@ -8,6 +8,15 @@
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/gapi/infer.hpp>
 
+using CompositeDecInputDescrs = std::pair<cv::GMatDesc, cv::GMatDesc>;
+namespace cv { namespace detail {
+    template<> struct CompileArgTag<CompositeDecInputDescrs> {
+        static const char* tag() {
+            return "custom.compositeDecoderInputDescrs";
+        }
+    };
+}} // namespace cv::detail
+
 namespace custom {
 using GSize = cv::GOpaque<cv::Size>;
 using GRRects = cv::GArray<cv::RotatedRect>;
@@ -38,10 +47,10 @@ G_API_OP(CropLabels, <std::tuple<GMats,GRRPoints>(cv::GMat,GRRects,std::vector<s
     }
 };
 
-G_API_OP(CompositeTRDecode, <GMats(GMats,GMats,cv::gapi::GNetPackage,size_t,size_t)>,
+G_API_OP(CompositeTRDecode, <GMats(GMats,GMats,size_t,size_t)>,
          "sample.custom.text.recogCompositeDecode") {
     static cv::GArrayDesc outMeta(const cv::GArrayDesc&, const cv::GArrayDesc&,
-                                  const cv::gapi::GNetPackage&, const size_t, const size_t) {
+                                  const size_t, const size_t) {
         return cv::empty_array_desc();
     }
 };

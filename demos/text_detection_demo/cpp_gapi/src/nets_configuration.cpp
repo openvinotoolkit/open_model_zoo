@@ -151,6 +151,11 @@ template<class Map> void getKeys(const Map& map, std::vector<std::string>& vec) 
         [](const typename Map::value_type& pair) { return pair.first; });
 }
 
+void getIntDims(const std::vector<size_t>& sizeVector, std::vector<int>& dims) {
+    std::transform(sizeVector.begin(), sizeVector.end(), std::back_inserter(dims),
+        [](const size_t dim) { return dim; });
+}
+
 void custom::NetsConfig::getTRcompositeInfo(const std::array<std::string,2>& encoderOutputNames_,
                                             const std::array<std::string,3>& decoderInputNames_,
                                             const std::array<std::string,2>& decoderOutputNames_,
@@ -170,17 +175,25 @@ void custom::NetsConfig::getTRcompositeInfo(const std::array<std::string,2>& enc
             decoderModelPath.find("encoder"), 7, "decoder");
     }
     auto decNetwork = ie.ReadNetwork(decoderModelPath);
+    auto decInputInfo = decNetwork.getInputsInfo();
 
     // Checking names legitimacy
     std::vector<std::string> encoderOutputLayers {};
     std::vector<std::string> decoderInputLayers  {};
     std::vector<std::string> decoderOutputLayers {};
-    getKeys(trNetwork.getOutputsInfo(), encoderOutputLayers);
-    getKeys(decNetwork.getInputsInfo(), decoderInputLayers);
+    getKeys(trNetwork.getOutputsInfo(),  encoderOutputLayers);
+    getKeys(decInputInfo,                decoderInputLayers);
     getKeys(decNetwork.getOutputsInfo(), decoderOutputLayers);
     checkCompositeNetNames(encoderOutputLayers, encoderOutputNames,
                            decoderInputLayers,  decoderInputNames,
                            decoderOutputLayers, decoderOutputNames);
+
+    decoderHiddenInputDims.clear();
+    getIntDims(decInputInfo[decoderInputNames[1]]->getInputData()->getTensorDesc().getDims(),
+               decoderHiddenInputDims);
+    decoderFeaturesInputDims.clear();
+    getIntDims(decInputInfo[decoderInputNames[2]]->getInputData()->getTensorDesc().getDims(),
+               decoderFeaturesInputDims);
 
     trAlphabet = std::string(3, kPadSymbol) + trSymbolsSet;
     decoderNumClasses = trAlphabet.length();
@@ -204,5 +217,5 @@ void custom::NetsConfig::configureTRcomposite(const std::string& trDevice) {
     static auto trDecNet = cv::gapi::ie::Params<nets::TextRecognitionDecoding> {
         decoderModelPath, fileNameNoExt(decoderModelPath) + ".bin", trDevice
     }.cfgInputLayers({decoderInputNames}).cfgOutputLayers({decoderOutputNames});
-    decNetwork += cv::gapi::networks(trDecNet);
+    networks += cv::gapi::networks(trDecNet);
 }

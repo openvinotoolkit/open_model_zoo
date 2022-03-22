@@ -48,19 +48,19 @@ public:
                             const std::string& trSymbolsSet, const std::string& decoderType);
     void configureTRcomposite(const std::string& trDevice);
 
-    cv::Size                  tdInputSize{};
-    size_t                    tdInputChannels = 0;
+    cv::Size tdInputSize{};
+    size_t   tdInputChannels = 0;
 
     std::vector<size_t> trInputDims{};
     size_t              trInputChannels = 0;
     std::string decoderModelPath = "";
-
+    std::vector<int> decoderHiddenInputDims{};
+    std::vector<int> decoderFeaturesInputDims{};
     size_t decoderNumClasses = 0;
     size_t decoderEndToken = 0;
 
     std::string trAlphabet = "";
 
     cv::gapi::GNetPackage networks;
-    cv::gapi::GNetPackage decNetwork;
 };
 }

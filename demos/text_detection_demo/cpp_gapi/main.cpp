@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
                 cv::GArray<cv::GMat> features;
                 std::tie(hiddens, features) =
                     cv::gapi::infer2<nets::TextRecognitionEncoding>(inRec, labels);
-                texts = custom::CompositeTRDecode::on(hiddens, features, config.decNetwork,
+                texts = custom::CompositeTRDecode::on(hiddens, features,
                                                       config.decoderNumClasses,
                                                       config.decoderEndToken);
             } else {
@@ -206,10 +206,16 @@ int main(int argc, char* argv[]) {
         cap.reset();
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe);
 
-        auto kernels  = custom::kernels();
+        auto compileArgs = cv::compile_args(custom::kernels(), config.networks);
+        if (trComposite) {
+            compileArgs.emplace_back(CompositeDecInputDescrs{
+                                        cv::GMatDesc(CV_32F, config.decoderHiddenInputDims),
+                                        cv::GMatDesc(CV_32F, config.decoderFeaturesInputDims)
+                                     });
+        }
         cv::GStreamingCompiled pipeline;
         if (gapiStreaming) {
-            pipeline = graph.compileStreaming(cv::compile_args(kernels, config.networks));
+            pipeline = graph.compileStreaming(std::move(compileArgs));
             pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap)));
             pipeline.start();
         }
@@ -245,8 +251,7 @@ int main(int argc, char* argv[]) {
                 if (!image.data) {
                     break;
                 }
-                graph.apply(cv::gin(image), getOutVector(),
-                            cv::compile_args(kernels, config.networks));
+                graph.apply(cv::gin(image), getOutVector(), std::move(compileArgs));
             }
             const auto numFound = outPts.size();
             int numRecognized = trEnabled ? 0 : numFound;
