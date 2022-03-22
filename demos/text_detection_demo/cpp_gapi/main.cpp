@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
         }
         if (trSymbolsSet.find(kPadSymbol) != trSymbolsSet.npos) {
             throw std::invalid_argument("Symbols set for the Text Recongition model must not "
-                                        "contain the reserved symbol " + kPadSymbol);
+                                        "contain the reserved symbol " + std::string{ kPadSymbol });
         }
 
         custom::NetsConfig config(FLAGS_m_td, FLAGS_m_tr);
