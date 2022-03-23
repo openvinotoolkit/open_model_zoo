@@ -591,7 +591,7 @@ DEMOS = [
             model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-r' : None,
+        TestCase(options={'-no_show': None, '-r' : None, '-n_iqs': '1',
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0123')}),

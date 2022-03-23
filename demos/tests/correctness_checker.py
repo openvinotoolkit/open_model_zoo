@@ -94,12 +94,6 @@ class CPPDemo(Demo):
     
     def checker(self):
         self.parser()
-        for device in self.results:
-            for case in self.results[device]:
-                print ("---* Device: {} - Case: {} *----\n".format(device, case))
-                for channel in self.results[device][case]:
-                    print ("Channel: {} - :{}".format(channel, self.results[device][case][channel]))
-                print ('---------------------------------------------------------')
 
         flag = False
         if "CPU" in self.results and "AUTO:CPU" in self.results:
@@ -114,6 +108,13 @@ class CPPDemo(Demo):
             else:
                 print ("GPU vs AUTO:GPU have inconsistent results")
 
+        if not flag:
+            for device in self.results:
+                for case in self.results[device]:
+                    print ("---* Device: {} - Case: {} *----\n".format(device, case))
+                    for channel in self.results[device][case]:
+                        print ("Channel: {} - :{}".format(channel, self.results[device][case][channel]))
+                    print ('---------------------------------------------------------')
         return flag
 
     
