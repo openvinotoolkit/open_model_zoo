@@ -23,6 +23,9 @@ std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
         return enabledMonitors;
     }
     for (unsigned char key: keys) {
+        if (key == "h") {
+            throw std::runtime_error("Unacceptable combination of monitor types-can't show and hide info at the same time");
+        }
         auto iter = keyToMonitorType.find(std::toupper(key));
         if (keyToMonitorType.end() == iter) {
             throw std::runtime_error("Unknown monitor type");
