@@ -106,7 +106,7 @@ class OpenPose(ImageModel):
         strides = (array.strides[0], array.strides[1], array.strides[2],
                    array.strides[1], array.strides[2])
         strided = np.lib.stride_tricks.as_strided(array, shapes, strides)
-        pooled_array = strided.max(axis=(3,4))
+        pooled_array = strided.max(axis=(3, 4))
         return np.expand_dims(pooled_array, axis=0)
 
     @staticmethod
