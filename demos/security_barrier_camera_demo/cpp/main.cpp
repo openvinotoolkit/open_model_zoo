@@ -398,7 +398,6 @@ void Drawer::process() {
 }
 
 void ResAggregator::process() {
-    //slog::debug <<"ResAggregator::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
