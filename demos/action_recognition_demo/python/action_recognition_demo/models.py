@@ -114,7 +114,7 @@ class IEModel:
         self.infer_queue.start_async(input_data, req_id)
 
     def wait_request(self, req_id):
-        self.infer_queue.wait_all()
+        self.infer_queue[req_id].wait()
         return self.outputs.pop(req_id, None)
 
 
