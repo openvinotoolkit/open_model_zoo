@@ -39,71 +39,87 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
+
     args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', required=True,
-                      help='Required. Path to an .xml file with a trained model '
-                           'or address of model inference service if using OVMS adapter.')
-    args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
-                      default='openvino', type=str, choices=('openvino', 'ovms'))
-    args.add_argument('-i', '--input', required=True,
-                      help='Required. An input to process. The input must be a single image, '
-                           'a folder of images, video file or camera id.')
-    args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
-                           'acceptable. The demo will look for a suitable plugin for device specified. '
-                           'Default value is CPU.')
+
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
+        help='show the help message and exit')
+
+    args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
+        help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
+
+    args.add_argument('-i', '--input', required=True, type=Path, metavar="<INPUT>",
+        help='an input to process. The input must be a single image, a folder of images or camera id')
+        
+    args.add_argument('--adapter', default='openvino', type=str, choices=('openvino', 'ovms'), metavar="<ADAPTER>",
+        help='specify the model adapter. Default is openvino')
+
+    args.add_argument('-d', '--device', default='CPU', type=str, metavar="<DEVICE>",
+        help='specify the target device to infer on: CPU, GPU, HDDL or MYRIAD is acceptable.'
+            'The demo will look for a suitable plugin for device specified. Default value is CPU')
 
     common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    common_model_args.add_argument('-topk', help='Optional. Number of top results. Default value is 5. Must be from 1 to 10.', default=5,
-                                   type=int, choices=range(1, 11))
-    common_model_args.add_argument('--layout', type=str, default=None,
-                                   help='Optional. Model inputs layouts. '
-                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
+
+    common_model_args.add_argument('--labels', default=None, type=str, metavar="<LABELS>",
+        help='labels mapping file')
+
+    common_model_args.add_argument('--layout', type=str, default=None, metavar="<STRING>",
+        help='model inputs layouts. Example: NCHW or input0:NCHW,input1:NC in case of more than one input')
+
+    common_model_args.add_argument('--topk', default=5, type=int, choices=range(1, 11), metavar="<NUMBER>",
+        help='number of top results(from 1 to 10). Default value is 5')
 
     infer_args = parser.add_argument_group('Inference options')
-    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
-                            default=0, type=int)
-    infer_args.add_argument('-nstreams', '--num_streams',
-                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
-                                 'mode (for HETERO and MULTI device cases use format '
-                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
-                            default='', type=str)
-    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
-                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+
+    infer_args.add_argument('-nireq', '--num_infer_requests', default=0, type=int, metavar="<NUMBER>",
+        help='number of infer requests')
+
+    infer_args.add_argument('-nstreams', '--num_streams', default='', type=str, metavar="<NUMBER>",
+        help='number of streams to use for inference on the CPU or/and GPU in throughput '
+            'mode (for HETERO and MULTI device cases use format '
+            '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)')
+
+    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int, metavar="<NUMBER>",
+        help='number of threads to use for inference on CPU (including HETERO cases)')
 
     io_args = parser.add_argument_group('Input/output options')
+
     io_args.add_argument('--loop', default=False, action='store_true',
-                         help='Optional. Enable reading the input in a loop.')
-    io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of the output file(s) to save.')
-    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
-                         help='Optional. Number of frames to store in output. '
-                              'If 0 is set, all frames are stored.')
-    io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
-    io_args.add_argument('--output_resolution', default=None, type=resolution,
-                         help='Optional. Specify the maximum output window resolution '
-                              'in (width x height) format. Example: 1280x720. '
-                              'Input frame size used by default.')
-    io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
-                         help='Optional. List of monitors to show initially.')
+        help='enable reading the input in a loop')
+
+    io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
+        help='name of the output file(s) to save')
+
+    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int, metavar="<NUMBER>",
+        help='number of frames to store in output. If 0 is set, all frames are stored. Default value is 1000')
+
+    io_args.add_argument('--no_show', action='store_true',
+        help="don't show output")
+
+    io_args.add_argument('--output_resolution', default=None, type=resolution, metavar="<STRING>",
+        help='specify the maximum output window resolution in (width x height) format. Example: 1280x720'
+            'Default value is input frame size')
+
+    io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<DEVICE>",
+        help='list of monitors to show initially')
 
     input_transform_args = parser.add_argument_group('Input transform options')
+
     input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
-                                      help='Optional. Switch the input channels order from '
-                                           'BGR to RGB.')
-    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
-                                      help='Optional. Normalize input by subtracting the mean '
-                                           'values per channel. Example: 255.0 255.0 255.0')
-    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
-                                      help='Optional. Divide input by scale values per channel. '
-                                           'Division is applied after mean values subtraction. '
-                                           'Example: 255.0 255.0 255.0')
+        help='switch the input channels order from BGR to RGB')
+
+    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3, metavar="<STRING>",
+        help='normalize input by subtracting the mean values per channel. Example: 255.0 255.0 255.0')
+
+    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3, metavar="<STRING>",
+        help='divide input by scale values per channel(division is applied after mean values subtraction). '
+            'Example: 255.0 255.0 255.0')
 
     debug_args = parser.add_argument_group('Debug options')
-    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
-                            default=False, action='store_true')
+
+    debug_args.add_argument('-r', '--raw_output_message', default=False, action='store_true',
+        help='output inference results raw values showing')
+
     return parser
 
 

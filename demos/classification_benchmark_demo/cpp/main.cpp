@@ -96,7 +96,7 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--res <STRING>]      " << res_msg
                   << "\n\t[--show] ([--noshow]) " << show_msg
                   << "\n\t[--time <NUMBER>]     " << time_msg
-                  << "\n\t[ -u]                 " << u_msg
+                  << "\n\t[ -u <DEVICE>]                 " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
                      "\n\t\tR, r, SpaceBar - Restart testing"
