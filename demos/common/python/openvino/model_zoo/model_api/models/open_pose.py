@@ -20,8 +20,8 @@ try:
     from numpy.core.umath import clip
 except ImportError:
     from numpy import clip
-import openvino.runtime.opset8 as opset8
 
+from ..adapters import OpenvinoAdapter
 from .image_model import ImageModel
 from .types import NumericalValue
 
@@ -31,43 +31,44 @@ class OpenPose(ImageModel):
 
     def __init__(self, model_adapter, configuration=None, preload=False):
         super().__init__(model_adapter, configuration, preload=False)
-        self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
-        self.heatmaps_blob_name = 'heatmaps'
-        self.pafs_blob_name = 'pafs'
+        self._check_io_number(1, 2)
 
-        function = self.model_adapter.model
-        paf = function.get_output_op(0)
-        paf_shape = paf.output(0).get_shape()
-        heatmap = function.get_output_op(1)
+        if isinstance(model_adapter, OpenvinoAdapter):
+            import openvino.runtime.opset8 as opset8
+            self.is_openvino_adapter = True
+        else:
+            self.is_openvino_adapter = False
 
-        heatmap_shape = heatmap.output(0).get_shape()
+        self.heatmaps_blob_name, self.pafs_blob_name = self.outputs
+        heatmap_shape = self.outputs[self.heatmaps_blob_name].shape
+        paf_shape = self.outputs[self.pafs_blob_name].shape
+
         if len(paf_shape) != 4 and len(heatmap_shape) != 4:
             self.raise_error('OpenPose outputs must be 4-dimensional')
         if paf_shape[2] != heatmap_shape[2] and paf_shape[3] != heatmap_shape[3]:
             self.raise_error('Last two dimensions of OpenPose outputs must match')
         if paf_shape[1] * 2 == heatmap_shape[1]:
-            paf, heatmap = heatmap, paf
+            self.heatmaps_blob_name, self.pafs_blob_name = self.pafs_blob_name, self.heatmaps_blob_name
         elif paf_shape[1] != heatmap_shape[1] * 2:
             self.raise_error('Size of second dimension of OpenPose of one output must be two times larger then size '
                              'of second dimension of another output')
 
-        paf = paf.inputs()[0].get_source_output().get_node()
-        paf.get_output_tensor(0).set_names({self.pafs_blob_name})
-        heatmap = heatmap.inputs()[0].get_source_output().get_node()
-
-        heatmap.get_output_tensor(0).set_names({self.heatmaps_blob_name})
-
         # Add keypoints NMS to the network.
         # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
-        p = int(np.round(6 / 7 * self.upsample_ratio))
-        k = 2 * p + 1
-        pooled_heatmap = opset8.max_pool(heatmap, kernel_shape=(k, k), dilations=(1, 1), pads_begin=(p, p), pads_end=(p, p),
-                                     strides=(1, 1), name=self.pooled_heatmaps_blob_name)
-        pooled_heatmap.output(0).get_tensor().set_names({self.pooled_heatmaps_blob_name})
-        self.model_adapter.model.add_outputs([pooled_heatmap.output(0)])
+        self.p = int(np.round(6 / 7 * self.upsample_ratio))
+        self.k = 2 * self.p + 1
 
-        self.inputs = self.model_adapter.get_input_layers()
-        self.outputs = self.model_adapter.get_output_layers()
+        if self.is_openvino_adapter:
+            self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
+            heatmap = self.model_adapter.model.get_output_op(1)
+            heatmap = heatmap.inputs()[0].get_source_output().get_node()
+
+            pooled_heatmap = opset8.max_pool(
+                heatmap, kernel_shape=(self.k, self.k), dilations=(1, 1), pads_begin=(self.p, self.p),
+                pads_end=(self.p, self.p), strides=(1, 1), name=self.pooled_heatmaps_blob_name)
+
+            pooled_heatmap.output(0).get_tensor().set_names({self.pooled_heatmaps_blob_name})
+            self.model_adapter.model.add_outputs([pooled_heatmap.output(0)])
 
         self.output_scale = self.inputs[self.image_blob_name].shape[-2] / self.outputs[self.heatmaps_blob_name].shape[-2]
 
@@ -99,6 +100,15 @@ class OpenPose(ImageModel):
         })
         return parameters
 
+    def max_pooling(self, array):
+        shapes = array.shape + (self.k, self.k)
+        array = np.pad(array, [(0, 0), (self.p, self.p), (self.p, self.p)], mode='constant')
+        strides = (array.strides[0], array.strides[1], array.strides[2],
+                   array.strides[1], array.strides[2])
+        strided = np.lib.stride_tricks.as_strided(array, shapes, strides)
+        pooled_array = strided.max(axis=(3,4))
+        return np.expand_dims(pooled_array, axis=0)
+
     @staticmethod
     def heatmap_nms(heatmaps, pooled_heatmaps):
         return heatmaps * (heatmaps == pooled_heatmaps)
@@ -128,7 +138,12 @@ class OpenPose(ImageModel):
     def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
         pafs = outputs[self.pafs_blob_name]
-        pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
+
+        if self.is_openvino_adapter:
+            pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
+        else:
+            pooled_heatmaps = self.max_pooling(heatmaps.squeeze())
+
         nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
         poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
         # Rescale poses to the original image.

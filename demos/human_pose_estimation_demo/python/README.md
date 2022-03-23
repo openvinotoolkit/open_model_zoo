@@ -52,10 +52,13 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,hrnet,openpose} -i
-                                     INPUT [--loop] [-o OUTPUT]
+usage: human_pose_estimation_demo.py [-h] -m MODEL -at
+                                     {ae,higherhrnet,openpose}
+                                     [--adapter {openvino,ovms}] -i INPUT
+                                     [--loop] [-o OUTPUT]
                                      [-limit OUTPUT_LIMIT] [-d DEVICE]
                                      [-t PROB_THRESHOLD] [--tsize TSIZE]
+                                     [--layout LAYOUT]
                                      [-nireq NUM_INFER_REQUESTS]
                                      [-nstreams NUM_STREAMS]
                                      [-nthreads NUM_THREADS] [-no_show]
@@ -68,6 +71,9 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -at {ae,higherhrnet,openpose}, --architecture_type {ae,higherhrnet,openpose}
                         Required. Specify model' architecture type.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is
+                        openvino.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera
@@ -98,6 +104,8 @@ Common model options:
                         resized to a predefined height, which is the target
                         size in this case. For Associative Embedding-like nets
                         target size is the length of a short first image side.
+  --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or
+                        input0:NCHW,input1:NC in case of more than one input.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -147,6 +155,21 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 human_pose_estimation_demo.py \
+  -d CPU \
+  -i 0 \
+  -m localhost:9000/models/human_pose_estimation \
+  -at ae
+  --adapter ovms
+```
 
 ## Demo Output
 
