@@ -51,7 +51,7 @@ as shown in code mockup below:
     }
 ```
 
-For more details on the requests-based OpenVINO™ Runtime API, including the Async execution, refer to [Integrate the OpenVINO™ Runtime with Your Application](https://docs.openvino.ai/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based OpenVINO™ Runtime API, including the Async execution, refer to [Integrate the OpenVINO™ Runtime with Your Application](https://docs.openvino.ai/latest/openvino_docs_Integrate_OV_with_your_application.html).
 
 ## Preparing to Run
 
