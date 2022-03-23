@@ -28,7 +28,7 @@ Other demo objectives are:
 
 On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 This demo operates in asynchronous manner by using "Infer Requests" that encapsulate the inputs/outputs and separates *scheduling and waiting for result*,
 as shown in code mockup below:
@@ -51,7 +51,7 @@ as shown in code mockup below:
     }
 ```
 
-For more details on the requests-based OpenVINO™ Runtime API, including the Async execution, refer to [Integrate the OpenVINO™ Runtime with Your Application](https://docs.openvino.ai/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based OpenVINO™ Runtime API, including the Async execution, refer to [Integrate the OpenVINO™ Runtime with Your Application](https://docs.openvino.ai/latest/openvino_docs_Integrate_OV_with_your_application.html).
 
 ## Preparing to Run
 
