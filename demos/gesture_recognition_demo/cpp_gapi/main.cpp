@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
-        while (pipeline.pull(std::move(cv::gout(out_frame, out_detections, out_label_number)))) {
+        while (pipeline.pull(cv::gout(out_frame, out_detections, out_label_number))) {
             /** Put FPS to frame**/
             if (isStart) {
                 metrics.update(startTime, out_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,

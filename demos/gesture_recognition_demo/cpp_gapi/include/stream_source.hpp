@@ -190,7 +190,7 @@ protected:
         }
 
         /** Put pulled batch to GRunArg data **/
-        cv::detail::VectorRef ref(std::move(producer.getBatch()));
+        cv::detail::VectorRef ref(producer.getBatch());
         data = std::move(ref);
         return true;
     }

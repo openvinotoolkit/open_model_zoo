@@ -259,7 +259,8 @@ void ModelSSD::prepareMultipleOutputs(std::shared_ptr<ov::Model>& model) {
         }
     }
     else {
-        throw std::logic_error("Incorrect number of 'boxes' output dimensions, expected 2 or 3, but had " + boxesShape.size());
+        throw std::logic_error("Incorrect number of 'boxes' output dimensions, expected 2 or 3, but had "
+            + std::to_string(boxesShape.size()));
     }
 
     ppp.output(outputsNames[0]).tensor().

@@ -276,7 +276,7 @@ std::vector<std::pair<float, Output>> CtcDecoderState::decode(
     candidates_[i]->approx_ctc = approx_ctc;
   }
 
-  return std::move(get_beam_search_result(candidates_, num_candidates));
+  return get_beam_search_result(candidates_, num_candidates);
 };
 
 std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
@@ -298,7 +298,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
   decoder.set_config("cutoff_top_n", cutoff_top_n, true);
 
   decoder.append(probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs);
-  return std::move(decoder.decode());
+  return decoder.decode();
 }
 
 std::vector<std::vector<std::pair<float, Output>>>

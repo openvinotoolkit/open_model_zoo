@@ -77,11 +77,14 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     preprocessMetrics.update(startTime);
 
     request.set_callback(
-        [this, request, frameID, internalModelData, metaData, startTime](std::exception_ptr) mutable {
+        [this, request, frameID, internalModelData, metaData, startTime](std::exception_ptr ex) mutable {
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
                 try {
+                    if (ex) {
+                        std::rethrow_exception(ex);
+                    }
                     InferenceResult result;
 
                     result.frameId = frameID;

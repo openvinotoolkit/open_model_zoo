@@ -226,7 +226,7 @@ std::vector<cv::RotatedRect> TextDetector::postProcess(
         float* link_data_pointer = output_tensors.at(kLocOutputName).data<float>();
 
         std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);;
-        if (m_modelLayout == ov::Layout({"NCHW"})) {
+        if (m_modelLayout == ov::Layout("NCHW")) {
             link_data = transpose4d(link_data, link_shape, { 0, 2, 3, 1 });
         }
 
@@ -246,7 +246,7 @@ std::vector<cv::RotatedRect> TextDetector::postProcess(
         float* cls_data_pointer = output_tensors.at(kClsOutputName).data<float>();
 
         std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
-        if (m_modelLayout == ov::Layout({"NCHW"})) {
+        if (m_modelLayout == ov::Layout("NCHW")) {
             cls_data = transpose4d(cls_data, cls_shape, { 0, 2, 3, 1 });
         }
 

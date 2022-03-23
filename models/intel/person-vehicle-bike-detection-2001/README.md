@@ -14,7 +14,7 @@ prior boxes for 384x384 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.226 (internal test set)                 |
+| AP @ [ IoU=0.50:0.95 ]          | 0.2259 (internal test set)                |
 | GFlops                          | 1.770                                     |
 | MParams                         | 1.821                                     |
 | Source framework                | PyTorch\*                                 |

@@ -92,20 +92,31 @@ class Quantizer:
         return pot_cmd_prefix
 
 
-    def quantize(self, reporter, model, precision, target_device, pot_cmd_prefix, pot_env) -> bool:
+    def quantize(self, reporter, model, precision, target_device, pot_cmd_prefix, pot_env, model_root=None) -> bool:
         input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
-        pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
+        model_root = _common.MODEL_ROOT if model_root is None else model_root
+        pot_config_base_path = model_root / model.subdirectory / 'quantization.yml'
+
+        reporter.print_section_heading('{}Quantizing {} from {} to {}',
+            '(DRY RUN) ' if self.dry_run else '', model.name, input_precision, precision)
 
         try:
             with pot_config_base_path.open('rb') as pot_config_base_file:
                 pot_config_base = yaml.safe_load(pot_config_base_file)
+
         except FileNotFoundError:
+            reporter.print('Unable to locate quantization.yml in {}, loading default POT config',
+                           pot_config_base_path)
             pot_config_base = DEFAULT_POT_CONFIG_BASE
+
+        accuracy_check_config = model_root/ model.subdirectory / 'accuracy-check.yml'
+        if not accuracy_check_config.exists():
+            reporter.error('Unable to locate accuracy-check.yml in {}', accuracy_check_config)
 
         pot_config_paths = {
             'engine': {
-                'config': str(_common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
+                'config': str(accuracy_check_config),
             },
             'model': {
                 'model': str(self.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
@@ -118,9 +129,6 @@ class Quantizer:
 
         if target_device:
             pot_config['compression']['target_device'] = target_device
-
-        reporter.print_section_heading('{}Quantizing {} from {} to {}',
-            '(DRY RUN) ' if self.dry_run else '', model.name, input_precision, precision)
 
         model_output_dir = self.output_dir / model.subdirectory / precision
         pot_config_path = model_output_dir / 'pot-config.json'
@@ -164,7 +172,7 @@ class Quantizer:
 
         return True
 
-    def bulk_quantize(self, reporter, models, target_device, datasets_definition_fp=None) -> List[str]:
+    def bulk_quantize(self, reporter, models, target_device, datasets_definition_fp=None, model_root=None) -> List[str]:
         failed_models = []
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -179,7 +187,7 @@ class Quantizer:
             pot_env = {
                 'ANNOTATIONS_DIR': str(annotation_dir),
                 'DATA_DIR': str(self.dataset_dir),
-                'DEFINITIONS_FILE': str(_common.DATASET_DEFINITIONS),
+                'DEFINITIONS_FILE': str(datasets_definition_fp),
             }
 
             for model in models:
@@ -200,7 +208,8 @@ class Quantizer:
                 })
 
                 for precision in sorted(model_precisions):
-                    if not self.quantize(reporter, model, precision, target_device, pot_cmd_prefix, pot_env):
+                    if not self.quantize(reporter, model, precision, target_device, pot_cmd_prefix, pot_env,
+                                         model_root):
                         failed_models.append(model.name)
                         break
         return failed_models

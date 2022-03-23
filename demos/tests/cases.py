@@ -733,11 +733,11 @@ DEMOS = [
             ),
             *combine_cases(
                TestCase(options={'--architecture_type': 'en-de'}),
-               [# TODO monitors_extension wasn't found
-                #    TestCase(options={
-                #        '-m_en': ModelArg('action-recognition-0001-encoder'),
-                #        '-m_de': ModelArg('action-recognition-0001-decoder'),
-                #    }),
+               [
+                   TestCase(options={
+                       '-m_en': ModelArg('action-recognition-0001-encoder'),
+                       '-m_de': ModelArg('action-recognition-0001-decoder'),
+                   }),
                    TestCase(options={
                        '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
                        '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
@@ -964,13 +964,12 @@ DEMOS = [
         ],
     )),
 
-    # TODO ImportError: Module 'pose_extractor' not found.
-    # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #                      **MONITORS,
-    #                      '-i': DataPatternArg('human-pose-estimation')}),
-    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # )),
+    PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None,
+                         **MONITORS,
+                         '-i': DataPatternArg('human-pose-estimation')}),
+       TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1292,29 +1291,28 @@ DEMOS = [
                           '-m': ModelArg('aclnet')}),
     )),
 
-    # TODO: No module named 'ctcdecode_numpy'
-    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     [
-    #         TestCase(options={'-p': 'mds08x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-    #         TestCase(options={'-p': 'mds06x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-    #                           # lm.binary is really in dl_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-    #                           '--realtime': None}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-    #     ],
-    # )),
+    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        [
+            TestCase(options={'-p': 'mds08x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+            TestCase(options={'-p': 'mds06x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+                              # lm.binary is really in dl_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+            TestCase(options={'-p': 'mds08x_en',  # test online mode
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+                              '--realtime': None}),
+            TestCase(options={'-p': 'mds08x_en',  # test without LM
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+        ],
+    )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),

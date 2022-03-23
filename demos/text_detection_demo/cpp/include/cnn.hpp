@@ -17,6 +17,7 @@ class Cnn {
 public:
     Cnn(const std::string& modelPath, const std::string& modelType, const std::string& deviceName,
         ov::Core& core, const cv::Size& new_input_resolution = cv::Size(), bool use_auto_resize = false);
+    virtual ~Cnn() = default;
 
     virtual std::map<std::string, ov::Tensor> Infer(const cv::Mat& frame) = 0;
 
