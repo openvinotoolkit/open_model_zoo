@@ -292,6 +292,8 @@ ReborningVideoFrame::~ReborningVideoFrame() {
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].lock();
         const auto frameId = ++context.videoFramesContext.lastframeIds[sourceID];
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].unlock();
+
+        // Stop reborning when frame ID reached to input queue size
         if (!context.isVideo && frameId >= FLAGS_n_iqs)
             return;
         std::shared_ptr<ReborningVideoFrame> reborn = std::make_shared<ReborningVideoFrame>(context, sourceID, frameId, frame);
@@ -335,7 +337,6 @@ bool Drawer::isReady() {
 
 void Drawer::process() {
     const int64_t frameId = sharedVideoFrame->frameId;
-    //slog::debug <<"Drawer::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     std::map<int64_t, GridMat>& gridMats = context.drawersContext.gridMats;
     context.drawersContext.drawerMutex.lock();
@@ -382,7 +383,9 @@ void Drawer::process() {
         } else {
             if (!context.isVideo) {
                 try {
-                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                    // Exit only when inferences on all of frames are finished.
+                    if (context.frameCounter >= FLAGS_n_iqs * context.readersContext.inputChannels.size())
+                        std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
                 }
                 catch (const std::bad_weak_ptr&) {}
             }
@@ -486,7 +489,6 @@ bool DetectionsProcessor::isReady() {
 }
 
 void DetectionsProcessor::process() {
-    //slog::debug <<"DetectionProcessor::process for channel-frameid [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "]....." << slog::endl;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     if (!FLAGS_m_va.empty()) {
         auto vehicleRectsIt = vehicleRects.begin();
