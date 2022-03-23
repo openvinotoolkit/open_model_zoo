@@ -22,6 +22,8 @@ import logging as log
 import cv2
 import numpy as np
 
+from openvino.runtime import AsyncInferQueue
+
 
 def center_crop(frame, crop_size):
     img_h, img_w, _ = frame.shape
@@ -93,23 +95,30 @@ class IEModel:
             log.error("Demo supports only models with 1 output")
             sys.exit(1)
 
+        self.outputs = {}
         compiled_model = core.compile_model(self.model, target_device)
         self.output_tensor = compiled_model.outputs[0]
         self.input_name = self.model.inputs[0].get_any_name()
         self.input_shape = self.model.inputs[0].shape
 
         self.num_requests = num_requests
-        self.infer_requests = [compiled_model.create_infer_request() for _ in range(self.num_requests)]
+        self.infer_queue = AsyncInferQueue(compiled_model, num_requests)
+        self.infer_queue.set_callback(self.completion_callback)
         log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
+
+    def completion_callback(self, infer_request, id):
+        self.outputs[id] = infer_request.results[self.output_tensor]
 
     def async_infer(self, frame, req_id):
         input_data = {self.input_name: frame}
-        self.infer_requests[req_id].start_async(inputs=input_data)
+        self.infer_queue.start_async(input_data, req_id)
 
     def wait_request(self, req_id):
-        self.infer_requests[req_id].wait()
-        return self.infer_requests[req_id].results[self.output_tensor]
-
+        self.infer_queue.wait_all()
+        try:
+            return self.outputs.pop(req_id)
+        except KeyError:
+            return None
 
 class DummyDecoder:
     def __init__(self, num_requests=2):
