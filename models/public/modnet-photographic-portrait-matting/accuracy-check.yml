@@ -1,0 +1,27 @@
+models:
+  - name: modnet-photographic-portrait-matting
+    launchers:
+      - framework: openvino
+        adapter: background_matting
+    datasets:
+      - name: HumanMattingDataset
+        preprocessing:
+          - type: resize
+            size: 512
+        postprocessing:
+          - type: resize
+            apply_to: annotation
+            size: 512
+        metrics:
+          - type: mae
+            name: MAD
+            presenter: print_vector
+            reference:
+              mean: 5.213472
+              std: 5.125874
+          - type: mse
+            name: MSE
+            presenter: print_vector
+            reference:
+              mean: 727.952792
+              std: 1196.277498

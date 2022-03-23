@@ -33,6 +33,8 @@
    :caption: Background Matting Models
 
    omz_models_model_background_matting_mobilenetv2
+   omz_models_model_modnet_photographic_portrait_matting
+   omz_models_model_modnet_webcam_portrait_matting
    omz_models_model_robust_video_matting_mobilenetv3
 
 .. toctree::
@@ -644,6 +646,8 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | background-matting-mobilenetv2 | PyTorch\* | [background-matting-mobilenetv2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| modnet-photographic-portrait-matting | PyTorch\* | [modnet-photographic-portrait-matting](./modnet-photographic-portrait-matting/README.md) | 5.21/727.95 | 31.1564 | 6.4597 |
+| modnet-webcam-portrait-matting | PyTorch\* | [modnet-webcam-portrait-matting](./modnet-webcam-portrait-matting/README.md) | 5.66/762.52 | 31.1564 | 6.4597 |
 | robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also
