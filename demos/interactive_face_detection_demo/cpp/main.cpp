@@ -122,7 +122,7 @@ void parse(int argc, char *argv[]) {
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    std::cout << ov::get_openvino_version() << std::endl;
+    slog::info << ov::get_openvino_version() << slog::endl;
 }
 } // namespace
 
