@@ -591,9 +591,10 @@ DEMOS = [
             model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-r' : None, '-n_iqs': '1',
+        TestCase(options={'-no_show': None, '-r' : None, '-n_iqs': '2',
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
+        # Change the model in order to obtain the ROI data
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0123')}),
         single_option_cases('-m_lpr',
             None,
