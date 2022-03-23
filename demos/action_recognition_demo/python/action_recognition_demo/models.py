@@ -115,10 +115,8 @@ class IEModel:
 
     def wait_request(self, req_id):
         self.infer_queue.wait_all()
-        try:
-            return self.outputs.pop(req_id)
-        except KeyError:
-            return None
+        return self.outputs.pop(req_id, None)
+
 
 class DummyDecoder:
     def __init__(self, num_requests=2):

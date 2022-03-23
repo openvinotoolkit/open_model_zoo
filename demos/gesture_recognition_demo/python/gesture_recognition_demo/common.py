@@ -80,7 +80,4 @@ class IEModel:  # pylint: disable=too-few-public-methods
     def wait_request(self, req_id):
         """Waits for the model output by the specified request ID"""
         self.infer_queue.wait_all()
-        try:
-            return self.outputs.pop(req_id)
-        except KeyError:
-            return None
+        return self.outputs.pop(req_id, None)
