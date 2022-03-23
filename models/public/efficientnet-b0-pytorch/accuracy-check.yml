@@ -33,11 +33,11 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
-            reference: 0.7691
+            reference: 0.777
           - name: accuracy@top5
             type: accuracy
             top_k: 5
-            reference: 0.9321
+            reference: 0.9352
 
   - name: efficientnet-b0-pytorch
 
@@ -65,8 +65,8 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
-            reference: 0.7691
+            reference: 0.777
           - name: accuracy@top5
             type: accuracy
             top_k: 5
-            reference: 0.9321
+            reference: 0.9352
