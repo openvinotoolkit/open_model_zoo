@@ -59,7 +59,7 @@ The following tasks can be solved with wrappers usage:
 
 | Task type                  | Model API wrappers |
 |----------------------------|--------------------|
-| Background Matting         | <ul><li>`VideoBackgroundMatting`</li><li>`ImageMattingWithBackground`</li></ul> |
+| Background Matting         | <ul><li>`VideoBackgroundMatting`</li><li>`ImageMattingWithBackground`</li><li>`PortraitBackgroundMatting`</li></ul> |
 | Classification             | <ul><li>`Classification`</li></ul> |
 | Deblurring                 | <ul><li>`Deblurring`</li></ul> |
 | Human Pose Estimation      | <ul><li>`HpeAssociativeEmbedding`</li><li>`OpenPose`</li></ul> |

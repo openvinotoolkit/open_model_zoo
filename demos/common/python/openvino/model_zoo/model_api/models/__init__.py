@@ -16,7 +16,7 @@
 
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
-from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting
+from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting, PortraitBackgroundMatting
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
@@ -58,6 +58,7 @@ __all__ = [
     'MonoDepthModel',
     'OpenPose',
     'OutputTransform',
+    'PortraitBackgroundMatting',
     'RESIZE_TYPES',
     'RetinaFace',
     'RetinaFacePyTorch',

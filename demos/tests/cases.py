@@ -757,7 +757,9 @@ DEMOS = [
             ModelArg('instance-segmentation-person-0007'),
             ModelArg('robust-video-matting-mobilenetv3'),
             ModelArg('background-matting-mobilenetv2'),
-            ModelArg('yolact-resnet50-fpn-pytorch')),
+            ModelArg('yolact-resnet50-fpn-pytorch'),
+            ModelArg('modnet-photographic-portrait-matting'),
+            ModelArg('modnet-webcam-portrait-matting')),
     )),
 
     PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
