@@ -592,21 +592,6 @@ void InferTask::process() {
     std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
-
-    //for (int i = 0; i < sharedVideoFrame->frame.rows; i++) {
-    //    if(i == sharedVideoFrame->frame.rows - 1)
-    //        slog::debug <<"InferTask::process for channel-frameid-imgsize [" << sharedVideoFrame->sourceID <<" - " << sharedVideoFrame->frameId << "-" << sharedVideoFrame->frame.total() << "]....." << slog::endl;
-    //    for (int j = 0; j < sharedVideoFrame->frame.cols; j++) {
-    //        auto bgr = sharedVideoFrame->frame.at<cv::Vec3b>(i,j);
-    //        int a = bgr[0];
-    //        int b = bgr[1];
-    //        int c = bgr[2];
-    //        if(i == sharedVideoFrame->frame.rows - 1)
-    //            std::cout << a <<" " << b << " " << c << " ";
-    //    }
-    //    if(i == sharedVideoFrame->frame.rows - 1)
-    //        std::cout << std::endl;
-    //}
     context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
 
     inferRequest.get().set_callback(
@@ -828,12 +813,10 @@ int main(int argc, char* argv[]) {
         context.drawersContext.drawersWorker = worker;
         context.resAggregatorsWorker = worker;
 
-        int readerCount = 0;
         for (uint64_t i = 0; i < FLAGS_n_iqs; i++) {
             for (unsigned sourceID = 0; sourceID < inputChannels.size(); sourceID++) {
                 VideoFrame::Ptr sharedVideoFrame = std::make_shared<ReborningVideoFrame>(context, sourceID, i);
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
-                readerCount++;
             }
         }
 

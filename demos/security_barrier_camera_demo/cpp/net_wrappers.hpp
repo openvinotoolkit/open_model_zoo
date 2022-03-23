@@ -119,19 +119,6 @@ public:
             // resize and copy data from image to tensor using OpenCV
             resize2tensor(img, inputTensor);
         }
-        /*
-        InferenceEngine::SizeVector blobSize = input->getTensorDesc().getDims();
-        const size_t width = blobSize[3];
-        const size_t height = blobSize[2];
-        const size_t channels = blobSize[1];
-        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
-        uint8_t* blobData = blobMapped.as<uint8_t*>();
-        for (size_t c = 0; c < channels; c++)
-            for (size_t h = 0; h < height; h++)
-                for (size_t w = 0; w < width; w++)
-                    std::cout << blobData[ c * width * height + h * width + w];
-        std::cout << std::endl;
-        */
     }
 
     std::list<Result> getResults(ov::InferRequest& inferRequest, const int64_t channelID, const int64_t frameID, cv::Size upscale, std::vector<std::string>& rawResults) {
