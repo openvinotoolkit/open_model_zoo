@@ -6,4 +6,8 @@ description: >-
   <https://github.com/DuinoDu/mtcnn>.
 task_type: detection
 framework: caffe
+stages_order:
+  - mtcnn-p
+  - mtcnn-r
+  - mtcnn-o
 license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE

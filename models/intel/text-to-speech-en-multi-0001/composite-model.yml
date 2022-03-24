@@ -6,4 +6,8 @@ description: >-
   The model is built on top of the modified ForwardTacotron and modified MelGAN frameworks.
 task_type: text_to_speech
 framework: dldt
+stages_order:
+  - text-to-speech-en-multi-0001-duration-prediction
+  - text-to-speech-en-multi-0001-regression
+  - text-to-speech-en-multi-0001-generation
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

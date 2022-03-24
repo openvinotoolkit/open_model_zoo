@@ -18,7 +18,6 @@ import cv2
 import numpy as np
 
 from .image_model import ImageModel
-from .model import WrapperError
 
 
 class VideoBackgroundMatting(ImageModel):
@@ -41,7 +40,7 @@ class VideoBackgroundMatting(ImageModel):
             if len(metadata.shape) == 4 and metadata.shape[1] == 3:
                 image_blob_names.append(name)
         if not image_blob_names:
-            raise WrapperError(self.__model__, 'Compatible inputs are not found')
+            self.raise_error('Compatible inputs are not found')
         return image_blob_names, image_info_blob_names
 
     def _get_outputs(self):
@@ -52,7 +51,7 @@ class VideoBackgroundMatting(ImageModel):
             elif len(metadata.shape) == 4 and metadata.shape[1] == 1:
                 image_blob_names['pha'] = name
         if len(image_blob_names) != 2:
-            raise WrapperError(self.__model__, 'Compatible outputs are not found')
+            self.raise_error('Compatible outputs are not found')
         return image_blob_names
 
     def get_inputs_map(self):
@@ -108,13 +107,13 @@ class ImageMattingWithBackground(ImageModel):
             if len(metadata.shape) == 4 and metadata.shape[1] == 3:
                 image_blob_names.append(name)
         if len(image_blob_names) != 2:
-            raise WrapperError(self.__model__, 'Compatible inputs are not found')
+            self.raise_error('Compatible inputs are not found')
         return image_blob_names, image_info_blob_names
 
     def set_input_shape(self):
         shapes = [tuple(self.inputs[name].shape) for name in self.image_blob_names]
         if len(set(shapes)) != 1:
-            raise WrapperError(self.__model__, 'Image inputs have incompatible shapes: {}'.format(shapes))
+            self.raise_error('Image inputs have incompatible shapes: {}'.format(shapes))
         return shapes[0]
 
     def _get_outputs(self):
@@ -125,7 +124,7 @@ class ImageMattingWithBackground(ImageModel):
             elif len(metadata.shape) == 4 and metadata.shape[1] == 1:
                 image_blob_names['pha'] = name
         if len(image_blob_names) != 2:
-            raise WrapperError(self.__model__, 'Compatible outputs are not found')
+            self.raise_error('Compatible outputs are not found')
         return image_blob_names
 
     def preprocess(self, inputs):
@@ -138,8 +137,8 @@ class ImageMattingWithBackground(ImageModel):
             if target_shape is None:
                 target_shape = meta['original_shape']
             elif meta['original_shape'] != target_shape:
-                raise WrapperError(self.__model__, 'Image inputs must have equal shapes but got: {} vs {}'
-                                    .format(target_shape, meta['original_shape']))
+                self.raise_error('Image inputs must have equal shapes but got: {} vs {}'.format(
+                    target_shape, meta['original_shape']))
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):

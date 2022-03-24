@@ -332,7 +332,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*| [densenet-121](./densenet-121/README.md)<br>[densenet-121-tf](./densenet-121-tf/README.md)| 74.42%/92.136%<br>74.46%/92.13%| 5.723~5.7287 | 7.971 |
 | DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/README.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
-| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
+| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>77.70%/93.52% | 0.819 | 5.268 |
 | EfficientNet V2 B0          | PyTorch\*                          | [efficientnet-v2-b0](./efficientnet-v2-b0/README.md) | 78.36%/94.02% | 1.4641 | 7.1094 |
 | EfficientNet V2 Small       | PyTorch\*                          | [efficientnet-v2-s](./efficientnet-v2-s/README.md) | 84.29%/97.26% | 16.9406  | 21.3816  |
 | HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/README.md)  | 73.1%/91.0% | 0.6208 | 4.5443 |

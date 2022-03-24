@@ -50,10 +50,10 @@ files:
     original_source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/__init__.py
   - name: efficientnet-b0.pth
-    size: 21376958
-    checksum: f44c3ff7ceeeda4ccf95a6720483cf2bee89f2db59d47e8349d2a7d46024e006b76e92105b6723060b898505312e70ff
-    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-b0-pytorch/efficientnet_b0-d6904d92.pth
+    size: 21376743
+    checksum: f6926743bf2213489f95c3b4bc6edc358ed9623780306e329ac8184ae36114237d98aa772761c180608316731db8e586
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0_ra-3dd342df.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/efficientnet-b0-pytorch/efficientnet_b0_ra-3dd342df.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=efficientnet_b0

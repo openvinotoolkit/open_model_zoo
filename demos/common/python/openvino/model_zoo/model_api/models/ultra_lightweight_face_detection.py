@@ -15,7 +15,6 @@
 """
 import numpy as np
 
-from .model import WrapperError
 from .detection_model import DetectionModel
 from .types import NumericalValue
 from .utils import Detection, nms
@@ -34,18 +33,16 @@ class UltraLightweightFaceDetection(DetectionModel):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.outputs.items()
 
         if bboxes_layer.shape[1] != scores_layer.shape[1]:
-            raise WrapperError(self.__model__,
-                               "Expected the same second dimension for boxes and scores, but got {} and {}"
-                               .format(bboxes_layer.shape, scores_layer.shape))
+            self.raise_error("Expected the same second dimension for boxes and scores, but got {} and {}".format(
+                bboxes_layer.shape, scores_layer.shape))
 
         if bboxes_layer.shape[2] == 4:
             return bboxes_blob_name, scores_blob_name
         elif scores_layer.shape[2] == 4:
             return scores_blob_name, bboxes_blob_name
         else:
-            raise WrapperError(self.__model__,
-                               "Expected shape [:,:,4] for bboxes output, but got {} and {}"
-                               .format(bboxes_layer.shape, scores_layer.shape))
+            self.raise_error("Expected shape [:,:,4] for bboxes output, but got {} and {}".format(
+                bboxes_layer.shape, scores_layer.shape))
 
     @classmethod
     def parameters(cls):

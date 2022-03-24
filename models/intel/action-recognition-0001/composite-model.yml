@@ -3,4 +3,7 @@ description: >-
   Transformer Network approach.
 task_type: action_recognition
 framework: dldt
+stages_order:
+  - action-recognition-0001-encoder
+  - action-recognition-0001-decoder
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

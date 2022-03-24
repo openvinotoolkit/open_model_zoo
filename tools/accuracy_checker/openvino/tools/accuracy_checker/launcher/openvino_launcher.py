@@ -15,6 +15,7 @@ limitations under the License.
 """
 #pylint:disable=no-name-in-module
 #pylint:disable=package-absolute-imports
+import io
 import multiprocessing
 from pathlib import Path
 import re
@@ -45,28 +46,15 @@ from .launcher import Launcher
 
 
 format_map = {
-      'f32': np.float32,
-      'i32': np.int32,
-      'i64': np.int64,
-      'fp16': np.float16,
-      'f16': np.float16,
-      'i16': np.int16,
-      'u16': np.uint16,
-      'i8': np.int8,
-      'u8': np.uint8,
+      'f32': np.float32, 'i32': np.int32, 'i64': np.int64,
+      'fp16': np.float16, 'f16': np.float16, 'i16': np.int16, 'u16': np.uint16,
+      'i8': np.int8, 'u8': np.uint8,
       'boolean': np.uint8
 }
 
 PRECISION_STR_TO_TYPE = {
-    'FP32': Type.f32,
-    'FP16': Type.f16,
-    'U8': Type.u8,
-    'U16': Type.u16,
-    'I8': Type.i8,
-    'I16': Type.i16,
-    'I32': Type.i32,
-    'I64': Type.i64,
-    'BOOL': Type.boolean
+    'FP32': Type.f32, 'FP16': Type.f16, 'U8': Type.u8, 'U16': Type.u16, 'I8': Type.i8, 'I16': Type.i16,
+    'I32': Type.i32, 'I64': Type.i64, 'BOOL': Type.boolean
 }
 
 
@@ -461,8 +449,7 @@ class OpenVINOLauncher(Launcher):
             if 'num_requests' in self.config:
                 warning(
                     "number requests already provided in device name specification. "
-                    "'num_requests' option will be ignored."
-                )
+                    "'num_requests' option will be ignored.")
         elif 'num_requests' in self.config and self.config['num_requests'] != 'AUTO':
             num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
         else:
@@ -502,15 +489,15 @@ class OpenVINOLauncher(Launcher):
         for device_name, device_version in versions.items():
             print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
                 device_name=device_name, descr=device_version.description, maj=device_version.major,
-                min=device_version.minor, num=device_version.build_number
-            ))
+                min=device_version.minor, num=device_version.build_number))
 
     def _create_network(self, input_shapes=None):
         model_path = Path(self._model)
         compiled_model = model_path.suffix == '.blob'
         if compiled_model:
             self.network = None
-            self.exec_network = self.ie_core.import_model(str(self._model), self._device)
+            with open(str(self._model), 'rb') as f: #pylint:disable=unspecified-encoding
+                self.exec_network = self.ie_core.import_model(io.BytesIO(f), self._device)
             self.original_outputs = self.exec_network.outputs
             model_batch = self._get_model_batch_size()
             self._batch = model_batch if model_batch is not None else 1
@@ -576,10 +563,11 @@ class OpenVINOLauncher(Launcher):
     def _get_model_batch_size(self):
         input_nodes = self.network.inputs if self.network else self.exec_network.inputs
         input_info = input_nodes[0]
-        if '...' in str(input_info.get_node().layout):
+        layout = input_info.get_node().layout
+        if '...' in str(layout) or layout is None:
             layout = self.get_layout_from_config(input_info.get_node().friendly_name)
         else:
-            layout = str(input_info.get_node().layout).replace('[', '').replace(']', '').replace(',', '')
+            layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]
@@ -599,7 +587,6 @@ class OpenVINOLauncher(Launcher):
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
         self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
         self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
-
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
@@ -674,7 +661,7 @@ class OpenVINOLauncher(Launcher):
                 if num_undef > 1:
                     return False
             layout = self.inputs[input_name].layout
-            if '...' in str(layout):
+            if '...' in str(layout) or layout is None:
                 layout = self.get_layout_from_config(input_name)
             else:
                 layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
@@ -851,8 +838,7 @@ class OpenVINOLauncher(Launcher):
             if 'precision' in input_config:
                 if self.network:
                     self.inputs[input_config['name']].set_element_type(
-                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()]
-                    )
+                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()])
 
     def _set_input_shape(self):
         if not self.network:
