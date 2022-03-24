@@ -69,5 +69,17 @@ DEMOS = [
         .add_test_cases(single_option_cases('-nireq', '3', '5'),
                         single_option_cases('-nstreams', '3', '4'),
                         single_option_cases('-nthreads', str(THREADS_NUM), str(THREADS_NUM - 2)))
-        .add_parser(PerformanceParser)
+        .add_parser(PerformanceParser),
+
+    deepcopy(BASE['bert_named_entity_recognition_demo/python'])
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU']),
+
+    deepcopy(BASE['gpt2_text_prediction_demo/python'])
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU']),
+
+    deepcopy(BASE['speech_recognition_wav2vec_demo/python'])
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU'])
 ]
