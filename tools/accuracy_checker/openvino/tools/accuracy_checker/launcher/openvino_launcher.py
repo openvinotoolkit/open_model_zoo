@@ -547,7 +547,7 @@ class OpenVINOLauncher(Launcher):
             if layer_name in self.const_inputs:
                 input_shapes[layer_name] = parse_partial_shape(input_node.get_node().partial_shape)
             else:
-                layer_shape = parse_partial_shape(input_node.get_node().partial_shape)
+                layer_shape = list(parse_partial_shape(input_node.get_node().partial_shape))
                 layout = self._process_layout(self.inputs[layer_name].layout, layer_name)
                 batch_pos = layout.find('N')
                 if batch_pos != -1:
@@ -558,15 +558,18 @@ class OpenVINOLauncher(Launcher):
 
     def _process_layout(self, ov_layout, layer_name):
         if '...' in str(ov_layout) or ov_layout is None:
-            layout = self.get_layout_from_config(layer_name)
+            ov_layout = self.get_layout_from_config(layer_name)
         else:
-            layout = str(layout).replace('[', '').replace(']', '').replace(',', '')
-        return layout
+            ov_layout = str(ov_layout).replace('[', '').replace(']', '').replace(',', '')
+        return ov_layout
 
     def _get_model_batch_size(self):
         input_nodes = self.network.inputs if self.network else self.exec_network.inputs
         input_info = input_nodes[0]
-        layout = self._process_layout(input_info.get_node().layout, input_info.get_node().friendly_name)
+        layout = (
+            self._process_layout(input_info.get_node().layout, input_info.get_node().friendly_name)
+            or self.default_layout
+        )
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]
@@ -701,8 +704,8 @@ class OpenVINOLauncher(Launcher):
             network = self.ie_core.read_model(model=str(model), weights=str(weights))
         else:
             network = self.ie_core.read_model(model=str(model))
-        self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
-        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
+        self.input_to_tensor_name = self.get_input_tensor_name_mapping(network)
+        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(network.inputs)}
         return network
 
     def inputs_info_for_meta(self, inputs=None):
