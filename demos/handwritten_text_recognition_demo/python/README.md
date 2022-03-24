@@ -1,6 +1,6 @@
 # Handwritten Text Recognition Demo
 
-This example demonstrates an approach to recognize handwritten Japanese, simplified Chinese, and English text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release). For English, it supports the characters in [GNHK](https://goodnotes.com/gnhk/).
+This example demonstrates an approach to recognize handwritten Japanese, simplified Chinese, and English text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release). For English, it supports the characters in [GNHK](https://www.amazon.science/publications/gnhk-a-dataset-for-english-handwriting-in-the-wild).
 ## How It Works
 
 The demo workflow is the following:
@@ -104,5 +104,5 @@ The demo reports
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
