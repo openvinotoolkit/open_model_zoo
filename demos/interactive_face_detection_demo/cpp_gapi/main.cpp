@@ -152,7 +152,6 @@ void parse(int argc, char *argv[]) {
                      "\n\t\tP, p, 0, spacebar - Pause"
                      "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
-        std::cout << ov::get_openvino_version() << std::endl;
         exit(0);
     } if (FLAGS_i.empty()) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
