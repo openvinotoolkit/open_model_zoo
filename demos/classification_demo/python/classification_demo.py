@@ -50,7 +50,7 @@ def build_argparser():
 
     args.add_argument('-i', '--input', required=True, type=Path, metavar="<INPUT>",
         help='an input to process. The input must be a single image, a folder of images or camera id')
-        
+
     args.add_argument('--adapter', default='openvino', type=str, choices=('openvino', 'ovms'), metavar="<ADAPTER>",
         help='specify the model adapter. Default is openvino')
 
