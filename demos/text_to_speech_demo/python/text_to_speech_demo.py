@@ -100,7 +100,7 @@ def build_argparser():
 def is_correct_args(args):
     if not ((args.model_vocoder is None and args.model_rnn is not None and args.model_upsample is not None) or
             (args.model_vocoder is not None and args.model_rnn is None and args.model_upsample is None)):
-        log.error('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
+        log.error('Can not use m_rnn and m_upsample with m_vocoder. Define m_vocoder or [m_rnn, m_upsample]')
         return False
     if args.alpha < 0.5 or args.alpha > 2.0:
         log.error('Can not use time coefficient less than 0.5 or greater than 2.0')
