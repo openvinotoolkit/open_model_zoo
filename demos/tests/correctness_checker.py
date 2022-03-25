@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from unittest import case
 
 class Demo(ABC):
     def __init__(self, name, implementation):
@@ -23,10 +22,10 @@ class Demo(ABC):
         self.implementation = implementation
         self.subdirectory = name + '/' + implementation
         self.results = {}
-    
+
     @abstractmethod
     def parser(self):
-        pass 
+        pass
 
     @abstractmethod
     def checker(self):
@@ -58,14 +57,14 @@ class CPPDemo(Demo):
                 case_index = output[index][output[index].find(":") + 1:]
                 if case_index not in self.results[device]:
                     self.results[device][case_index] = {}
-            
+
             if "Execution_time" in output[index]:
                 execution_time = output[index].split(':')[1]
                 if execution_time == '-1':
-                   while index < len(output) and 'Device' not in output[index]:
-                       index += 1 
-                   continue
-            
+                    while index < len(output) and 'Device' not in output[index]:
+                        index += 1
+                    continue
+
             # Pase the raw data
             while index < len(output) and 'ChannelId' in output[index]:
                 item = output[index][output[index].find('ChannelId'):].split(',')
@@ -91,45 +90,40 @@ class CPPDemo(Demo):
 
             index += 1
 
-    
     def checker(self):
         self.parser()
 
-        flag = False
-        if "CPU" in self.results and "AUTO:CPU" in self.results:
-            if self.results['CPU'] == self.results['AUTO:CPU']:
-                flag = True
-            else:
-                print ("CPU vs AUTO:CPU have inconsistent results")
-
-        if "GPU" in self.results and "AUTO:GPU" in self.results:
-            if self.results['GPU'] == self.results['AUTO:GPU']:
-                flag = True
-            else:
-                print ("GPU vs AUTO:GPU have inconsistent results")
-
-        if not flag:
-            for device in self.results:
-                for case in self.results[device]:
-                    print ("---* Device: {} - Case: {} *----\n".format(device, case))
-                    for channel in self.results[device][case]:
-                        print ("Channel: {} - :{}".format(channel, self.results[device][case][channel]))
-                    print ('---------------------------------------------------------')
+        flag = True
+        devices_list = {"CPU" : ["AUTO:CPU", "MULTI:CPU"], "GPU" : ["AUTO:CPU", "MULTI:CPU"]}
+        for device in devices_list:
+            for target in devices_list[device]:
+                if device in self.results and target in self.results:
+                    if self.results[device] != self.results[target]:
+                        flag = False
+                        print("Failed: {}-{} have inconsistent results".format(device, target))
+                        # Show the detailed inconsistent results
+                        for case in self.results[target]:
+                            if self.results[device][case] != self.results[target][case]:
+                                print("---* Device: {} - Case: {} *----\n".format(device, case))
+                                for channel in self.results[device][case]:
+                                    print("Channel: {} - :{}".format(channel, self.results[device][case][channel]))
+                                print('---------------------------------------------------------')
+                                print("---* Device: {} - Case: {} *----\n".format(target, case))
+                                for channel in self.results[target][case]:
+                                    print("Channel: {} - :{}".format(channel, self.results[target][case][channel]))
+                                print('---------------------------------------------------------')
         return flag
-
-    
 
 DEMOS = [
     CPPDemo(name='security_barrier_camera_demo')
 ]
 def main():
-   for demo in DEMOS:
-       print ("Checking {}...".format(demo.name))
-       if demo.checker():
-           print("Demo: {} passed.".format(demo.name))
-       else:
-           print("Demo: {} failed.".format(demo.name))
-
+    for demo in DEMOS:
+        print("Checking {}...".format(demo.name))
+        if demo.checker():
+            print("Demo {} correctness checking: Passed.".format(demo.name))
+        else:
+            print("Demo {} correctness checking: Failed.".format(demo.name))
 
 if __name__ == '__main__':
     main()

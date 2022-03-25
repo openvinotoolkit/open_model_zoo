@@ -266,7 +266,7 @@ def main():
             os.makedirs(filename, exist_ok=True)
             fo = open(filename + '/results.log', 'w+')
             print("Save to {}".format(filename))
-            content = '' 
+            content = ''
             content += 'Testing {}...'.format(demo.subdirectory) + '\n'
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
@@ -332,8 +332,8 @@ def main():
                         print(test_descr)
                         print(flush=True)
                         content += "Device:{}\nCaseId:{}\n".format(device, test_case_index)
-                        rawResults = '' 
-                        execution_time = -1 
+                        rawResults = ''
+                        execution_time = -1
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
@@ -344,7 +344,7 @@ def main():
                                 if "DEBUG" in line:
                                     rawResults += line
                                     rawResults += '\n'
-                            demo.parse_output(output, device, test_case_index)
+                            demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                             output = e.output
                             if isinstance(e, subprocess.CalledProcessError):
@@ -357,7 +357,7 @@ def main():
                             num_failures += 1
                             execution_time = -1
                             rawResults = {}
-                        
+
                         content += "Execution_time:{}\n".format(execution_time)
                         content += "{}\n".format(rawResults)
                         fo.write(content)
