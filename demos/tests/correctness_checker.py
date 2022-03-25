@@ -43,7 +43,7 @@ class CPPDemo(Demo):
             fo = open('/tmp/' + self.subdirectory + '/results.log', 'r')
         except IOError as err:
             print("File error: " + str(err))
-        output = [i.rstrip() for i in fo.readlines()]
+        output = [i.rstrip() for i in fo.readlines() if "DEBUG" in i]
         device = ''
         case_index = ''
         index = 1
@@ -52,49 +52,53 @@ class CPPDemo(Demo):
                 device = output[index][output[index].find(":") + 1:]
                 if device not in self.results:
                     self.results[device] = {}
-
-            if "CaseId" in output[index]:
+                index += 1
+                continue
+            elif "CaseId" in output[index]:
                 case_index = output[index][output[index].find(":") + 1:]
                 if case_index not in self.results[device]:
                     self.results[device][case_index] = {}
+                index += 1
+                continue
 
-            if "Execution_time" in output[index]:
+            elif "Execution_time" in output[index]:
                 execution_time = output[index].split(':')[1]
                 if execution_time == '-1':
                     while index < len(output) and 'Device' not in output[index]:
                         index += 1
                     continue
-
-            # Pase the raw data
-            while index < len(output) and 'ChannelId' in output[index]:
-                item = output[index][output[index].find('ChannelId'):].split(',')
-                # Channel ID
-                frame_results = {}
-                channel = item[0].split(':')
-                if channel[1] not in self.results[device][case_index]:
-                    self.results[device][case_index][channel[1]] = frame_results
-
-                # Frame ID
-                object_results = {}
-                frame = item[1].split(':')
-                if frame[1] not in self.results[device][case_index][channel[1]]:
-                    self.results[device][case_index][channel[1]][frame[1]] = object_results
-
-                # Object ID
-                label_prob_pos_results = []
-                objid = item[2].split(':')
-                if objid[1] not in self.results[device][case_index][channel[1]][frame[1]]:
-                    self.results[device][case_index][channel[1]][frame[1]][objid[1]] = label_prob_pos_results
-                self.results[device][case_index][channel[1]][frame[1]][objid[1]] = item[3:]
                 index += 1
+                continue
+            elif 'ChannelId' in output[index]:
+                # Pase the raw data
+                while index < len(output) and 'ChannelId' in output[index]:
+                    item = output[index][output[index].find('ChannelId'):].split(',')
+                    # Channel ID
+                    frame_results = {}
+                    channel = item[0].split(':')
+                    if channel[1] not in self.results[device][case_index]:
+                        self.results[device][case_index][channel[1]] = frame_results
 
-            index += 1
+                    # Frame ID
+                    object_results = {}
+                    frame = item[1].split(':')
+                    if frame[1] not in self.results[device][case_index][channel[1]]:
+                        self.results[device][case_index][channel[1]][frame[1]] = object_results
+
+                    # Object ID
+                    label_prob_pos_results = []
+                    objid = item[2].split(':')
+                    if objid[1] not in self.results[device][case_index][channel[1]][frame[1]]:
+                        self.results[device][case_index][channel[1]][frame[1]][objid[1]] = label_prob_pos_results
+                    self.results[device][case_index][channel[1]][frame[1]][objid[1]] = item[3:]
+                    index += 1
+            else:
+                index += 1
 
     def checker(self):
         self.parser()
-
         flag = True
-        devices_list = {"CPU" : ["AUTO:CPU", "MULTI:CPU"], "GPU" : ["AUTO:CPU", "MULTI:CPU"]}
+        devices_list = {"CPU" : ["AUTO:CPU", "MULTI:CPU", "AUTO:CPU,GPU"], "GPU" : ["AUTO:CPU", "MULTI:CPU", "AUTO:CPU,GPU"]}
         for device in devices_list:
             for target in devices_list[device]:
                 if device in self.results and target in self.results:

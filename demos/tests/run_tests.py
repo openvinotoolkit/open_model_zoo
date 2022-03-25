@@ -267,7 +267,7 @@ def main():
             fo = open(filename + '/results.log', 'w+')
             print("Save to {}".format(filename))
             content = ''
-            content += 'Testing {}...'.format(demo.subdirectory) + '\n'
+            content += '[ DEBUG ] Testing {}...'.format(demo.subdirectory) + '\n'
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
@@ -331,7 +331,7 @@ def main():
                             for arg in fixed_args + dev_arg + case_args))
                         print(test_descr)
                         print(flush=True)
-                        content += "Device:{}\nCaseId:{}\n".format(device, test_case_index)
+                        content += "[ DEBUG ] Device:{}\n[ DEBUG ] CaseId:{}\n".format(device, test_case_index)
                         rawResults = ''
                         execution_time = -1
                         try:
@@ -340,10 +340,8 @@ def main():
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
-                            for line in output.split('\n'):
-                                if "DEBUG" in line:
-                                    rawResults += line
-                                    rawResults += '\n'
+                            for line in output:
+                                rawResults += line
                             demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                             output = e.output
@@ -358,7 +356,7 @@ def main():
                             execution_time = -1
                             rawResults = {}
 
-                        content += "Execution_time:{}\n".format(execution_time)
+                        content += "[ DEBUG ] Execution_time:{}\n".format(execution_time)
                         content += "{}\n".format(rawResults)
                         fo.write(content)
                         content = ''
