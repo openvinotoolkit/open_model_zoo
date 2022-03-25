@@ -85,6 +85,8 @@
 | mtcnn-o | YES | YES |    |
 | mtcnn-p | YES | YES |    |
 | mtcnn-r | YES | YES |    |
+| nanodet-m-1.5x-416 | YES | YES |    |
+| nanodet-plus-m-1.5x-416 | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
 | ocrnet-hrnet-w48-paddle | YES | YES |    |
