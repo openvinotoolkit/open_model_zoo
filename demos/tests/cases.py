@@ -15,6 +15,7 @@
 import collections
 import itertools
 import sys
+from copy import deepcopy
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
@@ -1394,4 +1395,4 @@ DEMOS = [
 ]
 
 
-BASE = { demo.subdirectory : demo for demo in DEMOS }
+BASE = { demo.subdirectory : deepcopy(demo) for demo in DEMOS }
