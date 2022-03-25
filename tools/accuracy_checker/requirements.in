@@ -42,7 +42,7 @@ parasail>=1.2.4
 fast-ctc-decode>=0.2.5
 
 # raw image formats processing
-rawpy>=0.16.0
+rawpy~=0.17.1
 
 # lmdb dataset support
 lmdb>=1.2.1
