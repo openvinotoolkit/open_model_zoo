@@ -82,8 +82,8 @@ Options:
 
 ```sh
 python3 smartlab_demo.py
-    -tv ./stream_1_top.mp4
-    -fv ./stream_1_high.mp4
+    -tv stream_1_top.mp4
+    -sv stream_1_high.mp4
     -m_ta "./intel/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.xml"
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
