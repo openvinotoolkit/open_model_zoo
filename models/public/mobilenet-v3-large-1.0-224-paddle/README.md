@@ -12,8 +12,8 @@ For details see [paper](https://arxiv.org/abs/1905.02244) and [repository](https
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Classification                            |
-| GFlops                          | TBD                                       |
-| MParams                         | TBD                                       |
+| GFlops                          | 0.4565                                    |
+| MParams                         | 5.468                                     |
 | Source framework                | Paddle\*                                  |
 
 ## Accuracy

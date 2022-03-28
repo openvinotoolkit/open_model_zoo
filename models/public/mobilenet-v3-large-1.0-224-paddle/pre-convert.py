@@ -29,8 +29,8 @@ def main():
 
     subprocess.run([sys.executable, '--',
         str(args.input_dir / 'tools' / 'export_model.py'), '-c',
-        str(args.input_dir / 'MobileNetV3_small_x1_0.yaml'), '-o',
-        f"Global.pretrained_model={args.input_dir/ 'MobileNetV3_small_x1_0_pretrained'}",
+        str(args.input_dir / 'MobileNetV3_large_x1_0.yaml'), '-o',
+        f"Global.pretrained_model={args.input_dir/ 'MobileNetV3_large_x1_0_pretrained'}",
         '-o', f"Global.save_inference_dir={args.output_dir / 'inference_model'}",
         '-o', 'Global.device=cpu'
     ], check=True)

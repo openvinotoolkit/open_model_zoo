@@ -12,16 +12,16 @@ For details see [paper](https://arxiv.org/abs/1905.02244) and [repository](https
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Classification                            |
-| GFlops                          | TBD                                       |
-| MParams                         | TBD                                       |
+| GFlops                          | 0.1269                                    |
+| MParams                         | 2.9339                                    |
 | Source framework                | Paddle\*                                  |
 
 ## Accuracy
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| Top 1  | 67.36%         | 67.36%          |
-| Top 5  | 87.44%         | 87.44%          |
+| Metric | Result |
+| ------ | ------ |
+| Top 1  | 67.36% |
+| Top 5  | 87.44% |
 
 ## Input
 
