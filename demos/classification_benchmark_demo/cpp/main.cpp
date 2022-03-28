@@ -30,7 +30,8 @@ namespace {
 constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
 
-constexpr char i_msg[] = "an input to process. The input must be a single image or a folder of images";
+constexpr char i_msg[] = "an input to process. "
+    "The input must be a single image or a folder of images";
 DEFINE_string(i, "", i_msg);
 
 constexpr char labels_msg[] = "path to .txt file with labels";
@@ -43,7 +44,8 @@ constexpr char auto_resize_msg[] = "enable resizable input";
 DEFINE_bool(auto_resize, false, auto_resize_msg);
 
 constexpr char d_msg[] = "specify the target device to infer on. "
-    "The list of available devices is shown below. The demo will look for a suitable plugin for device specified. "
+    "The list of available devices is shown below. "
+    "The demo will look for a suitable plugin for device specified. "
     "Default value is CPU";
 DEFINE_string(d, "CPU", d_msg);
 
@@ -51,32 +53,37 @@ constexpr char gt_msg[] = "path to ground truth .txt file";
 DEFINE_string(gt, "", gt_msg);
 
 constexpr char layout_msg[] = "specify inputs layouts."
-    "Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input";
+    " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input";
 DEFINE_string(layout, "", layout_msg);
 
-constexpr char nireq_msg[] = "number of infer requests";
+constexpr char nireq_msg[] = "number of infer requests. If this option is omitted, "
+    "number of infer requests is determined automatically";
 DEFINE_uint32(nireq, 0, nireq_msg);
 
-constexpr char nstreams_msg[] = "specify count of streams";
+constexpr char nstreams_msg[] = "number of streams to use for inference on the CPU or/and GPU in "
+    "throughput mode (for HETERO and MULTI device cases use format "
+    "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 DEFINE_string(nstreams, "", nstreams_msg);
 
 constexpr char nt_msg[] = "number of top results. Must be >= 1. Default is 5";
 DEFINE_uint32(nt, 5, nt_msg);
 
-constexpr char nthreads_msg[] = "specify count of threads";
+constexpr char nthreads_msg[] = "number of threads";
 DEFINE_uint32(nthreads, 0, nthreads_msg);
 
 constexpr char res_msg[] = "set image grid resolution in format WxH. Default is 1280x720";
 DEFINE_string(res, "1280x720", res_msg);
 
-constexpr char show_msg[] = "disable showing of processed images";
+constexpr char show_msg[] = "(don't) show output";
 DEFINE_bool(show, true, show_msg);
 
 constexpr char time_msg[] = "time in seconds to execute program. Default is -1 (infinite time)";
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), time_msg);
 
-constexpr char u_msg[] = "list of monitors to show initially";
-DEFINE_string(u, "", u_msg);
+constexpr char u_msg[] = "resource utilization graphs. "
+    "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide. "
+    "Default is cdm";
+DEFINE_string(u, "cdm", u_msg);
 
 void parse(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
@@ -96,10 +103,11 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--res <STRING>]      " << res_msg
                   << "\n\t[--show] ([--noshow]) " << show_msg
                   << "\n\t[--time <NUMBER>]     " << time_msg
-                  << "\n\t[ -u <DEVICE>]                 " << u_msg
+                  << "\n\t[ -u <MONITOR>]                 " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
-                     "\n\t\tR, r, SpaceBar - Restart testing"
+                     "\n\t\tR, r - Restart testing"
+                     "\n\t\tP, p, 0, SpaceBar - Pause"
                      "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
 
         showAvailableDevices();
@@ -303,10 +311,13 @@ int main(int argc, char *argv[]) {
                 cv::imshow(argv[0], gridMat.outImg);
                 //--- Processing keyboard events
                 int key = cv::pollKey();
+                if ('p' == key || 'P' == key  || '0' == key || ' ' == key) { // Pause
+                    key = cv::waitKey(0);
+                }
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                     keepRunning = false;
                 }
-                else if (32 == key || 'r' == key || 'R' == key) {  // press space or r to restart testing if needed
+                else if ('r' == key || 'R' == key) {  // press space or r to restart testing if needed
                     isTestMode = true;
                     framesNum = 0;
                     framesNumOnCalculationStart = 0;
@@ -314,14 +325,6 @@ int main(int argc, char *argv[]) {
                     accuracy = 0;
                     elapsedSeconds = std::chrono::steady_clock::duration(0);
                     startTime = std::chrono::steady_clock::now();
-                }
-                else if ('p' == key || 'P' == key) {
-                    while (true) {
-                        cv::waitKey(0);
-                        if ('p' == key || 'P' == key) {
-                            break;
-                        }
-                    }
                 }
                 else {
                     presenter.handleKey(key);

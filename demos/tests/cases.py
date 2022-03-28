@@ -833,7 +833,7 @@ PYTHON_DEMOS = [
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
-            '--no_show': None,
+            '--noshow': None,
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
         [

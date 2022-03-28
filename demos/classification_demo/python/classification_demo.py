@@ -53,7 +53,7 @@ def build_argparser():
 
     args.add_argument('-d', '--device', default='CPU', type=str, metavar="<DEVICE>",
         help='specify the target device to infer on: CPU, GPU, HDDL or MYRIAD is acceptable.'
-            'The demo will look for a suitable plugin for device specified. Default value is CPU')
+            'The demo will look for a suitable plugin for device specified. Default is CPU')
 
     common_model_args = parser.add_argument_group('Common model options')
 
@@ -93,12 +93,12 @@ def build_argparser():
     io_args.add_argument('-noshow', '--noshow', action='store_true',
         help="don't show output")
 
-    io_args.add_argument('--output_resolution', default=None, type=resolution, metavar="<STRING>",
-        help='specify the maximum output window resolution in (width x height) format. Example: 1280x720'
-            'Default value is input frame size')
+    io_args.add_argument('--res', default=None, type=resolution, metavar="<STRING>",
+        help='set image grid resolution in format WxH')
 
-    io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<DEVICE>",
-        help='list of monitors to show initially')
+    io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITOR>",
+        help='resource utilization graphs. '
+            'c - average CPU load, d - load distribution over cores, m - memory usage, h - hide')
 
     input_transform_args = parser.add_argument_group('Input transform options')
 
@@ -243,8 +243,8 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
-                if args.output_resolution:
+                output_transform = OutputTransform(frame.shape[:2], args.res)
+                if args.res:
                     output_resolution = output_transform.new_resolution
                 else:
                     output_resolution = (frame.shape[1], frame.shape[0])
@@ -306,4 +306,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main() or 0)
+    main()
