@@ -3,4 +3,4 @@
 #
 
 add_demo(NAME noise_suppression_demo
-        SOURCES main.cpp)
+        SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")

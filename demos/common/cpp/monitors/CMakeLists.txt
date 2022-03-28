@@ -3,17 +3,17 @@
 #
 
 set(SOURCES
-    src/cpu_monitor.cpp
-    src/memory_monitor.cpp
-    src/presenter.cpp)
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cpu_monitor.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/memory_monitor.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/presenter.cpp")
 
 set(HEADERS
-    include/monitors/cpu_monitor.h
-    include/monitors/memory_monitor.h
-    include/monitors/presenter.h)
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/monitors/cpu_monitor.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/monitors/memory_monitor.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/monitors/presenter.h")
 
 if(WIN32)
-    list(APPEND SOURCES src/query_wrapper.cpp src/query_wrapper.h)
+    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/query_wrapper.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/query_wrapper.h")
 endif()
 
 set(TARGET_NAME "monitors")
