@@ -150,3 +150,36 @@ class ImageMattingWithBackground(ImageModel):
         fgr = cv2.cvtColor(cv2.resize(fgr, (w, h)), cv2.COLOR_RGB2BGR)
         pha = np.expand_dims(cv2.resize(pha, (w, h)), axis=-1)
         return fgr, pha
+
+
+class PortraitBackgroundMatting(ImageModel):
+    __model__ = 'Portrait-matting'
+
+    def __init__(self, model_adapter, configuration, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+        self._check_io_number(1, 1)
+        self.output_blob_name = self._get_outputs()
+
+    @classmethod
+    def parameters(cls):
+        return super().parameters()
+
+    def _get_outputs(self):
+        output_blob_name = next(iter(self.outputs))
+        output_size = self.outputs[output_blob_name].shape
+        if len(output_size) != 4:
+            self.raise_error("Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
+
+        return output_blob_name
+
+    def preprocess(self, inputs):
+        dict_inputs, meta = super().preprocess(inputs)
+        meta.update({"original_image": inputs})
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        output = outputs[self.output_blob_name][0].transpose(1, 2, 0)
+        original_frame = meta['original_image'] / 255.0
+        h, w = meta['original_shape'][:2]
+        res_output = np.expand_dims(cv2.resize(output, (w, h)), -1)
+        return original_frame, res_output
