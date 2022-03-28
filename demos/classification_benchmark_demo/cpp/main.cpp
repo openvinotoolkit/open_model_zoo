@@ -26,11 +26,11 @@
 
 #include "grid_mat.hpp"
 
-namespace{
+namespace {
 constexpr char h_msg[] = "show the help message and exit";
 DEFINE_bool(h, false, h_msg);
 
-constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images";
+constexpr char i_msg[] = "an input to process. The input must be a single image or a folder of images";
 DEFINE_string(i, "", i_msg);
 
 constexpr char labels_msg[] = "path to .txt file with labels";
@@ -39,7 +39,7 @@ DEFINE_string(labels, "", labels_msg);
 constexpr char m_msg[] = "path to an .xml file with a trained model";
 DEFINE_string(m, "", m_msg);
 
-constexpr char auto_resize_msg[] = "enables resizable input";
+constexpr char auto_resize_msg[] = "enable resizable input";
 DEFINE_bool(auto_resize, false, auto_resize_msg);
 
 constexpr char d_msg[] = "specify the target device to infer on. "
@@ -60,13 +60,13 @@ DEFINE_uint32(nireq, 0, nireq_msg);
 constexpr char nstreams_msg[] = "specify count of streams";
 DEFINE_string(nstreams, "", nstreams_msg);
 
-constexpr char nt_msg[] = "number of top results. Must be >= 1. Default value is 5";
+constexpr char nt_msg[] = "number of top results. Must be >= 1. Default is 5";
 DEFINE_uint32(nt, 5, nt_msg);
 
 constexpr char nthreads_msg[] = "specify count of threads";
 DEFINE_uint32(nthreads, 0, nthreads_msg);
 
-constexpr char res_msg[] = "set image grid resolution in format WxH. Default value is 1280x720";
+constexpr char res_msg[] = "set image grid resolution in format WxH. Default is 1280x720";
 DEFINE_string(res, "1280x720", res_msg);
 
 constexpr char show_msg[] = "disable showing of processed images";
@@ -106,9 +106,9 @@ void parse(int argc, char *argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
     } if (FLAGS_i.empty()) {
-        throw std::invalid_argument("-i <INPUT> can't be empty");
+        throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_m.empty()) {
-        throw std::invalid_argument("-m <MODEL FILE> can't be empty");
+        throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     } if (FLAGS_labels.empty()) {
         throw std::logic_error("--labels <LABELS> can't be empty");
     }
@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
             renderMetrics.update(renderingStart);
             elapsedSeconds = std::chrono::steady_clock::now() - startTime;
             if (FLAGS_show) {
-                cv::imshow("classification_demo", gridMat.outImg);
+                cv::imshow(argv[0], gridMat.outImg);
                 //--- Processing keyboard events
                 int key = cv::pollKey();
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc

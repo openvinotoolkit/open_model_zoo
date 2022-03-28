@@ -42,9 +42,6 @@ def build_argparser():
 
     args = parser.add_argument_group('Options')
 
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-        help='show the help message and exit')
-
     args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
         help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
 
@@ -90,10 +87,10 @@ def build_argparser():
     io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
         help='name of the output file(s) to save')
 
-    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int, metavar="<NUMBER>",
-        help='number of frames to store in output. If 0 is set, all frames are stored. Default value is 1000')
+    io_args.add_argument('-lim', '--lim', required=False, default=1000, type=int, metavar="<NUMBER>",
+        help='number of frames to store in output. If 0 is set, all frames are stored. Default is 1000')
 
-    io_args.add_argument('--no_show', action='store_true',
+    io_args.add_argument('-noshow', '--noshow', action='store_true',
         help="don't show output")
 
     io_args.add_argument('--output_resolution', default=None, type=resolution, metavar="<STRING>",
