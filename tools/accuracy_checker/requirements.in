@@ -3,7 +3,8 @@ tqdm>=4.54.1
 
 # image reading and preprocessing
 # note: python 3.6 wheels is not available since 0.18
-scikit-image>=0.17.2
+scikit-image~=0.17.2;python_version<"3.7"
+scikit-image>=0.19.2;python_version>="3.7"
 
 # there is issue with resolving versions for python3.6 and python3.7, pin to specific version of lib
 imagecodecs~=2020.5.30;python_version<"3.7"
