@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,4 +8,5 @@ file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_demo(NAME image_processing_demo
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPENDENCIES monitors models pipelines)
+    DEPENDENCIES monitors models pipelines
+)

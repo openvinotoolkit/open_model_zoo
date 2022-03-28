@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -18,6 +18,10 @@ set(HEADERS
     utils.hpp)
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+check_code_style(${PROJECT_NAME}
+    ENABLE_CLANG_FORMAT
+    ENABLE_CPPLINT)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     Threads::Threads)

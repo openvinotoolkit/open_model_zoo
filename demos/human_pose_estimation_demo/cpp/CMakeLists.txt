@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,4 +8,5 @@ file(GLOB H_FILES ./*.h)
 add_demo(NAME human_pose_estimation_demo
     SOURCES ${SRC_FILES}
     HEADERS ${H_FILES}
-    DEPENDENCIES monitors models pipelines)
+    DEPENDENCIES monitors models pipelines
+)

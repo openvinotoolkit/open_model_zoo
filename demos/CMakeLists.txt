@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -15,6 +15,10 @@ endif()
 
 project(Demos)
 
+include (CMakeDependentOption)
+
+cmake_dependent_option(ENABLE_CLANG_FORMAT "Enable clang-format checks during the build" ON "UNIX" OFF)
+option(ENABLE_CPPLINT "Enable cpplint checks during the build" ON)
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
@@ -94,6 +98,18 @@ endfunction()
 
 include(CMakeParseArguments)
 
+function(check_code_style NAME CLANG_FORMAT CPPLINT)
+    message(STATUS ${NAME})
+    # Check code style
+    if(CPPLINT)
+        add_cpplint_target(${NAME}_cpplint FOR_TARGETS ${NAME})
+    endif()
+    if(CLANG_FORMAT)
+        add_clang_format_target(${NAME}_clang FOR_TARGETS ${NAME})
+    endif()
+endfunction(check_code_style)
+
+
 # add_demo(NAME <target name>
 #     SOURCES <source files>
 #     [HEADERS <header files>]
@@ -121,6 +137,10 @@ macro(add_demo)
     # Create executable file from sources
     add_executable(${OMZ_DEMO_NAME} ${OMZ_DEMO_SOURCES} ${OMZ_DEMO_HEADERS})
 
+    check_code_style(${OMZ_DEMO_NAME}
+        ENABLE_CLANG_FORMAT
+        ENABLE_CPPLINT)
+
     if(WIN32)
         set_target_properties(${OMZ_DEMO_NAME} PROPERTIES COMPILE_PDB_NAME ${OMZ_DEMO_NAME})
     endif()
@@ -137,6 +157,10 @@ macro(add_demo)
     endif()
 endmacro()
 
+find_package(CMakeScripts REQUIRED
+             PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake"
+             NO_CMAKE_FIND_ROOT_PATH
+             NO_DEFAULT_PATH)
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
@@ -150,6 +174,13 @@ file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
 list(REMOVE_ITEM samples_dirs common thirdparty multi_channel_common)
 add_demos_to_build(${samples_dirs})
+
+if(ENABLE_CPPLINT)
+    message(STATUS "Enabled Cpplint checks")
+endif()
+if(ENABLE_CLANG_FORMAT)
+    message(STATUS "Enabled ClangFormat checks")
+endif()
 
 if(ENABLE_PYTHON)
     find_package(PythonInterp 3.6 REQUIRED)
