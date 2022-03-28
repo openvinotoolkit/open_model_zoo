@@ -98,16 +98,17 @@ endfunction()
 
 include(CMakeParseArguments)
 
-function(check_code_style NAME CLANG_FORMAT CPPLINT)
-    message(STATUS ${NAME})
-    # Check code style
-    if(CPPLINT)
-        add_cpplint_target(${NAME}_cpplint FOR_TARGETS ${NAME})
+macro(check_code_style)
+    set(oneValueArgs NAME CLANG_FORMAT CPPLINT)
+    cmake_parse_arguments(CHECK "${options}" "${oneValueArgs}"
+        "${multiValueArgs}" ${ARGN})
+    if(CHECK_CLANG_FORMAT)
+        add_clang_format_target(${CHECK_NAME}_clang FOR_TARGETS ${CHECK_NAME})
     endif()
-    if(CLANG_FORMAT)
-        add_clang_format_target(${NAME}_clang FOR_TARGETS ${NAME})
+    if(CHECK_CPPLINT)
+        add_cpplint_target(${CHECK_NAME}_cpplint FOR_TARGETS ${CHECK_NAME})
     endif()
-endfunction(check_code_style)
+endmacro()
 
 
 # add_demo(NAME <target name>
@@ -137,9 +138,9 @@ macro(add_demo)
     # Create executable file from sources
     add_executable(${OMZ_DEMO_NAME} ${OMZ_DEMO_SOURCES} ${OMZ_DEMO_HEADERS})
 
-    check_code_style(${OMZ_DEMO_NAME}
-        ENABLE_CLANG_FORMAT
-        ENABLE_CPPLINT)
+    check_code_style(NAME ${OMZ_DEMO_NAME}
+        CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+        CPPLINT ${ENABLE_CPPLINT})
 
     if(WIN32)
         set_target_properties(${OMZ_DEMO_NAME} PROPERTIES COMPILE_PDB_NAME ${OMZ_DEMO_NAME})

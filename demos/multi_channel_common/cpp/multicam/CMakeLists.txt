@@ -19,9 +19,9 @@ set(HEADERS
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-check_code_style(${PROJECT_NAME}
-    ENABLE_CLANG_FORMAT
-    ENABLE_CPPLINT)
+check_code_style(NAME ${TARGET_NAME}
+    CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+    CPPLINT ${ENABLE_CPPLINT})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     Threads::Threads)

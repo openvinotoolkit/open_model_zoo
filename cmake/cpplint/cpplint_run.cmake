@@ -27,7 +27,7 @@ execute_process(
     COMMAND
         "${PYTHON_EXECUTABLE}"
         "${CPPLINT_SCRIPT}"
-        "--linelength=160"
+        "--linelength=120"
         "--counting=detailed"
         "--quiet"
         "--filter=${FILTER}"
@@ -50,6 +50,6 @@ if(NOT SKIP_RETURN_CODE)
     if(NOT result EQUAL "0")
         # Display the cpplint output to console (to parse it form IDE)
         message("${output}")
-        message(FATAL_ERROR "[cpplint] Code style check failed for : ${INPUT_FILE}")
+        message(WARNING "[cpplint] Code style check failed for : ${INPUT_FILE}")
     endif()
 endif()

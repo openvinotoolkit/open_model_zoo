@@ -24,9 +24,9 @@ source_group("include" FILES ${HEADERS})
 
 add_library(${TARGET_NAME} STATIC ${SOURCES} ${HEADERS})
 
-check_code_style(${TARGET_NAME}
-                ENABLE_CLANG_FORMAT
-                ENABLE_CPPLINT)
+check_code_style(NAME ${TARGET_NAME}
+    CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+    CPPLINT ${ENABLE_CPPLINT})
 
 target_include_directories(monitors PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(monitors PRIVATE opencv_core opencv_imgproc)
