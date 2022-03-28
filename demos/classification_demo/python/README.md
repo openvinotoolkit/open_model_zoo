@@ -66,6 +66,8 @@ omz_converter --list models.lst
 * mobilenet-v2-pytorch
 * mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-tf
+* mobilenet-v3-large-1.0-224-paddle
+* mobilenet-v3-small-1.0-224-paddle
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf
