@@ -19,6 +19,7 @@ import os.path as osp
 
 import numpy as np
 from openvino.runtime import PartialShape
+from time import perf_counter
 
 from utils.text_preprocessing import text_to_sequence_with_dictionary, intersperse
 import utils.cmudict as cmudict
@@ -42,14 +43,18 @@ class AcousticGANIE:
         self.encoder = self.load_network(model_encoder)
         self.encoder_request = self.create_infer_request(self.encoder, model_encoder)
 
-        self.decoder = self.load_network(model_decoder)
-        self.decoder_request = self.create_infer_request(self.decoder, model_decoder)
-
         self.enc_input_data_name = "seq"
         self.enc_input_mask_name = "seq_len"
+        new_shape = {self.enc_input_data_name: PartialShape([1, -1]), self.enc_input_mask_name: PartialShape([1])}
+        self.encoder.reshape(new_shape)
+        self.encoder_request = self.create_infer_request(self.encoder)
 
+        self.decoder = self.load_network(model_decoder)
         self.dec_input_data_name = "z"
         self.dec_input_mask_name = "z_mask"
+        self.decoder.reshape({self.dec_input_data_name: PartialShape([1, 128, -1]),
+                              self.dec_input_mask_name: PartialShape([1, 1, -1])})
+        self.decoder_request = self.create_infer_request(self.decoder, model_decoder)
 
     def seq_to_indexes(self, text):
         res = text_to_sequence_with_dictionary(text, self.cmudict)
@@ -120,12 +125,6 @@ class AcousticGANIE:
         seq = np.array(seq)[None, :]
         seq_len = np.array([seq.shape[1]])
 
-        model_shape = self.encoder.input(self.enc_input_data_name).shape[1]
-        if model_shape != seq.shape[1]:
-            new_shape = {self.enc_input_data_name: PartialShape(seq.shape), self.enc_input_mask_name: PartialShape([1])}
-            self.encoder.reshape(new_shape)
-            self.encoder_request = self.create_infer_request(self.encoder)
-
         return {self.enc_input_data_name: seq, self.enc_input_mask_name: seq_len}
 
     def decoder_preprocess(self, alpha):
@@ -134,12 +133,6 @@ class AcousticGANIE:
         logw = self.encoder_request.get_tensor("logw").data[:]
 
         z, z_mask = self.gen_decoder_in(x_res, logw, x_mask, alpha)
-
-        model_shape = list(self.decoder.input(self.dec_input_data_name).shape)
-        if model_shape[-1] != z.shape[-1]:
-            self.decoder.reshape({self.dec_input_data_name: PartialShape(z.shape),
-                                  self.dec_input_mask_name: PartialShape(z_mask.shape)})
-            self.decoder_request = self.create_infer_request(self.decoder)
 
         return {self.dec_input_data_name: z, self.dec_input_mask_name: z_mask}
 

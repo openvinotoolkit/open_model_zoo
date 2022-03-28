@@ -206,13 +206,9 @@ class MelGANIE:
         self.MAX_WAV_VALUE = 32768.0 # constant for normalizing audio output in training stage
 
         self.model = self.load_network(model)
-        if self.model.input(self.input_name).shape[2] != default_width:
-            orig_shape = self.model.input(self.input_name).shape
-            new_shape = (orig_shape[0], orig_shape[1], default_width)
-            self.model.reshape({self.input_name: PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
+        self.model.reshape({self.input_name: PartialShape([1, 80, -1])})
 
         self.request = self.create_infer_request(self.model, model)
-        self.mel_len = self.model.input(self.input_name).shape[2]
 
     def load_network(self, model_path):
         log.info('Reading MelGAN model {}'.format(model_path))
@@ -229,10 +225,6 @@ class MelGANIE:
         if len(mel.shape) < 3:
             mel = np.expand_dims(mel, axis=0)
 
-        if self.mel_len != mel.shape[-1]:
-            self.model.reshape({self.input_name: PartialShape(mel.shape)})
-            self.request = self.create_infer_request(self.model)
-            self.mel_len = mel.shape[-1]
         return {self.input_name: mel}
 
     def forward(self, mel):
