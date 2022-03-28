@@ -17,7 +17,7 @@
 
 import logging as log
 import sys
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser
 from pathlib import Path
 from time import perf_counter
 
@@ -29,6 +29,7 @@ from openvino.model_zoo.model_api.models import Classification, OutputTransform
 from openvino.model_zoo.model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
 from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from openvino.runtime import get_version
 
 import monitors
 from images_capture import open_images_capture
@@ -37,7 +38,14 @@ from helpers import resolution, log_latency_per_stage
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
-def build_argparser():
+def parse():
+    def print_version():
+        log.info('OpenVINO Runtime')
+        print('\tbuild {}'.format(get_version()))
+
+    def print_key_bindings():
+        print('\n\tKey bindings:\n\t\tQ, q - Quit\n\t\tP, p, 0, SpaceBar - Pause')
+
     parser = ArgumentParser(add_help=False)
 
     args = parser.add_argument_group('Options')
@@ -117,6 +125,8 @@ def build_argparser():
     debug_args.add_argument('-r', '--raw_output_message', default=False, action='store_true',
         help='output inference results raw values showing')
 
+    print_version()
+    print_key_bindings()
     return parser
 
 
@@ -168,7 +178,7 @@ def print_raw_results(classifications, frame_id):
 
 
 def main():
-    args = build_argparser().parse_args()
+    args = parse().parse_args()
 
     cap = open_images_capture(args.input, args.loop)
     delay = int(cap.get_type() in {'VIDEO', 'CAMERA'})
@@ -288,6 +298,10 @@ def main():
             if not args.no_show:
                 cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
+
+                # Pause.
+                if key in {ord('p'), ord('P'), ord(' '), ord('0')}:
+                    cv2.waitKey(0)
 
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:

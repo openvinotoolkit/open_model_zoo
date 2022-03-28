@@ -34,9 +34,6 @@ constexpr char i_msg[] = "an input to process. "
     "The input must be a single image or a folder of images";
 DEFINE_string(i, "", i_msg);
 
-constexpr char labels_msg[] = "path to .txt file with labels";
-DEFINE_string(labels, "", labels_msg);
-
 constexpr char m_msg[] = "path to an .xml file with a trained model";
 DEFINE_string(m, "", m_msg);
 
@@ -51,6 +48,9 @@ DEFINE_string(d, "CPU", d_msg);
 
 constexpr char gt_msg[] = "path to ground truth .txt file";
 DEFINE_string(gt, "", gt_msg);
+
+constexpr char labels_msg[] = "path to .txt file with labels";
+DEFINE_string(labels, "", labels_msg);
 
 constexpr char layout_msg[] = "specify inputs layouts."
     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input";
@@ -117,8 +117,6 @@ void parse(int argc, char *argv[]) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
-    } if (FLAGS_labels.empty()) {
-        throw std::logic_error("--labels <LABELS> can't be empty");
     }
     slog::info << ov::get_openvino_version() << slog::endl;
 }
