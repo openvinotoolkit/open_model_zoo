@@ -42,7 +42,7 @@ from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
-DEVICE_KINDS = ['CPU', 'GPU', 'AUTO', 'AUTO:CPU,GPU', 'MULTI:CPU,GPU', 'MYRIAD', 'HETERO', 'HDDL']
+DEVICE_KINDS = ['CPU', 'GPU', 'MYRIAD', 'HETERO', 'HDDL']
 
 
 def build_argparser():
