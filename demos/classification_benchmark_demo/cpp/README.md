@@ -52,6 +52,7 @@ omz_converter --list models.lst
 * hbonet-0.25
 * hbonet-1.0
 * inception-resnet-v2-tf
+* levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-1.0-224

@@ -62,6 +62,7 @@
    omz_models_model_hbonet_0_25
    omz_models_model_hbonet_1_0
    omz_models_model_inception_resnet_v2_tf
+   omz_models_model_levit_128s
    omz_models_model_mixnet_l
    omz_models_model_mobilenet_v1_0_25_128
    omz_models_model_mobilenet_v1_1_0_224
@@ -344,6 +345,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 77.82%/94.03% | 22.227 | 30.223 |
+| LeViT 128S                  | PyTorch\*                          | [levit-128s](./levit-128s/README.md) | 76.54%/92.85% | 0.6177 | 8.2199 |
 | MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
