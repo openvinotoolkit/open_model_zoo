@@ -1,0 +1,4 @@
+# This file can be used with the --list option of the model downloader.
+yolo-v4-tiny-tf.xml
+single-image-super-resolution-1032.xml
+single-image-super-resolution-1033.xml
