@@ -20,8 +20,8 @@ For details see [paper](https://arxiv.org/abs/1905.02244) and [repository](https
 
 | Metric | Result |
 | ------ | ------ |
-| Top 1  | 67.36% |
-| Top 5  | 87.44% |
+| Top 1  | 68.21% |
+| Top 5  | 88.04% |
 
 ## Input
 
