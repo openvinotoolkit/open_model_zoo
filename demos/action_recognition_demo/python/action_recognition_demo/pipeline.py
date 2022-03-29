@@ -57,7 +57,7 @@ class PipelineStep:
 
     def join(self):
         self.input_queue.put(Signal.STOP)
-        if(self._thread!=None):
+        if(self._thread is not None):
             self._thread.join()
         self._thread = None
         self.working = False

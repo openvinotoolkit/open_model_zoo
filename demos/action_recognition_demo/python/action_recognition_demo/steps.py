@@ -37,7 +37,7 @@ def run_pipeline(capture, model_type, model, render_fn, raw_output, seq_size=16,
         pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel=False)
 
     pipeline.add_step("Render", RenderStep(render_fn, raw_output, fps=fps), parallel=True)
-    
+
     pipeline.run()
     pipeline.close()
     pipeline.print_statistics()
