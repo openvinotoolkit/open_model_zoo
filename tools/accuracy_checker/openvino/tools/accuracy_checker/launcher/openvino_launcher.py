@@ -587,8 +587,9 @@ class OpenVINOLauncher(Launcher):
             self.network = network
         if self.network is not None:
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
-        self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
-        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
+        self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network if self.network is not None else self.exec_network)
+        network_inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(network_inputs)}
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
