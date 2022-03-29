@@ -22,6 +22,7 @@ import re
 import warnings
 import numpy as np
 from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
+from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension,
@@ -587,8 +588,10 @@ class OpenVINOLauncher(Launcher):
             self.network = network
         if self.network is not None:
             self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
-        self.input_to_tensor_name = self.get_input_tensor_name_mapping(self.network)
-        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(self.network.inputs)}
+        self.input_to_tensor_name = self.get_input_tensor_name_mapping(
+            self.network if self.network is not None else self.exec_network)
+        network_inputs = self.network.inputs if self.network is not None else self.exec_network.inputs
+        self.input_to_index = {inp.get_node().friendly_name: idx for idx, inp in enumerate(network_inputs)}
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
@@ -597,12 +600,13 @@ class OpenVINOLauncher(Launcher):
                 self.print_input_output_info(self.network if self.network is not None else self.exec_network)
             if preprocessing:
                 self._set_preprocess(preprocessing)
+                self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
             model_batch = self._get_model_batch_size()
             model_batch = 1 if model_batch is None else model_batch
             self._batch = self.config.get('batch', model_batch)
             self._set_batch_size(self._batch)
             self.try_to_set_default_layout()
-            if self.network and not preprocessing and (not self.dyn_input_layers or self.is_dynamic):
+            if self.network and (not self.dyn_input_layers or self.is_dynamic or self.disable_resize_to_input):
                 self.exec_network = self.ie_core.compile_model(self.network, self._device)
                 self.infer_request = self.exec_network.create_infer_request()
 
@@ -838,11 +842,15 @@ class OpenVINOLauncher(Launcher):
 
     def _set_precision(self):
         config_inputs = self.config.get('inputs', [])
-        for input_config in config_inputs:
-            if 'precision' in input_config:
-                if self.network:
-                    self.inputs[input_config['name']].set_element_type(
-                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()])
+        has_precisions = ['precision' in inp for inp in config_inputs]
+        if has_precisions and self.network:
+            preprocessor = PrePostProcessor(self.network)
+            for input_config in config_inputs:
+                if 'precision' in input_config:
+                    name = input_config['name']
+                    element_type =  PRECISION_STR_TO_TYPE[input_config['precision'].upper()]
+                    preprocessor.input(self.input_to_index[name]).tensor().set_element_type(element_type)
+            self.network = preprocessor.build()
 
     def _set_input_shape(self):
         if not self.network:
@@ -914,33 +922,28 @@ class OpenVINOLauncher(Launcher):
             preprocess_steps = preprocess.ie_preprocess_steps
             if not preprocess_steps:
                 return
-            for input_name, input_info in self.network.input_info.items():
+            preprocessor = PrePostProcessor(self.network)
+            for input_name in self.inputs:
                 if input_name in self.const_inputs + self.image_info_inputs:
                     continue
+                input_id = self.input_to_index[input_name]
                 for (name, value) in preprocess_steps:
-                    setattr(input_info.preprocess_info, name, value)
-                if preprocess.ie_processor.has_normalization():
-                    channel_id = input_info.layout.find('C')
-                    if channel_id != -1:
-                        num_channels = input_info.input_data.shape[channel_id]
-                        preprocess.ie_processor.set_normalization(num_channels, input_info.preprocess_info)
-            self.disable_resize_to_input = preprocess.ie_processor.has_resize()
-            self._use_set_blob = self.disable_resize_to_input
-            self.load_network(self.network)
+                    if name == 'resize_algorithm':
+                        preprocessor.input(input_id).tensor().set_spatial_dynamic_shape()
+                        preprocessor.input(input_id).preprocess().resize(value)
+                        self.need_dyn_resolving = False
+                    if name == 'convert_color_format':
+                        src, dst = value
+                        preprocessor.input(input_id).tensor().set_color_format(src)
+                        preprocessor.input(input_id).preprocess().convert_color(dst)
+                    if name == 'mean_variant':
+                        mean, scale = value
+                        if mean is not None:
+                            preprocessor.input(input_id).preprocess().mean(mean)
+                        if scale is not None:
+                            preprocessor.input(input_id).preprocess().scale(scale)
+            self.network = preprocessor.build()
             self._preprocess_steps = preprocess_steps
-            return
-        preprocess_info_by_input = {}
-        preprocess_info = preprocess.preprocess_info
-        for input_name in self.inputs:
-            if input_name in self.const_inputs + self.image_info_inputs:
-                continue
-            if preprocess.ie_processor.has_normalization():
-                channel_id = self.inputs[input_name].layout.find('C')
-                if channel_id != -1:
-                    num_channels = self.inputs[input_name].shape[channel_id]
-                    preprocess.ie_processor.set_normalization(num_channels, preprocess_info)
-            preprocess_info_by_input[input_name] = preprocess_info
-        self._preprocess_info = preprocess_info_by_input
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def get_model_file_type(self):
