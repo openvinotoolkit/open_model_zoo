@@ -19,13 +19,15 @@ from ..config import ConfigValidator, StringField
 from ..utils import get_data_shapes
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
+from .ov_preprocessor import OVPreprocessor, ov_preprocess_available
 
 
 class PreprocessingExecutor:
     def __init__(
             self, processors=None, dataset_name='custom', dataset_meta=None,
             input_shapes=None,
-            enable_ie_preprocessing=False
+            enable_ie_preprocessing=False,
+            enable_ov_preprocessing=False
     ):
         self.processors = []
         self.dataset_meta = dataset_meta
@@ -39,6 +41,15 @@ class PreprocessingExecutor:
                 )
             else:
                 self.ie_processor = IEPreprocessor(processors)
+                processors = self.ie_processor.keep_preprocessing_info
+        if enable_ov_preprocessing:
+            if not ov_preprocess_available():
+                warnings.warn(
+                    'PreProcessInfo is not available in your InferenceEngine version or openvino is not installed'
+                    '--ie_preprocessing key will be ignored'
+                )
+            else:
+                self.ie_processor = OVPreprocessor(processors)
                 processors = self.ie_processor.keep_preprocessing_info
 
         if not processors:
