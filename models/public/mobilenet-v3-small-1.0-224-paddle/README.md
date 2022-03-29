@@ -1,4 +1,4 @@
-# mobilenet-v3-small-1.0-224-tf
+# mobilenet-v3-small-1.0-224-paddle
 
 ## Use Case and High-Level Description
 
@@ -35,6 +35,7 @@ Image, name: `x`, shape: `1, 3, 224, 224`, format: `B, C, H, W`, where:
 - `W` - image width
 
 Expected color order: `RGB`.
+Mean values - [123.675,116.28,103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted Model
 
@@ -54,7 +55,7 @@ Expected color order: `BGR`.
 Object classifier according to ImageNet classes, name - `softmax_1.tmp_0`,  shape - `1, 1000`, output data format is `B, C` where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted Model
 

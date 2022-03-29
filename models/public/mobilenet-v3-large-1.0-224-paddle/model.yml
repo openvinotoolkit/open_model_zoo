@@ -13,9 +13,9 @@
 # limitations under the License.
 
 description: >-
-  "mobilenet-v3-small-1.0-224-paddle" is one of MobileNets V3 - next generation of MobileNets,
+  "mobilenet-v3-large-1.0-224-paddle" is one of MobileNets V3 - next generation of MobileNets,
   based on a combination of complementary search techniques as well as a novel architecture
-  design. "mobilenet-v3-small-1.0-224-paddle" is pretraind in Paddle framework and targeted for low resource use cases.
+  design. "mobilenet-v3-large-1.0-224-paddle" is pretraind in Paddle framework and targeted for low resource use cases.
   For details see paper <https://arxiv.org/abs/1905.02244> and repository <https://github.com/PaddlePaddle/PaddleClas>.
 task_type: classification
 files:
