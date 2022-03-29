@@ -17,7 +17,7 @@
 
 import logging as log
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
@@ -29,7 +29,6 @@ from openvino.model_zoo.model_api.models import Classification, OutputTransform
 from openvino.model_zoo.model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
 from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
-from openvino.runtime import get_version
 
 import monitors
 from images_capture import open_images_capture
@@ -39,12 +38,12 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 
 def parse():
-    def print_key_bindings():
-        print('\n\tKey bindings:\n\t\tQ, q - Quit\n\t\tP, p, 0, SpaceBar - Pause')
-
     parser = ArgumentParser(add_help=False)
 
     args = parser.add_argument_group('Options')
+
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
+        help='show the help message and exit\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause')
 
     args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
         help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
@@ -76,8 +75,8 @@ def parse():
         help='number of infer requests')
 
     infer_args.add_argument('-nstreams', '--num_streams', default='', type=str, metavar="<NUMBER>",
-        help='number of streams to use for inference on the CPU or/and GPU in throughput '
-            'mode (for HETERO and MULTI device cases use format '
+        help='number of streams to use for inference on the CPU or/and GPU in throughput mode'
+            '\n(for HETERO and MULTI device cases use format '
             '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)')
 
     infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int, metavar="<NUMBER>",
@@ -85,17 +84,17 @@ def parse():
 
     io_args = parser.add_argument_group('Input/output options')
 
+    io_args.add_argument('-lim', '--limit', required=False, default=1000, type=int, metavar="<NUMBER>",
+        help='number of frames to store in output. If 0 is set, all frames are stored. Default is 1000')
+
     io_args.add_argument('--loop', default=False, action='store_true',
         help='enable reading the input in a loop')
 
-    io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
-        help='name of the output file(s) to save')
-
-    io_args.add_argument('-lim', '--lim', required=False, default=1000, type=int, metavar="<NUMBER>",
-        help='number of frames to store in output. If 0 is set, all frames are stored. Default is 1000')
-
     io_args.add_argument('-noshow', '--noshow', action='store_true',
         help="don't show output")
+
+    io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
+        help='name of the output file(s) to save')
 
     io_args.add_argument('--res', default=None, type=resolution, metavar="<STRING>",
         help='set image grid resolution in format WxH')
@@ -121,7 +120,6 @@ def parse():
     debug_args.add_argument('-r', '--raw_output_message', default=False, action='store_true',
         help='output inference results raw values showing')
 
-    print_key_bindings()
     return parser
 
 
@@ -222,15 +220,15 @@ def main():
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
             frame = draw_labels(frame, classifications, output_transform)
-            if delay or args.no_show:
+            if delay or args.noshow:
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            if video_writer.isOpened() and (args.limit <= 0 or next_frame_id_to_show <= args.limit-1):
                 video_writer.write(frame)
             next_frame_id_to_show += 1
 
-            if not args.no_show:
+            if not args.noshow:
                 cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
                 # Quit.
@@ -283,14 +281,14 @@ def main():
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
             frame = draw_labels(frame, classifications, output_transform)
-            if delay or args.no_show:
+            if delay or args.noshow:
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            if video_writer.isOpened() and (args.limit <= 0 or next_frame_id_to_show <= args.limit-1):
                 video_writer.write(frame)
 
-            if not args.no_show:
+            if not args.noshow:
                 cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
 
@@ -303,7 +301,7 @@ def main():
                     break
                 presenter.handleKey(key)
 
-    if delay or args.no_show:
+    if delay or args.noshow:
         metrics.log_total()
         log_latency_per_stage(cap.reader_metrics.get_latency(),
                             async_pipeline.preprocess_metrics.get_latency(),

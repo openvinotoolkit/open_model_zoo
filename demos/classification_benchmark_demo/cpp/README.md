@@ -132,7 +132,7 @@ For example, use the following command-line command to run the application:
                       -i <path_to_folder_with_images> \
                       --labels <path_to_file_with_list_of_labels> \
                       --gt <path_to_ground_truth_data_file> \
-                      -u CDM
+                      -u cdm
 ```
 
 ## Demo Output
