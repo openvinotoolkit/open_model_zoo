@@ -102,7 +102,8 @@ class EncoderStep(PipelineStep):
         self.async_model = AsyncWrapper(self.encoder, self.encoder.num_requests)
 
     def __del__(self):
-        self.encoder.infer_queue[0].cancel()
+        for ireq in self.encoder.infer_queue:
+            ireq.cancel()
 
     def process(self, frame):
         preprocessed = preprocess_frame(frame)
@@ -125,7 +126,8 @@ class DecoderStep(PipelineStep):
         self._embeddings = deque(maxlen=self.sequence_size)
 
     def __del__(self):
-        self.decoder.infer_queue[0].cancel()
+        for ireq in self.decoder.infer_queue:
+            ireq.cancel()
 
     def process(self, item):
         if item is None:
