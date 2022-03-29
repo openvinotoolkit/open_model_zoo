@@ -22,6 +22,7 @@ import re
 import warnings
 import numpy as np
 from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
+from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
     get_cpu_extension,
@@ -839,11 +840,15 @@ class OpenVINOLauncher(Launcher):
 
     def _set_precision(self):
         config_inputs = self.config.get('inputs', [])
-        for input_config in config_inputs:
-            if 'precision' in input_config:
-                if self.network:
-                    self.inputs[input_config['name']].set_element_type(
-                        PRECISION_STR_TO_TYPE[input_config['precision'].upper()])
+        has_precisions = ['precision' in inp for inp in config_inputs]
+        if has_precisions and self.network:
+            preprocessor = PrePostProcessor(self.network)
+            for input_config in config_inputs:
+                if 'precision' in input_config:
+                    name = input_config['name']
+                    element_type =  PRECISION_STR_TO_TYPE[input_config['precision'].upper()]
+                    preprocessor.input(self.input_to_index[name]).tensor().set_element_type(element_type)
+            self.network = preprocessor.build()
 
     def _set_input_shape(self):
         if not self.network:
