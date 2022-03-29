@@ -37,7 +37,7 @@ def run_pipeline(capture, model_type, model, render_fn, raw_output, seq_size=16,
         pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel=False)
 
     pipeline.add_step("Render", RenderStep(render_fn, raw_output, fps=fps), parallel=True)
-
+    
     pipeline.run()
     pipeline.close()
     pipeline.print_statistics()
@@ -101,6 +101,9 @@ class EncoderStep(PipelineStep):
         self.encoder = encoder
         self.async_model = AsyncWrapper(self.encoder, self.encoder.num_requests)
 
+    def __del__(self):
+        self.encoder.infer_queue[0].cancel()
+
     def process(self, frame):
         preprocessed = preprocess_frame(frame)
         preprocessed = preprocessed[np.newaxis, ...]  # add batch dimension
@@ -120,6 +123,9 @@ class DecoderStep(PipelineStep):
         self.decoder = decoder
         self.async_model = AsyncWrapper(self.decoder, self.decoder.num_requests)
         self._embeddings = deque(maxlen=self.sequence_size)
+
+    def __del__(self):
+        self.decoder.infer_queue[0].cancel()
 
     def process(self, item):
         if item is None:
