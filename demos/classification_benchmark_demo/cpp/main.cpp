@@ -103,7 +103,7 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--res <STRING>]      " << res_msg
                   << "\n\t[--show] ([--noshow]) " << show_msg
                   << "\n\t[--time <NUMBER>]     " << time_msg
-                  << "\n\t[ -u <MONITOR>]                 " << u_msg
+                  << "\n\t[ -u <MONITORS>]      " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
                      "\n\t\tR, r - Restart testing"
@@ -118,7 +118,7 @@ void parse(int argc, char *argv[]) {
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    slog::info << ov::get_openvino_version() << slog::endl;
+    std::cout << ov::get_openvino_version() << std::endl;
 }
 
 cv::Mat centerSquareCrop(const cv::Mat& image) {

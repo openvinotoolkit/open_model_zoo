@@ -39,10 +39,6 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 
 def parse():
-    def print_version():
-        log.info('OpenVINO Runtime')
-        print('\tbuild {}'.format(get_version()))
-
     def print_key_bindings():
         print('\n\tKey bindings:\n\t\tQ, q - Quit\n\t\tP, p, 0, SpaceBar - Pause')
 
@@ -104,7 +100,7 @@ def parse():
     io_args.add_argument('--res', default=None, type=resolution, metavar="<STRING>",
         help='set image grid resolution in format WxH')
 
-    io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITOR>",
+    io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITORS>",
         help='resource utilization graphs. '
             'c - average CPU load, d - load distribution over cores, m - memory usage, h - hide')
 
@@ -125,7 +121,6 @@ def parse():
     debug_args.add_argument('-r', '--raw_output_message', default=False, action='store_true',
         help='output inference results raw values showing')
 
-    print_version()
     print_key_bindings()
     return parser
 
