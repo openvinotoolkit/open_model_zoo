@@ -18,7 +18,7 @@ For details see [paper](https://arxiv.org/abs/1905.02244) and [repository](https
 
 ## Accuracy
 
-| Metric | Result         | 
+| Metric | Result         |
 | ------ | -------------- |
 | Top 1  | 75.248%        |
 | Top 5  | 92.32%         |
