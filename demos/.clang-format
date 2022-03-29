@@ -7,7 +7,7 @@ Language: Cpp
 Standard: Cpp11
 
 AccessModifierOffset: -4
-AlignAfterOpenBracket: DontAlign
+AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: true
@@ -23,18 +23,38 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
 BinPackArguments: false
 BinPackParameters: false
-CommentPragmas: '^#'
-Cpp11BracedListStyle: true
-DerivePointerAlignment: false
-FixNamespaceComments: true
-IndentCaseLabels: true
-IndentPPDirectives: AfterHash
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
-
+CommentPragmas: '^#'
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+FixNamespaceComments: true
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Current project headers.
+  - Regex:           '"([A-Za-z0-9.\/-_])+"'
+    Priority:        5
+  # Local libraries headers.
+  - Regex:           '<(models|monitors|pipelines|utils)\/([A-Za-z0-9.\/-_])+>'
+    Priority:        4
+  # 3rd party headers.
+  - Regex:           '<(gflags|opencv2|openvino|tbb)\/([A-Za-z0-9.\/-_])+>'
+    Priority:        3
+  # C++ standard library headers
+  - Regex:           '<([A-Za-z0-9.\/-_])+>'
+    Priority:        2
+  # C system headers
+  - Regex:           '<([A-Za-z0-9.\/-_])+.h>'
+    Priority:        1
+IndentCaseLabels: true
+IndentPPDirectives: AfterHash
 ForEachMacros:
   - foreach
   - FOREACH_CHILD
