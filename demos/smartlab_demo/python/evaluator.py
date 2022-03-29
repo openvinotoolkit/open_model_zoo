@@ -136,8 +136,7 @@ class Evaluator(object):
             display_frame_counter = 0
             action_seg_results = None
 
-        return self.state, self.scoring, self.keyframe, action_seg_results, \
-            top_det_results, side_det_results, frame_top, frame_side, display_frame_counter
+        return self.state, self.scoring, self.keyframe
 
     def check_consecutive(self):
         '''
@@ -351,7 +350,7 @@ class Evaluator(object):
         [center_x,center_y] = center
 
         # theta is the angle need to be rotated so that two roundscrew2 is horizontal
-        if right_x - left_x is not 0: # to avoid num/zero = infinity
+        if right_x - left_x != 0: # to avoid num/zero = infinity
             if right_y <= left_y:
                 theta = abs(math.atan((right_y - left_y) / (right_x - left_x)))   # angle in rad by default
             elif right_y > left_y:
