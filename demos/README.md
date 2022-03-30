@@ -38,6 +38,7 @@
    omz_demos_image_retrieval_demo_python
    omz_demos_segmentation_demo_cpp
    omz_demos_segmentation_demo_python
+   omz_demos_smart_framing_demo_cpp
    omz_demos_image_translation_demo_python
    omz_demos_instance_segmentation_demo_python
    omz_demos_interactive_face_detection_demo_cpp
@@ -139,7 +140,8 @@ The Open Model Zoo includes the following demos:
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
 - [Place Recognition Python\* Demo](./place_recognition_demo/python/README.md) - This demo demonstrates how to run Place Recognition models using OpenVINO™.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
-- [Speech Recognition DeepSpeech Python\* Demo](./speech_recognition_deepspeech_demo/python/README.md) - Speech recognition demo: accepts an audio file with an English phrase on input and converts it into text. This demo does streaming audio data processing and can optionally provide current transcription of the processed part.
+- [Smart Framing C++ Demo](./smart_framing_demo/cpp/README.md) - Person Detection followed by the Smart Framing/Croping and optionally Super Resolution, supports images/video and camera inputs.
+  [Speech Recognition DeepSpeech Python\* Demo](./speech_recognition_deepspeech_demo/python/README.md) - Speech recognition demo: accepts an audio file with an English phrase on input and converts it into text. This demo does streaming audio data processing and can optionally provide current transcription of the processed part.
 - [Speech Recognition QuartzNet Python\* Demo](./speech_recognition_quartznet_demo/python/README.md) - Speech recognition demo for QuartzNet: takes a whole audio file with an English phrase on input and converts it into text.
 - [Speech Recognition Wav2Vec Python\* Demo](./speech_recognition_wav2vec_demo/python/README.md) - Speech recognition demo for Wav2Vec: takes a whole audio file with an English phrase on input and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
