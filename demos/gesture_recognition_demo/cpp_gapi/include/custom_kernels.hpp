@@ -4,13 +4,19 @@
 
 #pragma once
 
-#include <opencv2/gapi.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
-#include <opencv2/gapi/gkernel.hpp>
-#include <atomic>
+#include <stddef.h>  // for size_t
 
-#include "tracker.hpp"
+#include <memory>  // for shared_ptr
 
+#include <opencv2/core.hpp>  // for Scalar, Size, CV_8U
+#include <opencv2/gapi/garray.hpp>  // for empty_array_desc, GArray (ptr only), GArrayDesc
+#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium, GKernelPackage
+#include <opencv2/gapi/gmat.hpp>  // for GMat (ptr only), GMatDesc
+#include <opencv2/gapi/gopaque.hpp>  // for empty_gopaque_desc, GOpaque (ptr only), GOpaqueDesc
+
+struct TrackedObject;
+
+// clang-format off
 namespace custom {
 G_API_OP(GetFastFrame,
          <cv::GMat(cv::GArray<cv::GMat>, cv::Size)>, "custom.get_fast_frame") {
@@ -69,4 +75,5 @@ G_API_OP(GestureRecognitionPostprocessing,
 };
 
 cv::gapi::GKernelPackage kernels();
-} // namespace custom
+// clang-format on
+}  // namespace custom

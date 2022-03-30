@@ -4,15 +4,26 @@
 
 #pragma once
 
-#include <opencv2/gapi.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <tuple>  // for make_tuple, tuple
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Size, Point2f, Point3f, Point, Rect
+#include <opencv2/gapi/garray.hpp>  // for empty_array_desc, GArrayDesc, GArray
+#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium
+#include <opencv2/gapi/gopaque.hpp>  // for GOpaque, GOpaqueDesc (ptr only)
+
+namespace cv {
+class GMat;
+struct GMatDesc;
+}  // namespace cv
 
 namespace custom {
-using GMat3  = std::tuple<cv::GMat, cv::GMat,cv::GMat>;
-using GMats  = cv::GArray<cv::GMat>;
+using GMat3 = std::tuple<cv::GMat, cv::GMat, cv::GMat>;
+using GMats = cv::GArray<cv::GMat>;
 using GRects = cv::GArray<cv::Rect>;
-using GSize  = cv::GOpaque<cv::Size>;
+using GSize = cv::GOpaque<cv::Size>;
 
+// clang-format off
 G_API_OP(PrepareEyes,
          <std::tuple<GMats,
                      GMats>(cv::GMat, GRects, GRects, GMats, cv::Size)>,
@@ -92,4 +103,5 @@ G_API_OP(ProcessLandmarks,
                                cv::empty_array_desc());
     }
 };
-} // namespace custom
+// clang-format on
+}  // namespace custom

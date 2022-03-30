@@ -2,10 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <math.h>  // for ceil
+#include <stddef.h>  // for size_t
+
+#include <algorithm>  // for min
+#include <limits>  // for numeric_limits
+#include <memory>  // for allocator_traits<>::value_type
+
+#include <opencv2/highgui.hpp>  // for destroyWindow, imshow, namedWindow
+#include <opencv2/imgproc.hpp>  // for getTextSize, putText, rectangle, FONT_HERSHEY_SIMPLEX, FILLED, LINE_AA
+
+#include "tracker.hpp"  // for TrackedObject
+
 #include <drawing_helper.hpp>
 
-DrawingHelper::DrawingHelper(bool show, int num_top_persons)
-    : no_show_(show), num_top_persons_(num_top_persons) {
+DrawingHelper::DrawingHelper(bool show, int num_top_persons) : no_show_(show), num_top_persons_(num_top_persons) {
     if (!no_show_) {
         cv::namedWindow(main_window_name_);
     }
@@ -39,10 +50,14 @@ cv::Rect DrawingHelper::DecreaseRectByRelBorders(const cv::Rect& r) {
     const float top = std::ceil(h * 0.0f);
     const float right = std::ceil(w * 0.0f);
     const float bottom = std::ceil(h * .7f);
-    return cv::Rect(r.x + int(left), r.y + int(top), int(r.width - left - right), int(r.height - top - bottom));
+    return cv::Rect(r.x + static_cast<int>(left),
+                    r.y + static_cast<int>(top),
+                    static_cast<int>(r.width - left - right),
+                    static_cast<int>(r.height - top - bottom));
 }
 
-int DrawingHelper::GetIndexOfTheNearestPerson(const TrackedObject& face, const std::vector<TrackedObject>& tracked_persons) {
+int DrawingHelper::GetIndexOfTheNearestPerson(const TrackedObject& face,
+                                              const std::vector<TrackedObject>& tracked_persons) {
     int argmax = -1;
     float max_iom = std::numeric_limits<float>::lowest();
     for (size_t i = 0; i < tracked_persons.size(); i++) {
@@ -88,18 +103,24 @@ void DrawingHelper::ClearTopWindow() {
     top_persons_.setTo(cv::Scalar(255, 255, 255));
     for (int i = 0; i < num_top_persons_; ++i) {
         const int shift = (i + 1) * margin_size_ + i * crop_width_;
-        cv::rectangle(top_persons_, cv::Point(shift, header_size_),
+        cv::rectangle(top_persons_,
+                      cv::Point(shift, header_size_),
                       cv::Point(shift + crop_width_, header_size_ + crop_height_),
-                      cv::Scalar(0, 0, 0), cv::FILLED);
+                      cv::Scalar(0, 0, 0),
+                      cv::FILLED);
 
         const auto label_to_draw = "#" + std::to_string(i + 1);
         int baseLine = 0;
-        const auto label_size =
-            cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_SIMPLEX, 2, 2, &baseLine);
+        const auto label_size = cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_SIMPLEX, 2, 2, &baseLine);
         const int text_shift = (crop_width_ - label_size.width) / 2;
-        cv::putText(top_persons_, label_to_draw,
-            cv::Point(shift + text_shift, label_size.height + baseLine / 2),
-            cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+        cv::putText(top_persons_,
+                    label_to_draw,
+                    cv::Point(shift + text_shift, label_size.height + baseLine / 2),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    1,
+                    cv::Scalar(0, 255, 0),
+                    2,
+                    cv::LINE_AA);
     }
 }
 

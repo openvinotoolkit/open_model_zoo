@@ -3,31 +3,58 @@
 //
 
 /**
-* \brief The entry point for the G-API interactive_face_detection_gapi demo application
-* \file interactive_face_detection_demo_gapi/main.cpp
-* \example interactive_face_detection_demo_gapi/main.cpp
-*/
-#include <gflags/gflags.h>
-#include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
-#include <utils_gapi/stream_source.hpp>
+ * \brief The entry point for the G-API interactive_face_detection_gapi demo application
+ * \file interactive_face_detection_demo_gapi/main.cpp
+ * \example interactive_face_detection_demo_gapi/main.cpp
+ */
+#include <math.h>  // for floor
+#include <stdlib.h>  // for size_t, exit, abs
 
-#include <openvino/openvino.hpp>
-#include <opencv2/gapi.hpp>
-#include <opencv2/gapi/core.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
-#include <opencv2/gapi/infer/parsers.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <algorithm>  // for max, copy
+#include <chrono>  // for steady_clock
+#include <exception>  // for set_terminate
+#include <iomanip>  // for operator<<, _Setprecision, setprecision
+#include <iostream>  // for operator<<, basic_ostream, ostream, cout, endl, fixed, ostrings...
+#include <list>  // for list<>::iterator, list
+#include <map>  // for map
+#include <memory>  // for __shared_ptr_access, make_shared, operator==, shared_ptr, uniqu...
+#include <stdexcept>  // for invalid_argument, runtime_error
+#include <string>  // for string, char_traits, operator+
+#include <tuple>  // for tie, tuple
+#include <utility>  // for move
+#include <vector>  // for vector
 
-#include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
-#include <utils_gapi/stream_source.hpp>
+#include <gflags/gflags.h>  // for clstring, DEFINE_string, DEFINE_bool, DEFINE_double, ParseComma...
+#include <opencv2/core.hpp>  // for Mat, Rect, Size, operator&, MatSize, Rect_, mean, CV_Assert, Point
+#include <opencv2/gapi/core.hpp>  // for size
+#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl
+#include <opencv2/gapi/garg.hpp>  // for gout, operator+=, GRunArgsP
+#include <opencv2/gapi/garray.hpp>  // for GArray, empty_array_desc, GArrayDesc
+#include <opencv2/gapi/gcommon.hpp>  // for compile_args
+#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
+#include <opencv2/gapi/gkernel.hpp>  // for kernels, G_API_OP, KernelTypeMedium
+#include <opencv2/gapi/gmat.hpp>  // for GMat
+#include <opencv2/gapi/gopaque.hpp>  // for GOpaque, GOpaqueDesc (ptr only)
+#include <opencv2/gapi/gproto.hpp>  // for GOut, operator+=, GIOProtoArgs, GIn
+#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
+#include <opencv2/gapi/infer.hpp>  // for infer, GNetworkType, G_API_NET, networks
+#include <opencv2/gapi/infer/ie.hpp>  // for Params
+#include <opencv2/gapi/infer/parsers.hpp>  // for parseSSD
+#include <opencv2/gapi/streaming/format.hpp>  // for copy
+#include <opencv2/highgui.hpp>  // for waitKey, imshow
+#include <opencv2/imgproc.hpp>  // for cvtColor, FONT_HERSHEY_COMPLEX, COLOR_BGR2GRAY
+#include <openvino/openvino.hpp>  // for get_openvino_version, operator<<
 
-#include "face.hpp"
-#include "visualizer.hpp"
+#include <monitors/presenter.h>  // for Presenter
+#include <utils/common.hpp>  // for fileNameNoExt, operator<<, showAvailableDevices, catcher
+#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
+#include <utils/ocv_common.hpp>  // for LazyVideoWriter
+#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics...
+#include <utils/slog.hpp>  // for LogStream, endl, info, debug
+#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+
+#include "face.hpp"  // for Face::Ptr, Face, matchFace
+#include "visualizer.hpp"  // for Visualizer, Visualizer::Ptr
 
 namespace {
 constexpr char h_msg[] = "show the help message and exit";
@@ -36,35 +63,42 @@ DEFINE_bool(h, false, h_msg);
 constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
 DEFINE_string(m, "", m_msg);
 
-constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+constexpr char i_msg[] =
+    "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
 DEFINE_string(i, "0", i_msg);
 
-constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
+constexpr char bb_enlarge_coef_msg[] =
+    "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
 
 constexpr char d_msg[] = "target device for Face Detection network (the list of available devices is shown below). "
-                                            "The demo will look for a suitable plugin for a specified device. Default is CPU";
+                         "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(d, "CPU", d_msg);
 
-constexpr char dag_msg[] = "target device for Age/Gender Recognition network (the list of available devices is shown below). "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+constexpr char dag_msg[] =
+    "target device for Age/Gender Recognition network (the list of available devices is shown below). "
+    "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(dag, "CPU", dag_msg);
 
-constexpr char dam_msg[] = "target device for Antispoofing Classification network (the list of available devices is shown below). "
-                                               "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+constexpr char dam_msg[] =
+    "target device for Antispoofing Classification network (the list of available devices is shown below). "
+    "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+    "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(dam, "CPU", dam_msg);
 
-constexpr char dem_msg[] = "target device for Emotions Recognition network (the list of available devices is shown below). "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+constexpr char dem_msg[] =
+    "target device for Emotions Recognition network (the list of available devices is shown below). "
+    "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(dem, "CPU", dem_msg);
 
-constexpr char dhp_msg[] = "target device for Head Pose Estimation network (the list of available devices is shown below). "
-                                               "The demo will look for a suitable plugin for a specified device. Default is CPU";
+constexpr char dhp_msg[] =
+    "target device for Head Pose Estimation network (the list of available devices is shown below). "
+    "The demo will look for a suitable plugin for a specified device. Default is CPU";
 DEFINE_string(dhp, "CPU", dhp_msg);
 
 constexpr char dlm_msg[] = "target device for Facial Landmarks Estimation network "
-                                               "(the list of available devices is shown below). The demo will look for a suitable plugin for device specified. Default is CPU";
+                           "(the list of available devices is shown below). The demo will look for a suitable plugin "
+                           "for device specified. Default is CPU";
 DEFINE_string(dlm, "CPU", dlm_msg);
 
 constexpr char dx_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
@@ -114,13 +148,13 @@ constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, t_msg);
 
 constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
-    "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
+                         "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
 DEFINE_string(u, "cdm", u_msg);
 
-void parse(int argc, char *argv[]) {
+void parse(int argc, char* argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout <<   "\t[ -h]                                         " << h_msg
+        std::cout << "\t[ -h]                                         " << h_msg
                   << "\n\t[--help]                                      print help on all arguments"
                   << "\n\t  -m <MODEL FILE>                             " << m_msg
                   << "\n\t[ -i <INPUT>]                                 " << i_msg
@@ -154,30 +188,30 @@ void parse(int argc, char *argv[]) {
         showAvailableDevices();
         std::cout << ov::get_openvino_version() << std::endl;
         exit(0);
-    } if (FLAGS_i.empty()) {
+    }
+    if (FLAGS_i.empty()) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
-    } if (FLAGS_m.empty()) {
+    }
+    if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
     slog::info << ov::get_openvino_version() << slog::endl;
 }
 
-static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
-                                                        "happy",
-                                                        "sad",
-                                                        "surprise",
-                                                        "anger"};
+static const std::vector<std::string> EMOTION_VECTOR = {"neutral", "happy", "sad", "surprise", "anger"};
 
 using AGInfo = std::tuple<cv::GMat, cv::GMat>;
 using HPInfo = std::tuple<cv::GMat, cv::GMat, cv::GMat>;
-G_API_NET(Faces,          <cv::GMat(cv::GMat)>, "face-detector");
-G_API_NET(AgeGender,      <AGInfo(cv::GMat)>,   "age-gender-recognition");
-G_API_NET(HeadPose,       <HPInfo(cv::GMat)>,   "head-pose-recognition");
+G_API_NET(Faces, <cv::GMat(cv::GMat)>, "face-detector");
+G_API_NET(AgeGender, <AGInfo(cv::GMat)>, "age-gender-recognition");
+G_API_NET(HeadPose, <HPInfo(cv::GMat)>, "head-pose-recognition");
 G_API_NET(FacialLandmark, <cv::GMat(cv::GMat)>, "facial-landmark-recognition");
-G_API_NET(Emotions,       <cv::GMat(cv::GMat)>, "emotions-recognition");
-G_API_NET(ASpoof,         <cv::GMat(cv::GMat)>, "anti-spoofing");
+G_API_NET(Emotions, <cv::GMat(cv::GMat)>, "emotions-recognition");
+G_API_NET(ASpoof, <cv::GMat(cv::GMat)>, "anti-spoofing");
 
-G_API_OP(PostProc, <cv::GArray<cv::Rect>(cv::GArray<cv::Rect>, cv::GOpaque<cv::Size>, double, double, double)>, "custom.fd_postproc") {
+// clang-format off
+G_API_OP(PostProc, <cv::GArray<cv::Rect>(cv::GArray<cv::Rect>,
+    cv::GOpaque<cv::Size>, double, double, double)>, "custom.fd_postproc") {
     static cv::GArrayDesc outMeta(const cv::GArrayDesc&, const cv::GOpaqueDesc&, double, double, double) {
         return cv::empty_array_desc();
     }
@@ -191,7 +225,7 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
                     double bb_dy_coefficient,
                     std::vector<cv::Rect> &out_faces) {
         out_faces.clear();
-        const cv::Rect surface({0,0}, frame_size);
+        const cv::Rect surface({0, 0}, frame_size);
         for (const auto& rc : rois) {
             // Make square and enlarge face bounding box for more robust operation of face analytics networks
             const int bb_width = rc.width;
@@ -216,68 +250,63 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
         }
     }
 };
+// clang-format on
 
-void rawOutputDetections(const cv::Mat&  ssd_result,
-                         const cv::Size& upscale,
-                         const double detectionThreshold) {
-    const auto &in_ssd_dims = ssd_result.size;
+void rawOutputDetections(const cv::Mat& ssd_result, const cv::Size& upscale, const double detectionThreshold) {
+    const auto& in_ssd_dims = ssd_result.size;
     CV_Assert(in_ssd_dims.dims() == 4u);
 
-    const int OBJECT_SIZE   = in_ssd_dims[3];
+    const int OBJECT_SIZE = in_ssd_dims[3];
     CV_Assert(OBJECT_SIZE == 7);
 
-    const float *data = ssd_result.ptr<float>();
+    const float* data = ssd_result.ptr<float>();
 
     const int detection_num = in_ssd_dims[2];
     for (int i = 0; i < detection_num; ++i) {
-        const float image_id   = data[i * OBJECT_SIZE + 0];
-        const float label      = data[i * OBJECT_SIZE + 1];
+        const float image_id = data[i * OBJECT_SIZE + 0];
+        const float label = data[i * OBJECT_SIZE + 1];
         const float confidence = data[i * OBJECT_SIZE + 2];
-        const float rc_left    = data[i * OBJECT_SIZE + 3];
-        const float rc_top     = data[i * OBJECT_SIZE + 4];
-        const float rc_right   = data[i * OBJECT_SIZE + 5];
-        const float rc_bottom  = data[i * OBJECT_SIZE + 6];
+        const float rc_left = data[i * OBJECT_SIZE + 3];
+        const float rc_top = data[i * OBJECT_SIZE + 4];
+        const float rc_right = data[i * OBJECT_SIZE + 5];
+        const float rc_bottom = data[i * OBJECT_SIZE + 6];
 
         if (image_id < 0.f) {  // indicates end of detections
             break;
         }
 
-        int x      = static_cast<int>(rc_left   * upscale.width);
-        int y      = static_cast<int>(rc_top    * upscale.height);
-        int width  = static_cast<int>(rc_right  * upscale.width)  - x;
+        int x = static_cast<int>(rc_left * upscale.width);
+        int y = static_cast<int>(rc_top * upscale.height);
+        int width = static_cast<int>(rc_right * upscale.width) - x;
         int height = static_cast<int>(rc_bottom * upscale.height) - y;
 
-        slog::debug << "[" << i << "," << label << "] element, prob = " << confidence <<
-             "    (" << x << "," << y << ")-(" << width << "," << height << ")"
-             << ((confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
+        slog::debug << "[" << i << "," << label << "] element, prob = " << confidence << "    (" << x << "," << y
+                    << ")-(" << width << "," << height << ")"
+                    << ((confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
     }
 }
 
 void rawOutputAgeGender(const int idx, const cv::Mat& out_ages, const cv::Mat& out_genders) {
-    const float *age_data = out_ages.ptr<float>();
-    const float *gender_data = out_genders.ptr<float>();
+    const float* age_data = out_ages.ptr<float>();
+    const float* gender_data = out_genders.ptr<float>();
 
     const float maleProb = gender_data[1];
-    const float age      = age_data[0] * 100;
+    const float age = age_data[0] * 100;
 
     slog::debug << "[" << idx << "] element, male prob = " << maleProb << ", age = " << age << slog::endl;
 }
 
-void rawOutputHeadpose(const int idx,
-                       const cv::Mat& out_y_fc,
-                       const cv::Mat& out_p_fc,
-                       const cv::Mat& out_r_fc) {
-    const float *y_data = out_y_fc.ptr<float>();
-    const float *p_data = out_p_fc.ptr<float>();
-    const float *r_data = out_r_fc.ptr<float>();
+void rawOutputHeadpose(const int idx, const cv::Mat& out_y_fc, const cv::Mat& out_p_fc, const cv::Mat& out_r_fc) {
+    const float* y_data = out_y_fc.ptr<float>();
+    const float* p_data = out_p_fc.ptr<float>();
+    const float* r_data = out_r_fc.ptr<float>();
 
-    slog::debug << "[" << idx << "] element, yaw = " << y_data[0] <<
-                 ", pitch = " << p_data[0] <<
-                 ", roll = " << r_data[0]  << slog::endl;
+    slog::debug << "[" << idx << "] element, yaw = " << y_data[0] << ", pitch = " << p_data[0]
+                << ", roll = " << r_data[0] << slog::endl;
 }
 
-void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
-    const float *lm_data = out_landmark.ptr<float>();
+void rawOutputLandmarks(const int idx, const cv::Mat& out_landmark) {
+    const float* lm_data = out_landmark.ptr<float>();
 
     slog::debug << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << slog::endl;
 
@@ -293,7 +322,7 @@ void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
 void rawOutputEmotions(const int idx, const cv::Mat& out_emotion) {
     const size_t emotionsVecSize = EMOTION_VECTOR.size();
 
-    const float *em_data = out_emotion.ptr<float>();
+    const float* em_data = out_emotion.ptr<float>();
 
     slog::debug << "[" << idx << "] element, predicted emotions (name = prob):" << slog::endl;
     for (size_t i = 0; i < emotionsVecSize; i++) {
@@ -334,8 +363,7 @@ void faceDataUpdate(const cv::Mat& frame,
         float intensity_mean = calcMean(frame(rect));
         intensity_mean += 1.0;
 
-        if ((face == nullptr) ||
-            ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
+        if ((face == nullptr) || ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
             face = std::make_shared<Face>(id++, rect);
         } else {
             prev_faces.remove(face);
@@ -348,14 +376,12 @@ void faceDataUpdate(const cv::Mat& frame,
     }
 }
 
-void ageGenderDataUpdate(const Face::Ptr& face,
-                         const cv::Mat& out_age,
-                         const cv::Mat& out_gender) {
-    const float *age_data =    out_age.ptr<float>();
-    const float *gender_data = out_gender.ptr<float>();
+void ageGenderDataUpdate(const Face::Ptr& face, const cv::Mat& out_age, const cv::Mat& out_gender) {
+    const float* age_data = out_age.ptr<float>();
+    const float* gender_data = out_gender.ptr<float>();
 
     const float maleProb = gender_data[1];
-    const float age      = age_data[0] * 100;
+    const float age = age_data[0] * 100;
 
     face->updateGender(maleProb);
     face->updateAge(age);
@@ -365,18 +391,18 @@ void headPoseDataUpdate(const Face::Ptr& face,
                         const cv::Mat& out_y_fc,
                         const cv::Mat& out_p_fc,
                         const cv::Mat& out_r_fc) {
-    const float *y_data = out_y_fc.ptr<float>();
-    const float *p_data = out_p_fc.ptr<float>();
-    const float *r_data = out_r_fc.ptr<float>();
+    const float* y_data = out_y_fc.ptr<float>();
+    const float* p_data = out_p_fc.ptr<float>();
+    const float* r_data = out_r_fc.ptr<float>();
 
     face->updateHeadPose(y_data[0], p_data[0], r_data[0]);
 }
 
 void emotionsDataUpdate(const Face::Ptr& face, const cv::Mat& out_emotion) {
-    const float *em_data = out_emotion.ptr<float>();
+    const float* em_data = out_emotion.ptr<float>();
 
     std::map<std::string, float> em_val_map;
-    for (size_t i = 0; i  < EMOTION_VECTOR.size(); i++) {
+    for (size_t i = 0; i < EMOTION_VECTOR.size(); i++) {
         em_val_map[EMOTION_VECTOR[i]] = em_data[i];
     }
 
@@ -384,7 +410,7 @@ void emotionsDataUpdate(const Face::Ptr& face, const cv::Mat& out_emotion) {
 }
 
 void landmarksDataUpdate(const Face::Ptr& face, const cv::Mat& out_landmark) {
-    const float *lm_data = out_landmark.ptr<float>();
+    const float* lm_data = out_landmark.ptr<float>();
     const size_t n_lm = 70;
     std::vector<float> normedLandmarks(&lm_data[0], &lm_data[n_lm]);
     face->updateLandmarks(normedLandmarks);
@@ -395,9 +421,9 @@ void ASpoofDataUpdate(const Face::Ptr& face, const cv::Mat& out_a_spoof) {
     const auto real_face_conf = as_data[0] * 100;
     face->updateRealFaceConfidence(real_face_conf);
 }
-} // namespace
+}  // namespace
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     std::set_terminate(catcher);
     parse(argc, argv);
     PerformanceMetrics metrics;
@@ -407,12 +433,8 @@ int main(int argc, char *argv[]) {
     cv::GMat detections = cv::gapi::infer<Faces>(in);
 
     cv::GOpaque<cv::Size> sz = cv::gapi::streaming::size(in);
-    cv::GArray<cv::Rect> faces_rects =
-        cv::gapi::parseSSD(detections, sz, float(FLAGS_t), false, false);
-    cv::GArray<cv::Rect> faces = PostProc::on(faces_rects, sz,
-                                                FLAGS_bb_enlarge_coef,
-                                                FLAGS_dx_coef,
-                                                FLAGS_dy_coef);
+    cv::GArray<cv::Rect> faces_rects = cv::gapi::parseSSD(detections, sz, static_cast<float>(FLAGS_t), false, false);
+    cv::GArray<cv::Rect> faces = PostProc::on(faces_rects, sz, FLAGS_bb_enlarge_coef, FLAGS_dx_coef, FLAGS_dy_coef);
     auto outs = GOut(cv::gapi::copy(in), detections, faces);
 
     cv::GArray<cv::GMat> ages, genders;
@@ -447,50 +469,59 @@ int main(int argc, char *argv[]) {
     auto pipeline = cv::GComputation(cv::GIn(in), std::move(outs));
     /** ---------------- End of graph ---------------- **/
     /** Configure networks **/
-    auto det_net = cv::gapi::ie::Params<Faces> {
-        FLAGS_m,                         // path to model
-        fileNameNoExt(FLAGS_m) + ".bin", // path to weights
-        FLAGS_d                          // device to use
+    auto det_net = cv::gapi::ie::Params<Faces>{
+        FLAGS_m,  // path to model
+        fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
+        FLAGS_d  // device to use
     };
     slog::info << "The Face Detection model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
-    auto age_net = cv::gapi::ie::Params<AgeGender> {
-        FLAGS_mag,                         // path to model
-        fileNameNoExt(FLAGS_mag) + ".bin", // path to weights
-        FLAGS_dag                          // device to use
-    }.cfgOutputLayers({ "age_conv3", "prob" });
+    auto age_net =
+        cv::gapi::ie::Params<AgeGender>{
+            FLAGS_mag,  // path to model
+            fileNameNoExt(FLAGS_mag) + ".bin",  // path to weights
+            FLAGS_dag  // device to use
+        }
+            .cfgOutputLayers({"age_conv3", "prob"});
     if (!FLAGS_mag.empty()) {
-        slog::info << "The Age/Gender Recognition model " << FLAGS_mag << " is loaded to " << FLAGS_dag << " device." << slog::endl;
+        slog::info << "The Age/Gender Recognition model " << FLAGS_mag << " is loaded to " << FLAGS_dag << " device."
+                   << slog::endl;
     } else {
         slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
     }
 
-    auto hp_net = cv::gapi::ie::Params<HeadPose> {
-        FLAGS_mhp,                         // path to model
-        fileNameNoExt(FLAGS_mhp) + ".bin", // path to weights
-        FLAGS_dhp                          // device to use
-    }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
+    auto hp_net =
+        cv::gapi::ie::Params<HeadPose>{
+            FLAGS_mhp,  // path to model
+            fileNameNoExt(FLAGS_mhp) + ".bin",  // path to weights
+            FLAGS_dhp  // device to use
+        }
+            .cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
     if (!FLAGS_mhp.empty()) {
-        slog::info << "The Head Pose Estimation model " << FLAGS_mhp << " is loaded to " << FLAGS_dhp << " device." << slog::endl;
+        slog::info << "The Head Pose Estimation model " << FLAGS_mhp << " is loaded to " << FLAGS_dhp << " device."
+                   << slog::endl;
     } else {
         slog::info << "Head Pose Estimation DISABLED." << slog::endl;
     }
 
-    auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
-        FLAGS_mlm,                         // path to model
-        fileNameNoExt(FLAGS_mlm) + ".bin", // path to weights
-        FLAGS_dlm                          // device to use
-    }.cfgOutputLayers({ "align_fc3" });
+    auto lm_net =
+        cv::gapi::ie::Params<FacialLandmark>{
+            FLAGS_mlm,  // path to model
+            fileNameNoExt(FLAGS_mlm) + ".bin",  // path to weights
+            FLAGS_dlm  // device to use
+        }
+            .cfgOutputLayers({"align_fc3"});
     if (!FLAGS_mlm.empty()) {
-        slog::info << "The Facial Landmarks Estimation model " << FLAGS_mlm << " is loaded to " << FLAGS_dlm << " device." << slog::endl;
+        slog::info << "The Facial Landmarks Estimation model " << FLAGS_mlm << " is loaded to " << FLAGS_dlm
+                   << " device." << slog::endl;
     } else {
         slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
     }
 
-    auto am_net = cv::gapi::ie::Params<ASpoof> {
-        FLAGS_mam,                         // path to model
-        fileNameNoExt(FLAGS_mam) + ".bin", // path to weights
-        FLAGS_dam                          // device to use
+    auto am_net = cv::gapi::ie::Params<ASpoof>{
+        FLAGS_mam,  // path to model
+        fileNameNoExt(FLAGS_mam) + ".bin",  // path to weights
+        FLAGS_dam  // device to use
     };
     if (!FLAGS_mam.empty()) {
         slog::info << "The Anti Spoof model " << FLAGS_mam << " is loaded to " << FLAGS_dam << " device." << slog::endl;
@@ -498,13 +529,14 @@ int main(int argc, char *argv[]) {
         slog::info << "Anti Spoof DISABLED." << slog::endl;
     }
 
-    auto emo_net = cv::gapi::ie::Params<Emotions> {
-        FLAGS_mem,                         // path to model
-        fileNameNoExt(FLAGS_mem) + ".bin", // path to weights
-        FLAGS_dem                          // device to use
+    auto emo_net = cv::gapi::ie::Params<Emotions>{
+        FLAGS_mem,  // path to model
+        fileNameNoExt(FLAGS_mem) + ".bin",  // path to weights
+        FLAGS_dem  // device to use
     };
     if (!FLAGS_mem.empty()) {
-        slog::info << "The Emotions Recognition model " << FLAGS_mem << " is loaded to " << FLAGS_dem << " device." << slog::endl;
+        slog::info << "The Emotions Recognition model " << FLAGS_mem << " is loaded to " << FLAGS_dem << " device."
+                   << slog::endl;
     } else {
         slog::info << "Emotions Recognition DISABLED." << slog::endl;
     }
@@ -520,25 +552,30 @@ int main(int argc, char *argv[]) {
     auto out_vector = cv::gout(frame, ssd_res, face_hub);
 
     std::vector<cv::Mat> out_ages, out_genders;
-    if (!FLAGS_mag.empty()) out_vector += cv::gout(out_ages, out_genders);
+    if (!FLAGS_mag.empty())
+        out_vector += cv::gout(out_ages, out_genders);
 
     std::vector<cv::Mat> out_y_fc, out_p_fc, out_r_fc;
-    if (!FLAGS_mhp.empty()) out_vector += cv::gout(out_y_fc, out_p_fc, out_r_fc);
+    if (!FLAGS_mhp.empty())
+        out_vector += cv::gout(out_y_fc, out_p_fc, out_r_fc);
 
     std::vector<cv::Mat> out_emotions;
-    if (!FLAGS_mem.empty()) out_vector += cv::gout(out_emotions);
+    if (!FLAGS_mem.empty())
+        out_vector += cv::gout(out_emotions);
 
     std::vector<cv::Mat> out_landmarks;
-    if (!FLAGS_mlm.empty()) out_vector += cv::gout(out_landmarks);
+    if (!FLAGS_mlm.empty())
+        out_vector += cv::gout(out_landmarks);
 
     std::vector<cv::Mat> out_a_spoof;
-    if (!FLAGS_mam.empty()) out_vector += cv::gout(out_a_spoof);
+    if (!FLAGS_mam.empty())
+        out_vector += cv::gout(out_a_spoof);
 
     Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_mag.empty(),
-                                                                !FLAGS_mem.empty(),
-                                                                !FLAGS_mhp.empty(),
-                                                                !FLAGS_mlm.empty(),
-                                                                !FLAGS_mam.empty());
+                                                              !FLAGS_mem.empty(),
+                                                              !FLAGS_mhp.empty(),
+                                                              !FLAGS_mlm.empty(),
+                                                              !FLAGS_mam.empty());
 
     std::list<Face::Ptr> out_faces;
     std::ostringstream out;
@@ -594,9 +631,7 @@ int main(int argc, char *argv[]) {
             Face::Ptr face;
 
             cv::Rect rect = face_hub[i] & cv::Rect({0, 0}, frame.size());
-            faceDataUpdate(frame, face, rect,
-                            prev_faces, face_hub,
-                            id, FLAGS_smooth);
+            faceDataUpdate(frame, face, rect, prev_faces, face_hub, id, FLAGS_smooth);
 
             if (!FLAGS_mag.empty()) {
                 ageGenderDataUpdate(face, out_ages[i], out_genders[i]);
@@ -637,12 +672,24 @@ int main(int argc, char *argv[]) {
 
         presenter->drawGraphs(frame);
         if (isStart) {
-            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            metrics.update(startTime,
+                           frame,
+                           {10, 22},
+                           cv::FONT_HERSHEY_COMPLEX,
+                           0.65,
+                           {200, 10, 10},
+                           2,
+                           PerformanceMetrics::MetricTypes::FPS);
             isStart = false;
         } else {
-            metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            metrics.update({},
+                           frame,
+                           {10, 22},
+                           cv::FONT_HERSHEY_COMPLEX,
+                           0.65,
+                           {200, 10, 10},
+                           2,
+                           PerformanceMetrics::MetricTypes::FPS);
         }
 
         /** Visualizing results **/

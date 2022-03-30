@@ -6,6 +6,8 @@
 
 #include "utils.hpp"
 
+#include <math.h>  // for acos, atan2, M_PI, M_PI_2
+
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
     auto r = cv::norm(gazeVector);

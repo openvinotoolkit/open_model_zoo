@@ -3,14 +3,38 @@
 //
 #pragma once
 
-#include <utils/slog.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <stddef.h>  // for size_t
 
-#include "action_detector.hpp"
-#include "face_reid.hpp"
-#include "recognizer.hpp"
-#include "logger.hpp"
-#include "drawing_helper.hpp"
+#include <memory>  // for shared_ptr
+#include <string>  // for string
+#include <tuple>  // for make_tuple, tuple
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Rect
+#include <opencv2/gapi/garray.hpp>  // for empty_array_desc, GArrayDesc, GArray
+#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium
+#include <opencv2/gapi/gmat.hpp>  // for GMat (ptr only), GMatDesc
+#include <opencv2/gapi/gopaque.hpp>  // for empty_gopaque_desc, GOpaque (ptr only), GOpaqueDesc
+#include <opencv2/gapi/render/render_types.hpp>  // for Prim
+
+#include "tracker.hpp"  // for Track, TrackedObject, TrackerParams
+
+class ActionDetection;
+class DrawingHelper;
+class FaceRecognizer;
+namespace cv {
+class GScalar;
+namespace detail {
+template <typename T>
+struct CompileArgTag;
+}  // namespace detail
+struct GScalarDesc;
+}  // namespace cv
+namespace detection {
+class FaceDetection;
+}  // namespace detection
+struct DetectedAction;
+struct DrawingElements;
 
 /** Parameters of trackers for stateful kernels **/
 struct TrackerParamsPack {
@@ -42,25 +66,29 @@ struct FaceTrack {
 };
 
 namespace cv {
-    namespace detail {
-        template<> struct CompileArgTag<TrackerParamsPack> {
-            static const char* tag() {
-                return "custom.get_recognition_result_state_params";
-            }
-        };
-
-        template<> struct CompileArgTag<bool> {
-            static const char* tag() {
-                return "custom.logger_state_params";
-            }
-        };
+namespace detail {
+template <>
+struct CompileArgTag<TrackerParamsPack> {
+    static const char* tag() {
+        return "custom.get_recognition_result_state_params";
     }
-}
+};
+
+template <>
+struct CompileArgTag<bool> {
+    static const char* tag() {
+        return "custom.logger_state_params";
+    }
+};
+}  // namespace detail
+}  // namespace cv
 
 using GPrims = cv::GArray<cv::gapi::wip::draw::Prim>;
-template<typename T> using four = std::tuple<T, T, T, T>;
+template <typename T>
+using four = std::tuple<T, T, T, T>;
 
 namespace custom {
+// clang-format off
     G_API_OP(BoxesAndLabels,
              <GPrims(const cv::GMat,
                      const cv::GOpaque<DrawingElements>,
@@ -187,4 +215,5 @@ namespace custom {
             return cv::empty_array_desc();
         }
     };
-}
+// clang-format on
+}  // namespace custom

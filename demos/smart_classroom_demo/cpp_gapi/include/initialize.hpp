@@ -5,23 +5,30 @@
 #pragma once
 
 #include <fstream>
+#include <limits>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
 
-#include <inference_engine.hpp>
-#include <openvino/openvino.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/infer/parsers.hpp>
+#include <openvino/openvino.hpp>
 
-#include "custom_kernels.hpp"
 #include "actions.hpp"
+#include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
+#include "recognizer.hpp"
+
+#include <inference_engine.hpp>
 
 namespace nets {
-    G_API_NET(FaceDetector,        <cv::GMat(cv::GMat)>, "face-detector");
-    G_API_NET(LandmarksDetector,   <cv::GMat(cv::GMat)>, "landmarks-detector");
-    G_API_NET(FaceReidentificator, <cv::GMat(cv::GMat)>, "face-reidentificator");
-    using PAInfo = std::tuple<cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat>;
-    G_API_NET(PersonDetActionRec,  <PAInfo(cv::GMat)>,   "person-detection-action-recognition");
-} // namespace nets
+G_API_NET(FaceDetector, <cv::GMat(cv::GMat)>, "face-detector");
+G_API_NET(LandmarksDetector, <cv::GMat(cv::GMat)>, "landmarks-detector");
+G_API_NET(FaceReidentificator, <cv::GMat(cv::GMat)>, "face-reidentificator");
+using PAInfo = std::tuple<cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat, cv::GMat>;
+G_API_NET(PersonDetActionRec, <PAInfo(cv::GMat)>, "person-detection-action-recognition");
+}  // namespace nets
 
 namespace config {
 inline char separator() {
@@ -123,28 +130,26 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
                                                                       const ArgsFlagsPack& flags) {
     ConstantParams const_params;
     const_params.teacher_id = flags.teacher_id;
-    const_params.actions_type = flags.teacher_id.empty()
-                                        ? flags.a_top > 0 ? TOP_K : STUDENT
-                                        : TEACHER;
-        const_params.actions_map = const_params.actions_type == STUDENT
-                                       ? parseActionLabels(flags.student_ac)
-                                       : const_params.actions_type == TOP_K
-                                           ? parseActionLabels(flags.top_ac)
-                                           : parseActionLabels(flags.teacher_ac);
-    const_params.top_action_id =
-            static_cast<int>(const_params.actions_type == TOP_K
-                                ? std::distance(const_params.actions_map.begin(),
-                                                find(const_params.actions_map.begin(), const_params.actions_map.end(), flags.top_id))
-                                : -1);
+    const_params.actions_type = flags.teacher_id.empty() ? flags.a_top > 0 ? TOP_K : STUDENT : TEACHER;
+    const_params.actions_map = const_params.actions_type == STUDENT
+                                   ? parseActionLabels(flags.student_ac)
+                                   : const_params.actions_type == TOP_K ? parseActionLabels(flags.top_ac)
+                                                                        : parseActionLabels(flags.teacher_ac);
+    const_params.top_action_id = static_cast<int>(
+        const_params.actions_type == TOP_K
+            ? std::distance(const_params.actions_map.begin(),
+                            find(const_params.actions_map.begin(), const_params.actions_map.end(), flags.top_id))
+            : -1);
     if (const_params.actions_type == TOP_K &&
-        (const_params.top_action_id < 0 || const_params.top_action_id >= static_cast<int>(const_params.actions_map.size()))) {
+        (const_params.top_action_id < 0 ||
+         const_params.top_action_id >= static_cast<int>(const_params.actions_map.size()))) {
         slog::err << "Cannot find target action: " << flags.top_id << slog::endl;
     }
     const auto num_top_persons = const_params.actions_type == TOP_K ? flags.a_top : -1;
     const_params.draw_ptr.reset(new DrawingHelper(flags.no_show, num_top_persons));
     const_params.video_path = video_path;
-    const_params.smooth_window_size = int(fps * flags.d_ad);
-    const_params.smooth_min_length = int(fps * flags.min_ad);
+    const_params.smooth_window_size = static_cast<int>(fps * flags.d_ad);
+    const_params.smooth_min_length = static_cast<int>(fps * flags.min_ad);
     const_params.top_flag = flags.a_top;
     const_params.draw_ptr->GetNewFrameSize(frame_size);
 
@@ -166,9 +171,8 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
     tracker_action_params.forget_delay = 150;
     tracker_action_params.affinity_thr = 0.9f;
     tracker_action_params.averaging_window_size_for_rects = 5;
-    tracker_action_params.averaging_window_size_for_labels = flags.ss_t > 0
-                                                             ? flags.ss_t
-                                                             : const_params.actions_type == TOP_K ? 5 : 1;
+    tracker_action_params.averaging_window_size_for_labels =
+        flags.ss_t > 0 ? flags.ss_t : const_params.actions_type == TOP_K ? 5 : 1;
     tracker_action_params.bbox_heights_range = cv::Vec2f(10, 2160);
     tracker_action_params.drop_forgotten_tracks = false;
     tracker_action_params.max_num_objects_in_track = std::numeric_limits<int>::max();
@@ -180,55 +184,55 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
 void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string& top_id) {
     slog::info << ov::get_openvino_version() << slog::endl;
     if (!teacher_id.empty() && !top_id.empty()) {
-        slog::err << "Cannot run simultaneously teacher action and top-k students recognition."
-                  << slog::endl;
+        slog::err << "Cannot run simultaneously teacher action and top-k students recognition." << slog::endl;
     }
 }
 
-void configNets(const NetsFlagsPack& flags,
-                      cv::gapi::GNetPackage& networks,
-                      cv::Scalar& reid_net_in_size) {
+void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv::Scalar& reid_net_in_size) {
     if (!flags.m_act.empty()) {
-        const std::array<std::string, 7> action_detector_5 = {
-            "mbox_loc1/out/conv/flat",
-            "mbox_main_conf/out/conv/flat/softmax/flat",
-            "mbox/priorbox",
-            "out/anchor1",
-            "out/anchor2",
-            "out/anchor3",
-            "out/anchor4"};
-        const std::array<std::string, 7> action_detector_6 = {
-            "ActionNet/out_detection_loc",
-            "ActionNet/out_detection_conf",
-            "ActionNet/action_heads/out_head_1_anchor_1",
-            "ActionNet/action_heads/out_head_2_anchor_1",
-            "ActionNet/action_heads/out_head_2_anchor_2",
-            "ActionNet/action_heads/out_head_2_anchor_3",
-            "ActionNet/action_heads/out_head_2_anchor_4"};
-       /** Create action detector net's parameters **/
-       std::array<std::string, 7> outputBlobList = isNetForSixActions(flags.m_act)
-           ? action_detector_6
-           : action_detector_5;
-       auto action_net = cv::gapi::ie::Params<nets::PersonDetActionRec>{
-           flags.m_act,
-           fileNameNoExt(flags.m_act) + ".bin",
-           flags.d_act,
-       }.cfgOutputLayers(outputBlobList);
-       networks += cv::gapi::networks(action_net);
-       slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
+        const std::array<std::string, 7> action_detector_5 = {"mbox_loc1/out/conv/flat",
+                                                              "mbox_main_conf/out/conv/flat/softmax/flat",
+                                                              "mbox/priorbox",
+                                                              "out/anchor1",
+                                                              "out/anchor2",
+                                                              "out/anchor3",
+                                                              "out/anchor4"};
+        const std::array<std::string, 7> action_detector_6 = {"ActionNet/out_detection_loc",
+                                                              "ActionNet/out_detection_conf",
+                                                              "ActionNet/action_heads/out_head_1_anchor_1",
+                                                              "ActionNet/action_heads/out_head_2_anchor_1",
+                                                              "ActionNet/action_heads/out_head_2_anchor_2",
+                                                              "ActionNet/action_heads/out_head_2_anchor_3",
+                                                              "ActionNet/action_heads/out_head_2_anchor_4"};
+        /** Create action detector net's parameters **/
+        std::array<std::string, 7> outputBlobList =
+            isNetForSixActions(flags.m_act) ? action_detector_6 : action_detector_5;
+        auto action_net =
+            cv::gapi::ie::Params<nets::PersonDetActionRec>{
+                flags.m_act,
+                fileNameNoExt(flags.m_act) + ".bin",
+                flags.d_act,
+            }
+                .cfgOutputLayers(outputBlobList);
+        networks += cv::gapi::networks(action_net);
+        slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act
+                   << " device." << slog::endl;
     } else {
         slog::info << "Person/Action Detection DISABLED." << slog::endl;
     }
     if (!flags.m_fd.empty()) {
         /** Create face detector net's parameters **/
-        auto det_net = cv::gapi::ie::Params<nets::FaceDetector>{
-            flags.m_fd,
-            fileNameNoExt(flags.m_fd) + ".bin",
-            flags.d_fd,
-        }.cfgInputReshape("data",
-                          {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
+        auto det_net =
+            cv::gapi::ie::Params<nets::FaceDetector>{
+                flags.m_fd,
+                fileNameNoExt(flags.m_fd) + ".bin",
+                flags.d_fd,
+            }
+                .cfgInputReshape("data",
+                                 {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         networks += cv::gapi::networks(det_net);
-        slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
+        slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device."
+                   << slog::endl;
     } else {
         slog::info << "Face Detection DISABLED." << slog::endl;
     }
@@ -241,7 +245,8 @@ void configNets(const NetsFlagsPack& flags,
             flags.d_lm,
         };
         if (!flags.m_lm.empty()) {
-            slog::info << "The Facial Landmarks Regression model" << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
+            slog::info << "The Facial Landmarks Regression model" << flags.m_lm << " is loaded to " << flags.d_lm
+                       << " device." << slog::endl;
         } else {
             slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
         }
@@ -253,18 +258,21 @@ void configNets(const NetsFlagsPack& flags,
         };
         networks += cv::gapi::networks(landm_net, reident_net);
         if (!flags.m_reid.empty()) {
-            slog::info << "The Face Re-Identification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
+            slog::info << "The Face Re-Identification model " << flags.m_reid << " is loaded to " << flags.d_reid
+                       << " device." << slog::endl;
         } else {
             slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
         InferenceEngine::Core core;
         const auto layerData = core.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
         const auto layerDims = layerData->getTensorDesc().getDims();
-        reid_net_in_size =
-            {double(layerDims[0]), double(layerDims[1]), double(layerDims[2]), double(layerDims[3])};
+        reid_net_in_size = {static_cast<double>(layerDims[0]),
+                            static_cast<double>(layerDims[1]),
+                            static_cast<double>(layerDims[2]),
+                            static_cast<double>(layerDims[3])};
     }
 }
-} // namespace config
+}  // namespace config
 
 namespace preparation {
 struct FGFlagsPack {
@@ -284,7 +292,8 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
     std::vector<int> idx_to_id;
     std::vector<GalleryObject> identities;
     const auto ids_list = flags.fg;
-    std::shared_ptr<detection::FaceDetection> face_det_ptr = std::make_shared<detection::FaceDetection>(config::getDetConfig(flags.exp_r_fd));
+    std::shared_ptr<detection::FaceDetection> face_det_ptr =
+        std::make_shared<detection::FaceDetection>(config::getDetConfig(flags.exp_r_fd));
     if (!ids_list.empty()) {
         /** ---------------- Gallery graph of demo ---------------- **/
         /** Input is one face from gallery **/
@@ -297,22 +306,18 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
             cv::GMat detections = cv::gapi::infer<nets::FaceDetector>(in);
             cv::GOpaque<cv::Size> sz = cv::gapi::streaming::size(in);
             cv::GArray<cv::Rect> face_rect =
-                cv::gapi::parseSSD(detections, sz, float(flags.t_reg_fd), true, true);
-            rect = custom::FaceDetectorPostProc::on(in,
-                                                    face_rect,
-                                                    face_det_ptr);
+                cv::gapi::parseSSD(detections, sz, static_cast<float>(flags.t_reg_fd), true, true);
+            rect = custom::FaceDetectorPostProc::on(in, face_rect, face_det_ptr);
         } else {
             /** Else ROI is equal to image size **/
             rect = custom::GetRectFromImage::on(in);
         }
         /** Get landmarks by ROI **/
-        cv::GArray<cv::GMat> landmarks =
-            cv::gapi::infer<nets::LandmarksDetector>(rect, in);
+        cv::GArray<cv::GMat> landmarks = cv::gapi::infer<nets::LandmarksDetector>(rect, in);
 
         /** Align face by landmarks **/
         cv::GScalar net_size(reid_net_in_size);
-        cv::GArray<cv::GMat> align_faces =
-            custom::AlignFacesForReidentification::on(in, landmarks, rect, net_size);
+        cv::GArray<cv::GMat> align_faces = custom::AlignFacesForReidentification::on(in, landmarks, rect, net_size);
 
         /** Get face identities metrics **/
         cv::GArray<cv::GMat> embeddings = cv::gapi::infer2<nets::FaceReidentificator>(in, align_faces);
@@ -342,15 +347,15 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
                 }
                 CV_Assert(!image.empty());
                 std::vector<cv::Rect> out_rect;
-                gallery_pp.apply(cv::gin(image), cv::gout(out_rect, emb),
+                gallery_pp.apply(cv::gin(image),
+                                 cv::gout(out_rect, emb),
                                  cv::compile_args(custom::kernels(), gallery_networks));
                 CV_Assert(emb.size() == 1);
                 CV_Assert(out_rect.size() == 1);
                 // NOTE: RegistrationStatus analog check
-                if (!out_rect.empty() &&
-                    (out_rect[0].width > flags.min_size_fr) &&
+                if (!out_rect.empty() && (out_rect[0].width > flags.min_size_fr) &&
                     (out_rect[0].height > flags.min_size_fr)) {
-                    out_embeddings.emplace_back(emb.front().reshape(1, { static_cast<int>(emb.front().total()), 1 }));
+                    out_embeddings.emplace_back(emb.front().reshape(1, {static_cast<int>(emb.front().total()), 1}));
                     idx_to_id.emplace_back(id);
                     identities.emplace_back(out_embeddings, label, id);
                     ++id;
@@ -368,4 +373,4 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
     rec_config.idx_to_id = idx_to_id;
     return std::make_shared<FaceRecognizer>(rec_config);
 }
-} // namespace preparation
+}  // namespace preparation

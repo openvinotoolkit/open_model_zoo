@@ -4,11 +4,18 @@
 
 #pragma once
 
-#include "opencv2/imgproc.hpp"
-#include <opencv2/highgui.hpp>
-#include "tracker.hpp"
+#include <stddef.h>  // for size_t
 
-#include <iostream>
+#include <memory>  // for allocator_traits<>::value_type
+#include <string>  // for string
+#include <utility>  // for pair
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Scalar, Mat
+#include <opencv2/highgui.hpp>  // for namedWindow
+#include <opencv2/videoio.hpp>  // for VideoCapture
+
+#include "tracker.hpp"  // for TrackedObjects
 
 class Visualizer {
 private:
@@ -36,13 +43,16 @@ private:
                       const TrackedObjects out_detections,
                       const int out_label_number,
                       const size_t current_id);
+
 public:
     Visualizer(const bool no_show,
                const std::string& storage_window_name,
                const std::vector<std::string>& labels,
-               const std::string& storage_path) :
-        no_show_(no_show), storage_window_name_(storage_window_name),
-        labels_(labels), storage_path_(storage_path) {
+               const std::string& storage_path)
+        : no_show_(no_show),
+          storage_window_name_(storage_window_name),
+          labels_(labels),
+          storage_path_(storage_path) {
         if (storage_path_.size() > 0) {
             getStorageElements();
         }

@@ -2,12 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-# pragma once
+#pragma once
 
-#include <list>
-#include <map>
+#include <stddef.h>  // for size_t
 
-#include <opencv2/opencv.hpp>
+#include <list>  // for list
+#include <map>  // for map
+#include <memory>  // for shared_ptr
+#include <string>  // for string
+#include <utility>  // for pair
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Rect
 
 // -------------------------Describe detected face on a frame-------------------
 
@@ -37,9 +43,9 @@ public:
     float _intensity_mean;
 
     size_t _id;
-    float  _age;
-    float  _maleScore;
-    float  _femaleScore;
+    float _age;
+    float _maleScore;
+    float _femaleScore;
     std::map<std::string, float> _emotions;
     float _yaw;
     float _pitch;

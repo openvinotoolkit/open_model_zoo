@@ -4,14 +4,21 @@
 
 #pragma once
 
-#include <opencv2/gapi/gkernel.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include <inference_engine.hpp>
+#include <cpp/ie_cnn_network.h>  // for CNNNetwork
+#include <ie_allocator.hpp>  // for InferenceEngine
+#include <ie_common.h>  // for OutputsDataMap
+#include <ie_input_info.hpp>  // for InputsDataMap
+#include <opencv2/core.hpp>  // for Size, CV_8U
+#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium, GKernelPackage
+#include <opencv2/gapi/gmat.hpp>  // for GMatDesc, GMat
 
 namespace IE = InferenceEngine;
 
 namespace custom {
+// clang-format off
 G_API_OP(GTensorToImg, <cv::GMat(cv::GMat)>, "custom.tensorToImg") {
     static cv::GMatDesc outMeta(const cv::GMatDesc& in) {
         // NB: Input is ND mat.
@@ -30,19 +37,21 @@ G_API_OP(GCalculateMaskRCNNBGMask,
         return cv::GMatDesc{CV_8U, 1, in_sz};
     }
 };
-
+// clang-format on
 class NNBGReplacer {
 public:
     NNBGReplacer() = default;
     virtual ~NNBGReplacer() = default;
     NNBGReplacer(const std::string& model_path);
     virtual cv::GMat replace(cv::GMat, const cv::Size&, cv::GMat) = 0;
-    const std::string& getName() { return m_tag; }
+    const std::string& getName() {
+        return m_tag;
+    }
 
 protected:
-    IE::CNNNetwork     m_cnn_network;
-    std::string        m_tag;
-    IE::InputsDataMap  m_inputs;
+    IE::CNNNetwork m_cnn_network;
+    std::string m_tag;
+    IE::InputsDataMap m_inputs;
     IE::OutputsDataMap m_outputs;
 };
 
@@ -70,4 +79,4 @@ private:
 
 cv::gapi::GKernelPackage kernels();
 
-} // namespace custom
+}  // namespace custom

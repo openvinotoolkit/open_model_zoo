@@ -4,10 +4,21 @@
 
 #include "face.hpp"
 
-Face::Face(size_t id, cv::Rect& location):
-    _location(location), _intensity_mean(0.f), _id(id), _age(-1),
-    _maleScore(0), _femaleScore(0), _yaw(0.f), _pitch(0.f), _roll(0.f),
-    _realFaceConfidence(0.f) {}
+#include <math.h>  // for floor
+
+#include <algorithm>  // for max_element
+
+Face::Face(size_t id, cv::Rect& location)
+    : _location(location),
+      _intensity_mean(0.f),
+      _id(id),
+      _age(-1),
+      _maleScore(0),
+      _femaleScore(0),
+      _yaw(0.f),
+      _pitch(0.f),
+      _roll(0.f),
+      _realFaceConfidence(0.f) {}
 
 void Face::updateAge(float value) {
     _age = (_age == -1) ? value : 0.95f * _age + 0.05f * value;
@@ -35,9 +46,9 @@ void Face::updateEmotions(const std::map<std::string, float>& values) {
 }
 
 void Face::updateHeadPose(float y, float p, float r) {
-    _yaw   = y;
+    _yaw = y;
     _pitch = p;
-    _roll  = r;
+    _roll = r;
 }
 
 void Face::updateLandmarks(std::vector<float> values) {
@@ -65,9 +76,11 @@ std::map<std::string, float> Face::getEmotions() {
 }
 
 std::pair<std::string, float> Face::getMainEmotion() {
-    auto x = std::max_element(_emotions.begin(), _emotions.end(),
-        [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
-            return p1.second < p2.second; });
+    auto x = std::max_element(_emotions.begin(),
+                              _emotions.end(),
+                              [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
+                                  return p1.second < p2.second;
+                              });
 
     return *x;
 }

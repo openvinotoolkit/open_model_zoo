@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Rect
 
 namespace detection {
 
@@ -17,6 +19,7 @@ struct DetectorConfig {
 class FaceDetection {
 private:
     DetectorConfig config_;
+
 public:
     explicit FaceDetection(const DetectorConfig& config) : config_(config) {}
     void truncateRois(const cv::Mat&, const std::vector<cv::Rect>&, std::vector<cv::Rect>&);

@@ -4,6 +4,8 @@
 
 #include "face_inference_results.hpp"
 
+#include <utils/slog.hpp>  // for LogStream, endl
+
 namespace gaze_estimation {
 
 slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults) {

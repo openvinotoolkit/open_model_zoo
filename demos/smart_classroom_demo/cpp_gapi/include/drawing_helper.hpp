@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include <utils/ocv_common.hpp>
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include "tracker.hpp"
+#include <opencv2/core.hpp>  // for Rect, Size, Mat
+
+struct TrackedObject;
 
 class DrawingHelper {
 public:

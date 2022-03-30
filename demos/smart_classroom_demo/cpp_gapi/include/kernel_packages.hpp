@@ -6,5 +6,5 @@
 #include <opencv2/gapi/gkernel.hpp>
 
 namespace custom {
-    cv::gapi::GKernelPackage kernels();
-} //namespace custom
+cv::gapi::GKernelPackage kernels();
+}  // namespace custom

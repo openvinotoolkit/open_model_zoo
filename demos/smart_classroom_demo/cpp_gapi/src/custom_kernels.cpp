@@ -2,8 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "kernel_packages.hpp"
 #include "custom_kernels.hpp"
+
+#include <algorithm>  // for max, min, find_if
+#include <map>  // for map
+
+#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl, GAPI_OCV_KERNEL_ST, GCPUStKernel...
+#include <opencv2/gapi/gcommon.hpp>  // for GCompileArgs, getCompileArg
+#include <opencv2/gapi/util/optional.hpp>  // for optional
+#include <opencv2/imgproc.hpp>  // for resize, getTextSize, CV_RGB, FONT_HERSHEY_PLAIN, LINE_AA
+
+#include <utils/slog.hpp>  // for LogStream, debug, endl
+
+#include "action_detector.hpp"  // for DetectedAction, DetectedActions, ActionDetection
+#include "actions.hpp"  // for FrameEventsTrack, RangeEventsTrack
+#include "detector.hpp"  // for FaceDetection
+#include "drawing_helper.hpp"  // for DrawingHelper, DrawingElements
+#include "face_reid.hpp"  // for AlignFaces, EmbeddingsGallery, EmbeddingsGallery::unknown_id
+#include "kernel_packages.hpp"  // for kernels
+#include "logger.hpp"  // for DetectionsLogger
+#include "recognizer.hpp"  // for FaceRecognizer
 
 /** State parameters for RecognizeResultPostProc stateful kernel **/
 struct PostProcState {
@@ -22,15 +40,17 @@ struct TopKState {
 /** State parameters for GetRecognitionResult stateful kernel **/
 struct TrackerState {
     TrackerState(TrackerParams tracker_reid_params, TrackerParams tracker_action_params)
-        : tracker_reid(Tracker(tracker_reid_params)), tracker_action(Tracker(tracker_action_params)) {}
+        : tracker_reid(Tracker(tracker_reid_params)),
+          tracker_action(Tracker(tracker_action_params)) {}
     Tracker tracker_reid;
     Tracker tracker_action;
 };
 
 /** Colors for labels and ROI **/
-const cv::Scalar red_color   = CV_RGB(255, 0,   0);
+const cv::Scalar red_color = CV_RGB(255, 0, 0);
 const cv::Scalar white_color = CV_RGB(255, 255, 255);
 
+// clang-format off
 GAPI_OCV_KERNEL(OCVFaceDetectorPostProc, custom::FaceDetectorPostProc) {
     static void run(const cv::Mat& in,
                     const std::vector<cv::Rect>& rois,
@@ -63,7 +83,8 @@ GAPI_OCV_KERNEL(OCVAlignFacesForReidentification,
         /** Preprocessing for CNN input **/
         for (auto& image : out_images) {
             cv::Mat rsz, cvt;
-            cv::resize(image, rsz, cv::Size(int(net_input_size[2]), int(net_input_size[3]))); // resize
+            cv::resize(image, rsz, cv::Size(static_cast<int>(net_input_size[2]),
+                static_cast<int>(net_input_size[3])));  // resize
             rsz.convertTo(cvt, CV_32F);                // to F32 type
             image.create(cv::Size(cvt.cols, cvt.rows * cvt.channels()), CV_32F);
             std::vector<cv::Mat> planes;
@@ -72,8 +93,11 @@ GAPI_OCV_KERNEL(OCVAlignFacesForReidentification,
             }
             cv::split(cvt, planes);                     // to NCHW
             std::vector<int> new_dims =
-                {int(net_input_size[0]), int(net_input_size[1]), int(net_input_size[2]), int(net_input_size[3])};
-            image = image.reshape(1, new_dims); // reshape to CNN input
+                { static_cast<int>(net_input_size[0]),
+                static_cast<int>(net_input_size[1]),
+                static_cast<int>(net_input_size[2]),
+                static_cast<int>(net_input_size[3]) };
+            image = image.reshape(1, new_dims);  // reshape to CNN input
         }
     }
 };
@@ -232,8 +256,7 @@ GAPI_OCV_KERNEL_ST(OCVRecognizeResultPostProc, custom::RecognizeResultPostProc, 
                 teacher_track_id = post_proc.teacher_track_id;
                 if (face_label == params.teacher_id) {
                     teacher_track_id = tracked_actions[person_ind].object_id;
-                }
-                else if (teacher_track_id == tracked_actions[person_ind].object_id) {
+                } else if (teacher_track_id == tracked_actions[person_ind].object_id) {
                     teacher_track_id = -1;
                 }
             }
@@ -248,13 +271,13 @@ GAPI_OCV_KERNEL_ST(OCVRecognizeResultPostProc, custom::RecognizeResultPostProc, 
                 post_proc.logger.AddDetectionToFrame(action, work_num_frames);
             }
             post_proc.face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
-        }
-        else if (teacher_track_id >= 0) {
+        } else if (teacher_track_id >= 0) {
             auto res_find = std::find_if(tracked_actions.begin(), tracked_actions.end(),
                 [teacher_track_id](const TrackedObject& o) { return o.object_id == teacher_track_id; });
             if (res_find != tracked_actions.end()) {
                 const auto& tracker_action = *res_find;
-                const auto& action_label = params.draw_ptr->GetActionTextLabel(tracker_action.label, params.actions_map);
+                const auto& action_label =
+                    params.draw_ptr->GetActionTextLabel(tracker_action.label, params.actions_map);
                 out_labels_det.emplace_back(action_label);
                 out_rects_det.emplace_back(tracker_action.rect);
                 post_proc.logger.AddPersonToFrame(tracker_action.rect, action_label, params.teacher_id);
@@ -372,8 +395,10 @@ GAPI_OCV_KERNEL_ST(OCVTopAction, custom::TopAction, TopKState) {
                     roi.height = std::min(roi.height, in.rows - roi.y);
 
                     auto frame_crop = in(roi).clone();
-                    cv::resize(frame_crop, frame_crop, cv::Size(params.draw_ptr->crop_width_, params.draw_ptr->crop_height_));
-                    const int shift = (action_id_in_top + 1) * params.draw_ptr->margin_size_ + action_id_in_top * params.draw_ptr->crop_width_;
+                    cv::resize(frame_crop, frame_crop,
+                        cv::Size(params.draw_ptr->crop_width_, params.draw_ptr->crop_height_));
+                    const int shift = (action_id_in_top + 1) * params.draw_ptr->margin_size_
+                        + action_id_in_top * params.draw_ptr->crop_width_;
                     frame_crop.copyTo(top_k(cv::Rect(shift, params.draw_ptr->header_size_,
                                                             params.draw_ptr->crop_width_,
                                                             params.draw_ptr->crop_height_)));
@@ -399,6 +424,7 @@ GAPI_OCV_KERNEL_ST(OCVTopAction, custom::TopAction, TopKState) {
         drawing_elements = {out_rects_det, {}, out_labels_det, {}};
     }
 };
+// clang-format on
 
 cv::gapi::GKernelPackage custom::kernels() {
     return cv::gapi::kernels<OCVFaceDetectorPostProc,

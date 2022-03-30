@@ -4,8 +4,13 @@
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
-#include <utils/slog.hpp>
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Point2i, Rect, Point2f, Point3f
+
+namespace slog {
+class LogStream;
+}  // namespace slog
 
 namespace gaze_estimation {
 struct FaceInferenceResults {

@@ -4,11 +4,21 @@
 
 #pragma once
 
-#include <opencv2/opencv.hpp>
-#include <details/ie_exception.hpp>
+#include <stddef.h>  // for size_t
 
-#include "tracker.hpp"
-#include "actions.hpp"
+#include <map>  // for map
+#include <memory>
+#include <ostream>  // for operator<<, basic_ostream::operator<<, basic_ostream, basic_ostream<>::__ostream...
+#include <string>  // for string, char_traits
+#include <tuple>  // for tuple
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Rect, Size
+
+#include "actions.hpp"  // for RangeEventsTrack, FrameEventsTrack
+
+struct Track;
+struct TrackedObject;
 
 class DetectionsLogger {
 private:
@@ -17,12 +27,12 @@ private:
     std::stringstream act_stat_log_stream_;
     std::stringstream act_det_log_stream_;
     std::stringstream log_stream_;
+
 public:
     DetectionsLogger();
     DetectionsLogger(bool enabled);
 
-    void CreateNextFrameRecord(const std::string& path, const int frame_idx,
-                               const size_t width, const size_t height);
+    void CreateNextFrameRecord(const std::string& path, const int frame_idx, const size_t width, const size_t height);
     void AddFaceToFrame(const cv::Rect& rect, const std::string& id, const std::string& action);
     void AddPersonToFrame(const cv::Rect& rect, const std::string& action, const std::string& id);
     void AddDetectionToFrame(const TrackedObject& object, const int frame_idx);
@@ -41,22 +51,25 @@ public:
                     const std::vector<std::string>& person_id_to_label);
     std::tuple<std::string, std::string, std::string> GetLogResult();
     void ConvertActionMapsToFrameEventTracks(const std::vector<std::map<int, int>>& obj_id_to_action_maps,
-                                             int default_action, std::map<int,
-                                             FrameEventsTrack>* obj_id_to_actions_track);
-    void ConvertRangeEventsTracksToActionMaps(int num_frames, const std::map<int,
-                                              RangeEventsTrack>& obj_id_to_events,
+                                             int default_action,
+                                             std::map<int, FrameEventsTrack>* obj_id_to_actions_track);
+    void ConvertRangeEventsTracksToActionMaps(int num_frames,
+                                              const std::map<int, RangeEventsTrack>& obj_id_to_events,
                                               std::vector<std::map<int, int>>* obj_id_to_action_maps);
     void SmoothTracks(const std::map<int, FrameEventsTrack>& obj_id_to_actions_track,
-                      int start_frame, int end_frame, int window_size, int min_length,
-                      int default_action, std::map<int, RangeEventsTrack>* obj_id_to_events);
+                      int start_frame,
+                      int end_frame,
+                      int window_size,
+                      int min_length,
+                      int default_action,
+                      std::map<int, RangeEventsTrack>* obj_id_to_events);
     std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_tracks);
 };
 
 #define SCR_CHECK(cond) IE_ASSERT(cond) << " "
 
 #define SCR_CHECK_BINARY(actual, expected, op) \
-    IE_ASSERT(actual op expected) << ". " \
-        << actual << " vs " << expected << ".  "
+    IE_ASSERT(actual op expected) << ". " << actual << " vs " << expected << ".  "
 
 #define SCR_CHECK_EQ(actual, expected) SCR_CHECK_BINARY(actual, expected, ==)
 #define SCR_CHECK_NE(actual, expected) SCR_CHECK_BINARY(actual, expected, !=)

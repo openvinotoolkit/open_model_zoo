@@ -4,7 +4,17 @@
 
 #pragma once
 
-#include "face.hpp"
+#include <stddef.h>  // for size_t
+
+#include <list>  // for list
+#include <map>  // for map
+#include <memory>  // for shared_ptr
+#include <string>  // for string
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Scalar, Size, Point, Mat, Point3f, Rect
+
+#include "face.hpp"  // for Face, Face::Ptr
 
 // --------Generic routines for visualization of detection results--------
 
@@ -27,6 +37,7 @@ public:
               cv::Scalar bgcolor);
 
     cv::Size getSize();
+
 private:
     std::vector<std::string> emotionNames;
     cv::Size size;
@@ -83,12 +94,7 @@ class Visualizer {
 public:
     using Ptr = std::shared_ptr<Visualizer>;
 
-    enum AnchorType {
-        TL = 0,
-        TR,
-        BL,
-        BR
-    };
+    enum AnchorType { TL = 0, TR, BL, BR };
 
     struct DrawParams {
         cv::Point cell;
@@ -97,10 +103,15 @@ public:
         size_t frameIdx;
     };
 
-    explicit Visualizer(bool m_ag = false, bool m_em = false,
-                        bool m_hp = false, bool m_lm = false, bool m_am = false,
-                        int leftPadding = 10, int rightPadding = 10,
-                        int topPadding = 75, int bottomPadding = 10);
+    explicit Visualizer(bool m_ag = false,
+                        bool m_em = false,
+                        bool m_hp = false,
+                        bool m_lm = false,
+                        bool m_am = false,
+                        int leftPadding = 10,
+                        int rightPadding = 10,
+                        int topPadding = 75,
+                        int bottomPadding = 10);
 
     void enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames);
     void draw(cv::Mat img, std::list<Face::Ptr> faces);

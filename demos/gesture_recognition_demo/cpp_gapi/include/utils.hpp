@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
+#include <string>  // for string
+#include <vector>  // for vector
+
+#include <opencv2/core.hpp>  // for Scalar
 
 cv::Scalar getNetShape(const std::string& path);
 
 void erase(std::string& str, const char symbol);
 
-template<typename... Sargs>
+template <typename... Sargs>
 void erase(std::string& str, const char symbol, Sargs... symbols);
 
 std::vector<std::string> fill_labels(const std::string& dir);

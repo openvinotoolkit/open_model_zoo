@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
+#include <opencv2/core.hpp>  // for Point2f, Point3f
 
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles);
