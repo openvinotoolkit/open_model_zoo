@@ -184,23 +184,47 @@ int main(int argc, char *argv[]) {
         LazyVideoWriter videoWriter{ FLAGS_o, cap->fps(), FLAGS_limit };
 
         /** Output Mat for result **/
+        cv::Mat image;
         cv::Mat out_image;
+        cv::Mat out_image_sr;
+        std::vector<custom::DetectedObject> objects;
+
+
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
-        while (pipeline.pull(cv::gout(out_image))) {
+        while (pipeline.pull(cv::gout(image, objects, out_image, out_image_sr))) {
             if (isStart) {
-                metrics.update(startTime, out_image, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                metrics.update(startTime, out_image_sr, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
                 isStart = false;
             }
             else {
-                metrics.update({}, out_image, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                metrics.update({}, out_image_sr, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
             }
-            videoWriter.write(out_image);
+            videoWriter.write(out_image_sr);
             if (!FLAGS_no_show) {
-                cv::imshow("Smart framing demo G-API", out_image);
+                //Draw detections on original image
+                for (const auto& el : objects) {
+                    std::cout << el << std::endl;
+                    cv::rectangle(image, el, cv::Scalar{ 0,255,0 }, 2, cv::LINE_8, 0);
+                    cv::putText(image, el.label, el.tl(), cv::FONT_HERSHEY_SIMPLEX, 1.0, { 0,255,0 }, 2);
+                }
+                //////////////////////////////////////////////////
+                ////Smart framing prototype
+                cv::Rect init_rect;
+                for (const auto& el : objects) {
+                    if (el.labelID == 0) {//person ID
+                        init_rect = init_rect | (cv::Rect)el;
+                    }
+                }
+                cv::rectangle(image, init_rect, cv::Scalar{ 255,0,0 }, 3, cv::LINE_8, 0);
+                cv::imshow("Smart framing demo G-API person detections", image);
+                cv::imshow("Smart framing demo G-API smart framing result", out_image);
+                if (FLAGS_apply_sr) {
+                    cv::imshow("Smart framing demo G-API smart framing with SR result", out_image_sr);
+                }
                 int key = cv::waitKey(1);
                 /** Press 'Esc' or 'Q' to quit **/
                 if (key == 27)
