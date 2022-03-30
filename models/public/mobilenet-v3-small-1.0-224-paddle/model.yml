@@ -26,7 +26,8 @@ files:
   - name: MobileNetV3_small_x1_0_pretrained.pdparams
     size: 17854119
     checksum: d3e68e1198e70a7f784e6723a5cb14f23f58651056c8d5adf6f67a21675ac5990cd7554fab914f079c4e1ef5669a32cf
-    source: https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/MobileNetV3_small_x1_0_pretrained.pdparams
+    original_source: https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/MobileNetV3_small_x1_0_pretrained.pdparams
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/mobilenet-v3-small-1.0-224-paddle/MobileNetV3_small_x1_0_pretrained.pdparams
   - name: tools/export_model.py
     size: 3635
     checksum: cf7563115a0ec676d989525500f67dc30dd52f6d7771ffe91e58538fed9479a9a134bb1168311ea71fe0bf29b739c561
