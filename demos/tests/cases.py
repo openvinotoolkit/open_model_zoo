@@ -53,7 +53,7 @@ class Demo:
         if len(self.device_keys) == 0:
             return {'CPU': []}
         if self.supported_devices:
-            device_list = self.supported_devices
+            device_list = list(set(device_list) & set(self.supported_devices))
         return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
     def get_models(self, case):
