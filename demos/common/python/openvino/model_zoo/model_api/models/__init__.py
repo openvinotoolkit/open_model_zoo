@@ -29,6 +29,7 @@ from .image_model import ImageModel
 from .instance_segmentation import MaskRCNNModel, YolactModel
 from .model import Model
 from .monodepth import MonoDepthModel
+from .nanodet import NanoDet, NanoDetPlus
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
@@ -56,6 +57,8 @@ __all__ = [
     'MaskRCNNModel',
     'Model',
     'MonoDepthModel',
+    'NanoDet',
+    'NanoDetPlus',
     'OpenPose',
     'OutputTransform',
     'PortraitBackgroundMatting',

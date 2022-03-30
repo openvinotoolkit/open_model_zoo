@@ -197,6 +197,8 @@
    omz_models_model_mobilenet_ssd
    omz_models_model_mobilenet_yolo_v4_syg
    omz_models_model_mtcnn
+   omz_models_model_nanodet_m_1.5x_416
+   omz_models_model_nanodet_plus_m_1.5x_416
    omz_models_model_pelee_coco
    omz_models_model_retinaface_resnet50_pytorch
    omz_models_model_retinanet_tf
@@ -439,6 +441,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
+| NanoDet with ShuffleNetV2 1.5x, size=416 | PyTorch\*            | [nanodet-m-1.5x-416](./nanodet-m-1.5x-416/README.md) | 27.38%/26.63% | 2.3895 | 2.0534 |
+| NanoDet Plus with ShuffleNetV2 1.5x, size=416 | PyTorch\*       | [nanodet-plus-m-1.5x-416](./nanodet-plus-m-1.5x-416/README.md) | 34.53%/33.77% | 3.0147 | 2.4614 |
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
