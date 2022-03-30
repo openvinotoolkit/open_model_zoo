@@ -20,17 +20,17 @@ import subprocess # nosec - disable B404:import-subprocess check
 
 from pathlib import Path
 
+from . import __version__
+
 PACKAGE_DIR = Path(__file__).resolve().parent
 MODEL_ROOT = PACKAGE_DIR / 'models'
 DATASET_DEFINITIONS = PACKAGE_DIR / 'data/dataset_definitions.yml'
-VERSION_FILE = None
 
 if not MODEL_ROOT.exists() or not DATASET_DEFINITIONS.exists():
     # We are run directly from OMZ rather than from an installed environment.
     _OMZ_ROOT = PACKAGE_DIR.parents[4]
     MODEL_ROOT = _OMZ_ROOT / 'models'
     DATASET_DEFINITIONS = _OMZ_ROOT / 'data/dataset_definitions.yml'
-    VERSION_FILE = _OMZ_ROOT / 'version.txt'
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
@@ -135,12 +135,11 @@ def get_package_path(python_executable, package_name):
     return file_path.parent, completed_process.stderr
 
 def get_version():
-    if VERSION_FILE and VERSION_FILE.is_file():
-        with VERSION_FILE.open('r') as version_file:
-            version = version_file.readline().rstrip('\n')
-        return f'commit {version}'
-    else:
-        return 'unknown'
+    try:
+        from openvino.runtime import get_version
+        return get_version()
+    except BaseException:
+        return __version__
 
 @contextlib.contextmanager
 def telemetry_session(app_name, tool):
@@ -151,9 +150,12 @@ def telemetry_session(app_name, tool):
         yield telemetry
     except SystemExit as e:
         telemetry.send_event('md', f'{tool}_result', 'failure' if e.code else 'success')
+        if e.code:
+            telemetry.send_event('md', f'{tool}_error_type', type(e))
         raise
-    except BaseException:
+    except BaseException as e:
         telemetry.send_event('md', f'{tool}_result', 'exception')
+        telemetry.send_event('md', f'{tool}_error_type', type(e))
         raise
     else:
         telemetry.send_event('md', f'{tool}_result', 'success')
