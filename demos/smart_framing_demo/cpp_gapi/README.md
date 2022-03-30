@@ -9,7 +9,7 @@ The demo application expects an yolo-v4-tiny-tf.xml object detection model in th
 The demo application expects an single-image-super-resolution-1032.xml or single-image-super-resolution-1033.xml super resolution model in the Intermediate Representation (IR) format if
 super resolution is enabled (default behaviour).
 
-The use case for the demo is an online conference where is needed to show only people and crop the most part of background. Super resolution can be optionally applied to minimize upscalling artifacts. 
+The use case for the demo is an online conference where is needed to show only people and crop the most part of background. Super resolution can be optionally applied to minimize upscalling artifacts.
 
 As input, the demo application accepts a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
 
