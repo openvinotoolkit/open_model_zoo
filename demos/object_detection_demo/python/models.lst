@@ -7,6 +7,10 @@ ctpn
 detr-resnet50
 # For --architecture_type=faceboxes
 faceboxes-pytorch
+# For --architecture_type = nanodet
+nanodet-m-1.5x-416
+# For --architecture_type = nanodet-plus
+nanodet-plus-m-1.5x-416
 # For --architecture_type=retinaface-pytorch
 retinaface-resnet50-pytorch
 # For --architecture_type=ssd
