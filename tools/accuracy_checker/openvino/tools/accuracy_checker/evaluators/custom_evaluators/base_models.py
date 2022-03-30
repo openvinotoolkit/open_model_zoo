@@ -393,7 +393,7 @@ class BaseONNXModel:
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
+            model_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
             if not model_list:
                 model_list = list(model.glob('*.onnx'))
             if not model_list:
