@@ -1,0 +1,58 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "mobilenet-v3-large-1.0-224-paddle" is one of MobileNets V3 - next generation of MobileNets,
+  based on a combination of complementary search techniques as well as a novel architecture
+  design. "mobilenet-v3-large-1.0-224-paddle" is pretraind in Paddle framework and targeted for low resource use cases.
+  For details see paper <https://arxiv.org/abs/1905.02244> and repository <https://github.com/PaddlePaddle/PaddleClas>.
+task_type: classification
+files:
+  - name: paddleclas-2.2.1-py3-none-any.whl
+    size: 306598
+    checksum: 16b0ea3a97393b17e40c657fce1b83ef78a8accef34e721cf6691151da1730efdbc7018635053636a023a2ca5abb3e4b
+    source: https://files.pythonhosted.org/packages/ba/2d/7e76250b345157c60639e9bbb301a39f1796cf882ac887a082245e54fa7d/paddleclas-2.2.1-py3-none-any.whl
+  - name: MobileNetV3_large_x1_0_pretrained.pdparams
+    size: 33273297
+    checksum: 4b5f60288b6b4e8a394c2c7b8e6aaaa17d02ab3541ce4589268626a2ec78beb5deeccc956c16b602412e7d687d2b2327
+    original_source: https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/MobileNetV3_large_x1_0_pretrained.pdparams
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/mobilenet-v3-large-1.0-224-paddle/MobileNetV3_large_x1_0_pretrained.pdparams
+  - name: tools/export_model.py
+    size: 3635
+    checksum: cf7563115a0ec676d989525500f67dc30dd52f6d7771ffe91e58538fed9479a9a134bb1168311ea71fe0bf29b739c561
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleClas/7c1f291b88914a862b824393ba00d8f54269a73e/tools/export_model.py
+  - name: MobileNetV3_large_x1_0.yaml
+    size: 2768
+    checksum: 3d7e066070fafdb3f01d49b3b6f422b96d93cf895dff89017accc583b034ad72be2c042e0db88fecee4d57fa74f4ba1f
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleClas/d6d5efe055caa9e08d0c392fcc02b49319afe14a/ppcls/configs/ImageNet/MobileNetV3/MobileNetV3_large_x1_0.yaml
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: paddleclas-2.2.1-py3-none-any.whl
+  - $type: regex_replace
+    file: tools/export_model.py
+    pattern: sys.path.append\(os.path.abspath\(os.path.join\(__dir__, '..\/'\)\)\)
+    replacement: sys.path.append(os.path.abspath(os.path.join(__dir__, '../paddleclas')))
+input_info:
+  - name: x
+    shape: [1, 3, 224, 224]
+    layout: NCHW
+model_optimizer_args:
+  - --reverse_input_channels
+  - --scale_values=[58.395, 57.12, 57.375]
+  - --mean_values=[123.675, 116.28, 103.53]
+  - --output=softmax_1.tmp_0
+  - --input_model=$conv_dir/inference_model/inference.pdmodel
+framework: paddle
+license: https://raw.githubusercontent.com/PaddlePaddle/PaddleClas/release/2.3/LICENSE

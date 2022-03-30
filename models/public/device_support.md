@@ -78,6 +78,8 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-v3-large-1.0-224-paddle | YES | YES | YES |
+| mobilenet-v3-small-1.0-224-paddle | YES | YES | YES |
 | mobilenet-yolo-v4-syg | YES | YES |    |
 | modnet-photographic-portrait-matting | YES | YES | YES |
 | modnet-webcam-portrait-matting | YES | YES | YES |
