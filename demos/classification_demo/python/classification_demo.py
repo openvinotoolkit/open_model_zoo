@@ -229,7 +229,7 @@ def main():
             next_frame_id_to_show += 1
 
             if not args.noshow:
-                cv2.imshow('Classification Results', frame)
+                cv2.imshow(__file__, frame)
                 key = cv2.waitKey(delay)
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
