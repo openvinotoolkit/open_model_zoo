@@ -35,26 +35,26 @@ FixNamespaceComments: true
 SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
-SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  # Current project headers.
+  # Current project headers
   - Regex:           '"([A-Za-z0-9.\/-_])+"'
     Priority:        5
-  # Local libraries headers.
-  - Regex:           '<(models|monitors|pipelines|utils)\/([A-Za-z0-9.\/-_])+>'
+  # Local libraries headers
+  - Regex:           '<(models|monitors|pipelines|utils|utils_gapi)\/([A-Za-z0-9.\/-_])+>'
     Priority:        4
-  # 3rd party headers.
+  # 3rd party headers with extension
   - Regex:           '<(gflags|opencv2|openvino|tbb)\/([A-Za-z0-9.\/-_])+>'
     Priority:        3
-  # C++ standard library headers
-  - Regex:           '<([A-Za-z0-9.\/-_])+>'
+  # C++ standard library headers without extension
+  - Regex:           '<([A-Za-z0-9\/-_])+>'
     Priority:        2
-  # C system headers
-  - Regex:           '<([A-Za-z0-9.\/-_])+.h>'
+  # C system headers with extension
+  - Regex:           '<([A-Za-z0-9.\/-_])+\.h>'
     Priority:        1
 IndentCaseLabels: true
 IndentPPDirectives: AfterHash
+SortIncludes: true
 ForEachMacros:
   - foreach
   - FOREACH_CHILD

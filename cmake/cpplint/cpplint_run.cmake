@@ -3,23 +3,21 @@
 #
 
 file(REMOVE "${OUTPUT_FILE}")
-
 set(DEFAULT_FILTER "
     -build/header_guard,\
     -build/include,\
-    -build/include_order,\
     -build/include_subdir,\
-    -build/include_what_you_use,\
     -build/namespaces,\
     -build/c++11,\
     -whitespace/indent,\
-    -whitespace/comments,\
-    -whitespace/ending_newline,\
     -runtime/references,\
     -runtime/int,\
     -runtime/explicit,\
     -readability/todo,\
     -readability/fn_size,\
+    +build/include_what_you_use, \
+    +whitespace/comments, \
+    +whitespace/ending_newline
 ")
 set(FILTER "${DEFAULT_FILTER}${CUSTOM_FILTER}")
 
