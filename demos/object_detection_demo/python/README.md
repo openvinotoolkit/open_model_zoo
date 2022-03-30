@@ -214,8 +214,8 @@ Common model options:
   --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or
                         input0:NCHW,input1:NC in case of more than one input.
   --num_classes NUM_CLASSES
-                        Optional. Number of detected classes. Only for NanoDet
-                        architecture type.
+                        Optional. Number of detected classes. Only for NanoDet, NanoDetPlus
+                        architecture types.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS

@@ -78,7 +78,8 @@ def build_argparser():
                                    help='Optional. Model inputs layouts. '
                                         'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     common_model_args.add_argument('--num_classes', default=None, type=int,
-                                   help='Optional. Number of detected classes. Only for NanoDet architecture type.')
+                                   help='Optional. Number of detected classes. Only for NanoDet, NanoDetPlus '
+                                        'architecture types.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
