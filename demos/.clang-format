@@ -46,6 +46,8 @@ IncludeCategories:
   # 3rd party headers with extension
   - Regex:           '<(gflags|opencv2|openvino|tbb)\/([A-Za-z0-9.\/-_])+>'
     Priority:        3
+  - Regex:           '<(cpp\/)?ie_.+>'
+    Priority:        3
   # C++ standard library headers without extension
   - Regex:           '<([A-Za-z0-9\/-_])+>'
     Priority:        2
