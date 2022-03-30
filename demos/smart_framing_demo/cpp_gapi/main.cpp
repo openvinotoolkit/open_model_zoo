@@ -165,8 +165,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        /** Custom kernels **/
-        auto kernels = custom::kernels();
+        /** Custom kernels plus CPU or Fluid **/
+        auto kernels = cv::gapi::combine(custom::kernels(),
+            util::getKernelPackage(FLAGS_kernel_package));
+
 
         cv::GStreamingCompiled pipeline = cv::GComputation(cv::GIn(in), cv::GOut(cv::gapi::copy(in), yolo_detections, out, FLAGS_apply_sr ? out_sr_pp : out))
                                                            .compileStreaming(cv::compile_args(kernels, networks));
