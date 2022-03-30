@@ -40,9 +40,9 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* yolo-v4-tiny-tf.xml
-* single-image-super-resolution-1032.xml
-* single-image-super-resolution-1033.xml
+* yolo-v4-tiny-tf
+* single-image-super-resolution-1032
+* single-image-super-resolution-1033
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
