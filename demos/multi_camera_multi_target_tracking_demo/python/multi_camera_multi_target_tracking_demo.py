@@ -251,7 +251,7 @@ def main():
     random.seed(config.random_seed)
     capture = MulticamCapture(args.input, args.loop)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

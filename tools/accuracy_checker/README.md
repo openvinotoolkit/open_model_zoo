@@ -1,5 +1,6 @@
 # Deep Learning accuracy validation framework
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -11,10 +12,11 @@
    omz_tools_accuracy_checker_custom_evaluators
    omz_tools_accuracy_checker_data_readers
    omz_tools_accuracy_checker_caffe_launcher
+   omz_tools_accuracy_checker_gapi_launcher
    omz_tools_accuracy_checker_mxnet_launcher
    omz_tools_accuracy_checker_onnx_runtime_launcher
    omz_tools_accuracy_checker_opencv_launcher
-   omz_tools_accuracy_checker_dlsdk_launcher
+   omz_tools_accuracy_checker_openvino_launcher
    omz_tools_accuracy_checker_pdpd_launcher
    omz_tools_accuracy_checker_pytorch_launcher
    omz_tools_accuracy_checker_tf2_launcher
@@ -27,18 +29,11 @@
    omz_tools_accuracy_checker_sample
 
 @endsphinxdirective
-
+-->
 
 The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
 
 ## Installation
-
-> **TIP**: You also can work with the Accuracy Checker inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
-> [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
-> performance of deep learning models on various Intel® architecture
-> configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
-> <br>
-> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Run_Locally) to get started.
 
 ### Prerequisites
 
@@ -111,6 +106,7 @@ python setup.py install_core
 
 When previous version of the tool is already installed in the environment, in some cases, it can broke the new installation.
 If you get a directory/file not found error, try manually removing the previous tool version from your environment or install the tool using following command in Accuracy Checker directory instead of setup.py install:
+
 ```bash
 pip install --upgrade --force-reinstall .
 ```
@@ -120,6 +116,7 @@ pip install --upgrade --force-reinstall .
 Accuracy Checker tool has an entry point for running in CLI, however, the majority of popular code editors or integrated development environments (IDEs) expect scripts as the starting point of application.
 Sometimes it can be useful to run the tool as a script for debugging or enabling new models.
 To use Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory, for example, `<open_model_zoo>/tools/accuracy_checker/main.py`, with the following code:
+
 ```python
 from openvino.tools.accuracy_checker.main import main
 
@@ -204,7 +201,7 @@ Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_run
 Launcher description can have differences.
 
 - [How to configure Caffe launcher](openvino/tools/accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/openvino_launcher_readme.md)
 - [How to configure OpenCV launcher](openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md)
 - [How to configure G-API launcher](openvino/tools/accuracy_checker/launcher/gapi_launcher_readme.md)
 - [How to configure MXNet Launcher](openvino/tools/accuracy_checker/launcher/mxnet_launcher_readme.md)

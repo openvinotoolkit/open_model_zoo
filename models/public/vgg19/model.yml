@@ -39,10 +39,11 @@ postprocessing:
     file: vgg19.prototxt
     pattern: 'dim: 10'
     replacement: 'dim: 1'
+input_info:
+  - name: data
+    shape: [1, 3, 224, 224]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,3,224,224]
-  - --input=data
-  - --layout=data(NCHW)
   - --mean_values=data[103.939,116.779,123.68]
   - --output=prob
   - --input_model=$dl_dir/vgg19.caffemodel

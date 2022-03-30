@@ -149,7 +149,8 @@ class AdapterField(BaseField):
 REQUIRES_KALDI = ['kaldi_latgen_faster_mapped']
 
 
-def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_loading=False):
+def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_loading=False,
+                   additional_output_mapping=None):
     label_map = None
     if dataset:
         metadata = dataset.metadata
@@ -169,7 +170,8 @@ def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_lo
         if kaldi_log_file:
             adapter_config['_kaldi_log_file'] = kaldi_log_file
 
-    adapter = Adapter.provide(adapter_type, adapter_config, label_map=label_map)
+    adapter = Adapter.provide(adapter_type, adapter_config, label_map=label_map,
+                              additional_output_mapping=additional_output_mapping)
 
     if launcher and not delayed_model_loading and adapter.output_blob is None:
         adapter.output_blob = launcher.output_blob

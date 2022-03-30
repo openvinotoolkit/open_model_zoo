@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2021-2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ from openvino.model_zoo.download_engine import cache, file_source, postprocessin
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 EXCLUDED_MODELS = []
 
+ModelInputInfo = collections.namedtuple('ModelInputInfo', ['name', 'shape', 'layout'])
+
 class ModelFile:
     def __init__(self, name, size, checksum, source):
         self.name = name
@@ -52,7 +54,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name
+        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -68,6 +70,7 @@ class Model:
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
+        self.input_info = input_info
         self.model_stages = {}
 
     @classmethod
@@ -100,6 +103,13 @@ class Model:
 
             framework = validation.validate_string_enum('"framework"', model['framework'],
                 known_frameworks.keys())
+
+            input_info = []
+            for input in model.get('input_info', []):
+                input_name = validation.validate_string('"input name"', input['name'])
+                shape = validation.validate_list('"input shape"', input.get('shape', []))
+                layout = validation.validate_string('"input layout"', input.get('layout', ''))
+                input_info.append(ModelInputInfo(input_name, shape, layout))
 
             conversion_to_onnx_args = model.get('conversion_to_onnx_args', None)
             if known_frameworks[framework]:
@@ -163,7 +173,8 @@ class Model:
 
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
-                task_type, conversion_to_onnx_args, known_frameworks[framework], composite_model_name)
+                task_type, conversion_to_onnx_args, known_frameworks[framework],
+                composite_model_name, input_info)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
@@ -179,6 +190,7 @@ class CompositeModel:
         self.precisions = precisions
         self.quantization_output_precisions = quantization_output_precisions
         self.composite_model_name = composite_model_name
+        self.input_info = []
 
     @classmethod
     def deserialize(cls, model, name, subdirectory, stages, known_frameworks=None, known_task_types=None):
@@ -201,8 +213,9 @@ class CompositeModel:
                                                         known_frameworks)
 
             model_stages = []
-            for model_subdirectory, model_part in stages.items():
-                model_stages.append(Model.deserialize(model_part, model_subdirectory.name, model_subdirectory, name,
+            for model_part_name, model_part in stages.items():
+                model_subdirectory = model_part.get('model_subdirectory')
+                model_stages.append(Model.deserialize(model_part, model_part_name, model_subdirectory, name,
                                                       known_frameworks=known_frameworks, known_task_types=known_task_types))
 
             quantization_output_precisions = model_stages[0].quantization_output_precisions
@@ -255,17 +268,22 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     validation.deserialization_context('In config "{}"'.format(composite_model_config)):
 
                     composite_model = yaml.safe_load(config_file)
+                    stages_order = composite_model.get('stages_order', [])
                     model_stages = {}
-                    for stage in sorted(composite_model_config.parent.glob('*/model.yml')):
+                    for stage in composite_model_config.parent.glob('*/model.yml'):
                         with stage.open('rb') as stage_config_file, \
                             validation.deserialization_context('In config "{}"'.format(stage_config_file)):
                             model = yaml.safe_load(stage_config_file)
 
                             stage_subdirectory = stage.parent.relative_to(models_root)
-                            model_stages[stage_subdirectory] = model
+                            model['model_subdirectory'] = stage_subdirectory
+                            model_stages[stage_subdirectory.name] = model
 
                     if len(model_stages) == 0:
                         continue
+
+                    model_stages = {stage_name: model_stages[stage_name] for stage_name in stages_order}
+
                     subdirectory = composite_model_config.parent.relative_to(models_root)
                     composite_models.append(CompositeModel.deserialize(
                         composite_model, composite_model_name, subdirectory, model_stages

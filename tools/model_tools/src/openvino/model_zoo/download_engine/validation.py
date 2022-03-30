@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2021-2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,4 +52,10 @@ def validate_nonnegative_int(context, value):
     if not isinstance(value, int) or value < 0:
         raise DeserializationError(
             '{}: expected a non-negative integer, got {!r}'.format(context, value))
+    return value
+
+def validate_list(context, value):
+    if not isinstance(value, list):
+        raise DeserializationError(
+            '{}: expected a list, got {!r}'.format(context, value))
     return value

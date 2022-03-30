@@ -35,7 +35,13 @@ The demo workflow is the following:
     * By default, tracking is used to show object instance with the same color throughout the whole video.
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different instance segmentation model topologies in one demo.
 
 ## Preparing to Run
 
@@ -69,7 +75,61 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields the short version of the usage message and an error message.
+Running the demo with `-h` shows this help message:
+```
+usage: instance_segmentation_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT [-d DEVICE] --labels LABELS [-t PROB_THRESHOLD] [--no_track] [--show_scores]
+                                     [--show_boxes] [--layout LAYOUT] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
+                                     [-limit OUTPUT_LIMIT] [--no_show] [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS] [-r]
+
+optional arguments:
+  -h, --help            show this help message and exitz
+
+Options:
+  -m MODEL, --model MODEL
+                        Required. Path to an .xml file with a trained model or address of model inference service if using ovms adapter.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is openvino.
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for device
+                        specified. Default value is CPU.
+
+Common model options:
+  --labels LABELS       Required. Path to a text file with class labels.
+  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
+                        Optional. Probability threshold for detections filtering.
+  --no_track            Optional. Disable object tracking for video/camera input.
+  --show_scores         Optional. Show detection scores.
+  --show_boxes          Optional. Show bounding boxes.
+  --layout LAYOUT       Optional. Model inputs layouts. Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input. To define
+                        layout you should use only capital letters
+
+Inference options:
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
+
+Input/output options:
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of the output file(s) to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+  --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
+
+Debug options:
+  -r, --raw_output_message
+                        Optional. Output inference results raw values showing.
+```
 
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 
@@ -111,10 +171,17 @@ The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

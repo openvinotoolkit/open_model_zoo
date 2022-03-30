@@ -4,8 +4,8 @@
 
   This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/legendary111/mobilenet-yolo-v4-syg/>,
-  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
+  For details, see [the repository](https://github.com/legendary111/mobilenet-yolo-v4-syg/),
+  [paper of MobileNetV2](https://arxiv.org/abs/1801.04381) and [YOLOv4](https://arxiv.org/abs/2004.10934).
 
 ## Specification
 

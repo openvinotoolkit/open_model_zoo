@@ -16,7 +16,7 @@ import numpy as np
 
 
 class IEModel:
-    """Class for inference of models in the Inference Engine format"""
+    """Class for inference of models in the OpenVINO Runtime format"""
     def __init__(self, core, model_path, labels_file, conf=.6, device='CPU'):
         self.confidence = conf
         self.load_model(core, model_path, device)
@@ -36,7 +36,7 @@ class IEModel:
         return img
 
     def forward(self, img):
-        """Performs forward pass of the wrapped IE model"""
+        """Performs forward pass of the wrapped model"""
         input_data = {self.input_tensor_name: self._preprocess(img)}
         return self.infer_request.infer(input_data)[self.output_tensor]
 
@@ -44,7 +44,7 @@ class IEModel:
         raise NotImplementedError
 
     def get_input_shape(self):
-        """Returns an input shape of the wrapped IE model"""
+        """Returns an input shape of the wrapped model"""
         return self.model.inputs[0].shape
 
     def get_allowed_inputs_len(self):
@@ -54,7 +54,7 @@ class IEModel:
         return (1, )
 
     def load_model(self, core, model_path, device):
-        """Loads a model in the Inference Engine format"""
+        """Loads a model in the OpenVINO Runtime format"""
         self.model = core.read_model(model_path)
 
         if len(self.model.inputs) not in self.get_allowed_inputs_len():

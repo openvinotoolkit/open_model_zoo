@@ -53,10 +53,17 @@ conversion_to_onnx_args:
   - --output-file=$conv_dir/colorization-siggraph.onnx
   - --input-names=data_l,user_ab,user_map
   - --output-names=color_ab
+input_info:
+  - name: data_l
+    shape: [1, 1, 256, 256]
+    layout: NCHW
+  - name: user_ab
+    shape: [1, 2, 256, 256]
+    layout: NCHW
+  - name: user_map
+    shape: [1, 1, 256, 256]
+    layout: NCHW
 model_optimizer_args:
-  - --input_shape=[1,1,256,256],[1,2,256,256],[1,1,256,256]
-  - --input=data_l,user_ab,user_map
-  - --layout=data_l(NCHW),user_ab(NCHW),user_map(NCHW)
   - --output=color_ab
   - --input_model=$conv_dir/colorization-siggraph.onnx
 framework: pytorch

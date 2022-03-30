@@ -57,7 +57,7 @@ class Wikitext2RawConverter(BaseFormatConverter):
         self.vocab_file = self.get_value_from_config('vocab_file')
         self.merges_file = self.get_value_from_config('merges_file')
         self.max_seq_length = int(self.get_value_from_config('max_seq_length'))
-        self.tokenizer = Tokenizer(BPE(str(self.vocab_file), str(self.merges_file)))
+        self.tokenizer = Tokenizer(BPE.from_file(str(self.vocab_file), str(self.merges_file)))
         self.tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
         self.tokenizer.decoder = decoders.ByteLevel()
 

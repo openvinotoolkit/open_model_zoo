@@ -43,7 +43,7 @@ static const char at_message[] = "Required. Type of the model, either 'ae' for A
 "or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-" Ex. \"[NCHW]\" or \"input1[NCHW],input2[NC]\" in case of more than one input.";
+" Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -211,12 +211,9 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
-        if (curr_frame.empty()) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 

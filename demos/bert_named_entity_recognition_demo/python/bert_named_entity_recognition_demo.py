@@ -58,8 +58,7 @@ def build_argparser():
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
     args.add_argument('--layout',
                       help='Optional. Model inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters',
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.',
                       type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
@@ -73,6 +72,8 @@ def build_argparser():
                       default='', type=str)
     args.add_argument('-nthreads', '--num_threads', default=None, type=int,
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+    args.add_argument('--dynamic_shape', action='store_true',
+                      help='Optional. Run model with dynamic input sequence. If not provided, input sequence is padded to max_seq_len')
     return parser
 
 
@@ -117,9 +118,10 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names})
+    enable_padding = not args.dynamic_shape
+    model = BertNamedEntityRecognition(model_adapter, {'vocab': vocab, 'input_names': args.input_names, 'enable_padding': enable_padding})
     if max_sentence_length > model.max_length:
-        model.reshape(max_sentence_length)
+        model.reshape(max_sentence_length if enable_padding else (1, max_sentence_length))
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)

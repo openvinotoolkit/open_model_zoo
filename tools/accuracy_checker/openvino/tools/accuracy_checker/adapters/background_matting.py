@@ -36,8 +36,8 @@ class ImageBackgroundMattingAdapter(Adapter):
         batch_size = len(identifiers)
         for i in range(batch_size):
             output = {
-                self.pha: self.to_image(pha[i], frame_meta[i]),
-                self.fgr: self.to_image(fgr[i], frame_meta[i])
+                self._orig_pha: self.to_image(pha[i], frame_meta[i]),
+                self._orig_fgr: self.to_image(fgr[i], frame_meta[i])
             }
             result.append(
                 BackgroundMattingPrediction(identifiers[i], output)
@@ -77,5 +77,7 @@ class ImageBackgroundMattingAdapter(Adapter):
 
     def configure(self):
         self.pha = self.get_value_from_config('alpha_out')
+        self._orig_pha = self.get_value_from_config('alpha_out')
         self.fgr = self.get_value_from_config('foreground_out')
+        self._orig_fgr = self.get_value_from_config('foreground_out')
         self.output_verified = False

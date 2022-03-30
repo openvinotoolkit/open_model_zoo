@@ -113,6 +113,16 @@ For replacement operation:
 - `replacement` — Replacement string
 - `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
+**`input_info`**
+
+List of inputs containing the information about input name, shape and layout. For example:
+```
+input_info:
+  - name: Placeholder
+    shape: [1, 224, 224, 3]
+    layout: NHWC
+```
+
 **`conversion_to_onnx_args`** (*only for PyTorch\* models*)
 
 List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
@@ -121,7 +131,6 @@ List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
 Conversion parameters (learn more in the [Model conversion](#model-conversion) section). For example:
 ```
-  - --input=data
   - --mean_values=data[127.5]
   - --scale_values=data[127.5]
   - --reverse_input_channels
@@ -163,10 +172,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: tf-densenet121.tar.gz
+input_info:
+  - name: Placeholder
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,224,224,3]
-  - --input=Placeholder
   - --mean_values=Placeholder[123.68,116.78,103.94]
   - --scale_values=Placeholder[58.8235294117647]
   - --output=densenet121/predictions/Reshape_1

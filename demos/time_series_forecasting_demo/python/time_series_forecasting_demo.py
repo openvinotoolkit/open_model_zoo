@@ -21,7 +21,8 @@ from collections import OrderedDict
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from openvino.runtime import Core, get_version
-from accuracy_checker.dataset import read_annotation
+from openvino.tools.accuracy_checker.dataset import read_annotation
+
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -36,7 +37,7 @@ class ForecastingEngine:
     """
     def __init__(self, model_path, input_name, output_name, quantiles):
         device = "CPU"
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
         log.info('Reading model {}'.format(model_path))

@@ -4,6 +4,7 @@ models:
       - framework: openvino
         adapter:
           type: narnmt
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to vocabulary and merges files.
           vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
           merges_file: machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
           output_name: pred
@@ -21,6 +22,7 @@ models:
 
         preprocessing:
           - type: decode_by_sentence_piece_bpe_tokenizer
+            # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to vocabulary and merges files.
             vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_src/vocab.json
             merges_file: machine-translation-nar-de-en-0002/tokenizer_src/merges.txt
 

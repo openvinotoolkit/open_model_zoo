@@ -11,7 +11,7 @@ Other demo objectives are:
 
 On startup, the application reads command line parameters and loads the specified networks. The Human Pose Estimation network is required.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
@@ -39,7 +39,23 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the demo with the `-h` option yields a usage message.
+Running the demo with `-h` shows this help message:
+```
+    [-h]              Print a usage message
+     -i               A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    [-loop]           Enable reading the inputs in a loop.
+    [-duplicate_num]  Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
+     -m <path>        Path to an .xml file with a trained model.
+    [-d <device>]     Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. Use "-d MULTI:<comma-separated_devices_list>" format to specify MULTI plugin. The application looks for a suitable plugin for the specified device.
+    [-bs]             Batch size for processing (the number of frames processed per infer request)
+    [-n_iqs]          Frame queue size for input channels
+    [-fps_sp]         FPS measurement sampling period between timepoints in msec
+    [-n_sp]           Number of sampling periods
+    [-no_show]        Don't show output.
+    [-show_stats]     Enable statistics report
+    [-real_input_fps] Disable input frames caching, for maximum throughput pipeline
+    [-u]              List of monitors to show initially.
+```
 
 To run the demo with the pre-trained Human Pose Estimation model on CPU with one camera, use the following command:
 
@@ -103,5 +119,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

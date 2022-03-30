@@ -29,11 +29,12 @@ files:
     checksum: 2c5236e29566a0d198e972630941840a98f2fcedce6d39b05dc61980166c29a7da9b55883c5dc8b568d682529c18430f
     original_source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-v4-syg/yolo_pb2ir.json
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-yolo-v4-syg/yolo_pb2ir.json
+input_info:
+  - name: input_1
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 model_optimizer_args:
   - --input_model=$dl_dir/mobilenet-yolo-v4-syg.pb
-  - --input_shape=[1,416,416,3]
-  - --input=input_1
-  - --layout=input_1(NHWC)
   - --scale_values=input_1[255]
   - --transformations_config=$dl_dir/yolo_pb2ir.json
   - --reverse_input_channels

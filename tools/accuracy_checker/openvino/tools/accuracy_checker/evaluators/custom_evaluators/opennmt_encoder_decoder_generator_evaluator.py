@@ -222,8 +222,7 @@ class CommonOVModel(BaseOpenVINOModel):
         results, raw_results = self.infer(input_data, raw_results=True)
         self.propagate_output(results)
         names = self.return_layers if len(self.return_layers) > 0 else self.output_layers
-        return tuple(
-            results[postprocess_output_name(name, results)] for name in names) + (raw_results,)
+        return tuple(results[name] for name in names) + (raw_results,)
 
     def fit_to_input(self, input_data):
         if isinstance(input_data, dict):
@@ -248,6 +247,18 @@ class CommonOVModel(BaseOpenVINOModel):
 
     def propagate_output(self, data):
         pass
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        for idx, out in enumerate(self.output_layers):
+            self.output_layers[idx] = postprocess_output_name(out, self.outputs,
+                                                              additional_mapping=self.additional_output_mapping,
+                                                              raise_error=False)
+        if hasattr(self, 'return_layers'):
+            for idx, out in enumerate(self.return_layers):
+                self.return_layers[idx] = postprocess_output_name(out, self.outputs,
+                                                                  additional_mapping=self.additional_output_mapping,
+                                                                  raise_error=False)
 
 
 class BeamSearch:
@@ -444,16 +455,15 @@ class GeneratorDLSDKModel(CommonDLSDKModel):
 class EncoderOVModel(CommonOVModel):
     default_model_suffix = 'encoder'
     input_layers = ['src', 'src_len']
-    output_layers = ['state.0/sink_port_0', 'state.1/sink_port_0', 'memory/sink_port_0']
-    return_layers = ['state.0/sink_port_0', 'state.1/sink_port_0', 'memory/sink_port_0']
+    output_layers = ['state.0', 'state.1', 'memory']
+    return_layers = ['state.0', 'state.1', 'memory']
 
 
 class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
     default_model_suffix = 'decoder'
     input_layers = ['c_0', 'h_0', 'input', 'input_feed.1', 'mem_len', 'memory']
-    output_layers = ['attn/sink_port_0', 'c_1/sink_port_0', 'h_1/sink_port_0', 'input_feed/sink_port_0',
-                     'output/sink_port_0']
-    return_layers = ['output/sink_port_0', 'attn/sink_port_0']
+    output_layers = ['attn', 'c_1', 'h_1', 'input_feed', 'output']
+    return_layers = ['output', 'attn']
     state_inputs = ['h_0', 'c_0', 'memory', 'mem_len', 'input_feed.1']
     state_outputs = ['h_1/sink_port_0', 'c_1/sink_port_0', '', '', 'input_feed/sink_port_0']
 
@@ -468,7 +478,7 @@ class DecoderOVModel(CommonOpenNMTDecoder, CommonOVModel):
 class GeneratorOVModel(CommonOVModel):
     default_model_suffix = 'generator'
     input_layers = ['input']
-    output_layers = ['output/sink_port_0']
+    output_layers = ['output']
 
 
 class CommonONNXModel(BaseONNXModel):

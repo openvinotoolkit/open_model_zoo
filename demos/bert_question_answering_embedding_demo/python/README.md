@@ -4,10 +4,10 @@ This README describes the Question Answering Embedding demo application that use
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads network(s) to the InferenceEngine.
+On startup the demo application reads command line parameters and loads model(s) to OpenVINO™ Runtime plugin.
 It also fetches data from the user-provided urls to populate the list of "contexts" with the text.
 Prior to the actual inference to answer user's questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
-This is done using the first ("emdbeddings-only") BERT model.
+This is done using the first ("embeddings-only") BERT model.
 
 After that, when user types a question, the "embeddings" network is used to calculate an embedding vector for the specified question.
 Using the L2 distance between the embedding vector of the question and the embedding vectors for the contexts the best (closest) contexts are selected
@@ -16,6 +16,12 @@ as candidates to further seek for the final answer to the question. At this poin
 Notice that question is usually much shorter than the contexts, so calculating the embedding for that is really fast. Also calculating the L2 distance between a context and question is almost free, compared to the actual inference. Together, during question answering, this substantially saves on the actual inference, which is needed ONLY for the question (while contexts are pre-calculated), compared to the conventional approach that has to concatenate each context with the question and do an inference on this large input (per context).
 
 If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displayed to the user.
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different question answering model topologies in one demo.
 
 ## Preparing to Run
 
@@ -158,6 +164,6 @@ Thus, for the long paragraph texts, the network is called multiple times as for 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)

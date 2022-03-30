@@ -2,4 +2,7 @@ description: >-
   Video Transformer Network for driver action recognition.
 task_type: action_recognition
 framework: dldt
+stages_order:
+  - driver-action-recognition-adas-0002-encoder
+  - driver-action-recognition-adas-0002-decoder
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

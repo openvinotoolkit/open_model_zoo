@@ -1,0 +1,27 @@
+models:
+  - name: modnet-webcam-portrait-matting
+    launchers:
+      - framework: openvino
+        adapter: background_matting
+    datasets:
+      - name: HumanMattingDataset
+        preprocessing:
+          - type: resize
+            size: 512
+        postprocessing:
+          - type: resize
+            apply_to: annotation
+            size: 512
+        metrics:
+          - type: mae
+            name: MAD
+            presenter: print_vector
+            reference:
+              mean: 5.657859
+              std: 6.205324
+          - type: mse
+            name: MSE
+            presenter: print_vector
+            reference:
+              mean: 762.524743
+              std: 1494.445331

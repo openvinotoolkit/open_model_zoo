@@ -80,7 +80,8 @@ PRECISION_TO_DTYPE = {
     'boolean': np.uint8
 }
 
-INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT', 'SCALE_FACTOR']
+INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'PROCESSED_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT',
+                             'SCALE_FACTOR']
 
 
 class InputFeeder:
@@ -116,9 +117,10 @@ class InputFeeder:
         if not self.dummy:
             parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list, layouts)
             self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
-            self.image_info_inputs, self.orig_image_info_inputs, self.scale_factor_inputs = parsing_results[3:6]
-            self.lstm_inputs = parsing_results[6]
-            self.ignore_inputs, self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[7:]
+            (self.image_info_inputs, self.orig_image_info_inputs, self.processed_image_info_inputs,
+             self.scale_factor_inputs) = parsing_results[3:7]
+            self.lstm_inputs = parsing_results[7]
+            self.ignore_inputs, self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[8:]
             if not self.non_constant_inputs:
                 raise ConfigError('Network should contain at least one layer for setting variable data.')
 
@@ -147,8 +149,16 @@ class InputFeeder:
                 return [[meta['scale_y'], meta['scale_x']] for meta in image_meta]
             return [[1, 1] for _ in image_meta]
 
-        meta_batch = extract_image_representations(data_representation_batch, meta_only=True)
+        data_batch, meta_batch = extract_image_representations(data_representation_batch, meta_only=False)
         image_infos = {}
+        if self.processed_image_info_inputs:
+            image_info_data = [np.shape(data) for data in data_batch]
+            image_infos = {
+                processed_image_info_input:
+                    prepare_image_info(image_info_data, processed_image_info_input, False)
+                for processed_image_info_input in self.processed_image_info_inputs
+            }
+            return image_infos
         im_info_resolved = False
         if 'image_info' in meta_batch[0]:
             image_info_data = [meta['image_info'] for meta in meta_batch]
@@ -187,7 +197,10 @@ class InputFeeder:
 
         filled_inputs = {}
         check_regex = True
-        if self.image_info_inputs or self.orig_image_info_inputs or self.scale_factor_inputs:
+        if (
+            self.image_info_inputs or self.orig_image_info_inputs or
+            self.processed_image_info_inputs or self.scale_factor_inputs
+        ):
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
         for idx, input_layer in enumerate(self.non_constant_inputs):
@@ -256,7 +269,10 @@ class InputFeeder:
         filled_inputs = {}
         filled_template = {}
         check_regex = True
-        if self.image_info_inputs or self.orig_image_info_inputs or self.scale_factor_inputs:
+        if (
+            self.image_info_inputs or self.orig_image_info_inputs or
+            self.processed_image_info_inputs or self.scale_factor_inputs
+        ):
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
         for idx, input_layer in enumerate(self.non_constant_inputs):
@@ -339,6 +355,7 @@ class InputFeeder:
         precisions = {}
         image_info_inputs = []
         orig_image_info_inputs = []
+        processed_image_info_inputs = []
         lstm_inputs = []
         ignore_inputs = []
         scale_factor_inputs = []
@@ -349,8 +366,8 @@ class InputFeeder:
                 raise ConfigError('network does not contain input "{}"'.format(name))
             if input_['type'] in INPUT_TYPES_WITHOUT_VALUE:
                 self._configure_inputs_without_value(
-                    input_, image_info_inputs, orig_image_info_inputs, scale_factor_inputs, lstm_inputs, ignore_inputs,
-                    precision_info, precisions)
+                    input_, image_info_inputs, orig_image_info_inputs, processed_image_info_inputs, scale_factor_inputs,
+                    lstm_inputs, ignore_inputs, precision_info, precisions)
                 continue
 
             value = input_.get('value')
@@ -376,7 +393,8 @@ class InputFeeder:
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
-            image_info_inputs + lstm_inputs + orig_image_info_inputs + ignore_inputs + scale_factor_inputs
+            image_info_inputs + lstm_inputs + orig_image_info_inputs + ignore_inputs + scale_factor_inputs +
+            processed_image_info_inputs
         )
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:
@@ -394,6 +412,7 @@ class InputFeeder:
             non_constant_inputs_mapping or None,
             image_info_inputs,
             orig_image_info_inputs,
+            processed_image_info_inputs,
             scale_factor_inputs,
             lstm_inputs,
             ignore_inputs,
@@ -404,7 +423,7 @@ class InputFeeder:
 
     def _configure_inputs_without_value(
             self, input_config, image_info_inputs,
-            orig_image_info_inputs, scale_factor_inputs, lstm_inputs, ignore_inputs,
+            orig_image_info_inputs, processed_image_info_inputs, scale_factor_inputs, lstm_inputs, ignore_inputs,
             precision_info, precisions):
         name = input_config['name']
         if input_config['type'] == 'IMAGE_INFO':
@@ -413,6 +432,10 @@ class InputFeeder:
 
         if input_config['type'] == 'ORIG_IMAGE_INFO':
             orig_image_info_inputs.append(name)
+            self.get_layer_precision(input_config, name, precision_info, precisions)
+
+        if input_config['type'] == 'PROCESSED_IMAGE_INFO':
+            processed_image_info_inputs.append(name)
             self.get_layer_precision(input_config, name, precision_info, precisions)
 
         if input_config['type'] == 'SCALE_FACTOR':

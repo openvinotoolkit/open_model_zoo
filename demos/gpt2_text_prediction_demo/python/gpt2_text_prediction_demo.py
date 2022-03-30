@@ -70,17 +70,17 @@ def main():
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # create tokenizer
-    tokenizer = Tokenizer(BPE(str(args.vocab), str(args.merges)))
+    tokenizer = Tokenizer(BPE.from_file(str(args.vocab), str(args.merges)))
     tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
     tokenizer.decoder = decoders.ByteLevel()
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = Core()
+    core = Core()
 
     # read IR
     log.info('Reading model {}'.format(args.model))
-    model = ie.read_model(args.model)
+    model = core.read_model(args.model)
 
     # check number inputs and outputs
     if len(model.inputs) != 1:
@@ -98,7 +98,7 @@ def main():
         model.reshape({input_tensor: PartialShape([Dimension(1), Dimension(0, args.max_seq_len)])})
 
     # load model to the device
-    compiled_model = ie.compile_model(model, args.device)
+    compiled_model = core.compile_model(model, args.device)
     output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
@@ -142,12 +142,12 @@ def main():
                 pad_len = max_length - cur_input_len
                 model_input = np.concatenate((input_ids, [[eos_token_id] * pad_len]), axis=-1)
 
-            # create numpy inputs for IE
+            # create numpy inputs for OpenVINO runtime
             inputs = {
                 input_tensor: model_input,
             }
 
-            # infer by IE
+            # infer by OpenVINO runtime
             t_start = time.perf_counter()
             outputs = infer_request.infer(inputs)[output_tensor]
             t_end = time.perf_counter()
