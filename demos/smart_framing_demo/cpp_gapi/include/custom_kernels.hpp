@@ -60,7 +60,7 @@ const std::vector<std::string> coco_classes = {
 "knife",          //43
 "spoon",          //44
 "bowl",           //45
-"banana",         //46 
+"banana",         //46
 "apple",          //47
 "sandwich",       //48
 "orange",         //49
