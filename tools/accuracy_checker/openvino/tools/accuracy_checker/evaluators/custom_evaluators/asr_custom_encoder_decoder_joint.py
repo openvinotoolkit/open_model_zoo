@@ -339,7 +339,7 @@ class DLSDKJoint(Joint, CommonDLSDKModel):
 class OVJoint(Joint, CommonOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['0', '1']
-        self.default_outputs = ['8/sink_port']
+        self.default_outputs = ['8/sink_port_0']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
