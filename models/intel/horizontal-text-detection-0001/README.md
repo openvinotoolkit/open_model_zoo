@@ -21,7 +21,7 @@ The key benefit of this model compared to the [base model](../text-detection-000
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 704, 704` in the format `1, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 704, 704` in the format `1, C, H, W`, where:
 
 - `C` - number of channels
 - `H` - image height

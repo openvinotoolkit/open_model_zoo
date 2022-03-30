@@ -30,7 +30,7 @@ curve.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 320, 544` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 3, 320, 544` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

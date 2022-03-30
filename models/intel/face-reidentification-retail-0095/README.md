@@ -34,7 +34,7 @@ To align the face, use a landmarks regression model: using regressed points and 
 
 ## Inputs
 
-Input image, name: `data` , shape: `1, 3, 128, 128` in the format `B, C, H, W`, where:
+Input image, name: `0` , shape: `1, 3, 128, 128` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

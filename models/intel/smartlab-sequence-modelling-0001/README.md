@@ -139,7 +139,7 @@ The outputs also include two parts: predictions and four feature outputs. Predic
    - `B` - batch size
    - `H`- feature map height
    - `W` - feature map width
-After post-process with argmx() function, the prediction result can be used to decide the action type of the current frame.
+After post-process with argmax() function, the prediction result can be used to decide the action type of the current frame.
 2. History feature 1, name: `fhis_out_0`, shape: `12, 64, 2048`, format: `C, H, W`,
 3. History feature 2, name: `fhis_out_1`, shape: `11, 64, 2048`, format: `C, H, W`,
 4. History feature 3, name: `fhis_out_2`, shape: `11, 64, 2048`, format: `C, H, W`,
