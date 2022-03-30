@@ -165,7 +165,11 @@ find_package(CMakeScripts REQUIRED
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
+set (TMP_IWYU_VAR ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE})
+set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "" CACHE STRING "WA to disable IWYU for thirdparty/gflags" FORCE)
 add_subdirectory(thirdparty/gflags)
+set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${TMP_IWYU_VAR} CACHE STRING "Enable" FORCE)
+
 add_subdirectory(common/cpp)
 add_subdirectory(common/cpp_gapi)
 add_subdirectory(multi_channel_common/cpp)
