@@ -61,6 +61,7 @@
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
+| levit-128s | YES | YES |    |
 | license-plate-recognition-barrier-0007 | YES |    |    |
 | mask_rcnn_inception_resnet_v2_atrous_coco | YES | YES |    |
 | mask_rcnn_resnet50_atrous_coco | YES | YES |    |
@@ -78,6 +79,8 @@
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
 | mobilenet-yolo-v4-syg | YES | YES |    |
+| modnet-photographic-portrait-matting | YES | YES | YES |
+| modnet-webcam-portrait-matting | YES | YES | YES |
 | mozilla-deepspeech-0.6.1 | YES |    |    |
 | mozilla-deepspeech-0.8.2 | YES |    |    |
 | mtcnn-o | YES | YES |    |

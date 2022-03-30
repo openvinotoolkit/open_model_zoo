@@ -1,0 +1,61 @@
+models:
+  - name: levit-128s-onnx
+
+    launchers:
+      - framework: onnx_runtime
+        model: levit-128s.onnx
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 249
+            interpolation: BICUBIC
+            aspect_ratio_scale: greater
+            use_pillow: True
+          - type: crop
+            size: 224
+            use_pillow: True
+          - type: normalization
+            mean: [123.675, 116.28, 103.53]
+            std: [58.395, 57.12, 57.375]
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7654
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9285
+
+  - name: levit-128s
+
+    launchers:
+      - framework: openvino
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 249
+            interpolation: BICUBIC
+            aspect_ratio_scale: greater
+            use_pillow: True
+          - type: crop
+            size: 224
+            use_pillow: True
+          - type: rgb_to_bgr
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.7654
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9285

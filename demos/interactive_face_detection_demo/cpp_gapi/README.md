@@ -31,7 +31,7 @@ Engine.
 5. G-API pipeline performs four inferences, using the Age/Gender, Head Pose, Emotions, Facial Landmarks detection and Anti-spoof detection networks if they are specified in the command line.
 6. The application displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
@@ -67,41 +67,42 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with the `-h` option yields the following usage message:
+Running the demo with `-h` shows this help message:
 
 ```
-interactive_face_detection_demo_gapi [OPTION]
-Options:
-
-    -h                         Print a usage message
-    -i "<path>"                Required. Path to a video file (specify "cam" to work with camera).
-    -o "<path>"                Optional. Name of the output file(s) to save.
-    -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
-    -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
-    -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
-    -m_em "<path>"             Optional. Path to an .xml file with a trained Emotions Recognition model.
-    -m_lm "<path>"             Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.
-    -m_am "<path>"             Optional. Path to an .xml file with a trained Antispoofing Classification model.
-    -d "<device>"              Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
-    -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
-    -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
-    -d_em "<device>"           Optional. Target device for Emotions Recognition network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for a specified device.
-    -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
-    -d_am "<device>"           Optional. Target device for Antispoofing Classification network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -no_show                   Optional. Don't show output.
-    -r                         Optional. Output inference results as raw values
-    -t                         Optional. Probability threshold for detections
-    -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face
-    -dx_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Ox axis
-    -dy_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Oy axis
-    -loop                Optional. Enable playing video on a loop
-    -no_smooth                 Optional. Do not smooth person attributes
-    -no_show_emotion_bar       Optional. Do not show emotion bar
-    -u                         Optional. List of monitors to show initially.
+    [ -h]                                         show the help message and exit
+    [--help]                                      print help on all arguments
+      -m <MODEL FILE>                             path to an .xml file with a trained Face Detection model
+    [ -i <INPUT>]                                 an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
+    [--bb_enlarge_coef <NUMBER>]                  coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2
+    [ -d <DEVICE>]                                specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+    [--dag <DEVICE>]                              target device for Age/Gender Recognition network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default is CPU
+    [--dam <DEVICE>]                              target device for Antispoofing Classification network (the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default is CPU
+    [--dem <DEVICE>]                              target device for Emotions Recognition network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default is CPU
+    [--dhp <DEVICE>]                              target device for Head Pose Estimation network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default is CPU
+    [--dlm <DEVICE>]                              target device for Facial Landmarks Estimation network (the list of available devices is shown below). The demo will look for a suitable plugin for device specified. Default is CPU
+    [--dx_coef <NUMBER>]                          coefficient to shift the bounding box around the detected face along the Ox axis
+    [--dy_coef <NUMBER>]                          coefficient to shift the bounding box around the detected face along the Oy axis
+    [--fps <NUMBER>]                              maximum FPS for playing video
+    [--lim <NUMBER>]                              number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
+    [--loop]                                      enable reading the input in a loop
+    [--mag <MODEL FILE>]                          path to an .xml file with a trained Age/Gender Recognition model
+    [--mam <MODEL FILE>]                          path to an .xml file with a trained Antispoofing Classification model
+    [--mem <MODEL FILE>]                          path to an .xml file with a trained Emotions Recognition model
+    [--mhp <MODEL FILE>]                          path to an .xml file with a trained Head Pose Estimation model
+    [--mlm <MODEL FILE>]                          path to an .xml file with a trained Facial Landmarks Estimation model
+    [ -o <OUTPUT>]                                name of the output file(s) to save
+    [ -r]                                         output inference results as raw values
+    [--show] ([--noshow])                         (don't) show output
+    [--show_emotion_bar] ([--noshow_emotion_bar]) (don't) show emotion bar
+    [--smooth] ([--nosmooth])                     (don't) smooth person attributes
+    [ -t <NUMBER>]                                probability threshold for detections. Default is 0.5
+    [ -u <DEVICE>]                                resource utilization graphs. Default is cdm. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
+    Key bindings:
+        Q, q, Esc - Quit
+        P, p, 0, spacebar - Pause
+        C - average CPU load, D - load distribution over cores, M - memory usage, H - hide
 ```
-
-Running the application with an empty list of options yields the usage message given above and an error message.
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
@@ -110,11 +111,11 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
   -d GPU \
   -i <path_to_video>/inputVideo.mp4 \
   -m <path_to_model>/face-detection-adas-0001.xml \
-  -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml \
-  -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
-  -m_em <path_to_model>/emotions-recognition-retail-0003.xml \
-  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml \
-  -m_am <path_to_model>/anti-spoof-mn3.xml
+  --mag <path_to_model>/age-gender-recognition-retail-0013.xml \
+  --mhp <path_to_model>/head-pose-estimation-adas-0001.xml \
+  --mem <path_to_model>/emotions-recognition-retail-0003.xml \
+  --mlm <path_to_model>/facial-landmarks-35-adas-0002.xml \
+  --mam <path_to_model>/anti-spoof-mn3.xml
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -123,7 +124,7 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
 * To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `--lim` option. The default value is 1000. To change it, you can apply the `--lim N` option, where `N` is the number of frames to store.
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
@@ -139,5 +140,5 @@ You can use this metric to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

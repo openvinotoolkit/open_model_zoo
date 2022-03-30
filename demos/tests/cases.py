@@ -219,26 +219,6 @@ DEMOS = [
                           '-m_o': ModelArg('mtcnn-o')}),
     )),
 
-    CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('375x500')}),
-        [
-            TestCase(options={
-                '-m': ModelArg('face-detection-retail-0004'),
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-            }),
-            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
-        ]
-    )),
-
     CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
@@ -387,19 +367,39 @@ DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
             device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={'--noshow': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-retail-0004'),
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '--mag': ModelArg('age-gender-recognition-retail-0013'),
+                '--mam': ModelArg('anti-spoof-mn3'),
+                '--mem': ModelArg('emotions-recognition-retail-0003'),
+                '--mhp': ModelArg('head-pose-estimation-adas-0001'),
+                '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
+            }),
+            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
+        ]
+    )),
+
+    CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
+            model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
+            device_keys=['-d', '--dag', '--dem', '--dlm', '--dhp', '--dam'],
+            test_cases=combine_cases(
+        TestCase(options={'--noshow': None,
+            **MONITORS,
+            '-i': DataPatternArg('375x500')}),
+        [
+            TestCase(options={
+                '-m': ModelArg('face-detection-retail-0004'),
+                '--mag': ModelArg('age-gender-recognition-retail-0013'),
+                '--mam': ModelArg('anti-spoof-mn3'),
+                '--mem': ModelArg('emotions-recognition-retail-0003'),
+                '--mhp': ModelArg('head-pose-estimation-adas-0001'),
+                '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
             }),
             TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
         ]
@@ -733,11 +733,11 @@ DEMOS = [
             ),
             *combine_cases(
                TestCase(options={'--architecture_type': 'en-de'}),
-               [# TODO monitors_extension wasn't found
-                #    TestCase(options={
-                #        '-m_en': ModelArg('action-recognition-0001-encoder'),
-                #        '-m_de': ModelArg('action-recognition-0001-decoder'),
-                #    }),
+               [
+                   TestCase(options={
+                       '-m_en': ModelArg('action-recognition-0001-encoder'),
+                       '-m_de': ModelArg('action-recognition-0001-decoder'),
+                   }),
                    TestCase(options={
                        '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
                        '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
@@ -757,7 +757,9 @@ DEMOS = [
             ModelArg('instance-segmentation-person-0007'),
             ModelArg('robust-video-matting-mobilenetv3'),
             ModelArg('background-matting-mobilenetv2'),
-            ModelArg('yolact-resnet50-fpn-pytorch')),
+            ModelArg('yolact-resnet50-fpn-pytorch'),
+            ModelArg('modnet-photographic-portrait-matting'),
+            ModelArg('modnet-webcam-portrait-matting')),
     )),
 
     PythonDemo(name='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -964,13 +966,12 @@ DEMOS = [
         ],
     )),
 
-    # TODO ImportError: Module 'pose_extractor' not found.
-    # PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
-    #    TestCase(options={'--no_show': None,
-    #                      **MONITORS,
-    #                      '-i': DataPatternArg('human-pose-estimation')}),
-    #    TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
-    # )),
+    PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={'--no_show': None,
+                         **MONITORS,
+                         '-i': DataPatternArg('human-pose-estimation')}),
+       TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    )),
 
     PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -1292,29 +1293,28 @@ DEMOS = [
                           '-m': ModelArg('aclnet')}),
     )),
 
-    # TODO: No module named 'ctcdecode_numpy'
-    # PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-    #     [
-    #         TestCase(options={'-p': 'mds08x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
-    #         TestCase(options={'-p': 'mds06x_en',
-    #                           '-m': ModelArg('mozilla-deepspeech-0.6.1'),
-    #                           # lm.binary is really in dl_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test online mode
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2'),
-    #                           # run_tests.py puts pre-converted files into dl_dir as
-    #                           # it always runs converter.py without --output_dir
-    #                           '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-    #                           '--realtime': None}),
-    #         TestCase(options={'-p': 'mds08x_en',  # test without LM
-    #                           '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
-    #     ],
-    # )),
+    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        [
+            TestCase(options={'-p': 'mds08x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm')}),
+            TestCase(options={'-p': 'mds06x_en',
+                              '-m': ModelArg('mozilla-deepspeech-0.6.1'),
+                              # lm.binary is really in dl_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
+            TestCase(options={'-p': 'mds08x_en',  # test online mode
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2'),
+                              # run_tests.py puts pre-converted files into dl_dir as
+                              # it always runs converter.py without --output_dir
+                              '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
+                              '--realtime': None}),
+            TestCase(options={'-p': 'mds08x_en',  # test without LM
+                              '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
+        ],
+    )),
 
     PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),

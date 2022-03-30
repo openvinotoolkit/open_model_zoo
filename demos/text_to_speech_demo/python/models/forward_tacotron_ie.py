@@ -232,7 +232,7 @@ class ForwardTacotronIE:
             if self.verbose:
                 log.debug("SAEmb shape: {0}".format(sub_aligned_emb.shape))
             mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx, speaker_embedding)
-            mels.append(mel)
+            mels.append(np.copy(mel))
             start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)

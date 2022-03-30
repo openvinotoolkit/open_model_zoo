@@ -33,6 +33,8 @@
    :caption: Background Matting Models
 
    omz_models_model_background_matting_mobilenetv2
+   omz_models_model_modnet_photographic_portrait_matting
+   omz_models_model_modnet_webcam_portrait_matting
    omz_models_model_robust_video_matting_mobilenetv3
 
 .. toctree::
@@ -60,6 +62,7 @@
    omz_models_model_hbonet_0_25
    omz_models_model_hbonet_1_0
    omz_models_model_inception_resnet_v2_tf
+   omz_models_model_levit_128s
    omz_models_model_mixnet_l
    omz_models_model_mobilenet_v1_0_25_128
    omz_models_model_mobilenet_v1_1_0_224
@@ -332,7 +335,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*| [densenet-121](./densenet-121/README.md)<br>[densenet-121-tf](./densenet-121-tf/README.md)| 74.42%/92.136%<br>74.46%/92.13%| 5.723~5.7287 | 7.971 |
 | DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/README.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
-| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
+| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>77.70%/93.52% | 0.819 | 5.268 |
 | EfficientNet V2 B0          | PyTorch\*                          | [efficientnet-v2-b0](./efficientnet-v2-b0/README.md) | 78.36%/94.02% | 1.4641 | 7.1094 |
 | EfficientNet V2 Small       | PyTorch\*                          | [efficientnet-v2-s](./efficientnet-v2-s/README.md) | 84.29%/97.26% | 16.9406  | 21.3816  |
 | HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/README.md)  | 73.1%/91.0% | 0.6208 | 4.5443 |
@@ -342,6 +345,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 77.82%/94.03% | 22.227 | 30.223 |
+| LeViT 128S                  | PyTorch\*                          | [levit-128s](./levit-128s/README.md) | 76.54%/92.85% | 0.6177 | 8.2199 |
 | MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
@@ -644,6 +648,8 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | background-matting-mobilenetv2 | PyTorch\* | [background-matting-mobilenetv2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| modnet-photographic-portrait-matting | PyTorch\* | [modnet-photographic-portrait-matting](./modnet-photographic-portrait-matting/README.md) | 5.21/727.95 | 31.1564 | 6.4597 |
+| modnet-webcam-portrait-matting | PyTorch\* | [modnet-webcam-portrait-matting](./modnet-webcam-portrait-matting/README.md) | 5.66/762.52 | 31.1564 | 6.4597 |
 | robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also

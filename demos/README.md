@@ -167,7 +167,7 @@ You can download the [Intel pre-trained models](../models/intel/index.md) or [pu
 ## Build the Demo Applications
 
 To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
-For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download OpenCV and set environment variables before building the demos:
+For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download prebuilt OpenCV and set environment variables before building the demos:
 
 ```sh
 <INSTALL_DIR>/extras/scripts/download_opencv.sh
@@ -180,9 +180,7 @@ source <INSTALL_DIR>/setupvars.sh
 > ```
 
 For the open-source version of OpenVINO, set the following variables:
-* `InferenceEngine_DIR` pointing to a folder containing `InferenceEngineConfig.cmake`
 * `OpenVINO_DIR` pointing to a folder containing `OpenVINOConfig.cmake`
-* `ngraph_DIR` pointing to a folder containing `ngraphConfig.cmake`.
 * `OpenCV_DIR` pointing to OpenCV. The same OpenCV version should be used both for OpenVINO and demos build.
 
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
@@ -192,8 +190,8 @@ Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PAT
 
 The officially supported Linux* build environment is the following:
 
-- Ubuntu* 18.04 LTS 64-bit or CentOS* 7.6 64-bit
-- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 4.8.5 (for CentOS* 7.6)
+- Ubuntu* 18.04 LTS 64-bit or Ubuntu* 20.04 LTS 64-bit
+- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 9.3.0 (for Ubuntu* 20.04)
 - CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
@@ -236,10 +234,8 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 
 - Microsoft Windows* 10
-- Microsoft Visual Studio* 2017, or 2019
-- CMake* version 3.10 or higher
-
-> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
+- Microsoft Visual Studio* 2019
+- CMake* version 3.14 or higher
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:
@@ -250,13 +246,19 @@ build_demos_msvc.bat
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
 a solution for a demo code. Optionally, you can also specify the preferred Microsoft Visual Studio version to be used by the script. Supported
-versions are: `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
+version is: `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2019, use the following command:
 
 ```bat
-build_demos_msvc.bat VS2017
+build_demos_msvc.bat VS2019
 ```
 
-The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+By default, the demo applications binaries are build into the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+The default build folder can be changed with `-b` option. For example, following command will buid Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
+
+```bat
+build_demos_msvc.bat -b c:\temp\omz-demos-build
+```
+
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the
@@ -415,7 +417,7 @@ For example, for the **Debug** configuration, go to the project's
 variable in the **Environment** field to the following:
 
 ```
-PATH=<INSTALL_DIR>\deployment_tools\inference_engine\bin\intel64\Debug;<INSTALL_DIR>\opencv\bin;%PATH%
+PATH=<INSTALL_DIR>\runtime\bin\intel64\Debug;<INSTALL_DIR>\extras\opencv\bin;%PATH%
 ```
 
 where `<INSTALL_DIR>` is the directory in which the OpenVINO toolkit is installed.

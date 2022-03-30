@@ -1,0 +1,69 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "modnet-webcam-portrait-matting" model is a lightweight matting objective decomposition
+  network (MODNet) for online video portrait matting in real-time with a single input
+  image with MobileNetV2 backbone. The model is pre-trained in PyTorch* framework
+  and converted to ONNX* format.
+
+  More details provided in the paper <https://arxiv.org/abs/2011.11961> and repository
+  <https://github.com/ZHKKKe/MODNet>.
+task_type: background_matting
+files:
+  - name: modnet_onnx.py
+    size: 9516
+    checksum: 37326740f2756572c639bb8089c70cfee6994f358fb185fe5f1c1f40c061a5d73f62319a8c2aa48d367778360751385e
+    source: https://raw.githubusercontent.com/ZHKKKe/MODNet/2938675e4b5c60ab5f5d7a2b2191c68256f99d70/onnx/modnet_onnx.py
+  - name: src/models/backbones/__init__.py
+    size: 277
+    checksum: cdb28b27092889a8293e189e80351087d0cd3135d3f0b56a4a4fd5ae28251bd0142e027d209cf63a24f6b6042255b384
+    source: https://raw.githubusercontent.com/ZHKKKe/MODNet/2938675e4b5c60ab5f5d7a2b2191c68256f99d70/src/models/backbones/__init__.py
+  - name: src/models/backbones/mobilenetv2.py
+    size: 5588
+    checksum: c100361a1b06a3751fd5b7720cb4a882153d62362421e51ef8ecccadf75acdcbd40376477739ac35f404a76388b01121
+    source: https://raw.githubusercontent.com/ZHKKKe/MODNet/2938675e4b5c60ab5f5d7a2b2191c68256f99d70/src/models/backbones/mobilenetv2.py
+  - name: src/models/backbones/wrapper.py
+    size: 2610
+    checksum: c627e513d6aca544c60fc7875c159e36563542c7d9a746e5b79c1a650118b6c8920561587061979d78993f12be906bbc
+    source: https://raw.githubusercontent.com/ZHKKKe/MODNet/2938675e4b5c60ab5f5d7a2b2191c68256f99d70/src/models/backbones/wrapper.py
+  - name: modnet_webcam_portrait_matting.ckpt
+    size: 26255603
+    checksum: fab9c2ee2995642e21656a3180e75c9a73d3442a2500e5f0e0a08e14bfe9c4640fccf7c055162ff039f4dd066102652c
+    oroginal_source:
+      $type: google_drive
+      id: 1Nf1ZxeJZJL8Qx9KadcYYyEmmlKhTADxX
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/modnet-webcam-portrait-matting/modnet_webcam_portrait_matting.ckpt
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_modnet
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/modnet_webcam_portrait_matting.ckpt"
+  - --input-shape=1,3,512,512
+  - --input-names=input
+  - --output-names=output
+  - --output-file=$conv_dir/modnet_webcam_portrait_matting.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 512, 512]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/modnet_webcam_portrait_matting.onnx
+  - --scale_values=input[127.5]
+  - --mean_values=input[127.5, 127.5, 127.5]
+  - --reverse_input_channels
+  - --output=output
+framework: pytorch
+license: https://raw.githubusercontent.com/ZHKKKe/MODNet/master/LICENSE
