@@ -571,7 +571,7 @@ int main(int argc, char *argv[]) {
 
         /** Init presenter **/
         if (presenter == nullptr) {
-            cv::Size graphSize{static_cast<int>(frame.rows / 4), 60};
+            cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
             presenter.reset(new Presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize));
         }
 
