@@ -53,6 +53,10 @@ class TestOMZModel(unittest.TestCase):
         model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/')
         self.assertIsInstance(model.model_config(), dict)
 
+    def test_vocab_loading(self):
+        model = omz.OMZModel.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16')
+        self.assertIsInstance(model.vocab(), dict)
+
     def test_infer_model(self):
         ie = Core()
         model = omz.OMZModel.download('colorization-v2', cache_dir='models/public/colorization-v2/', ie=ie)
@@ -63,27 +67,6 @@ class TestOMZModel(unittest.TestCase):
         inputs = {input_name: np.zeros((1, 1, 256, 256))}
         output = next(iter(model(inputs).values()))
         self.assertEqual(output.shape, (1, 2, 256, 256))
-
-    def test_infer_non_vision_model(self):
-        ie = Core()
-        model = omz.OMZModel.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16', ie=ie)
-
-        ie_model = ie.read_model(model.model_path)
-        input_names = [input.get_any_name() for input in ie_model.inputs]
-        input_shapes = [input.shape for input in ie_model.inputs]
-
-        expected_shapes = {
-            'output_s': (1, 384),
-            'output_e': (1, 384)
-        }
-
-        inputs = {}
-        for name, shape in zip(input_names, input_shapes):
-            inputs[name] = np.zeros(list(shape))
-
-        outputs = model(inputs)
-        for name, output in outputs.items():
-            self.assertEqual(output.shape, expected_shapes[name.get_any_name()])
 
     def test_load_public_composite(self):
         model = omz.OMZModel.download('mtcnn-p', precision='FP32')
@@ -117,7 +100,7 @@ class TestOMZModel(unittest.TestCase):
         model = omz.OMZModel.download('densenet-121', cache_dir='models/public/densenet-121/', ie=ie)
 
         input = np.zeros((224, 224, 3))
-        result = model.model_api_inference(input, model_creator=Classification, configuration={'topk': 1})
+        result = model(input, model_creator=Classification, configuration={'topk': 1})
 
         self.assertEqual(len(result), 1)
 
@@ -125,14 +108,10 @@ class TestOMZModel(unittest.TestCase):
         ie = Core()
         model = omz.OMZModel.download('pspnet-pytorch', cache_dir='models/public/pspnet-pytorch/', ie=ie)
 
-        input = np.random.randint(0, 256, (512, 512, 3))
-        result = model.model_api_inference(input)
+        input = np.zeros((512, 512, 3))
+        result = model(input)
 
         self.assertEqual(result.shape, (512, 512))
-
-    def test_vocab_loading(self):
-        model = omz.OMZModel.download('bert-large-uncased-whole-word-masking-squad-0001', precision='FP16')
-        self.assertIsInstance(model.vocab(), dict)
 
 if __name__ == '__main__':
     unittest.main()

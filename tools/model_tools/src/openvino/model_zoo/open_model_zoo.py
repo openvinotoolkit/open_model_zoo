@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import argparse
-import os
 import json
+import os
 import yaml
 
 from pathlib import Path
@@ -138,7 +138,12 @@ class OMZModel:
 
         description = 'Pretrained model {}'.format(model_path.name)
         name = model_path.stem
-        model = cls._load_model(cls, name)
+
+        try:
+            model = cls._load_model(cls, name)
+        except SystemExit:
+            model = None
+
         task_type = model.task_type if model else task_type
         architecture_type = model.architecture_type if model else None
         download_dir = model_path.parents[3]
@@ -149,11 +154,8 @@ class OMZModel:
     def _load_model(self, model_name):
         parser = argparse.ArgumentParser()
         args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
-        try:
-            model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT,
-                        mode=_configuration.ModelLoadingMode.ignore_composite)[0]
-        except SystemExit:
-            model = None
+        model = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT,
+                    mode=_configuration.ModelLoadingMode.ignore_composite)[0]
 
         return model
 
@@ -162,9 +164,48 @@ class OMZModel:
         self.compiled_model = self.ie.compile_model(self.model, device)
         self.device = device
 
-    def __call__(self, inputs, device='CPU'):
+    def __call__(self, inputs, device='CPU', model_creator=None, **kwargs):
+        if model_creator is None:
+            model_creator = self.model_creator
+
+        try:
+            self._create_model_api_instance(model_creator, device, **kwargs)
+        except Exception as exc:
+            if isinstance(exc, TypeError):
+                print(f'{str(exc)} Running in default mode.')
+                return self._default_inference(inputs, device)
+            else:
+                raise exc
+
+        self.model_api.load()
+        results, _ = self.model_api(inputs)
+
+        return results
+
+    def _create_model_api_instance(
+        self, model_creator, device, num_streams='', num_threads=None, max_num_requests=1, configuration=None
+    ):
+        plugin_config = get_user_config(device, num_streams, num_threads)
+        model_adapter = OpenvinoAdapter(create_core(), self.model_path, device=device,
+                            plugin_config=plugin_config, max_num_requests=max_num_requests)
+        self.model_api = model_creator(model_adapter, configuration)
+
+    def model_creator(self, model_adapter, configuration):
+        if self.architecture_type is None and self.task_type != 'classification':
+            raise TypeError('architecture_type is not set or model is usupported by Model API.')
+        else:
+            try:
+                if self.task_type == 'classification':
+                    return Classification(model_adapter, configuration)
+                else:
+                    return Model.create_model(self.architecture_type, model_adapter, configuration)
+            except Exception as exc:
+                raise RuntimeError('Unable to create model class, please check configuration parameters. '
+                                   'Errors occured: '+ str(exc))
+
+    def _default_inference(self, inputs, device='CPU'):
         if self.ie is None:
-            raise TypeError('ie is not specified or is of the wrong type.'
+            raise TypeError('ie is not specified or is of the wrong type. '
                             'Please check ie is of openvino.runtime.Core type.')
 
         if self.compiled_model is None or device != self.device:
@@ -261,38 +302,3 @@ class OMZModel:
 
     def input_info(self):
         return self.model_config().get('input_info', [])
-
-    def _create_model_api_instance(
-        self, model_creator, num_streams='', num_threads=None, max_num_requests=1, configuration=None
-    ):
-        plugin_config = get_user_config(self.device, num_streams, num_threads)
-        model_adapter = OpenvinoAdapter(create_core(), self.model_path, device=self.device,
-                            plugin_config=plugin_config, max_num_requests=max_num_requests)
-        self.model_api = model_creator(model_adapter, configuration)
-
-    def model_api_inference(self, inputs, device='CPU', model_creator=None, **kwargs):
-        self.device = device
-        if model_creator is None:
-            model_creator = self.model_creator
-
-        self._create_model_api_instance(model_creator, **kwargs)
-
-        if self.model_api is None:
-            raise RuntimeError('Unable to create model class, please check Model API package is installed.')
-
-        self.model_api.load()
-        results, _ = self.model_api(inputs)
-
-        return results
-
-    def model_creator(self, model_adapter, configuration):
-        try:
-            if self.task_type == 'classification' and self.architecture_type is None:
-                return Classification(model_adapter, configuration)
-            elif self.architecture_type is None:
-                raise TypeError('architecture_type is not set or model is usupported by Model API.')
-            else:
-                return Model.create_model(self.architecture_type, model_adapter, configuration)
-        except Exception as exc:
-            raise RuntimeError('Unable to create model class, please check configuration parameters.'
-                               'Errors occured: ' + str(exc))
