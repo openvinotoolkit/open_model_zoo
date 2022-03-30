@@ -62,7 +62,7 @@ The array of detection summary info, name - `output`, shape - `1, 3549, 112`, fo
 
 Detection box has the following format:
 
-- 80 probability distribution over the classes in logits format for 80 public available [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes.
+- 80 probability distribution over the classes in logits format for 80 public available [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes, listed in file `<omz_dir>/data/dataset_classes/coco_80cl.txt`.
 - 8 * 4 raw coordinates in format `A` * 4, where `A` - max value of integral set.
 
 ### Converted model
@@ -74,7 +74,7 @@ The array of detection summary info, name - `output`, shape - `1, 3549, 112`, fo
 
 Detection box has the following format:
 
-- 80 probability distribution over the classes in logits format for 80 public available [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes.
+- 80 probability distribution over the classes in logits format for 80 public available [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes, listed in file `<omz_dir>/data/dataset_classes/coco_80cl.txt`.
 - 8 * 4 raw coordinates in format `A` * 4, where `A` - max value of integral set.
 
 ## Download a Model and Convert it into OpenVINO™ IR Format
