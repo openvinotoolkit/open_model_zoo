@@ -169,13 +169,15 @@ class BaseDLSDKModel:
                 if not model_list:
                     model_list = list(model.glob('*.blob'))
             else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
+                model_list = list(model.glob('*{}*.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}*.blob'.format(self.default_model_suffix)))
+                onnx_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
+                if not model_list and not blob_list and not onnx_list:
                     model_list = list(model.glob('*.xml'))
                     blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
+                    onnx_list = list(model.glob('*.onnx'))
+                if not model_list:
+                    model_list = blob_list if blob_list else onnx_list
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
             if len(model_list) > 1:
@@ -391,7 +393,7 @@ class BaseONNXModel:
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
+            model_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
             if not model_list:
                 model_list = list(model.glob('*.onnx'))
             if not model_list:

@@ -901,7 +901,7 @@ def start_telemetry():
 def end_telemetry(tm):
     if tm:
         try:
-            tm.end_session()
+            tm.end_session('ac')
             tm.force_shutdown(1.0)
         except Exception: # pylint:disable=W0703
             pass

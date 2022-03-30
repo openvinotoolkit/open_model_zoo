@@ -42,7 +42,7 @@ class SegmentationModel(ImageModel):
         elif len(layer_shape) == 4:
             self.out_channels = layer_shape[1]
         else:
-            raise Exception("Unexpected output layer shape {}. Only 4D and 3D output layers are supported".format(layer_shape))
+            self.raise_error("Unexpected output layer shape {}. Only 4D and 3D output layers are supported".format(layer_shape))
 
         return layer_name
 

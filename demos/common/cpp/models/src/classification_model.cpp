@@ -42,7 +42,11 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
 
     result->topLabels.reserve(scoresTensor.get_size());
     for (size_t i = 0; i < scoresTensor.get_size(); ++i) {
-        result->topLabels.emplace_back(indicesPtr[i], labels[indicesPtr[i]], scoresPtr[i]);
+        int ind = indicesPtr[i];
+        if (ind < 0 || ind >= (int)labels.size()) {
+            throw std::runtime_error("Invalid index for the class label is found during postprocessing");
+        }
+        result->topLabels.emplace_back(ind, labels[ind], scoresPtr[i]);
     }
 
     return retVal;
@@ -135,7 +139,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     }
     if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "\tInserted 'other' label as first." << slog::endl;
+        slog::warn << "Inserted 'other' label as first." << slog::endl;
     }
     else if (classesNum != labels.size()) {
         throw std::logic_error("Model's number of classes and parsed labels must match ("

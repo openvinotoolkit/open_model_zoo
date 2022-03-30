@@ -213,8 +213,9 @@ class CompositeModel:
                                                         known_frameworks)
 
             model_stages = []
-            for model_subdirectory, model_part in stages.items():
-                model_stages.append(Model.deserialize(model_part, model_subdirectory.name, model_subdirectory, name,
+            for model_part_name, model_part in stages.items():
+                model_subdirectory = model_part.get('model_subdirectory')
+                model_stages.append(Model.deserialize(model_part, model_part_name, model_subdirectory, name,
                                                       known_frameworks=known_frameworks, known_task_types=known_task_types))
 
             quantization_output_precisions = model_stages[0].quantization_output_precisions
@@ -267,17 +268,22 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
                     validation.deserialization_context('In config "{}"'.format(composite_model_config)):
 
                     composite_model = yaml.safe_load(config_file)
+                    stages_order = composite_model.get('stages_order', [])
                     model_stages = {}
-                    for stage in sorted(composite_model_config.parent.glob('*/model.yml')):
+                    for stage in composite_model_config.parent.glob('*/model.yml'):
                         with stage.open('rb') as stage_config_file, \
                             validation.deserialization_context('In config "{}"'.format(stage_config_file)):
                             model = yaml.safe_load(stage_config_file)
 
                             stage_subdirectory = stage.parent.relative_to(models_root)
-                            model_stages[stage_subdirectory] = model
+                            model['model_subdirectory'] = stage_subdirectory
+                            model_stages[stage_subdirectory.name] = model
 
                     if len(model_stages) == 0:
                         continue
+
+                    model_stages = {stage_name: model_stages[stage_name] for stage_name in stages_order}
+
                     subdirectory = composite_model_config.parent.relative_to(models_root)
                     composite_models.append(CompositeModel.deserialize(
                         composite_model, composite_model_name, subdirectory, model_stages

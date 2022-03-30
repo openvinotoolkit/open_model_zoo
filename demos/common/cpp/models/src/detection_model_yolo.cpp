@@ -131,7 +131,7 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     yoloVersion = YOLO_V3;
     bool isRegionFound = false;
-    for (const auto op : model->get_ordered_ops()) {
+    for (const auto& op : model->get_ordered_ops()) {
         if (std::string("RegionYolo") == op->get_type_name()) {
             auto regionYolo = std::dynamic_pointer_cast<ov::op::v0::RegionYolo>(op);
 
@@ -141,7 +141,7 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
                 }
 
                 const auto& opName = op->get_friendly_name();
-                for (const auto out : outputs) {
+                for (const auto& out : outputs) {
                     if (out.get_node()->get_friendly_name() == opName ||
                         out.get_node()->get_input_node_ptr(0)->get_friendly_name() == opName) {
                         isRegionFound = true;

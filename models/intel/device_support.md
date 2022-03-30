@@ -47,7 +47,7 @@
 | icnet-camvid-ava-0001 | YES | YES | YES |
 | icnet-camvid-ava-sparse-30-0001 | YES | YES | YES |
 | icnet-camvid-ava-sparse-60-0001 | YES | YES | YES |
-| image-retrieval-0001 | YES | YES | YES |
+| image-retrieval-0001 | YES |    | YES |
 | instance-segmentation-security-0002 | YES |    |    |
 | instance-segmentation-security-0091 | YES |    |    |
 | instance-segmentation-security-0228 | YES |    |    |

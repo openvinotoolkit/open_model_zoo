@@ -202,7 +202,7 @@ GAPI_OCV_KERNEL(OCVGestureRecognitionPostprocessing, custom::GestureRecognitionP
             int minIdx = 0, maxIdx = 0;
             const float* data = asl_result[0].ptr<float>();
             // Find more suitable action
-            cv::minMaxIdx(asl_result[0].reshape(1, {int(asl_result[0].total())}), &min, &max, &minIdx, &maxIdx);
+            cv::minMaxIdx(asl_result[0].reshape(1, int(asl_result[0].total())), &min, &max, &minIdx, &maxIdx);
             if (data[maxIdx] > ar_threshold) {
                 label_number = maxIdx;
             }

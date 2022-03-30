@@ -8,6 +8,12 @@ On startup the demo application reads command line parameters and loads a model 
 It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different named entity recognition model topologies in one demo.
+
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst` file.
@@ -70,6 +76,8 @@ Options:
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
+  --dynamic_shape       Optional. Run model with dynamic input sequence. If
+                        not provided, input sequence is padded to max_seq_len
 ```
 
 ## Demo Inputs
@@ -118,11 +126,11 @@ Exemplary command:
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (text from the url) does not fit the model input
-(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
+(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context" and pad all input sequences to maximum sentence length if model executed with static shape.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)
