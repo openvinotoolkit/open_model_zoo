@@ -111,19 +111,20 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--show] ([--noshow])                         " << show_msg
                   << "\n\t[ -t <NUMBER>]                                " << t_msg
                   << "\n\t[--tpr <NUMBER>]                              " << tpr_msg
-                  << "\n\t[ -u <DEVICE>]                                " << u_msg
+                  << "\n\t[ -u <MONITORS>]                                " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
                      "\n\t\tP, p, 0, spacebar - Pause"
                      "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
         showAvailableDevices();
+        slog::info << ov::get_openvino_version() << slog::endl;
         exit(0);
     } if (FLAGS_i.empty()) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
-    slog::info << ov::get_openvino_version() << slog::endl;
+    std::cout << ov::get_openvino_version() << std::endl;
 }
 } // namespace
 

@@ -90,7 +90,7 @@ Running the application with the `-h` option yields the following usage message:
     [--show] ([--noshow])                         (don't) show output
     [ -t <NUMBER>]                                probability threshold for detections. Default is 0.5
     [--tpr <NUMBER>]                              cosine similarity threshold between two vectors for person reidentification. Default is 0.7
-    [ -u <DEVICE>]                                resource utilization graphs. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
+    [ -u <MONITORS>]                                resource utilization graphs. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
     Key bindings:
         Q, q, Esc - Quit
         P, p, 0, spacebar - Pause
