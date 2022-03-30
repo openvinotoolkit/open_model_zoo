@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        const bool use_single_channel_sr = false;
+        bool use_single_channel_sr = false;
         if (FLAGS_apply_sr) {
             if (FLAGS_at_sr == "1ch") {
                 use_single_channel_sr = true;
@@ -148,8 +148,8 @@ int main(int argc, char *argv[]) {
         cv::GMat out_sr_pp; //cropped resized output image after super resolution post processing
 
         std::tie(blob26x26, blob13x13) = cv::gapi::infer<YOLOv4TinyNet>(in);
-        yolo_detections = custom::YOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
-        out = custom::SmartFramingKernel::on(in, yolo_detections);
+        yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
+        out = custom::GSmartFramingKernel::on(in, yolo_detections);
         if (FLAGS_apply_sr) {
             if (use_single_channel_sr) {
                 cv::GMat b, g, r;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
             }
             else {
                 out_sr = cv::gapi::infer<SRNet3ch>(out, out);
-                out_sr_pp = custom::SuperResolutionPostProcessingKernel::on(out_sr);
+                out_sr_pp = custom::GSuperResolutionPostProcessingKernel::on(out_sr);
             }
         }
 
