@@ -61,6 +61,7 @@
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
+| levit-128s | YES | YES |    |
 | license-plate-recognition-barrier-0007 | YES |    |    |
 | mask_rcnn_inception_resnet_v2_atrous_coco | YES | YES |    |
 | mask_rcnn_resnet50_atrous_coco | YES | YES |    |
