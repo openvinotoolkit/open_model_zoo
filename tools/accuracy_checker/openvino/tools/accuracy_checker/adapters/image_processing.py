@@ -128,6 +128,16 @@ class MultiSuperResolutionAdapter(Adapter):
     __provider__ = 'multi_super_resolution'
     prediction_types = (SuperResolutionPrediction, )
 
+    @property
+    def additional_output_mapping(self):
+        return getattr(self, '_additional_output_mapping', None)
+
+    @additional_output_mapping.setter
+    def additional_output_mapping(self, value):
+        self._additional_output_mapping = value
+        for adapter in self.target_mapping.values():
+            adapter.additional_output_mapping = value
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
