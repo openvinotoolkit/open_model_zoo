@@ -207,13 +207,15 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
         /** Create action detector net's parameters **/
         std::array<std::string, 7> outputBlobList =
             isNetForSixActions(flags.m_act) ? action_detector_6 : action_detector_5;
+        // clang-format off
         auto action_net =
             cv::gapi::ie::Params<nets::PersonDetActionRec>{
                 flags.m_act,
                 fileNameNoExt(flags.m_act) + ".bin",
                 flags.d_act,
-            }
-                .cfgOutputLayers(outputBlobList);
+            }.cfgOutputLayers(outputBlobList);
+        // clang-format on
+
         networks += cv::gapi::networks(action_net);
         slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act
                    << " device." << slog::endl;
@@ -222,14 +224,16 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
     }
     if (!flags.m_fd.empty()) {
         /** Create face detector net's parameters **/
+        // clang-format off
         auto det_net =
             cv::gapi::ie::Params<nets::FaceDetector>{
                 flags.m_fd,
                 fileNameNoExt(flags.m_fd) + ".bin",
                 flags.d_fd,
-            }
-                .cfgInputReshape("data",
-                                 {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
+            }.cfgInputReshape("data",
+                              {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
+        // clang-format on
+
         networks += cv::gapi::networks(det_net);
         slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device."
                    << slog::endl;

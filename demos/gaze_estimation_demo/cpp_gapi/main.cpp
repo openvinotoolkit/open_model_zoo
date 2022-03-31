@@ -238,13 +238,14 @@ int main(int argc, char* argv[]) {
         slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm
                    << " device." << slog::endl;
 
+        // clang-format off
         auto gaze_net =
             cv::gapi::ie::Params<nets::Gaze>{
                 FLAGS_m,  // path to topology IR
                 fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
                 FLAGS_d,  // device specifier
-            }
-                .cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
+            }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
+        // clang-format on
         slog::info << "The Gaze Estimation model " << FLAGS_m << " is loaded to " << FLAGS_d << " device."
                    << slog::endl;
 

@@ -476,13 +476,15 @@ int main(int argc, char* argv[]) {
     };
     slog::info << "The Face Detection model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
+    // clang-format off
     auto age_net =
         cv::gapi::ie::Params<AgeGender>{
             FLAGS_mag,  // path to model
             fileNameNoExt(FLAGS_mag) + ".bin",  // path to weights
             FLAGS_dag  // device to use
-        }
-            .cfgOutputLayers({"age_conv3", "prob"});
+        }.cfgOutputLayers({"age_conv3", "prob"});
+    // clang-format on
+
     if (!FLAGS_mag.empty()) {
         slog::info << "The Age/Gender Recognition model " << FLAGS_mag << " is loaded to " << FLAGS_dag << " device."
                    << slog::endl;
@@ -490,13 +492,15 @@ int main(int argc, char* argv[]) {
         slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
     }
 
+    // clang-format off
     auto hp_net =
         cv::gapi::ie::Params<HeadPose>{
             FLAGS_mhp,  // path to model
             fileNameNoExt(FLAGS_mhp) + ".bin",  // path to weights
             FLAGS_dhp  // device to use
-        }
-            .cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
+        }.cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
+    // clang-format on
+
     if (!FLAGS_mhp.empty()) {
         slog::info << "The Head Pose Estimation model " << FLAGS_mhp << " is loaded to " << FLAGS_dhp << " device."
                    << slog::endl;
@@ -504,13 +508,15 @@ int main(int argc, char* argv[]) {
         slog::info << "Head Pose Estimation DISABLED." << slog::endl;
     }
 
+    // clang-format off
     auto lm_net =
         cv::gapi::ie::Params<FacialLandmark>{
             FLAGS_mlm,  // path to model
             fileNameNoExt(FLAGS_mlm) + ".bin",  // path to weights
             FLAGS_dlm  // device to use
-        }
-            .cfgOutputLayers({"align_fc3"});
+        }.cfgOutputLayers({"align_fc3"});
+    // clang-format on
+
     if (!FLAGS_mlm.empty()) {
         slog::info << "The Facial Landmarks Estimation model " << FLAGS_mlm << " is loaded to " << FLAGS_dlm
                    << " device." << slog::endl;

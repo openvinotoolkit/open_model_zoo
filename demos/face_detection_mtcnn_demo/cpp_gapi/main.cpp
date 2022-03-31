@@ -189,14 +189,14 @@ int main(int argc, char* argv[]) {
         /** Configure networks **/
 
         // MTCNN Refinement detection network
+        // clang-format off
         auto mtcnnr_net =
             cv::gapi::ie::Params<nets::MTCNNRefinement>{
                 FLAGS_m_r,  // path to topology IR
                 fileNameNoExt(FLAGS_m_r) + ".bin",  // path to weights
                 FLAGS_d_r,  // device specifier
-            }
-                .cfgOutputLayers({"conv5-2", "prob1"})
-                .cfgInputLayers({"data"});
+            }.cfgOutputLayers({"conv5-2", "prob1"})
+             .cfgInputLayers({"data"});
 
         // MTCNN Output detection network
         auto mtcnno_net =
@@ -204,10 +204,9 @@ int main(int argc, char* argv[]) {
                 FLAGS_m_o,  // path to topology IR
                 fileNameNoExt(FLAGS_m_o) + ".bin",  // path to weights
                 FLAGS_d_o,  // device specifier
-            }
-                .cfgOutputLayers({"conv6-2", "conv6-3", "prob1"})
-                .cfgInputLayers({"data"});
-
+            }.cfgOutputLayers({"conv6-2", "conv6-3", "prob1"})
+             .cfgInputLayers({"data"});
+        // clang-format off
         auto networks_mtcnn = cv::gapi::networks(mtcnnr_net, mtcnno_net);
 
         // MTCNN Proposal detection network

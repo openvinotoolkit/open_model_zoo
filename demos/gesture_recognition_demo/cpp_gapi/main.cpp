@@ -133,27 +133,29 @@ int main(int argc, char* argv[]) {
         auto graph = cv::GComputation(cv::GIn(batch, current_person_id), cv::GOut(fast_frame, tracked, label));
         /** ---------------- End of graph ---------------- **/
         /** Configure networks **/
+        // clang-format off
         auto person_detection =
             cv::gapi::ie::Params<nets::PersonDetection>{
                 FLAGS_m_d,  // path to model
                 fileNameNoExt(FLAGS_m_d) + ".bin",  // path to weights
                 FLAGS_d_d  // device to use
-            }
-                .cfgOutputLayers({"boxes"});  // This clarification here because of
+            }.cfgOutputLayers({"boxes"});  // This clarification here because of
                                               // GAPI take the first layer name from OutputsInfo
                                               // for one output G_API_NET API
+        // clang-format on
         slog::info << "The Person Detection ASL model " << FLAGS_m_d << " is loaded to " << FLAGS_d_d << " device."
                    << slog::endl;
 
+        // clang-format off
         auto action_recognition =
             cv::gapi::ie::Params<nets::ActionRecognition>{
                 FLAGS_m_a,  // path to model
                 fileNameNoExt(FLAGS_m_a) + ".bin",  // path to weights
                 FLAGS_d_a  // device to use
-            }
-                .cfgOutputLayers({"output"});  // This clarification here because of
+            }.cfgOutputLayers({"output"});  // This clarification here because of
                                                // GAPI take the first layer name from OutputsInfo
                                                // for one output G_API_NET API
+        // clang-format on
         slog::info << "The Action Recognition model " << FLAGS_m_a << " is loaded to " << FLAGS_d_a << " device."
                    << slog::endl;
 
