@@ -388,7 +388,7 @@ int main(int argc, char* argv[]) {
             cv::imshow(argv[0], frame);
             const int key = cv::pollKey();
             if (32 == key || 'P' == key || 'p' == key || '0' == key)
-                key = cv::waitKey(0);
+                cv::waitKey(0);
             if (27 == key || 'Q' == key || 'q' == key) // Esc
                 break;
             presenter.handleKey(key);
