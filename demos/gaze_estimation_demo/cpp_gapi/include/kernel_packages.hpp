@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,5 +7,5 @@
 #include <opencv2/gapi/gkernel.hpp>
 
 namespace custom {
-    cv::gapi::GKernelPackage kernels();
-} //namespace custom
+cv::gapi::GKernelPackage kernels();
+}  // namespace custom

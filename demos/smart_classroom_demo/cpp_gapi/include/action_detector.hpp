@@ -1,14 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
+#include <stddef.h>
+
+#include <string>
+#include <vector>
+
+#include <opencv2/core.hpp>
 
 /**
-* @brief Class for detection with action info
-*/
+ * @brief Class for detection with action info
+ */
 struct DetectedAction {
     /** @brief BBox of detection */
     cv::Rect rect;
@@ -20,18 +25,19 @@ struct DetectedAction {
     float action_conf;
 
     /**
-    * @brief Constructor
-    */
-    DetectedAction(const cv::Rect& rect, int label,
-                   float detection_conf, float action_conf)
-        : rect(rect), label(label), detection_conf(detection_conf),
+     * @brief Constructor
+     */
+    DetectedAction(const cv::Rect& rect, int label, float detection_conf, float action_conf)
+        : rect(rect),
+          label(label),
+          detection_conf(detection_conf),
           action_conf(action_conf) {}
 };
 using DetectedActions = std::vector<DetectedAction>;
 
 /**
-* @brief Class to store SSD-based head info
-*/
+ * @brief Class to store SSD-based head info
+ */
 struct SSDHead {
     /** @brief Step size for the head */
     int step;
@@ -39,14 +45,14 @@ struct SSDHead {
     std::vector<cv::Size2f> anchors;
 
     /**
-    * @brief Constructor
-    */
+     * @brief Constructor
+     */
     SSDHead(int step, const std::vector<cv::Size2f>& anchors) : step(step), anchors(anchors) {}
 };
 using SSDHeads = std::vector<SSDHead>;
 /**
-* @brief Config for the Action Detection model
-*/
+ * @brief Config for the Action Detection model
+ */
 struct ActionDetectorConfig {
     /** @brief Person detection action recognition 0006 network enable flag */
     bool net_with_six_actions = false;
@@ -76,18 +82,18 @@ struct ActionDetectorConfig {
     int input_width = 0;
     /** @brief  SSD bbox encoding variances */
     float variances[4]{0.1f, 0.1f, 0.2f, 0.2f};
-    SSDHeads new_det_heads{{8,  {{26.17863728f, 58.670372f}}},
-                           {16, {{35.36f, 81.829632f},
-                                 {45.8114572f, 107.651852f},
-                                 {63.31491832f, 142.595732f},
-                                 {93.5070856f, 201.107692f}}}};
+    SSDHeads new_det_heads{
+        {8, {{26.17863728f, 58.670372f}}},
+        {16,
+         {{35.36f, 81.829632f}, {45.8114572f, 107.651852f}, {63.31491832f, 142.595732f}, {93.5070856f, 201.107692f}}}};
 };
 
-class ActionDetection  {
+class ActionDetection {
 public:
     explicit ActionDetection(const ActionDetectorConfig& config);
 
-    DetectedActions fetchResults(const std::vector<cv::Mat> &ssd_results, const cv::Mat &in_frame);
+    DetectedActions fetchResults(const std::vector<cv::Mat>& ssd_results, const cv::Mat& in_frame);
+
 private:
     ActionDetectorConfig config_;
     float width_ = 0;
@@ -103,8 +109,8 @@ private:
     bool binary_task_;
 
     /**
-    * @brief BBox in normalized form (each coordinate is in range [0;1]).
-    */
+     * @brief BBox in normalized form (each coordinate is in range [0;1]).
+     */
     struct NormalizedBBox {
         float xmin;
         float ymin;
@@ -113,64 +119,64 @@ private:
     };
     typedef std::vector<NormalizedBBox> NormalizedBBoxes;
 
-     /**
-    * @brief Translates the detections from the network outputs
-    *
-    * @param loc Location buffer
-    * @param main_conf Detection conf buffer
-    * @param add_conf Action conf buffer
-    * @param priorboxes Priorboxes buffer
-    * @param frame_size Size of input image (WxH)
-    * @return Detected objects
-    */
+    /**
+     * @brief Translates the detections from the network outputs
+     *
+     * @param loc Location buffer
+     * @param main_conf Detection conf buffer
+     * @param add_conf Action conf buffer
+     * @param priorboxes Priorboxes buffer
+     * @param frame_size Size of input image (WxH)
+     * @return Detected objects
+     */
     DetectedActions GetDetections(const cv::Mat& loc,
                                   const cv::Mat& main_conf,
                                   const cv::Mat& priorboxes,
                                   const std::vector<cv::Mat>& add_conf,
                                   const cv::Size& frame_size) const;
 
-     /**
-    * @brief Translate input buffer to BBox
-    *
-    * @param data Input buffer
-    * @return BBox
-    */
-    inline NormalizedBBox
-    ParseBBoxRecord(const float* data, bool inverse) const;
+    /**
+     * @brief Translate input buffer to BBox
+     *
+     * @param data Input buffer
+     * @return BBox
+     */
+    inline NormalizedBBox ParseBBoxRecord(const float* data, bool inverse) const;
 
+    /**
+     * @brief Translate input buffer to BBox
+     *
+     * @param data Input buffer
+     * @return BBox
+     */
+    inline NormalizedBBox GeneratePriorBox(int pos,
+                                           int step,
+                                           const cv::Size2f& anchor,
+                                           const cv::Size& blob_size) const;
 
-     /**
-    * @brief Translate input buffer to BBox
-    *
-    * @param data Input buffer
-    * @return BBox
-    */
-    inline NormalizedBBox
-    GeneratePriorBox(int pos, int step, const cv::Size2f& anchor, const cv::Size& blob_size) const;
-
-     /**
-    * @brief Translates input blobs in SSD format to bbox in CV_Rect
-    *
-    * @param prior_bbox Prior boxes in SSD format
-    * @param variances Variances of prior boxes in SSD format
-    * @param encoded_bbox BBox to decode
-    * @param frame_size Size of input image (WxH)
-    * @return BBox in CV_Rect format
-    */
+    /**
+     * @brief Translates input blobs in SSD format to bbox in CV_Rect
+     *
+     * @param prior_bbox Prior boxes in SSD format
+     * @param variances Variances of prior boxes in SSD format
+     * @param encoded_bbox BBox to decode
+     * @param frame_size Size of input image (WxH)
+     * @return BBox in CV_Rect format
+     */
     cv::Rect ConvertToRect(const NormalizedBBox& prior_bbox,
                            const NormalizedBBox& variances,
                            const NormalizedBBox& encoded_bbox,
                            const cv::Size& frame_size) const;
 
-     /**
-    * @brief Carry out Soft Non-Maximum Suppression algorithm under detected actions
-    *
-    * @param detections Detected actions
-    * @param sigma Scale paramter
-    * @param top_k Number of top-score bboxes
-    * @param min_det_conf Minimum detection confidence
-    * @param out_indices Out indices of valid detections
-    */
+    /**
+     * @brief Carry out Soft Non-Maximum Suppression algorithm under detected actions
+     *
+     * @param detections Detected actions
+     * @param sigma Scale paramter
+     * @param top_k Number of top-score bboxes
+     * @param min_det_conf Minimum detection confidence
+     * @param out_indices Out indices of valid detections
+     */
     void SoftNonMaxSuppression(const DetectedActions& detections,
                                const float sigma,
                                size_t top_k,

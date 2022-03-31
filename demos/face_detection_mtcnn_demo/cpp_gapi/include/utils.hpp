@@ -1,14 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
+#include <algorithm>
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include <opencv2/gapi.hpp>
 
-//Infer helper function
+// Infer helper function
 namespace {
-static inline std::tuple<cv::GMat, cv::GMat> run_mtcnn_p(cv::GMat &in, const std::string &id) {
+static inline std::tuple<cv::GMat, cv::GMat> run_mtcnn_p(cv::GMat& in, const std::string& id) {
     cv::GInferInputs inputs;
     inputs["data"] = in;
     auto outputs = cv::gapi::infer<cv::gapi::Generic>(id, inputs);
@@ -17,35 +22,31 @@ static inline std::tuple<cv::GMat, cv::GMat> run_mtcnn_p(cv::GMat &in, const std
     return std::make_tuple(regressions, scores);
 }
 
-static inline std::string get_pnet_level_name(const cv::Size &in_size) {
+static inline std::string get_pnet_level_name(const cv::Size& in_size) {
     return "MTCNNProposal_" + std::to_string(in_size.width) + "x" + std::to_string(in_size.height);
 }
 
-int calculate_scales(const cv::Size &input_size, std::vector<double> &out_scales, std::vector<cv::Size> &out_sizes ) {
-    //calculate multi - scale and limit the maxinum side to 1000
-    //pr_scale: limit the maxinum side to 1000, < 1.0
+int calculate_scales(const cv::Size& input_size, std::vector<double>& out_scales, std::vector<cv::Size>& out_sizes) {
+    // calculate multi - scale and limit the maxinum side to 1000
+    // pr_scale: limit the maxinum side to 1000, < 1.0
     double pr_scale = 1.0;
     double h = static_cast<double>(input_size.height);
     double w = static_cast<double>(input_size.width);
-    if (std::min(w, h) > 1000)
-    {
+    if (std::min(w, h) > 1000) {
         pr_scale = 1000.0 / std::min(h, w);
         w = w * pr_scale;
         h = h * pr_scale;
-    }
-    else if (std::max(w, h) < 1000)
-    {
+    } else if (std::max(w, h) < 1000) {
         w = w * pr_scale;
         h = h * pr_scale;
     }
-    //multi - scale
+    // multi - scale
     out_scales.clear();
     out_sizes.clear();
     const double factor = 0.709;
     int factor_count = 0;
     double minl = std::min(h, w);
-    while (minl >= 12)
-    {
+    while (minl >= 12) {
         const double current_scale = pr_scale * std::pow(factor, factor_count);
         cv::Size current_size(static_cast<int>(static_cast<double>(input_size.width) * current_scale),
                               static_cast<int>(static_cast<double>(input_size.height) * current_scale));
@@ -57,18 +58,19 @@ int calculate_scales(const cv::Size &input_size, std::vector<double> &out_scales
     return factor_count;
 }
 
-int calculate_half_scales(const cv::Size &input_size, std::vector<double>& out_scales, std::vector<cv::Size>& out_sizes) {
+int calculate_half_scales(const cv::Size& input_size,
+                          std::vector<double>& out_scales,
+                          std::vector<cv::Size>& out_sizes) {
     double pr_scale = 0.5;
     const double h = static_cast<double>(input_size.height);
     const double w = static_cast<double>(input_size.width);
-    //multi - scale
+    // multi - scale
     out_scales.clear();
     out_sizes.clear();
     const double factor = 0.5;
     int factor_count = 0;
     double minl = std::min(h, w);
-    while (minl >= 12.0*2.0)
-    {
+    while (minl >= 12.0 * 2.0) {
         const double current_scale = pr_scale;
         cv::Size current_size(static_cast<int>(static_cast<double>(input_size.width) * current_scale),
                               static_cast<int>(static_cast<double>(input_size.height) * current_scale));
@@ -81,4 +83,4 @@ int calculate_half_scales(const cv::Size &input_size, std::vector<double>& out_s
     return factor_count;
 }
 
-} // anonymous namespace
+}  // anonymous namespace
