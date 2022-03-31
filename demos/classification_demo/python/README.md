@@ -123,8 +123,8 @@ usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT
 Options:
   -h, --help            show the help message and exit
                         Key bindings:
-                          Q, q - Quit
-                          P, p, 0, SpaceBar - Pause
+                          Q, q, Esc - Quit
+                          P, p, 0, SpaceBar - Pause for stream input. Any key - switch frame for separated images
   -m MODEL, --model MODEL
                         path to an .xml file with a trained model or address of model inference service if using OVMS adapter
   -i INPUT, --input INPUT

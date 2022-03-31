@@ -40,7 +40,7 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 def parse():
 
     def print_key_bindings():
-        print('\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for stream input. Any key - switch frame for separated images')
+        print('\nKey bindings:\n\tQ, q, Esc - Quit\n\tP, p, 0, SpaceBar - Pause for stream input. Any key - switch frame for separated images')
 
     parser = ArgumentParser(add_help=False)
 
@@ -49,10 +49,10 @@ def parse():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
         help='show the help message and exit')
 
-    args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
-        help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
+    args.add_argument('-m', '--model', required=True, type=str, metavar="<MODEL FILE>",
+        help='path to an .xml or .onnx file with a pretrained model or address of remote model if using OVMS adapter')
 
-    args.add_argument('-i', '--input', required=True, type=Path, metavar="<INPUT>",
+    args.add_argument('-i', '--input', required=True, metavar="<INPUT>",
         help='an input to process. The input must be a single image, a folder of images or camera id')
 
     args.add_argument('--adapter', default='openvino', type=str, choices=('openvino', 'ovms'), metavar="<ADAPTER>",
@@ -100,7 +100,7 @@ def parse():
     io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
         help='name of the output file(s) to save')
 
-    io_args.add_argument('-res', '--res', default=None, type=resolution, metavar="<STRING>",
+    io_args.add_argument('-res', '--res', default=None, type=str, metavar="<STRING>",
         help='set image grid resolution in format WxH')
 
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITORS>",
@@ -112,10 +112,10 @@ def parse():
     input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
         help='switch the input channels order from BGR to RGB')
 
-    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3, metavar="<STRING>",
+    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3, metavar="<FLOAT>",
         help='normalize input by subtracting the mean values per channel. Example: 255.0 255.0 255.0')
 
-    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3, metavar="<STRING>",
+    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3, metavar="<FLOAT>",
         help='divide input by scale values per channel(division is applied after mean values subtraction). '
             'Example: 255.0 255.0 255.0')
 
@@ -234,7 +234,7 @@ def main():
             next_frame_id_to_show += 1
 
             if not args.noshow:
-                cv2.imshow(__file__, frame)
+                cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
 
                 # Pause.

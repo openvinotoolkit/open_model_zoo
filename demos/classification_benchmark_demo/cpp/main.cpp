@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
             renderMetrics.update(renderingStart);
             elapsedSeconds = std::chrono::steady_clock::now() - startTime;
             if (FLAGS_show) {
-                cv::imshow(argv[0], gridMat.outImg);
+                cv::imshow("classification_demo", gridMat.outImg);
                 //--- Processing keyboard events
                 int key = cv::pollKey();
                 if ('p' == key || 'P' == key  || '0' == key || ' ' == key) { // Pause
