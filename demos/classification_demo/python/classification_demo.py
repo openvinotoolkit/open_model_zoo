@@ -40,7 +40,7 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 def parse():
 
     def print_key_bindings():
-        print('\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for camera id/Switch frame for separated images')
+        print('\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for stream input. Any key - switch frame for separated images')
 
     parser = ArgumentParser(add_help=False)
 
