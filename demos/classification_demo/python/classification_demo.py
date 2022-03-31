@@ -38,12 +38,16 @@ log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=
 
 
 def parse():
+
+    def print_key_bindings():
+        print('\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for camera id/Switch frame for separated images')
+
     parser = ArgumentParser(add_help=False)
 
     args = parser.add_argument_group('Options')
 
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-        help='show the help message and exit\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for camera id/Switch frame for separated images')
+        help='show the help message and exit')
 
     args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
         help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
@@ -67,24 +71,24 @@ def parse():
         help='model inputs layouts. Example: NCHW or input0:NCHW,input1:NC in case of more than one input')
 
     common_model_args.add_argument('--topk', default=5, type=int, choices=range(1, 11), metavar="<NUMBER>",
-        help='number of top results(from 1 to 10). Default value is 5')
+        help='number of top results(from 1 to 10). Default is 5')
 
     infer_args = parser.add_argument_group('Inference options')
 
-    infer_args.add_argument('-nireq', '--num_infer_requests', default=0, type=int, metavar="<NUMBER>",
+    infer_args.add_argument('-nireq', '--nireq', default=0, type=int, metavar="<NUMBER>",
         help='number of infer requests')
 
-    infer_args.add_argument('-nstreams', '--num_streams', default='', type=str, metavar="<NUMBER>",
+    infer_args.add_argument('-nstreams', '--nstreams', default='', type=str, metavar="<NUMBER>",
         help='number of streams to use for inference on the CPU or/and GPU in throughput mode'
             '\n(for HETERO and MULTI device cases use format '
             '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)')
 
-    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int, metavar="<NUMBER>",
+    infer_args.add_argument('-nthreads', '--nthreads', default=None, type=int, metavar="<NUMBER>",
         help='number of threads to use for inference on CPU (including HETERO cases)')
 
     io_args = parser.add_argument_group('Input/output options')
 
-    io_args.add_argument('-lim', '--limit', required=False, default=1000, type=int, metavar="<NUMBER>",
+    io_args.add_argument('-lim', '--lim', required=False, default=1000, type=int, metavar="<NUMBER>",
         help='number of frames to store in output. If 0 is set, all frames are stored. Default is 1000')
 
     io_args.add_argument('--loop', default=False, action='store_true',
@@ -96,7 +100,7 @@ def parse():
     io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
         help='name of the output file(s) to save')
 
-    io_args.add_argument('--res', default=None, type=resolution, metavar="<STRING>",
+    io_args.add_argument('-res', '--res', default=None, type=resolution, metavar="<STRING>",
         help='set image grid resolution in format WxH')
 
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITORS>",
@@ -120,6 +124,7 @@ def parse():
     debug_args.add_argument('-r', '--raw_output_message', default=False, action='store_true',
         help='output inference results raw values showing')
 
+    print_key_bindings()
     return parser
 
 
@@ -224,7 +229,7 @@ def main():
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.limit <= 0 or next_frame_id_to_show <= args.limit-1):
+            if video_writer.isOpened() and (args.lim <= 0 or next_frame_id_to_show <= args.lim-1):
                 video_writer.write(frame)
             next_frame_id_to_show += 1
 
@@ -290,11 +295,11 @@ def main():
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.limit <= 0 or next_frame_id_to_show <= args.limit-1):
+            if video_writer.isOpened() and (args.lim <= 0 or next_frame_id_to_show <= args.lim-1):
                 video_writer.write(frame)
 
             if not args.noshow:
-                cv2.imshow('Classification Results', frame)
+                cv2.imshow(__file__, frame)
                 key = cv2.waitKey(delay)
 
                 # Pause.

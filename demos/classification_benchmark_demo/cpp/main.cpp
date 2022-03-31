@@ -90,11 +90,11 @@ void parse(int argc, char *argv[]) {
     if (FLAGS_h || 1 == argc) {
         std::cout <<   "\t[ -h]                 " << h_msg
                   << "\n\t  -i <INPUT>          " << i_msg
-                  << "\n\t --labels <LABELS>    " << labels_msg
                   << "\n\t  -m <MODEL FILE>     " << m_msg
                   << "\n\t[--auto_resize]       " << res_msg
                   << "\n\t[ -d <DEVICE>]        " << d_msg
                   << "\n\t[--gt <STRING>]       " << gt_msg
+                  << "\n\t[--labels <LABELS>]   " << labels_msg
                   << "\n\t[--layout <STRING>]   " << layout_msg
                   << "\n\t[--nireq <NUMBER>]    " << nireq_msg
                   << "\n\t[--nstreams <NUMBER>] " << nstreams_msg
