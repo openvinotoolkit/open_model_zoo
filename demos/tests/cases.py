@@ -73,6 +73,10 @@ class Demo:
         if self.parser:
             self.parser(output, test_case, device)
 
+    def check_difference(self):
+        if self.parser:
+            return self.parser.check_difference()
+
     def update_option(self, updated_options):
         for case in self.test_cases[:]:
             self.update_case(case, updated_options, with_replacement=True)
@@ -591,7 +595,7 @@ DEMOS = [
             model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-r' : None, '-n_iqs': '1',
+        TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
         # Change the model in order to obtain the ROI data

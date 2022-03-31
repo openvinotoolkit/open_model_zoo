@@ -51,6 +51,7 @@ from data_sequences import DATA_SEQUENCES
 scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
+    'correctness': importlib.import_module('correctness_checker_cases').DEMOS,
 }
 
 
@@ -72,7 +73,7 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
     parser.add_argument('--scope', default='base',
-        help='The scenario for testing demos.', choices=('base', 'performance'))
+        help='The scenario for testing demos.', choices=('base', 'performance', 'correctness'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
@@ -368,6 +369,9 @@ def main():
                             write_log(test_descr, args.log_file)
                             write_log(output, args.log_file)
             fo.close()
+            if args.scope == "correctness":
+                print("Demo {} correctness checking....".format(demo.subdirectory))
+                demo.check_difference()
             print()
 
     print("{} failures:".format(num_failures))
