@@ -385,7 +385,7 @@ int main(int argc, char* argv[]) {
         }
         videoWriter.write(frame);
         if (FLAGS_show) {
-            cv::imshow(argv[0], frame);
+            cv::imshow("Detection results", frame);
             const int key = cv::pollKey();
             if (32 == key || 'P' == key || 'p' == key || '0' == key)
                 cv::waitKey(0);
