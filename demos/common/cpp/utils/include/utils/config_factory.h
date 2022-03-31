@@ -15,13 +15,13 @@
 */
 
 #pragma once
-#include <stdint.h>  // for uint32_t
+#include <stdint.h>
 
-#include <map>  // for map
-#include <set>  // for set
-#include <string>  // for string
+#include <map>
+#include <set>
+#include <string>
 
-#include <openvino/openvino.hpp>  // for AnyMap
+#include <openvino/openvino.hpp>
 
 struct ModelConfig {
     std::string deviceName;

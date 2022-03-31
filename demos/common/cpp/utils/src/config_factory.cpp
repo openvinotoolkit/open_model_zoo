@@ -16,14 +16,14 @@
 
 #include "utils/config_factory.h"
 
-#include <set>  // for set, set<>::iterator
-#include <string>  // for string, operator==, basic_string
-#include <utility>  // for pair
-#include <vector>  // for vector
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <openvino/runtime/intel_gpu/properties.hpp>  // for intel_gpu properties
+#include <openvino/runtime/intel_gpu/properties.hpp>
 
-#include "utils/args_helper.hpp"  // for parseDevices, parseValuePerDevice
+#include "utils/args_helper.hpp"
 
 std::set<std::string> ModelConfig::getDevices() {
     if (devices.empty()) {
