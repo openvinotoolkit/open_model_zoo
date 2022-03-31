@@ -138,17 +138,20 @@ class Detector:
             loc_subdet = self.side_ruler_subdetector
 
         # global detector inference
+        all_preds = []
         preds, _ = glb_subdet.inference(img)
         if len(preds) == 0: return None, None, None
-        all_preds = preds
+        all_preds.append(preds)
 
         # local detector inference
         parent_cat = loc_subdet.parent_cat
         parent_id = glb_subdet.detcls2id[parent_cat]
-        parent_roi = self._get_parent_roi(all_preds, parent_id)
+        parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
         if parent_roi is not None:
-            preds = loc_subdet.inference_in(img, parent_roi)
-            if preds is not None: np.vstack((all_preds, preds))
+            cascade_preds = loc_subdet.inference_in(img, parent_roi)
+            if cascade_preds is not None:
+                all_preds.append(cascade_preds)
+        all_preds = np.concatenate(all_preds)
 
         # cast class id integer
         for r, pred in enumerate(all_preds):
@@ -177,8 +180,8 @@ class Detector:
         side_bboxes, side_cls_ids, side_scores = self._detect_one(img_side, view='side')
 
         # get class label
-        top_labels = [self.all_classes[int(i)-1] for i in top_cls_ids]
-        side_labels = [self.all_classes[int(i)-1] for i in side_cls_ids]
+        top_labels = [self.all_classes[int(i) - 1] for i in top_cls_ids]
+        side_labels = [self.all_classes[int(i) - 1] for i in side_cls_ids]
 
         return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
 
@@ -204,8 +207,8 @@ class Detector:
         side_bboxes, side_cls_ids, side_scores = tdetSide.join()
 
         # get class label
-        top_labels = [self.all_classes[int(i)-1] for i in top_cls_ids]
-        side_labels = [self.all_classes[int(i)-1] for i in side_cls_ids]
+        top_labels = [self.all_classes[int(i) - 1] for i in top_cls_ids]
+        side_labels = [self.all_classes[int(i) - 1] for i in side_cls_ids]
 
         return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
 
