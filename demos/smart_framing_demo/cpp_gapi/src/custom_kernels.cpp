@@ -73,11 +73,11 @@ struct YOLOv4TinyPostProcessing {
         //case YOLO_V4_TINY:
         sideH = static_cast<int>(blob.size[2]);
         sideW = static_cast<int>(blob.size[3]);
-        std::cout << "parseYOLOOutput  sideH " << sideH << " sideW " << sideW << std::endl;
+        slog::debug << "parseYOLOOutput  sideH " << sideH << " sideW " << sideW << slog::endl;
         scaleW = resized_im_w;
         scaleH = resized_im_h;
-        std::cout << "parseYOLOOutput  scaleH " << scaleH << " scaleW " << scaleW << std::endl;
-        std::cout << "parseYOLOOutput  original_im_h " << original_im_h << " original_im_w " << original_im_w << std::endl;
+        slog::debug << "parseYOLOOutput  scaleH " << scaleH << " scaleW " << scaleW << slog::endl;
+        slog::debug << "parseYOLOOutput  original_im_h " << original_im_h << " original_im_w " << original_im_w << slog::endl;
 
 
         auto entriesNum = sideW * sideH;
@@ -108,10 +108,10 @@ struct YOLOv4TinyPostProcessing {
                     double width = std::exp(output_blob[box_index + 2 * entriesNum]) * blobs_anchor[blobID][2 * n] * original_im_w / scaleW;
 
                     custom::DetectedObject obj;
-                    obj.x = (float)std::max((x - width / 2), 0.);
-                    obj.y = (float)std::max((y - height / 2), 0.);
-                    obj.width = std::min((float)width, original_im_w - obj.x);
-                    obj.height = std::min((float)height, original_im_h - obj.y);
+                    obj.x = static_cast<float>(std::max((x - width / 2), 0.));
+                    obj.y = static_cast<float>(std::max((y - height / 2), 0.));
+                    obj.width = std::min(static_cast<float>(width), original_im_w - obj.x);
+                    obj.height = std::min(static_cast<float>(height), original_im_h - obj.y);
 
                     for (int j = 0; j < /*region.classes*/ region_classes; ++j) {
                         int class_index = calculateEntryIndex(entriesNum, /*region.coords*/ region_coords, /*region.classes*/ region_classes, n * entriesNum + i, /*region.coords*/ region_coords + 1 + j);
@@ -141,23 +141,23 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
         const float confidenceThreshold, const float boxIOUThreshold, const bool useAdvancedPostprocessing, std::vector<custom::DetectedObject> &objects) {
         YOLOv4TinyPostProcessing post_processor;
         int blob_size[2];
-        std::cout << "in_blob26x26 size " << in_blob26x26.size << std::endl;
-        std::cout << "in_blob13x13 size " << in_blob13x13.size << std::endl;
+        slog::debug << "in_blob26x26 size " << in_blob26x26.size << slog::endl;
+        slog::debug << "in_blob13x13 size " << in_blob13x13.size << slog::endl;
         blob_size[0] = in_blob26x26.size[0] * in_blob26x26.size[1] * in_blob26x26.size[2] * in_blob26x26.size[3];
         blob_size[1] = in_blob13x13.size[0] * in_blob13x13.size[1] * in_blob13x13.size[2] * in_blob13x13.size[3];
         int total_size = blob_size[0] + blob_size[1];
-        std::cout << "total_size " << total_size << std::endl; //should be 215475
+        slog::debug << "total_size " << total_size << slog::endl; //should be 215475
 
         //OMZ Post-processing for Yolo
         std::vector<custom::DetectedObject> initial_objects;
         post_processor.parseYOLOOutput(in_blob26x26, 0, post_processor.netInputHeight, post_processor.netInputWidth,
             image.rows, image.cols, confidenceThreshold, initial_objects);
-        std::cout << "Accumulated DetectedObject size for blobID " << 0 << " is " << initial_objects.size() << std::endl;
+        slog::debug << "Accumulated DetectedObject size for blobID " << 0 << " is " << initial_objects.size() << slog::endl;
         post_processor.parseYOLOOutput(in_blob13x13, 1, post_processor.netInputHeight, post_processor.netInputWidth,
             image.rows, image.cols, confidenceThreshold, initial_objects);
-        std::cout << "Accumulated DetectedObject size for blobID " << 1 << " is " << initial_objects.size() << std::endl;
+        slog::debug << "Accumulated DetectedObject size for blobID " << 1 << " is " << initial_objects.size() << slog::endl;
 
-        std::cout << "Total DetectedObject size " << initial_objects.size() << std::endl;
+        slog::debug << "Total DetectedObject size " << initial_objects.size() << slog::endl;
 
 
         if (useAdvancedPostprocessing) {
@@ -190,7 +190,7 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
                 objects.push_back(initial_objects[i]);
             }
         }
-        std::cout << "Filtered DetectedObject size " << objects.size() << std::endl;
+        slog::debug << "Filtered DetectedObject size " << objects.size() << slog::endl;
     }
 };
 
@@ -202,7 +202,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
                 init_rect = init_rect | (cv::Rect)el;
             }
         }
-        std::cout << "SF result rect" << init_rect << std::endl;
+        slog::debug << "SF result rect" << init_rect << slog::endl;
         if (!init_rect.empty()) {
             cv::Rect even_rect;
             even_rect.x = (init_rect.x % 2 == 0) ? (init_rect.x) : (init_rect.x - 1);
@@ -216,7 +216,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
             cv::Mat SF_resized_ROI;
             cv::Size target_size;
             target_size.height = image.size().height;
-            target_size.width = even_rect.width * ((float)image.size().height / (float)even_rect.height);
+            target_size.width = even_rect.width * (static_cast<float>(image.size().height) / static_cast<float>(even_rect.height));
             target_size.width = (target_size.width % 2 == 0) ? (target_size.width) : (target_size.width - 1);
             if (target_size.width > image.size().width) {
                 target_size.width = image.size().width;

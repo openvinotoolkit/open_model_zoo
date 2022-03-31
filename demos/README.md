@@ -140,7 +140,7 @@ The Open Model Zoo includes the following demos:
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
 - [Place Recognition Python\* Demo](./place_recognition_demo/python/README.md) - This demo demonstrates how to run Place Recognition models using OpenVINO™.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
-- [Smart Framing C++ Demo](./smart_framing_demo/cpp_gapi/README.md) - Person Detection followed by the Smart Framing/Croping and optionally Super Resolution, supports images/video and camera inputs.
+- [Smart Framing C++ G-API Demo](./smart_framing_demo/cpp_gapi/README.md) - Person Detection followed by the Smart Framing/Croping and optionally Super Resolution, supports images/video and camera inputs.
   [Speech Recognition DeepSpeech Python\* Demo](./speech_recognition_deepspeech_demo/python/README.md) - Speech recognition demo: accepts an audio file with an English phrase on input and converts it into text. This demo does streaming audio data processing and can optionally provide current transcription of the processed part.
 - [Speech Recognition QuartzNet Python\* Demo](./speech_recognition_quartznet_demo/python/README.md) - Speech recognition demo for QuartzNet: takes a whole audio file with an English phrase on input and converts it into text.
 - [Speech Recognition Wav2Vec Python\* Demo](./speech_recognition_wav2vec_demo/python/README.md) - Speech recognition demo for Wav2Vec: takes a whole audio file with an English phrase on input and converts it into text.

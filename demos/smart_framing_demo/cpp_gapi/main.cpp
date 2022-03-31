@@ -81,11 +81,9 @@ int main(int argc, char *argv[]) {
         if (FLAGS_apply_sr) {
             if (FLAGS_at_sr == "1ch") {
                 use_single_channel_sr = true;
-            }
-            else if (FLAGS_at_sr == "3ch") {
+            } else if (FLAGS_at_sr == "3ch") {
                 use_single_channel_sr = false;
-            }
-            else {
+            } else {
                 slog::err << "No model type or invalid model type (-at_sr) provided: " + FLAGS_at_sr << slog::endl;
                 return -1;
             }
@@ -133,12 +131,10 @@ int main(int argc, char *argv[]) {
 
             if (use_single_channel_sr) {
                 networks = cv::gapi::networks(net, sr);
-            }
-            else {
+            } else {
                 networks = cv::gapi::networks(net, sr3ch);
             }
-        }
-        else {
+        } else {
             networks = cv::gapi::networks(net);
         }
 
@@ -163,8 +159,7 @@ int main(int argc, char *argv[]) {
                 auto out_g = custom::GCvt32Fto8U::on(cv::gapi::infer<SRNet>(g));
                 auto out_r = custom::GCvt32Fto8U::on(cv::gapi::infer<SRNet>(r));
                 out_sr_pp = cv::gapi::merge3(out_b, out_g, out_r);
-            }
-            else {
+            } else {
                 out_sr = cv::gapi::infer<SRNet3ch>(out, out);
                 out_sr_pp = custom::GSuperResolutionPostProcessingKernel::on(out_sr);
             }
@@ -203,8 +198,7 @@ int main(int argc, char *argv[]) {
                 metrics.update(startTime, out_image_sr, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
                 isStart = false;
-            }
-            else {
+            } else {
                 metrics.update({}, out_image_sr, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
             }
@@ -212,7 +206,7 @@ int main(int argc, char *argv[]) {
             if (!FLAGS_no_show) {
                 //Draw detections on original image
                 for (const auto& el : objects) {
-                    std::cout << el << std::endl;
+                    slog::debug << el << slog::endl;
                     cv::rectangle(image, el, cv::Scalar{ 0,255,0 }, 2, cv::LINE_8, 0);
                     cv::putText(image, el.label, el.tl(), cv::FONT_HERSHEY_SIMPLEX, 1.0, { 0,255,0 }, 2);
                 }
@@ -221,7 +215,7 @@ int main(int argc, char *argv[]) {
                 cv::Rect init_rect;
                 for (const auto& el : objects) {
                     if (el.labelID == 0) {//person ID
-                        init_rect = init_rect | (cv::Rect)el;
+                        init_rect = init_rect | static_cast<cv::Rect>(el);
                     }
                 }
                 cv::rectangle(image, init_rect, cv::Scalar{ 255,0,0 }, 3, cv::LINE_8, 0);
