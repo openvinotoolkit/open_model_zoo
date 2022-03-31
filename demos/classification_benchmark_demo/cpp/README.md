@@ -37,6 +37,7 @@ omz_converter --list models.lst
 
 * alexnet
 * caffenet
+* convnext-tiny
 * densenet-121
 * densenet-121-tf
 * dla-34
