@@ -61,7 +61,7 @@ class LMDBReader(BaseReader):
         super().configure()
         if isinstance(lmdb, UnsupportedPackage):
             lmdb.raise_error(self.__provider__)
-        self.database = lmdb.open(bytes(self.data_source), readonly=True)
+        self.database = lmdb.open(bytes(self.data_source), readonly=True, lock=False)
 
     def read(self, data_id):
         with self.database.begin(write=False) as txn:
