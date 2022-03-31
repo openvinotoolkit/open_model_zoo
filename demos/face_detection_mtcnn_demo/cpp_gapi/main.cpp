@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
                 FLAGS_d_o,  // device specifier
             }.cfgOutputLayers({"conv6-2", "conv6-3", "prob1"})
              .cfgInputLayers({"data"});
-        // clang-format off
+        // clang-format on
         auto networks_mtcnn = cv::gapi::networks(mtcnnr_net, mtcnno_net);
 
         // MTCNN Proposal detection network
