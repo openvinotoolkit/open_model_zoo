@@ -180,6 +180,7 @@ DEMOS = [
         TestCase(options={'--no_show': None, '-at_sr': '3ch',
             **MONITORS,
             '-i': DataPatternArg('smart-classroom-demo'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl.txt')}),
          }),
         TestCase(options={
             '-m_yolo' : ModelArg('yolo-v4-tiny-tf'),

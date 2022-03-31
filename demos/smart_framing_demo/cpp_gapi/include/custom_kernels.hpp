@@ -96,6 +96,8 @@ const std::vector<std::string> coco_classes = {
 "toothbrush"      //79
 };
 
+std::vector<std::string> labels;
+
 struct DetectedObject : public cv::Rect2f
 {
     unsigned int labelID;

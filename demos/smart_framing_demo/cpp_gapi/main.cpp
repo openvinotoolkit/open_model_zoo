@@ -91,6 +91,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        if (!FLAGS_labels.empty()) {
+            custom::labels = DetectionModel::loadLabels(FLAGS_labels);
+        }
+
+
         /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));

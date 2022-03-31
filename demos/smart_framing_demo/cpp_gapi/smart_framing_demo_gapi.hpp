@@ -7,6 +7,8 @@
 
 #include <gflags/gflags.h>
 #include <utils/default_flags.hpp>
+#include <models/detection_model.h>
+
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -34,6 +36,9 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char labels_message[] = "Optional. Path to a file with labels mapping.";
+
+
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
@@ -52,6 +57,7 @@ DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(labels, "", labels_message);
 
 /**
 * \brief This function shows a help message
