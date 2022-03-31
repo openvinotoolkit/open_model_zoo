@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (!FLAGS_labels.empty()) {
-            custom::labels = DetectionModel::loadLabels(FLAGS_labels);
+            custom::coco_labels = DetectionModel::loadLabels(FLAGS_labels);
         }
 
 
