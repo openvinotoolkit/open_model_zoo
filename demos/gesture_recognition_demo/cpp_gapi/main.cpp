@@ -262,7 +262,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
-
     return 0;
 }
