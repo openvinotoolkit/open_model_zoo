@@ -1,8 +1,7 @@
 models:
-  - name: lj_ft_t2_v1
+  - name: hifi-gan
     launchers:
-      - framework: dlsdk
-        device: CPU
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:
@@ -25,3 +24,6 @@ models:
         metrics:
           - type: relative_l2_error
             presenter: print_vector
+            reference:
+              mean: 0.000005
+              std: 0.000001

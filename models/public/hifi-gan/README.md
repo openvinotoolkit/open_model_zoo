@@ -1,4 +1,4 @@
-# wavernn (composite)
+# hifi-gan
 
 ## Use Case and High-Level Description
 
