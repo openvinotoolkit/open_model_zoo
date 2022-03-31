@@ -17,7 +17,6 @@
 import cv2
 import time
 import concurrent.futures
-from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 
 from display import Display

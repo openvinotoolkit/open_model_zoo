@@ -102,8 +102,7 @@ class Evaluator(object):
         self.frame_counter = frame_counter
 
         action_seg_results = self.filter_action(action_seg_results, mode=self.action_mode)
-        top_det_results,side_det_results = self.filter_object(top_det_results, side_det_results)
-        frame_top,frame_side = self.filter_image(frame_top, frame_side)
+        top_det_results, side_det_results = self.filter_object(top_det_results, side_det_results)
 
         if frame_counter > self.pool_buffer_size:
             self.classify_state(action_seg_results)
@@ -121,6 +120,7 @@ class Evaluator(object):
                     self.evaluate_weights_right()
                     if not self.can_tidy:
                         self.evaluate_end_state()
+
                 self.evaluate_scale_balance()
 
                 if action_seg_results == "adjust_rider":
@@ -218,7 +218,7 @@ class Evaluator(object):
             h, w, c = frame_top.shape
             blank_image = 255 * np.ones(shape=(h, w, c), dtype=np.uint8)
             first_frame_top = first_frame_side = blank_image
-            return first_frame_top,first_frame_side
+            return first_frame_top, first_frame_side
 
         # after self.buffer_size frame, filtering of action occurs
         elif len(self.frame_top_buffer) == self.buffer_size:
@@ -333,7 +333,7 @@ class Evaluator(object):
             action_seg_results == "take_left" or action_seg_results == "take_right" or \
             action_seg_results == 'put_take':       #TODO:  filter input data for action so that only action persist  more than certain frame taken as true data
             self.first_put_take = True
-        if self.first_put_take == True: 
+        if self.first_put_take == True:
             self.state = "Measuring"
         elif self.first_put_take == False:
             self.state = "Initial"
@@ -589,7 +589,7 @@ class Evaluator(object):
             # mark will be given if users put the weight at right tray, mark will be kept constant except if users change tray (eg right to left tray)
             # once the first weight is put in left/right tray, self.weights_put become True to show weights have been put
             if self.weights_put == False or self.change_weights_direction == True:
-                if len(weight_inside_right_tray)>0:
+                if len(weight_inside_right_tray) > 0:
                     self.scoring["measuring_score_weights_right"] = 1
                     self.keyframe["measuring_score_weights_right"] = self.frame_counter
                     self.weights_put = True    # self.weights_put is prerequisites to enter end state
@@ -742,10 +742,10 @@ class Evaluator(object):
             # find center coordinate of roundscrew2 and pointerhead
             left_roundscrew2_center_coor = [(left_roundscrew2_coor[0] + left_roundscrew2_coor[2])/2, \
                                             (left_roundscrew2_coor[1] + left_roundscrew2_coor[3])/2]
-            right_roundscrew2_center_coor = [(right_roundscrew2_coor[0] + right_roundscrew2_coor[2])/2, \
-                                            (right_roundscrew2_coor[1] + right_roundscrew2_coor[3])/2]
+            right_roundscrew2_center_coor = [(right_roundscrew2_coor[0] + right_roundscrew2_coor[2]) / 2, \
+                                            (right_roundscrew2_coor[1] + right_roundscrew2_coor[3]) / 2]
             pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2])/2,\
-                                            (pointerhead_coor[0][1] + pointerhead_coor[0][3])/2]
+                                            (pointerhead_coor[0][1] + pointerhead_coor[0][3]) / 2]
 
             # rotate to make two roundscrew1 in a horizontal line
             rotated_left_coor,rotated_right_coor,rotated_center_coor = \
