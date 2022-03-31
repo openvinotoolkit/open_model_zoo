@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
 
 #include "models/image_model.h"
 

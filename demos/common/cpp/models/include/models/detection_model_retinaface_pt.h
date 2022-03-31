@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
 
 #include "models/detection_model.h"
 

@@ -20,12 +20,16 @@
 #include <vector>
 
 #include <opencv2/core.hpp>
-#include <openvino/openvino.hpp>
 
 #include <utils/image_utils.h>
 
 #include "models/image_model.h"
 
+namespace ov {
+class InferRequest;
+class Model;
+class Shape;
+}  // namespace ov
 struct HumanPose;
 struct InferenceResult;
 struct InputData;

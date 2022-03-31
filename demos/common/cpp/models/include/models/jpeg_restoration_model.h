@@ -19,11 +19,18 @@
 #include <memory>
 #include <string>
 
-#include <openvino/openvino.hpp>
+#include <opencv2/core/types.hpp>
 
 #include "models/image_model.h"
-#include "models/results.h"
 
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 class JPEGRestorationModel : public ImageModel {
 public:
     /// Constructor
