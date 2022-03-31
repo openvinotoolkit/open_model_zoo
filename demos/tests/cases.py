@@ -1221,6 +1221,24 @@ DEMOS = [
                                       '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'nanodet'}),
+                [
+                    TestCase(options={'-m': ModelArg('nanodet-m-1.5x-416')}),
+                    TestCase(options={'-m': ModelFileArg('nanodet-m-1.5x-416', 'nanodet-m-1.5x-416.onnx'),
+                                      '--mean_values': ['103.53', '116.28', '123.675'],
+                                      '--scale_values': ['57.375', '57.12', '58.395']}),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'nanodet-plus'}),
+                [
+                    TestCase(options={'-m': ModelArg('nanodet-plus-m-1.5x-416')}),
+                    TestCase(options={'-m': ModelFileArg('nanodet-plus-m-1.5x-416', 'nanodet-plus-m-1.5x-416.onnx'),
+                                      '--mean_values': ['103.53', '116.28', '123.675'],
+                                      '--scale_values': ['57.375', '57.12', '58.395']}),
+                ]
+            ),
         ],
     )),
 

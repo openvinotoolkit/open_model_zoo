@@ -78,6 +78,8 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-v3-large-1.0-224-paddle | YES | YES | YES |
+| mobilenet-v3-small-1.0-224-paddle | YES | YES | YES |
 | mobilenet-yolo-v4-syg | YES | YES |    |
 | modnet-photographic-portrait-matting | YES | YES | YES |
 | modnet-webcam-portrait-matting | YES | YES | YES |
@@ -86,6 +88,8 @@
 | mtcnn-o | YES | YES |    |
 | mtcnn-p | YES | YES |    |
 | mtcnn-r | YES | YES |    |
+| nanodet-m-1.5x-416 | YES | YES |    |
+| nanodet-plus-m-1.5x-416 | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
 | ocrnet-hrnet-w48-paddle | YES | YES |    |

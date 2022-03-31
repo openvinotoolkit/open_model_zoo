@@ -71,7 +71,9 @@
    omz_models_model_mobilenet_v2_1_0_224
    omz_models_model_mobilenet_v2_1_4_224
    omz_models_model_mobilenet_v2_pytorch
+   omz_models_model_mobilenet_v3_large_1_0_224_paddle
    omz_models_model_mobilenet_v3_large_1_0_224_tf
+   omz_models_model_mobilenet_v3_small_1_0_224_paddle
    omz_models_model_mobilenet_v3_small_1_0_224_tf
    omz_models_model_nfnet_f0
    omz_models_model_octave_resnet_26_0_25
@@ -195,6 +197,8 @@
    omz_models_model_mobilenet_ssd
    omz_models_model_mobilenet_yolo_v4_syg
    omz_models_model_mtcnn
+   omz_models_model_nanodet_m_1.5x_416
+   omz_models_model_nanodet_plus_m_1.5x_416
    omz_models_model_pelee_coco
    omz_models_model_retinaface_resnet50_pytorch
    omz_models_model_retinanet_tf
@@ -351,8 +355,8 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
 | MobileNet V2 1.0 224        | Caffe\*<br>TensorFlow\*<br>PyTorch\*| [mobilenet-v2](./mobilenet-v2/README.md) <br>[mobilenet-v2-1.0-224](./mobilenet-v2-1.0-224/README.md)<br>[mobilenet-v2-pytorch](./mobilenet-v2-pytorch/README.md) | 71.218%/90.178%<br>71.85%/90.69%<br>71.81%/90.396% | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/README.md) | 74.09%/91.97% | 1.183  | 6.087 |
-| MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) | 67.36%/87.44% | 0.1168 | 2.537 |
-| MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md) | 75.30%/92.62% | 0.4450 | 5.4721 |
+| MobileNet V3 Small 1.0      | TensorFlow\*<br>Paddle\* | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) <br> [mobilenet-v3-small-1.0-paddle](./mobilenet-v3-small-1.0-224-paddle/README.md) | 67.36%/87.44%<br>68.21%/88.04% | 0.1168<br>0.1269 | 2.537<br>2.9339 |
+| MobileNet V3 Large 1.0      | TensorFlow\*<br>Paddle\*                   | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md)<br>[mobilenet-v3-large-1.0-224-paddle](./mobilenet-v3-large-1.0-224-paddle/README.md) | 75.30%/92.62%<br>75.248%/92.32% | 0.4450<br>0.4565 | 5.4721<br>5.468 |
 | NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/README.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/README.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/README.md)     | 76.076%/92.584%| 3.768 | 15.99 |
@@ -437,6 +441,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
+| NanoDet with ShuffleNetV2 1.5x, size=416 | PyTorch\*            | [nanodet-m-1.5x-416](./nanodet-m-1.5x-416/README.md) | 27.38%/26.63% | 2.3895 | 2.0534 |
+| NanoDet Plus with ShuffleNetV2 1.5x, size=416 | PyTorch\*       | [nanodet-plus-m-1.5x-416](./nanodet-plus-m-1.5x-416/README.md) | 34.53%/33.77% | 3.0147 | 2.4614 |
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
