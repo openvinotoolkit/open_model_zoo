@@ -3,16 +3,19 @@
 //
 
 #include "distance.hpp"
-#include "logging.hpp"
+
+#include <cmath>
+#include <stddef.h>
 
 #include <vector>
 
-CosDistance::CosDistance(const cv::Size &descriptor_size)
-    : descriptor_size_(descriptor_size) {
+#include "logging.hpp"
+
+CosDistance::CosDistance(const cv::Size& descriptor_size) : descriptor_size_(descriptor_size) {
     PT_CHECK(descriptor_size.area() != 0);
 }
 
-float CosDistance::Compute(const cv::Mat &descr1, const cv::Mat &descr2) {
+float CosDistance::Compute(const cv::Mat& descr1, const cv::Mat& descr2) {
     PT_CHECK(!descr1.empty());
     PT_CHECK(!descr2.empty());
     PT_CHECK(descr1.size() == descriptor_size_);
@@ -25,8 +28,7 @@ float CosDistance::Compute(const cv::Mat &descr1, const cv::Mat &descr2) {
     return 0.5f * static_cast<float>(1.0 - xy / norm);
 }
 
-std::vector<float> CosDistance::Compute(const std::vector<cv::Mat> &descrs1,
-                                        const std::vector<cv::Mat> &descrs2) {
+std::vector<float> CosDistance::Compute(const std::vector<cv::Mat>& descrs1, const std::vector<cv::Mat>& descrs2) {
     PT_CHECK(descrs1.size() != 0);
     PT_CHECK(descrs1.size() == descrs2.size());
 
@@ -38,9 +40,7 @@ std::vector<float> CosDistance::Compute(const std::vector<cv::Mat> &descrs1,
     return distances;
 }
 
-
-float MatchTemplateDistance::Compute(const cv::Mat &descr1,
-                                     const cv::Mat &descr2) {
+float MatchTemplateDistance::Compute(const cv::Mat& descr1, const cv::Mat& descr2) {
     PT_CHECK(!descr1.empty() && !descr2.empty());
     PT_CHECK_EQ(descr1.size(), descr2.size());
     PT_CHECK_EQ(descr1.type(), descr2.type());
@@ -51,8 +51,8 @@ float MatchTemplateDistance::Compute(const cv::Mat &descr1,
     return scale_ * dist + offset_;
 }
 
-std::vector<float> MatchTemplateDistance::Compute(const std::vector<cv::Mat> &descrs1,
-                                                  const std::vector<cv::Mat> &descrs2) {
+std::vector<float> MatchTemplateDistance::Compute(const std::vector<cv::Mat>& descrs1,
+                                                  const std::vector<cv::Mat>& descrs2) {
     std::vector<float> result;
     for (size_t i = 0; i < descrs1.size(); i++) {
         result.push_back(Compute(descrs1[i], descrs2[i]));
