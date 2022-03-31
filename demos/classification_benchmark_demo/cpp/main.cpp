@@ -2,25 +2,38 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <stddef.h>
+
+#include <algorithm>
 #include <chrono>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <map>
+#include <memory>
+#include <ratio>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gflags/gflags.h>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <openvino/openvino.hpp>
 
 #include <models/classification_model.h>
+#include <models/input_data.h>
+#include <models/model_base.h>
 #include <models/results.h>
+#include <monitors/presenter.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
-
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
+#include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
@@ -88,7 +101,7 @@ static void showUsage() {
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -119,7 +132,7 @@ cv::Mat centerSquareCrop(const cv::Mat& image) {
     return image(cv::Rect(0, (image.rows - image.cols) / 2, image.cols, image.cols));
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics, readerMetrics, renderMetrics;
 
@@ -132,7 +145,8 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> imageNames;
         std::vector<cv::Mat> inputImages;
         parseInputFilesArguments(imageNames);
-        if (imageNames.empty()) throw std::runtime_error("No images provided");
+        if (imageNames.empty())
+            throw std::runtime_error("No images provided");
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
@@ -194,18 +208,20 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running routines ----------------------------------------------
         std::vector<std::string> labels = ClassificationModel::loadLabels(FLAGS_labels);
-        for (const auto & classIndex : classIndices) {
+        for (const auto& classIndex : classIndices) {
             if (classIndex >= labels.size()) {
-                throw std::runtime_error("Class index " + std::to_string(classIndex)
-                                         + " is outside the range supported by the model.");
-                }
+                throw std::runtime_error("Class index " + std::to_string(classIndex) +
+                                         " is outside the range supported by the model.");
+            }
         }
 
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 
-        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels, FLAGS_layout)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), core);
+        AsyncPipeline pipeline(std::unique_ptr<ModelBase>(
+                                   new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels, FLAGS_layout)),
+                               ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+                               core);
 
         Presenter presenter(FLAGS_u, 0);
         int width;
@@ -238,9 +254,11 @@ int main(int argc, char *argv[]) {
             if (isTestMode && elapsedSeconds >= testDuration) {
                 isTestMode = false;
                 typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-                gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9),
-                                  (framesNum - framesNumOnCalculationStart) / std::chrono::duration_cast<Sec>(
-                                    fpsCalculationDuration).count());
+                gridMat = GridMat(presenter,
+                                  cv::Size(width, height),
+                                  cv::Size(16, 9),
+                                  (framesNum - framesNumOnCalculationStart) /
+                                      std::chrono::duration_cast<Sec>(fpsCalculationDuration).count());
                 metrics = PerformanceMetrics();
                 startTime = std::chrono::steady_clock::now();
                 framesNum = 0;
@@ -252,14 +270,17 @@ int main(int argc, char *argv[]) {
                 auto imageStartTime = std::chrono::steady_clock::now();
 
                 pipeline.submitData(ImageInputData(inputImages[nextImageIndex]),
-                    std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex], imageStartTime, classIndices[nextImageIndex]));
+                                    std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex],
+                                                                                  imageStartTime,
+                                                                                  classIndices[nextImageIndex]));
                 nextImageIndex++;
                 if (nextImageIndex == imageNames.size()) {
                     nextImageIndex = 0;
                 }
             }
 
-            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them
+            // are available.
             pipeline.waitForData(false);
 
             //--- Checking for results and rendering data if it's ready
@@ -269,8 +290,8 @@ int main(int argc, char *argv[]) {
                 if (!classificationResult.metaData) {
                     throw std::invalid_argument("Renderer: metadata is null");
                 }
-                const ClassificationImageMetaData& classificationImageMetaData
-                    = classificationResult.metaData->asRef<const ClassificationImageMetaData>();
+                const ClassificationImageMetaData& classificationImageMetaData =
+                    classificationResult.metaData->asRef<const ClassificationImageMetaData>();
 
                 auto outputImg = classificationImageMetaData.img;
 
@@ -295,8 +316,13 @@ int main(int argc, char *argv[]) {
                 framesNum++;
                 gridMat.updateMat(outputImg, label, predictionResult);
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
-                gridMat.textUpdate(metrics, classificationResult.metaData->asRef<ImageMetaData>().timeStamp, accuracy, FLAGS_nt, isTestMode,
-                                   !FLAGS_gt.empty(), presenter);
+                gridMat.textUpdate(metrics,
+                                   classificationResult.metaData->asRef<ImageMetaData>().timeStamp,
+                                   accuracy,
+                                   FLAGS_nt,
+                                   isTestMode,
+                                   !FLAGS_gt.empty(),
+                                   presenter);
                 renderMetrics.update(renderingStart);
                 elapsedSeconds = std::chrono::steady_clock::now() - startTime;
                 if (!FLAGS_no_show) {
@@ -305,8 +331,8 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
-                    }
-                    else if (32 == key || 'r' == key || 'R' == key) {  // press space or r to restart testing if needed
+                    } else if (32 == key || 'r' == key ||
+                               'R' == key) {  // press space or r to restart testing if needed
                         isTestMode = true;
                         framesNum = 0;
                         framesNumOnCalculationStart = 0;
@@ -314,8 +340,7 @@ int main(int argc, char *argv[]) {
                         accuracy = 0;
                         elapsedSeconds = std::chrono::steady_clock::duration(0);
                         startTime = std::chrono::steady_clock::now();
-                    }
-                    else {
+                    } else {
                         presenter.handleKey(key);
                     }
                 }
@@ -328,16 +353,16 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        logLatencyPerStage(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
-            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
-            renderMetrics.getTotal().latency);
+        logLatencyPerStage(readerMetrics.getTotal().latency,
+                           pipeline.getPreprocessMetrics().getTotal().latency,
+                           pipeline.getInferenceMetircs().getTotal().latency,
+                           pipeline.getPostprocessMetrics().getTotal().latency,
+                           renderMetrics.getTotal().latency);
         slog::info << presenter.reportMeans() << slog::endl;
-    }
-    catch (const std::exception& error) {
+    } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
         return 1;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }

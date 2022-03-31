@@ -14,21 +14,34 @@
 // limitations under the License.
 */
 
+#include "models/detection_model_retinaface_pt.h"
+
+#include <cmath>
+#include <stdint.h>
+
+#include <algorithm>
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
+
 #include <openvino/openvino.hpp>
+
 #include <utils/common.hpp>
 #include <utils/nms.hpp>
-#include <utils/slog.hpp>
-#include "models/detection_model_retinaface_pt.h"
+#include <utils/ocv_common.hpp>
+
+#include "models/internal_model_data.h"
 #include "models/results.h"
 
-ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    float boxIOUThreshold, const std::string& layout)
+ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName,
+                                     float confidenceThreshold,
+                                     bool useAutoResize,
+                                     float boxIOUThreshold,
+                                     const std::string& layout)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}, layout),  // Default label is "Face"
-    landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
-}
+      landmarksNum(0),
+      boxIOUThreshold(boxIOUThreshold) {}
 
 void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -46,16 +59,15 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     ov::preprocess::PrePostProcessor ppp(model);
     inputTransform.setPrecision(ppp, model->input().get_any_name());
-    ppp.input().tensor().
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_layout({"NHWC"});
 
     if (useAutoResize) {
-        ppp.input().tensor().
-            set_spatial_dynamic_shape();
+        ppp.input().tensor().set_spatial_dynamic_shape();
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+        ppp.input()
+            .preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
 
     ppp.input().model().set_layout(inputLayout);
@@ -79,24 +91,23 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     for (auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
-        ppp.output(outTensorName).tensor().
-            set_element_type(ov::element::f32).
-            set_layout(output.get_shape().size() == 4 ? nchw : chw);
+        ppp.output(outTensorName)
+            .tensor()
+            .set_element_type(ov::element::f32)
+            .set_layout(output.get_shape().size() == 4 ? nchw : chw);
 
         if (outTensorName.find("bbox") != std::string::npos) {
             outputsNames[OUT_BOXES] = outTensorName;
-        }
-        else if (outTensorName.find("cls") != std::string::npos) {
+        } else if (outTensorName.find("cls") != std::string::npos) {
             outputsNames[OUT_SCORES] = outTensorName;
-        }
-        else if (outTensorName.find("landmark") != std::string::npos) {
-            // Landmarks might be optional, if it is present, resize names array to fit landmarks output name to the last item of array
-            // Considering that other outputs names are already filled in or will be filled later
+        } else if (outTensorName.find("landmark") != std::string::npos) {
+            // Landmarks might be optional, if it is present, resize names array to fit landmarks output name to the
+            // last item of array Considering that other outputs names are already filled in or will be filled later
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OUT_LANDMARKS + 1));
             outputsNames[OUT_LANDMARKS] = outTensorName;
-            landmarksNum = output.get_shape()[ov::layout::width_idx(chw)] / 2; // Each landmark consist of 2 variables (x and y)
-        }
-        else {
+            landmarksNum =
+                output.get_shape()[ov::layout::width_idx(chw)] / 2;  // Each landmark consist of 2 variables (x and y)
+        } else {
             continue;
         }
     }
@@ -108,7 +119,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     model = ppp.build();
     priors = generatePriorData();
 }
-
 
 std::vector<size_t> ModelRetinaFacePT::filterByScore(const ov::Tensor& scoresTensor, const float confidenceThreshold) {
     std::vector<size_t> indicies;
@@ -126,7 +136,8 @@ std::vector<size_t> ModelRetinaFacePT::filterByScore(const ov::Tensor& scoresTen
     return indicies;
 }
 
-std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scoresTensor, const std::vector<size_t>& indicies) {
+std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scoresTensor,
+                                                        const std::vector<size_t>& indicies) {
     const auto& shape = scoresTensor.get_shape();
     const float* scoresPtr = scoresTensor.data<float>();
 
@@ -134,38 +145,41 @@ std::vector<float> ModelRetinaFacePT::getFilteredScores(const ov::Tensor& scores
     scores.reserve(indicies.size());
 
     for (auto i : indicies) {
-        scores.push_back(scoresPtr[i*shape[2] + 1]);
+        scores.push_back(scoresPtr[i * shape[2] + 1]);
     }
     return scores;
 }
 
 std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const ov::Tensor& landmarksTensor,
-    const std::vector<size_t>& indicies, int imgWidth, int imgHeight) {
+                                                                 const std::vector<size_t>& indicies,
+                                                                 int imgWidth,
+                                                                 int imgHeight) {
     const auto& shape = landmarksTensor.get_shape();
     const float* landmarksPtr = landmarksTensor.data<float>();
 
-    std::vector<cv::Point2f> landmarks(landmarksNum*indicies.size());
+    std::vector<cv::Point2f> landmarks(landmarksNum * indicies.size());
 
     for (size_t i = 0; i < indicies.size(); i++) {
         const size_t idx = indicies[i];
         const auto& prior = priors[idx];
         for (size_t j = 0; j < landmarksNum; j++) {
-            landmarks[i*landmarksNum + j].x =
-                clamp(prior.cX + landmarksPtr[idx*shape[2] + j*2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
-            landmarks[i*landmarksNum + j].y =
-                clamp(prior.cY + landmarksPtr[idx*shape[2] + j*2 + 1] * variance[0] * prior.height, 0.f, 1.f) * imgHeight;
+            landmarks[i * landmarksNum + j].x =
+                clamp(prior.cX + landmarksPtr[idx * shape[2] + j * 2] * variance[0] * prior.width, 0.f, 1.f) * imgWidth;
+            landmarks[i * landmarksNum + j].y =
+                clamp(prior.cY + landmarksPtr[idx * shape[2] + j * 2 + 1] * variance[0] * prior.height, 0.f, 1.f) *
+                imgHeight;
         }
     }
     return landmarks;
 }
 
 std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
-    const float globalMinSizes[][2] = { {16, 32}, {64, 128}, {256, 512} };
-    const float steps[] = { 8., 16., 32. };
+    const float globalMinSizes[][2] = {{16, 32}, {64, 128}, {256, 512}};
+    const float steps[] = {8., 16., 32.};
     std::vector<ModelRetinaFacePT::Box> anchors;
     for (size_t stepNum = 0; stepNum < arraySize(steps); stepNum++) {
-        const int featureW = (int)std::round(netInputWidth / steps[stepNum]);
-        const int featureH = (int)std::round(netInputHeight / steps[stepNum]);
+        const int featureW = static_cast<int>(std::round(netInputWidth / steps[stepNum]));
+        const int featureH = static_cast<int>(std::round(netInputHeight / steps[stepNum]));
 
         const auto& minSizes = globalMinSizes[stepNum];
         for (int i = 0; i < featureH; i++) {
@@ -184,13 +198,14 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
 }
 
 std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const ov::Tensor& boxesTensor,
-    const std::vector<size_t>& indicies,int imgWidth, int imgHeight) {
+                                                                             const std::vector<size_t>& indicies,
+                                                                             int imgWidth,
+                                                                             int imgHeight) {
     std::vector<ModelRetinaFacePT::Rect> rects;
     rects.reserve(indicies.size());
 
     const auto& shape = boxesTensor.get_shape();
     const float* boxesPtr = boxesTensor.data<float>();
-
 
     if (shape[1] != priors.size()) {
         throw std::logic_error("rawBoxes size is not equal to priors size");
@@ -203,18 +218,17 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
         const float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
         const float width = prior.width * exp(pRawBox->width * variance[1]);
         const float height = prior.height * exp(pRawBox->height * variance[1]);
-        rects.push_back(Rect{
-            clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
-            clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
-            clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
-            clamp(cY + height / 2, 0.f, 1.f) * imgHeight });
+        rects.push_back(Rect{clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
+                             clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
+                             clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
+                             clamp(cY + height / 2, 0.f, 1.f) * imgHeight});
     }
 
     return rects;
 }
 
 std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infResult) {
-    //(raw_output, scale_x, scale_y, face_prob_threshold, image_size):
+    // (raw_output, scale_x, scale_y, face_prob_threshold, image_size):
     const auto boxesTensor = infResult.outputsData[outputsNames[OUT_BOXES]];
     const auto scoresTensor = infResult.outputsData[outputsNames[OUT_SCORES]];
 
@@ -222,17 +236,19 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
     const auto& scores = getFilteredScores(scoresTensor, validIndicies);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
-    const auto& landmarks = landmarksNum ?
-        getFilteredLandmarks(infResult.outputsData[outputsNames[OUT_LANDMARKS]],
-            validIndicies, internalData.inputImgWidth, internalData.inputImgHeight) :
-        std::vector<cv::Point2f>();
+    const auto& landmarks = landmarksNum ? getFilteredLandmarks(infResult.outputsData[outputsNames[OUT_LANDMARKS]],
+                                                                validIndicies,
+                                                                internalData.inputImgWidth,
+                                                                internalData.inputImgHeight)
+                                         : std::vector<cv::Point2f>();
 
-    const auto& proposals = getFilteredProposals(boxesTensor, validIndicies,
-        internalData.inputImgWidth, internalData.inputImgHeight);
+    const auto& proposals =
+        getFilteredProposals(boxesTensor, validIndicies, internalData.inputImgWidth, internalData.inputImgHeight);
 
     const auto& keptIndicies = nms(proposals, scores, boxIOUThreshold, !landmarksNum);
 
-    // --------------------------- Create detection result objects --------------------------------------------------------
+    // --------------------------- Create detection result objects
+    // --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
 
     result->objects.reserve(keptIndicies.size());
@@ -253,9 +269,7 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
 
         //--- Filtering landmarks coordinates
         for (uint32_t l = 0; l < landmarksNum; ++l) {
-            result->landmarks.emplace_back(landmarks[i*landmarksNum +l].x,
-                landmarks[i*landmarksNum + l].y
-            );
+            result->landmarks.emplace_back(landmarks[i * landmarksNum + l].x, landmarks[i * landmarksNum + l].y);
         }
     }
 

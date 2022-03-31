@@ -14,19 +14,27 @@
 // limitations under the License.
 */
 
+#include "models/segmentation_model.h"
+
+#include <stddef.h>
+#include <stdint.h>
+
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
-#include <utils/ocv_common.hpp>
-#include "models/segmentation_model.h"
+
+#include "models/internal_model_data.h"
 #include "models/results.h"
 
-SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout) :
-    ImageModel(modelFileName, useAutoResize, layout) {}
+SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout)
+    : ImageModel(modelFileName, useAutoResize, layout) {}
 
-std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename) {
+std::vector<std::string> SegmentationModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;
 
     /* Read labels (if any) */
@@ -61,17 +69,15 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     if (useAutoResize) {
-        ppp.input().tensor().
-            set_spatial_dynamic_shape();
+        ppp.input().tensor().set_spatial_dynamic_shape();
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+        ppp.input()
+            .preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
 
     ppp.input().model().set_layout(inputLayout);
@@ -87,20 +93,20 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     const ov::Shape& outputShape = output.get_shape();
     ov::Layout outputLayout("");
     switch (outputShape.size()) {
-    case 3:
-        outputLayout = "CHW";
-        outChannels = 1;
-        outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
-        outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
-        break;
-    case 4:
-        outputLayout = "NCHW";
-        outChannels = (int)(outputShape[ov::layout::channels_idx(outputLayout)]);
-        outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
-        outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
-        break;
-    default:
-        throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D outputs are supported.");
+        case 3:
+            outputLayout = "CHW";
+            outChannels = 1;
+            outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
+            outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
+            break;
+        case 4:
+            outputLayout = "NCHW";
+            outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
+            outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
+            outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
+            break;
+        default:
+            throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D outputs are supported.");
     }
 }
 
@@ -114,16 +120,14 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
     if (outChannels == 1 && outTensor.get_element_type() == ov::element::i32) {
         cv::Mat predictions(outHeight, outWidth, CV_32SC1, outTensor.data<int32_t>());
         predictions.convertTo(result->resultImage, CV_8UC1);
-    }
-    else if (outChannels == 1 && outTensor.get_element_type() == ov::element::i64) {
+    } else if (outChannels == 1 && outTensor.get_element_type() == ov::element::i64) {
         cv::Mat predictions(outHeight, outWidth, CV_32SC1);
         const auto data = outTensor.data<int64_t>();
         for (size_t i = 0; i < predictions.total(); ++i) {
             reinterpret_cast<int32_t*>(predictions.data)[i] = int32_t(data[i]);
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
-    }
-    else if (outTensor.get_element_type() == ov::element::f32) {
+    } else if (outTensor.get_element_type() == ov::element::f32) {
         const float* data = outTensor.data<float>();
         for (int rowId = 0; rowId < outHeight; ++rowId) {
             for (int colId = 0; colId < outWidth; ++colId) {
@@ -135,16 +139,19 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
                         classId = chId;
                         maxProb = prob;
                     }
-                } // nChannels
+                }  // nChannels
 
                 result->resultImage.at<uint8_t>(rowId, colId) = classId;
-            } // width
-        } // height
+            }  // width
+        }  // height
     }
 
-    cv::resize(result->resultImage, result->resultImage,
-        cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
-        0, 0, cv::INTER_NEAREST);
+    cv::resize(result->resultImage,
+               result->resultImage,
+               cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
+               0,
+               0,
+               cv::INTER_NEAREST);
 
     return std::unique_ptr<ResultBase>(result);
 }

@@ -15,11 +15,22 @@
 */
 
 #pragma once
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
+
+#include <opencv2/core.hpp>
+
 #include "models/detection_model.h"
-#include "models/results.h"
+
+namespace ov {
+class Model;
+class Tensor;
+}  // namespace ov
+struct InferenceResult;
+struct ResultBase;
 
 class ModelRetinaFacePT : public DetectionModel {
 public:
@@ -36,10 +47,18 @@ public:
         float right;
         float bottom;
 
-        float getWidth() const { return (right - left) + 1.0f; }
-        float getHeight() const { return (bottom - top) + 1.0f; }
-        float getXCenter() const { return left + (getWidth() - 1.0f) / 2.0f; }
-        float getYCenter() const { return top + (getHeight() - 1.0f) / 2.0f; }
+        float getWidth() const {
+            return (right - left) + 1.0f;
+        }
+        float getHeight() const {
+            return (bottom - top) + 1.0f;
+        }
+        float getXCenter() const {
+            return left + (getWidth() - 1.0f) / 2.0f;
+        }
+        float getYCenter() const {
+            return top + (getHeight() - 1.0f) / 2.0f;
+        }
     };
 
     /// Loads model and performs required initialization
@@ -49,31 +68,33 @@ public:
     /// @param useAutoResize - if true, image will be resized by openvino.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
     /// @param layout - model input layout
-    ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        float boxIOUThreshold, const std::string& layout = "");
+    ModelRetinaFacePT(const std::string& modelFileName,
+                      float confidenceThreshold,
+                      bool useAutoResize,
+                      float boxIOUThreshold,
+                      const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
     size_t landmarksNum;
     const float boxIOUThreshold;
-    float variance[2] = { 0.1f, 0.2f };
+    float variance[2] = {0.1f, 0.2f};
 
-    enum OutputType {
-        OUT_BOXES,
-        OUT_SCORES,
-        OUT_LANDMARKS,
-        OUT_MAX
-    };
+    enum OutputType { OUT_BOXES, OUT_SCORES, OUT_LANDMARKS, OUT_MAX };
 
     std::vector<ModelRetinaFacePT::Box> priors;
 
     std::vector<size_t> filterByScore(const ov::Tensor& scoresTensor, const float confidenceThreshold);
     std::vector<float> getFilteredScores(const ov::Tensor& scoresTensor, const std::vector<size_t>& indicies);
     std::vector<cv::Point2f> getFilteredLandmarks(const ov::Tensor& landmarksTensor,
-        const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
+                                                  const std::vector<size_t>& indicies,
+                                                  int imgWidth,
+                                                  int imgHeight);
     std::vector<ModelRetinaFacePT::Box> generatePriorData();
     std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const ov::Tensor& boxesTensor,
-        const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
+                                                              const std::vector<size_t>& indicies,
+                                                              int imgWidth,
+                                                              int imgHeight);
 
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

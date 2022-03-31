@@ -14,17 +14,28 @@
 // limitations under the License.
 */
 
+#include "models/hpe_model_openpose.h"
+
+#include <cmath>
+
 #include <algorithm>
+#include <map>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
-#include <opencv2/imgproc/imgproc.hpp>
+
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
-#include <utils/common.hpp>
+
+#include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-#include <utils/image_utils.h>
-#include "models/hpe_model_openpose.h"
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
 #include "models/openpose_decoder.h"
+#include "models/results.h"
 
 const cv::Vec3f HPEOpenPose::meanPixel = cv::Vec3f::all(128);
 const float HPEOpenPose::minPeaksDistance = 3.0f;
@@ -32,13 +43,15 @@ const float HPEOpenPose::midPointsScoreThreshold = 0.05f;
 const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
 const float HPEOpenPose::minSubsetScore = 0.2f;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
-    float confidenceThreshold, const std::string& layout) :
-    ImageModel(modelFileName, false, layout),
-    aspectRatio(aspectRatio),
-    targetSize(targetSize),
-    confidenceThreshold(confidenceThreshold) {
-}
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName,
+                         double aspectRatio,
+                         int targetSize,
+                         float confidenceThreshold,
+                         const std::string& layout)
+    : ImageModel(modelFileName, false, layout),
+      aspectRatio(aspectRatio),
+      targetSize(targetSize),
+      confidenceThreshold(confidenceThreshold) {}
 
 void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -50,14 +63,12 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Shape& inputShape = model->input().get_shape();
     const ov::Layout& inputLayout = getInputLayout(model->input());
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
-        || inputShape[ov::layout::channels_idx(inputLayout)] != 3)
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
+        inputShape[ov::layout::channels_idx(inputLayout)] != 3)
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     ppp.input().model().set_layout(inputLayout);
 
@@ -70,9 +81,7 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Layout outputLayout("NCHW");
     for (const auto& output : model->outputs()) {
         const auto& outTensorName = output.get_any_name();
-        ppp.output(outTensorName).tensor().
-            set_element_type(ov::element::f32)
-            .set_layout(outputLayout);
+        ppp.output(outTensorName).tensor().set_element_type(ov::element::f32).set_layout(outputLayout);
         outputsNames.push_back(outTensorName);
     }
     model = ppp.build();
@@ -89,16 +98,18 @@ void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         std::swap(outputsNames[0], outputsNames[1]);
     }
 
-    if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[batchId] != 1
-        || heatmapsOutputShape[ov::layout::channels_idx(outputLayout)] != keypointsNumber + 1) {
-        throw std::logic_error("1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM dimension of model's heatmap is expected");
+    if (heatmapsOutputShape.size() != 4 || heatmapsOutputShape[batchId] != 1 ||
+        heatmapsOutputShape[ov::layout::channels_idx(outputLayout)] != keypointsNumber + 1) {
+        throw std::logic_error("1x" + std::to_string(keypointsNumber + 1) +
+                               "xHFMxWFM dimension of model's heatmap is expected");
     }
-    if (pafsOutputShape.size() != 4 || pafsOutputShape[batchId] != 1
-        || pafsOutputShape[channelsId] != 2 * (keypointsNumber + 1)) {
-        throw std::logic_error("1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM dimension of model's output is expected");
+    if (pafsOutputShape.size() != 4 || pafsOutputShape[batchId] != 1 ||
+        pafsOutputShape[channelsId] != 2 * (keypointsNumber + 1)) {
+        throw std::logic_error("1x" + std::to_string(2 * (keypointsNumber + 1)) +
+                               "xHFMxWFM dimension of model's output is expected");
     }
-    if (pafsOutputShape[heightId] != heatmapsOutputShape[heightId]
-        || pafsOutputShape[widthId] != heatmapsOutputShape[widthId]) {
+    if (pafsOutputShape[heightId] != heatmapsOutputShape[heightId] ||
+        pafsOutputShape[widthId] != heatmapsOutputShape[widthId]) {
         throw std::logic_error("output and heatmap are expected to have matching last two dimensions");
     }
 
@@ -128,7 +139,8 @@ void HPEOpenPose::changeInputSize(std::shared_ptr<ov::Model>& model) {
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
-    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);
+    auto paddedImage =
+        resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);
     if (inputLayerSize.width < roi.width)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
 
@@ -137,8 +149,10 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     }
 
     request.set_input_tensor(wrapMat2Tensor(paddedImage));
-    return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
-        image.cols / static_cast<float>(roi.width), image.rows / static_cast<float>(roi.height));
+    return std::make_shared<InternalScaleData>(paddedImage.cols,
+                                               paddedImage.rows,
+                                               image.cols / static_cast<float>(roi.width),
+                                               image.rows / static_cast<float>(roi.height));
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
@@ -155,15 +169,15 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult)
 
     std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {
-        heatMaps[i] = cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1,
-                              heats + i * heatMapShape[2] * heatMapShape[3]);
+        heatMaps[i] =
+            cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1, heats + i * heatMapShape[2] * heatMapShape[3]);
     }
     resizeFeatureMaps(heatMaps);
 
     std::vector<cv::Mat> pafs(outputShape[1]);
     for (size_t i = 0; i < pafs.size(); i++) {
-        pafs[i] = cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1,
-                          predictions + i * heatMapShape[2] * heatMapShape[3]);
+        pafs[i] =
+            cv::Mat(heatMapShape[2], heatMapShape[3], CV_32FC1, predictions + i * heatMapShape[2] * heatMapShape[3]);
     }
     resizeFeatureMaps(pafs);
 
@@ -189,15 +203,16 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult)
 
 void HPEOpenPose::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
     for (auto& featureMap : featureMaps) {
-        cv::resize(featureMap, featureMap, cv::Size(),
-                   upsampleRatio, upsampleRatio, cv::INTER_CUBIC);
+        cv::resize(featureMap, featureMap, cv::Size(), upsampleRatio, upsampleRatio, cv::INTER_CUBIC);
     }
 }
 
-class FindPeaksBody: public cv::ParallelLoopBody {
+class FindPeaksBody : public cv::ParallelLoopBody {
 public:
-    FindPeaksBody(const std::vector<cv::Mat>& heatMaps, float minPeaksDistance,
-                  std::vector<std::vector<Peak> >& peaksFromHeatMap, float confidenceThreshold)
+    FindPeaksBody(const std::vector<cv::Mat>& heatMaps,
+                  float minPeaksDistance,
+                  std::vector<std::vector<Peak>>& peaksFromHeatMap,
+                  float confidenceThreshold)
         : heatMaps(heatMaps),
           minPeaksDistance(minPeaksDistance),
           peaksFromHeatMap(peaksFromHeatMap),
@@ -212,17 +227,15 @@ public:
 private:
     const std::vector<cv::Mat>& heatMaps;
     float minPeaksDistance;
-    std::vector<std::vector<Peak> >& peaksFromHeatMap;
+    std::vector<std::vector<Peak>>& peaksFromHeatMap;
     float confidenceThreshold;
 };
 
-std::vector<HumanPose> HPEOpenPose::extractPoses(
-        const std::vector<cv::Mat>& heatMaps,
-        const std::vector<cv::Mat>& pafs) const {
+std::vector<HumanPose> HPEOpenPose::extractPoses(const std::vector<cv::Mat>& heatMaps,
+                                                 const std::vector<cv::Mat>& pafs) const {
     std::vector<std::vector<Peak>> peaksFromHeatMap(heatMaps.size());
     FindPeaksBody findPeaksBody(heatMaps, minPeaksDistance, peaksFromHeatMap, confidenceThreshold);
-    cv::parallel_for_(cv::Range(0, static_cast<int>(heatMaps.size())),
-                      findPeaksBody);
+    cv::parallel_for_(cv::Range(0, static_cast<int>(heatMaps.size())), findPeaksBody);
     int peaksBefore = 0;
     for (size_t heatmapId = 1; heatmapId < heatMaps.size(); heatmapId++) {
         peaksBefore += static_cast<int>(peaksFromHeatMap[heatmapId - 1].size());
@@ -230,8 +243,12 @@ std::vector<HumanPose> HPEOpenPose::extractPoses(
             peak.id += peaksBefore;
         }
     }
-    std::vector<HumanPose> poses = groupPeaksToPoses(
-                peaksFromHeatMap, pafs, keypointsNumber, midPointsScoreThreshold,
-                foundMidPointsRatioThreshold, minJointsNumber, minSubsetScore);
+    std::vector<HumanPose> poses = groupPeaksToPoses(peaksFromHeatMap,
+                                                     pafs,
+                                                     keypointsNumber,
+                                                     midPointsScoreThreshold,
+                                                     foundMidPointsRatioThreshold,
+                                                     minJointsNumber,
+                                                     minSubsetScore);
     return poses;
 }

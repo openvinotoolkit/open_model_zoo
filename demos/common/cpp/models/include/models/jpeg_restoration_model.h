@@ -15,8 +15,12 @@
 */
 
 #pragma once
+
+#include <memory>
 #include <string>
+
 #include <openvino/openvino.hpp>
+
 #include "models/image_model.h"
 #include "models/results.h"
 
@@ -27,11 +31,12 @@ public:
     /// @param inputImgSize size of image to set model input shape
     /// @param jpegCompression flag allows to perform compression before the inference
     /// @param layout - model input layout
-    JPEGRestorationModel(const std::string& modelFileName, const cv::Size& inputImgSize,
-        bool jpegCompression, const std::string& layout = "");
+    JPEGRestorationModel(const std::string& modelFileName,
+                         const cv::Size& inputImgSize,
+                         bool jpegCompression,
+                         const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
