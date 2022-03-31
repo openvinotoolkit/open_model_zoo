@@ -51,7 +51,8 @@ class SubDetector:
         img_info["width"] = width
         img_feed, ratio = preprocess(img, self.input_shape)
         img_info["ratio"] = ratio
-        res_numpy = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode] # return (1, 3549, 15) of np.array
+        # (1, 3549, 15) of np.array
+        res_numpy = self.infer_request.infer({self.inode: np.expand_dims(img_feed, axis=0)})[self.onode]
 
         # streching bboxes to 416x416 input image.
         outputs_numpy = demo_postprocess(res_numpy, self.input_shape, p6=False)

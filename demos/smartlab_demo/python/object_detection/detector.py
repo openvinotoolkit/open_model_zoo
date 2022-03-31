@@ -138,20 +138,18 @@ class Detector:
             loc_subdet = self.side_ruler_subdetector
 
         # global detector inference
-        all_preds = []
-        preds, _ = glb_subdet.inference(img)
+        preds, _ = glb_subdet.inference(img) # Nx7 (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
         if len(preds) == 0: return None, None, None
-        all_preds.append(preds)
+        all_preds = preds
 
         # local detector inference
         parent_cat = loc_subdet.parent_cat
         parent_id = glb_subdet.detcls2id[parent_cat]
-        parent_roi = self._get_parent_roi(all_preds[-1], parent_id)
+        parent_roi = self._get_parent_roi(all_preds, parent_id)
         if parent_roi is not None:
             cascade_preds = loc_subdet.inference_in(img, parent_roi)
             if cascade_preds is not None:
-                all_preds.append(cascade_preds)
-        all_preds = np.concatenate(all_preds)
+                all_preds = np.vstack((all_preds, cascade_preds))
 
         # cast class id integer
         for r, pred in enumerate(all_preds):
