@@ -4,27 +4,41 @@
 
 #pragma once
 
+#include <stddef.h>
+
+#include <list>
+#include <map>
 #include <memory>
 #include <string>
-#include <list>
 #include <vector>
-#include <map>
-#include <opencv2/opencv.hpp>
 
+#include <opencv2/core.hpp>
+
+#include "detectors.hpp"
 #include "face.hpp"
 
-// -------------------------Generic routines for visualization of detection results-------------------------------------------------
+// -------------------------Generic routines for visualization of detection
+// results-------------------------------------------------
 
 // Drawing a bar of emotions
 class EmotionBarVisualizer {
 public:
     using Ptr = std::shared_ptr<EmotionBarVisualizer>;
 
-    explicit EmotionBarVisualizer(std::vector<std::string> const& emotionNames, cv::Size size = cv::Size(300, 140), cv::Size padding = cv::Size(10, 10),
-                              double opacity = 0.6, double textScale = 1, int textThickness = 1);
+    explicit EmotionBarVisualizer(std::vector<std::string> const& emotionNames,
+                                  cv::Size size = cv::Size(300, 140),
+                                  cv::Size padding = cv::Size(10, 10),
+                                  double opacity = 0.6,
+                                  double textScale = 1,
+                                  int textThickness = 1);
 
-    void draw(cv::Mat& img, std::map<std::string, float> emotions, cv::Point org, cv::Scalar fgcolor, cv::Scalar bgcolor);
+    void draw(cv::Mat& img,
+              std::map<std::string, float> emotions,
+              cv::Point org,
+              cv::Scalar fgcolor,
+              cv::Scalar bgcolor);
     cv::Size getSize();
+
 private:
     std::vector<std::string> emotionNames;
     cv::Size size;
@@ -58,10 +72,10 @@ public:
     using Ptr = std::shared_ptr<HeadPoseVisualizer>;
 
     explicit HeadPoseVisualizer(float scale = 50,
-                            cv::Scalar xAxisColor = cv::Scalar(0, 0, 255),
-                            cv::Scalar yAxisColor = cv::Scalar(0, 255, 0),
-                            cv::Scalar zAxisColor = cv::Scalar(255, 0, 0),
-                            int axisThickness = 2);
+                                cv::Scalar xAxisColor = cv::Scalar(0, 0, 255),
+                                cv::Scalar yAxisColor = cv::Scalar(0, 255, 0),
+                                cv::Scalar zAxisColor = cv::Scalar(255, 0, 0),
+                                int axisThickness = 2);
 
     void draw(cv::Mat& frame, cv::Point3f cpoint, HeadPoseDetection::Results headPose);
 
@@ -79,12 +93,7 @@ private:
 // Drawing detected faces on the frame
 class Visualizer {
 public:
-    enum AnchorType {
-        TL = 0,
-        TR,
-        BL,
-        BR
-    };
+    enum AnchorType { TL = 0, TR, BL, BR };
 
     struct DrawParams {
         cv::Point cell;
@@ -93,7 +102,11 @@ public:
         size_t frameIdx;
     };
 
-    explicit Visualizer(cv::Size const& imgSize, int leftPadding = 10, int rightPadding = 10, int topPadding = 75, int bottomPadding = 10);
+    explicit Visualizer(cv::Size const& imgSize,
+                        int leftPadding = 10,
+                        int rightPadding = 10,
+                        int topPadding = 75,
+                        int bottomPadding = 10);
 
     void enableEmotionBar(std::vector<std::string> const& emotionNames);
     void draw(cv::Mat img, std::list<Face::Ptr> faces);

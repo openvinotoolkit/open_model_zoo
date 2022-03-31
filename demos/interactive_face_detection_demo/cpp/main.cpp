@@ -2,12 +2,32 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <stdlib.h>
+
+#include <algorithm>
+#include <chrono>
+#include <exception>
 #include <iostream>
 #include <limits>
+#include <list>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <gflags/gflags.h>
-#include <utils/images_capture.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
+
 #include <monitors/presenter.h>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "detectors.hpp"
 #include "face.hpp"
@@ -20,17 +40,18 @@ DEFINE_bool(h, false, h_msg);
 constexpr char m_msg[] = "path to an .xml file with a trained Face Detection model";
 DEFINE_string(m, "", m_msg);
 
-constexpr char i_msg[] = "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+constexpr char i_msg[] =
+    "an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
 DEFINE_string(i, "0", i_msg);
 
-constexpr char bb_enlarge_coef_msg[] = "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
+constexpr char bb_enlarge_coef_msg[] =
+    "coefficient to enlarge/reduce the size of the bounding box around the detected face. Default is 1.2";
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_msg);
 
-constexpr char d_msg[] =
-    "specify a device to infer on (the list of available devices is shown below). "
-    "Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. "
-    "Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. "
-    "Default is CPU";
+constexpr char d_msg[] = "specify a device to infer on (the list of available devices is shown below). "
+                         "Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. "
+                         "Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. "
+                         "Default is CPU";
 DEFINE_string(d, "CPU", d_msg);
 
 constexpr char dx_coef_msg[] = "coefficient to shift the bounding box around the detected face along the Ox axis";
@@ -82,13 +103,13 @@ constexpr char t_msg[] = "probability threshold for detections. Default is 0.5";
 DEFINE_double(t, 0.5, t_msg);
 
 constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
-    "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
+                         "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
 DEFINE_string(u, "cdm", u_msg);
 
-void parse(int argc, char *argv[]) {
+void parse(int argc, char* argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, false);
     if (FLAGS_h || 1 == argc) {
-        std::cout <<   "\t[ -h]                                         " << h_msg
+        std::cout << "\t[ -h]                                         " << h_msg
                   << "\n\t[--help]                                      print help on all arguments"
                   << "\n\t  -m <MODEL FILE>                             " << m_msg
                   << "\n\t[ -i <INPUT>]                                 " << i_msg
@@ -118,16 +139,18 @@ void parse(int argc, char *argv[]) {
         showAvailableDevices();
         std::cout << ov::get_openvino_version() << std::endl;
         exit(0);
-    } if (FLAGS_i.empty()) {
+    }
+    if (FLAGS_i.empty()) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
-    } if (FLAGS_m.empty()) {
+    }
+    if (FLAGS_m.empty()) {
         throw std::invalid_argument{"-m <MODEL FILE> can't be empty"};
     }
     slog::info << ov::get_openvino_version() << slog::endl;
 }
-} // namespace
+}  // namespace
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     std::set_terminate(catcher);
     parse(argc, argv);
     PerformanceMetrics metrics;
@@ -135,8 +158,12 @@ int main(int argc, char *argv[]) {
     // --------------------------- 1. Loading Inference Engine -----------------------------
     ov::Core core;
 
-    FaceDetection faceDetector(FLAGS_m, FLAGS_t, FLAGS_r,
-                                static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
+    FaceDetection faceDetector(FLAGS_m,
+                               FLAGS_t,
+                               FLAGS_r,
+                               static_cast<float>(FLAGS_bb_enlarge_coef),
+                               static_cast<float>(FLAGS_dx_coef),
+                               static_cast<float>(FLAGS_dy_coef));
     AgeGenderDetection ageGenderDetector(FLAGS_mag, FLAGS_r);
     HeadPoseDetection headPoseDetector(FLAGS_mhp, FLAGS_r);
     EmotionsDetection emotionsDetector(FLAGS_mem, FLAGS_r);
@@ -202,7 +229,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Filling inputs of face analytics networks
-        for (auto &&face : prev_detection_results) {
+        for (auto&& face : prev_detection_results) {
             cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prevFrame.size());
             const cv::Mat& crop = prevFrame(clippedRect);
             ageGenderDetector.enqueue(crop);
@@ -212,7 +239,8 @@ int main(int argc, char *argv[]) {
             antispoofingClassifier.enqueue(crop);
         }
 
-        // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Estimation and Antispoofing Classifier networks simultaneously
+        // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Estimation and
+        // Antispoofing Classifier networks simultaneously
         ageGenderDetector.submitRequest();
         headPoseDetector.submitRequest();
         emotionsDetector.submitRequest();
@@ -289,7 +317,7 @@ int main(int argc, char *argv[]) {
         visualizer.draw(prevFrame, faces);
 
         presenter.drawGraphs(prevFrame);
-        metrics.update(startTimePrevFrame, prevFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+        metrics.update(startTimePrevFrame, prevFrame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
         timer.finish("total");
 

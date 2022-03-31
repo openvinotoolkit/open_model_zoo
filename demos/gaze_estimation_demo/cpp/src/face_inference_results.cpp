@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <iostream>
 #include "face_inference_results.hpp"
+
+#include <memory>
+#include <stdexcept>
+
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 
@@ -35,14 +39,12 @@ std::vector<cv::Point2f> FaceInferenceResults::getEyeLandmarks() {
         result[1] = faceLandmarks[1];
         result[2] = faceLandmarks[2];
         result[3] = faceLandmarks[3];
-    }
-    else if (faceLandmarks.size() == 98) {
+    } else if (faceLandmarks.size() == 98) {
         result[0] = faceLandmarks[60];
         result[1] = faceLandmarks[64];
         result[2] = faceLandmarks[68];
         result[3] = faceLandmarks[72];
-    }
-    else {
+    } else {
         throw std::runtime_error("the network must output 35 or 98 points");
     }
     return result;

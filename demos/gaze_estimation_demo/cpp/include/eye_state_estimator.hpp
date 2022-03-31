@@ -4,20 +4,23 @@
 
 #pragma once
 
-#include <cstdio>
 #include <string>
 
-#include "base_estimator.hpp"
+#include <opencv2/core.hpp>
 
-#include "face_inference_results.hpp"
+#include "base_estimator.hpp"
 #include "ie_wrapper.hpp"
 
+namespace ov {
+class Core;
+}  // namespace ov
+
 namespace gaze_estimation {
-class EyeStateEstimator: public BaseEstimator {
+struct FaceInferenceResults;
+
+class EyeStateEstimator : public BaseEstimator {
 public:
-    EyeStateEstimator(ov::Core& core,
-                      const std::string& modelPath,
-                      const std::string& deviceName);
+    EyeStateEstimator(ov::Core& core, const std::string& modelPath, const std::string& deviceName);
     void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
     ~EyeStateEstimator() override;
 

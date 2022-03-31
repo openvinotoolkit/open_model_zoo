@@ -2,16 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "landmarks_estimator.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "landmarks_estimator.hpp"
+#include <opencv2/imgproc.hpp>
+
+#include "face_inference_results.hpp"
 
 namespace gaze_estimation {
 
-LandmarksEstimator::LandmarksEstimator(
-    ov::Core& ie, const std::string& modelPath, const std::string& deviceName) :
-        ieWrapper(ie, modelPath, modelType, deviceName), numberLandmarks(0) {
+LandmarksEstimator::LandmarksEstimator(ov::Core& ie, const std::string& modelPath, const std::string& deviceName)
+    : ieWrapper(ie, modelPath, modelType, deviceName),
+      numberLandmarks(0) {
     inputTensorName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputTensorName);
 
@@ -35,7 +46,7 @@ void LandmarksEstimator::estimate(const cv::Mat& image, FaceInferenceResults& ou
     const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
     const auto& outputTensorDims = outputInfo.at(outputTensorName);
     if (outputTensorDims.size() == 2) {
-        outputResults.faceLandmarks=simplePostprocess(faceBoundingBox, faceCrop);
+        outputResults.faceLandmarks = simplePostprocess(faceBoundingBox, faceCrop);
 
     } else {
         outputResults.faceLandmarks = heatMapPostprocess(faceBoundingBox, faceCrop);
@@ -69,8 +80,8 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
 
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
         const cv::Mat& heatMap = heatMaps[landmarkId];
-        int px = int(preds[landmarkId].x);
-        int py = int(preds[landmarkId].y);
+        int px = static_cast<int>(preds[landmarkId].x);
+        int py = static_cast<int>(preds[landmarkId].y);
         if (1 < px && px < heatMap.cols - 1 && 1 < py && py < heatMap.rows - 1) {
             float diffFirst = heatMap.at<float>(py, px + 1) - heatMap.at<float>(py, px - 1);
             float diffSecond = heatMap.at<float>(py + 1, px) - heatMap.at<float>(py - 1, px);
@@ -79,7 +90,7 @@ std::vector<cv::Point2i> LandmarksEstimator::heatMapPostprocess(cv::Rect faceBou
         }
     }
 
-    //transform preds
+    // transform preds
     cv::Mat trans = affineTransform(center, scale, 0, heatMapsDims[2], heatMapsDims[3], cv::Point2f(0., 0.), true);
     std::vector<cv::Point2i> landmarks;
     for (size_t landmarkId = 0; landmarkId < numberLandmarks; landmarkId++) {
@@ -120,12 +131,17 @@ std::vector<cv::Point2f> LandmarksEstimator::getMaxPreds(std::vector<cv::Mat> he
         const float* heatMapData = heatMap.ptr<float>();
         std::vector<int> indices(reshapedSize);
         std::iota(std::begin(indices), std::end(indices), 0);
-        std::partial_sort(std::begin(indices), std::begin(indices) + numberLandmarks, std::end(indices),
-            [heatMapData](int l, int r) { return heatMapData[l] > heatMapData[r]; });
+        std::partial_sort(std::begin(indices),
+                          std::begin(indices) + numberLandmarks,
+                          std::end(indices),
+                          [heatMapData](int l, int r) {
+                              return heatMapData[l] > heatMapData[r];
+                          });
         size_t idx = indices[0];
         float maxVal = heatMapData[idx];
         if (maxVal > 0) {
-            preds.push_back(cv::Point2f(static_cast<float>(idx % heatMaps[0].cols), static_cast<float>(idx / heatMaps[0].cols)));
+            preds.push_back(
+                cv::Point2f(static_cast<float>(idx % heatMaps[0].cols), static_cast<float>(idx / heatMaps[0].cols)));
         } else {
             preds.push_back(cv::Point2f(-1, -1));
         }
@@ -136,16 +152,19 @@ std::vector<cv::Point2f> LandmarksEstimator::getMaxPreds(std::vector<cv::Mat> he
 int LandmarksEstimator::sign(float number) {
     if (number > 0) {
         return 1;
-    }
-    else if (number < 0) {
+    } else if (number < 0) {
         return -1;
     }
     return 0;
 }
 
-cv::Mat LandmarksEstimator::affineTransform(
-    cv::Point2f center, cv::Point2f scale, float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv)
-{
+cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center,
+                                            cv::Point2f scale,
+                                            float rot,
+                                            size_t dst_w,
+                                            size_t dst_h,
+                                            cv::Point2f shift,
+                                            bool inv) {
     cv::Point2f scale_tmp = scale;
     const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
@@ -171,14 +190,13 @@ cv::Mat LandmarksEstimator::affineTransform(
 cv::Point2f LandmarksEstimator::rotatePoint(cv::Point2f pt, float angle_rad) {
     float new_x = pt.x * cos(angle_rad) - pt.y * sin(angle_rad);
     float new_y = pt.x * sin(angle_rad) + pt.y * cos(angle_rad);
-    return  cv::Point2f(new_x, new_y);
+    return cv::Point2f(new_x, new_y);
 }
 
 cv::Point2f LandmarksEstimator::get3rdPoint(cv::Point2f a, cv::Point2f b) {
     cv::Point2f direction = a - b;
-    return  cv::Point2f(b.x - direction.y, b.y + direction.x);
+    return cv::Point2f(b.x - direction.y, b.y + direction.x);
 }
 
-LandmarksEstimator::~LandmarksEstimator() {
-}
+LandmarksEstimator::~LandmarksEstimator() {}
 }  // namespace gaze_estimation

@@ -2,24 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <cstdio>
+#include "face_detector.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <map>
 
-#include "openvino/openvino.hpp"
+#include <openvino/openvino.hpp>
 
-#include "face_detector.hpp"
+#include <utils/slog.hpp>
+
+#include "face_inference_results.hpp"
 
 namespace gaze_estimation {
 
-FaceDetector::FaceDetector(
-    ov::Core& core, const std::string& modelPath, const std::string& deviceName,
-    double detectionConfidenceThreshold, bool enableReshape) :
-        ieWrapper(core, modelPath, modelType, deviceName),
-        detectionThreshold(detectionConfidenceThreshold),
-        enableReshape(enableReshape)
-{
+FaceDetector::FaceDetector(ov::Core& core,
+                           const std::string& modelPath,
+                           const std::string& deviceName,
+                           double detectionConfidenceThreshold,
+                           bool enableReshape)
+    : ieWrapper(core, modelPath, modelType, deviceName),
+      detectionThreshold(detectionConfidenceThreshold),
+      enableReshape(enableReshape) {
     const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();
 
     inputTensorName = ieWrapper.expectSingleInput();
@@ -31,7 +38,8 @@ FaceDetector::FaceDetector(
     outputTensorName = ieWrapper.expectSingleOutput();
     const auto& outputTensorDims = outputInfo.at(outputTensorName);
 
-    if (outputTensorDims.size() != 4 || outputTensorDims[0] != 1 || outputTensorDims[1] != 1 || outputTensorDims[3] != 7) {
+    if (outputTensorDims.size() != 4 || outputTensorDims[0] != 1 || outputTensorDims[1] != 1 ||
+        outputTensorDims[3] != 7) {
         throw std::runtime_error(modelPath + ": expected \"" + outputTensorName + "\" to have shape 1x1xNx7");
     }
 
@@ -67,8 +75,8 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
         double networkAspectRatio = std::round(100. * inputTensorDims[3] / inputTensorDims[2]) / 100.;
         double aspectRatioThreshold = 0.01;
 
-         if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-             slog::debug << "Face Detection network is reshaped" << slog::endl;
+        if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
+            slog::debug << "Face Detection network is reshaped" << slog::endl;
             // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
             inputTensorDims[3] = static_cast<unsigned long>(inputTensorDims[2] * imageAspectRatio);
 
@@ -97,8 +105,7 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
         auto y = rawDetectionResults[detectionID * 7 + 4] * imageSize.height;
         auto height = rawDetectionResults[detectionID * 7 + 6] * imageSize.height - y;
 
-        cv::Rect faceRect(static_cast<int>(x), static_cast<int>(y),
-                          static_cast<int>(width), static_cast<int>(height));
+        cv::Rect faceRect(static_cast<int>(x), static_cast<int>(y), static_cast<int>(width), static_cast<int>(height));
         adjustBoundingBox(faceRect);
 
         auto rectIntersection = faceRect & imageRect;
@@ -115,7 +122,6 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     return detectionResult;
 }
 
-FaceDetector::~FaceDetector() {
-}
+FaceDetector::~FaceDetector() {}
 
 }  // namespace gaze_estimation

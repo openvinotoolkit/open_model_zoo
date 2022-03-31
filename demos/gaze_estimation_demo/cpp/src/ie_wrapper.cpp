@@ -2,22 +2,35 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "ie_wrapper.hpp"
+
+#include <cstdio>
+#include <functional>
 #include <map>
+#include <numeric>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "openvino/openvino.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
 #include <utils/common.hpp>
-
-#include "ie_wrapper.hpp"
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 
-IEWrapper::IEWrapper(
-    ov::Core& core, const std::string& modelPath, const std::string& modelType, const std::string& deviceName) :
-        modelPath(modelPath), modelType(modelType), deviceName(deviceName), core(core)
-{
+IEWrapper::IEWrapper(ov::Core& core,
+                     const std::string& modelPath,
+                     const std::string& modelType,
+                     const std::string& deviceName)
+    : modelPath(modelPath),
+      modelType(modelType),
+      deviceName(deviceName),
+      core(core) {
     slog::info << "Reading model: " << modelPath << slog::endl;
     model = core.read_model(modelPath);
     logBasicModelInfo(model);
@@ -33,19 +46,12 @@ void IEWrapper::setExecPart() {
         ov::Shape layerDims = inputs[i].get_shape();
         input_tensors_dims_info[layerName] = layerDims;
         if (layerDims.size() == 4) {
-            ppp.input(layerName).tensor().
-                set_element_type(ov::element::u8).
-                set_layout({ "NCHW" });
-        }
-        else if (layerDims.size() == 2) {
-            ppp.input(layerName).tensor().
-                set_element_type(ov::element::f32).
-                set_layout({ "NC" });
-        }
-        else {
+            ppp.input(layerName).tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
+        } else if (layerDims.size() == 2) {
+            ppp.input(layerName).tensor().set_element_type(ov::element::f32).set_layout({"NC"});
+        } else {
             throw std::runtime_error("Unknown type of input layer layout. Expected either 4 or 2 dimensional inputs");
         }
-
     }
     // set map of output tensor name -- tensor dimension pairs
     ov::OutputVector outputs = model->outputs();

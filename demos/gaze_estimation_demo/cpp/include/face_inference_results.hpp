@@ -5,8 +5,12 @@
 #pragma once
 
 #include <vector>
-#include <opencv2/core/core.hpp>
-#include "utils/slog.hpp"
+
+#include <opencv2/core.hpp>
+
+namespace slog {
+class LogStream;
+}  // namespace slog
 
 namespace gaze_estimation {
 struct FaceInferenceResults {

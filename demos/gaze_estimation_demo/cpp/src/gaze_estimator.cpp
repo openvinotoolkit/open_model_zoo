@@ -2,11 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "gaze_estimator.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <initializer_list>
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <cmath>
 
-#include "gaze_estimator.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
+
+#include "face_inference_results.hpp"
 
 namespace gaze_estimation {
 
@@ -14,20 +24,23 @@ const char TENSOR_HEAD_POSE_ANGLES[] = "head_pose_angles";
 const char TENSOR_LEFT_EYE_IMAGE[] = "left_eye_image";
 const char TENSOR_RIGHT_EYE_IMAGE[] = "right_eye_image";
 
-GazeEstimator::GazeEstimator(
-    ov::Core& ie, const std::string& modelPath, const std::string& deviceName, bool doRollAlign) :
-        ieWrapper(ie, modelPath, modelType, deviceName), rollAlign(doRollAlign)
-{
+GazeEstimator::GazeEstimator(ov::Core& ie,
+                             const std::string& modelPath,
+                             const std::string& deviceName,
+                             bool doRollAlign)
+    : ieWrapper(ie, modelPath, modelType, deviceName),
+      rollAlign(doRollAlign) {
     const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();
 
-    for (const auto& TensorName: {TENSOR_HEAD_POSE_ANGLES, TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
+    for (const auto& TensorName : {TENSOR_HEAD_POSE_ANGLES, TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
         if (inputInfo.find(TensorName) == inputInfo.end())
             throw std::runtime_error(modelPath + ": expected to have input named \"" + TensorName + "\"");
     }
 
     auto expectAngles = [&modelPath](const std::string& TensorName, const ov::Shape dims) {
-        bool is1Dim = !dims.empty()
-            && std::all_of(dims.begin(), dims.end() - 1, [](unsigned long n) { return n == 1; });
+        bool is1Dim = !dims.empty() && std::all_of(dims.begin(), dims.end() - 1, [](unsigned long n) {
+            return n == 1;
+        });
 
         if (!is1Dim || dims.back() != 3) {
             throw std::runtime_error(modelPath + ": expected \"" + TensorName + "\" to have dimensions [1x...]3");
@@ -36,7 +49,7 @@ GazeEstimator::GazeEstimator(
 
     expectAngles(TENSOR_HEAD_POSE_ANGLES, inputInfo.at(TENSOR_HEAD_POSE_ANGLES));
 
-    for (const auto& TensorName: { TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
+    for (const auto& TensorName : {TENSOR_LEFT_EYE_IMAGE, TENSOR_RIGHT_EYE_IMAGE}) {
         ieWrapper.expectImageInput(TensorName);
     }
 
@@ -111,6 +124,5 @@ void GazeEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputR
     outputResults.gazeVector = gazeVector;
 }
 
-GazeEstimator::~GazeEstimator() {
-}
+GazeEstimator::~GazeEstimator() {}
 }  // namespace gaze_estimation

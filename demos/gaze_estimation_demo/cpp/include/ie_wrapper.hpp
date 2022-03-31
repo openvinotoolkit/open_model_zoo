@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include <cstdio>
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
-#include "utils/common.hpp"
-#include "utils/ocv_common.hpp"
-#include "utils/slog.hpp"
+#include <openvino/openvino.hpp>
+
+namespace cv {
+class Mat;
+}  // namespace cv
 
 namespace gaze_estimation {
 class IEWrapper {

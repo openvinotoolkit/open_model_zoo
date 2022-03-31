@@ -2,29 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <functional>
-#include <chrono>
+#include <stddef.h>
+
 #include <algorithm>
-#include <iterator>
-#include <map>
+#include <chrono>
+#include <exception>
+#include <iomanip>
+#include <memory>
+#include <ostream>
+#include <ratio>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <set>
 
-#include "openvino/openvino.hpp"
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include "gflags/gflags.h"
-#include "monitors/presenter.h"
-#include "utils/images_capture.h"
-#include "utils/ocv_common.hpp"
-#include "utils/performance_metrics.hpp"
-#include "utils/slog.hpp"
+#include <monitors/presenter.h>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
+#include "crossroad_camera_demo.hpp"
 #include "detection_base.hpp"
 #include "detection_person.hpp"
 #include "detection_person_attr.hpp"
 #include "detection_person_reid.hpp"
-#include "crossroad_camera_demo.hpp"
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // Parsing and validation of input args
@@ -74,10 +82,10 @@ int main(int argc, char* argv[]) {
         Load(personReId).into(core, FLAGS_d_reid);
 
         // 3. Do inference
-        cv::Rect cropRoi; // cropped image coordinates
+        cv::Rect cropRoi;  // cropped image coordinates
         ov::Tensor frameTensor;
         ov::Tensor roiTensor;
-        cv::Mat person; // Mat object containing person data cropped by openCV
+        cv::Mat person;  // Mat object containing person data cropped by openCV
 
         // Start inference & calc performance
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
@@ -111,7 +119,7 @@ int main(int argc, char* argv[]) {
 
             // Process the results down to the pipeline
             ms personAttribsNetworkTime(0), personReIdNetworktime(0);
-            int personAttribsInferred = 0,  personReIdInferred = 0;
+            int personAttribsInferred = 0, personReIdInferred = 0;
             for (PersonDetection::Result& result : personDetection.results) {
                 if (result.label == FLAGS_person_label) {
                     // person
@@ -120,8 +128,9 @@ int main(int argc, char* argv[]) {
                         cropRoi.y = (result.location.y < 0) ? 0 : result.location.y;
                         cropRoi.width = std::min(result.location.width, frame.cols - cropRoi.x);
                         cropRoi.height = std::min(result.location.height, frame.rows - cropRoi.y);
-                        ov::Coordinate p00({ 0, (size_t)cropRoi.y, (size_t)cropRoi.x, 0 });
-                        ov::Coordinate p01({ 1, (size_t)(cropRoi.y + cropRoi.height), (size_t)(cropRoi.x + cropRoi.width), 3 });
+                        ov::Coordinate p00({0, (size_t)cropRoi.y, (size_t)cropRoi.x, 0});
+                        ov::Coordinate p01(
+                            {1, (size_t)(cropRoi.y + cropRoi.height), (size_t)(cropRoi.x + cropRoi.width), 3});
                         roiTensor = ov::Tensor(frameTensor, p00, p01);
                     } else {
                         // To crop ROI manually and allocate required memory (cv::Mat) again
@@ -158,7 +167,6 @@ int main(int argc, char* argv[]) {
                             bottom_color_p.x = static_cast<int>(resPersAttrAndColor.bottom_color_point.x) * person.cols;
                             bottom_color_p.y = static_cast<int>(resPersAttrAndColor.bottom_color_point.y) * person.rows;
 
-
                             cv::Rect person_rect(0, 0, person.cols, person.rows);
 
                             // Define area around top color's location
@@ -174,7 +182,7 @@ int main(int argc, char* argv[]) {
                             cv::Rect bc_rect;
                             bc_rect.x = bottom_color_p.x - person.cols / 6;
                             bc_rect.y = bottom_color_p.y - person.rows / 10;
-                            bc_rect.height =  2 * person.rows / 8;
+                            bc_rect.height = 2 * person.rows / 8;
                             bc_rect.width = 2 * person.cols / 6;
 
                             bc_rect = bc_rect & person_rect;
@@ -216,10 +224,14 @@ int main(int argc, char* argv[]) {
                     // Process outputs
                     if (!resPersAttrAndColor.attributes_strings.empty()) {
                         cv::Rect image_area(0, 0, frame.cols, frame.rows);
-                        cv::Rect tc_label(result.location.x + result.location.width, result.location.y,
-                                          result.location.width / 4, result.location.height / 2);
-                        cv::Rect bc_label(result.location.x + result.location.width, result.location.y + result.location.height / 2,
-                                            result.location.width / 4, result.location.height / 2);
+                        cv::Rect tc_label(result.location.x + result.location.width,
+                                          result.location.y,
+                                          result.location.width / 4,
+                                          result.location.height / 2);
+                        cv::Rect bc_label(result.location.x + result.location.width,
+                                          result.location.y + result.location.height / 2,
+                                          result.location.width / 4,
+                                          result.location.height / 2);
 
                         if (shouldHandleTopBottomColors) {
                             frame(tc_label & image_area) = resPersAttrAndColor.top_color;
@@ -229,17 +241,19 @@ int main(int argc, char* argv[]) {
                         for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i) {
                             cv::Scalar color;
                             if (resPersAttrAndColor.attributes_indicators[i]) {
-                                color = cv::Scalar(0, 200, 0); // has attribute
+                                color = cv::Scalar(0, 200, 0);  // has attribute
                             } else {
-                                color = cv::Scalar(0, 0, 255); // doesn't have attribute
+                                color = cv::Scalar(0, 0, 255);  // doesn't have attribute
                             }
-                            putHighlightedText(frame,
-                                    resPersAttrAndColor.attributes_strings[i],
-                                    cv::Point2f(static_cast<float>(result.location.x + 5 * result.location.width / 4),
-                                                static_cast<float>(result.location.y + 15 + 15 * i)),
-                                    cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                    0.5,
-                                    color, 1);
+                            putHighlightedText(
+                                frame,
+                                resPersAttrAndColor.attributes_strings[i],
+                                cv::Point2f(static_cast<float>(result.location.x + 5 * result.location.width / 4),
+                                            static_cast<float>(result.location.y + 15 + 15 * i)),
+                                cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                0.5,
+                                color,
+                                1);
                         }
 
                         if (FLAGS_r) {
@@ -250,17 +264,20 @@ int main(int argc, char* argv[]) {
                             slog::debug << "Person Attributes results: " << output_attribute_string << slog::endl;
                             if (shouldHandleTopBottomColors) {
                                 slog::debug << "Person top color: " << resPersAttrAndColor.top_color << slog::endl;
-                                slog::debug << "Person bottom color: " << resPersAttrAndColor.bottom_color << slog::endl;
+                                slog::debug << "Person bottom color: " << resPersAttrAndColor.bottom_color
+                                            << slog::endl;
                             }
                         }
                     }
                     if (!resPersReid.empty()) {
                         putHighlightedText(frame,
-                                    resPersReid,
-                                    cv::Point2f(static_cast<float>(result.location.x), static_cast<float>(result.location.y + 30)),
-                                    cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                    0.55,
-                                    cv::Scalar(250, 10, 10), 1);
+                                           resPersReid,
+                                           cv::Point2f(static_cast<float>(result.location.x),
+                                                       static_cast<float>(result.location.y + 30)),
+                                           cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                           0.55,
+                                           cv::Scalar(250, 10, 10),
+                                           1);
 
                         if (FLAGS_r) {
                             slog::debug << "Person Re-Identification results: " << resPersReid << slog::endl;
@@ -275,10 +292,16 @@ int main(int argc, char* argv[]) {
 
             // Execution statistics
             std::ostringstream out;
-            out << "Detection time : " << std::fixed << std::setprecision(2) << detection.count()
-                << " ms (" << 1000.f / detection.count() << " fps)";
+            out << "Detection time : " << std::fixed << std::setprecision(2) << detection.count() << " ms ("
+                << 1000.f / detection.count() << " fps)";
 
-            putHighlightedText(frame, out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
+            putHighlightedText(frame,
+                               out.str(),
+                               cv::Point2f(0, 20),
+                               cv::FONT_HERSHEY_COMPLEX_SMALL,
+                               0.8,
+                               {200, 10, 10},
+                               2);
 
             if (personDetection.results.size()) {
                 if (personAttribs.enabled() && personAttribsInferred) {
@@ -286,7 +309,13 @@ int main(int argc, char* argv[]) {
                     out.str("");
                     out << "Attributes Recognition time: " << std::fixed << std::setprecision(2) << average_time
                         << " ms (" << 1000.f / average_time << " fps)";
-                    putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
+                    putHighlightedText(frame,
+                                       out.str(),
+                                       cv::Point2f(0, 40),
+                                       cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                       0.8,
+                                       {200, 10, 10},
+                                       2);
                     if (FLAGS_r) {
                         slog::debug << out.str() << slog::endl;
                     }
@@ -294,9 +323,15 @@ int main(int argc, char* argv[]) {
                 if (personReId.enabled() && personReIdInferred) {
                     float average_time = static_cast<float>(personReIdNetworktime.count() / personReIdInferred);
                     out.str("");
-                    out << "Re-Identification time: " << std::fixed << std::setprecision(2) << average_time
-                        << " ms (" << 1000.f / average_time << " fps)";
-                    putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
+                    out << "Re-Identification time: " << std::fixed << std::setprecision(2) << average_time << " ms ("
+                        << 1000.f / average_time << " fps)";
+                    putHighlightedText(frame,
+                                       out.str(),
+                                       cv::Point2f(0, 60),
+                                       cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                       0.8,
+                                       {200, 10, 10},
+                                       2);
                     if (FLAGS_r) {
                         slog::debug << out.str() << slog::endl;
                     }
@@ -306,7 +341,7 @@ int main(int argc, char* argv[]) {
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", frame);
                 const int key = cv::waitKey(1);
-                if (27 == key) // Esc
+                if (27 == key)  // Esc
                     break;
                 presenter.handleKey(key);
             }
@@ -319,12 +354,10 @@ int main(int argc, char* argv[]) {
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
-    }
-    catch (const std::exception& error) {
+    } catch (const std::exception& error) {
         slog ::err << error.what() << slog::endl;
         return 1;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }

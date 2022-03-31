@@ -4,23 +4,25 @@
 
 #pragma once
 
-#include <cstdio>
 #include <string>
 
-#include "face_inference_results.hpp"
 #include "base_estimator.hpp"
-
 #include "ie_wrapper.hpp"
 
+namespace cv {
+class Mat;
+}  // namespace cv
+namespace ov {
+class Core;
+}  // namespace ov
+
 namespace gaze_estimation {
-class GazeEstimator: public BaseEstimator {
+struct FaceInferenceResults;
+
+class GazeEstimator : public BaseEstimator {
 public:
-    GazeEstimator(ov::Core& core,
-                  const std::string& modelPath,
-                  const std::string& deviceName,
-                  bool doRollAlign = true);
-    void estimate(const cv::Mat& image,
-                  FaceInferenceResults& outputResults) override;
+    GazeEstimator(ov::Core& core, const std::string& modelPath, const std::string& deviceName, bool doRollAlign = true);
+    void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
     ~GazeEstimator() override;
 
     const std::string modelType = "Gaze Estimation";

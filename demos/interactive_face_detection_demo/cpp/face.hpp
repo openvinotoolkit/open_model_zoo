@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-# pragma once
-#include <string>
+#pragma once
+#include <stddef.h>
+
+#include <list>
 #include <map>
 #include <memory>
+#include <string>
 #include <utility>
-#include <list>
 #include <vector>
-#include <opencv2/opencv.hpp>
+
+#include <opencv2/core.hpp>
 
 #include "detectors.hpp"
 

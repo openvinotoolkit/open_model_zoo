@@ -4,6 +4,8 @@
 #pragma once
 
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 
@@ -40,8 +42,7 @@ static std::vector<int> getShape(const std::string& header) {
         return std::vector<int>(1, 1);
 
     // Remove all commas.
-    shapeStr.erase(std::remove(shapeStr.begin(), shapeStr.end(), ','),
-                   shapeStr.end());
+    shapeStr.erase(std::remove(shapeStr.begin(), shapeStr.end(), ','), shapeStr.end());
 
     std::istringstream ss(shapeStr);
     int value;
@@ -65,7 +66,7 @@ cv::Mat blobFromNPY(const std::string& path) {
     ifs.ignore(1);  // Skip minor version byte.
 
     unsigned short headerSize;
-    ifs.read((char*)&headerSize, sizeof(headerSize));
+    ifs.read(reinterpret_cast<char*>(&headerSize), sizeof(headerSize));
 
     std::string header(headerSize, '*');
     ifs.read(&header[0], header.size());
@@ -85,8 +86,8 @@ cv::Mat blobFromNPY(const std::string& path) {
     else
         throw std::logic_error("Unexpected numpy data type: " + dataType);
 
-    ifs.read((char*)blob.data, blob.total() * blob.elemSize());
-    CV_Assert((size_t)ifs.gcount() == blob.total() * blob.elemSize());
+    ifs.read(reinterpret_cast<char*>(blob.data), blob.total() * blob.elemSize());
+    CV_Assert(static_cast<size_t>(ifs.gcount()) == blob.total() * blob.elemSize());
 
     return blob;
 }

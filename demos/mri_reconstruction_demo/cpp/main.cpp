@@ -1,8 +1,25 @@
 // Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+#include <stddef.h>
+#include <stdint.h>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
-#include <opencv2/opencv.hpp>
+
 #include <utils/common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
@@ -10,7 +27,9 @@
 #include "mri_reconstruction_demo.hpp"
 #include "npy_reader.hpp"
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]);
+constexpr char const* kWinName = "MRI reconstruction with OpenVINO";
+
+bool ParseAndCheckCommandLine(int argc, char* argv[]);
 
 static cv::Mat tensorToMat(const ov::Tensor& tensor);
 
@@ -21,8 +40,6 @@ struct MRIData {
     // Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
     static constexpr double stats[]{2.20295299e-1, 1.11048916e+3};
 };
-
-static const std::string kWinName = "MRI reconstruction with OpenVINO";
 
 void callback(int pos, void* userdata);
 
@@ -77,7 +94,7 @@ int main(int argc, char** argv) {
     const int width = mri.data.size[2];
     mri.data /= sqrt(height * width);
 
-    mri.reconstructed.create({ numSlices, height, width }, CV_8U);
+    mri.reconstructed.create({numSlices, height, width}, CV_8U);
 
     slog::info << "Compute..." << slog::endl;
 
@@ -103,7 +120,8 @@ int main(int argc, char** argv) {
 
     metrics.update(startTime);
     slog::info << "Metrics report:" << slog::endl;
-    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms" << slog::endl;
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms"
+               << slog::endl;
 
     // Visualization loop.
     if (!FLAGS_no_show) {
@@ -121,10 +139,12 @@ cv::Mat tensorToMat(const ov::Tensor& tensor) {
     // NOTE: OpenVINO runtime sizes are reversed.
     ov::Shape tensorShape = tensor.get_shape();
     std::vector<int> size;
-    std::transform(tensorShape.begin(), tensorShape.end(), std::back_inserter(size), [](size_t dim) -> int { return int(dim); });
+    std::transform(tensorShape.begin(), tensorShape.end(), std::back_inserter(size), [](size_t dim) -> int {
+        return static_cast<int>(dim);
+    });
     ov::element::Type precision = tensor.get_element_type();
     CV_Assert(precision == ov::element::f32);
-    return cv::Mat(size, CV_32F, (void*)tensor.data());
+    return cv::Mat(size, CV_32F, static_cast<void*>(tensor.data()));
 }
 
 void callback(int sliceId, void* userdata) {
@@ -145,10 +165,18 @@ void callback(int sliceId, void* userdata) {
     cv::hconcat(std::vector<cv::Mat>({img, masked, rec}), render);
     cv::copyMakeBorder(render, render, kBorderSize, 0, 0, 0, cv::BORDER_CONSTANT, 255);
     cv::putText(render, "Original", cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
-    cv::putText(render, cv::format("Sampled (PSNR %.1f)", cv::PSNR(img, masked, 255)),
-                cv::Point(width, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
-    cv::putText(render, cv::format("Reconstructed (PSNR %.1f)", cv::PSNR(img, rec, 255)),
-                cv::Point(width*2, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
+    cv::putText(render,
+                cv::format("Sampled (PSNR %.1f)", cv::PSNR(img, masked, 255)),
+                cv::Point(width, 15),
+                cv::FONT_HERSHEY_SIMPLEX,
+                0.5,
+                0);
+    cv::putText(render,
+                cv::format("Reconstructed (PSNR %.1f)", cv::PSNR(img, rec, 255)),
+                cv::Point(width * 2, 15),
+                cv::FONT_HERSHEY_SIMPLEX,
+                0.5,
+                0);
 
     cv::imshow(kWinName, render);
     cv::waitKey(1);
@@ -169,7 +197,7 @@ cv::Mat kspaceToImage(const cv::Mat& kspace) {
     return img;
 }
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
