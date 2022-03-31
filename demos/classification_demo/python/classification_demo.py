@@ -182,9 +182,9 @@ def main():
     delay = int(cap.get_type() in {'VIDEO', 'CAMERA'})
 
     if args.adapter == 'openvino':
-        plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
+        plugin_config = get_user_config(args.device, args.nstreams, args.nthreads)
         model_adapter = OpenvinoAdapter(create_core(), args.model, device=args.device, plugin_config=plugin_config,
-                                        max_num_requests=args.num_infer_requests, model_parameters = {'input_layouts': args.layout})
+                                        max_num_requests=args.nireq, model_parameters = {'input_layouts': args.layout})
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
