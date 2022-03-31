@@ -89,8 +89,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        std::vector<std::string> coco_labels;
         if (!FLAGS_labels.empty()) {
-            custom::coco_labels = DetectionModel::loadLabels(FLAGS_labels);
+            coco_labels = DetectionModel::loadLabels(FLAGS_labels);
         }
 
 
