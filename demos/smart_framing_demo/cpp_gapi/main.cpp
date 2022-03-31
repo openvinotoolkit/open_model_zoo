@@ -94,15 +94,6 @@ int main(int argc, char *argv[]) {
         }
 
 
-        /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
-            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
-        const auto tmp = cap->read();
-        cap.reset();
-        cv::Size frame_size = cv::Size{ tmp.cols, tmp.rows };
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
-            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
-
         /** ---------------- Main graph of demo ---------------- **/
         cv::gapi::GNetPackage networks;
 
@@ -174,6 +165,16 @@ int main(int argc, char *argv[]) {
                                                            .compileStreaming(cv::compile_args(kernels, networks));
 
         /** ---------------- End of graph ---------------- **/
+
+        /** Get information about frame **/
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
+            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+        const auto tmp = cap->read();
+        cap.reset();
+        cv::Size frame_size = cv::Size{ tmp.cols, tmp.rows };
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
+            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+
 
         /** ---------------- The execution part ---------------- **/
         pipeline.setSource<custom::CommonCapSrc>(cap);
