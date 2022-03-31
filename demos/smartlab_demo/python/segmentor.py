@@ -166,7 +166,7 @@ class SegmentorMstcn:
 
             # if the input shape is unsupported shape, add dummpy result of noise and skip inference
             if input_mstcn.shape != (1, 2048, 1):
-                tranposed_logits = np.zeros((16, 2048))
+                tranposed_logits = np.zeros((2048, 16))
                 self.TemporalLogits = np.concatenate([self.TemporalLogits, tranposed_logits], axis=0)
                 return None
 
@@ -181,9 +181,9 @@ class SegmentorMstcn:
                 predictions --> 4x64x24
                 his_fea --> [12*[64x2048], 11*[64x2048], 11*[64x2048], 11*[64x2048]]
             """
-            temporal_logits = predictions[:, :len(self.ActionTerms), :] # 4x16xN
-            softmaxed_logits = softmax(temporal_logits[-1], 1) # 16xN
-            tranposed_logits = softmaxed_logits.transpose((1, 0))
+            temporal_logits = predictions[:, :len(self.ActionTerms), :] # Nx16x2048
+            softmaxed_logits = softmax(temporal_logits[-1], 1) # 16x2048
+            tranposed_logits = softmaxed_logits.transpose((1, 0)) # 2048x16
             self.TemporalLogits = np.concatenate([self.TemporalLogits, tranposed_logits], axis=0)
         else:
             for batch_idx in range(num_batch):
@@ -207,7 +207,7 @@ class SegmentorMstcn:
                         string = list(key.names)[0]
                         self.his_fea[string] = out[string]
 
-                temporal_logits = predictions[:, :len(self.ActionTerms), :] # 4x16xN
-                softmaxed_logits = softmax(temporal_logits[-1], 1) # 16xN
+                temporal_logits = predictions[:, :len(self.ActionTerms), :]
+                softmaxed_logits = softmax(temporal_logits[-1], 1)
                 tranposed_logits = softmaxed_logits.transpose((1, 0))
                 self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
