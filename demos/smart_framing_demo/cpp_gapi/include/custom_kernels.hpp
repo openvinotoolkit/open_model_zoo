@@ -9,6 +9,8 @@
 
 #include <inference_engine.hpp>
 
+#include "utils/slog.hpp"
+
 namespace IE = InferenceEngine;
 
 namespace custom {
