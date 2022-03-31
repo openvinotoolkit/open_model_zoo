@@ -193,94 +193,46 @@ class WaveRNNIE:
 class MelGANIE:
     def __init__(self, model, core, device='CPU', default_width=80):
         """
-        return class provided MelGAN inference.
+        return class provided MelGAN/HiFiGAN inference.
 
-        :param model: path to xml with MelGAN model of WaveRNN
+        :param model: path to xml with MelGAN/HiFiGAN model
         :param core: OpenVINO Core instance
         :param device: target device
         :return:
         """
         self.device = device
         self.core = core
-
-        self.scales = 4
-        self.hop_length = 256
+        self.input_name = 'mel'
+        self.MAX_WAV_VALUE = 32768.0 # constant for normalizing audio output in training stage
 
         self.model = self.load_network(model)
-        if self.model.input('mel').shape[2] != default_width:
-            orig_shape = self.model.input('mel').shape
-            new_shape = (orig_shape[0], orig_shape[1], default_width)
-            self.model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
+        self.model.reshape({self.input_name: PartialShape([1, 80, -1])})
 
-        self.requests = self.create_infer_requests(self.model, model, self.scales)
-
-        # fixed number of columns in mel-spectrogramm
-        self.mel_len = self.model.input('mel').shape[2]
-        self.widths = [self.mel_len * (i + 1) for i in range(self.scales)]
+        self.request = self.create_infer_request(self.model, model)
 
     def load_network(self, model_path):
         log.info('Reading MelGAN model {}'.format(model_path))
         return self.core.read_model(model_path)
 
-    def create_infer_requests(self, model, path, scales=None):
-        if scales is not None:
-            orig_shape = model.input('mel').shape
-            requests = []
-            for i in range(scales):
-                new_shape = (orig_shape[0], orig_shape[1], orig_shape[2] * (i + 1))
-                model.reshape({"mel": PartialShape([new_shape[0], new_shape[1], new_shape[2]])})
-                compiled_model = self.core.compile_model(model, device_name=self.device)
-                requests.append(compiled_model.create_infer_request())
-                model.reshape({"mel": PartialShape([orig_shape[0], orig_shape[1], orig_shape[2]])})
-        else:
-            compiled_model = self.core.compile_model(model, device_name=self.device)
-            requests = compiled_model.create_infer_request()
-        log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
+    def create_infer_request(self, model, path=None):
+        compiled_model = self.core.compile_model(model, device_name=self.device)
+        requests = compiled_model.create_infer_request()
+        if path is not None:
+            log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
         return requests
 
+    def preprocess_input(self, mel):
+        if len(mel.shape) < 3:
+            mel = np.expand_dims(mel, axis=0)
+
+        return {self.input_name: mel}
+
     def forward(self, mel):
-        mel = np.expand_dims(mel, axis=0)
-        res_audio = []
-        last_padding = 0
-        if mel.shape[2] % self.mel_len:
-            last_padding = self.mel_len - mel.shape[2] % self.mel_len
-
-        mel = np.pad(mel, ((0, 0), (0, 0), (0, last_padding)), 'constant', constant_values=-11.5129)
-
-        active_net = -1
-        cur_w = -1
-        cols = mel.shape[2]
-
-        for i, w in enumerate(self.widths):
-            if cols <= w:
-                cur_w = w
-                active_net = i
-                break
-        if active_net == -1:
-            cur_w = self.widths[-1]
-
-        c_begin = 0
-        c_end = cur_w
-        while c_begin < cols:
-            self.requests[active_net].infer(inputs={"mel": mel[:, :, c_begin:c_end]})
-            audio = self.requests[active_net].get_tensor("audio").data[:]
-            res_audio.extend(audio)
-
-            c_begin = c_end
-
-            if c_end + cur_w >= cols:
-                for i, w in enumerate(self.widths):
-                    if w >= cols - c_end:
-                        cur_w = w
-                        active_net = i
-                        break
-
-            c_end += cur_w
-        if last_padding:
-            audio = res_audio[:-self.hop_length * last_padding]
-        else:
-            audio = res_audio
-
+        input = self.preprocess_input(mel)
+        self.request.infer(input)
+        audio = self.request.get_tensor("audio").data[:]
+        if np.max(audio) <= 2.0:
+            audio = audio * self.MAX_WAV_VALUE
         audio = np.array(audio).astype(dtype=np.int16)
 
         return audio

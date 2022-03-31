@@ -46,29 +46,30 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: text_to_speech_demo.py [-h] -m_duration MODEL_DURATION -m_forward
-                              MODEL_FORWARD -i INPUT [-o OUT] [-d DEVICE]
-                              [-m_upsample MODEL_UPSAMPLE] [-m_rnn MODEL_RNN]
+usage: text_to_speech_demo.py [-h] -m_encoder MODEL_ENCODER -m_decoder
+                              MODEL_DECODER -i [INPUT [INPUT ...]] [-o OUT]
+                              [-d DEVICE] [-m_upsample MODEL_UPSAMPLE]
+                              [-m_rnn MODEL_RNN]
                               [--upsampler_width UPSAMPLER_WIDTH]
                               [-m_melgan MODEL_MELGAN] [-s_id SPEAKER_ID]
                               [-a ALPHA]
 
 Options:
   -h, --help            Show this help message and exit.
-  -m_duration MODEL_DURATION, --model_duration MODEL_DURATION
-                        Required. Path to ForwardTacotron`s duration
-                        prediction part (*.xml format).
-  -m_forward MODEL_FORWARD, --model_forward MODEL_FORWARD
-                        Required. Path to ForwardTacotron`s mel-spectrogram
-                        regression part (*.xml format).
-  -i INPUT, --input INPUT
+  -m_encoder MODEL_ENCODER, --model_encoder MODEL_ENCODER
+                        Required. Path to encoder of acoustic model (*.xml
+                        format).
+  -m_decoder MODEL_DECODER, --model_decoder MODEL_DECODER
+                        Required. Path to decoder of acoustic model (*.xml
+                        format).
+  -i [INPUT [INPUT ...]], --input [INPUT [INPUT ...]]
                         Required. Text or path to the input file.
   -o OUT, --out OUT     Optional. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL, MYRIAD or HETERO is acceptable. The
-                        demo will look for a suitable plugin for device
-                        specified. Default value is CPU
+                        GPU, HDDL, MYRIAD or HETERO is acceptable. The demo
+                        will look for a suitable plugin for device specified.
+                        Default value is CPU
   -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE
                         Path to WaveRNN`s part for mel-spectrogram upsampling
                         by time axis (*.xml format).

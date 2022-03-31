@@ -27,6 +27,7 @@ import wave
 from openvino.runtime import Core, get_version
 
 from models.forward_tacotron_ie import ForwardTacotronIE
+from models.acoustic_gan_ie import AcousticGANIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
 from utils.gui import init_parameters_interactive
 
@@ -47,11 +48,11 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m_duration", "--model_duration",
-                      help="Required. Path to ForwardTacotron`s duration prediction part (*.xml format).",
+    args.add_argument("-m_encoder", "--model_encoder",
+                      help="Required. Path to encoder of acoustic model  (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-m_forward", "--model_forward",
-                      help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
+    args.add_argument("-m_decoder", "--model_decoder",
+                      help="Required. Path to decoder of acoustic model (*.xml format).",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Text or path to the input file.", required=True,
                       type=str, nargs='*')
@@ -77,8 +78,8 @@ def build_argparser():
                       required=False,
                       type=int)
 
-    args.add_argument("-m_melgan", "--model_melgan",
-                      help="Path to model of the MelGAN (*.xml format).",
+    args.add_argument("-m_vocoder", "--model_vocoder",
+                      help="Path to model of the MelGAN or HiFiGAN (*.xml format).",
                       default=None, required=False,
                       type=str)
 
@@ -97,9 +98,9 @@ def build_argparser():
 
 
 def is_correct_args(args):
-    if not ((args.model_melgan is None and args.model_rnn is not None and args.model_upsample is not None) or
-            (args.model_melgan is not None and args.model_rnn is None and args.model_upsample is None)):
-        log.error('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
+    if not ((args.model_vocoder is None and args.model_rnn is not None and args.model_upsample is not None) or
+            (args.model_vocoder is not None and args.model_rnn is None and args.model_upsample is None)):
+        log.error('Can not use m_rnn and m_upsample with m_vocoder. Define m_vocoder or [m_rnn, m_upsample]')
         return False
     if args.alpha < 0.5 or args.alpha > 2.0:
         log.error('Can not use time coefficient less than 0.5 or greater than 2.0')
@@ -109,6 +110,33 @@ def is_correct_args(args):
         return False
 
     return True
+
+def load_vocoder(args, core):
+    if args.model_vocoder is not None:
+        vocoder = MelGANIE(args.model_vocoder, core, device=args.device)
+    else:
+        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, core, device=args.device,
+                            upsampler_width=args.upsampler_width)
+    return vocoder
+
+def load_acoustic_model(args, core):
+    model = core.read_model(args.model_encoder)
+    speaker_emb = None
+
+    if 'pos_mask' in [input.any_name for input in model.inputs]:
+        acoustic_model = ForwardTacotronIE(args.model_encoder, args.model_decoder, core, args.device, verbose=False)
+        if acoustic_model.is_multi_speaker:
+            if args.speaker_id == -1:
+                interactive_parameter = init_parameters_interactive(args)
+                args.alpha = 1.0 / interactive_parameter["speed"]
+                speaker_emb = acoustic_model.get_pca_speaker_embedding(interactive_parameter["gender"],
+                                                                         interactive_parameter["style"])
+            else:
+                speaker_emb = acoustic_model.get_speaker_embeddings()[args.speaker_id, :]
+    else:
+        acoustic_model = AcousticGANIE(args.model_encoder, args.model_decoder, core, args.device, verbose=False)
+
+    return acoustic_model, speaker_emb
 
 def parse_input(input):
     if not input:
@@ -136,32 +164,17 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
-    if args.model_melgan is not None:
-        vocoder = MelGANIE(args.model_melgan, core, device=args.device)
-    else:
-        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, core, device=args.device,
-                            upsampler_width=args.upsampler_width)
-
-    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, core, args.device, verbose=False)
+    vocoder = load_vocoder(args, core)
+    acoustic_model, speaker_emb = load_acoustic_model(args, core)
 
     audio_res = np.array([], dtype=np.int16)
-
-    speaker_emb = None
-    if forward_tacotron.is_multi_speaker:
-        if args.speaker_id == -1:
-            interactive_parameter = init_parameters_interactive(args)
-            args.alpha = 1.0 / interactive_parameter["speed"]
-            speaker_emb = forward_tacotron.get_pca_speaker_embedding(interactive_parameter["gender"],
-                                                                     interactive_parameter["style"])
-        else:
-            speaker_emb = forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]
 
     len_th = 80
 
     input_data = parse_input(args.input)
 
-    time_forward = 0
-    time_wavernn = 0
+    time_acoustic_model = 0
+    time_vocoder = 0
 
     time_s_all = perf_counter()
     count = 0
@@ -183,20 +196,20 @@ def main():
 
         for text in tqdm(texts):
             time_s = perf_counter()
-            mel = forward_tacotron.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
-            time_forward += perf_counter() - time_s
+            mel = acoustic_model.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
+            time_acoustic_model += perf_counter() - time_s
 
             time_s = perf_counter()
             audio = vocoder.forward(mel)
-            time_wavernn += perf_counter() - time_s
+            time_vocoder += perf_counter() - time_s
 
             audio_res = np.append(audio_res, audio)
 
     total_latency = (perf_counter() - time_s_all) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
-    log.debug("\tVocoder time: {:.1f} ms".format(time_wavernn * 1e3))
-    log.debug("\tForwardTacotronTime: {:.1f} ms".format(time_forward * 1e3))
+    log.debug("\tVocoder time: {:.1f} ms".format(time_vocoder * 1e3))
+    log.debug("\tAcoustic model time: {:.1f} ms".format(time_acoustic_model * 1e3))
 
     save_wav(audio_res, args.out)
 
