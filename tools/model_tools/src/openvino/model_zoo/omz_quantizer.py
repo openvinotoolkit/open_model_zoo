@@ -49,11 +49,15 @@ def main():
     args = parser.parse_args()
 
     with _common.telemetry_session('Model Quantizer', 'quantizer') as telemetry:
-        models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
+        args_count = sum([args.all, args.name is not None, args.list is not None, args.print_all])
+        if args_count == 0:
+            telemetry.send_event('md', 'quantizer_selection_mode', None)
+        else:
+            for mode in ['all', 'list', 'name', 'print_all']:
+                if getattr(args, mode):
+                    telemetry.send_event('md', 'quantizer_selection_mode', mode)
 
-        for mode in ['all', 'list', 'name']:
-            if getattr(args, mode):
-                telemetry.send_event('md', 'quantizer_selection_mode', mode)
+        models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
         if args.precisions is None:
             requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
@@ -64,7 +68,7 @@ def main():
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
-                'precisions': str(requested_precisions).replace(',', ';'),
+                'precisions': str(sorted(requested_precisions)).replace(',', ';'),
             }
             telemetry.send_event('md', 'quantizer_model', json.dumps(model_information))
 

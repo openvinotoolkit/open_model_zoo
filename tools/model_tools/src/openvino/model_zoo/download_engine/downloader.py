@@ -63,17 +63,12 @@ class Downloader:
         return self._requested_precisions
 
     @requested_precisions.setter
-    def requested_precisions(self, value: str = None):
-        if value is None:
-            _requested_precisions = _common.KNOWN_PRECISIONS
-        else:
-            _requested_precisions = set(value.split(','))
-
-        unknown_precisions = _requested_precisions - _common.KNOWN_PRECISIONS
+    def requested_precisions(self, value: Set[str] = None):
+        unknown_precisions = value - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-        self._requested_precisions = _requested_precisions
+        self._requested_precisions = value
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
         start_time = time.monotonic()

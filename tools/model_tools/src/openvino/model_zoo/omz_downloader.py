@@ -68,24 +68,32 @@ def main():
     reporter = Downloader.make_reporter(args.progress_format)
 
     with _common.telemetry_session('Model Downloader', 'downloader') as telemetry:
+        args_count = sum([args.all, args.name is not None, args.list is not None, args.print_all])
+        if args_count == 0:
+            telemetry.send_event('md', 'downloader_selection_mode', None)
+        else:
+            for mode in ['all', 'list', 'name', 'print_all']:
+                if getattr(args, mode):
+                    telemetry.send_event('md', 'downloader_selection_mode', mode)
+
         models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
-
-        for mode in ['all', 'list', 'name']:
-            if getattr(args, mode):
-                telemetry.send_event('md', 'downloader_selection_mode', mode)
-
         failed_models = set()
 
-        downloader = Downloader(args.precisions, args.output_dir, args.cache_dir, args.num_attempts)
+        if args.precisions is None:
+            requested_precisions = _common.KNOWN_PRECISIONS
+        else:
+            requested_precisions = set(args.precisions.split(','))
 
         for model in models:
-            precisions_to_send = downloader.requested_precisions if args.precisions else downloader.requested_precisions & model.precisions
+            precisions_to_send = requested_precisions if args.precisions else requested_precisions & model.precisions
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
-                'precisions': str(precisions_to_send).replace(',', ';'),
+                'precisions': str(sorted(precisions_to_send)).replace(',', ';'),
             }
             telemetry.send_event('md', 'downloader_model', json.dumps(model_information))
+
+        downloader = Downloader(requested_precisions, args.output_dir, args.cache_dir, args.num_attempts)
 
         failed_models = downloader.bulk_download_model(models, reporter, args.jobs, args.progress_format)
 
