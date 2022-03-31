@@ -1,16 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <tuple>  // for make_tuple, tuple
-#include <vector>  // for vector
+#include <tuple>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Size, Point2f, Point3f, Point, Rect
-#include <opencv2/gapi/garray.hpp>  // for empty_array_desc, GArrayDesc, GArray
-#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque, GOpaqueDesc (ptr only)
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gopaque.hpp>
 
 namespace cv {
 class GMat;

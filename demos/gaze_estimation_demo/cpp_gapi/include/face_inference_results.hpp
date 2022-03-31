@@ -1,12 +1,12 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <vector>  // for vector
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Point2i, Rect, Point2f, Point3f
+#include <opencv2/core.hpp>
 
 namespace slog {
 class LogStream;

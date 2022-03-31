@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <memory>  // for allocator_traits<>::value_type
-#include <string>  // for string
-#include <utility>  // for pair
-#include <vector>  // for vector
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Scalar, Mat
-#include <opencv2/highgui.hpp>  // for namedWindow
-#include <opencv2/videoio.hpp>  // for VideoCapture
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/videoio.hpp>
 
-#include "tracker.hpp"  // for TrackedObjects
+#include "tracker.hpp"
 
 class Visualizer {
 private:

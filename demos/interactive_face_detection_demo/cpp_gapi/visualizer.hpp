@@ -1,20 +1,20 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <list>  // for list
-#include <map>  // for map
-#include <memory>  // for shared_ptr
-#include <string>  // for string
-#include <vector>  // for vector
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Scalar, Size, Point, Mat, Point3f, Rect
+#include <opencv2/core.hpp>
 
-#include "face.hpp"  // for Face, Face::Ptr
+#include "face.hpp"
 
 // --------Generic routines for visualization of detection results--------
 

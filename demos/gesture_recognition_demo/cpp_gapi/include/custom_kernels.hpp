@@ -1,18 +1,18 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <memory>  // for shared_ptr
+#include <memory>
 
-#include <opencv2/core.hpp>  // for Scalar, Size, CV_8U
-#include <opencv2/gapi/garray.hpp>  // for empty_array_desc, GArray (ptr only), GArrayDesc
-#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium, GKernelPackage
-#include <opencv2/gapi/gmat.hpp>  // for GMat (ptr only), GMatDesc
-#include <opencv2/gapi/gopaque.hpp>  // for empty_gopaque_desc, GOpaque (ptr only), GOpaqueDesc
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
 
 struct TrackedObject;
 

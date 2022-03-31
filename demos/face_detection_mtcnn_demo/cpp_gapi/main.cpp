@@ -2,51 +2,51 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for copy
-#include <chrono>  // for steady_clock
-#include <exception>  // for exception
-#include <iomanip>  // for operator<<, _Setprecision, setprecision, fixed
-#include <limits>  // for numeric_limits
-#include <memory>  // for shared_ptr, __shared_ptr_access, allocator_traits<>::value_type
-#include <stdexcept>  // for logic_error
-#include <string>  // for operator+, string
-#include <tuple>  // for tie, tuple
-#include <utility>  // for move
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <iomanip>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Size, Mat, Rect, CV_Assert
-#include <opencv2/gapi/core.hpp>  // for size, transpose
-#include <opencv2/gapi/garg.hpp>  // for gout
-#include <opencv2/gapi/garray.hpp>  // for GArray
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args, operator+=
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque
-#include <opencv2/gapi/gproto.hpp>  // for GIn, GOut
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled, queue_capacity
-#include <opencv2/gapi/imgproc.hpp>  // for BGR2RGB
-#include <opencv2/gapi/infer.hpp>  // for infer, networks, operator+=, GNetworkType, G_API_NET, GNetPackage
-#include <opencv2/gapi/infer/ie.hpp>  // for Params
-#include <opencv2/gapi/render/render.hpp>  // for render3ch
-#include <opencv2/highgui.hpp>  // for imshow, waitKey
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_COMPLEX
-#include <openvino/openvino.hpp>  // for get_openvino_version
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/render/render.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/args_helper.hpp>  // for stringToSize
-#include <utils/common.hpp>  // for fileNameNoExt, operator<<, showAvailableDevices
-#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics::M...
-#include <utils/slog.hpp>  // for LogStream, endl, info, err
-#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+#include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
-#include "custom_kernels.hpp"  // for RunNMS, ApplyRegression, Face, BBoxesToSquares, kernels, BuildFaces
-#include "face_detection_mtcnn_demo.hpp"  // for FLAGS_th, FLAGS_i, FLAGS_m_o, FLAGS_m_p, FLAGS_m_r, FLAGS_loop
-#include "gflags/gflags.h"  // for clstring, ParseCommandLineNonHelpFlags
-#include "utils.hpp"  // for get_pnet_level_name, run_mtcnn_p, calculate_half_scales, calculate...
+#include "custom_kernels.hpp"
+#include "face_detection_mtcnn_demo.hpp"
+#include "gflags/gflags.h"
+#include "utils.hpp"
 
 const int MAX_PYRAMID_LEVELS = 13;
 

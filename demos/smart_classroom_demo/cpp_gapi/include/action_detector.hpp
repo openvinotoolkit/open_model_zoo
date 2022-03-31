@@ -1,15 +1,15 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <string>  // for string
-#include <vector>  // for vector
+#include <string>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Size2f, Size, Rect
+#include <opencv2/core.hpp>
 
 /**
  * @brief Class for detection with action info

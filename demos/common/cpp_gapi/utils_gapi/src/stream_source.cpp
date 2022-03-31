@@ -1,14 +1,14 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "utils_gapi/stream_source.hpp"
 
-#include <opencv2/gapi/garg.hpp>  // for Data
-#include <opencv2/gapi/gmat.hpp>  // for GMatDesc, descr_of
-#include <opencv2/gapi/own/assert.hpp>  // for GAPI_Assert
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/own/assert.hpp>
 
-#include <utils/images_capture.h>  // for ImagesCapture
+#include <utils/images_capture.h>
 
 namespace custom {
 CommonCapSrc::CommonCapSrc(std::shared_ptr<ImagesCapture>& imagesCapture) : cap(imagesCapture) {

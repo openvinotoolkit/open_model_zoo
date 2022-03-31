@@ -1,17 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "action_detector.hpp"
 
-#include <math.h>  // for exp
-
-#include <algorithm>  // for max, min, max_element, nth_element
-#include <iterator>  // for distance
-#include <limits>  // for numeric_limits
-#include <memory>  // for allocator_traits<>::value_type, __alloc_traits<>::value_type
-#include <numeric>  // for iota
-#include <stdexcept>  // for logic_error
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <numeric>
+#include <stdexcept>
 
 #define SSD_LOCATION_RECORD_SIZE 4
 #define SSD_PRIORBOX_RECORD_SIZE 4

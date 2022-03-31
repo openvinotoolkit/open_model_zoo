@@ -1,12 +1,11 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "face.hpp"
 
-#include <math.h>  // for floor
-
-#include <algorithm>  // for max_element
+#include <algorithm>
+#include <cmath>
 
 Face::Face(size_t id, cv::Rect& location)
     : _location(location),

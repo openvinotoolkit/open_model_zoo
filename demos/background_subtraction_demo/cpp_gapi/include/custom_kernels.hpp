@@ -4,16 +4,16 @@
 
 #pragma once
 
-#include <string>  // for string
-#include <vector>  // for vector
+#include <string>
+#include <vector>
 
-#include <cpp/ie_cnn_network.h>  // for CNNNetwork
-#include <ie_allocator.hpp>  // for InferenceEngine
-#include <ie_common.h>  // for OutputsDataMap
-#include <ie_input_info.hpp>  // for InputsDataMap
-#include <opencv2/core.hpp>  // for Size, CV_8U
-#include <opencv2/gapi/gkernel.hpp>  // for G_API_OP, KernelTypeMedium, GKernelPackage
-#include <opencv2/gapi/gmat.hpp>  // for GMatDesc, GMat
+#include <cpp/ie_cnn_network.h>
+#include <ie_allocator.hpp>
+#include <ie_common.h>
+#include <ie_input_info.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gmat.hpp>
 
 namespace IE = InferenceEngine;
 

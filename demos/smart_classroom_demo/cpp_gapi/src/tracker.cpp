@@ -1,14 +1,13 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "tracker.hpp"
 
-#include <math.h>  // for exp
-
-#include <algorithm>  // for max, max_element, min_element
-#include <limits>  // for numeric_limits
-#include <utility>  // for pair, move
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <utility>
 
 const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 

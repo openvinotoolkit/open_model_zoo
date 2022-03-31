@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,9 +6,9 @@
 
 #include "visualizer.hpp"
 
-#include <algorithm>  // for max
+#include <algorithm>
 
-#include <opencv2/imgproc.hpp>  // for putText, FONT_HERSHEY_SIMPLEX, rectangle
+#include <opencv2/imgproc.hpp>
 
 void Visualizer::getStorageElements() {
     cv::FileStorage fs(storage_path_, cv::FileStorage::Mode::READ);

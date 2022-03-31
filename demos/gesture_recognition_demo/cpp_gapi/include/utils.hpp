@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <string>  // for string
-#include <vector>  // for vector
+#include <string>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Scalar
+#include <opencv2/core.hpp>
 
 cv::Scalar getNetShape(const std::string& path);
 

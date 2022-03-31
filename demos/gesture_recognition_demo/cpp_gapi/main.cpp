@@ -2,49 +2,49 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for copy
-#include <chrono>  // for steady_clock
-#include <exception>  // for exception
-#include <iomanip>  // for operator<<, _Setprecision, setprecision, fixed
-#include <limits>  // for numeric_limits
-#include <memory>  // for shared_ptr, make_shared, __shared_ptr_access
-#include <stdexcept>  // for logic_error
-#include <string>  // for operator+, string
-#include <utility>  // for move
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <iomanip>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Size, Mat, Scalar_, Vec
-#include <opencv2/gapi/garg.hpp>  // for gin, gout
-#include <opencv2/gapi/garray.hpp>  // for GArray
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque
-#include <opencv2/gapi/gproto.hpp>  // for GIn, GOut
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
-#include <opencv2/gapi/infer.hpp>  // for infer, infer2, networks, GNetworkType, G_API_NET
-#include <opencv2/gapi/infer/ie.hpp>  // for Params
-#include <opencv2/gapi/streaming/source.hpp>  // for make_src
-#include <opencv2/highgui.hpp>  // for waitKey
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_COMPLEX
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/streaming/source.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/args_helper.hpp>  // for stringToSize
-#include <utils/common.hpp>  // for fileNameNoExt, showAvailableDevices
-#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics...
-#include <utils/slog.hpp>  // for LogStream, endl, info, err
+#include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
-#include "custom_kernels.hpp"  // for kernels, ConstructClip, ExtractBoundingBox, GestureRecognitionP...
-#include "gesture_recognition_demo_gapi.hpp"  // for FLAGS_m_a, FLAGS_m_d, FLAGS_i, FLAGS_c, FLAGS_d_a, FLAGS_d_d
-#include "gflags/gflags.h"  // for clstring, ParseCommandLineNonHelpFlags
-#include "stream_source.hpp"  // for GestRecCapSource
-#include "tracker.hpp"  // for TrackedObject (ptr only), TrackedObjects
-#include "utils.hpp"  // for getNetShape, fill_labels
-#include "visualizer.hpp"  // for Visualizer
+#include "custom_kernels.hpp"
+#include "gesture_recognition_demo_gapi.hpp"
+#include "gflags/gflags.h"
+#include "stream_source.hpp"
+#include "tracker.hpp"
+#include "utils.hpp"
+#include "visualizer.hpp"
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     /** ---------- Parsing and validating input arguments ----------**/

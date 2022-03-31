@@ -1,19 +1,19 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <list>  // for list
-#include <map>  // for map
-#include <memory>  // for shared_ptr
-#include <string>  // for string
-#include <utility>  // for pair
-#include <vector>  // for vector
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Rect
+#include <opencv2/core.hpp>
 
 // -------------------------Describe detected face on a frame-------------------
 

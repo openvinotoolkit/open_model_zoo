@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,18 +6,17 @@
 
 #include "results_marker.hpp"
 
-#include <ctype.h>  // for toupper
-#include <math.h>  // for round, cos, sin, M_PI
+#include <cmath>
+#include <cctype>
+#include <vector>
 
-#include <vector>  // for vector
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <opencv2/core.hpp>  // for Scalar, Point2f, Point, Point_, Rect_, format, operator+, Point3f, ope...
-#include <opencv2/imgproc.hpp>  // for rectangle, line, arrowedLine, circle, FONT_HERSHEY_PLAIN, FONT_HERSHEY...
+#include <utils/ocv_common.hpp>
 
-#include <utils/ocv_common.hpp>  // for putHighlightedText
-
-#include "face_inference_results.hpp"  // for FaceInferenceResults
-#include "utils.hpp"  // for gazeVectorToGazeAngles
+#include "face_inference_results.hpp"
+#include "utils.hpp"
 
 namespace gaze_estimation {
 ResultsMarker::ResultsMarker(bool showFaceBoundingBox,

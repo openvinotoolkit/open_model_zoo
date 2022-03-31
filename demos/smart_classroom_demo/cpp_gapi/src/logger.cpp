@@ -1,17 +1,17 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "logger.hpp"
 
-#include <algorithm>  // for max
-#include <iomanip>  // for operator<<, setfill, setw
-#include <memory>  // for allocator_traits<>::value_type, allocator, __alloc_traits<>::value_type
-#include <utility>  // for pair
+#include <algorithm>
+#include <iomanip>
+#include <memory>
+#include <utility>
 
-#include <ie_common.h>  // for IE_ASSERT
+#include <ie_common.h>
 
-#include "tracker.hpp"  // for TrackedObject, Track, TrackedObjects
+#include "tracker.hpp"
 
 namespace {
 

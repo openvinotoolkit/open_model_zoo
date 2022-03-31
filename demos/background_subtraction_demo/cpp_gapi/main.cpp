@@ -2,55 +2,55 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for max
-#include <chrono>  // for steady_clock
-#include <exception>  // for exception
-#include <iomanip>  // for operator<<, _Setprecision, setprecision, fixed
-#include <limits>  // for numeric_limits
-#include <memory>  // for shared_ptr, make_shared, __shared_ptr_access
-#include <stdexcept>  // for logic_error
-#include <string>  // for allocator, operator==, operator+, string, basic_string, char...
-#include <utility>  // for move
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <iomanip>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Size, Mat, CV_8UC3, Scalar
-#include <opencv2/gapi/core.hpp>  // for resize
-#include <opencv2/gapi/cpu/core.hpp>  // for kernels
-#include <opencv2/gapi/cpu/imgproc.hpp>  // for kernels
-#include <opencv2/gapi/fluid/core.hpp>  // for kernels
-#include <opencv2/gapi/fluid/imgproc.hpp>  // for kernels
-#include <opencv2/gapi/garg.hpp>  // for gin, operator+=, gout
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation, GComputation::Generator
-#include <opencv2/gapi/gkernel.hpp>  // for combine, GKernelPackage
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gproto.hpp>  // for GIn, GOut, operator+=, GIOProtoArgs
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
-#include <opencv2/gapi/imgproc.hpp>  // for blur
-#include <opencv2/gapi/infer.hpp>  // for networks, Generic (ptr only)
-#include <opencv2/gapi/infer/ie.hpp>  // for Params
-#include <opencv2/gapi/own/assert.hpp>  // for GAPI_Assert
-#include <opencv2/gapi/streaming/source.hpp>  // for make_src
-#include <opencv2/gapi/util/optional.hpp>  // for optional, make_optional
-#include <opencv2/highgui.hpp>  // for imshow, waitKey
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_COMPLEX
-#include <openvino/openvino.hpp>  // for get_openvino_version
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/cpu/core.hpp>
+#include <opencv2/gapi/cpu/imgproc.hpp>
+#include <opencv2/gapi/fluid/core.hpp>
+#include <opencv2/gapi/fluid/imgproc.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/own/assert.hpp>
+#include <opencv2/gapi/streaming/source.hpp>
+#include <opencv2/gapi/util/optional.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/args_helper.hpp>  // for stringToSize
-#include <utils/common.hpp>  // for fileNameNoExt, operator<<, showAvailableDevices
-#include <utils/config_factory.h>  // for ModelConfig, ConfigFactory
-#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetr...
-#include <utils/slog.hpp>  // for LogStream, endl, info, err
-#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+#include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/config_factory.h>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
-#include "background_subtraction_demo_gapi.hpp"  // for FLAGS_m, FLAGS_at, FLAGS_target_bgr, FLAGS_blur_bgr, FLAGS_d
-#include "custom_kernels.hpp"  // for BGMattingReplacer, MaskRCNNBGReplacer, kernels, NNBGReplacer
-#include "gflags/gflags.h"  // for clstring, ParseCommandLineNonHelpFlags
+#include "background_subtraction_demo_gapi.hpp"
+#include "custom_kernels.hpp"
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {

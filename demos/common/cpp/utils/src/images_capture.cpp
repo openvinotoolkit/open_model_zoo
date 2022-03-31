@@ -1,9 +1,9 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 #include "utils/images_capture.h"
 
-#include <string.h>  // for size_t, strcmp
+#include <string.h>
 
 #ifdef _WIN32
 #    include "w_dirent.hpp"
@@ -11,16 +11,16 @@
 #    include <dirent.h>  // for closedir, dirent, opendir, readdir, DIR
 #endif
 
-#include <algorithm>  // for max, sort
-#include <chrono>  // for steady_clock
-#include <fstream>  // for ifstream
-#include <memory>  // for allocator, unique_ptr
-#include <stdexcept>  // for runtime_error, invalid_argument, out_of_range
-#include <string>  // for string, operator+, operator<, basic_string, char_traits, swap, stoi
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-#include <opencv2/imgcodecs.hpp>  // for imread
-#include <opencv2/videoio.hpp>  // for VideoCapture, CAP_PROP_FPS, CAP_PROP_POS_FRAMES, CAP_PROP_AUTOFOCUS, CAP_PR...
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
 
 class InvalidInput : public std::runtime_error {
 public:

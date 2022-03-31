@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <memory>  // for shared_ptr
+#include <memory>
 
-#include <opencv2/core.hpp>  // for Mat
-#include <opencv2/gapi/gmetaarg.hpp>  // for GMetaArg
-#include <opencv2/gapi/streaming/source.hpp>  // for IStreamSource
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/gmetaarg.hpp>
+#include <opencv2/gapi/streaming/source.hpp>
 
 class ImagesCapture;
 namespace cv {

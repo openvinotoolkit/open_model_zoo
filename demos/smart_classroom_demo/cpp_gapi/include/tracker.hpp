@@ -1,19 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <memory>  // for shared_ptr
-#include <set>  // for set
-#include <string>  // for string
-#include <tuple>  // for tuple
-#include <unordered_map>  // for unordered_map
-#include <vector>  // for vector
+#include <memory>
+#include <set>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Rect, CV_Assert, Vec2f, Size
+#include <opencv2/core.hpp>
 
 struct TrackedObject {
     cv::Rect rect;

@@ -1,20 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "tracker.hpp"
 
-#include <math.h>  // for exp
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <set>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-#include <algorithm>  // for max_element
-#include <memory>  // for allocator_traits<>::value_type
-#include <set>  // for set, operator!=, operator==, _Rb_tree_const_iterator
-#include <tuple>  // for tuple, get
-#include <unordered_map>  // for unordered_map, _Map_base<>::mapped_type, operator==, unordered_map<>::iter...
-#include <utility>  // for pair
-#include <vector>  // for vector
-
-#include <utils/kuhn_munkres.hpp>  // for KuhnMunkres
+#include <utils/kuhn_munkres.hpp>
 
 cv::Point center(const cv::Rect& rect) {
     int x = static_cast<int>(rect.x + rect.width * 0.5);

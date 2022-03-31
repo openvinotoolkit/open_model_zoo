@@ -4,16 +4,16 @@
 
 #include "custom_kernels.hpp"
 
-#include <algorithm>  // for copy, min, max
-#include <atomic>  // for atomic, __atomic_base
-#include <cstdint>  // for uint8_t
-#include <vector>  // for vector
+#include <algorithm>
+#include <atomic>
+#include <cstdint>
+#include <vector>
 
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl, GAPI_OCV_KERNEL_ST, GCPUStKernel...
-#include <opencv2/gapi/gcommon.hpp>  // for GCompileArgs
-#include <opencv2/imgproc.hpp>  // for resize
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include "tracker.hpp"  // for TrackedObjects, TrackerParams, Tracker, TrackedObject
+#include "tracker.hpp"
 
 const float BOUNDING_BOX_THRESHOLD = 0.4f;
 const int ACTION_IMAGE_SCALE = 256;

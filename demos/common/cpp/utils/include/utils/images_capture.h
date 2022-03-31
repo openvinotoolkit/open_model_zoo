@@ -1,17 +1,17 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <limits>  // for numeric_limits
-#include <memory>  // for unique_ptr
-#include <string>  // for string
+#include <limits>
+#include <memory>
+#include <string>
 
-#include <opencv2/core.hpp>  // for Mat, Size
+#include <opencv2/core.hpp>
 
-#include "utils/performance_metrics.hpp"  // for PerformanceMetrics
+#include "utils/performance_metrics.hpp"
 
 enum class read_type { efficient, safe };
 

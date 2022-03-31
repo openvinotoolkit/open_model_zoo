@@ -1,20 +1,21 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <math.h>  // for ceil
-#include <stddef.h>  // for size_t
+#include "drawing_helper.hpp"
 
-#include <algorithm>  // for min
-#include <limits>  // for numeric_limits
-#include <memory>  // for allocator_traits<>::value_type
+#include <stddef.h>
 
-#include <opencv2/highgui.hpp>  // for destroyWindow, imshow, namedWindow
-#include <opencv2/imgproc.hpp>  // for getTextSize, putText, rectangle, FONT_HERSHEY_SIMPLEX, FILLED, LINE_AA
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
 
-#include "tracker.hpp"  // for TrackedObject
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <drawing_helper.hpp>
+#include "tracker.hpp"
+
 
 DrawingHelper::DrawingHelper(bool show, int num_top_persons) : no_show_(show), num_top_persons_(num_top_persons) {
     if (!no_show_) {

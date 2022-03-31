@@ -1,13 +1,13 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 #include "custom_kernels.hpp"
 
-#include <string>  // for string
-#include <utility>  // for swap, make_pair, pair
+#include <string>
+#include <utility>
 
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_SIMPLEX
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/imgproc.hpp>
 
 namespace {
 const float P_NET_WINDOW_SIZE = 12.0f;

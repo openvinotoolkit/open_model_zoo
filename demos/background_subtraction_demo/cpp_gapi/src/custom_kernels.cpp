@@ -4,23 +4,23 @@
 
 #include "custom_kernels.hpp"
 
-#include <algorithm>  // for max, copy_n, min
-#include <map>  // for _Rb_tree_iterator, map<>::mapped_type
-#include <memory>  // for __shared_ptr_access, allocator_traits<>::value_type, shared_ptr
-#include <stdexcept>  // for logic_error
-#include <utility>  // for pair
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <utility>
 
-#include <ie_core.hpp>  // for Core
-#include <ie_data.h>  // for Data
-#include <ie_layouts.h>  // for TensorDesc
-#include <opencv2/gapi/core.hpp>  // for convertTo, merge3, mul, resize
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl
-#include <opencv2/gapi/gscalar.hpp>  // for GScalar
-#include <opencv2/gapi/imgproc.hpp>  // for medianBlur
-#include <opencv2/gapi/infer.hpp>  // for infer, GInferInputs, GInferOutputsTyped, GInferInputsTyped<>::Sto...
-#include <opencv2/gapi/operators.hpp>  // for operator&, operator+, operator-, operator~
-#include <opencv2/gapi/own/assert.hpp>  // for GAPI_Assert
-#include <opencv2/imgproc.hpp>  // for resize
+#include <ie_core.hpp>
+#include <ie_data.h>
+#include <ie_layouts.h>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/gscalar.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/operators.hpp>
+#include <opencv2/gapi/own/assert.hpp>
+#include <opencv2/imgproc.hpp>
 
 // clang-format off
 GAPI_OCV_KERNEL(OCVTensorToImg, custom::GTensorToImg) {

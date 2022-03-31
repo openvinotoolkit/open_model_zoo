@@ -1,19 +1,18 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "visualizer.hpp"
 
-#include <math.h>  // for cos, sin
+#include <algorithm>
+#include <cmath>
+#include <ostream>
+#include <utility>
 
-#include <algorithm>  // for max, max_element
-#include <ostream>  // for operator<<, basic_ostream, ostringstream, basic_ostream::operator<<
-#include <utility>  // for pair
+#include <opencv2/imgproc.hpp>
 
-#include <opencv2/imgproc.hpp>  // for line, rectangle, circle, FONT_HERSHEY_COMPLEX_SMALL, getTextSize, putText
-
-#include <utils/ocv_common.hpp>  // for putHighlightedText
-#include <utils/slog.hpp>  // for LogStream, endl, warn
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 // EmotionBarVisualizer
 EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames,

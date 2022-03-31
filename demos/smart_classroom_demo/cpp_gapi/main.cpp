@@ -2,57 +2,57 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for max
-#include <chrono>  // for steady_clock
-#include <exception>  // for exception
-#include <iomanip>  // for operator<<, _Setprecision, setprecision, fixed
-#include <memory>  // for shared_ptr, __shared_ptr_access, make_shared
-#include <ostream>  // for operator<<, basic_ostream, ofstream, endl, fstream
-#include <stdexcept>  // for logic_error
-#include <string>  // for string, basic_string, operator<<, char_traits
-#include <tuple>  // for tie, tuple, make_tuple
-#include <utility>  // for move
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <iomanip>
+#include <memory>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <gflags/gflags.h>  // for clstring, ParseCommandLineNonHelpFlags
-#include <opencv2/core.hpp>  // for Mat, Size, Rect, cvRound, Scalar
-#include <opencv2/gapi/core.hpp>  // for size
-#include <opencv2/gapi/garg.hpp>  // for gout, operator+=
-#include <opencv2/gapi/garray.hpp>  // for GArray, GArray<>::HT
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque
-#include <opencv2/gapi/gproto.hpp>  // for GOut, operator+=, GIOProtoArgs, GIn
-#include <opencv2/gapi/gscalar.hpp>  // for GScalar
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
-#include <opencv2/gapi/infer.hpp>  // for infer, infer2, GNetPackage
-#include <opencv2/gapi/infer/parsers.hpp>  // for parseSSD
-#include <opencv2/gapi/render/render.hpp>  // for render3ch
-#include <opencv2/gapi/streaming/format.hpp>  // for copy
-#include <opencv2/highgui.hpp>  // for waitKey
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_COMPLEX, resize
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gscalar.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/parsers.hpp>
+#include <opencv2/gapi/render/render.hpp>
+#include <opencv2/gapi/streaming/format.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/common.hpp>  // for showAvailableDevices
-#include <utils/images_capture.h>  // for ImagesCapture, openImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics...
-#include <utils/slog.hpp>  // for LogStream, endl, err, info, debug, warn
-#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+#include <monitors/presenter.h>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
-#include "action_detector.hpp"  // for DetectedAction, ActionDetection (ptr only)
-#include "actions.hpp"  // for TOP_K, TEACHER
-#include "custom_kernels.hpp"  // for ConstantParams, FaceTrack, AlignFacesForReidentification, Boxes...
-#include "detector.hpp"  // for FaceDetection
-#include "drawing_helper.hpp"  // for DrawingElements, DrawingHelper
-#include "initialize.hpp"  // for FaceReidentificator, FaceDetector, LandmarksDetector, PersonDet...
-#include "kernel_packages.hpp"  // for kernels
-#include "recognizer.hpp"  // for FaceRecognizer
-#include "smart_classroom_demo_gapi.hpp"  // for FLAGS_i, FLAGS_m_act, FLAGS_m_fd, FLAGS_al, FLAGS_exp_r_fd, FLA...
-#include "tracker.hpp"  // for TrackedObject, TrackerParams
+#include "action_detector.hpp"
+#include "actions.hpp"
+#include "custom_kernels.hpp"
+#include "detector.hpp"
+#include "drawing_helper.hpp"
+#include "initialize.hpp"
+#include "kernel_packages.hpp"
+#include "recognizer.hpp"
+#include "smart_classroom_demo_gapi.hpp"
+#include "tracker.hpp"
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {

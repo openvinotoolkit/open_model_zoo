@@ -1,18 +1,18 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 #include "custom_kernels.hpp"
 
-#include <math.h>  // for cos, sin
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for max, min
-#include <memory>  // for allocator_traits<>::value_type
+#include <algorithm>
+#include <cmath>
+#include <memory>
 
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl
-#include <opencv2/imgproc.hpp>  // for getRotationMatrix2D, resize, warpAffine
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include "kernel_packages.hpp"  // for kernels
+#include "kernel_packages.hpp"
 
 namespace {
 void rotateImageAroundCenter(const cv::Mat& srcImage, const float angle, cv::Mat& dstImage) {

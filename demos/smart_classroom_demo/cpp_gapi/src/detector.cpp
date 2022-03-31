@@ -1,10 +1,10 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "detector.hpp"
 
-#include <algorithm>  // for max, min
+#include <algorithm>
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
 

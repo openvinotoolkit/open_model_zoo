@@ -7,54 +7,54 @@
  * \file interactive_face_detection_demo_gapi/main.cpp
  * \example interactive_face_detection_demo_gapi/main.cpp
  */
-#include <math.h>  // for floor
-#include <stdlib.h>  // for size_t, exit, abs
+#include <stdlib.h>
 
-#include <algorithm>  // for max, copy
-#include <chrono>  // for steady_clock
-#include <exception>  // for set_terminate
-#include <iomanip>  // for operator<<, _Setprecision, setprecision
-#include <iostream>  // for operator<<, basic_ostream, ostream, cout, endl, fixed, ostrings...
-#include <list>  // for list<>::iterator, list
-#include <map>  // for map
-#include <memory>  // for __shared_ptr_access, make_shared, operator==, shared_ptr, uniqu...
-#include <stdexcept>  // for invalid_argument, runtime_error
-#include <string>  // for string, char_traits, operator+
-#include <tuple>  // for tie, tuple
-#include <utility>  // for move
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <exception>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <gflags/gflags.h>  // for clstring, DEFINE_string, DEFINE_bool, DEFINE_double, ParseComma...
-#include <opencv2/core.hpp>  // for Mat, Rect, Size, operator&, MatSize, Rect_, mean, CV_Assert, Point
-#include <opencv2/gapi/core.hpp>  // for size
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl
-#include <opencv2/gapi/garg.hpp>  // for gout, operator+=, GRunArgsP
-#include <opencv2/gapi/garray.hpp>  // for GArray, empty_array_desc, GArrayDesc
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
-#include <opencv2/gapi/gkernel.hpp>  // for kernels, G_API_OP, KernelTypeMedium
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque, GOpaqueDesc (ptr only)
-#include <opencv2/gapi/gproto.hpp>  // for GOut, operator+=, GIOProtoArgs, GIn
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
-#include <opencv2/gapi/infer.hpp>  // for infer, GNetworkType, G_API_NET, networks
-#include <opencv2/gapi/infer/ie.hpp>  // for Params
-#include <opencv2/gapi/infer/parsers.hpp>  // for parseSSD
-#include <opencv2/gapi/streaming/format.hpp>  // for copy
-#include <opencv2/highgui.hpp>  // for waitKey, imshow
-#include <opencv2/imgproc.hpp>  // for cvtColor, FONT_HERSHEY_COMPLEX, COLOR_BGR2GRAY
-#include <openvino/openvino.hpp>  // for get_openvino_version, operator<<
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/parsers.hpp>
+#include <opencv2/gapi/streaming/format.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/common.hpp>  // for fileNameNoExt, operator<<, showAvailableDevices, catcher
-#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics...
-#include <utils/slog.hpp>  // for LogStream, endl, info, debug
-#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+#include <monitors/presenter.h>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
-#include "face.hpp"  // for Face::Ptr, Face, matchFace
-#include "visualizer.hpp"  // for Visualizer, Visualizer::Ptr
+#include "face.hpp"
+#include "visualizer.hpp"
 
 namespace {
 constexpr char h_msg[] = "show the help message and exit";

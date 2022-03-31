@@ -1,27 +1,27 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "custom_kernels.hpp"
 
-#include <algorithm>  // for max, min, find_if
-#include <map>  // for map
+#include <algorithm>
+#include <map>
 
-#include <opencv2/gapi/cpu/gcpukernel.hpp>  // for GAPI_OCV_KERNEL, GCPUKernelImpl, GAPI_OCV_KERNEL_ST, GCPUStKernel...
-#include <opencv2/gapi/gcommon.hpp>  // for GCompileArgs, getCompileArg
-#include <opencv2/gapi/util/optional.hpp>  // for optional
-#include <opencv2/imgproc.hpp>  // for resize, getTextSize, CV_RGB, FONT_HERSHEY_PLAIN, LINE_AA
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/util/optional.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <utils/slog.hpp>  // for LogStream, debug, endl
+#include <utils/slog.hpp>
 
-#include "action_detector.hpp"  // for DetectedAction, DetectedActions, ActionDetection
-#include "actions.hpp"  // for FrameEventsTrack, RangeEventsTrack
-#include "detector.hpp"  // for FaceDetection
-#include "drawing_helper.hpp"  // for DrawingHelper, DrawingElements
-#include "face_reid.hpp"  // for AlignFaces, EmbeddingsGallery, EmbeddingsGallery::unknown_id
-#include "kernel_packages.hpp"  // for kernels
-#include "logger.hpp"  // for DetectionsLogger
-#include "recognizer.hpp"  // for FaceRecognizer
+#include "action_detector.hpp"
+#include "actions.hpp"
+#include "detector.hpp"
+#include "drawing_helper.hpp"
+#include "face_reid.hpp"
+#include "kernel_packages.hpp"
+#include "logger.hpp"
+#include "recognizer.hpp"
 
 /** State parameters for RecognizeResultPostProc stateful kernel **/
 struct PostProcState {

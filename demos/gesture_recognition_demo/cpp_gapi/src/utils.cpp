@@ -4,17 +4,17 @@
 
 #include "utils.hpp"
 
-#include <algorithm>  // for remove, max
-#include <fstream>  // for ifstream
-#include <map>  // for _Rb_tree_iterator
-#include <memory>  // for __shared_ptr_access, shared_ptr
-#include <stdexcept>  // for logic_error
-#include <utility>  // for pair
+#include <algorithm>
+#include <fstream>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <utility>
 
-#include <cpp/ie_cnn_network.h>  // for CNNNetwork
-#include <ie_core.hpp>  // for Core
-#include <ie_input_info.hpp>  // for InputInfo, InputsDataMap
-#include <ie_layouts.h>  // for TensorDesc
+#include <cpp/ie_cnn_network.h>
+#include <ie_core.hpp>
+#include <ie_input_info.hpp>
+#include <ie_layouts.h>
 
 #define _USE_MATH_DEFINES
 

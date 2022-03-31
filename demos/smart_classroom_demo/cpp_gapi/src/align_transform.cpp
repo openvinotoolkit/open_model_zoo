@@ -1,18 +1,18 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for max
-#include <limits>  // for numeric_limits
-#include <memory>  // for allocator_traits<>::value_type
-#include <vector>  // for vector
+#include <algorithm>
+#include <limits>
+#include <memory>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Mat, Scalar, operator*, Vec, meanStdDev, operator-=, operator/=, reduce, MatExpr
-#include <opencv2/imgproc.hpp>  // for warpAffine, WARP_INVERSE_MAP
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include "face_reid.hpp"  // for AlignFaces
+#include "face_reid.hpp"
 
 static const float h = 112.;
 static const float w = 96.;

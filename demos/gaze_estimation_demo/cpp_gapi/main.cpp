@@ -2,58 +2,58 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <math.h>  // for round, fabs
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for copy, max
-#include <chrono>  // for steady_clock
-#include <exception>  // for exception
-#include <iomanip>  // for operator<<, _Setprecision, setprecision, fixed
-#include <limits>  // for numeric_limits
-#include <map>  // for _Rb_tree_iterator
-#include <memory>  // for shared_ptr, __shared_ptr_access
-#include <stdexcept>  // for logic_error
-#include <string>  // for operator+, string
-#include <tuple>  // for tie, tuple
-#include <utility>  // for pair
-#include <vector>  // for vector
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <exception>
+#include <iomanip>
+#include <limits>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <cpp/ie_cnn_network.h>  // for CNNNetwork
-#include <ie_core.hpp>  // for Core
-#include <ie_input_info.hpp>  // for InputsDataMap, InputInfo
-#include <ie_layouts.h>  // for TensorDesc
-#include <opencv2/core.hpp>  // for Rect, Point2f, Point2i, Point3f, Size, Point, Mat, flip
-#include <opencv2/gapi/core.hpp>  // for size
-#include <opencv2/gapi/garg.hpp>  // for gout
-#include <opencv2/gapi/garray.hpp>  // for GArray
-#include <opencv2/gapi/gcommon.hpp>  // for compile_args
-#include <opencv2/gapi/gcomputation.hpp>  // for GComputation
-#include <opencv2/gapi/gmat.hpp>  // for GMat
-#include <opencv2/gapi/gopaque.hpp>  // for GOpaque
-#include <opencv2/gapi/gproto.hpp>  // for GIn, GOut
-#include <opencv2/gapi/gstreaming.hpp>  // for GStreamingCompiled
-#include <opencv2/gapi/infer.hpp>  // for infer, infer2, GNetworkType, G_API_NET, networks
-#include <opencv2/gapi/infer/ie.hpp>  // for Params
-#include <opencv2/gapi/streaming/format.hpp>  // for copy
-#include <opencv2/highgui.hpp>  // for imshow, waitKey
-#include <opencv2/imgproc.hpp>  // for FONT_HERSHEY_COMPLEX
-#include <openvino/openvino.hpp>  // for get_openvino_version
+#include <cpp/ie_cnn_network.h>
+#include <gflags/gflags.h>
+#include <ie_core.hpp>
+#include <ie_input_info.hpp>
+#include <ie_layouts.h>
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gcommon.hpp>
+#include <opencv2/gapi/gcomputation.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+#include <opencv2/gapi/gproto.hpp>
+#include <opencv2/gapi/gstreaming.hpp>
+#include <opencv2/gapi/infer.hpp>
+#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/streaming/format.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include <monitors/presenter.h>  // for Presenter
-#include <utils/args_helper.hpp>  // for stringToSize
-#include <utils/common.hpp>  // for fileNameNoExt, operator<<, showAvailableDevices
-#include <utils/images_capture.h>  // for openImagesCapture, ImagesCapture, read_type, read_type::safe
-#include <utils/ocv_common.hpp>  // for LazyVideoWriter
-#include <utils/performance_metrics.hpp>  // for PerformanceMetrics, PerformanceMetrics::FPS, PerformanceMetrics...
-#include <utils/slog.hpp>  // for LogStream, endl, info, err, debug
-#include <utils_gapi/stream_source.hpp>  // for CommonCapSrc
+#include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
-#include "custom_kernels.hpp"  // for PrepareEyes, GMat3, ParseSSD, ProcessEyes, ProcessGazes, Proces...
-#include "face_inference_results.hpp"  // for FaceInferenceResults, operator<<, gaze_estimation
-#include "gaze_estimation_demo_gapi.hpp"  // for FLAGS_m_fd, FLAGS_m, FLAGS_m_es, FLAGS_m_hp, FLAGS_m_lm, FLAGS_i
-#include "gflags/gflags.h"  // for clstring, ParseCommandLineNonHelpFlags
-#include "kernel_packages.hpp"  // for kernels
-#include "results_marker.hpp"  // for ResultsMarker
+#include "custom_kernels.hpp"
+#include "face_inference_results.hpp"
+#include "gaze_estimation_demo_gapi.hpp"
+#include "kernel_packages.hpp"
+#include "results_marker.hpp"
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {

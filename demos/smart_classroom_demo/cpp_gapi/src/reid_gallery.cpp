@@ -1,19 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <math.h>  // for sqrt
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <algorithm>  // for max, find_if
-#include <memory>  // for allocator_traits<>::value_type
-#include <string>  // for string, operator==
-#include <vector>  // for vector, vector<>::const_iterator
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Mat, CV_32F
+#include <opencv2/core.hpp>
 
-#include "face_reid.hpp"  // for EmbeddingsGallery, GalleryObject
-#include "tracker.hpp"  // for KuhnMunkres, TrackedObject, TrackedObject::UNKNOWN_LABEL_IDX
+#include "face_reid.hpp"
+#include "tracker.hpp"
 
 namespace {
 float ComputeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
