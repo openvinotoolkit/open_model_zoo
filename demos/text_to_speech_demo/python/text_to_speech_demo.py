@@ -154,7 +154,7 @@ def main():
             speaker_emb = forward_tacotron.get_pca_speaker_embedding(interactive_parameter["gender"],
                                                                      interactive_parameter["style"])
         else:
-            speaker_emb = forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]
+            speaker_emb = [forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]]
 
     len_th = 80
 
