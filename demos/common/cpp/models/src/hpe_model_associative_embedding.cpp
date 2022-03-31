@@ -16,10 +16,10 @@
 
 #include "models/hpe_model_associative_embedding.h"
 
-#include <cmath>
 #include <stddef.h>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 #include <string>

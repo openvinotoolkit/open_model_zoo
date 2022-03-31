@@ -16,9 +16,8 @@
 
 #include "models/detection_model_faceboxes.h"
 
-#include <cmath>
-
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 

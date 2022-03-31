@@ -16,10 +16,10 @@
 
 #include "models/detection_model_retinaface_pt.h"
 
-#include <cmath>
 #include <stdint.h>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 #include <string>

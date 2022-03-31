@@ -16,9 +16,8 @@
 
 #include "models/openpose_decoder.h"
 
-#include <cmath>
-
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <utility>
 #include <vector>

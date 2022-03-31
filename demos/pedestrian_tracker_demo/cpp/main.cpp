@@ -6,8 +6,8 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include <cmath>
 #include <chrono>
+#include <cmath>
 #include <exception>
 #include <map>
 #include <memory>

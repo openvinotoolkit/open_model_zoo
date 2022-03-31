@@ -1,12 +1,12 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "distance.hpp"
 
-#include <cmath>
 #include <stddef.h>
 
+#include <cmath>
 #include <vector>
 
 #include "logging.hpp"

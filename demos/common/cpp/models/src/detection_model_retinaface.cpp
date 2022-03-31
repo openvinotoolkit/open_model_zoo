@@ -16,10 +16,10 @@
 
 #include "models/detection_model_retinaface.h"
 
-#include <cmath>
 #include <stddef.h>
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 #include <opencv2/core.hpp>

@@ -16,9 +16,8 @@
 
 #include "models/hpe_model_openpose.h"
 
-#include <cmath>
-
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <stdexcept>
 #include <string>

@@ -16,9 +16,8 @@
 
 #include "models/detection_model_yolo.h"
 
-#include <cmath>
-
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <stdexcept>
 #include <string>

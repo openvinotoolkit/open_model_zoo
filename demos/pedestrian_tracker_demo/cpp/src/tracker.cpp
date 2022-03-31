@@ -4,10 +4,10 @@
 
 #include "tracker.hpp"
 
-#include <cmath>
 #include <stdlib.h>
 
 #include <algorithm>
+#include <cmath>
 #include <deque>
 #include <limits>
 #include <map>
