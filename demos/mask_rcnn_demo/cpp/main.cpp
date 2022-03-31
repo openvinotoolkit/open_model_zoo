@@ -2,22 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stddef.h>
-
-#include <gflags/gflags.h>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
-#include <openvino/openvino.hpp>
-
-#include <utils/common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
 /**
  * @brief The entry point for Mask RCNN demo application
  * @file mask_rcnn_demo/main.cpp
  * @example mask_rcnn_demo/main.cpp
  */
+
+
+#include <stddef.h>
+
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -29,7 +22,16 @@
 #include <utility>
 #include <vector>
 
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
+
 #include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "mask_rcnn_demo.h"
 

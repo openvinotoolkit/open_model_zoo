@@ -7,6 +7,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <opencv2/core.hpp>
+
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
     auto r = cv::norm(gazeVector);
