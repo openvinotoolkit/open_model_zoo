@@ -57,7 +57,7 @@ class SegmentorMstcn:
         net.reshape({net.inputs[0]: PartialShape(
             [self.EmbedBatchSize, self.EmbedWindowLength, self.ImgSizeHeight, self.ImgSizeWidth, 3])})
         nodes = net.get_ops()
-        net.add_outputs(nodes[13].output(0))
+        net.add_outputs(nodes[11].output(0))
         self.i3d = core.compile_model(model=net, device_name=device)
 
         self.mstcn_net = core.read_model(mstcn_path)
@@ -124,8 +124,7 @@ class SegmentorMstcn:
                     [cv2.resize(img_buffer[start_index + i * self.EmbedWindowAtrous],
                     (self.ImgSizeHeight, self.ImgSizeWidth)) for i in range(self.EmbedWindowLength)]
                     for j in range(self.EmbedBatchSize)]
-                input_data = np.asarray(input_data).transpose((0, 4, 1, 2, 3))
-                input_data = input_data * 127.5 + 127.5
+                input_data = np.asarray(input_data) * 127.5 + 127.5
 
                 input_dict = {self.i3d.inputs[0]: input_data}
                 out_logits = infer_request.infer(input_dict)[self.i3d.outputs[1]]
@@ -139,14 +138,15 @@ class SegmentorMstcn:
 
     def action_segmentation(self):
         # read buffer
+        batch_size = self.SegBatchSize
         embed_buffer_top = self.EmbedBufferTop
         embed_buffer_front = self.EmbedBufferFront
-        batch_size = self.SegBatchSize
         start_index = self.TemporalLogits.shape[0]
         end_index = min(embed_buffer_top.shape[-1], embed_buffer_front.shape[-1])
         num_batch = (end_index - start_index) // batch_size
 
         infer_request = self.reshape_mstcn.create_infer_request()
+
         if num_batch < 0:
             log.debug("Waiting for the next frame ...")
         elif num_batch == 0:
@@ -163,9 +163,14 @@ class SegmentorMstcn:
                         string = list(key.names)[0]
                         feed_dict[string] = self.his_fea[string]
             feed_dict['input'] = input_mstcn
-            if input_mstcn.shape == (1, 2048, 1):
-                out = infer_request.infer(feed_dict)
 
+            # if the input shape is unsupported shape, add dummpy result of noise and skip inference
+            if input_mstcn.shape != (1, 2048, 1):
+                tranposed_logits = np.zeros((16, 2048))
+                self.TemporalLogits = np.concatenate([self.TemporalLogits, tranposed_logits], axis=0)
+                return None
+
+            out = infer_request.infer(feed_dict)
             predictions = out[list(out.keys())[-1]]
             for key in self.mstcn_output_key:
                 if 'fhis_in_' in str(key.names):
@@ -173,13 +178,13 @@ class SegmentorMstcn:
                     self.his_fea[string] = out[string]
 
             """
-                predictions --> 4x1x64x24
-                his_fea --> [12*[1x64x2048], 11*[1x64x2048], 11*[1x64x2048], 11*[1x64x2048]]
+                predictions --> 4x64x24
+                his_fea --> [12*[64x2048], 11*[64x2048], 11*[64x2048], 11*[64x2048]]
             """
-            temporal_logits = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
-            temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
-            temporal_logits = temporal_logits.transpose((0, 2, 1)).squeeze(axis=0)
-            self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
+            temporal_logits = predictions[:, :len(self.ActionTerms), :] # 4x16xN
+            softmaxed_logits = softmax(temporal_logits[-1], 1) # 16xN
+            tranposed_logits = softmaxed_logits.transpose((1, 0))
+            self.TemporalLogits = np.concatenate([self.TemporalLogits, tranposed_logits], axis=0)
         else:
             for batch_idx in range(num_batch):
                 unit1 = embed_buffer_top[:,
@@ -202,7 +207,7 @@ class SegmentorMstcn:
                         string = list(key.names)[0]
                         self.his_fea[string] = out[string]
 
-                temporal_logits = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
-                temporal_logits = softmax(temporal_logits[-1], 1)  # 1x16xN
-                temporal_logits = temporal_logits.transpose((0, 2, 1)).squeeze(axis=0)
+                temporal_logits = predictions[:, :len(self.ActionTerms), :] # 4x16xN
+                softmaxed_logits = softmax(temporal_logits[-1], 1) # 16xN
+                tranposed_logits = softmaxed_logits.transpose((1, 0))
                 self.TemporalLogits = np.concatenate([self.TemporalLogits, temporal_logits], axis=0)
