@@ -107,7 +107,7 @@ class CustomBuild(distutils.command.build_py.build_py):
 
 setup(
     install_requires=read_text('requirements.in'),
-    version=get_version('src/openvino/model_zoo/__init__.py'),
+    version=get_version('src/openvino/model_zoo/_version.py'),
     extras_require={
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),
