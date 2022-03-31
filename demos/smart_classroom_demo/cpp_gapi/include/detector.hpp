@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <vector>  // for vector
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Rect
+#include <opencv2/core.hpp>
 
 namespace detection {
 

@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
-#include <map>  // for map
+#include <map>
 #include <memory>
-#include <ostream>  // for operator<<, basic_ostream::operator<<, basic_ostream, basic_ostream<>::__ostream...
-#include <string>  // for string, char_traits
-#include <tuple>  // for tuple
-#include <vector>  // for vector
+#include <ostream>
+#include <string>
+#include <tuple>
+#include <vector>
 
-#include <opencv2/core.hpp>  // for Rect, Size
+#include <opencv2/core.hpp>
 
-#include "actions.hpp"  // for RangeEventsTrack, FrameEventsTrack
+#include "actions.hpp"
 
 struct Track;
 struct TrackedObject;
