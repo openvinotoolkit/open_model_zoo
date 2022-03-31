@@ -70,8 +70,8 @@ constexpr char o_msg[] = "name of the output file(s) to save";
 DEFINE_string(o, "", o_msg);
 
 constexpr char person_label_msg[] = "the integer index of the objects' category corresponding to persons "
-                          "(as it is returned from the detection network, may vary from one network to another). "
-                          "Default is 1";
+    "(as it is returned from the detection network, may vary from one network to another). "
+    "Default is 1";
 DEFINE_int32(person_label, 1, person_label_msg);
 
 constexpr char r_msg[] = "output inference results as raw values";
@@ -87,7 +87,7 @@ constexpr char tpr_msg[] = "cosine similarity threshold between two vectors for 
 DEFINE_double(tpr, 0.7, tpr_msg);
 
 constexpr char u_msg[] = "resource utilization graphs. "
-                         "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
+    "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
 DEFINE_string(u, "", u_msg);
 
 void parse(int argc, char *argv[]) {
@@ -111,7 +111,7 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--show] ([--noshow])                         " << show_msg
                   << "\n\t[ -t <NUMBER>]                                " << t_msg
                   << "\n\t[--tpr <NUMBER>]                              " << tpr_msg
-                  << "\n\t[ -u <MONITORS>]                                " << u_msg
+                  << "\n\t[ -u <MONITORS>]                              " << u_msg
                   << "\n\tKey bindings:"
                      "\n\t\tQ, q, Esc - Quit"
                      "\n\t\tP, p, 0, spacebar - Pause"
@@ -385,9 +385,11 @@ int main(int argc, char* argv[]) {
         }
         videoWriter.write(frame);
         if (FLAGS_show) {
-            cv::imshow("Detection results", frame);
-            const int key = cv::waitKey(1);
-            if (27 == key) // Esc
+            cv::imshow(argv[0], frame);
+            const int key = cv::pollKey();
+            if (32 == key || 'P' == key || 'p' == key || '0' == key)
+                key = cv::waitKey(0);
+            if (27 == key || 'Q' == key || 'q' == key) // Esc
                 break;
             presenter.handleKey(key);
         }
