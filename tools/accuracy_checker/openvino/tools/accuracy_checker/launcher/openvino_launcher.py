@@ -574,8 +574,11 @@ class OpenVINOLauncher(Launcher):
         input_info = input_nodes[0]
         layout = (
             self._process_layout(input_info.get_node().layout, input_info.get_node().friendly_name)
-            or self.default_layout
+            or ''
         )
+        input_shape = parse_partial_shape(input_info.partial_shape)
+        if not layout and len(input_shape) == len(self.default_layout):
+            layout = self.default_layout
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]
