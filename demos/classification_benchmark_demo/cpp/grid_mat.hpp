@@ -101,14 +101,14 @@ public:
         cv::Scalar textColor;
         switch (predictionResul) {
             case PredictionResult::Correct:
-                textColor = cv::Scalar(75, 255, 75);
-                break;  // green
+                textColor = cv::Scalar(75, 255, 75);  // green
+                break;
             case PredictionResult::Incorrect:
-                textColor = cv::Scalar(50, 50, 255);
-                break;  // red
+                textColor = cv::Scalar(50, 50, 255);  // red
+                break;
             case PredictionResult::Unknown:
-                textColor = cv::Scalar(200, 10, 10);
-                break;  // blue
+                textColor = cv::Scalar(200, 10, 10);  // blue
+                break;
             default:
                 throw std::runtime_error("Undefined type of prediction result");
         }
@@ -150,6 +150,4 @@ private:
     cv::Size testMessageSize;
 };
 
-// defenition of the static member needed to remove clang build error
-// https://stackoverflow.com/questions/8016780/undefined-reference-to-static-constexpr-char
 constexpr const char GridMat::testMessage[];

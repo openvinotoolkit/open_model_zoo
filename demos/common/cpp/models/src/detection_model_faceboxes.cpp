@@ -225,22 +225,18 @@ std::vector<ModelFaceBoxes::Anchor> filterBoxes(const ov::Tensor& boxesTensor,
 }
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
-    // --------------------------- Filter scores and get valid indices for bounding
-    // boxes----------------------------------
+    // Filter scores and get valid indices for bounding boxes
     const auto scoresTensor = infResult.outputsData[outputsNames[1]];
     const auto scores = filterScores(scoresTensor, confidenceThreshold);
 
-    // --------------------------- Filter bounding boxes on indices
-    // -------------------------------------------------------
+    // Filter bounding boxes on indices
     auto boxesTensor = infResult.outputsData[outputsNames[0]];
     std::vector<Anchor> boxes = filterBoxes(boxesTensor, anchors, scores.first, variance);
 
-    // --------------------------- Apply Non-maximum Suppression
-    // ----------------------------------------------------------
+    // Apply Non-maximum Suppression
     const std::vector<int> keep = nms(boxes, scores.second, boxIOUThreshold);
 
-    // --------------------------- Create detection result objects
-    // --------------------------------------------------------
+    // Create detection result objects
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     const auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     const auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
