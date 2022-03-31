@@ -43,7 +43,7 @@ def parse():
     args = parser.add_argument_group('Options')
 
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-        help='show the help message and exit\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause')
+        help='show the help message and exit\nKey bindings:\n\tQ, q - Quit\n\tP, p, 0, SpaceBar - Pause for camera id/Switch frame for separated images')
 
     args.add_argument('-m', '--model', required=True, type=Path, metavar="<MODEL FILE>",
         help='path to an .xml file with a trained model or address of model inference service if using OVMS adapter')
@@ -231,6 +231,11 @@ def main():
             if not args.noshow:
                 cv2.imshow(__file__, frame)
                 key = cv2.waitKey(delay)
+
+                # Pause.
+                if key in {ord('p'), ord('P'), ord(' '), ord('0')}:
+                    cv2.waitKey(0)
+
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
