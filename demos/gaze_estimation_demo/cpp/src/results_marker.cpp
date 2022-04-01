@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#define _USE_MATH_DEFINES
+
 #include "results_marker.hpp"
 
-#define _USE_MATH_DEFINES
 #include <cctype>
 #include <cmath>
 #include <vector>

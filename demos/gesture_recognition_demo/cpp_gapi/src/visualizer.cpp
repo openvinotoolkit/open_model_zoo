@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#define _USE_MATH_DEFINES
-
 #include "visualizer.hpp"
 
 #include <algorithm>

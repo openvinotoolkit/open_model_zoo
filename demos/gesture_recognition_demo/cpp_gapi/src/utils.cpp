@@ -16,8 +16,6 @@
 #include <ie_input_info.hpp>
 #include <ie_layouts.h>
 
-#define _USE_MATH_DEFINES
-
 cv::Scalar getNetShape(const std::string& path) {
     const auto network = InferenceEngine::Core{}.ReadNetwork(path);
     const auto layerData = network.getInputsInfo().begin()->second;
