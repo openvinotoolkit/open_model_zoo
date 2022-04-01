@@ -592,6 +592,7 @@ void InferTask::process() {
     std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
+
     context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
 
     inferRequest.get().set_callback(
@@ -613,7 +614,6 @@ void InferTask::process() {
 bool Reader::isReady() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.readersContext.lastCapturedFrameIdsMutexes[sharedVideoFrame->sourceID].lock();
-    // Look for the next frame
     if (context.readersContext.lastCapturedFrameIds[sharedVideoFrame->sourceID] + 1 == sharedVideoFrame->frameId) {
         return true;
     } else {

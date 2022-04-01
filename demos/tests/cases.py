@@ -598,7 +598,7 @@ DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
-        # Change the model in order to obtain the ROI data
+        # Update to this model in order to obtain the ROI data
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0123')}),
         single_option_cases('-m_lpr',
             None,
