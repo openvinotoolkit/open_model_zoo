@@ -51,7 +51,6 @@ struct YOLOv4TinyPostProcessing {
         return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
     }
 
-    //std::string getLabelName(int labelID) { return (size_t)labelID < custom::coco_classes.size() ? custom::coco_classes[labelID] : std::string("Label #") + std::to_string(labelID); }
     std::string getLabelName(int labelID, const std::vector<std::string> &labels) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 
     std::vector<float> blobs_anchor[2]{

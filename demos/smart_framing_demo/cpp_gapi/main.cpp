@@ -182,8 +182,6 @@ int main(int argc, char *argv[]) {
 
 
         /** ---------------- The execution part ---------------- **/
-        //pipeline.setSource<custom::CommonCapSrc>(cap);
-        //pipeline.setSource<custom::CommonCapSrc>(cap);
         pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap), coco_labels));
 
         cv::Size graphSize{ static_cast<int>(frame_size.width / 4), 60 };
