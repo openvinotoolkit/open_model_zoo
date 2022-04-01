@@ -47,7 +47,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
     def __init__(self, demo):
         super().__init__(demo)
 
-    def __call__(self, output, test_case, device, execution_time=-1):
+    def __call__(self, output, test_case, device, execution_time=0):
         # Results format
         #               {"device name":
         #                   {"case index 0":
@@ -91,7 +91,6 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         # Parsing the raw data
         print("Demo {} results parsing....".format(self.demo_name))
         output = [i.rstrip() for i in output.split('\n') if "DEBUG" in i and "ChannelId" in i]
-        #print("========\nCase id: {}\nOutput: {}\n========".format(self.case_index[device], output))
         for item in output:
             item = item[item.find('ChannelId'):].split(',')
             # Channel ID

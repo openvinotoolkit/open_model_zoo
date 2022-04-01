@@ -51,7 +51,7 @@ from data_sequences import DATA_SEQUENCES
 scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
-    'correctness': importlib.import_module('correctness_checker_cases').DEMOS,
+    'correctness': importlib.import_module('correctness_cases').DEMOS,
 }
 
 
@@ -245,6 +245,7 @@ def main():
             dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
 
         num_failures = 0
+        correctness_failures = 0
 
         try:
             pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
@@ -263,12 +264,6 @@ def main():
             print(header)
             print()
             demo.set_precisions(args.precisions, model_info)
-            filename = '/tmp/' + demo.subdirectory
-            os.makedirs(filename, exist_ok=True)
-            fo = open(filename + '/results.log', 'w+')
-            print("Save to {}".format(filename))
-            content = ''
-            content += '[ DEBUG ] Testing {}...'.format(demo.subdirectory) + '\n'
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
@@ -332,17 +327,12 @@ def main():
                             for arg in fixed_args + dev_arg + case_args))
                         print(test_descr)
                         print(flush=True)
-                        content += "[ DEBUG ] Device:{}\n[ DEBUG ] CaseId:{}\n".format(device, test_case_index)
-                        rawResults = ''
-                        execution_time = -1
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
-                            for line in output:
-                                rawResults += line
                             demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                             output = e.output
@@ -354,13 +344,7 @@ def main():
                             print(output)
                             failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
-                            execution_time = -1
-                            rawResults = {}
 
-                        content += "[ DEBUG ] Execution_time:{}\n".format(execution_time)
-                        content += "{}\n".format(rawResults)
-                        fo.write(content)
-                        content = ''
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
                         if args.log_file:
@@ -368,13 +352,16 @@ def main():
                                 write_log(header, args.log_file)
                             write_log(test_descr, args.log_file)
                             write_log(output, args.log_file)
-            fo.close()
             if args.scope == "correctness":
                 print("Demo {} correctness checking....".format(demo.subdirectory))
-                demo.check_difference()
+                if not demo.check_difference():
+                    correctness_failures += 1
             print()
 
     print("{} failures:".format(num_failures))
+    if args.scope == "correctness":
+        print("Correctness Failures: {}".format(correctness_failures))
+
     for test in failed_tests:
         print(test)
 
