@@ -112,7 +112,7 @@ G_API_OP(GYOLOv4TinyPostProcessingKernel, < GDetections(cv::GMat, cv::GMat, cv::
         static cv::GArrayDesc outMeta(const cv::GMatDesc&,
                                       const cv::GMatDesc&,
                                       const cv::GMatDesc&,
-                                      const cv::GArrayDesc& , const float, const float, const bool) {
+                                      const cv::GArrayDesc&, const float, const float, const bool) {
             return cv::empty_array_desc();
         }
 };
