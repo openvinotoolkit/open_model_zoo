@@ -18,7 +18,7 @@ project(Demos)
 include (CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_CLANG_FORMAT "Enable clang-format checks during the build" ON "UNIX" OFF)
-option(ENABLE_CPPLINT "Enable cpplint checks during the build" ON)
+option(ENABLE_CPPLINT "Enable cpplint checks during the build" OFF)
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
