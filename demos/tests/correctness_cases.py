@@ -13,12 +13,10 @@
 # limitations under the License.
 
 import os
-import re
-from args import DataPatternArg
 from copy import deepcopy
 from abc import ABC, abstractmethod
 
-from cases import BASE, single_option_cases
+from cases import BASE
 
 THREADS_NUM = os.cpu_count()
 
@@ -32,7 +30,7 @@ class CorrectnessCheckerBase(ABC):
 
     @abstractmethod
     def __call__(self, output, test_case, device, execution_time=-1):
-        print("========\nOutput: {}\n======\ntest_case: {}\n========\ndevice: {} \n==========".format(output, test_case, device))
+        pass
 
     @abstractmethod
     def check_difference(self):
@@ -51,7 +49,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         # Results format
         #               {"device name":
         #                   {"case index 0":
-        #                       {"channel id 0": 
+        #                       {"channel id 0":
         #                           {"frame id 0":
         #                               {"object id 0":{"label:xx,prob:xx,x,y,width,hight"},
         #                               {"object id 1":{"label:xx,prob:xx,x,y,width,hight"},
@@ -64,7 +62,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         #                           }
         #                       },
         #                       .....
-        #                       {"channel id n": 
+        #                       {"channel id n":
         #                       .....
         #                       }
         #                   {"case index n":
@@ -79,17 +77,16 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
 
         if device not in self.results:
             self.results[device] = {}
-        
-        case_index = self.case_index[device] 
+
+        case_index = self.case_index[device]
         if case_index not in self.results[device]:
             self.results[device][case_index] = {}
-        
+
         if execution_time < 0:
             self.case_index[device] += 1
             return
 
         # Parsing the raw data
-        print("Demo {} results parsing....".format(self.demo_name))
         output = [i.rstrip() for i in output.split('\n') if "DEBUG" in i and "ChannelId" in i]
         for item in output:
             item = item[item.find('ChannelId'):].split(',')
@@ -98,13 +95,13 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
             channel = item[0].split(':')[1]
             if channel not in self.results[device][case_index]:
                 self.results[device][case_index][channel] = frame_results
-            
+
             # Frame ID
             object_results = {}
             frame = item[1].split(':')[1]
             if frame not in self.results[device][case_index][channel]:
                 self.results[device][case_index][channel][frame] = object_results
-            
+
             # Object ID
             label_prob_pos_results = []
             objid = item[2].split(':')[1]
@@ -113,7 +110,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
             self.results[device][case_index][channel][frame][objid] = item[3:]
 
         self.case_index[device] += 1
-    
+
     def check_difference(self):
         flag = True
         devices_list = {"AUTO:GPU,CPU" : ["CPU", "GPU"],
@@ -125,7 +122,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
             for target in devices_list[device]:
                 if device not in self.results or target not in self.results:
                     flag = False
-                    err_msg += "\tMiss the results of device {} or device {}.\n".format(device,target)
+                    err_msg += "\tMiss the results of device {} or device {}.\n".format(device, target)
                 if device in self.results and target in self.results:
                     if self.results[device] != self.results[target]:
                         flag = False
