@@ -23,6 +23,8 @@
 #include <utils/args_helper.hpp>
 #include <utils/config_factory.h>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+
 
 #include "smart_framing_demo_gapi.hpp"
 #include "custom_kernels.hpp"
