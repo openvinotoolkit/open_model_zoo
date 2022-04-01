@@ -4,7 +4,7 @@ This README describes the Noise Suppression demo application.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 It also read user-provided sound file with mix of speech and some noise to feed it into the network by small sequential patches.
 The output of network is also sequence of audio patches with clean speech. The patches collected together and save into output audio file.
 
@@ -55,6 +55,6 @@ The demo reports
 
 ## See Also
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
 * [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)

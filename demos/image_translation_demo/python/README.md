@@ -4,7 +4,7 @@ This demo application demonstrates an example of using neural networks to synthe
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. To get the result, the demo performs the following steps:
 
 1. Reading input data (semantic segmentation mask of image for translation, exemplar image and mask of exemplar image).
 2. Preprocessing for input image and masks.
@@ -117,5 +117,5 @@ The results of the demo processing are saved to a folder that is specified by th
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -83,3 +83,6 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `byte_reader` - read raw binary data and wrap them to numpy-array.
 * `lmdb_reader` - extract image on a given index from LMDB database.
 * `kaldi_ark_reader` - read Kaldi\* archive format (ark).
+* `flac_reader` - read FLAC file into NumPy array.
+  * `dtype` - specifies precision of reading data. Supported values: `float32`, `float64`, `int16`, `int32`. Optional, default `int32`.
+  * `mono` - get mean along channels if multichannel audio loaded (Optional, default `False`).

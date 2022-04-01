@@ -14,12 +14,15 @@
 // limitations under the License.
 */
 
-#include <vector>
-#include <openvino/openvino.hpp>
 #include "pipelines/requests_pool.h"
 
-RequestsPool::RequestsPool(ov::CompiledModel& compiledModel, unsigned int size) :
-    numRequestsInUse(0) {
+#include <algorithm>
+#include <exception>
+#include <vector>
+
+#include <openvino/openvino.hpp>
+
+RequestsPool::RequestsPool(ov::CompiledModel& compiledModel, unsigned int size) : numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
         requests.emplace_back(compiledModel.create_infer_request(), false);
     }
@@ -35,12 +38,12 @@ RequestsPool::~RequestsPool() {
 ov::InferRequest RequestsPool::getIdleRequest() {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = std::find_if(requests.begin(), requests.end(),
-        [](const std::pair<ov::InferRequest, bool>& x) {return !x.second; });
+    const auto& it = std::find_if(requests.begin(), requests.end(), [](const std::pair<ov::InferRequest, bool>& x) {
+        return !x.second;
+    });
     if (it == requests.end()) {
         return ov::InferRequest();
-    }
-    else {
+    } else {
         it->second = true;
         numRequestsInUse++;
         return it->first;
@@ -49,8 +52,11 @@ ov::InferRequest RequestsPool::getIdleRequest() {
 
 void RequestsPool::setRequestIdle(const ov::InferRequest& request) {
     std::lock_guard<std::mutex> lock(mtx);
-    const auto& it = std::find_if(this->requests.begin(), this->requests.end(),
-        [&request](const std::pair<ov::InferRequest, bool>& x) {return x.first == request; });
+    const auto& it = std::find_if(this->requests.begin(),
+                                  this->requests.end(),
+                                  [&request](const std::pair<ov::InferRequest, bool>& x) {
+                                      return x.first == request;
+                                  });
     it->second = false;
     numRequestsInUse--;
 }

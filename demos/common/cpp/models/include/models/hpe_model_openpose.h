@@ -15,12 +15,25 @@
 */
 
 #pragma once
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
+
+#include <opencv2/core.hpp>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct HumanPose;
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class HPEOpenPose : public ImageModel {
 public:
@@ -30,13 +43,15 @@ public:
     /// @param targetSize - the height used for model reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
     /// @param layout - model input layout
-    HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize,
-        float confidenceThreshold, const std::string& layout = "");
+    HPEOpenPose(const std::string& modelFileName,
+                double aspectRatio,
+                int targetSize,
+                float confidenceThreshold,
+                const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
     static const size_t keypointsNumber = 18;
 
@@ -56,8 +71,7 @@ protected:
     int targetSize;
     float confidenceThreshold;
 
-    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
-                                        const std::vector<cv::Mat>& pafs) const;
+    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps, const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
     void changeInputSize(std::shared_ptr<ov::Model>& model);

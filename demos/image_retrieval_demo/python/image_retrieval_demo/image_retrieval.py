@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019-2021 Intel Corporation
+ Copyright (c) 2019-2022 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ from openvino.runtime import Core, get_version
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
-    """ Class that allows worknig with Inference Engine model. """
+    """ Class that allows working with OpenVINO Runtime model. """
 
     def __init__(self, model_path, device):
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         core = Core()
 
@@ -45,7 +45,8 @@ class IEModel(): # pylint: disable=too-few-public-methods
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
-        image = np.transpose(image, (0, 3, 1, 2))
+        if self.model.input(self.input_tensor_name).shape[1] == 3:
+            image = np.transpose(image, (0, 3, 1, 2))
         input_data = {self.input_tensor_name: image}
         return self.infer_request.infer(input_data)[self.output_tensor]
 

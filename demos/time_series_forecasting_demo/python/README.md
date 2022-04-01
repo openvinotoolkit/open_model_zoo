@@ -6,7 +6,7 @@ This README describes the Time Series Forecasting demo application.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 
 The program provides an interactive CLI interface that gets a test dataset in .pickle format as input and draws predicted quantiles and ground truth curves.
 
@@ -41,7 +41,7 @@ omz_converter --list models.lst
 
 The demo works with the test dataset in the .pickle format provided by accuracy_checker.
 
-* Install accuracy_checker following to the [instruction](../../../tools/accuracy_checker/README.md).
+* Install accuracy_checker following the [instruction](../../../tools/accuracy_checker/README.md).
 * Convert test dataset:
 
 ```sh
@@ -86,5 +86,5 @@ The application draws predicted quantiles and ground truth curves.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

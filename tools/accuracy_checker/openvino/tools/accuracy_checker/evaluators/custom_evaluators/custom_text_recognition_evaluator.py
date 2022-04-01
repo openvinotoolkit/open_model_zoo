@@ -120,6 +120,8 @@ class BaseSequentialModel(BaseCascadeModel):
         self.update_inputs_outputs_info()
 
     def update_inputs_outputs_info(self):
+        if not hasattr(self.recognizer_encoder, 'inputs'):
+            return
         with_prefix = next(iter(self.recognizer_encoder.inputs)).startswith('encoder')
         if with_prefix != self.with_prefix:
             for input_k, input_name in self.recognizer_encoder.inputs_mapping.items():
@@ -132,14 +134,31 @@ class BaseSequentialModel(BaseCascadeModel):
         if hasattr(self.recognizer_encoder, 'outputs'):
             outputs_mapping = self.recognizer_encoder.outputs
             for output_k in self.recognizer_encoder.outputs_mapping:
-                self.recognizer_encoder.outputs_mapping[output_k] = postprocess_output_name(
-                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                postprocessed_name = postprocess_output_name(
+                    self.recognizer_encoder.outputs_mapping[output_k], outputs_mapping,
+                    additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
                 )
+                if postprocessed_name not in outputs_mapping:
+                    postprocessed_name = postprocess_output_name(
+                    generate_layer_name(self.recognizer_encoder.outputs_mapping[output_k], 'encoder_', with_prefix),
+                    outputs_mapping,
+                    additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
+                )
+                self.recognizer_encoder.outputs_mapping[output_k] = postprocessed_name
+
             outputs_mapping = self.recognizer_decoder.outputs
             for output_k in self.recognizer_decoder.outputs_mapping:
-                self.recognizer_decoder.outputs_mapping[output_k] = postprocess_output_name(
-                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping, raise_error=False
+                postprocessed_name = postprocess_output_name(
+                    self.recognizer_decoder.outputs_mapping[output_k], outputs_mapping,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
                 )
+                if postprocessed_name not in outputs_mapping:
+                    postprocessed_name = postprocess_output_name(
+                    generate_layer_name(self.recognizer_decoder.outputs_mapping[output_k], 'decoder_', with_prefix),
+                    outputs_mapping,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
+                )
+                self.recognizer_decoder.outputs_mapping[output_k] = postprocessed_name
 
     def predict(self, identifiers, input_data):
         pass
@@ -179,8 +198,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
 
         if callback:
             callback(enc_raw_res)
-        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res)
-        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res)
+        feats_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['features'], enc_res,
+                                            additional_mapping=self.recognizer_encoder.additional_output_mapping)
+        hidden_out = postprocess_output_name(self.recognizer_encoder.outputs_mapping['decoder_hidden'], enc_res,
+                                             additional_mapping=self.recognizer_encoder.additional_output_mapping)
         features = enc_res[feats_out]
         dec_state = enc_res[hidden_out]
 
@@ -200,8 +221,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             else:
                 dec_raw_res = dec_res
 
-            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res)
-            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res)
+            logits_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_output'], dec_res,
+                                                 additional_mapping=self.recognizer_decoder.additional_output_mapping)
+            hidden_out = postprocess_output_name(self.recognizer_decoder.outputs_mapping['decoder_hidden'], dec_res,
+                                                 additional_mapping=self.recognizer_decoder.additional_output_mapping)
             dec_state = dec_res[hidden_out]
             logit = dec_res[logits_out]
             tgt = np.argmax(logit, axis=1)

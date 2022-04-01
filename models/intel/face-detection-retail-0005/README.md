@@ -26,7 +26,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 300, 300` in the format `B, C, H, W`, where:
+Image, name: `input.1`, shape: `1, 3, 300, 300` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

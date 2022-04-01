@@ -1,5 +1,6 @@
 # Open Model Zoo Demos
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -9,19 +10,25 @@
    omz_demos_human_pose_estimation_3d_demo_python
    omz_demos_3d_segmentation_demo_python
    omz_demos_action_recognition_demo_python
+   omz_demos_background_subtraction_demo_cpp_gapi
+   omz_demos_background_subtraction_demo_python
    omz_demos_bert_named_entity_recognition_demo_python
    omz_demos_bert_question_answering_embedding_demo_python
    omz_demos_bert_question_answering_demo_python
-   omz_demos_classification_demo_cpp
+   omz_demos_classification_benchmark_demo_cpp
+   omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
+   omz_demos_face_detection_mtcnn_demo_cpp_gapi
    omz_demos_face_detection_mtcnn_demo_python
    omz_demos_face_recognition_demo_python
    omz_demos_formula_recognition_demo_python
    omz_demos_gaze_estimation_demo_cpp_gapi
    omz_demos_interactive_face_detection_demo_cpp_gapi
    omz_demos_gaze_estimation_demo_cpp
+   omz_demos_gesture_recognition_demo_cpp_gapi
    omz_demos_gesture_recognition_demo_python
+   omz_demos_gpt2_text_prediction_demo_python
    omz_demos_handwritten_text_recognition_demo_python
    omz_demos_human_pose_estimation_demo_cpp
    omz_demos_human_pose_estimation_demo_python
@@ -36,10 +43,13 @@
    omz_demos_interactive_face_detection_demo_cpp
    omz_demos_machine_translation_demo_python
    omz_demos_monodepth_demo_python
+   omz_demos_mri_reconstruction_demo_cpp
+   omz_demos_mri_reconstruction_demo_python
    omz_demos_multi_camera_multi_target_tracking_demo_python
    omz_demos_multi_channel_face_detection_demo_cpp
    omz_demos_multi_channel_human_pose_estimation_demo_cpp
    omz_demos_multi_channel_object_detection_demo_yolov3_cpp
+   omz_demos_noise_suppression_demo_cpp
    omz_demos_noise_suppression_demo_python
    omz_demos_object_detection_demo_cpp
    omz_demos_object_detection_demo_python
@@ -47,11 +57,14 @@
    omz_demos_place_recognition_demo_python
    omz_demos_security_barrier_camera_demo_cpp
    omz_demos_single_human_pose_estimation_demo_python
+   omz_demos_smartlab_demo_python
    omz_demos_smart_classroom_demo_cpp
+   omz_demos_smart_classroom_demo_cpp_gapi
    omz_demos_social_distance_demo_cpp
    omz_demos_sound_classification_demo_python
    omz_demos_speech_recognition_deepspeech_demo_python
    omz_demos_speech_recognition_quartznet_demo_python
+   omz_demos_speech_recognition_wav2vec_demo_python
    omz_demos_mask_rcnn_demo_cpp
    omz_demos_text_detection_demo_cpp
    omz_demos_text_spotting_demo_python
@@ -60,6 +73,7 @@
    omz_demos_whiteboard_inpainting_demo_python
 
 @endsphinxdirective
+-->
 
 The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
 
@@ -137,7 +151,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
-- [Time Series Forecasting Python\* Demo](./time_series_forecasting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to time series forecastig.
+- [Time Series Forecasting Python\* Demo](./time_series_forecasting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to time series forecasting.
 - [Whiteboard Inpainting Python\* Demo](./whiteboard_inpainting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to detect and hide a person on a video so that all text on a whiteboard is visible.
 
 ## Media Files Available for Demos
@@ -153,7 +167,7 @@ You can download the [Intel pre-trained models](../models/intel/index.md) or [pu
 ## Build the Demo Applications
 
 To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
-For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download OpenCV and set environment variables before building the demos:
+For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download prebuilt OpenCV and set environment variables before building the demos:
 
 ```sh
 <INSTALL_DIR>/extras/scripts/download_opencv.sh
@@ -166,9 +180,7 @@ source <INSTALL_DIR>/setupvars.sh
 > ```
 
 For the open-source version of OpenVINO, set the following variables:
-* `InferenceEngine_DIR` pointing to a folder containing `InferenceEngineConfig.cmake`
 * `OpenVINO_DIR` pointing to a folder containing `OpenVINOConfig.cmake`
-* `ngraph_DIR` pointing to a folder containing `ngraphConfig.cmake`.
 * `OpenCV_DIR` pointing to OpenCV. The same OpenCV version should be used both for OpenVINO and demos build.
 
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
@@ -178,8 +190,8 @@ Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PAT
 
 The officially supported Linux* build environment is the following:
 
-- Ubuntu* 18.04 LTS 64-bit or CentOS* 7.6 64-bit
-- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 4.8.5 (for CentOS* 7.6)
+- Ubuntu* 18.04 LTS 64-bit or Ubuntu* 20.04 LTS 64-bit
+- GCC* 7.5.0 (for Ubuntu* 18.04) or GCC* 9.3.0 (for Ubuntu* 20.04)
 - CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
@@ -222,10 +234,8 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 
 - Microsoft Windows* 10
-- Microsoft Visual Studio* 2017, or 2019
-- CMake* version 3.10 or higher
-
-> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
+- Microsoft Visual Studio* 2019
+- CMake* version 3.14 or higher
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:
@@ -236,13 +246,19 @@ build_demos_msvc.bat
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
 a solution for a demo code. Optionally, you can also specify the preferred Microsoft Visual Studio version to be used by the script. Supported
-versions are: `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
+version is: `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2019, use the following command:
 
 ```bat
-build_demos_msvc.bat VS2017
+build_demos_msvc.bat VS2019
 ```
 
-The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+By default, the demo applications binaries are build into the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
+The default build folder can be changed with `-b` option. For example, following command will buid Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
+
+```bat
+build_demos_msvc.bat -b c:\temp\omz-demos-build
+```
+
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the
@@ -272,37 +288,17 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="model_api_installation"></a>Python\* model API installation
+### <a name="python_requirements"></a>Dependencies for Python* Demos
 
-Python Model API with model wrappers and pipelines can be installed as a part of OpenVINO&trade; toolkit or from source.
-Installation from source is as follows:
-
-1. Install Python (version 3.6 or higher), [setuptools](https://pypi.org/project/setuptools/):
-
-2. Build the wheel with the following command:
+The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
 ```sh
-python <omz_dir>/demos/common/python/setup.py bdist_wheel
-```
-The built wheel should appear in the dist folder;
-Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
-
-3. Install the package in the clean environment with `--force-reinstall` key:
-```sh
-python -m pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
-```
-Alternatively, instead of building the wheel you can use the following command inside  `<omz_dir>/demos/common/python/` directory to build and install the package:
-```sh
-python -m pip install .
+python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-When the model API package is installed, you can import it as follows:
-```sh
-python -c "from openvino.model_zoo import model_api"
-```
+### <a name="python_model_api"></a>Python\* model API package
 
-> **NOTE**: On Linux and macOS, you may need to type `python3` instead of `python`. You may also need to [install pip](https://pip.pypa.io/en/stable/installation/).
-> For example, on Ubuntu execute the following command to get pip installed: `sudo apt install python3-pip`.
+To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
@@ -421,7 +417,7 @@ For example, for the **Debug** configuration, go to the project's
 variable in the **Environment** field to the following:
 
 ```
-PATH=<INSTALL_DIR>\deployment_tools\inference_engine\bin\intel64\Debug;<INSTALL_DIR>\opencv\bin;%PATH%
+PATH=<INSTALL_DIR>\runtime\bin\intel64\Debug;<INSTALL_DIR>\extras\opencv\bin;%PATH%
 ```
 
 where `<INSTALL_DIR>` is the directory in which the OpenVINO toolkit is installed.

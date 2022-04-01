@@ -18,29 +18,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 856006
-    checksum: 7eab8f34f6ab96fe751702f7c8fb3ccb4b4be83c41fdd57b9421d85bb16c7d1003c04ae1d4ddaf686a106756f07b3829
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 856090
+    checksum: d266de08d059fc8377b9980b1ab486511dee2731ee188422aaf58b24980e528bc1546d9cef011711cf00c6b21d8c9f8a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800356
     checksum: c0836ec1f0093ac2a6c3f1702a677e5c412f69593e0fa69e78abf5239ee2a1dc0ee51ddafaaea7ef32f791cf8165aa90
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 1177465
-    checksum: 6259bb495420ff1a53910bdea9a67bebc8ea83a0a0a35fb85064f814ee55cc1eb29b392ded5284fd92c24e1e53a7eaae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 1177549
+    checksum: a06812870b3db2fe662b8eedd503f228cd2d8cf17bc25b30f28619aedc6d701dff0be92a9b04356eb02f53247b065ba6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900230
     checksum: a84de6e8fb31f9414bbc6c07c114d70f5bc75975dfdb86eaae8f45857d0c7966d211440ed557f1f8b9fd68e3e69daef7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.xml
-    size: 2214331
-    checksum: 7abdda3cc2a3baceb54a188c40c41753eef5a944de9f05f71a95b0f6ec91569128589e01d9c1791327c6511bea096587
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 2279290
+    checksum: 2c13e746c3294c2b390d94d38490c5a4f698cebd1a650bf707add8b2c9e37813a923c9262ce4ab26a942ad150499750f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.bin
     size: 2140986
     checksum: a2de9388867d79c422815c6d46e7d13c903bbdef9ad728f49eaa82b681a8c0426520d2d6d5c04de429844ee90a49481b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
 input_info:
   - name: data
     shape: [1, 3, 400, 680]

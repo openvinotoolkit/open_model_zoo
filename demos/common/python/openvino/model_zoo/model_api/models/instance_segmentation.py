@@ -18,7 +18,6 @@ import cv2
 import numpy as np
 
 from .image_model import ImageModel
-from .model import WrapperError
 from .types import NumericalValue, ListValue, StringValue
 from .utils import nms, load_labels
 
@@ -65,7 +64,7 @@ class MaskRCNNModel(ImageModel):
             elif len(layer_shape) == 3:
                 outputs['masks'] = layer_name
             else:
-                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                self.raise_error("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
 
         return outputs
 
@@ -82,7 +81,7 @@ class MaskRCNNModel(ImageModel):
             elif layer_name == 'raw_masks' and len(layer_shape) == 4:
                 outputs['masks'] = layer_name
             else:
-                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                self.raise_error("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
         return outputs
 
     def preprocess(self, inputs):
@@ -189,7 +188,7 @@ class YolactModel(ImageModel):
             elif layer_name == 'mask' and len(layer_shape) == 3:
                 outputs['masks'] = layer_name
             else:
-                raise WrapperError(self.__model__, "Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
+                self.raise_error("Unexpected output layer shape {} with name {}".format(layer_shape, layer_name))
         return outputs
 
     def postprocess(self, outputs, meta):

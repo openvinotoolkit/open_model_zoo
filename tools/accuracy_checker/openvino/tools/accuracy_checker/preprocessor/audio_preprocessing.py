@@ -539,6 +539,11 @@ class AudioToMelSpectrogram(Preprocessor):
             'use_deterministic_dithering': BoolField(optional=True, default=True,
                                                      description="Applies determined dithering to signal spectrum"),
             'dither': NumberField(optional=True, value_type=float, default=0.00001, description="Dithering value"),
+            'stft_padded': BoolField(optional=True, default=True,
+                                     description="Enables padding at the end of input signal for STFT"),
+            'stft_boundary': StringField(choices=['even', 'odd', 'constant', 'zeros'], optional=True, default='zeros',
+                                         description="Specifies how to generate boundary values for STFT"),
+            'do_transpose': BoolField(optional=True, default=True, description="Enables input transpose"),
         })
         return params
 
@@ -555,6 +560,9 @@ class AudioToMelSpectrogram(Preprocessor):
         self.frame_splicing = self.get_value_from_config('splicing')
         self.use_deterministic_dithering = self.get_value_from_config('use_deterministic_dithering')
         self.dither = self.get_value_from_config('dither')
+        self.stft_padded = self.get_value_from_config('stft_padded')
+        self.stft_boundary = self.get_value_from_config('stft_boundary')
+        self.do_transpose = self.get_value_from_config('do_transpose')
 
         self.normalize = 'per_feature'
         self.lowfreq = 0
@@ -568,14 +576,11 @@ class AudioToMelSpectrogram(Preprocessor):
         self.log_zero_guard_value = 2 ** -24
 
     def process(self, image, annotation_meta=None):
-        if self.sample_rate is None:
-            sample_rate = image.metadata.get('sample_rate')
-            if sample_rate is None:
-                raise RuntimeError(
-                    'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
-                )
-        else:
-            sample_rate = self.sample_rate
+        if self.sample_rate is None and image.metadata.get('sample_rate') is None:
+            raise RuntimeError(
+                'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
+            )
+        sample_rate = self.sample_rate if self.sample_rate is not None else image.metadata['sample_rate']
         self.window_length = int(self.window_size * sample_rate)
         self.hop_length = int(self.window_stride * sample_rate)
         self.n_fft = int(self.n_fft or 2 ** np.ceil(np.log2(self.window_length)))
@@ -604,7 +609,8 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # do stft with weighting window
         _, _, x = dsp.stft(x.squeeze(), fs=sample_rate, window=self.window, nperseg=self.window_length,
-                           noverlap=self.hop_length, nfft=self.n_fft)
+                           noverlap=self.hop_length, nfft=self.n_fft,
+                           padded=self.stft_padded, boundary=self.stft_boundary)
         x *= sum(self.window)
 
         # get power spectrum
@@ -642,7 +648,8 @@ class AudioToMelSpectrogram(Preprocessor):
                     x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value,
                                mode='constant')
         # transpose according to model input layout
-        x = np.transpose(x, [2, 0, 1])
+        if self.do_transpose:
+            x = np.transpose(x, [2, 0, 1])
         image.data = x
         return image
 

@@ -699,7 +699,7 @@ int main(int argc, char* argv[]) {
             inputChannels.push_back(InputChannel::create(inputSources[channelI]));
         }
 
-        // Init OpenVINO Core
+        // Load OpenVINO Runtime
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
 

@@ -13,8 +13,8 @@
 
 import numpy as np
 
-from .model import Model, WrapperError
-from .types import DictValue, NumericalValue, StringValue
+from .model import Model
+from .types import DictValue, NumericalValue, StringValue, BooleanValue
 
 
 class Bert(Model):
@@ -27,7 +27,7 @@ class Bert(Model):
         self.token_pad = [self.vocab['[PAD]']]
         self.input_names = [i.strip() for i in self.input_names.split(',')]
         if self.inputs.keys() != set(self.input_names):
-            raise WrapperError(self.__model__, 'The Wrapper expects input names: {}, actual network input names: {}'.format(
+            self.raise_error('The Wrapper expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.inputs.keys())))
         self.max_length = self.inputs[self.input_names[0]].shape[1]
 
@@ -37,13 +37,15 @@ class Bert(Model):
         parameters.update({
             'vocab': DictValue(),
             'input_names': StringValue(description='Comma-separated names of input layers'),
+            'enable_padding': BooleanValue(
+                description='Should be input sequence padded to max sequence len or not', default_value=True
+            )
         })
         return parameters
 
     def preprocess(self, inputs):
         input_ids, attention_mask, token_type_ids = self.form_request(inputs)
-
-        pad_len = self.pad_input(input_ids, attention_mask, token_type_ids)
+        pad_len = self.pad_input(input_ids, attention_mask, token_type_ids) if self.enable_padding else 0
         meta = {'pad_len': pad_len, 'inputs': inputs}
 
         return self.create_input_dict(input_ids, attention_mask, token_type_ids), meta
@@ -54,7 +56,7 @@ class Bert(Model):
     def pad_input(self, input_ids, attention_mask, token_type_ids):
         pad_len = self.max_length - len(input_ids)
         if pad_len < 0:
-            raise ValueError("The input request is longer than max number of tokens ({})"
+            self.raise_error("The input request is longer than max number of tokens ({})"
                              " processed by model".format(self.max_length))
         input_ids += self.token_pad * pad_len
         token_type_ids += [0] * pad_len
@@ -79,7 +81,7 @@ class Bert(Model):
         default_input_shape = input_info.shape
         super().reshape(new_shapes)
         self.logger.debug("\tReshape model from {} to {}".format(default_input_shape, new_shapes[input_name]))
-        self.max_length = new_length
+        self.max_length = new_length if not isinstance(new_length, tuple) else new_length[1]
 
 
 class BertNamedEntityRecognition(Bert):
@@ -106,7 +108,7 @@ class BertNamedEntityRecognition(Bert):
 
         filtered_labels_id = [
             (i, label_i) for i, label_i in enumerate(labels_id)
-            if label_i != 0 and 0 < i < self.max_length - meta['pad_len']
+            if label_i != 0 and 0 < i < self.max_length - meta['pad_len'] - 1
         ]
         return score, filtered_labels_id
 
@@ -140,7 +142,7 @@ class BertQuestionAnswering(Bert):
 
         self.output_names = [o.strip() for o in self.output_names.split(',')]
         if self.outputs.keys() != set(self.output_names):
-            raise WrapperError(self.__model__, 'The Wrapper output names: {}, actual network output names: {}'.format(
+            self.raise_error('The Wrapper expects output names: {}, actual network output names: {}'.format(
                 self.output_names, list(self.outputs.keys())))
 
     @classmethod

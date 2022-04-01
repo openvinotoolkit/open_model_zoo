@@ -31,10 +31,10 @@ def check_input_name(model, input_tensor_name):
 
 
 class ForwardTacotronIE:
-    def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
+    def __init__(self, model_duration, model_forward, core, device='CPU', verbose=False):
         self.verbose = verbose
         self.device = device
-        self.ie = ie
+        self.core = core
 
         self.duration_predictor_model = self.load_network(model_duration)
         self.duration_predictor_request = self.create_infer_request(self.duration_predictor_model, model_duration)
@@ -111,10 +111,10 @@ class ForwardTacotronIE:
 
     def load_network(self, model_path):
         log.info('Reading ForwardTacotron model {}'.format(model_path))
-        return self.ie.read_model(model_path)
+        return self.core.read_model(model_path)
 
     def create_infer_request(self, model, path):
-        compiled_model = self.ie.compile_model(model, device_name=self.device)
+        compiled_model = self.core.compile_model(model, device_name=self.device)
         log.info('The ForwardTacotron model {} is loaded to {}'.format(path, self.device))
         return compiled_model.create_infer_request()
 
@@ -126,7 +126,7 @@ class ForwardTacotronIE:
                       "input_mask": input_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = np.array([speaker_embedding])
+                inputs["speaker_embedding"] = np.array(speaker_embedding)
             self.duration_predictor_request.infer(inputs)
         else:
             self.duration_predictor_request.infer(inputs={"input_seq": sequence})
@@ -154,7 +154,7 @@ class ForwardTacotronIE:
                       "data_mask": data_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = np.array([speaker_embedding])
+                inputs["speaker_embedding"] = np.array(speaker_embedding)
             self.forward_request.infer(inputs)
         else:
             self.forward_request.infer(inputs={"data": aligned_emb})
@@ -215,7 +215,7 @@ class ForwardTacotronIE:
             if speaker_emb is not None:
                 speaker_embedding = speaker_emb
             else:
-                speaker_embedding = self.speaker_embeddings[speaker_id, :]
+                speaker_embedding = [self.speaker_embeddings[speaker_id, :]]
 
         aligned_emb = self.forward_duration_prediction_by_delimiters(text, speaker_embedding, alpha)
 
@@ -232,7 +232,7 @@ class ForwardTacotronIE:
             if self.verbose:
                 log.debug("SAEmb shape: {0}".format(sub_aligned_emb.shape))
             mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx, speaker_embedding)
-            mels.append(mel)
+            mels.append(np.copy(mel))
             start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)

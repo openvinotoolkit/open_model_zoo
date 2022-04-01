@@ -26,7 +26,10 @@ import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, ImageMattingWithBackground, VideoBackgroundMatting
+from openvino.model_zoo.model_api.models import (
+    MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel,
+    ImageMattingWithBackground, VideoBackgroundMatting, PortraitBackgroundMatting
+)
 from openvino.model_zoo.model_api.models.utils import load_labels
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
 from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
@@ -58,7 +61,7 @@ def build_argparser():
     args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                       help='Optional. Probability threshold for detections filtering.')
     args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
-                      help='Optional. A resize type for model preprocess. By defauld used model predefined type.')
+                      help='Optional. A resize type for model preprocess. By default used model predefined type.')
     args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
     args.add_argument('--target_bgr', default=None, type=str,
                       help='Optional. Background onto which to composite the output (by default to green field).')
@@ -122,6 +125,9 @@ def get_model(model_adapter, configuration, args):
             raise ValueError('The ImageMattingWithBackground model expects the specified "--background" option.')
         model = ImageMattingWithBackground(model_adapter, configuration)
         need_bgr_input = True
+        is_matting_model = True
+    elif len(inputs) == 1 and len(outputs) == 1:
+        model = PortraitBackgroundMatting(model_adapter, configuration)
         is_matting_model = True
     else:
         model = MaskRCNNModel(model_adapter, configuration)

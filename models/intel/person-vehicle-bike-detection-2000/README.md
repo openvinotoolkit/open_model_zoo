@@ -14,7 +14,7 @@ prior boxes for 256x256 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.165 (internal test set)                 |
+| AP @ [ IoU=0.50:0.95 ]          | 0.1647 (internal test set)                |
 | GFlops                          | 0.787                                     |
 | MParams                         | 1.821                                     |
 | Source framework                | PyTorch\*                                 |
@@ -25,7 +25,7 @@ curve.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 256, 256` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 256, 256` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

@@ -133,12 +133,12 @@ def read_wav(file, as_float=False):
 def main():
     args = build_argparser()
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = Core()
+    core = Core()
 
     log.info('Reading model {}'.format(args.model))
-    model = ie.read_model(args.model)
+    model = core.read_model(args.model)
 
     if len(model.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")
@@ -157,7 +157,7 @@ def main():
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    compiled_model = ie.compile_model(model, args.device)
+    compiled_model = core.compile_model(model, args.device)
     output_tensor = compiled_model.outputs[0]
     infer_request = compiled_model.create_infer_request()
     log.info('The model {} is loaded to {}'.format(args.model, args.device))

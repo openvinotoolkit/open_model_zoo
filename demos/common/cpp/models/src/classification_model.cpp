@@ -14,22 +14,33 @@
 // limitations under the License.
 */
 
+#include "models/classification_model.h"
+
+#include <algorithm>
 #include <fstream>
+#include <iterator>
+#include <map>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
-#include <openvino/openvino.hpp>
+
 #include <openvino/op/softmax.hpp>
 #include <openvino/op/topk.hpp>
-#include <utils/ocv_common.hpp>
+#include <openvino/openvino.hpp>
+
 #include <utils/slog.hpp>
-#include "models/classification_model.h"
+
 #include "models/results.h"
 
-ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize,
-    const std::vector<std::string>& labels, const std::string& layout) :
-    ImageModel(modelFileName, useAutoResize, layout),
-    nTop(nTop),
-    labels(labels) {}
+ClassificationModel::ClassificationModel(const std::string& modelFileName,
+                                         size_t nTop,
+                                         bool useAutoResize,
+                                         const std::vector<std::string>& labels,
+                                         const std::string& layout)
+    : ImageModel(modelFileName, useAutoResize, layout),
+      nTop(nTop),
+      labels(labels) {}
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
     const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[0])->second;
@@ -42,7 +53,11 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
 
     result->topLabels.reserve(scoresTensor.get_size());
     for (size_t i = 0; i < scoresTensor.get_size(); ++i) {
-        result->topLabels.emplace_back(indicesPtr[i], labels[indicesPtr[i]], scoresPtr[i]);
+        int ind = indicesPtr[i];
+        if (ind < 0 || ind >= static_cast<int>(labels.size())) {
+            throw std::runtime_error("Invalid index for the class label is found during postprocessing");
+        }
+        result->topLabels.emplace_back(ind, labels[ind], scoresPtr[i]);
     }
 
     return retVal;
@@ -90,22 +105,20 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     const auto height = inputShape[ov::layout::height_idx(inputLayout)];
     if (height != width) {
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
-            " Got " + std::to_string(height) +
-            "x" + std::to_string(width) + ".");
+                               " Got " +
+                               std::to_string(height) + "x" + std::to_string(width) + ".");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     if (useAutoResize) {
-        ppp.input().tensor().
-            set_spatial_dynamic_shape();
+        ppp.input().tensor().set_spatial_dynamic_shape();
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+        ppp.input()
+            .preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
 
     ppp.input().model().set_layout(inputLayout);
@@ -118,28 +131,27 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     const ov::Shape& outputShape = model->output().get_shape();
     if (outputShape.size() != 2 && outputShape.size() != 4) {
         throw std::logic_error("Classification model wrapper supports topologies only with"
-            " 2-dimensional or 4-dimensional output");
+                               " 2-dimensional or 4-dimensional output");
     }
 
     const ov::Layout outputLayout("NCHW");
-    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout)] != 1
-        || outputShape[ov::layout::width_idx(outputLayout)] != 1)) {
+    if (outputShape.size() == 4 && (outputShape[ov::layout::height_idx(outputLayout)] != 1 ||
+                                    outputShape[ov::layout::width_idx(outputLayout)] != 1)) {
         throw std::logic_error("Classification model wrapper supports topologies only"
-            " with 4-dimensional output which has last two dimensions of size 1");
+                               " with 4-dimensional output which has last two dimensions of size 1");
     }
 
     size_t classesNum = outputShape[ov::layout::channels_idx(outputLayout)];
     if (nTop > classesNum) {
-        throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but "
-            + std::to_string(nTop) + " labels are requested to be predicted");
+        throw std::logic_error("The model provides " + std::to_string(classesNum) + " classes, but " +
+                               std::to_string(nTop) + " labels are requested to be predicted");
     }
     if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "\tInserted 'other' label as first." << slog::endl;
-    }
-    else if (classesNum != labels.size()) {
-        throw std::logic_error("Model's number of classes and parsed labels must match ("
-            + std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
+        slog::warn << "Inserted 'other' label as first." << slog::endl;
+    } else if (classesNum != labels.size()) {
+        throw std::logic_error("Model's number of classes and parsed labels must match (" +
+                               std::to_string(outputShape[1]) + " and " + std::to_string(labels.size()) + ')');
     }
 
     ppp.output().tensor().set_element_type(ov::element::f32);
@@ -147,33 +159,33 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
 
     // --------------------------- Adding softmax and topK output  ---------------------------
     auto nodes = model->get_ops();
-    auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes),
-        [](const std::shared_ptr<ov::Node>& op) { return std::string(op->get_type_name()) == "Softmax"; });
+    auto softmaxNodeIt = std::find_if(std::begin(nodes), std::end(nodes), [](const std::shared_ptr<ov::Node>& op) {
+        return std::string(op->get_type_name()) == "Softmax";
+    });
 
     std::shared_ptr<ov::Node> softmaxNode;
     if (softmaxNodeIt == nodes.end()) {
         auto logitsNode = model->get_output_op(0)->input(0).get_source_output().get_node();
         softmaxNode = std::make_shared<ov::op::v1::Softmax>(logitsNode->output(0), 1);
-    }
-    else {
+    } else {
         softmaxNode = *softmaxNodeIt;
     }
-    const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32,
-                                                          ov::Shape{},
-                                                          std::vector<size_t>{nTop});
-    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v3::TopK>(softmaxNode, k, 1,
+    const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32, ov::Shape{}, std::vector<size_t>{nTop});
+    std::shared_ptr<ov::Node> topkNode = std::make_shared<ov::op::v3::TopK>(softmaxNode,
+                                                                            k,
+                                                                            1,
                                                                             ov::op::v3::TopK::Mode::MAX,
                                                                             ov::op::v3::TopK::SortType::SORT_VALUES);
 
     auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
     auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
-    ov::ResultVector res({ scores, indices });
+    ov::ResultVector res({scores, indices});
     model = std::make_shared<ov::Model>(res, model->get_parameters(), "classification");
 
     // manually set output tensors name for created topK node
-    model->outputs()[0].set_names({ "indices" });
+    model->outputs()[0].set_names({"indices"});
     outputsNames.push_back("indices");
-    model->outputs()[1].set_names({ "scores" });
+    model->outputs()[1].set_names({"scores"});
     outputsNames.push_back("scores");
 
     // set output precisions

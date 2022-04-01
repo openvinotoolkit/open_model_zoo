@@ -4,7 +4,7 @@ This demo demonstrates an example of using neural networks to colorize a graysca
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads one network to the Inference Engine for execution. Once the program receives an image, it performs the following steps:
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin for execution. Once the program receives an image, it performs the following steps:
 
 1. Converts the frame into the LAB color space.
 2. Uses the L-channel to predict A and B channels.
@@ -96,5 +96,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

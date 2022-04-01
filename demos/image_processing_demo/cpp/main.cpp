@@ -14,26 +14,40 @@
 // limitations under the License.
 */
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <chrono>
+#include <exception>
 #include <iostream>
-#include <map>
+#include <memory>
+#include <stdexcept>
 #include <string>
-#include <unordered_map>
-#include <sys/stat.h>
+#include <utility>
+#include <vector>
 
 #include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
 
-#include <monitors/presenter.h>
 #include <models/deblurring_model.h>
+#include <models/image_model.h>
+#include <models/input_data.h>
 #include <models/jpeg_restoration_model.h>
+#include <models/model_base.h>
+#include <models/results.h>
 #include <models/style_transfer_model.h>
 #include <models/super_resolution_model.h>
+#include <monitors/presenter.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
-#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/config_factory.h>
 #include <utils/default_flags.hpp>
-#include <utils/ocv_common.hpp>
 #include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
@@ -43,24 +57,28 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
+static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for "
+                                 "Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
-" Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
-"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
-"The demo will look for a suitable plugin for a specified device.";
-static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+                                     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
+static const char target_device_message[] =
+    "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+    "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+    "The demo will look for a suitable plugin for a specified device.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer "
+                                    "requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
-"throughput mode (for HETERO and MULTI device cases use format "
-"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+                                          "throughput mode (for HETERO and MULTI device cases use format "
+                                          "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+static const char output_resolution_message[] =
+    "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 static const char jc_message[] = "Optional. Flag of using compression for jpeg images. "
-    "Default value if false. Only for jr architecture type.";
+                                 "Default value if false. Only for jr architecture type.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -75,13 +93,12 @@ DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 DEFINE_bool(jc, false, jc_message);
 
-
 /**
-* \brief This function shows a help message
-*/
+ * \brief This function shows a help message
+ */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "image_processing_demo_async [OPTION]" << std::endl;
+    std::cout << "image_processing_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
@@ -102,7 +119,7 @@ static void showUsage() {
     std::cout << "    -jc                       " << jc_message << std::endl;
 }
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -128,7 +145,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type, bool doCompression=false) {
+std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type, bool doCompression = false) {
     if (type == "sr") {
         return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, frameSize, FLAGS_layout));
     }
@@ -144,7 +161,7 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics, renderMetrics;
 
@@ -154,14 +171,11 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
         cv::Mat curr_frame;
 
         auto startTime = std::chrono::steady_clock::now();
         curr_frame = cap->read();
-        if (curr_frame.empty()) {
-            throw std::logic_error("Can't read an image from the input");
-        }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
@@ -169,12 +183,12 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+                               ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+                               core);
         Presenter presenter(FLAGS_u);
 
-        int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
-            std::make_shared<ImageMetaData>(curr_frame, startTime));
+        int64_t frameNum =
+            pipeline.submitData(ImageInputData(curr_frame), std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
@@ -197,12 +211,10 @@ int main(int argc, char *argv[]) {
                 cv::Size viewSize = view.getSize();
                 if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
                     outputResolution = viewSize;
-            }
-            else {
-                outputResolution = cv::Size{
-                    std::stoi(FLAGS_output_resolution.substr(0, found)),
-                    std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
-                };
+            } else {
+                outputResolution =
+                    cv::Size{std::stoi(FLAGS_output_resolution.substr(0, found)),
+                             std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))};
             }
             outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
@@ -230,10 +242,11 @@ int main(int argc, char *argv[]) {
                 }
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
-            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them
+            // are available.
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
@@ -247,15 +260,14 @@ int main(int argc, char *argv[]) {
                         cv::Size viewSize = view.getSize();
                         if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
                             outputResolution = viewSize;
-                    }
-                    else {
+                    } else {
                         outputResolution = cv::Size{
                             std::stoi(FLAGS_output_resolution.substr(0, found)),
-                            std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
-                        };
+                            std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))};
                     }
 
-                    outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
+                    outputTransform =
+                        OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
                 }
 
@@ -264,14 +276,17 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(outFrame);
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                               outFrame,
+                               {10, 22},
+                               cv::FONT_HERSHEY_COMPLEX,
+                               0.65);
                 videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     view.show(outFrame);
 
                     //--- Processing keyboard events
                     auto key = cv::waitKey(1);
-                    if (27 == key || 'q' == key || 'Q' == key) { // Esc
+                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
                     } else {
                         view.handleKey(key);
@@ -280,7 +295,7 @@ int main(int argc, char *argv[]) {
                 }
                 framesProcessed++;
             }
-        } // while(keepRunning)
+        }  // while(keepRunning)
 
         // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
@@ -294,14 +309,13 @@ int main(int argc, char *argv[]) {
                         cv::Size viewSize = view.getSize();
                         if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
                             outputResolution = viewSize;
-                    }
-                    else {
+                    } else {
                         outputResolution = cv::Size{
                             std::stoi(FLAGS_output_resolution.substr(0, found)),
-                            std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
-                        };
+                            std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))};
                     }
-                    outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
+                    outputTransform =
+                        OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
                 }
 
@@ -309,7 +323,10 @@ int main(int argc, char *argv[]) {
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                               outFrame,
+                               {10, 22},
+                               cv::FONT_HERSHEY_COMPLEX,
+                               0.65);
                 videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     view.show(outFrame);
@@ -322,17 +339,16 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
-            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
-            renderMetrics.getTotal().latency);
+        logLatencyPerStage(cap->getMetrics().getTotal().latency,
+                           pipeline.getPreprocessMetrics().getTotal().latency,
+                           pipeline.getInferenceMetircs().getTotal().latency,
+                           pipeline.getPostprocessMetrics().getTotal().latency,
+                           renderMetrics.getTotal().latency);
         slog::info << presenter.reportMeans() << slog::endl;
-
-    }
-    catch (const std::exception& error) {
+    } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
         return 1;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }

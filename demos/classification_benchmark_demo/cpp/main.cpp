@@ -2,25 +2,38 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <stddef.h>
+
+#include <algorithm>
 #include <chrono>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <map>
+#include <memory>
+#include <ratio>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gflags/gflags.h>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <openvino/openvino.hpp>
 
 #include <models/classification_model.h>
+#include <models/input_data.h>
+#include <models/model_base.h>
 #include <models/results.h>
+#include <monitors/presenter.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
-
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
+#include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
@@ -169,7 +182,6 @@ int main(int argc, char *argv[]) {
         if (!inputGtFile.is_open()) {
             throw std::runtime_error("Can't open the ground truth file.");
         }
-
         std::string line;
         while (std::getline(inputGtFile, line)) {
             size_t separatorIdx = line.find(' ');
@@ -256,7 +268,6 @@ int main(int argc, char *argv[]) {
 
         if (pipeline.isReadyToProcess()) {
             auto imageStartTime = std::chrono::steady_clock::now();
-
             pipeline.submitData(ImageInputData(inputImages[nextImageIndex]),
                 std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex], imageStartTime, classIndices[nextImageIndex]));
             nextImageIndex++;
@@ -277,9 +288,7 @@ int main(int argc, char *argv[]) {
             }
             const ClassificationImageMetaData& classificationImageMetaData
                 = classificationResult.metaData->asRef<const ClassificationImageMetaData>();
-
             auto outputImg = classificationImageMetaData.img;
-
             if (outputImg.empty()) {
                 throw std::invalid_argument("Renderer: image provided in metadata is empty");
             }

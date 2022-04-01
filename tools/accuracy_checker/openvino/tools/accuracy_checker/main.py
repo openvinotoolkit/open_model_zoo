@@ -101,7 +101,7 @@ def main():
             exception(e)
             return_code = 1
             continue
-        end_telemetry(tm)
+    end_telemetry(tm)
     sys.exit(return_code)
 
 

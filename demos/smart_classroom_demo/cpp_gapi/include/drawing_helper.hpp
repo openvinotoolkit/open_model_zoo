@@ -1,12 +1,15 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <utils/ocv_common.hpp>
+#include <string>
+#include <vector>
 
-#include "tracker.hpp"
+#include <opencv2/core.hpp>
+
+struct TrackedObject;
 
 class DrawingHelper {
 public:

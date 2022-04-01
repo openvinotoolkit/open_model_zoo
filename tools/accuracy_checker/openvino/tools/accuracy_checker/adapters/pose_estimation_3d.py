@@ -41,8 +41,8 @@ class HumanPose3dAdapter(Adapter):
     __provider__ = 'human_pose_estimation_3d'
     prediction_types = (PoseEstimation3dPrediction,)
 
-    def __init__(self, launcher_config, label_map=None, output_blob=None):
-        super().__init__(launcher_config, label_map, output_blob)
+    def __init__(self, launcher_config, label_map=None, output_blob=None, additional_output_mapping=None):
+        super().__init__(launcher_config, label_map, output_blob, additional_output_mapping)
         launcher_2d_config = OrderedDict([
             ('type', HumanPoseAdapter.__provider__),
             ('part_affinity_fields_out', launcher_config['part_affinity_fields_out']),

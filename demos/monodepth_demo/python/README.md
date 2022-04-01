@@ -3,19 +3,24 @@
 This topic demonstrates how to run the MonoDepth demo application, which produces a disparity map for a given input image.
 To this end, the code uses the network described in [Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer](https://arxiv.org/abs/1907.01341).
 
-Below is the `midasnet` model inference result for `<openvino_dir>/deployment_tools/demo/car_1.bmp` sample image
+Below is the `midasnet` model inference result:
 
 ![example](./disp.png)
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different monocular depth estimation model topologies in one demo.
 
 ## Preparing to Run
 
@@ -110,7 +115,7 @@ has to wait before being sent for inference.
 For higher FPS, it is recommended that you set `-nireq` to slightly exceed the `-nstreams` value,
 summed across all devices used.
 
-> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
+> **NOTE**: This demo is based on the callback functionality from the OpenVINO™ Runtime API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to a decrease in FPS.
@@ -150,5 +155,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

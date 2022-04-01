@@ -24,7 +24,7 @@ For the tests to work, the test data directory must contain:
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
-* a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
+* a file how_are_you_doing.wav from (https://storage.openvinotoolkit.org/data/test_data/)
 * a file stream_8_high.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_high.mp4
 * a file stream_8_top.mp4 from https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/stream_8_top.mp4
 """
@@ -34,7 +34,6 @@ import contextlib
 import csv
 import json
 import os
-import platform
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
@@ -45,6 +44,7 @@ import importlib
 from pathlib import Path
 
 from args import ArgContext, Arg, ModelArg
+from cases import Demo
 from data_sequences import DATA_SEQUENCES
 
 scopes = {
@@ -68,7 +68,8 @@ def parse_args():
     parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
-        help='list of demos to run tests for (by default, every demo is tested)')
+        help='list of demos to run tests for (by default, every demo is tested). '
+        'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
     parser.add_argument('--scope', default='base',
         help='The scenario for testing demos.', choices=('base', 'performance'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -77,10 +78,12 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--log-file', type=Path,
+        help='path to log file')
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
         help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
-        help='IR precisions for all models. By default, models are tested in FP16 precision')
+        help='IR precisions for all models. By default, models are tested in FP16, FP16-INT8 precisions')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
         help='directory with pre-converted models (IRs)')
     return parser.parse_args()
@@ -94,6 +97,11 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
         if first_time:
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
+
+
+def write_log(test_log, log_file):
+    with log_file.open('a+', newline='') as txtfile:
+        txtfile.write(test_log + '\n')
 
 
 @contextlib.contextmanager
@@ -210,9 +218,22 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
+        if all(impl in Demo.IMPLEMENTATION_TYPES for impl in names_of_demos_to_test):
+            names_of_demos_to_test = {demo.subdirectory for demo in DEMOS if demo.implementation in names_of_demos_to_test}
+
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
+
+    if len(demos_to_test) == 0:
+        if args.demos:
+            print("List of demos to test is empty.")
+            print(f"Command line argument '--demos {args.demos}' was passed, check that you've specified correct value from the list below:")
+            print(*(list(Demo.IMPLEMENTATION_TYPES) + [demo.subdirectory for demo in DEMOS]), sep=',')
+        raise RuntimeError("Not found demos to test!")
+
+    print(f"{len(demos_to_test)} demos will be tested:")
+    print(*[demo.subdirectory for demo in demos_to_test], sep =',')
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
@@ -223,18 +244,21 @@ def main():
 
         num_failures = 0
 
-        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         try:
-            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+            pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
         except KeyError:
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}",
         }
 
+        print('Demo Environment: {}'.format(demo_environment))
+
+        failed_tests = []
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.subdirectory))
+            header = 'Testing {}'.format(demo.subdirectory)
+            print(header)
             print()
             demo.set_precisions(args.precisions, model_info)
 
@@ -297,28 +321,42 @@ def main():
                                 print(flush=True)
                                 skip = True
                         if skip: continue
-                        print('Test case #{}/{}:'.format(test_case_index, device),
-                            ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                        test_descr = 'Test case #{}/{}:\n{}'.format(test_case_index, device, ' '.join(shlex.quote(str(arg))
+                            for arg in fixed_args + dev_arg + case_args))
+                        print(test_descr)
                         print(flush=True)
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment)
+                                env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
-                        except subprocess.CalledProcessError as e:
-                            print(e.output)
-                            print('Exit code:', e.returncode)
+                        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                            output = e.output
+                            if isinstance(e, subprocess.CalledProcessError):
+                                exit_msg = f'Exit code: {e.returncode}\n'
+                            elif isinstance(e, subprocess.TimeoutExpired):
+                                exit_msg = f'Command timed out after {e.timeout} seconds\n'
+                            output += exit_msg
+                            print(output)
+                            failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
                             execution_time = -1
 
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                        if args.log_file:
+                            if test_case_index == 0:
+                                write_log(header, args.log_file)
+                            write_log(test_descr, args.log_file)
+                            write_log(output, args.log_file)
 
             print()
 
-    print("Failures: {}".format(num_failures))
+    print("{} failures:".format(num_failures))
+    for test in failed_tests:
+        print(test)
 
     sys.exit(0 if num_failures == 0 else 1)
 

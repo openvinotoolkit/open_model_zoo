@@ -2,4 +2,7 @@ description: >-
   ForwardTacotron model for text to speech task.
 task_type: text_to_speech
 framework: onnx
+stages_order:
+  - forward-tacotron-duration-prediction
+  - forward-tacotron-regression
 license: https://github.com/as-ideas/ForwardTacotron/blob/master/LICENSE

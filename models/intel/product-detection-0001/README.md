@@ -20,7 +20,7 @@ The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `oc
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
+Image, name: `input.1`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

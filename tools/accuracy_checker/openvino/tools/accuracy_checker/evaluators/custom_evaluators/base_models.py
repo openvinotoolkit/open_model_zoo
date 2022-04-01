@@ -169,13 +169,15 @@ class BaseDLSDKModel:
                 if not model_list:
                     model_list = list(model.glob('*.blob'))
             else:
-                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-                if not model_list and not blob_list:
+                model_list = list(model.glob('*{}*.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}*.blob'.format(self.default_model_suffix)))
+                onnx_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
+                if not model_list and not blob_list and not onnx_list:
                     model_list = list(model.glob('*.xml'))
                     blob_list = list(model.glob('*.blob'))
-                    if not model_list:
-                        model_list = blob_list
+                    onnx_list = list(model.glob('*.onnx'))
+                if not model_list:
+                    model_list = blob_list if blob_list else onnx_list
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
             if len(model_list) > 1:
@@ -341,6 +343,16 @@ class BaseOpenVINOModel(BaseDLSDKModel):
             return {node.get_node().friendly_name: node.get_node() for node in self.network.outputs}
         return {node.get_node().friendly_name: node.get_node() for node in self.exec_network.outputs}
 
+    @property
+    def additional_output_mapping(self):
+        out_tensor_name_to_node = {}
+        for out in self.network.outputs:
+            if not out.names:
+                continue
+            for name in out.names:
+                out_tensor_name_to_node[name] = out.get_node().friendly_name
+        return out_tensor_name_to_node
+
     def fit_to_input(self, input_data):
         input_info = self.inputs[self.input_blob]
         if (self.input_blob in self.dynamic_inputs or
@@ -355,10 +367,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         tensors_mapping = self.input_tensors_mapping()
         feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
         outputs = self.infer_request.infer(feed_dict)
-        res_outputs = {
-            out_node.get_node().friendly_name: out_res
-            for out_node, out_res in outputs.items()
-        }
+        res_outputs = {out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()}
         if raw_results:
             return res_outputs, outputs
         return res_outputs
@@ -384,7 +393,7 @@ class BaseONNXModel:
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
+            model_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
             if not model_list:
                 model_list = list(model.glob('*.onnx'))
             if not model_list:

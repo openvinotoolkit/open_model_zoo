@@ -244,9 +244,6 @@ int main(int argc, char* argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat image = cap->read();
-        if (!image.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
 
         LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
         cv::Size graphSize{static_cast<int>(image.cols / 4), 60};

@@ -14,28 +14,34 @@
 // limitations under the License.
 */
 
-#include <algorithm>
-#include <utility>
-#include <vector>
-#include <utils/common.hpp>
-#include <utils/kuhn_munkres.hpp>
 #include "models/associative_embedding_decoder.h"
 
+#include <algorithm>
+#include <iterator>
+#include <limits>
+#include <numeric>
+#include <vector>
+
+#include <utils/kuhn_munkres.hpp>
 
 void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
                const std::vector<cv::Mat>& aembdsMaps,
                std::vector<std::vector<Peak>>& allPeaks,
-               size_t jointId, size_t maxNumPeople,
+               size_t jointId,
+               size_t maxNumPeople,
                float detectionThreshold) {
-
     const cv::Mat& nmsHeatMap = nmsHeatMaps[jointId];
     const float* heatMapData = nmsHeatMap.ptr<float>();
     cv::Size outputSize = nmsHeatMap.size();
 
     std::vector<int> indices(outputSize.area());
     std::iota(std::begin(indices), std::end(indices), 0);
-    std::partial_sort(std::begin(indices), std::begin(indices) + maxNumPeople, std::end(indices),
-                      [heatMapData](int l, int r) { return heatMapData[l] > heatMapData[r]; });
+    std::partial_sort(std::begin(indices),
+                      std::begin(indices) + maxNumPeople,
+                      std::end(indices),
+                      [heatMapData](int l, int r) {
+                          return heatMapData[l] > heatMapData[r];
+                      });
 
     for (size_t personId = 0; personId < maxNumPeople; personId++) {
         int index = indices[personId];
@@ -45,21 +51,21 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
         float score = heatMapData[index];
         allPeaks[jointId].reserve(maxNumPeople);
         if (score > detectionThreshold) {
-            allPeaks[jointId].emplace_back(Peak{cv::Point2f(static_cast<float>(x), static_cast<float>(y)),
-                                           score, tag});
+            allPeaks[jointId].emplace_back(Peak{cv::Point2f(static_cast<float>(x), static_cast<float>(y)), score, tag});
         }
     }
 }
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
-                             size_t maxNumPeople, size_t numJoints,
+                             size_t maxNumPeople,
+                             size_t numJoints,
                              float tagThreshold) {
-    size_t jointOrder[] { 0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16 };
+    size_t jointOrder[]{0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16};
     std::vector<Pose> allPoses;
     for (size_t jointId : jointOrder) {
         std::vector<Peak>& jointPeaks = allPeaks[jointId];
         std::vector<float> tags;
-        for (auto& peak: jointPeaks) {
+        for (auto& peak : jointPeaks) {
             tags.push_back(peak.tag);
         }
         if (allPoses.empty()) {
@@ -109,8 +115,14 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
         }
 
         if (numAdded > numGrouped) {
-            cv::copyMakeBorder(matchingCost, matchingCost, 0, 0, 0, numAdded - numGrouped,
-                               cv::BORDER_CONSTANT, 10000000);
+            cv::copyMakeBorder(matchingCost,
+                               matchingCost,
+                               0,
+                               0,
+                               0,
+                               numAdded - numGrouped,
+                               cv::BORDER_CONSTANT,
+                               10000000);
         }
         // Get pairs
         auto res = KuhnMunkres().Solve(matchingCost);
@@ -118,8 +130,7 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
             size_t col = res[row];
             if (row < numAdded && col < numGrouped && tagsDiff.at<float>(row, col) < tagThreshold) {
                 allPoses[col].add(jointId, jointPeaks[row]);
-            }
-            else {
+            } else {
                 Pose pose = Pose(numJoints);
                 pose.add(jointId, jointPeaks[row]);
                 allPoses.push_back(pose);
@@ -130,24 +141,25 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
 }
 
 namespace {
-    cv::Point2f adjustLocation(const int x, const int y, const cv::Mat& heatMap) {
-        cv::Point2f delta(0.f, 0.f);
-        int width = heatMap.cols;
-        int height = heatMap.rows;
-        if ((1 < x) && (x < width - 1) && (1 < y) && (y < height - 1)) {
-            auto diffX = heatMap.at<float>(y, x + 1) - heatMap.at<float>(y, x - 1);
-            auto diffY = heatMap.at<float>(y + 1, x) - heatMap.at<float>(y - 1, x);
-            delta.x = diffX > 0 ? 0.25f : -0.25f;
-            delta.y = diffY > 0 ? 0.25f : -0.25f;
-        }
-        return delta;
+cv::Point2f adjustLocation(const int x, const int y, const cv::Mat& heatMap) {
+    cv::Point2f delta(0.f, 0.f);
+    int width = heatMap.cols;
+    int height = heatMap.rows;
+    if ((1 < x) && (x < width - 1) && (1 < y) && (y < height - 1)) {
+        auto diffX = heatMap.at<float>(y, x + 1) - heatMap.at<float>(y, x - 1);
+        auto diffY = heatMap.at<float>(y + 1, x) - heatMap.at<float>(y - 1, x);
+        delta.x = diffX > 0 ? 0.25f : -0.25f;
+        delta.y = diffY > 0 ? 0.25f : -0.25f;
     }
+    return delta;
 }
+}  // namespace
 
 void adjustAndRefine(std::vector<Pose>& allPoses,
                      const std::vector<cv::Mat>& heatMaps,
                      const std::vector<cv::Mat>& aembdsMaps,
-                     int poseId, const float delta) {
+                     int poseId,
+                     const float delta) {
     Pose& pose = allPoses[poseId];
     float poseTag = pose.getPoseTag();
     for (size_t jointId = 0; jointId < pose.size(); jointId++) {
@@ -164,8 +176,7 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
                 peak.keypoint.x += delta;
                 peak.keypoint.y += delta;
             }
-        }
-        else {
+        } else {
             // Refine
             // Get position with the closest tag value to the pose tag
             cv::Mat diff = cv::abs(aembds - poseTag);

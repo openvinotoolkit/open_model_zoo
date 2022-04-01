@@ -19,21 +19,21 @@ description: >-
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-denseunet-ll-0001.xml
-    size: 746388
-    checksum: b796137ba7ea652c0a6395d844caf7bbaf5ee7df43352ef415a6b7b5e08ca2b6747f95cded0b111663d7b2ee76f7f8bb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.xml
+    size: 724747
+    checksum: 07816a72c68db3fc9996d48f55cd9016a9320223f7318c77a37485e0c34380b2b12b919fc596c1bd1d460fb6dfb67b87
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.xml
   - name: FP32/noise-suppression-denseunet-ll-0001.bin
-    size: 17273588
-    checksum: 6901673714321cc5573ab41d8beb39a3916bb3314b51971c7286fa25e260c806bb968c271265ec0d098fdf2dfabae245
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.bin
+    size: 17250892
+    checksum: 9e2038d788acecd0076d31cc0ecfcc75129bff666ab77c8b427eb71a19c4771a24eb35415ff43e4812643028e650be69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.bin
   - name: FP16/noise-suppression-denseunet-ll-0001.xml
-    size: 874979
-    checksum: 1a9ee2904fd3778f2a864a806475faaeeb5396ff7465111b59f9c9d32e0d930f80eeea2c75559493696685b247859def
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.xml
+    size: 831626
+    checksum: 2427145fc6f96f5556b76294615dc44f6b5e47689a99d721025d0b3319650661538f8c23ba929ae8af9b09a6019f0825
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.xml
   - name: FP16/noise-suppression-denseunet-ll-0001.bin
-    size: 8636916
-    checksum: 9f49ee26292bc583795530cd4ec55637e3a2826017534f68b91a77ef3ceca7a7e916cb9b396de023af26078e69aaf761
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
+    size: 8625568
+    checksum: 356a8628ce4fa90b062628dabb02d6066769cde0825b97eb83e8bd2dcd2ee6b4df28c204d8895cc2033e13a2e7e9de7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
 input_info:
   - name: input
     shape: [1, 128]

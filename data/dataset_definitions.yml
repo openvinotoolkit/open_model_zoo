@@ -1254,7 +1254,7 @@ datasets:
     dataset_meta: antispoofing.json
 
   - name: sound_classification
-    data_source: audio_dataset
+    data_source: audio_dataset/data
     annotation_conversion:
       converter: sound_classification
       annotation_file: audio_dataset/validation.csv
@@ -1493,3 +1493,14 @@ datasets:
       annotation_file: object_detection/streams_1/high/annotations/instances_glb2bcls3.json
     annotation: mscoco_detection_high_3cls.pickle
     dataset_meta: mscoco_detection_high_3cls.json
+
+  - name: HumanMattingDataset
+    data_source:  human_matting_dataset/clip_img/1803151818/clip_00000000
+    additional_data_source: human_matting_dataset/matting/1803151818/matting_00000000
+    annotation_conversion:
+      converter: background_matting
+      images_dir: human_matting_dataset/clip_img/1803151818/clip_00000000
+      masks_dir: human_matting_dataset/matting/1803151818/matting_00000000
+      image_postfix: '.jpg'
+    annotation: human_matting.pickle
+    dataset_meta: human_matting.json

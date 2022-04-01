@@ -7,7 +7,7 @@ This demo showcases inference of Object Detection networks using Sync and Async 
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
 Specifically, this demo keeps the number of Infer Requests that you have set using `-nireq` flag.
-While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data
+While some of the Infer Requests are processed by OpenVINO™ Runtime, the other ones can be filled with new frame data
 and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
 This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously
@@ -31,13 +31,18 @@ Other demo objectives are:
 
 ## How It Works
 
-On startup, the application reads command-line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a model to OpenVINO™ Runtime plugin. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different object detection model topologies in one demo.
 
 ## Preparing to Run
 
@@ -67,6 +72,10 @@ omz_converter --list models.lst
   - detr-resnet50
 * architecture_type = faceboxes
   - faceboxes-pytorch
+* architecture_type = nanodet
+  - nanodet-m-1.5x-416
+* architecture_type = nanodet-plus
+  - nanodet-plus-m-1.5x-416
 * architecture_type = retinaface-pytorch
   - retinaface-resnet50-pytorch
 * architecture_type = ssd
@@ -154,12 +163,13 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
+                                {centernet,detr,ctpn,faceboxes,nanodet,nanodet-plus,retinaface,retinaface-pytorch,ssd,ultra_lightweight_face_detection,yolo,yolov4,yolof,yolox,yolov3-onnx}
                                 -i INPUT [--adapter {openvino,ovms}]
                                 [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
                                 [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
                                 [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
-                                [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+                                [--masks MASKS [MASKS ...]] [--layout LAYOUT]
+                                [--num_classes NUM_CLASSES][-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                                 [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
                                 [--reverse_input_channels] [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
@@ -170,7 +180,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model or
                         address of model inference service if using OVMS adapter.
-  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
+  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {centernet,detr,ctpn,faceboxes,nanodet,nanodet-plus,retinaface,retinaface-pytorch,ssd,ultra_lightweight_face_detection,yolo,yolov4,yolof,yolox,yolov3-onnx}.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -189,7 +199,7 @@ Common model options:
                         Optional. Probability threshold for detections
                         filtering.
   --resize_type {standard,fit_to_window,fit_to_window_letterbox}
-                        Optional. A resize type for model preprocess. By defauld used model predefined type.
+                        Optional. A resize type for model preprocess. By default used model predefined type.
   --input_size INPUT_SIZE INPUT_SIZE
                         Optional. The first image size used for CTPN model
                         reshaping. Default: 600 600. Note that submitted
@@ -201,6 +211,11 @@ Common model options:
   --masks MASKS [MASKS ...]
                         Optional. A space separated list of mask for anchors. By default used default masks for model.
                         Only for YOLOV4 architecture type.
+  --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or
+                        input0:NCHW,input1:NC in case of more than one input.
+  --num_classes NUM_CLASSES
+                        Optional. Number of detected classes. Only for NanoDet, NanoDetPlus
+                        architecture types.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -268,7 +283,7 @@ has to wait before being sent for inference.
 For higher FPS, it is recommended that you set `-nireq` to slightly exceed the `-nstreams` value,
 summed across all devices used.
 
-> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
+> **NOTE**: This demo is based on the callback functionality from the OpenVINO™ Runtime API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.
@@ -305,11 +320,18 @@ The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
 * [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server)

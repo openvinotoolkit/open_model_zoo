@@ -1,5 +1,6 @@
 # Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
+<!--
 @sphinxdirective
 
 .. toctree::
@@ -13,10 +14,28 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: 3D Semantic Segmentation Models
+
+   omz_models_model_brain_tumor_segmentation_0001
+   omz_models_model_brain_tumor_segmentation_0002
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
    :caption: Action Recognition Models
 
    omz_models_model_common_sign_language_0001
    omz_models_model_i3d_rgb_tf
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Background Matting Models
+
+   omz_models_model_background_matting_mobilenetv2
+   omz_models_model_modnet_photographic_portrait_matting
+   omz_models_model_modnet_webcam_portrait_matting
+   omz_models_model_robust_video_matting_mobilenetv3
 
 .. toctree::
    :maxdepth: 1
@@ -26,23 +45,14 @@
    omz_models_model_alexnet
    omz_models_model_anti_spoof_mn3
    omz_models_model_caffenet
+   omz_models_model_convnext_tiny
    omz_models_model_densenet_121
-   omz_models_model_densenet_121_caffe2
    omz_models_model_densenet_121_tf
-   omz_models_model_densenet_161
-   omz_models_model_densenet_161_tf
-   omz_models_model_densenet_169
-   omz_models_model_densenet_169_tf
-   omz_models_model_densenet_201
-   omz_models_model_densenet_201_tf
    omz_models_model_dla_34
    omz_models_model_efficientnet_b0
    omz_models_model_efficientnet_b0_pytorch
-   omz_models_model_efficientnet_b0_auto_aug
-   omz_models_model_efficientnet_b5
-   omz_models_model_efficientnet_b5_pytorch
-   omz_models_model_efficientnet_b7_pytorch
-   omz_models_model_efficientnet_b7_auto_aug
+   omz_models_model_efficientnet_v2_b0
+   omz_models_model_efficientnet_v2_s
    omz_models_model_googlenet_v1
    omz_models_model_googlenet_v1_tf
    omz_models_model_googlenet_v2
@@ -51,30 +61,23 @@
    omz_models_model_googlenet_v3_pytorch
    omz_models_model_googlenet_v4_tf
    omz_models_model_hbonet_0_25
-   omz_models_model_hbonet_0_5
    omz_models_model_hbonet_1_0
    omz_models_model_inception_resnet_v2_tf
+   omz_models_model_levit_128s
    omz_models_model_mixnet_l
    omz_models_model_mobilenet_v1_0_25_128
-   omz_models_model_mobilenet_v1_0_50_160
-   omz_models_model_mobilenet_v1_0_50_224
    omz_models_model_mobilenet_v1_1_0_224
    omz_models_model_mobilenet_v1_1_0_224_tf
    omz_models_model_mobilenet_v2
    omz_models_model_mobilenet_v2_1_0_224
    omz_models_model_mobilenet_v2_1_4_224
    omz_models_model_mobilenet_v2_pytorch
+   omz_models_model_mobilenet_v3_large_1_0_224_paddle
    omz_models_model_mobilenet_v3_large_1_0_224_tf
+   omz_models_model_mobilenet_v3_small_1_0_224_paddle
    omz_models_model_mobilenet_v3_small_1_0_224_tf
    omz_models_model_nfnet_f0
-   omz_models_model_octave_densenet_121_0_125
-   omz_models_model_octave_resnet_101_0_125
-   omz_models_model_octave_resnet_200_0_125
    omz_models_model_octave_resnet_26_0_25
-   omz_models_model_octave_resnet_50_0_125
-   omz_models_model_octave_resnext_101_0_25
-   omz_models_model_octave_resnext_50_0_25
-   omz_models_model_octave_se_resnet_50_0_125
    omz_models_model_open_closed_eye_0001
    omz_models_model_regnetx_3_2gf
    omz_models_model_repvgg_a0
@@ -83,23 +86,20 @@
    omz_models_model_resnest_50_pytorch
    omz_models_model_resnet_18_pytorch
    omz_models_model_resnet_34_pytorch
-   omz_models_model_resnet_50_caffe2
    omz_models_model_resnet_50_pytorch
    omz_models_model_resnet_50_tf
    omz_models_model_rexnet_v1_x1_0
    omz_models_model_se_inception
-   omz_models_model_se_resnet_101
-   omz_models_model_se_resnet_152
    omz_models_model_se_resnet_50
-   omz_models_model_se_resnext_101
    omz_models_model_se_resnext_50
+   omz_models_model_shufflenet_v2_x0_5
    omz_models_model_shufflenet_v2_x1_0
    omz_models_model_squeezenet1_0
    omz_models_model_squeezenet1_1
-   omz_models_model_squeezenet1_1_caffe2
+   omz_models_model_swin_tiny_patch4_window7_224
+   omz_models_model_t2t_vit_14
    omz_models_model_vgg16
    omz_models_model_vgg19
-   omz_models_model_vgg19_caffe2
 
 .. toctree::
    :maxdepth: 1
@@ -108,6 +108,13 @@
 
    omz_models_model_colorization_siggraph
    omz_models_model_colorization_v2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Deblurring Models
+
+   omz_models_model_deblurgan_v2
 
 .. toctree::
    :maxdepth: 1
@@ -133,13 +140,7 @@
    :caption: Image Inpainting Models
 
    omz_models_model_gmcnn_places2_tf
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Image Processing Models
-
-   omz_models_model_deblurgan_v2
+   omz_models_model_hybrid_cs_model_mri
 
 .. toctree::
    :maxdepth: 1
@@ -154,10 +155,15 @@
    :caption: Instance Segmentation Models
 
    omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_mask_rcnn_inception_v2_coco
-   omz_models_model_mask_rcnn_resnet101_atrous_coco
    omz_models_model_mask_rcnn_resnet50_atrous_coco
    omz_models_model_yolact_resnet50_fpn_pytorch
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: JPEG Artifacts Removal Models
+
+   omz_models_model_fbcnn
 
 .. toctree::
    :maxdepth: 1
@@ -177,17 +183,11 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Object Attribute Estimation Models
-
-   omz_models_model_vehicle_reid_0001
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
    :caption: Object Detection Models
 
    omz_models_model_ctdet_coco_dlav0_512
    omz_models_model_ctpn
+   omz_models_model_detr_resnet50
    omz_models_model_efficientdet_d0_tf
    omz_models_model_efficientdet_d1_tf
    omz_models_model_face_detection_retail_0044
@@ -196,7 +196,10 @@
    omz_models_model_faster_rcnn_resnet50_coco
    omz_models_model_mobilefacedet_v1_mxnet
    omz_models_model_mobilenet_ssd
+   omz_models_model_mobilenet_yolo_v4_syg
    omz_models_model_mtcnn
+   omz_models_model_nanodet_m_1.5x_416
+   omz_models_model_nanodet_plus_m_1.5x_416
    omz_models_model_pelee_coco
    omz_models_model_retinaface_resnet50_pytorch
    omz_models_model_retinanet_tf
@@ -213,10 +216,14 @@
    omz_models_model_yolo_v1_tiny_tf
    omz_models_model_yolo_v2_tf
    omz_models_model_yolo_v2_tiny_tf
+   omz_models_model_yolo_v3_onnx
    omz_models_model_yolo_v3_tf
+   omz_models_model_yolo_v3_tiny_onnx
    omz_models_model_yolo_v3_tiny_tf
    omz_models_model_yolo_v4_tf
    omz_models_model_yolo_v4_tiny_tf
+   omz_models_model_yolof
+   omz_models_model_yolox_tiny
 
 .. toctree::
    :maxdepth: 1
@@ -224,7 +231,6 @@
    :caption: Optical Character Recognition Models
 
    omz_models_model_license_plate_recognition_barrier_0007
-   omz_models_model_text_recognition_resnet_fc
 
 .. toctree::
    :maxdepth: 1
@@ -245,13 +251,13 @@
    :hidden:
    :caption: Semantic Segmentation Models
 
-   omz_models_model_brain_tumor_segmentation_0001
-   omz_models_model_brain_tumor_segmentation_0002
    omz_models_model_deeplabv3
+   omz_models_model_drn_d_38
    omz_models_model_fastseg_large
    omz_models_model_fastseg_small
    omz_models_model_hrnet_v2_c1_segmentation
    omz_models_model_pspnet_pytorch
+   omz_models_model_ocrnet_hrnet_w48_paddle
 
 .. toctree::
    :maxdepth: 1
@@ -269,6 +275,7 @@
    omz_models_model_mozilla_deepspeech_0_6_1
    omz_models_model_mozilla_deepspeech_0_8_2
    omz_models_model_quartznet_15x5_en
+   omz_models_model_wav2vec2_base
 
 .. toctree::
    :maxdepth: 1
@@ -280,10 +287,32 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Text-to-speech Models
+   :caption: Text Prediction Models
+
+   omz_models_model_gpt_2
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text Recognition Models
+
+   omz_models_model_text_recognition_resnet_fc
+   omz_models_model_vitstr_small_patch16_224
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Text to Speech Models
 
    omz_models_model_forward_tacotron
    omz_models_model_wavernn
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Vehicle Reidentification Models
+
+   omz_models_model_vehicle_reid_0001
 
 
 .. raw:: html
@@ -293,6 +322,7 @@
    </script>
 
 @endsphinxdirective
+-->
 
 OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
@@ -301,16 +331,17 @@ The table [Public Pre-Trained Models Device Support](./device_support.md) summar
 
 You can download models and convert them into OpenVINO™ IR format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
-## Classification
+## Classification Models
 
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/README.md)   | 56.598%/79.812% | 1.5 | 60.965 |
 | AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/README.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
+| ConvNeXt Tiny               | PyTorch\*                          | [convnext-tiny](./convnext-tiny/README.md) | 82.05%/95.86% | 8.9419 | 28.5892 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*| [densenet-121](./densenet-121/README.md)<br>[densenet-121-tf](./densenet-121-tf/README.md)| 74.42%/92.136%<br>74.46%/92.13%| 5.723~5.7287 | 7.971 |
 | DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/README.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
-| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
+| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>77.70%/93.52% | 0.819 | 5.268 |
 | EfficientNet V2 B0          | PyTorch\*                          | [efficientnet-v2-b0](./efficientnet-v2-b0/README.md) | 78.36%/94.02% | 1.4641 | 7.1094 |
 | EfficientNet V2 Small       | PyTorch\*                          | [efficientnet-v2-s](./efficientnet-v2-s/README.md) | 84.29%/97.26% | 16.9406  | 21.3816  |
 | HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/README.md)  | 73.1%/91.0% | 0.6208 | 4.5443 |
@@ -320,13 +351,14 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 77.82%/94.03% | 22.227 | 30.223 |
+| LeViT 128S                  | PyTorch\*                          | [levit-128s](./levit-128s/README.md) | 76.54%/92.85% | 0.6177 | 8.2199 |
 | MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
 | MobileNet V2 1.0 224        | Caffe\*<br>TensorFlow\*<br>PyTorch\*| [mobilenet-v2](./mobilenet-v2/README.md) <br>[mobilenet-v2-1.0-224](./mobilenet-v2-1.0-224/README.md)<br>[mobilenet-v2-pytorch](./mobilenet-v2-pytorch/README.md) | 71.218%/90.178%<br>71.85%/90.69%<br>71.81%/90.396% | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/README.md) | 74.09%/91.97% | 1.183  | 6.087 |
-| MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) | 67.36%/87.44% | 0.1168 | 2.537 |
-| MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md) | 75.30%/92.62% | 0.4450 | 5.4721 |
+| MobileNet V3 Small 1.0      | TensorFlow\*<br>Paddle\* | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) <br> [mobilenet-v3-small-1.0-paddle](./mobilenet-v3-small-1.0-224-paddle/README.md) | 67.36%/87.44%<br>68.21%/88.04% | 0.1168<br>0.1269 | 2.537<br>2.9339 |
+| MobileNet V3 Large 1.0      | TensorFlow\*<br>Paddle\*                   | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md)<br>[mobilenet-v3-large-1.0-224-paddle](./mobilenet-v3-large-1.0-224-paddle/README.md) | 75.30%/92.62%<br>75.248%/92.32% | 0.4450<br>0.4565 | 5.4721<br>5.468 |
 | NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/README.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/README.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/README.md)     | 76.076%/92.584%| 3.768 | 15.99 |
@@ -351,7 +383,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*              | [vgg19](./vgg19/README.md) | 71.062%/89.832% | 39.3 | 143.667  |
 
-## Segmentation
+## Segmentation Models
 
 Semantic segmentation is an extension of object detection problem. Instead of
 returning bounding boxes, semantic segmentation models return a "painted"
@@ -360,7 +392,7 @@ class. These networks are much bigger than respective object detection networks,
 but they provide a better (pixel-level) localization of objects and they can
 detect areas with complex shape.
 
-### Semantic Segmentation
+### Semantic Segmentation Models
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
@@ -372,7 +404,7 @@ detect areas with complex shape.
 | PSPNet R-50-D8  | PyTorch\*      | [pspnet-pytorch](./pspnet-pytorch/README.md) | 70.6% | 357.1719 | 46.5827 |
 | OCRNet HRNet_w48 | Paddle\*      | [ocrnet-hrnet-w48-paddle](./ocrnet-hrnet-w48-paddle/README.md)| 82.15% | 324.66 | 70.47 |
 
-### Instance Segmentation
+### Instance Segmentation Models
 
 Instance segmentation is an extension of object detection and semantic
 segmentation problems. Instead of predicting a bounding box around each object
@@ -384,14 +416,14 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/README.md)| 	29.75%/27.46% | 294.738 | 50.222 |
 | YOLACT ResNet 50 FPN | PyTorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/README.md) | 28.0%/30.69% | 118.575 |  36.829  |
 
-### 3D Semantic Segmentation
+### 3D Semantic Segmentation Models
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | Brain Tumor Segmentation  | MXNet\*        | [brain-tumor-segmentation-0001](./brain-tumor-segmentation-0001/README.md) | 92.4003% | 409.996 | 38.192 |
 | Brain Tumor Segmentation 2| PyTorch\*      | [brain-tumor-segmentation-0002](./brain-tumor-segmentation-0002/README.md) | 91.4826% | 300.801 | 4.51  |
 
-## Object Detection
+## Object Detection Models
 
 Several detection models can be used to detect a set of the most popular
 objects - for example, faces, people, vehicles. Most of the networks are
@@ -411,6 +443,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
+| NanoDet with ShuffleNetV2 1.5x, size=416 | PyTorch\*            | [nanodet-m-1.5x-416](./nanodet-m-1.5x-416/README.md) | 27.38%/26.63% | 2.3895 | 2.0534 |
+| NanoDet Plus with ShuffleNetV2 1.5x, size=416 | PyTorch\*       | [nanodet-plus-m-1.5x-416](./nanodet-plus-m-1.5x-416/README.md) | 34.53%/33.77% | 3.0147 | 2.4614 |
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
@@ -434,7 +468,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLOF                                | PyTorch\*                | [yolof](./yolof/README.md)           | 60.69%/66.23%/43.63% | 175.37942 | 48.228 |
 | YOLOX Tiny                           | PyTorch\*                | [yolox-tiny](./yolox-tiny/README.md) | 47.85%/52.56%/31.82%| 6.4813 | 5.0472 |
 
-## Face Recognition
+## Face Recognition Models
 
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
@@ -442,7 +476,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md) | 99.68%| 24.2115  | 65.1320 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
 
-## Human Pose Estimation
+## Human Pose Estimation Models
 
 Human pose estimation task is to predict a pose: body skeleton, which consists
 of keypoints and connections between them, for every person in an input image or
@@ -459,7 +493,7 @@ instances, thus faster than previous, because network runs once.
 | single-human-pose-estimation-0001| PyTorch\*      | [single-human-pose-estimation-0001](./single-human-pose-estimation-0001/README.md) | 69.0491% | 60.125 | 33.165 |
 | higher-hrnet-w32-human-pose-estimation | PyTorch\* | [higher-hrnet-w32-human-pose-estimation](./higher-hrnet-w32-human-pose-estimation/README.md) | 64.64%    | 92.8364 | 28.6180 |
 
-## Monocular Depth Estimation
+## Monocular Depth Estimation Models
 
 The task of monocular depth estimation is to predict a depth (or inverse depth) map based on a single input image.
 Since this task contains - in the general setting - some ambiguity, the resulting depth maps are often only defined up to an unknown scaling factor.
@@ -469,7 +503,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/README.md)| 0.07071 | 207.25144  |    104.081     |
 | FCRN ResNet50-Upproj        | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/README.md)| 0.573 | 63.5421 | 34.5255 |
 
-## Image Inpainting
+## Image Inpainting Models
 
 Image inpainting task is to estimate suitable pixel information to fill holes in images.
 
@@ -478,7 +512,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/README.md) | 33.47Db | 691.1589 | 12.7773|
 | Hybrid-CS-Model-MRI       | TensorFlow\*   | [hybrid-cs-model-mri](./hybrid-cs-model-mri/README.md) | 34.27Db | 146.6037 | 11.3313 |
 
-## Style Transfer
+## Style Transfer Models
 
 Style transfer task is to transfer the style of one image to another.
 
@@ -486,7 +520,7 @@ Style transfer task is to transfer the style of one image to another.
 | ------------------------------ | ---------------| -------------- | -------- | ------ | ------- |
 | fast-neural-style-mosaic-onnx  | ONNX\*         | [fast-neural-style-mosaic-onnx](./fast-neural-style-mosaic-onnx/README.md) | 12.04dB | 15.518 | 1.679 |
 
-## Action Recognition
+## Action Recognition Models
 
 The task of action recognition is to predict action that is being performed on a short video clip
 (tensor formed by stacking sampled frames from input video).
@@ -496,7 +530,7 @@ The task of action recognition is to predict action that is being performed on a
 | RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 64.83%/84.58% | 278.9815 | 12.6900|
 | common-sign-language-0001         | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
-## Colorization
+## Colorization Models
 
 Colorization task is to predict colors of scene from grayscale image.
 
@@ -505,7 +539,7 @@ Colorization task is to predict colors of scene from grayscale image.
 | colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/README.md) | 26.99dB | 83.6045 |  32.2360 |
 | colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/README.md) | 27.73dB | 150.5441 |  34.0511 |
 
-## Sound Classification
+## Sound Classification Models
 
 The task of sound classification is to predict what sounds are in an audio fragment.
 
@@ -514,7 +548,7 @@ The task of sound classification is to predict what sounds are in an audio fragm
 | ACLNet                    | PyTorch\* | [aclnet](./aclnet/README.md) | 86%/92% | 1.4     | 2.7     |
 | ACLNet-int8               | PyTorch\* | [aclnet-int8](./aclnet-int8/README.md) | 87%/93%   | 1.41     | 2.71     |
 
-## Speech Recognition
+## Speech Recognition Models
 
 The task of speech recognition is to recognize and translate spoken language into text.
 
@@ -525,7 +559,7 @@ The task of speech recognition is to recognize and translate spoken language int
 | QuartzNet         | PyTorch\*      | [quartznet-15x5-en](./quartznet-15x5-en/README.md)               | 3.86%    | 2.4195 | 18.8857 |
 | Wav2Vec 2.0 Base  | PyTorch\*      | [wav2vec2-base](./wav2vec2-base/README.md)                       | 3.39%    | 26.843 | 94.3965 |
 
-## Image Translation
+## Image Translation Models
 
 The task of image translation is to generate the output based on exemplar.
 
@@ -533,13 +567,13 @@ The task of image translation is to generate the output based on exemplar.
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/README.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
-## Optical Character Recognition
+## Optical Character Recognition Models
 
 | Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | license-plate-recognition-barrier-0007 | TensorFlow\* | [license-plate-recognition-barrier-0007](./license-plate-recognition-barrier-0007/README.md) | 98% | 0.347 | 1.435 |
 
-## Place Recognition
+## Place Recognition Models
 
 The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
 
@@ -547,7 +581,7 @@ The task of place recognition is to quickly and accurately recognize the locatio
 | ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
 | NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/README.md) | 82.0321% | 36.6374| 149.0021|
 
-## Deblurring
+## Deblurring Models
 
 The task of image deblurring.
 
@@ -555,7 +589,7 @@ The task of image deblurring.
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/README.md) | 28.25Db  | 80.8919 | 2.1083   |
 
-## JPEG artifacts removal
+## JPEG Artifacts Removal Models
 
 The task of restoration images from jpeg format.
 
@@ -563,7 +597,7 @@ The task of restoration images from jpeg format.
 | -------------- | -------------- | ---------------------------------------------- | -------- | ---------- | -------- |
 | FBCNN          | PyTorch\*      | [fbcnn](./fbcnn/README.md)                     | 34.34Db  | 1420.78235 | 71.922   |
 
-## Salient object detection
+## Salient Object Detection Models
 
  Salient object detection is a task-based on a visual attention mechanism,
  in which algorithms aim to explore objects or regions more attentive than the surrounding areas on the scene or images.
@@ -572,7 +606,7 @@ The task of restoration images from jpeg format.
 | -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
 | F3Net          | PyTorch\*      | [f3net](./f3net/README.md) | 84.21%   | 31.2883 | 25.2791  |
 
-## Text Prediction
+## Text Prediction Models
 
 Text prediction is a task to predict the next word, given all of the previous words within some text.
 
@@ -580,7 +614,7 @@ Text prediction is a task to predict the next word, given all of the previous wo
 | -------------- | -------------- | -------------------------- | -------- | -------- | -------- |
 | GPT-2          | PyTorch\*      | [gpt-2](./gpt-2/README.md) | 29.00%   | 293.0489 | 175.6203 |
 
-## Text Recognition
+## Text Recognition Models
 
 Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
@@ -592,14 +626,14 @@ The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 i
 | Resnet-FC                       | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94%   | 40.3704 | 177.9668 |
 | ViTSTR Small patch=16, size=224 | PyTorch\*      | [vitstr-small-patch16-224](./vitstr-small-patch16-224/README.md)     | 90.34%   | 9.1544  | 21.5061  |
 
-## Text to Speech
+## Text to Speech Models
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md):<br>forward-tacotron-duration-prediction <br>forward-tacotron-regression |  | <br>6.66 <br>4.91 | <br>13.81 <br>3.05 |
 | WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md):<br>wavernn-upsampler <br>wavernn-rnn |  | <br>0.37 <br>0.06 | <br>0.4 <br>3.83 |
 
-## Named Entity Recognition
+## Named Entity Recognition Models
 
 Named entity recognition (NER) is the task of tagging entities in text with their corresponding type.
 
@@ -607,13 +641,13 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
 | bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
 
-## Vehicle Reidentification
+## Vehicle Reidentification Models
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
 
-## Background matting
+## Background Matting Models
 
 Background matting is a method of separating a foreground from a background in an image or video,
 wherein some pixels may belong to foreground as well as background, such pixels are called partial
@@ -621,7 +655,9 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| background-matting-mobilenetv2 | PyTorch\* | [background-matting-v2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| background-matting-mobilenetv2 | PyTorch\* | [background-matting-mobilenetv2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
+| modnet-photographic-portrait-matting | PyTorch\* | [modnet-photographic-portrait-matting](./modnet-photographic-portrait-matting/README.md) | 5.21/727.95 | 31.1564 | 6.4597 |
+| modnet-webcam-portrait-matting | PyTorch\* | [modnet-webcam-portrait-matting](./modnet-webcam-portrait-matting/README.md) | 5.66/762.52 | 31.1564 | 6.4597 |
 | robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also

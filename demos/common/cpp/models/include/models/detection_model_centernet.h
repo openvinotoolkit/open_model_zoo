@@ -15,11 +15,20 @@
 */
 
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
+
 #include "models/detection_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class ModelCenterNet : public DetectionModel {
 public:
@@ -29,15 +38,20 @@ public:
         float right;
         float bottom;
 
-        float getWidth() const { return (right - left) + 1.0f; }
-        float getHeight() const { return (bottom - top) + 1.0f; }
+        float getWidth() const {
+            return (right - left) + 1.0f;
+        }
+        float getHeight() const {
+            return (bottom - top) + 1.0f;
+        }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
-    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
-        const std::vector<std::string>& labels = std::vector<std::string>(), const std::string& layout = "");
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    ModelCenterNet(const std::string& modelFileName,
+                   float confidenceThreshold,
+                   const std::vector<std::string>& labels = std::vector<std::string>(),
+                   const std::string& layout = "");
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

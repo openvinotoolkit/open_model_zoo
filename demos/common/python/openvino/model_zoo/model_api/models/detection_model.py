@@ -14,41 +14,41 @@
  limitations under the License.
 """
 from .types import ListValue, NumericalValue, StringValue
-from .model import WrapperError
 from .image_model import ImageModel
 from .utils import load_labels, clip_detections
 
 
 class DetectionModel(ImageModel):
-    '''An abstract detection model class
+    '''An abstract wrapper for object detection model
 
-    This class supports detection models. The Detection Model must have single image input.
+    The DetectionModel must have a single image input.
+    It inherits `preprocess` from `ImageModel` wrapper. Also, it defines `_resize_detections` method,
+    which should be used in `postprocess`, to clip bounding boxes and resize ones to original image shape.
 
-    Attributes:
-        labels(List[str]): list of labels for classes (could be None)
-        threshold(float): threshold for detection filtering, any detection with confidence less than this value
-            should be omitted in ``posptrocess`` method (0<=thresold<=1.0 for most models)
-        iou_threshold(float): threshold for NMS detection filtering
+    The `postprocess` method must be implemented in a specific inherited wrapper.
     '''
 
     def __init__(self, model_adapter, configuration=None, preload=False):
-        '''The Detection Model constructor
+        '''Detection Model constructor
 
-        Calls the ``ImageModel`` construtor first.
+        It extends the `ImageModel` construtor.
 
         Args:
-            labels(Iterable[str], str, Path): list of labels for detection classes or path to file with them
-            threshold(float): threshold for detections filtering by confidence
-            iou_threshold(float): threshold for NMS filtering
+            model_adapter (ModelAdapter): allows working with the specified executor
+            configuration (dict, optional): it contains values for parameters accepted by specific
+              wrapper (`confidence_threshold`, `labels` etc.) which are set as data attributes
+            preload (bool, optional): a flag whether the model is loaded to device while
+              initialization. If `preload=False`, the model must be loaded via `load` method before inference
 
         Raises:
-            RuntimeError: If loaded model has more than one image inputs
+            WrapperError: if the model has more than 1 image inputs
         '''
+
         super().__init__(model_adapter, configuration, preload)
 
         if not self.image_blob_name:
-            raise WrapperError(self.__model__, "The Wrapper supports only one image input, but {} found"
-                               .format(len(self.image_blob_names)))
+            self.raise_error("The Wrapper supports only one image input, but {} found".format(
+                len(self.image_blob_names)))
 
         if self.path_to_labels:
             self.labels = load_labels(self.path_to_labels)
@@ -67,32 +67,32 @@ class DetectionModel(ImageModel):
         return parameters
 
     def _resize_detections(self, detections, meta):
-        '''Resizes detection bounding boxes according to initial image size
+        '''Resizes detection bounding boxes according to initial image shape.
 
-        Implements resize operations for different image resize types (see ``ImageModel`` class for details).
-        Applies clipping bounding box to original image size.
+        It implements image resizing depending on the set `resize_type`(see `ImageModel` for details).
+        Next, it applies bounding boxes clipping.
 
         Args:
-            detections(List[Detection]): list of detections with coordinates in normalized form
-            meta: meta information with fields `resized_shape` and `original_shape`
+            detections (List[Detection]): list of detections with coordinates in normalized form
+            meta (dict): the input metadata obtained from `preprocess` method
 
         Returns:
-            List of detections fit to initial image (resized and clipped)
+            - list of detections with resized and clipped coordinates fit to initial image
 
         Raises:
-            RuntimeError: If model uses custom resize or `resize_type` not set
+            WrapperError: If the model uses custom resize or `resize_type` is not set
         '''
         resized_shape = meta['resized_shape']
         original_shape = meta['original_shape']
 
-        if self.resize_type=='fit_to_window_letterbox':
+        if self.resize_type == 'fit_to_window_letterbox':
             detections = resize_detections_letterbox(detections, original_shape[1::-1], resized_shape[1::-1])
         elif self.resize_type == 'fit_to_window':
             detections = resize_detections_with_aspect_ratio(detections, original_shape[1::-1], resized_shape[1::-1], (self.w, self.h))
         elif self.resize_type == 'standard':
             detections = resize_detections(detections, original_shape[1::-1])
         else:
-            raise WrapperError(self.__model__, 'Unknown resize type {}'.format(self.resize_type))
+            self.raise_error('Unknown resize type {}'.format(self.resize_type))
         return clip_detections(detections, original_shape)
 
 

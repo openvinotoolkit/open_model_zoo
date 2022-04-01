@@ -18,21 +18,21 @@ description: >-
 task_type: detection
 files:
   - name: FP32/smartlab-object-detection-0003.xml
-    size: 376727
-    checksum: 85420ef8f2dc86d30c36f91fa8fa4842c9876ee200967866ac4031dcb8d560c7a17149c895b780d2e821fb2170744853
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml
+    size: 373017
+    checksum: 2ccd93716003703fa17fe972f44a27e6ff45f3ca9051cee742503737dc2e8ec879d3b0cfbbdb97fc84fd6b9b31e01e96
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml
   - name: FP32/smartlab-object-detection-0003.bin
-    size: 3563580
-    checksum: a37eaf31c571dbd95efabd5d2cf7eae4724a81638adc345808889645de817eb0a3cc38364cd9c46adb533bc160e6b45b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.bin
+    size: 3563540
+    checksum: 7cf7253119608c4df2e23619753f01e59c32f5f2c998b27dd88bb896235157ddbcf46f06d25cfd422ae373fbcd3dd585
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.bin
   - name: FP16/smartlab-object-detection-0003.xml
-    size: 502940
-    checksum: 05798eaa44716f13169765fadb58e8a995e6f56472067075fd3f335a710a0aaddce728c12824a2398e7c4136664047cf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.xml
+    size: 498167
+    checksum: 80400179648cc3aef08b08ff5ea39ddd574c639566bb019643af77863598dcdc1fa72ed3a4ebef1c17b747b3bfbd6273
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.xml
   - name: FP16/smartlab-object-detection-0003.bin
-    size: 1781942
-    checksum: 1f73b8f1b7fe52c34a6979a1b2518e5f421a773a3b5a98d6e1c09d99b5655f63f81f31646cac56860d70f88f7f1923bd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.bin
+    size: 1781914
+    checksum: b27b806fbb49360d1af871d2a91642ab48222e16b591e3a146572310519c6c6d362ab39ed01ddc0e271580a89c2951cf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.bin
 input_info:
   - name: images
     shape: [1, 3, 416, 416]

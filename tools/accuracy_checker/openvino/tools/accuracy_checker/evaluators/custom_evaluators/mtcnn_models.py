@@ -22,7 +22,9 @@ import numpy as np
 
 from ...preprocessor import PreprocessingExecutor
 from ...config import ConfigError
-from ...utils import contains_any, extract_image_representations, read_pickle, get_path, parse_partial_shape
+from ...utils import (
+    contains_any, extract_image_representations, read_pickle, get_path, parse_partial_shape, postprocess_output_name
+)
 from .mtcnn_evaluator_utils import cut_roi, calibrate_predictions, nms, transform_for_callback
 from ...logging import print_info
 from ...launcher import InputFeeder
@@ -602,6 +604,18 @@ class OVModelMixin(BaseOpenVINOModel):
             for c_input in config_inputs:
                 c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
             self.model_info['inputs'] = config_inputs
+        config_outputs = self.model_info['outputs']
+        for key, value in config_outputs.items():
+            output = postprocess_output_name(
+                value, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False
+            )
+            if output not in self.outputs:
+                output =postprocess_output_name(
+                    generate_name(model_prefix, network_with_prefix, value),
+                    value, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False
+                )
+            config_outputs[key] = output
+        self.model_info['outputs'] = config_outputs
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):

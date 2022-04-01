@@ -38,7 +38,7 @@ def build_argparser():
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
-                             "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
+                             "The demo will look for a suitable OpenVINO Runtime plugin for this device. Default value is CPU.")
     parser.add_argument('--vocab', help='Optional. Path to an .json file with encoding vocabulary.')
     parser.add_argument('--dynamic_shape', action='store_true',
                         help='Optional. Using dynamic shapes for inputs of model.')
@@ -125,7 +125,7 @@ def main():
         audio = np.frombuffer(wave_read.readframes(pcm_length * channel_num), dtype=np.int16).reshape((1, pcm_length))
         audio =  audio.astype(float) / np.iinfo(np.int16).max
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

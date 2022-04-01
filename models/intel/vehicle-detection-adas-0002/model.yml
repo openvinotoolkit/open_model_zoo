@@ -18,29 +18,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/vehicle-detection-adas-0002.xml
-    size: 261606
-    checksum: bdd959baf671a2cfe5628bd99b1d252d2d290fec5f41fcb634f78911426f2416aaead502fd8c6077e210448bcd6b3dda
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+    size: 261691
+    checksum: defb9816fea043330c5a43b6d8b89e8bff863af95e4484c535d819ef340c471fddc8a7346bcdaf9cf188e0bc0610ffed
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
   - name: FP32/vehicle-detection-adas-0002.bin
     size: 4314552
     checksum: caa4273a8a43e8f010fdcbdc67f679452585f7f5d16d70a8bef021cede47ac5e88c145380e5497192ea4ca98847f314e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
   - name: FP16/vehicle-detection-adas-0002.xml
-    size: 323380
-    checksum: 8d588e9102e32a5a823a695d8b257d7673ef50ee20c62341bf17d70b01629b8699bd5593a4b450558843b5924311759c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+    size: 323465
+    checksum: f990f42d1a66e415821650532cf6644d5a1ef994e0e917629e068bc73bd637401f5a6bded83426be287f3fa3fbfb8691
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
   - name: FP16/vehicle-detection-adas-0002.bin
     size: 2157328
     checksum: c5e281f2624a4fda0ac5199b35ab605e008fc99925d1b3a341198e129fdd02f8a4441963e3215f7b14afc62218de24b2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
   - name: FP16-INT8/vehicle-detection-adas-0002.xml
-    size: 503486
-    checksum: aadeed86c58175f5466133e10bf5bfe83135da160c887ecd23efa1aeee5b836495da50eb9286fee3cf8b150082f0c288
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
+    size: 512526
+    checksum: af55fea665aa568a310f1b0ee69e6189abb7107d45ae1d612f8d148c850be05807f9010de2c7d1340010383566ac229c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
   - name: FP16-INT8/vehicle-detection-adas-0002.bin
     size: 1160552
     checksum: 5f082ff9f2e4600dbe383da9aac859ba80f78cba6536400bf113515da9cd5184826cb60e0a1942dabe98813762f47a18
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
 input_info:
   - name: data
     shape: [1, 3, 384, 672]

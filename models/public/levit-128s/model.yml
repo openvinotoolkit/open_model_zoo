@@ -1,0 +1,66 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "levit-128s" model is one of the LeViT models family: a hybrid neural network
+  for fast inference image classification. The model is pre-trained on the ImageNet
+  dataset. LeViT-128s model is a small LeViT variant that has 128 channels on input
+  of the transformer stage and 2, 3 and 4 number of pairs of Attention and MLP blocks
+  at 1, 2 and 3 model stages respectively.
+
+  The model input is a blob that consists of a single image of "1, 3, 224, 224" in
+  "RGB" order.
+
+  The model output is typical object classifier for the 1000 different classifications
+  matching with those in the ImageNet database.
+
+  For details see repository <https://github.com/rwightman/pytorch-image-models> and
+  paper <https://arxiv.org/abs/2104.01136>.
+task_type: classification
+files:
+  - name: timm-0.5.4-py3-none-any.whl
+    size: 431537
+    checksum: e8f1967a8e2029fe21a43875132b4b123227b718abc35725d7f2b9fd0ef2062884ac3dd558570b51a780aad89bc375d6
+    source: https://files.pythonhosted.org/packages/49/65/a83208746dc9c0d70feff7874b49780ff110810feb528df4b0ecadcbee60/timm-0.5.4-py3-none-any.whl
+  - name: LeViT-128S-96703c44.pth
+    size: 32152063
+    checksum: ac05427904bc10921aa04e4c5970ce75429e4b77231b6735d584d570f4dfaebd9de42539d2200802f1d5a069e8e0071a
+    original_source: https://dl.fbaipublicfiles.com/LeViT/LeViT-128S-96703c44.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/levit-128s/LeViT-128S-96703c44.pth
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: timm-0.5.4-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_levit
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/LeViT-128S-96703c44.pth"
+  - --input-shape=1,3,224,224
+  - --input-names=image
+  - --output-names=probs
+  - --output-file=$conv_dir/levit-128s.onnx
+input_info:
+  - name: image
+    shape: [1, 3, 224, 224]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/levit-128s.onnx
+  - --mean_values=image[123.675,116.28,103.53]
+  - --scale_values=image[58.395, 57.12, 57.375]
+  - --reverse_input_channels
+  - --output=probs
+framework: pytorch
+license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

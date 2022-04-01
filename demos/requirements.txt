@@ -12,7 +12,8 @@ scikit-learn~=0.24.1
 scipy~=1.5.4
 sympy>=1.8
 tensorboardX>=2.1
-tokenizers~=0.10.1
+tokenizers~=0.10.1;python_version<"3.7"
+tokenizers>=0.10.1;python_version>="3.7"
 tqdm>=4.54.1
 -r common/python/requirements.txt
 -r common/python/requirements_ovms.txt

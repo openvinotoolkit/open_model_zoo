@@ -15,26 +15,24 @@ For the original MSTCN++ model details see [paper](https://arxiv.org/abs/2006.09
 
 ## Accuracy
 <table>
-    <thead>
-        <tr>
-            <th colspan="2">Accuracy</th>
-            <th>noise/background</th>
-            <th>remove_support_sleeve</th>
-            <th>adjust_rider</th>
-            <th>adjust_nut</th>
-            <th>adjust_balancing</th>
-            <th>open_box</th>
-            <th>close_box</th>
-            <th>choose_weight</th>
-            <th>put_left</th>
-            <th>put_right</th>
-            <th>take_left</th>
-            <th>take_right</th>
-            <th>install support_sleeve</th>
-            <th>mean</th>
-            <th>mPR (P+R)/2</th>
-        </tr>
-    </thead>
+    <tr>
+        <th colspan="2">Accuracy</th>
+        <th>noise/background</th>
+        <th>remove_support_sleeve</th>
+        <th>adjust_rider</th>
+        <th>adjust_nut</th>
+        <th>adjust_balancing</th>
+        <th>open_box</th>
+        <th>close_box</th>
+        <th>choose_weight</th>
+        <th>put_left</th>
+        <th>put_right</th>
+        <th>take_left</th>
+        <th>take_right</th>
+        <th>install support_sleeve</th>
+        <th>mean</th>
+        <th>mPR (P+R)/2</th>
+    </tr>
     <tbody>
         <tr>
             <td rowspan=2>frame-level</td>
@@ -141,7 +139,7 @@ The outputs also include two parts: predictions and four feature outputs. Predic
    - `B` - batch size
    - `H`- feature map height
    - `W` - feature map width
-After post-process with argmx() function, the prediction result can be used to decide the action type of the current frame.
+After post-process with argmax() function, the prediction result can be used to decide the action type of the current frame.
 2. History feature 1, name: `fhis_out_0`, shape: `12, 64, 2048`, format: `C, H, W`,
 3. History feature 2, name: `fhis_out_1`, shape: `11, 64, 2048`, format: `C, H, W`,
 4. History feature 3, name: `fhis_out_2`, shape: `11, 64, 2048`, format: `C, H, W`,

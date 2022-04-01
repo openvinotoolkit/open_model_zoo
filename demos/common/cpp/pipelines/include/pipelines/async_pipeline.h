@@ -15,23 +15,33 @@
 */
 
 #pragma once
+#include <stdint.h>
+
 #include <condition_variable>
-#include <deque>
-#include <map>
-#include <string>
+#include <exception>
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+
 #include <openvino/openvino.hpp>
+
 #include <models/results.h>
-#include <models/model_base.h>
-#include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
+
 #include "pipelines/requests_pool.h"
+
+class ModelBase;
+struct InputData;
+struct MetaData;
+struct ModelConfig;
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
 class AsyncPipeline {
 public:
     /// Loads model and performs required initialization
-    /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.
+    /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing
+    /// pointer to this function.
     /// @param config - fine tuning configuration for model
     /// @param core - reference to ov::Core instance to use.
     /// If it is omitted, new instance of  ov::Core will be created inside.
@@ -40,39 +50,55 @@ public:
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
     /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
-    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if
+    /// any result is ready.
     void waitForData(bool shouldKeepOrder = true);
 
     /// @returns true if there's available infer requests in the pool
     /// and next frame can be submitted for processing, false otherwise.
-    bool isReadyToProcess() { return requestsPool->isIdleRequestAvailable(); }
+    bool isReadyToProcess() {
+        return requestsPool->isIdleRequestAvailable();
+    }
 
     /// Waits for all currently submitted requests to be completed.
     ///
-    void waitForTotalCompletion() { if (requestsPool) requestsPool->waitForTotalCompletion(); }
+    void waitForTotalCompletion() {
+        if (requestsPool)
+            requestsPool->waitForTotalCompletion();
+    }
 
     /// Submits data to the model for inference
     /// @param inputData - input data to be submitted
     /// @param metaData - shared pointer to metadata container.
     /// Might be null. This pointer will be passed through pipeline and put to the final result structure.
     /// @returns -1 if image cannot be scheduled for processing (there's no free InferRequest available).
-    /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the result structure.
+    /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the
+    /// result structure.
     virtual int64_t submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData);
 
     /// Gets available data from the queue
     /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
-    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if
+    /// any result is ready.
     virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder = true);
 
-    PerformanceMetrics getInferenceMetircs(){ return inferenceMetrics;}
-    PerformanceMetrics getPreprocessMetrics(){ return preprocessMetrics;}
-    PerformanceMetrics getPostprocessMetrics() { return postprocessMetrics;}
+    PerformanceMetrics getInferenceMetircs() {
+        return inferenceMetrics;
+    }
+    PerformanceMetrics getPreprocessMetrics() {
+        return preprocessMetrics;
+    }
+    PerformanceMetrics getPostprocessMetrics() {
+        return postprocessMetrics;
+    }
 
 protected:
     /// Returns processed result, if available
     /// @param shouldKeepOrder if true, function will return processed data sequentially,
-    /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random order.
-    /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
+    /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random
+    /// order.
+    /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's
+    /// no any results yet.
     virtual InferenceResult getInferenceResult(bool shouldKeepOrder);
 
     std::unique_ptr<RequestsPool> requestsPool;
