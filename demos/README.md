@@ -38,7 +38,7 @@
    omz_demos_image_retrieval_demo_python
    omz_demos_segmentation_demo_cpp
    omz_demos_segmentation_demo_python
-   omz_demos_smart_framing_demo_cpp
+   omz_demos_smart_framing_demo_cpp_gapi
    omz_demos_image_translation_demo_python
    omz_demos_instance_segmentation_demo_python
    omz_demos_interactive_face_detection_demo_cpp

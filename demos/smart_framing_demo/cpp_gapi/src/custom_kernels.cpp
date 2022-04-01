@@ -83,17 +83,16 @@ struct YOLOv4TinyPostProcessing {
         auto entriesNum = sideW * sideH;
         const float* output_blob = (float*)blob.data;
 
-        auto postprocessRawData = /*(yoloVersion == YOLO_V4 || yoloVersion == YOLO_V4_TINY) ?*/ sigmoid;// : linear;
+        auto postprocessRawData = sigmoid;
 
         // --------------------------- Parsing YOLO Region output -------------------------------------
         for (int i = 0; i < entriesNum; ++i) {
             int row = i / sideW;
             int col = i % sideW;
-            //for (int n = 0; n < region.num; ++n) {
             for (int n = 0; n < region_num; ++n) {
                 //--- Getting region data from blob
-                int obj_index = calculateEntryIndex(entriesNum, /*region.coords*/ region_coords, /*region.classes*/ region_classes, n * entriesNum + i, /*region.coords*/ region_coords);
-                int box_index = calculateEntryIndex(entriesNum, /*region.coords*/ region_coords, /*region.classes*/ region_classes, n * entriesNum + i, 0);
+                int obj_index = calculateEntryIndex(entriesNum,  region_coords, region_classes, n * entriesNum + i, region_coords);
+                int box_index = calculateEntryIndex(entriesNum,  region_coords, region_classes, n * entriesNum + i, 0);
                 float scale = postprocessRawData(output_blob[obj_index]);
 
                 //--- Preliminary check for confidence threshold conformance
@@ -102,8 +101,6 @@ struct YOLOv4TinyPostProcessing {
                     double x = (col + postprocessRawData(output_blob[box_index + 0 * entriesNum])) / sideW * original_im_w;
                     double y = (row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
 
-                    //double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
-                    //double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
                     double height = std::exp(output_blob[box_index + 3 * entriesNum]) * blobs_anchor[blobID][2 * n + 1] * original_im_h / scaleH;
                     double width = std::exp(output_blob[box_index + 2 * entriesNum]) * blobs_anchor[blobID][2 * n] * original_im_w / scaleW;
 
@@ -113,8 +110,8 @@ struct YOLOv4TinyPostProcessing {
                     obj.width = std::min(static_cast<float>(width), original_im_w - obj.x);
                     obj.height = std::min(static_cast<float>(height), original_im_h - obj.y);
 
-                    for (int j = 0; j < /*region.classes*/ region_classes; ++j) {
-                        int class_index = calculateEntryIndex(entriesNum, /*region.coords*/ region_coords, /*region.classes*/ region_classes, n * entriesNum + i, /*region.coords*/ region_coords + 1 + j);
+                    for (int j = 0; j < region_classes; ++j) {
+                        int class_index = calculateEntryIndex(entriesNum, region_coords, region_classes, n * entriesNum + i, region_coords + 1 + j);
                         float prob = scale * postprocessRawData(output_blob[class_index]);
 
                         //--- Checking confidence threshold conformance and adding region to the list
@@ -199,7 +196,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
         cv::Rect init_rect;
         for (const auto& el : objects) {
             if (el.labelID == 0) {//person ID
-                init_rect = init_rect | (cv::Rect)el;
+                init_rect = init_rect | static_cast<cv::Rect>(el);
             }
         }
         slog::debug << "SF result rect" << init_rect << slog::endl;
@@ -224,7 +221,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
             cv::resize(SF_ROI, SF_resized_ROI, target_size);
             int left_add = (image.size().width - target_size.width) / 2;
             int right_add = (image.size().width - target_size.width) / 2;
-            cv::copyMakeBorder(/*croped_rect*/ SF_resized_ROI, out,
+            cv::copyMakeBorder(SF_resized_ROI, out,
                 0,
                 0,
                 left_add,
@@ -239,7 +236,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
 
 GAPI_OCV_KERNEL(OCVSuperResolutionPostProcessingKernel, custom::GSuperResolutionPostProcessingKernel) {
     static void run(const cv::Mat & image, cv::Mat & out) {
-        float* outputData = (float*)image.data;
+        float* outputData = static_cast<float*>(image.data);
         size_t outChannels = image.size[1];
         size_t outHeight = image.size[2];
         size_t outWidth = image.size[3];
@@ -267,15 +264,15 @@ GAPI_OCV_KERNEL(OCVSuperResolutionPostProcessingKernel, custom::GSuperResolution
 // NB: cv::gapi::convertTo + reshape from 4D blob to image
 GAPI_OCV_KERNEL(OCVCvt32Fto8U, custom::GCvt32Fto8U) {
     static void run(const cv::Mat & in,
-        cv::Mat & out) {
-        int h = in.size[2];
-        int w = in.size[3];
+                    cv::Mat & out) {
+                    int h = in.size[2];
+                    int w = in.size[3];
 
-        auto* out_p = out.ptr<uint8_t>();
-        auto* in_p = in.ptr<const float>();
+                    auto* out_p = out.ptr<uint8_t>();
+                    auto* in_p = in.ptr<const float>();
 
-        std::transform(in_p, in_p + h * w, out_p,
-            [](float v) { return static_cast<uint8_t>(v * 255); });
+                    std::transform(in_p, in_p + h * w, out_p,
+                                   [](float v) { return static_cast<uint8_t>(v * 255); });
     }
 };
 
