@@ -20,7 +20,7 @@ This is a porosity weld recognition model. It runs on a video stream capturing w
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
