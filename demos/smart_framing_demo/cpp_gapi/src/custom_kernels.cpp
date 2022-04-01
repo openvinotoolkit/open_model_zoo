@@ -51,7 +51,8 @@ struct YOLOv4TinyPostProcessing {
         return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
     }
 
-    std::string getLabelName(int labelID) { return (size_t)labelID < custom::coco_classes.size() ? custom::coco_classes[labelID] : std::string("Label #") + std::to_string(labelID); }
+    //std::string getLabelName(int labelID) { return (size_t)labelID < custom::coco_classes.size() ? custom::coco_classes[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::string getLabelName(int labelID, std::vector<std::string> &labels) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 
     std::vector<float> blobs_anchor[2]{
         {23.0f, 27.0f, 37.0f, 58.0f, 81.0f, 82.0f},
@@ -62,7 +63,7 @@ struct YOLOv4TinyPostProcessing {
         const cv::Mat& blob, int blobID, const unsigned long resized_im_h,
         const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, const float confidenceThreshold,
-        std::vector<custom::DetectedObject>& objects) {
+        std::vector<std::string>&labels, std::vector<custom::DetectedObject>& objects) {
         // --------------------------- Extracting layer parameters -------------------------------------
         int sideW = 0;
         int sideH = 0;
@@ -134,7 +135,7 @@ using GPostProc = cv::GOpaque<YOLOv4TinyPostProcessing>;
 
 
 GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKernel) {
-    static void run(const cv::Mat & image, const cv::Mat & in_blob26x26, const cv::Mat & in_blob13x13,
+    static void run(const cv::Mat & image, const cv::Mat & in_blob26x26, const cv::Mat & in_blob13x13, std::vector<std::string> &labels,
         const float confidenceThreshold, const float boxIOUThreshold, const bool useAdvancedPostprocessing, std::vector<custom::DetectedObject> &objects) {
         YOLOv4TinyPostProcessing post_processor;
         int blob_size[2];
@@ -148,10 +149,10 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
         //OMZ Post-processing for Yolo
         std::vector<custom::DetectedObject> initial_objects;
         post_processor.parseYOLOOutput(in_blob26x26, 0, post_processor.netInputHeight, post_processor.netInputWidth,
-            image.rows, image.cols, confidenceThreshold, initial_objects);
+            image.rows, image.cols, confidenceThreshold, labels, initial_objects);
         slog::debug << "Accumulated DetectedObject size for blobID " << 0 << " is " << initial_objects.size() << slog::endl;
         post_processor.parseYOLOOutput(in_blob13x13, 1, post_processor.netInputHeight, post_processor.netInputWidth,
-            image.rows, image.cols, confidenceThreshold, initial_objects);
+            image.rows, image.cols, confidenceThreshold, labels, initial_objects);
         slog::debug << "Accumulated DetectedObject size for blobID " << 1 << " is " << initial_objects.size() << slog::endl;
 
         slog::debug << "Total DetectedObject size " << initial_objects.size() << slog::endl;

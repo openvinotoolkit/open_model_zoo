@@ -89,9 +89,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        std::vector<std::string> custom::coco_labels;
+        std::vector<std::string> coco_labels;
         if (!FLAGS_labels.empty()) {
-            custom::coco_labels = DetectionModel::loadLabels(FLAGS_labels);
+            coco_labels = DetectionModel::loadLabels(FLAGS_labels);
         }
 
 
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
         cv::GMat out_sr_pp; //cropped resized output image after super resolution post processing
 
         std::tie(blob26x26, blob13x13) = cv::gapi::infer<YOLOv4TinyNet>(in);
-        yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
+        yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, coco_labels, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
         out = custom::GSmartFramingKernel::on(in, yolo_detections);
         if (FLAGS_apply_sr) {
             if (use_single_channel_sr) {

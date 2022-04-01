@@ -98,8 +98,6 @@ const std::vector<std::string> coco_classes = {
 "toothbrush"      //79
 };
 
-extern std::vector<std::string> coco_labels;
-
 struct DetectedObject : public cv::Rect2f
 {
     unsigned int labelID;
@@ -108,9 +106,13 @@ struct DetectedObject : public cv::Rect2f
 };
 
 using GDetections = cv::GArray<DetectedObject>;
+using GLabels = cv::Garray<std::string>;
 
-G_API_OP(GYOLOv4TinyPostProcessingKernel, < GDetections(cv::GMat, cv::GMat, cv::GMat, float, float, bool) >, "custom.yolov4_tiny_post_processing") {
-        static cv::GArrayDesc outMeta(const cv::GMatDesc&, const cv::GMatDesc&, const cv::GMatDesc&, const float, const float, const bool) {
+G_API_OP(GYOLOv4TinyPostProcessingKernel, < GDetections(cv::GMat, cv::GMat, cv::GMat, GLabels, float, float, bool) >, "custom.yolov4_tiny_post_processing") {
+        static cv::GArrayDesc outMeta(const cv::GMatDesc&,
+                                      const cv::GMatDesc&,
+                                      const cv::GMatDesc&,
+                                      const cv::GArrayDesc& , const float, const float, const bool) {
             return cv::empty_array_desc();
         }
 };
