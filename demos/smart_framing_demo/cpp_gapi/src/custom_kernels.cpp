@@ -135,7 +135,7 @@ using GPostProc = cv::GOpaque<YOLOv4TinyPostProcessing>;
 
 
 GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKernel) {
-    static void run(const cv::Mat & image, const cv::Mat & in_blob26x26, const cv::Mat & in_blob13x13, std::vector<std::string> &labels,
+    static void run(const cv::Mat & image, const cv::Mat & in_blob26x26, const cv::Mat & in_blob13x13, const std::vector<std::string> &labels,
         const float confidenceThreshold, const float boxIOUThreshold, const bool useAdvancedPostprocessing, std::vector<custom::DetectedObject> &objects) {
         YOLOv4TinyPostProcessing post_processor;
         int blob_size[2];
