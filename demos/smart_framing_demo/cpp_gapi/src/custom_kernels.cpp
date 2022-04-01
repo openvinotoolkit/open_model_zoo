@@ -119,7 +119,7 @@ struct YOLOv4TinyPostProcessing {
                         if (prob >= confidenceThreshold) {
                             obj.confidence = prob;
                             obj.labelID = j;
-                            obj.label = getLabelName(obj.labelID);
+                            obj.label = getLabelName(obj.labelID, labels);
                             objects.push_back(obj);
                         }
                     }

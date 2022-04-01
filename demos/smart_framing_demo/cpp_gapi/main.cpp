@@ -133,6 +133,7 @@ int main(int argc, char *argv[]) {
         cv::GMat blob26x26; //float32[1,255,26,26]
         cv::GMat blob13x13; //float32[1,255,13,13]
         cv::GArray<custom::DetectedObject> yolo_detections;
+        cv::GArray<std::string> labels;
 
         // Now build the graph
         cv::GMat in;
@@ -141,7 +142,7 @@ int main(int argc, char *argv[]) {
         cv::GMat out_sr_pp; //cropped resized output image after super resolution post processing
 
         std::tie(blob26x26, blob13x13) = cv::gapi::infer<YOLOv4TinyNet>(in);
-        yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, coco_labels, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
+        yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, labels, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
         out = custom::GSmartFramingKernel::on(in, yolo_detections);
         if (FLAGS_apply_sr) {
             if (use_single_channel_sr) {
@@ -162,7 +163,7 @@ int main(int argc, char *argv[]) {
             util::getKernelPackage(FLAGS_kernel_package));
 
 
-        cv::GStreamingCompiled pipeline = cv::GComputation(cv::GIn(in), cv::GOut(cv::gapi::copy(in), yolo_detections, out, FLAGS_apply_sr ? out_sr_pp : out))
+        cv::GStreamingCompiled pipeline = cv::GComputation(cv::GIn(in, labels), cv::GOut(cv::gapi::copy(in), yolo_detections, out, FLAGS_apply_sr ? out_sr_pp : out))
                                                            .compileStreaming(cv::compile_args(kernels, networks));
 
         /** ---------------- End of graph ---------------- **/
@@ -178,7 +179,9 @@ int main(int argc, char *argv[]) {
 
 
         /** ---------------- The execution part ---------------- **/
-        pipeline.setSource<custom::CommonCapSrc>(cap);
+        //pipeline.setSource<custom::CommonCapSrc>(cap);
+        //pipeline.setSource<custom::CommonCapSrc>(cap);
+        pipeline.setSource(cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap), coco_labels));
 
         cv::Size graphSize{ static_cast<int>(frame_size.width / 4), 60 };
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
