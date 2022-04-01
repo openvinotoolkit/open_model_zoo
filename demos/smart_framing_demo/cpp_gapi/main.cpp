@@ -22,6 +22,7 @@
 #include <utils_gapi/stream_source.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/config_factory.h>
+#include <utils/images_capture.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 
