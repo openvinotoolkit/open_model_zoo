@@ -15,9 +15,19 @@
 */
 
 #pragma once
-#include <openvino/openvino.hpp>
+#include <memory>
+#include <string>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class StyleTransferModel : public ImageModel {
 public:
@@ -26,8 +36,7 @@ public:
     /// @param layout - model input layout
     StyleTransferModel(const std::string& modelFileName, const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

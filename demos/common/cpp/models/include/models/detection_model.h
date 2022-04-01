@@ -15,8 +15,11 @@
 */
 
 #pragma once
+#include <stddef.h>
+
 #include <string>
 #include <vector>
+
 #include "models/image_model.h"
 
 class DetectionModel : public ImageModel {
@@ -30,8 +33,11 @@ public:
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     /// @param layout - model input layout
-    DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        const std::vector<std::string>& labels, const std::string& layout = "");
+    DetectionModel(const std::string& modelFileName,
+                   float confidenceThreshold,
+                   bool useAutoResize,
+                   const std::vector<std::string>& labels,
+                   const std::string& layout = "");
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
@@ -39,6 +45,7 @@ protected:
     float confidenceThreshold;
     std::vector<std::string> labels;
 
-    std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ?
-                                                   labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::string getLabelName(int labelID) {
+        return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID);
+    }
 };

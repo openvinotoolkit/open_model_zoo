@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <memory>
 #include <vector>
-#include <opencv2/core/core.hpp>
+
+#include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
 ///
@@ -21,7 +21,7 @@ public:
     /// \param[in] descr2 Second descriptor.
     /// \return Distance between two descriptors.
     ///
-    virtual float Compute(const cv::Mat &descr1, const cv::Mat &descr2) = 0;
+    virtual float Compute(const cv::Mat& descr1, const cv::Mat& descr2) = 0;
 
     ///
     /// \brief Computes distances between two descriptors in batches.
@@ -29,8 +29,7 @@ public:
     /// \param[in] descrs2 Batch of second descriptors.
     /// \return Distances between descriptors.
     ///
-    virtual std::vector<float> Compute(const std::vector<cv::Mat> &descrs1,
-                                       const std::vector<cv::Mat> &descrs2) = 0;
+    virtual std::vector<float> Compute(const std::vector<cv::Mat>& descrs1, const std::vector<cv::Mat>& descrs2) = 0;
 
     virtual ~IDescriptorDistance() {}
 };
@@ -45,7 +44,7 @@ public:
     /// \brief CosDistance constructor.
     /// \param[in] descriptor_size Descriptor size.
     ///
-    explicit CosDistance(const cv::Size &descriptor_size);
+    explicit CosDistance(const cv::Size& descriptor_size);
 
     ///
     /// \brief Computes distance between two descriptors.
@@ -53,7 +52,7 @@ public:
     /// \param descr2 Second descriptor.
     /// \return Distance between two descriptors.
     ///
-    float Compute(const cv::Mat &descr1, const cv::Mat &descr2) override;
+    float Compute(const cv::Mat& descr1, const cv::Mat& descr2) override;
 
     ///
     /// \brief Computes distances between two descriptors in batches.
@@ -61,14 +60,11 @@ public:
     /// \param[in] descrs2 Batch of second descriptors.
     /// \return Distances between descriptors.
     ///
-    std::vector<float> Compute(
-        const std::vector<cv::Mat> &descrs1,
-        const std::vector<cv::Mat> &descrs2) override;
+    std::vector<float> Compute(const std::vector<cv::Mat>& descrs1, const std::vector<cv::Mat>& descrs2) override;
 
 private:
     cv::Size descriptor_size_;
 };
-
 
 ///
 /// \brief Computes distance between images
@@ -88,30 +84,30 @@ public:
     ///            Final distance is computed as:
     ///            scale * distance + offset.
     ///
-    MatchTemplateDistance(int type = cv::TemplateMatchModes::TM_CCORR_NORMED,
-                          float scale = -1, float offset = 1)
-        : type_(type), scale_(scale), offset_(offset) {}
+    MatchTemplateDistance(int type = cv::TemplateMatchModes::TM_CCORR_NORMED, float scale = -1, float offset = 1)
+        : type_(type),
+          scale_(scale),
+          offset_(offset) {}
     ///
     /// \brief Computes distance between image descriptors.
     /// \param[in] descr1 First image descriptor.
     /// \param[in] descr2 Second image descriptor.
     /// \return Distance between image descriptors.
     ///
-    float Compute(const cv::Mat &descr1, const cv::Mat &descr2) override;
+    float Compute(const cv::Mat& descr1, const cv::Mat& descr2) override;
     ///
     /// \brief Computes distances between two descriptors in batches.
     /// \param[in] descrs1 Batch of first descriptors.
     /// \param[in] descrs2 Batch of second descriptors.
     /// \return Distances between descriptors.
     ///
-    std::vector<float> Compute(const std::vector<cv::Mat> &descrs1,
-                               const std::vector<cv::Mat> &descrs2) override;
+    std::vector<float> Compute(const std::vector<cv::Mat>& descrs1, const std::vector<cv::Mat>& descrs2) override;
     virtual ~MatchTemplateDistance() {}
 
 private:
-    int type_;      ///< Method of MatchTemplate function computation.
-    float scale_;   ///< Scale parameter for the distance. Final distance is
-                    /// computed as: scale * distance + offset.
+    int type_;  ///< Method of MatchTemplate function computation.
+    float scale_;  ///< Scale parameter for the distance. Final distance is
+                   /// computed as: scale * distance + offset.
     float offset_;  ///< Offset parameter for the distance. Final distance is
                     /// computed as: scale * distance + offset.
 };
