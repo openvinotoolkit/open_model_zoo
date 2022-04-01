@@ -100,7 +100,7 @@ def parse():
     io_args.add_argument('-o', '--output', required=False, metavar="<OUTPUT>",
         help='name of the output file(s) to save')
 
-    io_args.add_argument('-res', '--res', default=None, type=str, metavar="<STRING>",
+    io_args.add_argument('-res', '--res', default=None, type=resolution, metavar="<STRING>",
         help='set image grid resolution in format WxH')
 
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str, metavar="<MONITORS>",
@@ -299,7 +299,7 @@ def main():
                 video_writer.write(frame)
 
             if not args.noshow:
-                cv2.imshow(__file__, frame)
+                cv2.imshow('Classification Results', frame)
                 key = cv2.waitKey(delay)
 
                 # Pause.
