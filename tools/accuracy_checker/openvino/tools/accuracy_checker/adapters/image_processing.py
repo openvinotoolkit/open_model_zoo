@@ -135,8 +135,9 @@ class MultiSuperResolutionAdapter(Adapter):
     @additional_output_mapping.setter
     def additional_output_mapping(self, value):
         self._additional_output_mapping = value
-        for adapter in self.target_mapping.values():
-            adapter.additional_output_mapping = value
+        if hasattr(self, '_per_target_adapters'):
+            for adapter in self._per_target_adapters.values():
+                adapter.additional_output_mapping = value
 
     @classmethod
     def parameters(cls):
@@ -176,7 +177,11 @@ class MultiSuperResolutionAdapter(Adapter):
         common_adapter_config = deepcopy(self.launcher_config)
         self._per_target_adapters = {}
         for key, output_name in self.target_mapping.items():
-            self._per_target_adapters[key] = SuperResolutionAdapter(common_adapter_config, output_blob=output_name)
+            self._per_target_adapters[key] = SuperResolutionAdapter(
+                common_adapter_config, output_blob=output_name,
+                additional_output_mapping=self.additional_output_mapping
+            )
+
 
     def process(self, raw, identifiers=None, frame_meta=None):
         predictions = [{}] * len(identifiers)
