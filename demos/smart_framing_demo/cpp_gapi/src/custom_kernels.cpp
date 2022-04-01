@@ -52,7 +52,7 @@ struct YOLOv4TinyPostProcessing {
     }
 
     //std::string getLabelName(int labelID) { return (size_t)labelID < custom::coco_classes.size() ? custom::coco_classes[labelID] : std::string("Label #") + std::to_string(labelID); }
-    std::string getLabelName(int labelID, std::vector<std::string> &labels) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::string getLabelName(int labelID, const std::vector<std::string> &labels) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 
     std::vector<float> blobs_anchor[2]{
         {23.0f, 27.0f, 37.0f, 58.0f, 81.0f, 82.0f},
@@ -63,7 +63,7 @@ struct YOLOv4TinyPostProcessing {
         const cv::Mat& blob, int blobID, const unsigned long resized_im_h,
         const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, const float confidenceThreshold,
-        std::vector<std::string>&labels, std::vector<custom::DetectedObject>& objects) {
+        const std::vector<std::string>&labels, std::vector<custom::DetectedObject>& objects) {
         // --------------------------- Extracting layer parameters -------------------------------------
         int sideW = 0;
         int sideH = 0;
