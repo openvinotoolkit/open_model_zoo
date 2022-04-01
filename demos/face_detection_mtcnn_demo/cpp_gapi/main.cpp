@@ -16,6 +16,7 @@
 #include <utility>
 #include <vector>
 
+#include <gflags/gflags.h>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/garg.hpp>
@@ -45,7 +46,6 @@
 
 #include "custom_kernels.hpp"
 #include "face_detection_mtcnn_demo.hpp"
-#include "gflags/gflags.h"
 #include "utils.hpp"
 
 const int MAX_PYRAMID_LEVELS = 13;

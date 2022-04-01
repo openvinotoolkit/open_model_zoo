@@ -15,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include <gflags/gflags.h>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/garg.hpp>
 #include <opencv2/gapi/garray.hpp>
@@ -40,7 +41,6 @@
 
 #include "custom_kernels.hpp"
 #include "gesture_recognition_demo_gapi.hpp"
-#include "gflags/gflags.h"
 #include "stream_source.hpp"
 #include "tracker.hpp"
 #include "utils.hpp"
