@@ -17,8 +17,7 @@
 #include "detectors.hpp"
 #include "face.hpp"
 
-// -------------------------Generic routines for visualization of detection
-// results-------------------------------------------------
+// Generic routines for visualization of detection results
 
 // Drawing a bar of emotions
 class EmotionBarVisualizer {

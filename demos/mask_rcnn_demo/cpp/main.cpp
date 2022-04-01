@@ -8,7 +8,6 @@
  * @example mask_rcnn_demo/main.cpp
  */
 
-
 #include <stddef.h>
 
 #include <algorithm>
