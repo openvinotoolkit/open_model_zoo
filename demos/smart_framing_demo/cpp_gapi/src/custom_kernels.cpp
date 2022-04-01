@@ -237,7 +237,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
 
 GAPI_OCV_KERNEL(OCVSuperResolutionPostProcessingKernel, custom::GSuperResolutionPostProcessingKernel) {
     static void run(const cv::Mat & image, cv::Mat & out) {
-        float* outputData = static_cast<float*>(image.data);
+        float* outputData = (float*)image.data;
         size_t outChannels = image.size[1];
         size_t outHeight = image.size[2];
         size_t outWidth = image.size[3];
