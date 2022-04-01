@@ -15,6 +15,7 @@
 | colorization-siggraph | YES | YES | YES |
 | colorization-v2 | YES | YES | YES |
 | common-sign-language-0001 | YES | YES |    |
+| convnext-tiny | YES |    |    |
 | ctdet_coco_dlav0_512 | YES | YES | YES |
 | ctpn | YES | YES | YES |
 | deblurgan-v2 | YES | YES | YES |
@@ -61,6 +62,7 @@
 | hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
+| levit-128s | YES | YES |    |
 | license-plate-recognition-barrier-0007 | YES |    |    |
 | mask_rcnn_inception_resnet_v2_atrous_coco | YES | YES |    |
 | mask_rcnn_resnet50_atrous_coco | YES | YES |    |
@@ -77,6 +79,8 @@
 | mobilenet-v2-pytorch | YES | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES | YES |
+| mobilenet-v3-large-1.0-224-paddle | YES | YES | YES |
+| mobilenet-v3-small-1.0-224-paddle | YES | YES | YES |
 | mobilenet-yolo-v4-syg | YES | YES |    |
 | modnet-photographic-portrait-matting | YES | YES | YES |
 | modnet-webcam-portrait-matting | YES | YES | YES |
@@ -85,6 +89,8 @@
 | mtcnn-o | YES | YES |    |
 | mtcnn-p | YES | YES |    |
 | mtcnn-r | YES | YES |    |
+| nanodet-m-1.5x-416 | YES | YES |    |
+| nanodet-plus-m-1.5x-416 | YES | YES |    |
 | netvlad-tf | YES |    |    |
 | nfnet-f0 | YES | YES | YES |
 | ocrnet-hrnet-w48-paddle | YES | YES |    |

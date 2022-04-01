@@ -1,0 +1,26 @@
+models:
+  - name: nanodet-m-1.5x-416
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: nanodet
+          is_legacy: true
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        preprocessing:
+          - type: resize
+            size: 416
+            aspect_ratio_scale: fit_to_window
+          - type: padding
+            size: 416
+            pad_type: right_bottom
+        postprocessing:
+          - type: resize_prediction_boxes
+            rescale: true
+        metrics:
+          - type: coco_precision
+            reference: 0.2738
+          - type: coco_orig_precision
+            reference: 0.2663

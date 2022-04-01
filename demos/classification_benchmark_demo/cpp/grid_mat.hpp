@@ -1,24 +1,22 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
 #include <algorithm>
+#include <queue>
 #include <set>
 #include <string>
 #include <vector>
-#include <queue>
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>
 
-#include <opencv2/imgproc.hpp>
-#include <opencv2/core.hpp>
-
-enum class PredictionResult { Correct,
-                              Incorrect,
-                              Unknown };
+enum class PredictionResult { Correct, Incorrect, Unknown };
 
 class GridMat {
 public:
@@ -27,9 +25,8 @@ public:
     explicit GridMat(Presenter& presenter,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
                      const cv::Size aspectRatio = cv::Size{16, 9},
-                     double targetFPS = 60
-                     ):
-                     currSourceId{0} {
+                     double targetFPS = 60)
+        : currSourceId{0} {
         cv::Size size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
                       static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
         if (size.width == 0 || size.height == 0) {
@@ -45,12 +42,13 @@ public:
         }
 
         outImg.create((cellSize.height * size.height) + presenter.graphSize.height,
-                       cellSize.width * size.width, CV_8UC3);
+                      cellSize.width * size.width,
+                      CV_8UC3);
         outImg.setTo(0);
 
         textSize = cv::getTextSize("", fontType, fontScale, thickness, &baseline);
         accuracyMessageSize = cv::getTextSize("Accuracy (top 0): 0.000", fontType, fontScale, thickness, &baseline);
-        testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
+        testMessageSize = cv::getTextSize(GridMat::testMessage, fontType, fontScale, thickness, &baseline);
     }
 
     void textUpdate(PerformanceMetrics& metrics,
@@ -60,28 +58,37 @@ public:
                     bool isFpsTest,
                     bool showAccuracy,
                     Presenter& presenter) {
-        rectangle(outImg,
-                  {0, 0}, {outImg.cols, presenter.graphSize.height},
-                  cv::Scalar(0, 0, 0), cv::FILLED);
+        rectangle(outImg, {0, 0}, {outImg.cols, presenter.graphSize.height}, cv::Scalar(0, 0, 0), cv::FILLED);
 
         presenter.drawGraphs(outImg);
 
-        metrics.update(lastRequestStartTime, outImg, cv::Point(textPadding, textSize.height + textPadding),
-                                  fontType, fontScale, cv::Scalar(255, 100, 100), thickness);
+        metrics.update(lastRequestStartTime,
+                       outImg,
+                       cv::Point(textPadding, textSize.height + textPadding),
+                       fontType,
+                       fontScale,
+                       cv::Scalar(255, 100, 100),
+                       thickness);
 
         if (showAccuracy) {
             cv::putText(outImg,
                         cv::format("Accuracy (top %d): %.3f", nTop, accuracy),
                         cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
-                        fontType, fontScale, cv::Scalar(255, 255, 255), thickness);
+                        fontType,
+                        fontScale,
+                        cv::Scalar(255, 255, 255),
+                        thickness);
         }
 
         if (isFpsTest) {
-            cv::putText(outImg,
-                        testMessage,
-                        cv::Point(outImg.cols - testMessageSize.width - textPadding,
-                                  (textSize.height + textPadding) * 2),
-                        fontType, fontScale, cv::Scalar(50, 50, 255), thickness);
+            cv::putText(
+                outImg,
+                GridMat::testMessage,
+                cv::Point(outImg.cols - testMessageSize.width - textPadding, (textSize.height + textPadding) * 2),
+                fontType,
+                fontScale,
+                cv::Scalar(50, 50, 255),
+                thickness);
         }
     }
 
@@ -94,11 +101,14 @@ public:
         cv::Scalar textColor;
         switch (predictionResul) {
             case PredictionResult::Correct:
-                textColor = cv::Scalar(75, 255, 75); break;   // green
+                textColor = cv::Scalar(75, 255, 75);  // green
+                break;
             case PredictionResult::Incorrect:
-                textColor = cv::Scalar(50, 50, 255); break;   // red
+                textColor = cv::Scalar(50, 50, 255);  // red
+                break;
             case PredictionResult::Unknown:
-                textColor = cv::Scalar(200, 10, 10); break;  // blue
+                textColor = cv::Scalar(200, 10, 10);  // blue
+                break;
             default:
                 throw std::runtime_error("Undefined type of prediction result");
         }
@@ -106,9 +116,13 @@ public:
         cv::Size labelTextSize = cv::getTextSize(label, fontType, 1, 2, &baseline);
         double labelFontScale = static_cast<double>(cellSize.width - 2 * labelThickness) / labelTextSize.width;
         cv::resize(mat, prevImg, cellSize);
-        putHighlightedText(prevImg, label,
-            cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
-            fontType, labelFontScale, textColor, 2);
+        putHighlightedText(prevImg,
+                           label,
+                           cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
+                           fontType,
+                           labelFontScale,
+                           textColor,
+                           2);
         cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));
         prevImg.copyTo(cell);
         cv::rectangle(cell, {0, 0}, {cell.cols, cell.rows}, {255, 50, 50}, labelThickness);  // draw a border
@@ -129,11 +143,11 @@ private:
     static constexpr double fontScale = 1.5;
     static const int thickness = 2;
     static const int textPadding = 10;
-    static const std::string testMessage;
+    static constexpr const char testMessage[] = "Testing, please wait...";
     int baseline;
     cv::Size textSize;
     cv::Size accuracyMessageSize;
     cv::Size testMessageSize;
 };
 
-const std::string GridMat::testMessage = "Testing, please wait...";
+constexpr const char GridMat::testMessage[];

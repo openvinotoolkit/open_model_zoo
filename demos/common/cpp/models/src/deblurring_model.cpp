@@ -14,18 +14,29 @@
 // limitations under the License.
 */
 
-#include <string>
-#include <vector>
-#include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 #include "models/deblurring_model.h"
 
-DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
-    ImageModel(modelFileName, false, layout) {
-        netInputHeight = inputImgSize.height;
-        netInputWidth = inputImgSize.width;
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
+
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
+#include "models/results.h"
+
+DeblurringModel::DeblurringModel(const std::string& modelFileName,
+                                 const cv::Size& inputImgSize,
+                                 const std::string& layout)
+    : ImageModel(modelFileName, false, layout) {
+    netInputHeight = inputImgSize.height;
+    netInputWidth = inputImgSize.width;
 }
 
 void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
@@ -40,15 +51,13 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Shape& inputShape = model->input().get_shape();
     const ov::Layout& inputLayout = getInputLayout(model->input());
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
-        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
+        inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout("NHWC");
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
 
     ppp.input().model().set_layout(inputLayout);
 
@@ -61,8 +70,8 @@ void DeblurringModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     const ov::Shape& outputShape = model->output().get_shape();
     const ov::Layout outputLayout("NCHW");
-    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
-        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 ||
+        outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 
@@ -81,9 +90,9 @@ void DeblurringModel::changeInputSize(std::shared_ptr<ov::Model>& model) {
     const auto widthId = ov::layout::width_idx(layout);
 
     if (inputShape[heightId] % stride || inputShape[widthId] % stride) {
-        throw std::logic_error("Model input shape HxW = "
-            + std::to_string(inputShape[heightId]) + "x" + std::to_string(inputShape[widthId])
-            + "must be divisible by stride " + std::to_string(stride));
+        throw std::logic_error("Model input shape HxW = " + std::to_string(inputShape[heightId]) + "x" +
+                               std::to_string(inputShape[widthId]) + "must be divisible by stride " +
+                               std::to_string(stride));
     }
 
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
@@ -102,12 +111,10 @@ std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& 
     size_t w = image.cols;
     cv::Mat resizedImage;
 
-    if (netInputHeight - stride < h && h <= netInputHeight
-        && netInputWidth - stride < w && w <= netInputWidth) {
+    if (netInputHeight - stride < h && h <= netInputHeight && netInputWidth - stride < w && w <= netInputWidth) {
         int bottom = netInputHeight - h;
         int right = netInputWidth - w;
-        cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right,
-                           cv::BORDER_CONSTANT, 0);
+        cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right, cv::BORDER_CONSTANT, 0);
     } else {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
         cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
@@ -125,20 +132,21 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
     const auto outputData = infResult.getFirstOutputTensor().data<float>();
 
     std::vector<cv::Mat> imgPlanes;
-    const ov::Shape& outputShape= infResult.getFirstOutputTensor().get_shape();
+    const ov::Shape& outputShape = infResult.getFirstOutputTensor().get_shape();
     const ov::Layout outputLayout("NCHW");
-    size_t outHeight = (int)(outputShape[ov::layout::height_idx(outputLayout)]);
-    size_t outWidth = (int)(outputShape[ov::layout::width_idx(outputLayout)]);
+    size_t outHeight = static_cast<int>((outputShape[ov::layout::height_idx(outputLayout)]));
+    size_t outWidth = static_cast<int>((outputShape[ov::layout::width_idx(outputLayout)]));
     size_t numOfPixels = outWidth * outHeight;
-    imgPlanes = std::vector<cv::Mat>{
-          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
-          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
-          cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
+    imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
+                                     cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
+                                     cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
     cv::Mat resultImg;
     cv::merge(imgPlanes, resultImg);
 
-    if (netInputHeight - stride < static_cast<size_t>(inputImgSize.inputImgHeight) && static_cast<size_t>(inputImgSize.inputImgHeight) <= netInputHeight
-        && netInputWidth - stride < static_cast<size_t>(inputImgSize.inputImgWidth) && static_cast<size_t>(inputImgSize.inputImgWidth) <= netInputWidth) {
+    if (netInputHeight - stride < static_cast<size_t>(inputImgSize.inputImgHeight) &&
+        static_cast<size_t>(inputImgSize.inputImgHeight) <= netInputHeight &&
+        netInputWidth - stride < static_cast<size_t>(inputImgSize.inputImgWidth) &&
+        static_cast<size_t>(inputImgSize.inputImgWidth) <= netInputWidth) {
         result->resultImage = resultImg(cv::Rect(0, 0, inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));
     } else {
         cv::resize(resultImg, result->resultImage, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));

@@ -62,13 +62,13 @@ Expected color order: `BGR`.
 
 ## Outputs
 
-1. The array of detection summary info, name: `conv2d_58/Conv2D/YoloRegion`,  shape: `1, 13, 13, 255`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name: `conv2d_58/Conv2D/YoloRegion`,  shape: `1, 255, 13, 13`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name: `conv2d_66/Conv2D/YoloRegion`,  shape: `1, 26, 26, 255`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name: `conv2d_66/Conv2D/YoloRegion`,  shape: `1, 255, 26, 26`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name: `conv2d_74/Conv2D/YoloRegion`,  shape: `1, 52, 52, 255`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name: `conv2d_74/Conv2D/YoloRegion`,  shape: `1, 255, 52, 52`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each of the arrays the output format is `B, Cx, Cy, N*85`, where:
+For each of the arrays the output format is `B, N*85, Cx, Cy`, where:
 
 - `B` - batch size
 - `Cx`, `Cy` - cell index

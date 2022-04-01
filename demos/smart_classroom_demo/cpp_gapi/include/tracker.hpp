@@ -1,12 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
+#include <stddef.h>
+
+#include <memory>
 #include <set>
+#include <string>
+#include <tuple>
 #include <unordered_map>
+#include <vector>
+
+#include <opencv2/core.hpp>
 
 struct TrackedObject {
     cv::Rect rect;
@@ -16,12 +23,13 @@ struct TrackedObject {
     int label;  // either id of a label, or UNKNOWN_LABEL_IDX
     static const int UNKNOWN_LABEL_IDX;  // the value (-1) for unknown label
 
-    size_t frame_idx;      ///< Frame index where object was detected (-1 if N/A).
+    size_t frame_idx;  ///< Frame index where object was detected (-1 if N/A).
 
-    TrackedObject(const cv::Rect &rect = cv::Rect(), float conf = -1.0f,
-                  int label = -1, int object_id = -1)
-        : rect(rect),  confidence(conf),
-          object_id(object_id), label(label),
+    TrackedObject(const cv::Rect& rect = cv::Rect(), float conf = -1.0f, int label = -1, int object_id = -1)
+        : rect(rect),
+          confidence(conf),
+          object_id(object_id),
+          label(label),
           frame_idx(-1) {}
 };
 
@@ -48,10 +56,11 @@ public:
     /// \return Optimal column index for each row. -1 means that there is no
     /// column for row.
     ///
-    std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix);
+    std::vector<size_t> Solve(const cv::Mat& dissimilarity_matrix);
 
 private:
     class Impl;
+
     std::shared_ptr<Impl> impl_;  ///< Class implementation.
 };
 
@@ -105,7 +114,7 @@ struct Track {
     /// \brief Track constructor.
     /// \param objs Detected objects sequence.
     ///
-    explicit Track(const TrackedObjects &objs) : objects(objs), lost(0), length(1) {
+    explicit Track(const TrackedObjects& objs) : objects(objs), lost(0), length(1) {
         CV_Assert(!objs.empty());
         first_object = objs[0];
     }
@@ -114,13 +123,17 @@ struct Track {
     /// \brief empty returns if track does not contain objects.
     /// \return true if track does not contain objects.
     ///
-    bool empty() const { return objects.empty(); }
+    bool empty() const {
+        return objects.empty();
+    }
 
     ///
     /// \brief size returns number of detected objects in a track.
     /// \return number of detected objects in a track.
     ///
-    size_t size() const { return objects.size(); }
+    size_t size() const {
+        return objects.size();
+    }
 
     ///
     /// \brief operator [] return const reference to detected object with
@@ -128,7 +141,9 @@ struct Track {
     /// \param i Index of object.
     /// \return const reference to detected object with specified index.
     ///
-    const TrackedObject &operator[](size_t i) const { return objects[i]; }
+    const TrackedObject& operator[](size_t i) const {
+        return objects[i];
+    }
 
     ///
     /// \brief operator [] return non-const reference to detected object with
@@ -136,13 +151,15 @@ struct Track {
     /// \param i Index of object.
     /// \return non-const reference to detected object with specified index.
     ///
-    TrackedObject &operator[](size_t i) { return objects[i]; }
+    TrackedObject& operator[](size_t i) {
+        return objects[i];
+    }
 
     ///
     /// \brief back returns const reference to last object in track.
     /// \return const reference to last object in track.
     ///
-    const TrackedObject &back() const {
+    const TrackedObject& back() const {
         CV_Assert(!empty());
         return objects.back();
     }
@@ -151,13 +168,13 @@ struct Track {
     /// \brief back returns non-const reference to last object in track.
     /// \return non-const reference to last object in track.
     ///
-    TrackedObject &back() {
+    TrackedObject& back() {
         CV_Assert(!empty());
         return objects.back();
     }
 
     TrackedObjects objects;  ///< Detected objects;
-    size_t lost;             ///< How many frames ago track has been lost.
+    size_t lost;  ///< How many frames ago track has been lost.
 
     TrackedObject first_object;  ///< First object in track.
     size_t length;  ///< Length of a track including number of objects that were
@@ -174,7 +191,7 @@ public:
     /// parameters.
     /// \param[in] params Tracker parameters.
     ///
-    explicit Tracker(const TrackerParams &params = TrackerParams())
+    explicit Tracker(const TrackerParams& params = TrackerParams())
         : params_(params),
           tracks_counter_(0),
           frame_size_() {}
@@ -184,7 +201,7 @@ public:
     /// \param[in] frame Colored image (CV_8UC3).
     /// \param[in] detections Detected objects on the frame.
     ///
-    void Process(const cv::Mat &frame, const TrackedObjects &detections);
+    void Process(const cv::Mat& frame, const TrackedObjects& detections);
 
     ///
     /// \brief Get tracked detections with labels.
@@ -204,7 +221,7 @@ public:
     /// ago).
     /// \return Set of tracks {id, track}.
     ///
-    const std::unordered_map<size_t, Track> &tracks() const;
+    const std::unordered_map<size_t, Track>& tracks() const;
 
     ///
     /// \brief tracks Returns all tracks including forgotten (lost too many frames
@@ -232,32 +249,33 @@ public:
     size_t pipeline_idx = 0;
 
 private:
-    const std::set<size_t> &active_track_ids() const { return active_track_ids_; }
+    const std::set<size_t>& active_track_ids() const {
+        return active_track_ids_;
+    }
 
-    float ShapeAffinity(const cv::Rect &trk, const cv::Rect &det);
-    float MotionAffinity(const cv::Rect &trk, const cv::Rect &det);
+    float ShapeAffinity(const cv::Rect& trk, const cv::Rect& det);
+    float MotionAffinity(const cv::Rect& trk, const cv::Rect& det);
 
-    void SolveAssignmentProblem(
-            const std::set<size_t> &track_ids, const TrackedObjects &detections,
-            std::set<size_t> *unmatched_tracks,
-            std::set<size_t> *unmatched_detections,
-            std::set<std::tuple<size_t, size_t, float>> *matches);
-    void FilterDetectionsAndStore(const TrackedObjects &detected_objects);
+    void SolveAssignmentProblem(const std::set<size_t>& track_ids,
+                                const TrackedObjects& detections,
+                                std::set<size_t>* unmatched_tracks,
+                                std::set<size_t>* unmatched_detections,
+                                std::set<std::tuple<size_t, size_t, float>>* matches);
+    void FilterDetectionsAndStore(const TrackedObjects& detected_objects);
 
-    void ComputeDissimilarityMatrix(const std::set<size_t> &active_track_ids,
-                                    const TrackedObjects &detections,
-                                    cv::Mat *dissimilarity_matrix);
+    void ComputeDissimilarityMatrix(const std::set<size_t>& active_track_ids,
+                                    const TrackedObjects& detections,
+                                    cv::Mat* dissimilarity_matrix);
 
-    float Distance(const TrackedObject &obj1, const TrackedObject &obj2);
+    float Distance(const TrackedObject& obj1, const TrackedObject& obj2);
 
-    void AddNewTrack(const TrackedObject &detection);
+    void AddNewTrack(const TrackedObject& detection);
 
-    void AddNewTracks(const TrackedObjects &detections);
+    void AddNewTracks(const TrackedObjects& detections);
 
-    void AddNewTracks(const TrackedObjects &detections,
-                      const std::set<size_t> &ids);
+    void AddNewTracks(const TrackedObjects& detections, const std::set<size_t>& ids);
 
-    void AppendToTrack(size_t track_id, const TrackedObject &detection);
+    void AppendToTrack(size_t track_id, const TrackedObject& detection);
 
     bool EraseTrackIfBBoxIsOutOfFrame(size_t track_id);
 
@@ -265,7 +283,7 @@ private:
 
     bool UptateLostTrackAndEraseIfItsNeeded(size_t track_id);
 
-    void UpdateLostTracks(const std::set<size_t> &track_ids);
+    void UpdateLostTracks(const std::set<size_t>& track_ids);
 
     // Parameters of the pipeline.
     TrackerParams params_;
@@ -285,5 +303,5 @@ private:
     cv::Size frame_size_;
 };
 
-int LabelWithMaxFrequencyInTrack(const Track &track, int window_size);
+int LabelWithMaxFrequencyInTrack(const Track& track, int window_size);
 std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector<Track>& tracks);

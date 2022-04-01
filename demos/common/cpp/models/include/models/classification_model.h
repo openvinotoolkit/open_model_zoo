@@ -15,11 +15,19 @@
 */
 
 #pragma once
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct ResultBase;
 
 class ClassificationModel : public ImageModel {
 public:
@@ -31,8 +39,11 @@ public:
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class.
     /// @param layout - model input layout
-    ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize,
-        const std::vector<std::string>& labels, const std::string& layout = "");
+    ClassificationModel(const std::string& modelFileName,
+                        size_t nTop,
+                        bool useAutoResize,
+                        const std::vector<std::string>& labels,
+                        const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 

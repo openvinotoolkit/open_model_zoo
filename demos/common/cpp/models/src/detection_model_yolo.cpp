@@ -14,33 +14,69 @@
 // limitations under the License.
 */
 
-#include <string>
-#include <vector>
-#include <openvino/openvino.hpp>
-#include <openvino/op/region_yolo.hpp>
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
 #include "models/detection_model_yolo.h"
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <openvino/openvino.hpp>
+
+#include <utils/common.hpp>
+#include <utils/slog.hpp>
+
+#include "models/internal_model_data.h"
 #include "models/results.h"
 
 std::vector<float> defaultAnchors[] = {
     // YOLOv1v2
-    { 0.57273f, 0.677385f, 1.87446f, 2.06253f, 3.33843f, 5.47434f, 7.88282f, 3.52778f, 9.77052f, 9.16828f },
+    {0.57273f, 0.677385f, 1.87446f, 2.06253f, 3.33843f, 5.47434f, 7.88282f, 3.52778f, 9.77052f, 9.16828f},
     // YOLOv3
-    { 10.0f, 13.0f, 16.0f, 30.0f, 33.0f, 23.0f,
-      30.0f, 61.0f, 62.0f, 45.0f, 59.0f, 119.0f,
-      116.0f, 90.0f, 156.0f, 198.0f, 373.0f, 326.0f},
+    {10.0f,
+     13.0f,
+     16.0f,
+     30.0f,
+     33.0f,
+     23.0f,
+     30.0f,
+     61.0f,
+     62.0f,
+     45.0f,
+     59.0f,
+     119.0f,
+     116.0f,
+     90.0f,
+     156.0f,
+     198.0f,
+     373.0f,
+     326.0f},
     // YOLOv4
-    { 12.0f, 16.0f, 19.0f, 36.0f, 40.0f, 28.0f,
-      36.0f, 75.0f, 76.0f, 55.0f, 72.0f, 146.0f,
-      142.0f, 110.0f, 192.0f, 243.0f, 459.0f, 401.0f},
+    {12.0f,
+     16.0f,
+     19.0f,
+     36.0f,
+     40.0f,
+     28.0f,
+     36.0f,
+     75.0f,
+     76.0f,
+     55.0f,
+     72.0f,
+     146.0f,
+     142.0f,
+     110.0f,
+     192.0f,
+     243.0f,
+     459.0f,
+     401.0f},
     // YOLOv4_Tiny
-    { 10.0f, 14.0f, 23.0f, 27.0f, 37.0f, 58.0f,
-      81.0f, 82.0f, 135.0f, 169.0f, 344.0f, 319.0f},
+    {10.0f, 14.0f, 23.0f, 27.0f, 37.0f, 58.0f, 81.0f, 82.0f, 135.0f, 169.0f, 344.0f, 319.0f},
     // YOLOF
-    { 16.0f, 16.0f, 32.0f, 32.0f, 64.0f, 64.0f,
-      128.0f, 128.0f, 256.0f, 256.0f, 512.0f, 512.0f}
-};
+    {16.0f, 16.0f, 32.0f, 32.0f, 64.0f, 64.0f, 128.0f, 128.0f, 256.0f, 256.0f, 512.0f, 512.0f}};
 
 const std::vector<int64_t> defaultMasks[] = {
     // YOLOv1v2
@@ -48,12 +84,11 @@ const std::vector<int64_t> defaultMasks[] = {
     // YOLOv3
     {},
     // YOLOv4
-    {0, 1, 2, 3, 4, 5, 6, 7, 8 },
+    {0, 1, 2, 3, 4, 5, 6, 7, 8},
     // YOLOv4_Tiny
     {1, 2, 3, 3, 4, 5},
     // YOLOF
-    {0, 1, 2, 3, 4, 5}
-};
+    {0, 1, 2, 3, 4, 5}};
 
 static inline float sigmoid(float x) {
     return 1.f / (1.f + exp(-x));
@@ -63,18 +98,21 @@ static inline float linear(float x) {
     return x;
 }
 
-
-ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
-    const std::vector<float>& anchors, const std::vector<int64_t>& masks,
-    const std::string& layout) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels, layout),
-    boxIOUThreshold(boxIOUThreshold),
-    useAdvancedPostprocessing(useAdvancedPostprocessing),
-    yoloVersion(YOLO_V3),
-    presetAnchors(anchors),
-    presetMasks(masks) {
-}
+ModelYolo::ModelYolo(const std::string& modelFileName,
+                     float confidenceThreshold,
+                     bool useAutoResize,
+                     bool useAdvancedPostprocessing,
+                     float boxIOUThreshold,
+                     const std::vector<std::string>& labels,
+                     const std::vector<float>& anchors,
+                     const std::vector<int64_t>& masks,
+                     const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels, layout),
+      boxIOUThreshold(boxIOUThreshold),
+      useAdvancedPostprocessing(useAdvancedPostprocessing),
+      yoloVersion(YOLO_V3),
+      presetAnchors(anchors),
+      presetMasks(masks) {}
 
 void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -92,17 +130,15 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     if (useAutoResize) {
-        ppp.input().tensor().
-            set_spatial_dynamic_shape();
+        ppp.input().tensor().set_spatial_dynamic_shape();
 
-        ppp.input().preprocess().
-            convert_element_type(ov::element::f32).
-            resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+        ppp.input()
+            .preprocess()
+            .convert_element_type(ov::element::f32)
+            .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
     }
 
     ppp.input().model().set_layout(inputLayout);
@@ -118,9 +154,10 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     for (auto& out : outputs) {
         ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
         if (out.get_shape().size() == 4) {
-            if (out.get_shape()[ov::layout::height_idx(yoloRegionLayout)] != out.get_shape()[ov::layout::width_idx(yoloRegionLayout)] &&
-                out.get_shape()[ov::layout::height_idx({ "NHWC" })] == out.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
-                yoloRegionLayout = { "NHWC" };
+            if (out.get_shape()[ov::layout::height_idx(yoloRegionLayout)] !=
+                    out.get_shape()[ov::layout::width_idx(yoloRegionLayout)] &&
+                out.get_shape()[ov::layout::height_idx({"NHWC"})] == out.get_shape()[ov::layout::width_idx({"NHWC"})]) {
+                yoloRegionLayout = {"NHWC"};
             }
             ppp.output(out.get_any_name()).tensor().set_layout(yoloRegionLayout);
         }
@@ -152,17 +189,17 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         }
     }
 
-    if(!isRegionFound) {
-        switch(outputsNames.size()) {
-        case 1:
-            yoloVersion = YOLOF;
-            break;
-        case 2:
-            yoloVersion = YOLO_V4_TINY;
-            break;
-        case 3:
-            yoloVersion = YOLO_V4;
-            break;
+    if (!isRegionFound) {
+        switch (outputsNames.size()) {
+            case 1:
+                yoloVersion = YOLOF;
+                break;
+            case 2:
+                yoloVersion = YOLO_V4_TINY;
+                break;
+            case 3:
+                yoloVersion = YOLO_V4;
+                break;
         }
 
         int num = yoloVersion == YOLOF ? 6 : 3;
@@ -170,34 +207,40 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         int i = 0;
 
         auto chosenMasks = presetMasks.size() ? presetMasks : defaultMasks[yoloVersion];
-        if(chosenMasks.size() != num * outputs.size()) {
-            throw std::runtime_error(std::string("Invalid size of masks array, got ") + std::to_string(presetMasks.size()) +
-                ", should be " + std::to_string(num * outputs.size()));
+        if (chosenMasks.size() != num * outputs.size()) {
+            throw std::runtime_error(std::string("Invalid size of masks array, got ") +
+                                     std::to_string(presetMasks.size()) + ", should be " +
+                                     std::to_string(num * outputs.size()));
         }
 
-        std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outShapes, this](const std::string& x, const std::string& y)
-                {return outShapes[x][ov::layout::height_idx(yoloRegionLayout)] > outShapes[y][ov::layout::height_idx(yoloRegionLayout)]; });
+        std::sort(outputsNames.begin(),
+                  outputsNames.end(),
+                  [&outShapes, this](const std::string& x, const std::string& y) {
+                      return outShapes[x][ov::layout::height_idx(yoloRegionLayout)] >
+                             outShapes[y][ov::layout::height_idx(yoloRegionLayout)];
+                  });
 
         for (const auto& name : outputsNames) {
             const auto& shape = outShapes[name];
             if (shape[ov::layout::channels_idx(yoloRegionLayout)] % num != 0) {
                 throw std::logic_error(std::string("Output tenosor ") + name + " has wrong 2nd dimension");
             }
-            regions.emplace(name, Region(
-                shape[ov::layout::channels_idx(yoloRegionLayout)] / num - 4 - (isObjConf ? 1 : 0),
-                4,
-                presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
-                std::vector<int64_t>(chosenMasks.begin() + i * num, chosenMasks.begin() + (i + 1) * num),
-                shape[ov::layout::width_idx(yoloRegionLayout)], shape[ov::layout::height_idx(yoloRegionLayout)]));
+            regions.emplace(
+                name,
+                Region(shape[ov::layout::channels_idx(yoloRegionLayout)] / num - 4 - (isObjConf ? 1 : 0),
+                       4,
+                       presetAnchors.size() ? presetAnchors : defaultAnchors[yoloVersion],
+                       std::vector<int64_t>(chosenMasks.begin() + i * num, chosenMasks.begin() + (i + 1) * num),
+                       shape[ov::layout::width_idx(yoloRegionLayout)],
+                       shape[ov::layout::height_idx(yoloRegionLayout)]));
             i++;
         }
-    }
-    else {
+    } else {
         // Currently externally set anchors and masks are supported only for YoloV4
-        if(presetAnchors.size() || presetMasks.size()) {
+        if (presetAnchors.size() || presetMasks.size()) {
             slog::warn << "Preset anchors and mask can be set for YoloV4 model only. "
-                "This model is not YoloV4, so these options will be ignored." << slog::endl;
+                          "This model is not YoloV4, so these options will be ignored."
+                       << slog::endl;
         }
     }
 }
@@ -210,8 +253,13 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (auto& output : infResult.outputsData) {
-        this->parseYOLOOutput(output.first, output.second, netInputHeight, netInputWidth,
-            internalData.inputImgHeight, internalData.inputImgWidth, objects);
+        this->parseYOLOOutput(output.first,
+                              output.second,
+                              netInputHeight,
+                              netInputWidth,
+                              internalData.inputImgHeight,
+                              internalData.inputImgWidth,
+                              objects);
     }
 
     if (useAdvancedPostprocessing) {
@@ -222,7 +270,9 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
         for (const auto& obj1 : objects) {
             bool isGoodResult = true;
             for (const auto& obj2 : objects) {
-                if (obj1.labelID == obj2.labelID && obj1.confidence < obj2.confidence && intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) { // if obj1 is the same as obj2, condition expression will evaluate to false anyway
+                if (obj1.labelID == obj2.labelID && obj1.confidence < obj2.confidence &&
+                    intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) {  // if obj1 is the same as obj2, condition
+                                                                             // expression will evaluate to false anyway
                     isGoodResult = false;
                     break;
                 }
@@ -233,7 +283,9 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
         }
     } else {
         // Classic postprocessing
-        std::sort(objects.begin(), objects.end(), [](const DetectedObject& x, const DetectedObject& y) { return x.confidence > y.confidence; });
+        std::sort(objects.begin(), objects.end(), [](const DetectedObject& x, const DetectedObject& y) {
+            return x.confidence > y.confidence;
+        });
         for (size_t i = 0; i < objects.size(); ++i) {
             if (objects[i].confidence == 0)
                 continue;
@@ -248,10 +300,12 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult& infResult) {
 }
 
 void ModelYolo::parseYOLOOutput(const std::string& output_name,
-    const ov::Tensor& tensor, const unsigned long resized_im_h,
-    const unsigned long resized_im_w, const unsigned long original_im_h,
-    const unsigned long original_im_w,
-    std::vector<DetectedObject>& objects) {
+                                const ov::Tensor& tensor,
+                                const unsigned long resized_im_h,
+                                const unsigned long resized_im_w,
+                                const unsigned long original_im_h,
+                                const unsigned long original_im_w,
+                                std::vector<DetectedObject>& objects) {
     // --------------------------- Extracting layer parameters -------------------------------------
     auto it = regions.find(output_name);
     if (it == regions.end()) {
@@ -263,28 +317,29 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     int sideH = 0;
     unsigned long scaleH;
     unsigned long scaleW;
-    switch(yoloVersion) {
-    case YOLO_V1V2:
-        sideH = region.outputHeight;
-        sideW = region.outputWidth;
-        scaleW = region.outputWidth;
-        scaleH = region.outputHeight;
-        break;
-    case YOLO_V3:
-    case YOLO_V4:
-    case YOLO_V4_TINY:
-    case YOLOF:
-        sideH = static_cast<int>(tensor.get_shape()[ov::layout::height_idx(yoloRegionLayout)]);
-        sideW = static_cast<int>(tensor.get_shape()[ov::layout::width_idx(yoloRegionLayout)]);
-        scaleW = resized_im_w;
-        scaleH = resized_im_h;
-        break;
+    switch (yoloVersion) {
+        case YOLO_V1V2:
+            sideH = region.outputHeight;
+            sideW = region.outputWidth;
+            scaleW = region.outputWidth;
+            scaleH = region.outputHeight;
+            break;
+        case YOLO_V3:
+        case YOLO_V4:
+        case YOLO_V4_TINY:
+        case YOLOF:
+            sideH = static_cast<int>(tensor.get_shape()[ov::layout::height_idx(yoloRegionLayout)]);
+            sideW = static_cast<int>(tensor.get_shape()[ov::layout::width_idx(yoloRegionLayout)]);
+            scaleW = resized_im_w;
+            scaleH = resized_im_h;
+            break;
     }
 
     auto entriesNum = sideW * sideH;
     const float* outData = tensor.data<float>();
 
-    auto postprocessRawData = (yoloVersion == YOLO_V4 || yoloVersion == YOLO_V4_TINY || yoloVersion == YOLOF) ? sigmoid : linear;
+    auto postprocessRawData =
+        (yoloVersion == YOLO_V4 || yoloVersion == YOLO_V4_TINY || yoloVersion == YOLOF) ? sigmoid : linear;
 
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < entriesNum; ++i) {
@@ -292,32 +347,49 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
         int col = i % sideW;
         for (int n = 0; n < region.num; ++n) {
             //--- Getting region data
-            int obj_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, region.coords);
-            int box_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, 0);
+            int obj_index = calculateEntryIndex(entriesNum,
+                                                region.coords,
+                                                region.classes + isObjConf,
+                                                n * entriesNum + i,
+                                                region.coords);
+            int box_index =
+                calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, 0);
             float scale = isObjConf ? postprocessRawData(outData[obj_index]) : 1;
 
             //--- Preliminary check for confidence threshold conformance
-            if (scale >= confidenceThreshold){
+            if (scale >= confidenceThreshold) {
                 //--- Calculating scaled region's coordinates
                 float x, y;
                 if (yoloVersion == YOLOF) {
-                    x = ((float)col / sideW + outData[box_index + 0 * entriesNum] * region.anchors[2 * n] / scaleW) * original_im_w;
-                    y = ((float)row / sideH + outData[box_index + 1 * entriesNum] * region.anchors[2 * n + 1] / scaleH) * original_im_h;
+                    x = (static_cast<float>(col) / sideW +
+                         outData[box_index + 0 * entriesNum] * region.anchors[2 * n] / scaleW) *
+                        original_im_w;
+                    y = (static_cast<float>(row) / sideH +
+                         outData[box_index + 1 * entriesNum] * region.anchors[2 * n + 1] / scaleH) *
+                        original_im_h;
                 } else {
-                    x = (float)(col + postprocessRawData(outData[box_index + 0 * entriesNum])) / sideW * original_im_w;
-                    y = (float)(row + postprocessRawData(outData[box_index + 1 * entriesNum])) / sideH * original_im_h;
+                    x = static_cast<float>((col + postprocessRawData(outData[box_index + 0 * entriesNum])) / sideW *
+                                           original_im_w);
+                    y = static_cast<float>((row + postprocessRawData(outData[box_index + 1 * entriesNum])) / sideH *
+                                           original_im_h);
                 }
-                float height = (float)std::exp(outData[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
-                float width = (float)std::exp(outData[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
+                float height = static_cast<float>(std::exp(outData[box_index + 3 * entriesNum]) *
+                                                  region.anchors[2 * n + 1] * original_im_h / scaleH);
+                float width = static_cast<float>(std::exp(outData[box_index + 2 * entriesNum]) * region.anchors[2 * n] *
+                                                 original_im_w / scaleW);
 
                 DetectedObject obj;
-                obj.x = clamp(x-width/2, 0.f, (float)original_im_w);
-                obj.y = clamp(y-height/2, 0.f, (float)original_im_h);
-                obj.width = clamp(width, 0.f, (float)original_im_w - obj.x);
-                obj.height = clamp(height, 0.f, (float)original_im_h - obj.y);
+                obj.x = clamp(x - width / 2, 0.f, static_cast<float>(original_im_w));
+                obj.y = clamp(y - height / 2, 0.f, static_cast<float>(original_im_h));
+                obj.width = clamp(width, 0.f, static_cast<float>(original_im_w - obj.x));
+                obj.height = clamp(height, 0.f, static_cast<float>(original_im_h - obj.y));
 
                 for (size_t j = 0; j < region.classes; ++j) {
-                    int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes + isObjConf, n * entriesNum + i, region.coords + isObjConf + j);
+                    int class_index = calculateEntryIndex(entriesNum,
+                                                          region.coords,
+                                                          region.classes + isObjConf,
+                                                          n * entriesNum + i,
+                                                          region.coords + isObjConf + j);
                     float prob = scale * postprocessRawData(outData[class_index]);
 
                     //--- Checking confidence threshold conformance and adding region to the list
@@ -342,7 +414,8 @@ int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, size_t lclasses,
 double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {
     double overlappingWidth = fmin(o1.x + o1.width, o2.x + o2.width) - fmax(o1.x, o2.x);
     double overlappingHeight = fmin(o1.y + o1.height, o2.y + o2.height) - fmax(o1.y, o2.y);
-    double intersectionArea = (overlappingWidth < 0 || overlappingHeight < 0) ? 0 : overlappingHeight * overlappingWidth;
+    double intersectionArea =
+        (overlappingWidth < 0 || overlappingHeight < 0) ? 0 : overlappingHeight * overlappingWidth;
     double unionArea = o1.width * o1.height + o2.width * o2.height - intersectionArea;
     return intersectionArea / unionArea;
 }
@@ -358,7 +431,6 @@ ModelYolo::Region::Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionY
     outputHeight = shape[2];
 
     if (num) {
-
         // Parsing YoloV3 parameters
         anchors.resize(num * 2);
 
@@ -367,7 +439,6 @@ ModelYolo::Region::Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionY
             anchors[i * 2 + 1] = regionYolo->get_anchors()[mask[i] * 2 + 1];
         }
     } else {
-
         // Parsing YoloV2 parameters
         num = regionYolo->get_num_regions();
         anchors = regionYolo->get_anchors();
@@ -378,9 +449,16 @@ ModelYolo::Region::Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionY
     }
 }
 
-ModelYolo::Region::Region(size_t classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, size_t outputWidth, size_t outputHeight) :
-    classes(classes), coords(coords),
-    outputWidth(outputWidth), outputHeight(outputHeight) {
+ModelYolo::Region::Region(size_t classes,
+                          int coords,
+                          const std::vector<float>& anchors,
+                          const std::vector<int64_t>& masks,
+                          size_t outputWidth,
+                          size_t outputHeight)
+    : classes(classes),
+      coords(coords),
+      outputWidth(outputWidth),
+      outputHeight(outputHeight) {
     num = masks.size();
 
     if (anchors.size() == 0 || anchors.size() % 2 != 0) {
@@ -394,8 +472,7 @@ ModelYolo::Region::Region(size_t classes, int coords, const std::vector<float>& 
             this->anchors[i * 2] = anchors[masks[i] * 2];
             this->anchors[i * 2 + 1] = anchors[masks[i] * 2 + 1];
         }
-    }
-    else {
+    } else {
         this->anchors = anchors;
         num = anchors.size() / 2;
     }

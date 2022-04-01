@@ -14,20 +14,28 @@
 // limitations under the License.
 */
 
+#include "models/style_transfer_model.h"
+
+#include <stddef.h>
+
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <memory>
-#include <opencv2/opencv.hpp>
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
+
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
-#include "models/style_transfer_model.h"
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
 #include "models/results.h"
 
-StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout) :
-    ImageModel(modelFileName, false, layout) {
-}
+StyleTransferModel::StyleTransferModel(const std::string& modelFileName, const std::string& layout)
+    : ImageModel(modelFileName, false, layout) {}
 
 void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output ---------------------------------------------
@@ -41,8 +49,8 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     const ov::Shape& inputShape = model->input().get_shape();
     ov::Layout inputLayout = getInputLayout(model->input());
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
-        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
+        inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
@@ -51,12 +59,9 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
 
     ov::preprocess::PrePostProcessor ppp(model);
     ppp.input().preprocess().convert_element_type(ov::element::f32);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout("NHWC");
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout("NHWC");
 
     ppp.input().model().set_layout(inputLayout);
-
 
     // --------------------------- Prepare output  -----------------------------------------------------
     const ov::OutputVector& outputs = model->outputs();
@@ -66,9 +71,9 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     outputsNames.push_back(model->output().get_any_name());
 
     const ov::Shape& outputShape = model->output().get_shape();
-    ov::Layout outputLayout{ "NCHW" };
-    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1
-        || outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
+    ov::Layout outputLayout{"NCHW"};
+    if (outputShape.size() != 4 || outputShape[ov::layout::batch_idx(outputLayout)] != 1 ||
+        outputShape[ov::layout::channels_idx(outputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's output is expected");
     }
 
@@ -76,7 +81,8 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     model = ppp.build();
 }
 
-std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
+std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData,
+                                                                  ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
@@ -87,7 +93,6 @@ std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputDat
 }
 
 std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& infResult) {
-
     ImageResult* result = new ImageResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
@@ -95,15 +100,14 @@ std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& inf
     const auto outputData = infResult.getFirstOutputTensor().data<float>();
 
     const ov::Shape& outputShape = infResult.getFirstOutputTensor().get_shape();
-    size_t outHeight = (int)(outputShape[2]);
-    size_t outWidth = (int)(outputShape[3]);
+    size_t outHeight = static_cast<int>(outputShape[2]);
+    size_t outWidth = static_cast<int>(outputShape[3]);
     size_t numOfPixels = outWidth * outHeight;
 
     std::vector<cv::Mat> imgPlanes;
-    imgPlanes = std::vector<cv::Mat>{
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2])),
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0]))};
+    imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2])),
+                                     cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
+                                     cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0]))};
     cv::Mat resultImg;
     cv::merge(imgPlanes, resultImg);
     cv::resize(resultImg, result->resultImage, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight));

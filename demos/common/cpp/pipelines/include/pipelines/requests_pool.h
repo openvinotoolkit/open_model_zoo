@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include <atomic>
-#include <map>
-#include <openvino/openvino.hpp>
-#include <map>
+#include <stddef.h>
 
+#include <mutex>
+#include <utility>
+#include <vector>
+
+#include <openvino/openvino.hpp>
 
 /// This is class storing requests pool for asynchronous pipeline
 ///
@@ -29,8 +31,9 @@ public:
     RequestsPool(ov::CompiledModel& compiledModel, unsigned int size);
     ~RequestsPool();
 
-    /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
-    /// This function is thread safe as long as request is used only until setRequestIdle call
+    /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be
+    /// reset after request processing completion) This function is thread safe as long as request is used only until
+    /// setRequestIdle call
     /// @returns pointer to request with idle state or nullptr if all requests are in use.
     ov::InferRequest getIdleRequest();
 
@@ -48,7 +51,8 @@ public:
     bool isIdleRequestAvailable();
 
     /// Waits for completion of every non-idle requests in pool.
-    /// getIdleRequest should not be called together with this function or after it to avoid race condition or invalid state
+    /// getIdleRequest should not be called together with this function or after it to avoid race condition or invalid
+    /// state
     /// @returns number of requests in use
     void waitForTotalCompletion();
 

@@ -495,6 +495,7 @@ class OpenVINOLauncher(Launcher):
     def _create_network(self, input_shapes=None):
         model_path = Path(self._model)
         compiled_model = model_path.suffix == '.blob'
+        self.out_tensor_name_to_node = {}
         if compiled_model:
             self.network = None
             with open(str(self._model), 'rb') as f: #pylint:disable=unspecified-encoding
@@ -502,12 +503,16 @@ class OpenVINOLauncher(Launcher):
             self.original_outputs = self.exec_network.outputs
             model_batch = self._get_model_batch_size()
             self._batch = model_batch if model_batch is not None else 1
+            for out in self.original_outputs:
+                if not out.names:
+                    continue
+                for name in out.names:
+                    self.out_tensor_name_to_node[name] = out.get_node().friendly_name
             return
         if self._weights is None and self._model.suffix != '.onnx':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
-        self.out_tensor_name_to_node = {}
         for out in self.original_outputs:
             if not out.names:
                 continue
@@ -569,8 +574,11 @@ class OpenVINOLauncher(Launcher):
         input_info = input_nodes[0]
         layout = (
             self._process_layout(input_info.get_node().layout, input_info.get_node().friendly_name)
-            or self.default_layout
+            or ''
         )
+        input_shape = parse_partial_shape(input_info.partial_shape)
+        if not layout and len(input_shape) == len(self.default_layout):
+            layout = self.default_layout
         batch_pos = layout.find('N')
         if batch_pos != -1:
             return parse_partial_shape(input_info.partial_shape)[batch_pos]

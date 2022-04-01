@@ -27,6 +27,7 @@ import distutils.command.build_py
 import distutils.command.sdist
 import itertools
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -46,6 +47,14 @@ OMZ_ROOT = Path(os.environ.get('OMZ_ROOT', SETUP_DIR.parents[1]))
 
 def read_text(path):
     return (SETUP_DIR / path).read_text()
+
+def get_version(path):
+    version_file = read_text(path)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    else:
+        return "0.0.0"
 
 # We can't build sdists, because we depend on files outside the
 # project directory. Disable the sdist command to prevent creation
@@ -98,7 +107,7 @@ class CustomBuild(distutils.command.build_py.build_py):
 
 setup(
     install_requires=read_text('requirements.in'),
-    version="1.0.1",
+    version=get_version('src/openvino/model_zoo/_version.py'),
     extras_require={
         'pytorch': read_text('requirements-pytorch.in'),
         'tensorflow2': read_text('requirements-tensorflow.in'),

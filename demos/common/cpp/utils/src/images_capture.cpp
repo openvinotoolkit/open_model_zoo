@@ -1,32 +1,35 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+#include "utils/images_capture.h"
 
-#include <utils/images_capture.h>
+#include <string.h>
 
 #ifdef _WIN32
-#include "w_dirent.hpp"
+#    include "w_dirent.hpp"
 #else
-#include <dirent.h>
+#    include <dirent.h>  // for closedir, dirent, opendir, readdir, DIR
 #endif
 
-#include <opencv2/imgcodecs.hpp>
-
+#include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <memory>
 #include <stdexcept>
 #include <string>
-#include <memory>
-#include <fstream>
+#include <vector>
+
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
 
 class InvalidInput : public std::runtime_error {
 public:
-    explicit InvalidInput(const std::string& message) noexcept
-        : std::runtime_error(message) {}
+    explicit InvalidInput(const std::string& message) noexcept : std::runtime_error(message) {}
 };
 
 class OpenError : public std::runtime_error {
 public:
-    explicit OpenError(const std::string& message) noexcept
-        : std::runtime_error(message) {}
+    explicit OpenError(const std::string& message) noexcept : std::runtime_error(message) {}
 };
 
 class ImreadWrapper : public ImagesCapture {
@@ -34,7 +37,7 @@ class ImreadWrapper : public ImagesCapture {
     bool canRead;
 
 public:
-    ImreadWrapper(const std::string &input, bool loop) : ImagesCapture{loop}, canRead{true} {
+    ImreadWrapper(const std::string& input, bool loop) : ImagesCapture{loop}, canRead{true} {
         auto startTime = std::chrono::steady_clock::now();
 
         std::ifstream file(input.c_str());
@@ -42,18 +45,23 @@ public:
             throw InvalidInput("Can't find the image by " + input);
 
         img = cv::imread(input);
-        if(!img.data)
+        if (!img.data)
             throw OpenError("Can't open the image from " + input);
         else
             readerMetrics.update(startTime);
     }
 
-    double fps() const override {return 1.0;}
+    double fps() const override {
+        return 1.0;
+    }
 
-    std::string getType() const override {return "IMAGE";}
+    std::string getType() const override {
+        return "IMAGE";
+    }
 
     cv::Mat read() override {
-        if (loop) return img.clone();
+        if (loop)
+            return img.clone();
         if (canRead) {
             canRead = false;
             return img.clone();
@@ -71,12 +79,17 @@ class DirReader : public ImagesCapture {
     const std::string input;
 
 public:
-    DirReader(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit) : ImagesCapture{loop},
-            fileId{0}, nextImgId{0}, initialImageId{initialImageId}, readLengthLimit{readLengthLimit}, input{input} {
-        DIR *dir = opendir(input.c_str());
+    DirReader(const std::string& input, bool loop, size_t initialImageId, size_t readLengthLimit)
+        : ImagesCapture{loop},
+          fileId{0},
+          nextImgId{0},
+          initialImageId{initialImageId},
+          readLengthLimit{readLengthLimit},
+          input{input} {
+        DIR* dir = opendir(input.c_str());
         if (!dir)
             throw InvalidInput("Can't find the dir by " + input);
-        while (struct dirent *ent = readdir(dir))
+        while (struct dirent* ent = readdir(dir))
             if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
                 names.emplace_back(ent->d_name);
         closedir(dir);
@@ -88,16 +101,21 @@ public:
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             if (img.data) {
                 ++readImgs;
-                if (readImgs - 1 >= initialImageId) return;
+                if (readImgs - 1 >= initialImageId)
+                    return;
             }
             ++fileId;
         }
         throw OpenError("Can't read the first image from " + input);
     }
 
-    double fps() const override {return 1.0;}
+    double fps() const override {
+        return 1.0;
+    }
 
-    std::string getType() const override {return "DIR";}
+    std::string getType() const override {
+        return "DIR";
+    }
 
     cv::Mat read() override {
         auto startTime = std::chrono::steady_clock::now();
@@ -141,8 +159,12 @@ class VideoCapWrapper : public ImagesCapture {
     size_t readLengthLimit;
 
 public:
-    VideoCapWrapper(const std::string &input, bool loop, read_type type, size_t initialImageId, size_t readLengthLimit)
-            : ImagesCapture{loop}, first_read{true}, type{type}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
+    VideoCapWrapper(const std::string& input, bool loop, read_type type, size_t initialImageId, size_t readLengthLimit)
+        : ImagesCapture{loop},
+          first_read{true},
+          type{type},
+          nextImgId{0},
+          initialImageId{static_cast<double>(initialImageId)} {
         if (0 == readLengthLimit) {
             throw std::runtime_error("readLengthLimit must be positive");
         }
@@ -155,9 +177,13 @@ public:
         throw InvalidInput("Can't open the video from " + input);
     }
 
-    double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
+    double fps() const override {
+        return cap.get(cv::CAP_PROP_FPS);
+    }
 
-    std::string getType() const override {return "VIDEO";}
+    std::string getType() const override {
+        return "VIDEO";
+    }
 
     cv::Mat read() override {
         auto startTime = std::chrono::steady_clock::now();
@@ -202,9 +228,14 @@ class CameraCapWrapper : public ImagesCapture {
     size_t readLengthLimit;
 
 public:
-    CameraCapWrapper(const std::string &input, bool loop, read_type type,
-                size_t readLengthLimit, cv::Size cameraResolution)
-            : ImagesCapture{loop}, type{type}, nextImgId{0} {
+    CameraCapWrapper(const std::string& input,
+                     bool loop,
+                     read_type type,
+                     size_t readLengthLimit,
+                     cv::Size cameraResolution)
+        : ImagesCapture{loop},
+          type{type},
+          nextImgId{0} {
         if (0 == readLengthLimit) {
             throw std::runtime_error("readLengthLimit must be positive");
         }
@@ -219,14 +250,18 @@ public:
                 return;
             }
             throw OpenError("Can't open the camera from " + input);
-        }
-        catch (const std::invalid_argument&) { throw InvalidInput("Can't find the camera " + input); }
-        catch (const std::out_of_range&) { throw InvalidInput("Can't find the camera " + input); }
+        } catch (const std::invalid_argument&) {
+            throw InvalidInput("Can't find the camera " + input);
+        } catch (const std::out_of_range&) { throw InvalidInput("Can't find the camera " + input); }
     }
 
-    double fps() const override {return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;}
+    double fps() const override {
+        return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;
+    }
 
-    std::string getType() const override {return "CAMERA";}
+    std::string getType() const override {
+        return "CAMERA";
+    }
 
     cv::Mat read() override {
         auto startTime = std::chrono::steady_clock::now();
@@ -248,29 +283,43 @@ public:
     }
 };
 
-std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop,
-        read_type type, size_t initialImageId, size_t readLengthLimit, cv::Size cameraResolution) {
-    if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
+std::unique_ptr<ImagesCapture> openImagesCapture(const std::string& input,
+                                                 bool loop,
+                                                 read_type type,
+                                                 size_t initialImageId,
+                                                 size_t readLengthLimit,
+                                                 cv::Size cameraResolution) {
+    if (readLengthLimit == 0)
+        throw std::runtime_error{"Read length limit must be positive"};
     std::vector<std::string> invalidInputs, openErrors;
-    try { return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop}); }
-    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
-    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+    try {
+        return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop});
+    } catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); } catch (const OpenError& e) {
+        openErrors.push_back(e.what());
+    }
 
-    try { return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit}); }
-    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
-    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+    try {
+        return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit});
+    } catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); } catch (const OpenError& e) {
+        openErrors.push_back(e.what());
+    }
 
-    try { return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, type, initialImageId, readLengthLimit}); }
-    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
-    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+    try {
+        return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, type, initialImageId, readLengthLimit});
+    } catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); } catch (const OpenError& e) {
+        openErrors.push_back(e.what());
+    }
 
-    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, type, readLengthLimit, cameraResolution}); }
-    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
-    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+    try {
+        return std::unique_ptr<ImagesCapture>(
+            new CameraCapWrapper{input, loop, type, readLengthLimit, cameraResolution});
+    } catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); } catch (const OpenError& e) {
+        openErrors.push_back(e.what());
+    }
 
     std::vector<std::string> errorMessages = openErrors.empty() ? invalidInputs : openErrors;
     std::string errorsInfo;
-    for (const auto& message: errorMessages) {
+    for (const auto& message : errorMessages) {
         errorsInfo.append(message + "\n");
     }
     throw std::runtime_error(errorsInfo);

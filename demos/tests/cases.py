@@ -15,6 +15,7 @@
 import collections
 import itertools
 import sys
+from copy import deepcopy
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
@@ -41,6 +42,7 @@ class Demo:
 
         self._exec_name = self.subdirectory.replace('/', '_')
         self.parser = None
+        self.supported_devices = None
 
         Demo.IMPLEMENTATION_TYPES.add(implementation)
 
@@ -50,6 +52,8 @@ class Demo:
     def device_args(self, device_list):
         if len(self.device_keys) == 0:
             return {'CPU': []}
+        if self.supported_devices:
+            device_list = list(set(device_list) & set(self.supported_devices))
         return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
     def get_models(self, case):
@@ -97,6 +101,10 @@ class Demo:
                 if not isinstance(model, ModelArg) or model.name not in set(models):
                     self.test_cases.remove(case)
                     continue
+        return self
+
+    def only_devices(self, devices):
+        self.supported_devices = devices
         return self
 
     def set_precisions(self, precisions, model_info):
@@ -1240,6 +1248,24 @@ DEMOS = [
                                       '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'nanodet'}),
+                [
+                    TestCase(options={'-m': ModelArg('nanodet-m-1.5x-416')}),
+                    TestCase(options={'-m': ModelFileArg('nanodet-m-1.5x-416', 'nanodet-m-1.5x-416.onnx'),
+                                      '--mean_values': ['103.53', '116.28', '123.675'],
+                                      '--scale_values': ['57.375', '57.12', '58.395']}),
+                ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'nanodet-plus'}),
+                [
+                    TestCase(options={'-m': ModelArg('nanodet-plus-m-1.5x-416')}),
+                    TestCase(options={'-m': ModelFileArg('nanodet-plus-m-1.5x-416', 'nanodet-plus-m-1.5x-416.onnx'),
+                                      '--mean_values': ['103.53', '116.28', '123.675'],
+                                      '--scale_values': ['57.375', '57.12', '58.395']}),
+                ]
+            ),
         ],
     )),
 
@@ -1408,4 +1434,4 @@ DEMOS = [
 ]
 
 
-BASE = { demo.subdirectory : demo for demo in DEMOS }
+BASE = { demo.subdirectory : deepcopy(demo) for demo in DEMOS }

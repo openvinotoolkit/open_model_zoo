@@ -405,7 +405,6 @@ class InputFeeder:
                 inputs_entry, precision_info, not_config_inputs, precisions, layouts_info, layouts
             )
 
-
         return (
             constant_inputs,
             non_constant_inputs,

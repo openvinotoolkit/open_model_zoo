@@ -39,6 +39,7 @@ omz_converter --list models.lst
 
 * alexnet
 * caffenet
+* convnext-tiny
 * densenet-121
 * densenet-121-tf
 * dla-34
@@ -56,6 +57,7 @@ omz_converter --list models.lst
 * hbonet-0.25
 * hbonet-1.0
 * inception-resnet-v2-tf
+* levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-1.0-224
@@ -66,6 +68,8 @@ omz_converter --list models.lst
 * mobilenet-v2-pytorch
 * mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-tf
+* mobilenet-v3-large-1.0-224-paddle
+* mobilenet-v3-small-1.0-224-paddle
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf

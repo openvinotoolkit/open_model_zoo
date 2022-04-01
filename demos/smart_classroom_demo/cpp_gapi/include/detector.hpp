@@ -1,10 +1,12 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
+#include <vector>
+
+#include <opencv2/core.hpp>
 
 namespace detection {
 
@@ -17,6 +19,7 @@ struct DetectorConfig {
 class FaceDetection {
 private:
     DetectorConfig config_;
+
 public:
     explicit FaceDetection(const DetectorConfig& config) : config_(config) {}
     void truncateRois(const cv::Mat&, const std::vector<cv::Rect>&, std::vector<cv::Rect>&);

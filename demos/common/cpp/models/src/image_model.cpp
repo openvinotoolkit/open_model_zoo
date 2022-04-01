@@ -14,14 +14,23 @@
 // limitations under the License.
 */
 
-#include <openvino/openvino.hpp>
-#include <utils/image_utils.h>
 #include "models/image_model.h"
 
-ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout) :
-    ModelBase(modelFileName, layout),
-    useAutoResize(useAutoResize) {
-}
+#include <stdexcept>
+#include <vector>
+
+#include <opencv2/core.hpp>
+#include <openvino/openvino.hpp>
+
+#include <utils/image_utils.h>
+#include <utils/ocv_common.hpp>
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
+
+ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout)
+    : ModelBase(modelFileName, layout),
+      useAutoResize(useAutoResize) {}
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;

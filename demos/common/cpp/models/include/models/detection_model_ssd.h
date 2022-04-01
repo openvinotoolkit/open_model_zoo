@@ -15,11 +15,22 @@
 */
 
 #pragma once
+#include <stddef.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
+
 #include "models/detection_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class ModelSSD : public DetectionModel {
 public:
@@ -33,12 +44,12 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     /// @param layout - model input layout
     ModelSSD(const std::string& modelFileName,
-        float confidenceThreshold, bool useAutoResize,
-        const std::vector<std::string>& labels = std::vector<std::string>(),
-        const std::string& layout = "");
+             float confidenceThreshold,
+             bool useAutoResize,
+             const std::vector<std::string>& labels = std::vector<std::string>(),
+             const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
