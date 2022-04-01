@@ -33,7 +33,6 @@ import argparse
 import contextlib
 import csv
 import json
-from operator import contains
 import os
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check

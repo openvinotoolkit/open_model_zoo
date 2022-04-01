@@ -70,7 +70,6 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         #                   }
         #               }
 
-
         # Generate case id for each device
         if device not in self.case_index:
             self.case_index[device] = 0
