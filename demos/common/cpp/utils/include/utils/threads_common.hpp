@@ -100,8 +100,7 @@ public:
         }
     }
     void stop() {
-        if (tasks.empty())
-            running = false;
+        running = false;
         tasksCondVar.notify_all();
     }
     void join() {
