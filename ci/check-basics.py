@@ -150,7 +150,8 @@ def main():
         all_passed = False
 
     print('running bandit...', flush=True)
-    if subprocess.run([sys.executable, '-m', 'bandit', '.', '-r', '-c', '.bandit'], cwd=OMZ_ROOT).returncode != 0:
+    if subprocess.run([sys.executable, '-m', 'bandit', '.', '-r', '-c', '.bandit',
+        '--exclude', './cmake/cpplint/cpplint.py'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
     print('running documentation checks...', flush=True)
