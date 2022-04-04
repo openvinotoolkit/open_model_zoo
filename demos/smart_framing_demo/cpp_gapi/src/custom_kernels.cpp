@@ -191,7 +191,7 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
 };
 
 GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
-    static void run(const cv::Mat & image, const std::vector<DetectedObject> &objects, cv::Mat & out) {
+    static void run(const cv::Mat & image, const std::vector<custom::DetectedObject> &objects, cv::Mat & out) {
         cv::Rect init_rect;
         for (const auto& el : objects) {
             if (el.labelID == 0) {//person ID
