@@ -4,7 +4,7 @@ This demo shows how to use gpt-2 model for inference to perform interactive cond
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 It also encodes a user input prompt received via command line arguments or user input, and then uses it to predict the output sequence.
 
 ## Preparing to Run
@@ -72,7 +72,7 @@ The application reads and encodes text from input string, then performs transfor
 
 ## Demo Outputs
 
-The application outputs predicted text, continuing input string for each input strings.
+The application outputs predicted text, continuing input string for each input string.
 
 ## Example Demo Cmd-Line
 
@@ -89,5 +89,5 @@ You can use the following command to try the demo (assuming the used model from 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

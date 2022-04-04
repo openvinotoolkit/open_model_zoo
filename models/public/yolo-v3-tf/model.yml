@@ -27,10 +27,11 @@ files:
     size: 384
     checksum: 9367c59fbd1208675cfa40fc6ebe1c73c1d316e14d59fc7226d2773ed6d0e9d83b276a294db705ace92f60c7a83e1ad6
     source: https://download.01.org/opencv/public_models/022020/yolo_v3/yolo_v3_new.json
+input_info:
+  - name: input_1
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,416,416,3]
-  - --layout=input_1(NHWC)
-  - --input=input_1
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3.json

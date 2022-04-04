@@ -27,11 +27,12 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: inception_resnet_v2_2018_04_27.tgz
+input_info:
+  - name: input
+    shape: [1, 299, 299, 3]
+    layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,299,299,3]
-  - --layout=input(NHWC)
-  - --input=input
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd

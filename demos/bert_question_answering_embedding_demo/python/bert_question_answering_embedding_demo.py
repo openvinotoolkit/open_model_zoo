@@ -62,8 +62,7 @@ def build_argparser():
                       required=False, type=str)
     args.add_argument('--layout_emb', type=str, default=None,
                       help='Optional. MODEL_EMB inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters')
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("-m_qa", "--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
@@ -81,8 +80,7 @@ def build_argparser():
                       default="1.2", required=False, type=str)
     args.add_argument('--layout_qa', type=str, default=None,
                       help='Optional. MODEL_QA inputs layouts. '
-                           'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input.'
-                           'To define layout you should use only capital letters')
+                           'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
     args.add_argument("-a", "--max_answer_token_num",
                       help="Optional. Maximum number of tokens in exact answer",
                       default=15,

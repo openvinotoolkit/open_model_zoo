@@ -18,7 +18,7 @@ As an input, the demo application takes:
 * Path to a video file
 * Index of a web camera
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
@@ -49,14 +49,6 @@ omz_converter --list models.lst
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
-### Install Dependencies
-
-To install required dependencies, open a terminal and run the following:
-
-```bash
-pip3 install -r requirements.txt
-```
-
 ## Running
 
 Run the application with the `-h` option to see the following usage message:
@@ -64,10 +56,9 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: whiteboard_inpainting_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                      [-limit OUTPUT_LIMIT]
-                                     -m_i M_INSTANCE_SEGMENTATION
-                                     -m_s M_SEMANTIC_SEGMENTATION
-                                     [-t THRESHOLD] [--no_show]
-                                     [-d DEVICE] [-l CPU_EXTENSION]
+                                     [-m_i M_INSTANCE_SEGMENTATION]
+                                     [-m_s M_SEMANTIC_SEGMENTATION]
+                                     [-t THRESHOLD] [--no_show] [-d DEVICE]
                                      [-u UTILIZATION_MONITORS]
 
 Whiteboard inpainting demo
@@ -94,9 +85,6 @@ optional arguments:
                         Optional. Specify a target device to infer on. CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for the device specified.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to a
-                        shared library with the kernels impl.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
@@ -134,5 +122,5 @@ You can use both of these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -32,17 +32,21 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName, size_
     labels(labels) {}
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
-    const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[0])->second;
-    const float* scoresPtr = scoresTensor.data<float>();
-    const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[1])->second;
+    const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[0])->second;
     const int* indicesPtr = indicesTensor.data<int>();
+    const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[1])->second;
+    const float* scoresPtr = scoresTensor.data<float>();
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
 
     result->topLabels.reserve(scoresTensor.get_size());
     for (size_t i = 0; i < scoresTensor.get_size(); ++i) {
-        result->topLabels.emplace_back(indicesPtr[i], labels[indicesPtr[i]], scoresPtr[i]);
+        int ind = indicesPtr[i];
+        if (ind < 0 || ind >= (int)labels.size()) {
+            throw std::runtime_error("Invalid index for the class label is found during postprocessing");
+        }
+        result->topLabels.emplace_back(ind, labels[ind], scoresPtr[i]);
     }
 
     return retVal;
@@ -135,7 +139,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     }
     if (classesNum == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "\tInserted 'other' label as first." << slog::endl;
+        slog::warn << "Inserted 'other' label as first." << slog::endl;
     }
     else if (classesNum != labels.size()) {
         throw std::logic_error("Model's number of classes and parsed labels must match ("
@@ -165,13 +169,20 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
                                                                             ov::op::v3::TopK::Mode::MAX,
                                                                             ov::op::v3::TopK::SortType::SORT_VALUES);
 
-    auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
-    auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
+    auto indices = std::make_shared<ov::op::v0::Result>(topkNode->output(0));
+    auto scores = std::make_shared<ov::op::v0::Result>(topkNode->output(1));
     ov::ResultVector res({ scores, indices });
     model = std::make_shared<ov::Model>(res, model->get_parameters(), "classification");
+
     // manually set output tensors name for created topK node
-    model->outputs()[0].set_names({"indices"});
+    model->outputs()[0].set_names({ "indices" });
     outputsNames.push_back("indices");
-    model->outputs()[1].set_names({"scores"});
+    model->outputs()[1].set_names({ "scores" });
     outputsNames.push_back("scores");
+
+    // set output precisions
+    ppp = ov::preprocess::PrePostProcessor(model);
+    ppp.output("indices").tensor().set_element_type(ov::element::i32);
+    ppp.output("scores").tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
 }

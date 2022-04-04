@@ -80,8 +80,7 @@ def build_argparser():
                                         'is the length of a short first image side.')
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
-                                        'Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input. '
-                                        'To define layout you should use only capital letters')
+                                        'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -184,7 +183,7 @@ def main():
         'aspect_ratio': frame.shape[1] / frame.shape[0],
         'confidence_threshold': args.prob_threshold,
         'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
-        'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
+        'delta': 0.5 if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
     }
     model = ImageModel.create_model(ARCHITECTURES[args.architecture_type], model_adapter, config)
     model.log_layers_info()

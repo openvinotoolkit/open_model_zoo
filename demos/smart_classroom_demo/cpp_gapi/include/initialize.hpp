@@ -257,8 +257,8 @@ void configNets(const NetsFlagsPack& flags,
         } else {
             slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
-        InferenceEngine::Core ie;
-        const auto layerData = ie.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
+        InferenceEngine::Core core;
+        const auto layerData = core.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
         const auto layerDims = layerData->getTensorDesc().getDims();
         reid_net_in_size =
             {double(layerDims[0]), double(layerDims[1]), double(layerDims[2]), double(layerDims[3])};

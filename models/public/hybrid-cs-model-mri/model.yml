@@ -31,6 +31,10 @@ files:
     checksum: acf3e20ce39e94588981cbd7b6d9a642216c3ac2f689bb2a17a73819a3d2058705de6456d1a78d24df8dcb8fafab1f31
     size: 160
     source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Data/stats_fs_unet_norm_20.npy
+  - name: sampling_mask_20perc.npy
+    checksum: 4a88932c723819aa11cd12a052dd6c54afcf489c7f601ffc092e6c28f7a0487015ef2364844a3aa9e8821a02150cf363
+    size: 65664
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Data/sampling_mask_20perc.npy
   - name: frequency_spatial_network.py
     checksum: 6b2b2542144617e3787ae6e3d1298a04b7171add0afe6fe2490bcb0a42a7af8a952454246071eb589f98ebfbad89cf88
     size: 9735
@@ -57,8 +61,10 @@ postprocessing:
     file: frequency_spatial_network.py
     pattern: 'K.tf'
     replacement: 'tf'
+input_info:
+  - name: input_1
+    shape: [1, 256, 256, 2]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,256,256,2]
-  - --layout=NHWC
   - --saved_model_dir=$conv_dir/saved_model
 license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE

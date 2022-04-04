@@ -103,14 +103,17 @@ class SequentialModel(BaseCascadeModel):
             'dlsdk': RecognizerDecoderDLSDKModel,
             'openvino': RecognizerDecoderOVModel
         }
-        self.detector = create_model(network_info.get('detector', {}), launcher, self._detector_mapping,
+        detector_info = network_info.get('detector', {})
+        detector_info.update({
+            'adapter_info': adapter_info
+        })
+        self.detector = create_model(detector_info, launcher, self._detector_mapping,
                                      'detector', delayed_model_loading)
         self.recognizer_encoder = create_model(network_info.get('recognizer_encoder', {}), launcher,
                                                self._encoder_mapping, 'encoder', delayed_model_loading)
         self.recognizer_decoder = create_model(network_info.get('recognizer_decoder', {}), launcher,
                                                self._decoder_mapping, 'decoder', delayed_model_loading)
         self.max_seq_len = int(meta.get('max_seq_len', 28))
-        self.adapter = create_adapter(adapter_info)
         self.alphabet = meta.get('alphabet', '__abcdefghijklmnopqrstuvwxyz0123456789')
         self.sos_index = int(meta.get('sos_index', 0))
         self.eos_index = int(meta.get('eos_index', 1))
@@ -121,6 +124,12 @@ class SequentialModel(BaseCascadeModel):
             'recognizer_encoder': self.recognizer_encoder,
             'recognizer_decoder': self.recognizer_decoder
         }
+        if not delayed_model_loading:
+            self.update_inputs_outputs_info()
+
+    @property
+    def adapter(self):
+        return self.detector.adapter
 
     def predict(self, identifiers, input_data, frame_meta=None, callback=None):
         assert len(identifiers) == 1
@@ -197,15 +206,38 @@ class SequentialModel(BaseCascadeModel):
         )
         self.adapter.outputs_verified = False
         if hasattr(self.detector, 'outputs'):
-            self.detector.text_feats_out = postprocess_output_name(
-                self.detector.text_feats_out, self.detector.outputs, raise_error=False)
-            self.recognizer_encoder.output = postprocess_output_name(
-                self.recognizer_encoder.output, self.recognizer_encoder.outputs, raise_error=False
+            text_feats_out = postprocess_output_name(
+                self.detector.text_feats_out, self.detector.outputs,
+                additional_mapping=self.detector.additional_output_mapping, raise_error=False)
+            if text_feats_out not in self.detector.outputs:
+                text_feats_out = postprocess_output_name(
+                generate_layer_name(self.detector.text_feats_out, 'detector_', with_prefix),
+                self.detector.outputs,
+                additional_mapping=self.detector.additional_output_mapping, raise_error=False)
+            self.detector.text_feats_out = text_feats_out
+            encoder_output = postprocess_output_name(
+                self.recognizer_encoder.output, self.recognizer_encoder.outputs,
+                additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
             )
+            if encoder_output not in self.recognizer_encoder.outputs:
+                encoder_output = postprocess_output_name(
+                generate_layer_name(self.recognizer_encoder.output, 'recognizer_encoder_', with_prefix),
+                self.recognizer_encoder.outputs,
+                additional_mapping=self.recognizer_encoder.additional_output_mapping, raise_error=False
+            )
+            self.recognizer_encoder.output = encoder_output
             for out, out_value in self.recognizer_decoder.model_outputs.items():
-                self.recognizer_decoder.model_outputs[out] = postprocess_output_name(
-                out_value, self.recognizer_decoder.outputs, raise_error=False
-            )
+                output = postprocess_output_name(
+                    out_value, self.recognizer_decoder.outputs,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
+                )
+                if output not in self.recognizer_decoder.outputs:
+                    output = postprocess_output_name(
+                    generate_layer_name(out_value, 'recognizer_decoder_', with_prefix),
+                    self.recognizer_decoder.outputs,
+                    additional_mapping=self.recognizer_decoder.additional_output_mapping, raise_error=False
+                )
+                self.recognizer_decoder.model_outputs[out] = output
         if with_prefix != self.with_prefix:
             self.recognizer_encoder.input = generate_layer_name(
                 self.recognizer_encoder.input, 'recognizer_encoder_', with_prefix
@@ -222,6 +254,7 @@ class DetectorDLSDKModel(BaseDLSDKModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.im_info_name = None
         self.im_data_name = None
+        self.adapter = create_adapter(network_info['adapter_info'])
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
     def predict(self, identifiers, input_data):
@@ -280,6 +313,7 @@ class DetectorOVModel(BaseOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.im_info_name = None
         self.im_data_name = None
+        self.adapter_info = network_info['adapter_info']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
     def predict(self, identifiers, input_data):
@@ -312,9 +346,10 @@ class DetectorOVModel(BaseOpenVINOModel):
         ]
         if self.im_info_name:
             self.im_info_name = self.im_info_name[0]
-            self.text_feats_out = 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features'
         else:
-            self.text_feats_out = 'text_features/sink_port_0'
+            self.text_feats_out = 'text_features'
+        self.adapter = create_adapter(self.adapter_info, additional_output_mapping=self.additional_output_mapping)
 
 
 class RecognizerDLSDKModel(BaseDLSDKModel):

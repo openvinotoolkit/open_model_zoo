@@ -49,7 +49,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 #include <iostream>
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "gesture_recognition_demo_gapi [OPTION]" << std::endl;
+    std::cout << "face_detection_mtcnn_demo_gapi [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                       " << help_message << std::endl;

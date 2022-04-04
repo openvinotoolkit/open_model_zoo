@@ -243,12 +243,18 @@ class SequentialModel(BaseCascadeModel):
     def update_inputs_outputs_info(self):
         if hasattr(self.forward_tacotron_duration, 'outputs'):
             self.duration_output = postprocess_output_name(
-                self.duration_output, self.forward_tacotron_duration.outputs, raise_error=False)
+                self.duration_output,
+                self.forward_tacotron_duration.outputs,
+                additional_mapping=self.forward_tacotron_duration.additional_output_mapping, raise_error=False)
             self.embeddings_output = postprocess_output_name(
-                self.embeddings_output, self.forward_tacotron_duration.outputs, raise_error=False)
-            self.mel_output = postprocess_output_name(self.mel_output, self.forward_tacotron_regression.outputs,
-                                                      raise_error=False)
-            self.audio_output = postprocess_output_name(self.audio_output, self.melgan.outputs, raise_error=False)
+                self.embeddings_output, self.forward_tacotron_duration.outputs,
+                additional_mapping=self.forward_tacotron_duration.additional_output_mapping, raise_error=False)
+            self.mel_output = postprocess_output_name(
+                self.mel_output, self.forward_tacotron_regression.outputs,
+                additional_mapping=self.forward_tacotron_regression.additional_output_mapping, raise_error=False)
+            self.audio_output = postprocess_output_name(
+                self.audio_output, self.melgan.outputs,
+                additional_mapping=self.melgan.additional_output_mapping, raise_error=False)
             self.adapter.output_blob = self.audio_output
         current_name = next(iter(self.forward_tacotron_duration.inputs))
         with_prefix = current_name.startswith('forward_tacotron_duration_')
@@ -469,16 +475,21 @@ class SequentialModelGAN(BaseCascadeModel):
     def update_inputs_outputs_info(self):
         if hasattr(self.encoder, 'outputs'):
             self.encoder_output_for_decoder = postprocess_output_name(
-                self.encoder_output_for_decoder, self.encoder.outputs, raise_error=False)
+                self.encoder_output_for_decoder, self.encoder.outputs,
+                additional_mapping=self.encoder.additional_output_mapping, raise_error=False)
             self.encoder_output_for_attention = postprocess_output_name(
-                self.encoder_output_for_attention, self.encoder.outputs, raise_error=False)
+                self.encoder_output_for_attention, self.encoder.outputs,
+                additional_mapping=self.encoder.additional_output_mapping, raise_error=False)
             self.encoder_output_for_duration = postprocess_output_name(
-                self.encoder_output_for_duration, self.encoder.outputs, raise_error=False)
+                self.encoder_output_for_duration, self.encoder.outputs,
+                additional_mapping=self.encoder.additional_output_mapping, raise_error=False)
             self.encoder_output_mask = postprocess_output_name(
-                self.encoder_output_mask, self.encoder.outputs, raise_error=False)
+                self.encoder_output_mask, self.encoder.outputs,
+                additional_mapping=self.encoder.additional_output_mapping, raise_error=False)
 
             self.decoder_output = postprocess_output_name(
-                self.decoder_output, self.decoder.outputs, raise_error=False)
+                self.decoder_output, self.decoder.outputs,
+                additional_mapping=self.decoder.additional_output_mapping, raise_error=False)
             self.adapter.output_blob = self.decoder_output
 
 class TTSDLSDKModel(BaseDLSDKModel):

@@ -116,13 +116,8 @@ static UNUSED const Color CITYSCAPES_COLORS[] = {
 };
 
 inline void showAvailableDevices() {
-#if defined(OV_NEW_API)
     ov::Core core;
     std::vector<std::string> devices = core.get_available_devices();
-#else
-    InferenceEngine::Core ie;
-    std::vector<std::string> devices = ie.GetAvailableDevices();
-#endif
 
     std::cout << "Available devices:";
     for (const auto& device : devices) {
@@ -172,7 +167,7 @@ inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
     ov::OutputVector outputs = model->outputs();
 
     slog::info << "\tInputs: " << slog::endl;
-    for (const ov::Output<ov::Node> input : inputs) {
+    for (const ov::Output<ov::Node>& input : inputs) {
         const std::string name = input.get_any_name();
         const ov::element::Type type = input.get_element_type();
         const ov::PartialShape shape = input.get_partial_shape();

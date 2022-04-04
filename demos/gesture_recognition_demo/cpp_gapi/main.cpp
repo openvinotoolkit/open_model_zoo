@@ -57,15 +57,12 @@ int main(int argc, char *argv[]) {
         const auto ar_net_shape = getNetShape(FLAGS_m_a);
 
         /** Get information about frame from cv::VideoCapture **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cap.reset();
-        if (!tmp.data) {
-            throw std::runtime_error("Couldn't grab first frame");
-        }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
 
         /** Share runtime id with graph **/
@@ -158,7 +155,7 @@ int main(int argc, char *argv[]) {
         bool isStart = true;
         const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
-        while (pipeline.pull(std::move(cv::gout(out_frame, out_detections, out_label_number)))) {
+        while (pipeline.pull(cv::gout(out_frame, out_detections, out_label_number))) {
             /** Put FPS to frame**/
             if (isStart) {
                 metrics.update(startTime, out_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,

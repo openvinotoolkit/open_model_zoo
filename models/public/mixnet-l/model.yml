@@ -33,10 +33,11 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: mixnet-l.tar.gz
+input_info:
+  - name: IteratorGetNext:0
+    shape: [1, 224, 224, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,224,224,3]
-  - --input=IteratorGetNext:0
-  - --layout=IteratorGetNext:0(NHWC)
   - --output=logits
   - --input_meta_graph=$dl_dir/mixnet-l/model.ckpt.meta
   - --reverse_input_channels

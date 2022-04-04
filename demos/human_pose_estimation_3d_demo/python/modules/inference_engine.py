@@ -22,7 +22,7 @@ class InferenceEngine:
         self.device = device
         self.stride = stride
 
-        log.info('OpenVINO Inference Engine')
+        log.info('OpenVINO Runtime')
         log.info('\tbuild: {}'.format(get_version()))
         self.core = Core()
 

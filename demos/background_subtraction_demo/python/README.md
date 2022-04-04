@@ -29,7 +29,10 @@ The demo application expects an instance segmentation or background matting mode
     * At least two outputs including:
         * `fgr` with normalized in [0, 1] range foreground
         * `pha` with normalized in [0, 1] range alpha
-4. for video background matting models based on RNN architecture:
+4. for image background matting models without trimap (background segmentation):
+    * Single input for input image.
+    * Single output with normalized in [0, 1] range alpha
+5. for video background matting models based on RNN architecture:
     * Five inputs:
         * `src` for input image
         * recurrent inputs: `r1`, `r2`, `r3`, `r4`
@@ -53,7 +56,13 @@ The demo workflow is the following:
     * If you specify `--blur_bgr`, background will be blurred according to a set value. By default equal to zero and is not applied.
     * If you specify `--show_with_original_frame`, the result image will be merged with an input one.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different background subtraction model topologies in one demo.
 
 ## Preparing to Run
 
@@ -75,10 +84,12 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* instance-segmentation-person-????
-* yolact-resnet50-fpn-pytorch
 * background-matting-mobilenetv2
+* instance-segmentation-person-????
+* modnet-photographic-portrait-matting
+* modnet-webcam-portrait-matting
 * robust-video-matting-mobilenetv3
+* yolact-resnet50-fpn-pytorch
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -126,7 +137,7 @@ Options:
                         filtering.
   --resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}
                         Optional. A resize type for model preprocess. By
-                        defauld used model predefined type.
+                        default used model predefined type.
   --labels LABELS       Optional. Labels mapping file.
   --target_bgr TARGET_BGR
                         Optional. Background onto which to composite the
@@ -215,10 +226,17 @@ The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-You can use both of these metrics to measure application-level performance.
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -96,7 +96,7 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     # Plugin initialization for specified device and load extensions library if specified
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

@@ -1,5 +1,8 @@
 # How to use predefined configuration files
 
+**Note**: Since 2022.1 all provided Open Model Zoo configuration files switched to work with OpenVINO™ API 2.0. For launching models with API 1.0, additional actions may be required,, see [config migration guide](../openvino/launchers/../tools/accuracy_checker/launcher/openvino_launcher_readme.md#migrate-accuracy-checker-configuration-from-openvino-api-10-to-20)
+
+
 ## Structure
 
 Configuration file declares validation process. Every model has to have entry in `models` list. Each entry has to contain distinct `name`, `launchers` and `datasets` sections.
@@ -68,30 +71,29 @@ See how to evaluate model with using predefined configuration file for [densenet
 - `OMZ_ROOT` - root of Open Model Zoo project
 - `DATASET_DIR` - root directory with dataset
 - `MODEL_DIR` - root directory with model
-- `OPENVINO_DIR` - root directory with installed the OpenVINO&trade; toolkit
 
 1. First of all, you need to prepare dataset according to [Dataset Preparation Guide](../../../data/datasets.md)
 2. Download original model files from online source using [Model Downloader](../../../tools/model_tools/README.md)
     ```sh
-    OMZ_ROOT/tools/model_tools/downloader.py --name densenet-121-tf --output_dir MODEL_DIR
+    omz_downloader --name densenet-121-tf --output_dir MODEL_DIR
     ```
-3. Convert model in the Inference Engine IR format using Model Optimizer via [Model Converter](../../../tools/model_tools/README.md)
+3. Convert model in the OpenVINO IR format using Model Optimizer via [Model Converter](../../../tools/model_tools/README.md)
     ```sh
-    OMZ_ROOT/tools/model_tools/converter.py --name densenet-121-tf --download_dir MODEL_DIR --mo OPENVINO_DIR/deployment_tools/model_optimizer/mo.py
+    omz_converter --name densenet-121-tf --download_dir MODEL_DIR
     ```
 4. Run evaluation for model in FP32 precision using [Accuracy Checker](../README.md)
     ```sh
-    accuracy-check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP32 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td CPU
+    accuracy_check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP32 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td CPU
     ```
     Similarly, you can run evaluation for model in FP16 precision
     ```sh
-    accuracy-check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td GPU
+    accuracy_check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td GPU
     ```
 5. Also you can quantize full-precision models in the IR format into low-precision versions via [Model Quantizer](../../../tools/model_tools/README.md)
    ```sh
-   OMZ_ROOT/tools/model_tools/quantizer.py --name densenet-121-tf --dataset_dir DATASET_DIR --model_dir MODEL_DIR
+   omz_quantizer --name densenet-121-tf --dataset_dir DATASET_DIR --model_dir MODEL_DIR
    ```
    Run evaluation for quantized model:
     ```sh
-    accuracy-check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16-INT8 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td CPU GPU
+    accuracy_check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16-INT8 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td CPU GPU
     ```

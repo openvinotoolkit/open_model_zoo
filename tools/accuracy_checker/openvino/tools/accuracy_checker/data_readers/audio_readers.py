@@ -21,7 +21,12 @@ import numpy as np
 
 from ..config import BoolField, StringField
 from .data_reader import BaseReader, DataRepresentation, KaldiMatrixIdentifier, KaldiFrameIdentifier
-from ..utils import contains_any
+from ..utils import contains_any, UnsupportedPackage
+
+try:
+    import soundfile as sf
+except (ImportError, OSError) as import_error:
+    sf = UnsupportedPackage('soundfile', str(import_error))
 
 
 class WavReader(BaseReader):
@@ -183,3 +188,51 @@ class KaldiARKReader(BaseReader):
                 rows.append(np.array(arr[:-1], dtype='float32')) # last line
                 mat = np.vstack(rows)
                 return mat
+
+
+class FlacReader(BaseReader):
+    __provider__ = 'flac_reader'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'dtype': StringField(
+                choices=['float32', 'float64', 'int16', 'int32'], optional=True, default='int16',
+                description='specifies precision of reading data'
+            ),
+            'mono': BoolField(optional=True, default=False,
+                              description='get mean along channels if multichannel audio loaded'),
+        })
+        return params
+
+    def configure(self):
+        if isinstance(sf, UnsupportedPackage):
+            sf.raise_error(self.__provider__)
+        super().configure()
+        self.dtype = self.get_value_from_config('dtype')
+        self.mono = self.get_value_from_config('mono')
+
+    @staticmethod
+    def prepare_read(frames, start=0, stop=None):
+        start, stop, _ = slice(start, stop).indices(frames)
+        stop = max(stop, start)
+        res_frames = stop - start
+        return res_frames
+
+    def read(self, data_id):
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+
+        with sf.SoundFile(data_path) as f:
+            frames = self.prepare_read(f.frames)
+            data = f.read(frames, dtype=self.dtype)
+            samplerate = f.samplerate
+            channels = f.channels
+
+        data = data.reshape(-1, channels).T
+        if channels > 1 and self.mono:
+            data = data.mean(0, keepdims=True)
+        return data, {'sample_rate': samplerate}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)

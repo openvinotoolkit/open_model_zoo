@@ -21,7 +21,7 @@ The text-to-speech-en-0002-encoder model is a encoder part of GAN based network.
 
 ### Inputs
 
-1. Sequence, name: `seq`, shape: `1, 128`, format: `B,C`, where:
+1. Sequence, name: `seq`, shape: `1, 128`, format: `B, C`, where:
 
     - `B` - batch size
     - `C` - number of symbols in sequence

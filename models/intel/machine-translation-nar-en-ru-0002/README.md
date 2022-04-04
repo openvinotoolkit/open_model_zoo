@@ -22,6 +22,8 @@ The quality metrics were calculated on the wmt19-ru-en dataset ("test" split in 
 |---------------------------|---------------|
 | BLEU                      |        22.7 % |
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 name: `tokens`

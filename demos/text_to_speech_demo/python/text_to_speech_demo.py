@@ -132,17 +132,17 @@ def main():
     if not is_correct_args(args):
         return 1
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
-    ie = Core()
+    core = Core()
 
     if args.model_melgan is not None:
-        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
+        vocoder = MelGANIE(args.model_melgan, core, device=args.device)
     else:
-        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
+        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, core, device=args.device,
                             upsampler_width=args.upsampler_width)
 
-    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
+    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, core, args.device, verbose=False)
 
     audio_res = np.array([], dtype=np.int16)
 
@@ -156,7 +156,7 @@ def main():
         else:
             speaker_emb = forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]
 
-    len_th = 512
+    len_th = 80
 
     input_data = parse_input(args.input)
 
@@ -173,7 +173,7 @@ def main():
         if len(line) > len_th:
             texts = []
             prev_begin = 0
-            delimiters = '.!?;:'
+            delimiters = '.!?;:,'
             for i, c in enumerate(line):
                 if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
                     texts.append(line[prev_begin:i + 1])

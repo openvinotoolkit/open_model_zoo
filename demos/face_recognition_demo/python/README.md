@@ -27,23 +27,9 @@ to align the faces and the face gallery to match faces found on a video
 frame with the ones in the gallery. Then, the processing results are
 visualized and displayed on the screen or written to the output file.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
-
-### Installation and dependencies
-
-The demo depends on:
-
-* OpenVINO library (2021.4 or newer)
-* Python (any, which is supported by OpenVINO)
-* OpenCV (>=4.2.5)
-
-To install all the required Python modules you can use:
-
-``` sh
-pip install -r requirements.txt
-```
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/face_recognition_demo/python/models.lst` file.
@@ -103,22 +89,20 @@ Running the application with the `-h` option or without
 any arguments yields the following message:
 
 ```
-python ./face_recognition_demo.py -h
-
 usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
-                                [-limit OUTPUT_LIMIT] [--no_show]
+                                [-limit OUTPUT_LIMIT]
                                 [--output_resolution OUTPUT_RESOLUTION]
-                                [--crop_size CROP_SIZE]
+                                [--no_show] [--crop_size CROP_SIZE CROP_SIZE]
                                 [--match_algo {HUNGARIAN,MIN_DIST}]
-                                [-u UTILIZATION_MONITORS]
-                                -fg PATH [--run_detector] [--allow_grow]
-                                -m_fd PATH -m_lm PATH -m_reid PATH
-                                [--fd_input_size FD_INPUT_SIZE]
+                                [-u UTILIZATION_MONITORS] [-fg FG]
+                                [--run_detector] [--allow_grow] -m_fd M_FD
+                                -m_lm M_LM -m_reid M_REID
+                                [--fd_input_size FD_INPUT_SIZE FD_INPUT_SIZE]
                                 [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-l PATH] [-c PATH] [-v] [-t_fd [0..1]]
-                                [-t_id [0..1]] [-exp_r_fd NUMBER]
+                                [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}] [-v]
+                                [-t_fd [0..1]] [-t_id [0..1]]
+                                [-exp_r_fd NUMBER]
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -181,14 +165,6 @@ Inference options:
   -d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Face Reidentification
                         model. Default value is CPU.
-  -l PATH, --cpu_lib PATH
-                        Optional. For MKLDNN (CPU)-targeted custom layers,
-                        if any. Path to a shared library with custom
-                        layers implementations.
-  -c PATH, --gpu_lib PATH
-                        Optional. For clDNN (GPU)-targeted custom layers,
-                        if any. Path to the XML file with descriptions
-                        of the kernels.
   -v, --verbose         Optional. Be more verbose.
   -t_fd [0..1]          Optional. Probability threshold for face detections.
   -t_id [0..1]          Optional. Cosine distance threshold between two vectors
@@ -251,5 +227,5 @@ You can use both of these metrics to measure application-level performance.
 ## See also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

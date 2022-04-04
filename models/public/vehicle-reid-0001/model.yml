@@ -27,10 +27,11 @@ files:
       $type: google_drive
       id: 1MEtaIr_9mWuntGD9edydFl_T5waloNRm
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vehicle-reid-0001/osnet_ain_x1_0_vehicle_reid.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 208, 208]
+    layout: NCHW
 model_optimizer_args:
-  - --input=input
-  - --input_shape=[1,3,208,208]
-  - --layout=input(NCHW)
   - --output=output
   - --reverse_input_channels
   - --input_model=$dl_dir/osnet_ain_x1_0_vehicle_reid.onnx

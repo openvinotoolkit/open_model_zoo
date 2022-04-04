@@ -28,10 +28,6 @@ static const char target_device_message_lpr[] = "Optional. Specify the target de
                                                 "The application looks for a suitable plugin for the specified device.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char thresh_output_message[] = "Optional. Probability threshold for vehicle and license plate detections.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char ninfer_request_message[] = "Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.";
@@ -65,8 +61,6 @@ DEFINE_string(d_va, "CPU", target_device_message_vehicle_attribs);
 DEFINE_string(d_lpr, "CPU", target_device_message_lpr);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, ninfer_request_message);
@@ -87,7 +81,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "interactive_vehicle_detection [OPTION]" << std::endl;
+    std::cout << "security_barrier_camera_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;
@@ -95,9 +89,6 @@ void showUsage() {
     std::cout << "    -m \"<path>\"                " << detection_model_message << std::endl;
     std::cout << "    -m_va \"<path>\"             " << vehicle_attribs_model_message << std::endl;
     std::cout << "    -m_lpr \"<path>\"            " << lpr_model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"     " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"     " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -d_va \"<device>\"           " << target_device_message_vehicle_attribs << std::endl;
     std::cout << "    -d_lpr \"<device>\"          " << target_device_message_lpr << std::endl;

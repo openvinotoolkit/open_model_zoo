@@ -29,7 +29,7 @@ from .filter import (
 
 from .cast_to_int import CastToInt
 from .clip_boxes import ClipBoxes
-from .nms import NMS, ClassAwareNMS, SoftNMS, DIoUNMS
+from .nms import NMS, ClassAwareNMS, SoftNMS, DIoUNMS, WeightedNMS
 from .resize_prediction_boxes import ResizePredictionBoxes
 from .faster_rcnn_postprocessing_resize import FRCNNPostprocessingBboxResize
 from .correct_yolo_v2_boxes import CorrectYoloV2Boxes
@@ -67,6 +67,7 @@ from .invert_mask import InvertMask
 from .rescale_mask import RescaleMask
 from .facial_landmarks_98_postprocess import Heatmap2Keypoints
 from .text_similarity_pooling import SentenceSimilarityPooling
+from .hand_landmarks_postprocess import HandLandmarksPostprocessor
 
 __all__ = [
     'Postprocessor',
@@ -154,5 +155,9 @@ __all__ = [
 
     'Heatmap2Keypoints',
 
-    'SentenceSimilarityPooling'
+    'SentenceSimilarityPooling',
+
+    'WeightedNMS',
+
+    'HandLandmarksPostprocessor'
 ]

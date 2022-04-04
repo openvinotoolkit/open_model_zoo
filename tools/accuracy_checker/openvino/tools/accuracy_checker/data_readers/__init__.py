@@ -41,7 +41,7 @@ from .data_reader import (
 from .annotation_readers import AnnotationFeaturesReader
 from .binary_data_readers import PickleReader, ByteFileReader, LMDBReader
 from .medical_imaging_readers import NiftiImageReader, DicomReader
-from .audio_readers import WavReader, KaldiARKReader
+from .audio_readers import WavReader, KaldiARKReader, FlacReader
 from .numpy_readers import NumPyReader, NumpyTXTReader, NumpyDictReader, NumpyBinReader
 from .image_readers import (
     OpenCVImageReader,
@@ -79,6 +79,7 @@ __all__ = [
     'TensorflowImageReader',
     'AnnotationFeaturesReader',
     'WavReader',
+    'FlacReader',
     'DicomReader',
     'PickleReader',
     'NumPyReader',

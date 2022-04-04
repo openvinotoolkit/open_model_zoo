@@ -26,10 +26,11 @@ files:
     size: 31229887
     checksum: 729fd402458eb997c47b1f1fdada9c3f056bfc146df5be147854bd6241fc3c99980a162297633fd8eef2a43db76e64dd
     source: https://raw.githubusercontent.com/becauseofAI/MobileFace/128cea33b928dc9bb6d1963202b57a97f5661ccf/MobileFace_Detection/model/mobilefacedet_v1_mxnet-0000.params
+input_info:
+  - name: data
+    shape: [1, 256, 256, 3]
+    layout: NHWC
 model_optimizer_args:
-  - --input_shape=[1,256,256,3]
-  - --layout=data(NHWC)
-  - --input=data
   - --output=yolov30_yolooutputv30_reshape0,yolov30_yolooutputv31_reshape0,yolov30_yolooutputv32_reshape0
   - --input_model=$dl_dir/mobilefacedet_v1_mxnet-0000.params
   - --transformations_config=$config_dir/mobileface_det.json

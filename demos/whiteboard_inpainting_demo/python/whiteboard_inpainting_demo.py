@@ -105,7 +105,7 @@ def main():
         cv2.namedWindow(WINNAME)
         cv2.setMouseCallback(WINNAME, mouse.get_points)
 
-    log.info('OpenVINO Inference Engine')
+    log.info('OpenVINO Runtime')
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Intel Corporation
+# Copyright (c) 2019-2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ from pathlib import Path
 from openvino.model_zoo import _configuration, _common
 
 def to_info(model):
+    accuracy_config = _common.MODEL_ROOT / model.subdirectory / 'accuracy-check.yml'
+    model_config = _common.MODEL_ROOT / model.subdirectory / 'model.yml'
     result = {
         'name': model.name,
         'composite_model_name': model.composite_model_name,
@@ -28,10 +30,15 @@ def to_info(model):
         'description': model.description,
         'framework': model.framework,
         'license_url': model.license_url,
+        'accuracy_config': str(accuracy_config) if accuracy_config.exists() else None,
+        'model_config': str(model_config) if model_config.exists() else None,
         'precisions': sorted(model.precisions),
         'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
         'task_type': str(model.task_type),
+        'input_info': [
+            {'name': input.name, 'shape': input.shape, 'layout': input.layout} for input in model.input_info
+        ],
         'model_stages': [],
     }
 
