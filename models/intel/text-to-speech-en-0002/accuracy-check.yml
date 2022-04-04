@@ -13,11 +13,11 @@ evaluations:
       adapter:
         type: multi_output_regression
         outputs:
-            - logw
-            - x_m
-            - x_res
-            - x_mask
-            - mel
+          - logw
+          - x_m
+          - x_res
+          - x_mask
+          - mel
         keep_shape: True
 
       launchers:
