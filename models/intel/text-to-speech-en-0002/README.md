@@ -88,5 +88,11 @@ Mel-spectrogram, name: `mel`, shape: `1, 80, 256`, format: `B, C, T`, where:
     - `T` - time in mel-spectrogram
     - `C` - number of rows in mel-spectrogram
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text-to-speech Python\* Demo](../../../demos/text_to_speech_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
