@@ -1424,8 +1424,8 @@ datasets:
       image_folder: Raw-data/Single-channel/Val
       reconstructed_folder: accuracy_checker_preprocess/Single-channel/Reconstructed
       sampled_folder: accuracy_checker_preprocess/Single-channel/Sampled
-      mask_file: hybrid-cs-model-mri/sampling_mask_20perc.npy
-      stats_file: hybrid-cs-model-mri/stats_fs_unet_norm_20.npy
+      mask_file: sampling_mask_20perc.npy
+      stats_file: stats_fs_unet_norm_20.npy
 
   - name: WikiText_2_raw_gpt2
     annotation: wikitext_2_raw.pickle

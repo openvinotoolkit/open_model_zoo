@@ -31,7 +31,7 @@ For details on this model, see [repository](https://github.com/mozilla/DeepSpeec
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
 Increasing beam_width improves WER metric and slows down decoding. Speech Recognition DeepSpeech Demo has a faster C++ CTC decoder module.
 
-Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded and converted by [Model Downloader and other automation tools](../../../tools/model_tools/README.md).
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_model` is a path to the folder, where the current model is downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
 
 ## Input
 
