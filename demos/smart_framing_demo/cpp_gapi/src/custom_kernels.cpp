@@ -174,8 +174,7 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
                     objects.push_back(obj1);
                 }
             }
-        }
-        else {
+        } else {
             // Classic postprocessing
             std::sort(initial_objects.begin(), initial_objects.end(), [](const custom::DetectedObject& x, const custom::DetectedObject& y) { return x.confidence > y.confidence; });
             for (size_t i = 0; i < initial_objects.size(); ++i) {
@@ -192,6 +191,47 @@ GAPI_OCV_KERNEL(OCVYOLOv4TinyPostProcessing, custom::GYOLOv4TinyPostProcessingKe
 };
 
 GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
+    static void run(const cv::Mat & image, const std::vector<DetectedObject> &objects, cv::Mat & out) {
+        cv::Rect init_rect;
+        for (const auto& el : objects) {
+            if (el.labelID == 0) {//person ID
+                init_rect = init_rect | static_cast<cv::Rect>(el);
+            }
+        }
+        slog::debug << "SF result rect" << init_rect << slog::endl;
+        if (!init_rect.empty()) {
+            cv::Rect adjusted_rect;
+            adjusted_rect.y = init_rect.y;
+            adjusted_rect.height = init_rect.height;
+            adjusted_rect.width = static_cast<int>((static_cast<float>(image.size().width) *
+                                                    static_cast<float>(init_rect.height)) /
+                                                   (static_cast<float>(image.size().height)));
+            int x_delta = adjusted_rect.width - init_rect.width;
+            int even_x_delta = (x_delta % 2 == 0) ? (x_delta) : (x_delta - 1);
+            adjusted_rect.x = init_rect.x - (even_x_delta / 2);
+            slog::debug << "SF adjusted rect before check" << adjusted_rect << slog::endl;
+            if (adjusted_rect.x < 0) {
+                adjusted_rect.width = adjusted_rect.width + abs(adjusted_rect.x);
+                adjusted_rect.x = MAX(0, adjusted_rect.x);
+            }
+            if (adjusted_rect.x + adjusted_rect.width > image.size().width) {
+                int width_delta = adjusted_rect.x + adjusted_rect.width - image.size().width;
+                adjusted_rect.width = adjusted_rect.width - width_delta;
+            }
+            slog::debug << "SF adjusted rect after check" << adjusted_rect << slog::endl;
+
+
+            cv::Mat SF_ROI;
+            image(adjusted_rect).copyTo(SF_ROI);
+
+            cv::resize(SF_ROI, out, image.size());
+        } else {
+            image.copyTo(out);
+        }
+    }
+};
+
+GAPI_OCV_KERNEL(OCVSmartFramingMakeBorderKernel, custom::GSmartFramingMakeBorderKernel) {
     static void run(const cv::Mat & image, const std::vector<custom::DetectedObject> &objects, cv::Mat & out) {
         cv::Rect init_rect;
         for (const auto& el : objects) {
@@ -227,8 +267,7 @@ GAPI_OCV_KERNEL(OCVSmartFramingKernel, custom::GSmartFramingKernel) {
                 left_add,
                 right_add,
                 cv::BORDER_CONSTANT, cv::Scalar::all(127));
-        }
-        else {
+        } else {
             image.copyTo(out);
         }
     }

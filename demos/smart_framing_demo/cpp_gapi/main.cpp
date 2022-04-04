@@ -146,7 +146,11 @@ int main(int argc, char *argv[]) {
 
         std::tie(blob26x26, blob13x13) = cv::gapi::infer<YOLOv4TinyNet>(in);
         yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, labels, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);
-        out = custom::GSmartFramingKernel::on(in, yolo_detections);
+        if (FLAGS_crop_with_borders) {
+            out = custom::GSmartFramingMakeBorderKernel::on(in, yolo_detections);
+        } else {
+            out = custom::GSmartFramingKernel::on(in, yolo_detections);
+        }
         if (FLAGS_apply_sr) {
             if (use_single_channel_sr) {
                 cv::GMat b, g, r;

@@ -37,6 +37,7 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
+static const char crop_with_borders_message[] = "Optional. Apply alternative Smart Cropping with monocrhome borders.";
 
 
 
@@ -58,6 +59,8 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(labels, "", labels_message);
+DEFINE_bool(crop_with_borders, false, crop_with_borders_message);
+
 
 /**
 * \brief This function shows a help message
@@ -89,4 +92,6 @@ static void showUsage() {
     std::cout << "    -nstreams                     " << num_streams_message << std::endl;
     std::cout << "    -no_show                      " << no_show_message << std::endl;
     std::cout << "    -u                            " << utilization_monitors_message << std::endl;
+    std::cout << "    -labels                       " << labels_message << std::endl;
+    std::cout << "    -crop_with_borders            " << crop_with_borders_message << std::endl;
 }

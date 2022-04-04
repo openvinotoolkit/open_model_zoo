@@ -40,6 +40,12 @@ G_API_OP(GSmartFramingKernel, <cv::GMat(cv::GMat, GDetections)>, "custom.smart_f
         }
 };
 
+G_API_OP(GSmartFramingMakeBorderKernel, <cv::GMat(cv::GMat, GDetections)>, "custom.smart_framing_make_border") {
+    static cv::GMatDesc outMeta(const cv::GMatDesc & in, const cv::GArrayDesc&) {
+        return in;
+    }
+};
+
 G_API_OP(GSuperResolutionPostProcessingKernel, < cv::GMat(cv::GMat) >, "custom.super_resolution_post_processing") {
         static cv::GMatDesc outMeta(const cv::GMatDesc & in) {
             cv::GMatDesc out_desc(CV_8U /* depth */, in.dims[1] /* channels */, cv::Size(in.dims[3], in.dims[2]), false /* planar */);
