@@ -37,9 +37,10 @@ files:
   - name: RepVGG-B3-200epochs-train.pth
     size: 492817293
     sha256: ddb6ba07d090d7369486e7c90a2ebbd706af399cf40c619812fa52f6d91d928d
-    source:
+    original_source:
       $type: google_drive
       id: 1wBpq5317iPKk3-qblBHnx35bY_WumAlU
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-b3/RepVGG-B3-200epochs-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG

@@ -34,9 +34,10 @@ files:
   - name: Resnet50_Final.pth
     size: 109497761
     sha256: 6d1de9c2944f2ccddca5f5e010ea5ae64a39845a86311af6fdf30841b0a5a16d
-    source:
+    original_source:
       $type: google_drive
       id: 14KX6VqF69MdSPk3Tr9PlDYbq7ArpdNUW
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/retinaface-resnet50-pytorch/Resnet50_Final.pth
 postprocessing:
   # disable unnecessary downloads of pretrained ResNet50 weights
   - $type: regex_replace

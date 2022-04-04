@@ -206,9 +206,10 @@ files:
   - name: vedastr/ckpt/resnet_fc.pth
     size: 712199075
     sha256: 4c78128cb1aae415cf17c51aab3d6047f6fd3756cc9e9b25ee110cdda0fa0c52
-    source:
+    original_source:
       $type: google_drive
       id: 1OnUGdv9RFhFbQGXUUkWMcxUZg0mPV0kK
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/text-recognition-resnet-fc/vedastr/ckpt/resnet_fc.pth
   - name: vedastr/addict-2.4.0-py3-none-any.whl
     size: 3832
     sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc

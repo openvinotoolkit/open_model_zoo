@@ -48,9 +48,10 @@ files:
   - name: yolact/yolact_resnet50_54_800000.pth
     size: 127300392
     sha256: c12bb7a7e0343281db7f1407b376970bb52651f121d0b60bc4a49207acb6d6d7
-    source:
+    original_source:
       $type: google_drive
       id: 1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolact-resnet50-fpn-pytorch/yolact/yolact_resnet50_54_800000.pth
 framework: pytorch
 postprocessing:
   - $type: regex_replace

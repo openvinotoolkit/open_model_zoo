@@ -74,15 +74,17 @@ files:
   - name: model_files/ckpt/latest_net_Corr.pth
     size: 237624725
     sha256: 5deef28927dfc56e18c8510ffcdf0280b558987a38a2b455cda62242ecbe7971
-    source:
+    original_source:
       $type: google_drive
       id: 1yNCapBY7YqMoKeyVWwTwceqrEKHpUzYN
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/cocosnet/model_files/ckpt/latest_net_Corr.pth
   - name: model_files/ckpt/latest_net_G.pth
     size: 387069636
     sha256: 9a77b52d0c34a279d6b4e7eff4bd00077543f7ffc2806b5b2a32222cfbccc655
-    source:
+    original_source:
       $type: google_drive
       id: 1zVG4SnR1uI8bC8fagZrgxNYCI5GRmJuR
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/cocosnet/model_files/ckpt/latest_net_G.pth
 postprocessing:
   - $type: regex_replace
     file: model_files/models/networks/__init__.py

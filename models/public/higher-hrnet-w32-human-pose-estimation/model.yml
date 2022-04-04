@@ -53,9 +53,10 @@ files:
   - name: ckpt/pose_higher_hrnet_w32_512.pth
     size: 115172215
     sha256: ef4c99ab8341b5d8c0437b3ea44aec6bd13b82f49b3b2c5e7696ce06c04777f5
-    source:
+    original_source:
       $type: google_drive
       id: 1V9Iz0ZYy9m8VeaspfKECDW0NKlGsYmO1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/higher-hrnet-w32-human-pose-estimation/ckpt/pose_higher_hrnet_w32_512.pth
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

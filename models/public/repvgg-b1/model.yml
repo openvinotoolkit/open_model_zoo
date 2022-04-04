@@ -37,9 +37,10 @@ files:
   - name: RepVGG-B1-train.pth
     size: 230009223
     sha256: fef08fb7dbe34966de425a4d1936c523d67bc05fadfe5228ea39514cbc62e1f5
-    source:
+    original_source:
       $type: google_drive
       id: 1VlCfXXiaJjNjzQBy3q7C3H2JcxoL0fms
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/repvgg-b1/RepVGG-B1-train.pth
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=RepVGG
