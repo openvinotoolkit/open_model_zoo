@@ -562,6 +562,14 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
 
+Deep Learning models for speech synthesis (mel spectrogram generation).
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [text-to-speech-en-0002](./text-to-speech-en-0002/README.md) |       |        |
+|   text-to-speech-en-0002-encoder                 | 2.44 | 9.59 |
+|   text-to-speech-en-0002-decoder                 | 2.32 | 4.44 |
+
 ## Speech Noise Suppression
 
 Deep Learning models for noise suppression.
