@@ -23,9 +23,10 @@ files:
   - name: ctdet_coco_dlav0_1x.pth
     size: 221889662
     sha256: 23a4ff7102c47c427bc1f24cec2059b8d837a0253363978d467a70e643b699d3
-    source:
+    original_source:
       $type: google_drive
       id: 18yBxWOlhTo32_swSug_HM4q3BeWgxp_N
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/ctdet_coco_dlav0_512/ctdet_coco_dlav0_1x.pth
   - name: CenterNet/src/lib/models/model.py
     size: 3415
     sha256: 29f17e75eb1fb3f6a9f5ca632922bcf932b1f6c63732eb1cdd043b5f8f849d30
