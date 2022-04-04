@@ -939,7 +939,7 @@ def parse_partial_shape(partial_shape):
 
 
 def postprocess_output_name(
-    output_name, outputs, suffix=('/sink_port_0', ':0'), additional_mapping=None, raise_error=True
+    output_name, outputs, suffix=('/sink_port_0', ':0', '/sink_port_1'), additional_mapping=None, raise_error=True
 ):
     suffixes = [suffix] if isinstance(suffix, str) else suffix
     outputs = outputs[0] if isinstance(outputs, list) else outputs
