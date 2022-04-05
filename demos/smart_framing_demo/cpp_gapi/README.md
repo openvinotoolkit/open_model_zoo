@@ -57,27 +57,23 @@ Run the application with the `-h` option to see the following usage message:
 smart_framing_demo_gapi [OPTION]
 Options:
 
-    -h                         Print a usage message.
-    -i                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                      Optional. Enable reading the input in a loop.
-    -o "<path>"                Optional. Name of the output file(s) to save.
-    -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -res "<WxH>"               Optional. Set camera resolution in format WxH.
-    -m_yolo "<path>"           Required. Path to an .xml file with a trained YOLO v4 Tiny model.
-    -at_sr "<type>"            Required if Super Resolution is not disabled by apply_sr=false flag. Architecture type: Super Resolution - 3 channels input (3ch) or 1 channel input (1ch).
-    -m_sr "<path>"             Required if Super Resolution is not disabled by apply_sr=false flag. Path to an .xml file with a trained Super Resolution model.
-    -kernel_package "<string>" Optional. G-API kernel package type: opencv, fluid (by default opencv is used).
-    -d_yolo "<device>"         Optional. Target device for YOLO v4 Tiny network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_sr "<device>"           Optional. Target device for Super resolution network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -t_conf_yolo               Optional. YOLO v4 Tiny confidence threshold.
-    -t_box_iou_yolo            Optional. YOLO v4 Tiny box IOU threshold.
-    -advanced_pp               Optional. Use advanced post-processing for the YOLO v4 Tiny.
-    -apply_sr                  Optional. Use Super Resolution post processing model.
-    -nireq "<integer>"         Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
-    -nthreads "<integer>"      Optional. Number of threads.
-    -nstreams                  Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -no_show                   Optional. Don't show output.
-    -u                         Optional. List of monitors to show initially.
+    -h                          Print a usage message.
+    -i                          Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+    --loop                      Optional. Enable reading the input in a loop.
+    -o "<path>"                 Optional. Name of the output file(s) to save.
+    --limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+    --res "<WxH>"               Optional. Set camera resolution in format WxH.
+    --m_yolo "<path>"           Required. Path to an .xml file with a trained YOLO v4 Tiny model.
+    --at_sr "<type>"            Optional  If Super Resolution (SR) model path provided, defines which SR architecture should be used. Architecture type: Super Resolution - Default 3 channels input (3ch) or 1 channel input (1ch).
+    --m_sr "<path>"             Optional  Path to an .xml file with a trained Super Resolution Post Processing model.
+    --kernel_package "<string>" Optional. G-API kernel package type: opencv, fluid (by default opencv is used).
+    --d_yolo "<device>"         Optional. Target device for YOLO v4 Tiny network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    --d_sr "<device>"           Optional. Target device for Super resolution network (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    --t_conf_yolo               Optional. YOLO v4 Tiny confidence threshold.
+    --t_box_iou_yolo            Optional. YOLO v4 Tiny box IOU threshold.
+    --advanced_pp               Optional. Use advanced post-processing for the YOLO v4 Tiny.
+    --show                      Optional. (Don't) show output.
+    -u                          Optional. List of monitors to show initially.
 
 Available target devices:  <targets>
 ```

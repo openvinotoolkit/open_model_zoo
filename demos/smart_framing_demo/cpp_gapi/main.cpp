@@ -29,27 +29,10 @@
 #include <utils/default_flags.hpp>
 #include <models/detection_model.h>
 
-
-
-//#include "smart_framing_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 
 
 namespace util {
-//bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-//    /** ---------- Parsing and validating input arguments ----------**/
-//    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-//    if (FLAGS_h) {
-//        showUsage();
-//        showAvailableDevices();
-//        return false;
-//    }
-//    if (FLAGS_i.empty())
-//        throw std::logic_error("Parameter -i is not set");
-//    if (FLAGS_m_yolo.empty())
-//        throw std::logic_error("Parameter -m_yolo is not set");
-//    return true;
-//}
 
 static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
     if (type == "opencv") {
@@ -107,17 +90,6 @@ DEFINE_double(t_box_iou_yolo, 0.5, thr_box_iou_yolov4_msg);
 constexpr char advanced_pp_msg[] = "use advanced post-processing for the YOLO v4 Tiny.";
 DEFINE_bool(advanced_pp, true, advanced_pp_msg);
 
-//constexpr char nireq_msg[] = "number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
-//DEFINE_uint32(nireq, 1, nireq_msg);
-//
-//constexpr char num_threads_msg[] = "number of threads.";
-//DEFINE_uint32(nthreads, 0, num_threads_msg);
-//
-//constexpr char num_streams_msg[] = "number of streams to use for inference on the CPU or/and GPU in "
-//"throughput mode (for HETERO and MULTI device cases use format "
-//"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-//DEFINE_string(nstreams, "", num_streams_msg);
-
 constexpr char labels_msg[] = "path to a file with labels mapping.";
 DEFINE_string(labels, "", labels_msg);
 
@@ -157,9 +129,6 @@ void parse(int argc, char* argv[]) {
                   << "\n\t[--t_conf_yolo <NUMBER>]                      " << thr_conf_yolov4_msg
                   << "\n\t[--t_box_iou_yolo <NUMBER>]                   " << thr_box_iou_yolov4_msg
                   << "\n\t[--advanced_pp]                               " << advanced_pp_msg
-                  //<< "\n\t[--nireq <NUMBER>]                            " << nireq_msg
-                  //<< "\n\t[--nthreads <NUMBER>]                         " << num_threads_msg
-                  //<< "\n\t[--nstreams <NUMBER>]                         " << num_streams_msg
                   << "\n\t[--lim <NUMBER>]                              " << lim_msg
                   << "\n\t[--loop]                                      " << loop_msg
                   << "\n\t[ -o <OUTPUT>]                                " << o_msg
@@ -193,9 +162,6 @@ int main(int argc, char *argv[]) {
         PerformanceMetrics metrics;
 
         // ---------- Parsing and validating of input arguments ----------
-        //if (!util::ParseAndCheckCommandLine(argc, argv)) {
-        //    return 0;
-        //}
         parse(argc, argv);
 
         bool apply_sr = false;
