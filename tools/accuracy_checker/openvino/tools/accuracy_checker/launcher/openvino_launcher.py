@@ -104,11 +104,9 @@ class OpenVINOLauncher(Launcher):
         self._num_requests = None
 
         if not delayed_model_loading:
-            self._model, self._weights = automatic_model_search(
-                    self._model_name, self.get_value_from_config('model'),
-                    self.get_value_from_config('weights'),
-                    self.get_value_from_config('_model_type')
-            )
+            self._model, self._weights = automatic_model_search(self._model_name, self.get_value_from_config('model'),
+                                                                self.get_value_from_config('weights'),
+                                                                self.get_value_from_config('_model_type'))
             self.load_network(log=not postpone_inputs_configuration, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
             if not postpone_inputs_configuration:
@@ -153,10 +151,7 @@ class OpenVINOLauncher(Launcher):
 
     @property
     def inputs(self):
-        if self.network is None:
-            inputs = self.exec_network.inputs
-        else:
-            inputs = self.network.inputs
+        inputs = self.exec_network.inputs if self.network is None else self.network.inputs
         return {input_info.get_node().friendly_name: input_info.get_node() for input_info in inputs}
 
     @property
@@ -835,7 +830,9 @@ class OpenVINOLauncher(Launcher):
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
-            return np.transpose(data, layout)[0] if layout is not None else data[0]
+            if layout is not None:
+                return np.transpose(data[0], layout) if len(layout) == 3 else np.transpose(data, layout)[0]
+            return data[0]
         if len(layer_shape) == 1:
             return np.resize(data, layer_shape)
         if (len(data_shape) == 3) and (len(layer_shape) == 2) and (data_shape[0] == 1) and (
