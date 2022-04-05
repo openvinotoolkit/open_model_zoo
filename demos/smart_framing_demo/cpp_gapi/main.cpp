@@ -107,13 +107,13 @@ DEFINE_double(t_box_iou_yolo, 0.5, thr_box_iou_yolov4_msg);
 constexpr char advanced_pp_msg[] = "use advanced post-processing for the YOLO v4 Tiny.";
 DEFINE_bool(advanced_pp, true, advanced_pp_msg);
 
-constexpr char nireq_message[] = "number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+constexpr char nireq_msg[] = "number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 DEFINE_uint32(nireq, 1, nireq_msg);
 
 constexpr char num_threads_msg[] = "number of threads.";
 DEFINE_uint32(nthreads, 0, num_threads_msg);
 
-constexpr char num_streams_message[] = "number of streams to use for inference on the CPU or/and GPU in "
+constexpr char num_streams_msg[] = "number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 DEFINE_string(nstreams, "", num_streams_msg);
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
 
         bool apply_sr = false;
         bool use_single_channel_sr = false;
-        if (!FLAGS_m_sr.empty())
+        if (!FLAGS_m_sr.empty()) {
             apply_sr = true;
             if (FLAGS_at_sr == "1ch") {
                 use_single_channel_sr = true;
