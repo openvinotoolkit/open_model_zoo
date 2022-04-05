@@ -21,7 +21,7 @@ try:
     from openvino.preprocess import ResizeAlgorithm, ColorFormat # pylint:disable=W9902
 except ImportError:
     ResizeAlgorithm = None
-from ..utils import get_or_parse_value
+from ...utils import get_or_parse_value
 
 
 def ov_preprocess_available():
@@ -89,7 +89,7 @@ class OVPreprocessor:
             'NEAREST': ResizeAlgorithm.RESIZE_NEAREST,
             'CUBIC': ResizeAlgorithm.RESIZE_CUBIC
         }
-        if 'aspect_ratio' in config:
+        if 'aspect_ratio_scale' in config:
             return None
         interpolation = config.get('interpolation', 'BILINEAR').upper()
         if interpolation not in supported_interpolations:

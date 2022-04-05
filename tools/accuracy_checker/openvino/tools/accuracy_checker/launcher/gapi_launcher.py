@@ -115,7 +115,7 @@ class GAPILauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry: dict, *args, **kwargs):
+    def __init__(self, config_entry: dict, *args, preprocessor=None, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
@@ -128,6 +128,7 @@ class GAPILauncher(Launcher):
         self._inputs_shapes, self._const_inputs = self.get_inputs_from_config(self.config)
         multi_input = (len(self._inputs_shapes) - len(self.const_inputs)) > 1
         self.non_image_inputs = False
+        self.preprocessor = preprocessor
         if multi_input:
             for name, shape in self._inputs_shapes.items():
                 if name in self.const_inputs:
@@ -177,6 +178,10 @@ class GAPILauncher(Launcher):
             pp = cv2.gapi.ie.params(*args)
         else:
             pp = cv2.gapi.mx.params('net', str(self.model))
+            if self.preprocessor:
+                steps = [step.value for step in self.preprocessor.ie_preprocess_steps]
+                if steps:
+                    pp.cfgPreprocList(steps)
         for input_name, value in self._const_inputs.items():
             pp.constInput(input_name, value)
         if self.backend == 'ie':
