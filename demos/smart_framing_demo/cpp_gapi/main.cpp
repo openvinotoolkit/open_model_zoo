@@ -36,20 +36,20 @@
 
 
 namespace util {
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    /** ---------- Parsing and validating input arguments ----------**/
-    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-    if (FLAGS_h) {
-        showUsage();
-        showAvailableDevices();
-        return false;
-    }
-    if (FLAGS_i.empty())
-        throw std::logic_error("Parameter -i is not set");
-    if (FLAGS_m_yolo.empty())
-        throw std::logic_error("Parameter -m_yolo is not set");
-    return true;
-}
+//bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+//    /** ---------- Parsing and validating input arguments ----------**/
+//    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
+//    if (FLAGS_h) {
+//        showUsage();
+//        showAvailableDevices();
+//        return false;
+//    }
+//    if (FLAGS_i.empty())
+//        throw std::logic_error("Parameter -i is not set");
+//    if (FLAGS_m_yolo.empty())
+//        throw std::logic_error("Parameter -m_yolo is not set");
+//    return true;
+//}
 
 static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
     if (type == "opencv") {
