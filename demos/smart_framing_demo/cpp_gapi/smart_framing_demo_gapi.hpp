@@ -7,7 +7,6 @@
 
 #include <gflags/gflags.h>
 #include <utils/default_flags.hpp>
-#include <models/detection_model.h>
 
 
 DEFINE_INPUT_FLAGS
@@ -16,10 +15,9 @@ DEFINE_OUTPUT_FLAGS
 static const char help_message[] = "Print a usage message.";
 static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
 static const char yolo_model_message[] = "Required. Path to an .xml file with a trained YOLO v4 Tiny model.";
-static const char sr_at_message[] = "Required if Super Resolution is not disabled by apply_sr=false flag. "
-"Architecture type: Super Resolution - 3 channels input (3ch) or 1 channel input (1ch).";
-static const char sr_model_message[] = "Required if Super Resolution is not disabled by apply_sr=false flag. "
-"Path to an .xml file with a trained Super Resolution model.";
+static const char sr_at_message[] = "Optional. If Super Resolution (SR) model path provided, defines which SR architecture should be used. "
+"Architecture type: Super Resolution - Default 3 channels input (3ch) or 1 channel input (1ch).";
+static const char sr_model_message[] = "Optional. Path to an .xml file with a trained Super Resolution Post Processing model.";
 static const char kernel_package_message[] = "Optional. G-API kernel package type: opencv, fluid (by default opencv is used).";
 static const char yolo_device_message[] = "Optional. Target device for YOLO v4 Tiny network (the list of available devices is shown below). "
                                             "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
@@ -44,7 +42,7 @@ static const char crop_with_borders_message[] = "Optional. Apply alternative Sma
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
 DEFINE_string(m_yolo, "", yolo_model_message);
-DEFINE_string(at_sr, "", sr_at_message);
+DEFINE_string(at_sr, "3ch", sr_at_message);
 DEFINE_string(m_sr, "", sr_model_message);
 DEFINE_string(kernel_package, "opencv", kernel_package_message);
 DEFINE_string(d_yolo, "CPU", yolo_device_message);
@@ -52,7 +50,6 @@ DEFINE_string(d_sr, "CPU", sr_device_message);
 DEFINE_double(t_conf_yolo, 0.5, thr_conf_yolov4_message);
 DEFINE_double(t_box_iou_yolo, 0.5, thr_box_iou_yolov4_message);
 DEFINE_bool(advanced_pp, true, advanced_pp_message);
-DEFINE_bool(apply_sr, true, apply_sr_message);
 DEFINE_uint32(nireq, 1, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -86,7 +83,6 @@ static void showUsage() {
     std::cout << "    -t_conf_yolo                  " << thr_conf_yolov4_message << std::endl;
     std::cout << "    -t_box_iou_yolo               " << thr_box_iou_yolov4_message << std::endl;
     std::cout << "    -advanced_pp                  " << advanced_pp_message << std::endl;
-    std::cout << "    -apply_sr                     " << apply_sr_message << std::endl;
     std::cout << "    -nireq \"<integer>\"          " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"       " << num_threads_message << std::endl;
     std::cout << "    -nstreams                     " << num_streams_message << std::endl;

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <gflags/gflags.h>
 #include <opencv2/gapi/streaming/cap.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/core.hpp>
@@ -25,9 +26,12 @@
 #include <utils/images_capture.h>
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
+#include <utils/default_flags.hpp>
+#include <models/detection_model.h>
 
 
-#include "smart_framing_demo_gapi.hpp"
+
+//#include "smart_framing_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 
 
@@ -44,11 +48,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -i is not set");
     if (FLAGS_m_yolo.empty())
         throw std::logic_error("Parameter -m_yolo is not set");
-    if (FLAGS_m_sr.empty() && FLAGS_apply_sr)
-        throw std::logic_error("Parameter -m_sr is not set");
-    if (FLAGS_at_sr.empty() && FLAGS_apply_sr) {
-        throw std::logic_error("Parameter -at_sr is not set");
-    }
     return true;
 }
 
@@ -67,21 +66,142 @@ static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
 
 } // namespace util
 
+namespace {
+constexpr char h_msg[] = "show the help message and exit";
+DEFINE_bool(h, false, h_msg);
+
+constexpr char i_msg[] =
+"an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0";
+DEFINE_string(i, "0", i_msg);
+
+constexpr char camera_resolution_msg[] = "set camera resolution in format WxH.";
+DEFINE_string(res, "1280x720", camera_resolution_msg);
+
+constexpr char yolo_m_msg[] = "path to an .xml file with a trained YOLO v4 Tiny model.";
+DEFINE_string(m_yolo, "", yolo_m_msg);
+
+constexpr char sr_at_msg[] = "if Super Resolution (SR) model path provided, defines which SR architecture should be used. "
+"Architecture type: Super Resolution - Default 3 channels input (3ch) or 1 channel input (1ch).";
+DEFINE_string(at_sr, "3ch", sr_at_msg);
+
+constexpr char sr_m_msg[] = "path to an .xml file with a trained Super Resolution Post Processing model.";
+DEFINE_string(m_sr, "", sr_m_msg);
+
+constexpr char kernel_package_msg[] = "G-API kernel package type: opencv, fluid (by default opencv is used).";
+DEFINE_string(kernel_package, "opencv", kernel_package_msg);
+
+constexpr char yolo_d_msg[] = "target device for YOLO v4 Tiny network (the list of available devices is shown below). "
+"The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+DEFINE_string(d_yolo, "CPU", yolo_d_msg);
+
+constexpr char sr_d_msg[] = "target device for Super Resolution network (the list of available devices is shown below). "
+"The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+DEFINE_string(d_sr, "CPU", sr_d_msg);
+
+constexpr char thr_conf_yolov4_msg[] = "YOLO v4 Tiny confidence threshold.";
+DEFINE_double(t_conf_yolo, 0.5, thr_conf_yolov4_msg);
+
+constexpr char thr_box_iou_yolov4_msg[] = "YOLO v4 Tiny box IOU threshold.";
+DEFINE_double(t_box_iou_yolo, 0.5, thr_box_iou_yolov4_msg);
+
+constexpr char advanced_pp_msg[] = "use advanced post-processing for the YOLO v4 Tiny.";
+DEFINE_bool(advanced_pp, true, advanced_pp_msg);
+
+constexpr char nireq_message[] = "number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+DEFINE_uint32(nireq, 1, nireq_msg);
+
+constexpr char num_threads_msg[] = "number of threads.";
+DEFINE_uint32(nthreads, 0, num_threads_msg);
+
+constexpr char num_streams_message[] = "number of streams to use for inference on the CPU or/and GPU in "
+"throughput mode (for HETERO and MULTI device cases use format "
+"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+DEFINE_string(nstreams, "", num_streams_msg);
+
+constexpr char labels_msg[] = "path to a file with labels mapping.";
+DEFINE_string(labels, "", labels_msg);
+
+constexpr char crop_with_borders_msg[] = "apply alternative Smart Cropping with monocrhome borders.";
+DEFINE_bool(crop_with_borders, false, crop_with_borders_msg);
+
+constexpr char show_msg[] = "(don't) show output";
+DEFINE_bool(show, true, show_msg);
+
+constexpr char o_msg[] = "name of the output file(s) to save";
+DEFINE_string(o, "", o_msg);
+
+constexpr char lim_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+DEFINE_uint32(lim, 1000, lim_msg);
+
+// TODO: Make this option valid for single image case
+constexpr char loop_msg[] = "enable playing video on a loop";
+DEFINE_bool(loop, false, loop_msg);
+
+constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
+"c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
+DEFINE_string(u, "cdm", u_msg);
+
+void parse(int argc, char* argv[]) {
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
+    if (FLAGS_h || 1 == argc) {
+        std::cout << "\t[ -h]                                           " << h_msg
+                  << "\n\t[--help]                                      print help on all arguments"
+                  << "\n\t[ -i <INPUT>]                                 " << i_msg
+                  << "\n\t[--res <WxH>]                                 " << camera_resolution_msg
+                  << "\n\t --m_yolo <MODEL FILE>                        " << yolo_m_msg
+                  << "\n\t[--at_sr]                                     " << sr_at_msg
+                  << "\n\t[--m_sr <MODEL FILE>]                         " << sr_m_msg
+                  << "\n\t[--kernel_package]                            " << kernel_package_msg
+                  << "\n\t[--d_yolo <DEVICE>]                           " << yolo_d_msg
+                  << "\n\t[--d_sr <DEVICE>]                             " << sr_d_msg
+                  << "\n\t[--t_conf_yolo <NUMBER>]                      " << thr_conf_yolov4_msg
+                  << "\n\t[--t_box_iou_yolo <NUMBER>]                   " << thr_box_iou_yolov4_msg
+                  << "\n\t[--advanced_pp]                               " << advanced_pp_msg
+                  << "\n\t[--nireq <NUMBER>]                            " << nireq_msg
+                  << "\n\t[--nthreads <NUMBER>]                         " << num_threads_msg
+                  << "\n\t[--nstreams <NUMBER>]                         " << num_streams_msg
+                  << "\n\t[--lim <NUMBER>]                              " << lim_msg
+                  << "\n\t[--loop]                                      " << loop_msg
+                  << "\n\t[ -o <OUTPUT>]                                " << o_msg
+                  << "\n\t[--labels]                                    " << labels_msg
+                  << "\n\t[--crop_with_borders]                         " << crop_with_borders_msg
+                  << "\n\t[--show] ([--noshow])                         " << show_msg
+                  << "\n\t[ -u <DEVICE>]                                " << u_msg
+                  << "\n\tKey bindings:"
+                     "\n\t\tQ, q, Esc - Quit"
+                     "\n\t\tP, p, 0, spacebar - Pause"
+                     "\n\t\tC - average CPU load, D - load distribution over cores, M - memory usage, H - hide\n";
+        showAvailableDevices();
+        std::cout << ov::get_openvino_version() << std::endl;
+        exit(0);
+    }
+    if (FLAGS_i.empty()) {
+        throw std::invalid_argument{"-i <INPUT> can't be empty"};
+    }
+    if (FLAGS_m_yolo.empty()) {
+        throw std::invalid_argument{"-m_yolo <MODEL FILE> can't be empty"};
+    }
+    /** Get OpenVINO runtime version **/
+    slog::info << ov::get_openvino_version() << slog::endl;
+}
+}  // namespace
+
 using GMat2 = std::tuple<cv::GMat, cv::GMat>;
 
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        /** Get OpenVINO runtime version **/
-        slog::info << ov::get_openvino_version() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
-        if (!util::ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
-        }
+        //if (!util::ParseAndCheckCommandLine(argc, argv)) {
+        //    return 0;
+        //}
+        parse(argc, argv);
 
+        bool apply_sr = false;
         bool use_single_channel_sr = false;
-        if (FLAGS_apply_sr) {
+        if (!FLAGS_m_sr.empty())
+            apply_sr = true;
             if (FLAGS_at_sr == "1ch") {
                 use_single_channel_sr = true;
             } else if (FLAGS_at_sr == "3ch") {
@@ -110,7 +230,7 @@ int main(int argc, char *argv[]) {
         }.cfgOutputLayers({ "conv2d_20/BiasAdd/Add", "conv2d_17/BiasAdd/Add" }).cfgInputLayers({ "image_input" });
         G_API_NET(SRNet, <cv::GMat(cv::GMat)>, "super_resolution");
         G_API_NET(SRNet3ch, <cv::GMat(cv::GMat, cv::GMat)>, "super_resolution_3ch");
-        if (FLAGS_apply_sr) {
+        if (apply_sr) {
             using sr_net = cv::gapi::ie::Params<SRNet>;
             using sr_net3ch = cv::gapi::ie::Params<SRNet3ch>;
             auto sr = sr_net{
@@ -151,7 +271,7 @@ int main(int argc, char *argv[]) {
         } else {
             out = custom::GSmartFramingKernel::on(in, yolo_detections);
         }
-        if (FLAGS_apply_sr) {
+        if (apply_sr) {
             if (use_single_channel_sr) {
                 cv::GMat b, g, r;
                 std::tie(b, g, r) = cv::gapi::split3(out);
@@ -170,7 +290,7 @@ int main(int argc, char *argv[]) {
             util::getKernelPackage(FLAGS_kernel_package));
 
 
-        cv::GStreamingCompiled pipeline = cv::GComputation(cv::GIn(in, labels), cv::GOut(cv::gapi::copy(in), yolo_detections, out, FLAGS_apply_sr ? out_sr_pp : out))
+        cv::GStreamingCompiled pipeline = cv::GComputation(cv::GIn(in, labels), cv::GOut(cv::gapi::copy(in), yolo_detections, out, apply_sr ? out_sr_pp : out))
                                                            .compileStreaming(cv::compile_args(kernels, networks));
 
         /** ---------------- End of graph ---------------- **/
@@ -191,7 +311,7 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{ static_cast<int>(frame_size.width / 4), 60 };
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        LazyVideoWriter videoWriter{ FLAGS_o, cap->fps(), FLAGS_limit };
+        LazyVideoWriter videoWriter{ FLAGS_o, cap->fps(), FLAGS_lim };
 
         /** Output Mat for result **/
         cv::Mat image;
@@ -213,7 +333,7 @@ int main(int argc, char *argv[]) {
                     0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
             }
             videoWriter.write(out_image_sr);
-            if (!FLAGS_no_show) {
+            if (FLAGS_show) {
                 //Draw detections on original image
                 for (const auto& el : objects) {
                     slog::debug << el << slog::endl;
@@ -231,7 +351,7 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(image, init_rect, cv::Scalar{ 255,0,0 }, 3, cv::LINE_8, 0);
                 cv::imshow("Smart framing demo G-API person detections", image);
                 cv::imshow("Smart framing demo G-API smart framing result", out_image);
-                if (FLAGS_apply_sr) {
+                if (apply_sr) {
                     cv::imshow("Smart framing demo G-API smart framing with SR result", out_image_sr);
                 }
                 int key = cv::waitKey(1);
