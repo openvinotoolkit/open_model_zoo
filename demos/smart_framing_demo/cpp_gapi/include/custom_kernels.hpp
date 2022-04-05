@@ -11,8 +11,6 @@
 
 #include <utils/slog.hpp>
 
-namespace IE = InferenceEngine;
-
 namespace custom {
 
 struct DetectedObject : public cv::Rect2f

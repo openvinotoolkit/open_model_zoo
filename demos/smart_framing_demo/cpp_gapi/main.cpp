@@ -183,11 +183,8 @@ int main(int argc, char *argv[]) {
             coco_labels = DetectionModel::loadLabels(FLAGS_labels);
         }
 
-
-        /** ---------------- Main graph of demo ---------------- **/
-        cv::gapi::GNetPackage networks;
-
         /** Configure networks **/
+        cv::gapi::GNetPackage networks;
         G_API_NET(YOLOv4TinyNet, <GMat2(cv::GMat)>, "yolov4tiny_detector");
         const auto net = cv::gapi::ie::Params<YOLOv4TinyNet>{
             FLAGS_m_yolo,                         // path to topology IR
@@ -219,16 +216,16 @@ int main(int argc, char *argv[]) {
             networks = cv::gapi::networks(net);
         }
 
-        cv::GMat blob26x26; //float32[1,255,26,26]
-        cv::GMat blob13x13; //float32[1,255,13,13]
-        cv::GArray<custom::DetectedObject> yolo_detections;
-        cv::GArray<std::string> labels;
-
+        /** ---------------- Main graph of demo ---------------- **/
         // Now build the graph
         cv::GMat in;
         cv::GMat out; //cropped resized output image
         cv::GMat out_sr; //cropped resized output image after super resolution
         cv::GMat out_sr_pp; //cropped resized output image after super resolution post processing
+        cv::GMat blob26x26; //float32[1,255,26,26]
+        cv::GMat blob13x13; //float32[1,255,13,13]
+        cv::GArray<custom::DetectedObject> yolo_detections;
+        cv::GArray<std::string> labels;
 
         std::tie(blob26x26, blob13x13) = cv::gapi::infer<YOLOv4TinyNet>(in);
         yolo_detections = custom::GYOLOv4TinyPostProcessingKernel::on(in, blob26x26, blob13x13, labels, FLAGS_t_conf_yolo, FLAGS_t_box_iou_yolo, FLAGS_advanced_pp);

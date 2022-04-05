@@ -128,8 +128,6 @@ struct YOLOv4TinyPostProcessing {
     }
 };
 
-using GPostProc = cv::GOpaque<YOLOv4TinyPostProcessing>;
-
 } // anonymous namespace
 
 
