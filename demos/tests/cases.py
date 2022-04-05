@@ -185,7 +185,7 @@ DEMOS = [
             model_keys=['-m_yolo', '-m_sr'],
             device_keys=['-d_yolo', '-d_sr'],
             test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-at_sr': '3ch',
+        TestCase(options={'--noshow': None, '-at_sr': '3ch',
             **MONITORS,
             '-i': DataPatternArg('smart-classroom-demo'),
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl.txt'),
