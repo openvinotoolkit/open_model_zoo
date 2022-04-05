@@ -3,7 +3,7 @@
 #
 
 if(ENABLE_CLANG_FORMAT)
-    set(CLANG_FORMAT_FILENAME clang-format)
+    set(CLANG_FORMAT_FILENAME "clang-format" "clang-format-10")
     message(STATUS "Detecting ClangFormat")
     find_program(CLANG_FORMAT NAMES ${CLANG_FORMAT_FILENAME} PATHS ENV PATH)
     if(CLANG_FORMAT)
