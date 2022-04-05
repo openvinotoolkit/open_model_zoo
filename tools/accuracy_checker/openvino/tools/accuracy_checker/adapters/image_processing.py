@@ -177,8 +177,10 @@ class MultiSuperResolutionAdapter(Adapter):
         common_adapter_config = deepcopy(self.launcher_config)
         self._per_target_adapters = {}
         for key, output_name in self.target_mapping.items():
+            adapter_config = deepcopy(common_adapter_config)
+            adapter_config['target_out'] = output_name
             self._per_target_adapters[key] = SuperResolutionAdapter(
-                common_adapter_config, output_blob=output_name,
+                adapter_config,
                 additional_output_mapping=self.additional_output_mapping
             )
 
