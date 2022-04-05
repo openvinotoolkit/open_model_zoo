@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/infer.hpp>
@@ -8,6 +9,14 @@
 #include <opencv2/gapi/streaming/meta.hpp>
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/gapi/cpu/core.hpp>
+
+#include "cascade_detection_demo_gapi.hpp"
+
+#include <monitors/presenter.h>
+#include <utils_gapi/stream_source.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/config_factory.h>
+#include <utils/ocv_common.hpp>
 
 using GDetections = cv::GArray<cv::Rect>;
 using GLabelsIds  = cv::GArray<int>;
@@ -128,50 +137,188 @@ GAPI_OCV_KERNEL(OCVLabeledBoxes, LabeledBoxes) {
     }
 };
 
-G_API_NET(ObjectDetector, <cv::GMat(cv::GMat)>, "sample.vpu.object-detector");
-G_API_NET(Classifier, <cv::GMat(cv::GMat)>, "sample.vpu.classifier");
+G_API_NET(Detector, <cv::GMat(cv::GMat)>, "sample.detector");
+G_API_NET(Classifier, <cv::GMat(cv::GMat)>, "sample.classifier");
 
-int main() {
+namespace util {
+bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+    /** ---------- Parsing and validating input arguments ----------**/
+    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
+    if (FLAGS_h) {
+        showUsage();
+        showAvailableDevices();
+        return false;
+    }
+    if (FLAGS_i.empty())
+        throw std::logic_error("Parameter -i is not set");
+    if (FLAGS_dm.empty())
+        throw std::logic_error("Parameter -dm is not set");
+    if (FLAGS_cm.empty()) {
+        throw std::logic_error("Parameter -cm is not set");
+    }
+    return true;
+}
+static std::vector<std::string> readLabelsFromFile(const std::string& file_path) {
+    std::vector<std::string> out_labels;
+
+    std::ifstream is;
+    is.open(file_path, std::ios::in);
+
+    if (!is.is_open()) {
+        throw std::logic_error(std::string("Could not open ") + file_path);
+    }
+
+    std::string label;
+    while (std::getline(is, label)) {
+        // simple trimming from the end:
+        label.erase(std::find_if(label.rbegin(), label.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }).base(), label.end());
+
+        out_labels.push_back(label);
+    }
+    return out_labels;
+}
+
+} // namespace util
+
+int main(int argc, char* argv[]) {
+    PerformanceMetrics metrics;
+
+    /** Get OpenVINO runtime version **/
+    slog::info << ov::get_openvino_version() << slog::endl;
+    // ---------- Parsing and validating of input arguments ----------
+    if (!util::ParseAndCheckCommandLine(argc, argv)) {
+        return 0;
+    }
+
     std::vector<std::string> detector_labels;
     std::vector<std::string> classifier_labels;
+    if (!FLAGS_det_labels.empty()) {
+        detector_labels = util::readLabelsFromFile(FLAGS_det_labels);
+    }
+    auto num_classes = FLAGS_num_classes;
+    if (!FLAGS_cls_labels.empty()) {
+        classifier_labels = util::readLabelsFromFile(FLAGS_cls_labels);
+        num_classes = classifier_labels.size();
+    }
 
-	const std::string opt_parser = "yolo";
-    const int opt_num_classes = 1;
-	// Declare the pipeline inputs
-	cv::GFrame in;
-	// Run Inference for detector on the full frame
-	cv::GMat detections = cv::gapi::infer<ObjectDetector>(in);
-	// Parse detections, project them to the original image frame
-	cv::GArray<cv::Rect> objs;
-	cv::GArray<int> det_ids;
+    /** Get information about frame **/
+    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
+        std::numeric_limits<size_t>::max());
+    const auto tmp = cap->read();
+    cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
 
-	auto im_size = cv::gapi::streaming::size(in);
+    /** ---------------- Main graph of demo ---------------- **/
+    cv::GComputation comp([&]{
+        cv::GMat in;
+        cv::GMat detections = cv::gapi::infer<Detector>(in);
 
-	if (opt_parser == "yolo") {
-		std::tie(objs, det_ids) = cv::gapi::streaming::parseYolo(detections, im_size, 0.5f, 0.5f);
-	}
-	else {
-		std::tie(objs, det_ids) = cv::gapi::streaming::parseSSD(detections, im_size, 0.6f, -1);
-	}
+        auto im_size = cv::gapi::streaming::size(in);
 
-	// Filter out of bounds projections
-	cv::GArray<cv::Rect> filtered_objs;
-	cv::GArray<int> filtered_det_ids;
-	std::tie(filtered_objs, filtered_det_ids) = FilterOutOfBounds::on(objs,
-			det_ids,
-			im_size);
+        cv::GArray<cv::Rect> objs;
+        cv::GArray<int> det_ids;
+        if (FLAGS_parser == "yolo") {
+            std::tie(objs, det_ids) = cv::gapi::streaming::parseYolo(detections, im_size, 0.5f, 0.5f);
+        }
+        else {
+            std::tie(objs, det_ids) = cv::gapi::streaming::parseSSD(detections, im_size, 0.6f, -1);
+        }
 
-	// Run Inference for classifier on the passed ROIs of the frame
-	cv::GArray<cv::GMat> filtered_probs = cv::gapi::infer<Classifier>(filtered_objs, in);
+        // Filter out of bounds projections
+        cv::GArray<cv::Rect> filtered_objs;
+        cv::GArray<int> filtered_det_ids;
+        std::tie(filtered_objs, filtered_det_ids) = FilterOutOfBounds::on(objs,
+                det_ids,
+                im_size);
 
-	// Run custom operation to project probabilities to the labels identifiers
-	cv::GArray<int> filtered_cls_ids = ParseProbs::on(filtered_probs, opt_num_classes, 0.5f);
+        // Run Inference for classifier on the passed ROIs of the frame
+        cv::GArray<cv::GMat> filtered_probs = cv::gapi::infer<Classifier>(filtered_objs, in);
+        // Run custom operation to project probabilities to the labels identifiers
+        cv::GArray<int> filtered_cls_ids = ParseProbs::on(filtered_probs, num_classes, 0.5f);
 
-    auto prims = LabeledBoxes::on(filtered_objs,
-                                  filtered_det_ids,
-                                  filtered_cls_ids,
-                                  detector_labels,
-                                  classifier_labels);
-    auto rendered = cv::gapi::wip::draw::renderFrame(in, prims);
-    cv::GComputation comp(cv::GIn(in), cv::GOut(rendered));
+        auto prims = LabeledBoxes::on(filtered_objs,
+                filtered_det_ids,
+                filtered_cls_ids,
+                detector_labels,
+                classifier_labels);
+
+        auto rendered = cv::gapi::wip::draw::render3ch(in, prims);
+        return cv::GComputation(cv::GIn(in), cv::GOut(rendered));
+    });
+
+    auto det_config = ConfigFactory::getUserConfig(FLAGS_ddm, FLAGS_det_nireq,
+                                                   FLAGS_det_nstreams, FLAGS_det_nthreads);
+    const auto detector = cv::gapi::ie::Params<Detector> {
+        FLAGS_dm,                           // path to topology IR
+        fileNameNoExt(FLAGS_dm) + ".bin",   // path to weights
+        FLAGS_ddm                           // device specifier
+    }.cfgNumRequests(det_config.maxAsyncRequests)
+     .pluginConfig(det_config.getLegacyConfig());
+    slog::info << "The detection model " << FLAGS_dm << " is loaded to " << FLAGS_ddm << " device." << slog::endl;
+
+    auto cls_config = ConfigFactory::getUserConfig(FLAGS_dcm, FLAGS_cls_nireq,
+                                                   FLAGS_cls_nstreams, FLAGS_cls_nthreads);
+    const auto classifier = cv::gapi::ie::Params<Classifier> {
+        FLAGS_cm,                           // path to topology IR
+        fileNameNoExt(FLAGS_cm) + ".bin",   // path to weights
+        FLAGS_dcm                           // device specifier
+    }.cfgNumRequests(cls_config.maxAsyncRequests)
+     .pluginConfig(cls_config.getLegacyConfig());
+    slog::info << "The classification model " << FLAGS_cm << " is loaded to " << FLAGS_dcm << " device." << slog::endl;
+
+    auto pipeline = comp.compileStreaming(
+            cv::compile_args(cv::gapi::kernels<OCVFilterOutOfBounds, OCVParseProbs, OCVLabeledBoxes>(),
+                             cv::gapi::networks(detector, classifier)));
+
+    /** Output container for result **/
+    cv::Mat output;
+
+    /** ---------------- The execution part ---------------- **/
+    cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0,
+        std::numeric_limits<size_t>::max());
+
+    pipeline.setSource<custom::CommonCapSrc>(cap);
+    std::string windowName = "Cascade detection demo G-API";
+    int delay = 1;
+
+    cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
+    Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
+
+    LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+
+    bool isStart = true;
+    const auto startTime = std::chrono::steady_clock::now();
+    pipeline.start();
+
+    while(pipeline.pull(cv::gout(output))) {
+        presenter.drawGraphs(output);
+        if (isStart) {
+            metrics.update(startTime, output, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            isStart = false;
+        }
+        else {
+            metrics.update({}, output, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+        }
+
+        videoWriter.write(output);
+
+        if (!FLAGS_no_show) {
+            cv::imshow(windowName, output);
+            int key = cv::waitKey(delay);
+            /** Press 'Esc' to quit **/
+            if (key == 27) {
+                break;
+            } else {
+                presenter.handleKey(key);
+            }
+        }
+    }
+    slog::info << "Metrics report:" << slog::endl;
+    slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
+    slog::info << presenter.reportMeans() << slog::endl;
+
+    return 0;
 }
