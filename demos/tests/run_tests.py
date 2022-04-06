@@ -356,11 +356,9 @@ def main():
                 if not demo.check_difference():
                     correctness_failures += 1
             print()
-
-    print("{} failures:".format(num_failures))
     if args.scope == "correctness":
         print("Correctness Failures: {}".format(correctness_failures))
-
+    print("{} failures:".format(num_failures))
     for test in failed_tests:
         print(test)
 

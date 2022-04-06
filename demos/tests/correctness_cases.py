@@ -18,9 +18,6 @@ from abc import ABC, abstractmethod
 
 from cases import BASE
 
-THREADS_NUM = os.cpu_count()
-
-
 class CorrectnessCheckerBase(ABC):
     def __init__(self, demo):
         self.filename = demo.subdirectory.replace('/', '_') + '.log'
@@ -42,9 +39,6 @@ class CorrectnessCheckerBase(ABC):
 
 
 class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
-    def __init__(self, demo):
-        super().__init__(demo)
-
     def __call__(self, output, test_case, device, execution_time=0):
         # Results format
         #               {"device name":
@@ -80,10 +74,6 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         case_index = self.case_index[device]
         if case_index not in self.results[device]:
             self.results[device][case_index] = {}
-
-        if execution_time < 0:
-            self.case_index[device] += 1
-            return
 
         # Parsing the raw data
         output = [i.rstrip() for i in output.split('\n') if "DEBUG" in i and "ChannelId" in i]
@@ -144,7 +134,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         return flag
 
 DEMOS = [
-    deepcopy(BASE['security_barrier_camera_demo/cpp'])
+    BASE['security_barrier_camera_demo/cpp']
     .update_option({'-r': None, '-n_iqs': '1'})
     .add_parser(DemoSecurityBarrierCamera)
 ]
