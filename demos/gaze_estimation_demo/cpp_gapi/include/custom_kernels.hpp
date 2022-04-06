@@ -1,18 +1,29 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/gapi.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <tuple>
+#include <vector>
+
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/garray.hpp>
+#include <opencv2/gapi/gkernel.hpp>
+#include <opencv2/gapi/gopaque.hpp>
+
+namespace cv {
+class GMat;
+struct GMatDesc;
+}  // namespace cv
 
 namespace custom {
-using GMat3  = std::tuple<cv::GMat, cv::GMat,cv::GMat>;
-using GMats  = cv::GArray<cv::GMat>;
+using GMat3 = std::tuple<cv::GMat, cv::GMat, cv::GMat>;
+using GMats = cv::GArray<cv::GMat>;
 using GRects = cv::GArray<cv::Rect>;
-using GSize  = cv::GOpaque<cv::Size>;
+using GSize = cv::GOpaque<cv::Size>;
 
+// clang-format off
 G_API_OP(PrepareEyes,
          <std::tuple<GMats,
                      GMats>(cv::GMat, GRects, GRects, GMats, cv::Size)>,
@@ -92,4 +103,5 @@ G_API_OP(ProcessLandmarks,
                                cv::empty_array_desc());
     }
 };
-} // namespace custom
+// clang-format on
+}  // namespace custom

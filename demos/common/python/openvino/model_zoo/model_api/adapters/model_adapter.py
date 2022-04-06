@@ -35,7 +35,7 @@ class ModelAdapter(metaclass=abc.ABCMeta):
 
         - Reading the model from disk or other place
         - Loading the model to the device
-        - Accessing the information about input/output layers
+        - Accessing the information about inputs/outputs
         - The model reshaping
         - Synchronous model inference
         - Asynchronous model inference
@@ -58,34 +58,36 @@ class ModelAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_input_layers(self):
         '''
-        Gets the names of model input layers and for each layer creates the Metadata structure,
-           which contains the information about the layer shape, blob precision in OpenVINO format, meta (optional)
+        Gets the names of model inputs and for each one creates the Metadata structure,
+           which contains the information about the input shape, layout, precision
+           in OpenVINO format, meta (optional)
 
         Returns:
-            - the dict containing Metadata for all input layers
+            - the dict containing Metadata for all inputs
         '''
 
     @abc.abstractmethod
     def get_output_layers(self):
         '''
-        Gets the names of model output layers and for each layer creates the Metadata structure,
-           which contains the information about the layer shape, blob precision in OpenVINO format, meta (optional)
+        Gets the names of model outputs and for each one creates the Metadata structure,
+           which contains the information about the output shape, layout, precision
+           in OpenVINO format, meta (optional)
 
         Returns:
-            - the dict containing Metadata for all output layers
+            - the dict containing Metadata for all outputs
         '''
 
     @abc.abstractmethod
     def reshape_model(self, new_shape):
         '''
-        Reshapes the model input layers to fit the new input shape.
+        Reshapes the model inputs to fit the new input shape.
 
         Args:
-            - new_shape(dict): the dictionary with input layers as keys and
+            - new_shape (dict): the dictionary with inputs names as keys and
                 list of new shape as values in the following format:
                 {
-                    'input_layer_1': [1, 128, 128, 3],
-                    'input_layer_2': [1, 128, 128, 3],
+                    'input_layer_name_1': [1, 128, 128, 3],
+                    'input_layer_name_2': [1, 128, 128, 3],
                     ...
                 }
         '''
@@ -98,16 +100,16 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         Args:
             - dict_data: it's submitted to the model for inference and has the following format:
                 {
-                    'input_layer_1': data_1,
-                    'input_layer_2': data_2,
+                    'input_layer_name_1': data_1,
+                    'input_layer_name_2': data_2,
                     ...
                 }
 
         Returns:
-            - raw result(dict) - model raw output in the following format:
+            - raw result (dict) - model raw output in the following format:
                 {
-                    'output_layer_1': raw_result_1,
-                    'output_layer_2': raw_result_2,
+                    'output_layer_name_1': raw_result_1,
+                    'output_layer_name_2': raw_result_2,
                     ...
                 }
         '''
@@ -123,8 +125,8 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         Args:
             - dict_data: it's submitted to the model for inference and has the following format:
                 {
-                    'input_layer_1': data_1,
-                    'input_layer_2': data_2,
+                    'input_layer_name_1': data_1,
+                    'input_layer_name_2': data_2,
                     ...
                 }
             - callback_fn: the callback function, which is defined outside the adapter

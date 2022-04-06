@@ -28,9 +28,9 @@ from .utils import Layout
 
 
 class OVMSAdapter(ModelAdapter):
-    """
+    '''
     Class that allows working with models served by the OpenVINO Model Server
-    """
+    '''
 
     tf2ov_precision = {
         "DT_INT64": "I64",

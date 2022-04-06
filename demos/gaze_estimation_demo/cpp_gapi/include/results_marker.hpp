@@ -1,12 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include "face_inference_results.hpp"
+namespace cv {
+class Mat;
+}  // namespace cv
 
 namespace gaze_estimation {
+struct FaceInferenceResults;
+
 class ResultsMarker {
 public:
     ResultsMarker(bool showFaceBoundingBox,

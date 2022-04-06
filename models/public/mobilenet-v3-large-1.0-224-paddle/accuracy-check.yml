@@ -1,0 +1,24 @@
+models:
+  - name: mobilenet-v3-large-1.0-224-paddle
+    launchers:
+      - framework: openvino
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.75248
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9232

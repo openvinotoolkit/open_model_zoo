@@ -39,7 +39,7 @@ This model presents a person attributes classification algorithm analysis scenar
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
+Image, name: `0`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
 
 - `C` - number of channels
 - `H` - image height

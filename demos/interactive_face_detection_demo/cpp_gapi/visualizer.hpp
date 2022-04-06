@@ -1,8 +1,18 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
+
+#include <stddef.h>
+
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <opencv2/core.hpp>
 
 #include "face.hpp"
 
@@ -27,6 +37,7 @@ public:
               cv::Scalar bgcolor);
 
     cv::Size getSize();
+
 private:
     std::vector<std::string> emotionNames;
     cv::Size size;
@@ -83,12 +94,7 @@ class Visualizer {
 public:
     using Ptr = std::shared_ptr<Visualizer>;
 
-    enum AnchorType {
-        TL = 0,
-        TR,
-        BL,
-        BR
-    };
+    enum AnchorType { TL = 0, TR, BL, BR };
 
     struct DrawParams {
         cv::Point cell;
@@ -97,10 +103,15 @@ public:
         size_t frameIdx;
     };
 
-    explicit Visualizer(bool m_ag = false, bool m_em = false,
-                        bool m_hp = false, bool m_lm = false, bool m_am = false,
-                        int leftPadding = 10, int rightPadding = 10,
-                        int topPadding = 75, int bottomPadding = 10);
+    explicit Visualizer(bool m_ag = false,
+                        bool m_em = false,
+                        bool m_hp = false,
+                        bool m_lm = false,
+                        bool m_am = false,
+                        int leftPadding = 10,
+                        int rightPadding = 10,
+                        int topPadding = 75,
+                        int bottomPadding = 10);
 
     void enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames);
     void draw(cv::Mat img, std::list<Face::Ptr> faces);

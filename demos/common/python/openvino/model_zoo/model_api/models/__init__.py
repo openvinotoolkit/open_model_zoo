@@ -16,7 +16,7 @@
 
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
-from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting
+from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting, PortraitBackgroundMatting
 from .centernet import CenterNet
 from .classification import Classification
 from .deblurring import Deblurring
@@ -29,6 +29,7 @@ from .image_model import ImageModel
 from .instance_segmentation import MaskRCNNModel, YolactModel
 from .model import Model
 from .monodepth import MonoDepthModel
+from .nanodet import NanoDet, NanoDetPlus
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
@@ -56,8 +57,11 @@ __all__ = [
     'MaskRCNNModel',
     'Model',
     'MonoDepthModel',
+    'NanoDet',
+    'NanoDetPlus',
     'OpenPose',
     'OutputTransform',
+    'PortraitBackgroundMatting',
     'RESIZE_TYPES',
     'RetinaFace',
     'RetinaFacePyTorch',

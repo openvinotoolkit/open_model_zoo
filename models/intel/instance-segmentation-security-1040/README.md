@@ -36,12 +36,14 @@ The expected channel order is `BGR`
 
 ## Outputs
 
-1. Name: `labels`, shape: `100` - Contiguous integer class ID for every
+Model has outputs with dynamic shapes.
+
+1. Name: `labels`, shape: `-1` - Contiguous integer class ID for every
    detected object.
-2. Name: `boxes`, shape: `100, 5` - Bounding boxes around every detected objects
+2. Name: `boxes`, shape: `-1, 5` - Bounding boxes around every detected objects
    in (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format and its
    confidence score in range [0, 1].
-3. Name: `masks`, shape: `100, 28, 28` - Segmentation heatmaps for every output
+3. Name: `masks`, shape: `-1, 28, 28` - Segmentation heatmaps for every output
    bounding box.
 
 ## Training Pipeline

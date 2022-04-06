@@ -1,71 +1,84 @@
+// Copyright (C) 2022 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+//
+
 #include "custom_kernels.hpp"
 
 #include <algorithm>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <utility>
 
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
-
-#include <opencv2/gapi/imgproc.hpp>
+#include <ie_core.hpp>
+#include <ie_data.h>
+#include <ie_layouts.h>
 #include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/gscalar.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/operators.hpp>
+#include <opencv2/gapi/own/assert.hpp>
+#include <opencv2/imgproc.hpp>
 
+// clang-format off
 GAPI_OCV_KERNEL(OCVTensorToImg, custom::GTensorToImg) {
-    static void run(const cv::Mat  &in,
-                    cv::Mat        &out) {
+    static void run(const cv::Mat &in,
+                    cv::Mat &out) {
         auto* out_p = out.ptr<float>();
         auto* in_p  = in.ptr<const float>();
         std::copy_n(in_p, in.size[2] * in.size[3], out_p);
     }
 };
+// clang-format on
 
-static cv::Rect expandBox(const float x0,
-                          const float y0,
-                          const float x1,
-                          const float y1,
-                          const float scale) {
+static cv::Rect expandBox(const float x0, const float y0, const float x1, const float y1, const float scale) {
     const float w_half = ((x1 - x0) * 0.5f) * scale;
     const float h_half = ((y1 - y0) * 0.5f) * scale;
-    const float x_c    =  (x1 + x0) * 0.5f;
-    const float y_c    =  (y1 + y0) * 0.5f;
-    cv::Point tl((int)(x_c - w_half), (int)(y_c - h_half));
-    cv::Point br((int)(x_c + w_half), (int)(y_c + h_half));
+    const float x_c = (x1 + x0) * 0.5f;
+    const float y_c = (y1 + y0) * 0.5f;
+    cv::Point tl(static_cast<int>(x_c - w_half), static_cast<int>(y_c - h_half));
+    cv::Point br(static_cast<int>(x_c + w_half), static_cast<int>(y_c + h_half));
     return cv::Rect(tl, br);
 }
 
 static int clip(int value, int lower, int upper) {
     return std::max(lower, std::min(value, upper));
-};
+}
 
+// clang-format off
 GAPI_OCV_KERNEL(OCVCalculateMaskRCNNBGMask, custom::GCalculateMaskRCNNBGMask) {
     static void run(const cv::Size& original_sz,
                     const cv::Size& model_in_size,
-                    const cv::Mat&  raw_labels,
-                    const cv::Mat&  raw_boxes,
-                    const cv::Mat&  raw_masks,
-                    cv::Mat&        mask) {
+                    const cv::Mat& raw_labels,
+                    const cv::Mat& raw_boxes,
+                    const cv::Mat& raw_masks,
+                    cv::Mat& mask) {
         GAPI_Assert(raw_labels.depth() == CV_32S);
         GAPI_Assert(raw_boxes.depth()  == CV_32F);
         GAPI_Assert(raw_masks.depth()  == CV_32F);
 
-        const int   BOX_SIZE          = 5;
-        const int   CONFIDENCE_OFFSET = 4;
-        const int   BOX_X0_OFFSET     = 0;
-        const int   BOX_Y0_OFFSET     = 1;
-        const int   BOX_X1_OFFSET     = 2;
-        const int   BOX_Y1_OFFSET     = 3;
-        const int   PERSON_ID         = 0;
-        const float BIN_THRESHOLD     = 0.5f;
+        const int BOX_SIZE = 5;
+        const int CONFIDENCE_OFFSET = 4;
+        const int BOX_X0_OFFSET = 0;
+        const int BOX_Y0_OFFSET = 1;
+        const int BOX_X1_OFFSET = 2;
+        const int BOX_Y1_OFFSET = 3;
+        const int PERSON_ID = 0;
+        const float BIN_THRESHOLD = 0.5f;
 
-        const int    num_boxes      = raw_boxes.size[0];
-        const float* boxes_ptr      = raw_boxes.ptr<float>();
+        const int num_boxes = raw_boxes.size[0];
+        const float* boxes_ptr = raw_boxes.ptr<float>();
         // FIXME: In order to create "view" over raw_masks, need to obtain non const pointer.
-              float* masks_ptr      = const_cast<float*>(raw_masks.ptr<float>());
-        const int*   labels_ptr     = raw_labels.ptr<int>();
-        const float  prob_threshold = 0.5;
+        float* masks_ptr = const_cast<float*>(raw_masks.ptr<float>());
+        const int* labels_ptr = raw_labels.ptr<int>();
+        const float prob_threshold = 0.5;
         const cv::Size mask_sz(raw_masks.size[1], raw_masks.size[2]);
 
         const float scale_x = static_cast<float>(model_in_size.width)  / original_sz.width;
         const float scale_y = static_cast<float>(model_in_size.height) / original_sz.height;
-        const float scale   = 1.f;
+        const float scale = 1.f;
 
         std::vector<cv::Mat> person_masks;
         for (int box_idx = 0; box_idx < num_boxes; ++box_idx) {
@@ -121,17 +134,17 @@ GAPI_OCV_KERNEL(OCVCalculateMaskRCNNBGMask, custom::GCalculateMaskRCNNBGMask) {
         }
     }
 };
+// clang-format on
 
 custom::NNBGReplacer::NNBGReplacer(const std::string& model_path) {
     IE::Core core;
     m_cnn_network = core.ReadNetwork(model_path);
-    m_tag         = m_cnn_network.getName();
-    m_inputs      = m_cnn_network.getInputsInfo();
-    m_outputs     = m_cnn_network.getOutputsInfo();
+    m_tag = m_cnn_network.getName();
+    m_inputs = m_cnn_network.getInputsInfo();
+    m_outputs = m_cnn_network.getOutputsInfo();
 }
 
-custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path)
-    : custom::NNBGReplacer(model_path) {
+custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path) : custom::NNBGReplacer(model_path) {
     for (const auto& p : m_outputs) {
         const auto& layer_name = p.first;
         if (layer_name.rfind("TopK") != std::string::npos) {
@@ -156,29 +169,22 @@ custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path)
     }
 }
 
-cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GMat in,
-                                             const cv::Size& in_size,
-                                             cv::GMat background) {
+cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GMat in, const cv::Size& in_size, cv::GMat background) {
     cv::GInferInputs inputs;
     inputs[m_input_name] = in;
     auto outputs = cv::gapi::infer<cv::gapi::Generic>(m_tag, inputs);
-    auto labels  = outputs.at(m_labels_name);
-    auto boxes   = outputs.at(m_boxes_name);
-    auto masks   = outputs.at(m_masks_name);
+    auto labels = outputs.at(m_labels_name);
+    auto boxes = outputs.at(m_boxes_name);
+    auto masks = outputs.at(m_masks_name);
 
     const auto& dims = m_inputs.at(m_input_name)->getTensorDesc().getDims();
     GAPI_Assert(dims.size() == 4u);
-    auto mask = custom::GCalculateMaskRCNNBGMask::on(in_size,
-                                                     cv::Size(dims[3], dims[2]),
-                                                     labels,
-                                                     boxes,
-                                                     masks);
+    auto mask = custom::GCalculateMaskRCNNBGMask::on(in_size, cv::Size(dims[3], dims[2]), labels, boxes, masks);
     auto mask3ch = cv::gapi::medianBlur(cv::gapi::merge3(mask, mask, mask), 11);
     return (mask3ch & in) + (~mask3ch & background);
 }
 
-custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path)
-    : NNBGReplacer(model_path) {
+custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path) : NNBGReplacer(model_path) {
     if (m_inputs.size() != 1) {
         throw std::logic_error("Supported only single input background matting models!");
     }
@@ -190,18 +196,15 @@ custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path)
     m_output_name = m_outputs.begin()->first;
 }
 
-cv::GMat custom::BGMattingReplacer::replace(cv::GMat in,
-                                            const cv::Size& in_size,
-                                            cv::GMat background) {
+cv::GMat custom::BGMattingReplacer::replace(cv::GMat in, const cv::Size& in_size, cv::GMat background) {
     cv::GInferInputs inputs;
     inputs[m_input_name] = in;
     auto outputs = cv::gapi::infer<cv::gapi::Generic>(m_tag, inputs);
 
-    auto alpha = cv::gapi::resize(
-            custom::GTensorToImg::on(outputs.at(m_output_name)), in_size);
+    auto alpha = cv::gapi::resize(custom::GTensorToImg::on(outputs.at(m_output_name)), in_size);
     auto alpha3ch = cv::gapi::merge3(alpha, alpha, alpha);
-    auto in_fp    = cv::gapi::convertTo(in, CV_32F);
-    auto bgr_fp   = cv::gapi::convertTo(background, CV_32F);
+    auto in_fp = cv::gapi::convertTo(in, CV_32F);
+    auto bgr_fp = cv::gapi::convertTo(background, CV_32F);
 
     cv::GScalar one(cv::Scalar::all(1.));
     auto out = cv::gapi::mul(alpha3ch, in_fp) + cv::gapi::mul((one - alpha3ch), bgr_fp);

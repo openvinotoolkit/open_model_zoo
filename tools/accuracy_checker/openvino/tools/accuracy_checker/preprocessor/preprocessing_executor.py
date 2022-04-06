@@ -18,27 +18,25 @@ import warnings
 from ..config import ConfigValidator, StringField
 from ..utils import get_data_shapes
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
-from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
+from .launcher_preprocessing import preprocessing_available, get_preprocessor
 
 
 class PreprocessingExecutor:
     def __init__(
             self, processors=None, dataset_name='custom', dataset_meta=None,
-            input_shapes=None,
-            enable_ie_preprocessing=False
+            input_shapes=None, enable_runtime_preprocessing=False, runtime_framework=None
     ):
         self.processors = []
         self.dataset_meta = dataset_meta
         self._multi_infer_transformations = False
         self.ie_processor = None
-        if enable_ie_preprocessing:
-            if not ie_preprocess_available():
+        if enable_runtime_preprocessing:
+            if not preprocessing_available(runtime_framework):
                 warnings.warn(
-                    'PreProcessInfo is not available in your InferenceEngine version or openvino is not installed'
-                    '--ie_preprocessing key will be ignored'
-                )
+                    f'Preprocessing for {runtime_framework} is not available, '
+                    'specified in command line parameter will be ignored')
             else:
-                self.ie_processor = IEPreprocessor(processors)
+                self.ie_processor = get_preprocessor(runtime_framework)(processors)
                 processors = self.ie_processor.keep_preprocessing_info
 
         if not processors:

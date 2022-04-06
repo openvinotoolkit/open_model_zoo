@@ -84,7 +84,7 @@ def parse_args():
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
         help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
-        help='IR precisions for all models. By default, models are tested in FP16 precision')
+        help='IR precisions for all models. By default, models are tested in FP16, FP16-INT8 precisions')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
         help='directory with pre-converted models (IRs)')
     return parser.parse_args()

@@ -29,7 +29,10 @@ The demo application expects an instance segmentation or background matting mode
     * At least two outputs including:
         * `fgr` with normalized in [0, 1] range foreground
         * `pha` with normalized in [0, 1] range alpha
-4. for video background matting models based on RNN architecture:
+4. for image background matting models without trimap (background segmentation):
+    * Single input for input image.
+    * Single output with normalized in [0, 1] range alpha
+5. for video background matting models based on RNN architecture:
     * Five inputs:
         * `src` for input image
         * recurrent inputs: `r1`, `r2`, `r3`, `r4`
@@ -81,10 +84,12 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* instance-segmentation-person-????
-* yolact-resnet50-fpn-pytorch
 * background-matting-mobilenetv2
+* instance-segmentation-person-????
+* modnet-photographic-portrait-matting
+* modnet-webcam-portrait-matting
 * robust-video-matting-mobilenetv3
+* yolact-resnet50-fpn-pytorch
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -233,5 +238,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -1,8 +1,10 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "face_inference_results.hpp"
+
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 

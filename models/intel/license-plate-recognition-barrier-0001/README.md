@@ -46,7 +46,7 @@ thoroughly. Other types of license plates may underperform.
 
 ## Outputs
 
-Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
+Encoded vector of floats, name: `dec`, shape: `1, 88, 1, 1`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0

@@ -39,6 +39,7 @@ omz_converter --list models.lst
 
 * alexnet
 * caffenet
+* convnext-tiny
 * densenet-121
 * densenet-121-tf
 * dla-34
@@ -56,6 +57,7 @@ omz_converter --list models.lst
 * hbonet-0.25
 * hbonet-1.0
 * inception-resnet-v2-tf
+* levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-1.0-224
@@ -66,6 +68,8 @@ omz_converter --list models.lst
 * mobilenet-v2-pytorch
 * mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-tf
+* mobilenet-v3-large-1.0-224-paddle
+* mobilenet-v3-small-1.0-224-paddle
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf
@@ -236,5 +240,5 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

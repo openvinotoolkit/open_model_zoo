@@ -1,11 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
-#include <utils/slog.hpp>
+#include <vector>
+
+#include <opencv2/core.hpp>
+
+namespace slog {
+class LogStream;
+}  // namespace slog
 
 namespace gaze_estimation {
 struct FaceInferenceResults {

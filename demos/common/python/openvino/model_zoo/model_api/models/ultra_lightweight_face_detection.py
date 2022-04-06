@@ -73,5 +73,4 @@ class UltraLightweightFaceDetection(DetectionModel):
 
         keep = nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.iou_threshold)
 
-        filtered_score = filtered_score[keep]
-        return [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
+        return [Detection(*det, 0) for det in zip(x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep], filtered_score[keep])]

@@ -1,0 +1,207 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "nanodet-m-1.5x-416" model is one from NanoDet models family, which is a FCOS-style
+  one-stage anchor-free object detection model which using Generalized Focal Loss
+  as classification and regression loss. The model is a super fast and high accuracy
+  lightweight model with ShuffleNetV2 1.5x backbone. This model was pre-trained on
+  Common Objects in Context (COCO) <https://cocodataset.org/#home> dataset.
+
+  More details provided in the repository <https://github.com/RangiLyu/nanodet>.
+task_type: detection
+files:
+  - name: arch/one_stage_detector.py
+    size: 2089
+    checksum: e5e31980335ad3f5347f7af439003a7594708f543f7a2aea5708afb387bbcfcc0b857047736c6432afac57c345738c59
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/arch/one_stage_detector.py
+  - name: backbone/shufflenetv2.py
+    size: 7071
+    checksum: 40692e4fe1a79d4d7241b151e29045265fb8de2a96344b585134b9d201e4a34aad4f03e59765c490b33bb5edafcbf8b5
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/backbone/shufflenetv2.py
+  - name: fpn/pan.py
+    size: 3138
+    checksum: aa1158104c9bce50a1cae73f207fcb086c92ee3abe90a6cf46237e7da705844f209f172ceffcc275e00909862aeada5c
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/fpn/pan.py
+  - name: fpn/fpn.py
+    size: 3153
+    checksum: 84dc50850c5f1ac77dc5a91277ffab8ef04346ffe24856db7510f2d1de2b5b182827909f4eba5583156da072a0004839
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/fpn/fpn.py
+  - name: head/gfl_head.py
+    size: 26236
+    checksum: f7104d786e51ade7e05e1a03eb77465b7533dfd03c3f4439ca8bcbbe17287adc8b937c3a6f8699555db87ec4674be0cd
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/head/gfl_head.py
+  - name: head/nanodet_head.py
+    size: 6257
+    checksum: b958ed144686aedc7be5245138978f76c59c366646126833d081fbe2dc9d610e2a23c5650a6d93393af23b8ef32564b5
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/head/nanodet_head.py
+  - name: util/yacs.py
+    size: 19589
+    checksum: b43e74383e65db36d8c33eab7520c567d9d52872d97964fb9c76ec4464536a63813b191a10f03cc2708424aeb63a5489
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/util/yacs.py
+  - name: util/config.py
+    size: 900
+    checksum: e3140915820e7f313e8460a6c6932b8425dfc818e7cab5116fc560f6a2a268ca53e96f79111980d81bde9281142a5181
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/util/config.py
+  - name: head/assigner/atss_assigner.py
+    size: 7319
+    checksum: 5c16ed21bc6035fc28088772f6190b204135f5b49e3d73569be8496a4992a33a7a5ed27d962f0fc2b3bc0072d6050d0f
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/head/assigner/atss_assigner.py
+  - name: head/assigner/base_assigner.py
+    size: 194
+    checksum: c8d710c4d41295ab1223af6e935e752115f8865c2817becf30196608d4a8187c06bc993dd846906a90254e6e6c11f494
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/head/assigner/base_assigner.py
+  - name: loss/iou_loss.py
+    size: 17695
+    checksum: 3c5cab473d747c2233c7ce475bfc7fc18ac76343e3f4d904032fc68df93f3c4e67222508afcf7eb41514d967246de5ae
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/loss/iou_loss.py
+  - name: loss/gfocal_loss.py
+    size: 7108
+    checksum: b03cf327c104397effa951406fb3f1e9be8dc46b02798131aa89c8001cb1f4a1fbde7caa98adf8cd92d1a0e1277cfcbd
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/loss/gfocal_loss.py
+  - name: loss/utils.py
+    size: 2923
+    checksum: b52207a1a42fb01d064e39e7362790fd03fa13318657b6a09a354ef7b0fc46c1c7c8b8e1adb69debb13b5be78ef53962
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/loss/utils.py
+  - name: nanodet-m-1.5x-416.yml
+    size: 3348
+    checksum: 3cc655c9d578ff8ed495c82f26a97fc66e120d9659506193f119d568a401372514ee11c93f35e46f19f0886167e66ef7
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/config/legacy_v0.x_configs/nanodet-m-1.5x-416.yml
+  - name: module/activation.py
+    size: 1191
+    checksum: 943d4b42719731e62c9b99a9c6488146221f5839192bd9fa6a1815368fc501009d0f72e42d3f2490d1c0cf50ab0739fd
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/module/activation.py
+  - name: module/conv.py
+    size: 13248
+    checksum: 313a7a50cd09f915f7becacaae799ce578dcb173cc3d5f01f9a365e0f242d7b489ea4948a896ee78f54cf9b034a356af
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/module/conv.py
+  - name: module/init_weights.py
+    size: 1453
+    checksum: b60012ebff5a8414b31d5f4ce6696e5e3d7aecc31bdb7430668bc2f9391d8840937439b2ac26abf55f83ad9fbbf9fcb8
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/module/init_weights.py
+  - name: module/norm.py
+    size: 1726
+    checksum: 278a3558e52351e98dfe97d8b478c737b54f9e3a88a6bd6a71af02fff0fa54cd04f0855f9c9c70878c4f08ae375d85d5
+    source: https://raw.githubusercontent.com/RangiLyu/nanodet/3cda376ce0b237930933762e862a267319c06092/nanodet/model/module/norm.py
+  - name: pytorch_lightning-1.5.10-py3-none-any.whl
+    size: 527715
+    checksum: 40cc821389c9419485852b32947dbd9908768ff0b02cc1074f26a2cd71d4313961b8ae242668a6f1fe48de737abd58ca
+    source: https://files.pythonhosted.org/packages/18/f1/f59b307f75db1886c96e396eec878501510677394868680b8d2b8b58c47c/pytorch_lightning-1.5.10-py3-none-any.whl
+  - name: torchmetrics-0.7.2-py3-none-any.whl
+    size: 397196
+    checksum: f1309177dfbee6d1715539a1c3a910849a5a58e6411575e4b916fbf2e20a2309ab5e9b03d2b5b061a2323210edb9a5af
+    source: https://files.pythonhosted.org/packages/f7/ec/3160fd2d30b55b35e9cfd8670c95fcaeb1daa9dba28aa912cfe40d696a3b/torchmetrics-0.7.2-py3-none-any.whl
+  - name: pyDeprecate-0.3.2-py3-none-any.whl
+    size: 10400
+    checksum: 90d8cdc11a049362146d2dd777f87e5284b78c75d877648a8779a860bbae52a3de3f11b25b1fbf2fcb0033e896ee3921
+    source: https://files.pythonhosted.org/packages/40/9c/173f3cf770e66f3c9592318806aebb8617ba405d6d4c09493dabea75985c/pyDeprecate-0.3.2-py3-none-any.whl
+  - name: fsspec-2022.2.0-py3-none-any.whl
+    size: 134940
+    checksum: 3a32a05567c2a0d4848af71fb17333026c002efb05aa5cc26870acfd4f1b1057f3f1c3e55bb3faadf038ac1d2dfcd8cd
+    source: https://files.pythonhosted.org/packages/b4/80/cd21f093faef23c03b9fc1274be7a3bfd63b809d2f06a1cff92e00cacfcc/fsspec-2022.2.0-py3-none-any.whl
+  - name: nanodet_m_1.5x_416.ckpt
+    size: 8500581
+    checksum: 805c55b8db2ddc872b6e50b5c9a038e69aaf3023a9e11af288c9c9791920c5294d01c927847790b210fc4215fd324b29
+    original_source:
+      $type: google_drive
+      id: 1CCYgwX3LWfN7hukcomhEhGWN-qcC3Tv4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.2/nanodet-m-1.5x-416/nanodet_m_1.5x_416.ckpt
+postprocessing:
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'from ..backbone import build_backbone'
+    replacement: 'from backbone.shufflenetv2 import ShuffleNetV2'
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'from ..fpn import build_fpn'
+    replacement: 'from fpn.pan import PAN'
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'from ..head import build_head'
+    replacement: 'from head.nanodet_head import NanoDetHead'
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'self.backbone = build_backbone\(backbone_cfg\)'
+    replacement: 'self.backbone = ShuffleNetV2(**backbone_cfg)'
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'self.fpn = build_fpn\(fpn_cfg\)'
+    replacement: 'self.fpn = PAN(**fpn_cfg)'
+  - $type: regex_replace
+    file: arch/one_stage_detector.py
+    pattern: 'self.head = build_head\(head_cfg\)'
+    replacement: 'self.head = NanoDetHead(**head_cfg)'
+  - $type: regex_replace
+    file: backbone/shufflenetv2.py
+    pattern: 'from ..module.activation import act_layers'
+    replacement: 'from module.activation import act_layers'
+  - $type: regex_replace
+    file: fpn/fpn.py
+    pattern: 'from ..module'
+    replacement: 'from module'
+  - $type: regex_replace
+    file: head/nanodet_head.py
+    pattern: 'from ..module'
+    replacement: 'from module'
+  - $type: regex_replace
+    file: head/gfl_head.py
+    pattern: '(from nanodet.util import|bbox2distance,|distance2bbox,|images_to_levels,|multi_apply,|overlay_bbox_cv,|from
+      (.*data.transform.warp)|from ..module)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: head/gfl_head.py
+    pattern: 'overlay_bbox_cv,\n\)'
+    replacement: 'overlay_bbox_cv,\n#)'
+  - $type: regex_replace
+    file: head/gfl_head.py
+    pattern: 'from ..loss'
+    replacement: 'from loss'
+  - $type: regex_replace
+    file: head/assigner/atss_assigner.py
+    pattern: '(from ...loss|from .assign_result)'
+    replacement: '# \g<0>'
+  - $type: unpack_archive
+    format: zip
+    file: pytorch_lightning-1.5.10-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: torchmetrics-0.7.2-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: pyDeprecate-0.3.2-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: fsspec-2022.2.0-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_nanodet
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/nanodet_m_1.5x_416.ckpt"
+  - --model-param=cfg_path=r"$dl_dir/nanodet-m-1.5x-416.yml"
+  - --input-shape=1,3,416,416
+  - --input-names=data
+  - --output-names=output
+  - --output-file=$conv_dir/nanodet-m-1.5x-416.onnx
+input_info:
+  - name: data
+    shape: [1, 3, 416, 416]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/nanodet-m-1.5x-416.onnx
+  - --scale_values=data[57.375, 57.12, 58.395]
+  - --mean_values=data[103.53, 116.28, 123.675]
+  - --output=output
+framework: pytorch
+license: https://raw.githubusercontent.com/RangiLyu/nanodet/main/LICENSE

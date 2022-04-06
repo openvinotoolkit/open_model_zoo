@@ -14,17 +14,33 @@
 // limitations under the License.
 */
 
+#include "models/detection_model_centernet.h"
+
+#include <stddef.h>
+
+#include <algorithm>
+#include <cmath>
+#include <map>
+#include <stdexcept>
+#include <utility>
+
+#include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
+
 #include <utils/common.hpp>
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
-#include "models/detection_model_centernet.h"
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
+#include "models/results.h"
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
-    float confidenceThreshold, const std::vector<std::string>& labels, const std::string& layout)
-    : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout) {
-}
+                               float confidenceThreshold,
+                               const std::vector<std::string>& labels,
+                               const std::string& layout)
+    : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout) {}
 
 void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -42,8 +58,7 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 
     ov::preprocess::PrePostProcessor ppp(model);
     inputTransform.setPrecision(ppp, model->input().get_any_name());
-    ppp.input().tensor().
-        set_layout("NHWC");
+    ppp.input().tensor().set_layout("NHWC");
 
     ppp.input().model().set_layout(inputLayout);
 
@@ -57,13 +72,11 @@ void ModelCenterNet::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         throw std::logic_error("CenterNet model wrapper expects models that have 3 outputs");
     }
 
-    const ov::Layout outLayout{ "NCHW" };
+    const ov::Layout outLayout{"NCHW"};
     for (const auto& output : model->outputs()) {
         auto outTensorName = output.get_any_name();
         outputsNames.push_back(outTensorName);
-        ppp.output(outTensorName).tensor().
-            set_element_type(ov::element::f32).
-            set_layout(outLayout);
+        ppp.output(outTensorName).tensor().set_element_type(ov::element::f32).set_layout(outLayout);
     }
     std::sort(outputsNames.begin(), outputsNames.end());
     model = ppp.build();
@@ -85,26 +98,31 @@ cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
     return b + cv::Point2f(-direct.y, direct.x);
 }
 
-cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, size_t outputWidth, size_t outputHeight, bool inv = false) {
-    float rotRad =  static_cast<float>(CV_PI) * rot / 180.0f;
-    auto srcDir = getDir({ 0.0f, -0.5f * srcW }, rotRad);
-    cv::Point2f dstDir(0.0f,  -0.5f * outputWidth);
-    std::vector<cv::Point2f> src(3, { 0.0f, 0.0f });
-    std::vector<cv::Point2f> dst(3, { 0.0f, 0.0f });
+cv::Mat getAffineTransform(float centerX,
+                           float centerY,
+                           int srcW,
+                           float rot,
+                           size_t outputWidth,
+                           size_t outputHeight,
+                           bool inv = false) {
+    float rotRad = static_cast<float>(CV_PI) * rot / 180.0f;
+    auto srcDir = getDir({0.0f, -0.5f * srcW}, rotRad);
+    cv::Point2f dstDir(0.0f, -0.5f * outputWidth);
+    std::vector<cv::Point2f> src(3, {0.0f, 0.0f});
+    std::vector<cv::Point2f> dst(3, {0.0f, 0.0f});
 
-    src[0] = { centerX, centerY };
+    src[0] = {centerX, centerY};
     src[1] = srcDir + src[0];
     src[2] = get3rdPoint(src[0], src[1]);
 
-    dst[0] = { outputWidth * 0.5f, outputHeight * 0.5f };
+    dst[0] = {outputWidth * 0.5f, outputHeight * 0.5f};
     dst[1] = dst[0] + dstDir;
     dst[2] = get3rdPoint(dst[0], dst[1]);
 
     cv::Mat trans;
     if (inv) {
         trans = cv::getAffineTransform(dst, src);
-    }
-    else {
+    } else {
         trans = cv::getAffineTransform(src, dst);
     }
 
@@ -139,7 +157,7 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sha
                 }
 
                 // ---------------------  store index and score------------------------------------
-                scores.push_back({ chSize * ch + shape[2] * w + h, max });
+                scores.push_back({chSize * ch + shape[2] * w + h, max});
 
                 bool next = true;
                 // ---------------------- maxpool2d -----------------------------------------------
@@ -151,8 +169,7 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sha
                                 next = false;
                                 break;
                             }
-                        }
-                        else {
+                        } else {
                             if (max < 0) {
                                 scores.pop_back();
                                 next = false;
@@ -168,7 +185,6 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, const ov::Shape& sha
     return scores;
 }
 
-
 static std::vector<std::pair<size_t, float>> filterScores(const ov::Tensor& scoresTensor, float threshold) {
     auto shape = scoresTensor.get_shape();
     float* scoresPtr = scoresTensor.data<float>();
@@ -176,30 +192,36 @@ static std::vector<std::pair<size_t, float>> filterScores(const ov::Tensor& scor
     return nms(scoresPtr, shape, threshold);
 }
 
-std::vector<std::pair<float, float>> filterReg(const ov::Tensor& regressionTensor, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+std::vector<std::pair<float, float>> filterReg(const ov::Tensor& regressionTensor,
+                                               const std::vector<std::pair<size_t, float>>& scores,
+                                               size_t chSize) {
     const float* regPtr = regressionTensor.data<float>();
     std::vector<std::pair<float, float>> reg;
 
     for (auto s : scores) {
-        reg.push_back({ regPtr[s.first % chSize], regPtr[chSize + s.first % chSize] });
+        reg.push_back({regPtr[s.first % chSize], regPtr[chSize + s.first % chSize]});
     }
 
     return reg;
 }
 
-std::vector<std::pair<float, float>> filterWH(const ov::Tensor& whTensor, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+std::vector<std::pair<float, float>> filterWH(const ov::Tensor& whTensor,
+                                              const std::vector<std::pair<size_t, float>>& scores,
+                                              size_t chSize) {
     const float* whPtr = whTensor.data<float>();
     std::vector<std::pair<float, float>> wh;
 
     for (auto s : scores) {
-        wh.push_back({ whPtr[s.first % chSize], whPtr[chSize + s.first % chSize] });
+        wh.push_back({whPtr[s.first % chSize], whPtr[chSize + s.first % chSize]});
     }
 
     return wh;
 }
 
-std::vector<ModelCenterNet::BBox> calcBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
-    const std::vector<std::pair<float, float>>& wh, const ov::Shape& shape) {
+std::vector<ModelCenterNet::BBox> calcBoxes(const std::vector<std::pair<size_t, float>>& scores,
+                                            const std::vector<std::pair<float, float>>& reg,
+                                            const std::vector<std::pair<float, float>>& wh,
+                                            const ov::Shape& shape) {
     std::vector<ModelCenterNet::BBox> boxes(scores.size());
 
     for (size_t i = 0; i < boxes.size(); ++i) {
@@ -216,16 +238,20 @@ std::vector<ModelCenterNet::BBox> calcBoxes(const std::vector<std::pair<size_t, 
     return boxes;
 }
 
-void transform(std::vector<ModelCenterNet::BBox>& boxes, const ov::Shape& shape, int scale, float centerX, float centerY) {
+void transform(std::vector<ModelCenterNet::BBox>& boxes,
+               const ov::Shape& shape,
+               int scale,
+               float centerX,
+               float centerY) {
     cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, shape[2], shape[3], true);
 
     for (auto& b : boxes) {
         ModelCenterNet::BBox newbb;
 
-        newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
-        newbb.top = trans.at<float>(1, 0) *  b.left + trans.at<float>(1, 1) *  b.top + trans.at<float>(1, 2);
-        newbb.right = trans.at<float>(0, 0) *  b.right + trans.at<float>(0, 1) *  b.bottom + trans.at<float>(0, 2);
-        newbb.bottom = trans.at<float>(1, 0) *  b.right + trans.at<float>(1, 1) *  b.bottom + trans.at<float>(1, 2);
+        newbb.left = trans.at<float>(0, 0) * b.left + trans.at<float>(0, 1) * b.top + trans.at<float>(0, 2);
+        newbb.top = trans.at<float>(1, 0) * b.left + trans.at<float>(1, 1) * b.top + trans.at<float>(1, 2);
+        newbb.right = trans.at<float>(0, 0) * b.right + trans.at<float>(0, 1) * b.bottom + trans.at<float>(0, 2);
+        newbb.bottom = trans.at<float>(1, 0) * b.right + trans.at<float>(1, 1) * b.bottom + trans.at<float>(1, 2);
 
         b = newbb;
     }
@@ -243,7 +269,6 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     const auto& whTensor = infResult.outputsData[outputsNames[2]];
     const auto wh = filterWH(whTensor, scores, chSize);
-
 
     // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
     auto boxes = calcBoxes(scores, reg, wh, heatmapTensorShape);
@@ -265,10 +290,10 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
-        desc.x = clamp(boxes[i].left, 0.f, (float)imgWidth);
-        desc.y = clamp(boxes[i].top, 0.f, (float)imgHeight);
-        desc.width = clamp(boxes[i].getWidth(), 0.f, (float)imgWidth);
-        desc.height = clamp(boxes[i].getHeight(), 0.f, (float)imgHeight);
+        desc.x = clamp(boxes[i].left, 0.f, static_cast<float>(imgWidth));
+        desc.y = clamp(boxes[i].top, 0.f, static_cast<float>(imgHeight));
+        desc.width = clamp(boxes[i].getWidth(), 0.f, static_cast<float>(imgWidth));
+        desc.height = clamp(boxes[i].getHeight(), 0.f, static_cast<float>(imgHeight));
 
         result->objects.push_back(desc);
     }
