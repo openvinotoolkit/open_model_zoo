@@ -117,6 +117,10 @@ class IEModel:
         self.infer_queue[req_id].wait()
         return self.outputs.pop(req_id, None)
 
+    def cancel(self):
+        for ireq in self.infer_queue:
+            ireq.cancel()
+
 
 class DummyDecoder:
     def __init__(self, num_requests=2):
@@ -133,3 +137,6 @@ class DummyDecoder:
     def wait_request(self, req_id):
         assert req_id in self.requests
         return self.requests.pop(req_id)
+
+    def cancel(self):
+        pass
