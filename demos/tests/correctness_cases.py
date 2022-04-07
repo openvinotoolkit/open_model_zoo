@@ -29,9 +29,43 @@ class CorrectnessCheckerBase(ABC):
     def __call__(self, output, test_case, device, execution_time=-1):
         pass
 
-    @abstractmethod
     def check_difference(self):
-        pass
+        flag = True
+        devices_list = {"AUTO:GPU,CPU" : ["CPU", "GPU"],
+                        "AUTO:CPU" : ["CPU"],
+                        "AUTO:GPU" : ["GPU"],
+                        "MULTI:GPU,CPU" : ["CPU", "GPU"]}
+        err_msg = ''
+        for device in devices_list:
+            for target in devices_list[device]:
+                if device not in self.results or target not in self.results:
+                    flag = False
+                    err_msg += "\tMiss the results of device {} or device {}.\n".format(device, target)
+                if device in self.results and target in self.results:
+                    if self.results[device] != self.results[target]:
+                        flag = False
+                        err_msg += "\tInconsistent results between device {} and {} \n".format(device, target)
+                        # Show the detailed inconsistent results
+                        for case in self.results[target]:
+                            if self.results[device][case] != self.results[target][case]:
+                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(device, case))
+                                for channel in self.results[device][case]:
+                                    for frame in self.results[device][case][channel]:
+                                        if channel not in self.results[target][case] or (channel in self.results[target][case] and frame not in self.results[target][case][channel]):
+                                            err_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[device][case][channel][frame]))
+                                err_msg += ('\t\t---------------------------------------------------------\n')
+                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(target, case))
+                                for channel in self.results[target][case]:
+                                    for frame in self.results[target][case][channel]:
+                                        if channel not in self.results[device][case] or (channel in self.results[device][case] and frame not in self.results[device][case][channel]):
+                                            err_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
+                                        elif self.results[device][case][channel][frame] != self.results[target][case][channel][frame]:
+                                            err_msg += ("\t\t\tInconsist result:\n\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[target][case][channel][frame]))
+                                            err_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[device][case][channel][frame]))
+                                err_msg += ('\t\t---------------------------------------------------------\n')
+        if not flag:
+            print("Correctness checking: Failure\n{}".format(err_msg))
+        return flag
 
     def write_to_log(self, result, test_case, device):
         with open(self.filename, 'w') as f:
@@ -40,6 +74,7 @@ class CorrectnessCheckerBase(ABC):
 
 class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
     def __call__(self, output, test_case, device, execution_time=0):
+        # Parsing results from raw data
         # Results format
         #               {"device name":
         #                   {"case index 0":
@@ -100,41 +135,8 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
 
         self.case_index[device] += 1
 
-    def check_difference(self):
-        flag = True
-        devices_list = {"AUTO:GPU,CPU" : ["CPU", "GPU"],
-                        "AUTO:CPU" : ["CPU"],
-                        "AUTO:GPU" : ["GPU"],
-                        "MULTI:GPU,CPU" : ["CPU", "GPU"]}
-        err_msg = ''
-        for device in devices_list:
-            for target in devices_list[device]:
-                if device not in self.results or target not in self.results:
-                    flag = False
-                    err_msg += "\tMiss the results of device {} or device {}.\n".format(device, target)
-                if device in self.results and target in self.results:
-                    if self.results[device] != self.results[target]:
-                        flag = False
-                        err_msg += "\tInconsistent results between device {} and {} \n".format(device, target)
-                        # Show the detailed inconsistent results
-                        for case in self.results[target]:
-                            if self.results[device][case] != self.results[target][case]:
-                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(device, case))
-                                for channel in self.results[device][case]:
-                                    for frame in self.results[device][case][channel]:
-                                        err_msg += ("\t\t\tChannel {} - Frame {} : {}\n".format(channel, frame, self.results[device][case][channel][frame]))
-                                err_msg += ('\t\t---------------------------------------------------------\n')
-                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(target, case))
-                                for channel in self.results[target][case]:
-                                    for frame in self.results[target][case][channel]:
-                                        err_msg += ("\t\t\tChannel {} - Frame {} : {}\n".format(channel, frame, self.results[target][case][channel][frame]))
-                                err_msg += ('\t\t---------------------------------------------------------\n')
-        if not flag:
-            print("Correctness checking: Failure\n{}".format(err_msg))
-        return flag
-
 DEMOS = [
-    BASE['security_barrier_camera_demo/cpp']
+    deepcopy(BASE['security_barrier_camera_demo/cpp'])
     .update_option({'-r': None, '-n_iqs': '1'})
     .add_parser(DemoSecurityBarrierCamera)
 ]
