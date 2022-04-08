@@ -442,7 +442,6 @@ class Evaluator(object):
 
                     # if rider move, check tweezers and rider distance
                     # if tweezers and rider are apart more than use_tweezers_threshold pixels (based on euclidean distance), consider not using tweezers
-                    print(np.linalg.norm(rider_min_coordinate - tweezers_min_coordinate))
                     if np.linalg.norm(rider_min_coordinate - tweezers_min_coordinate) <= self.use_tweezers_threshold and self.rider_tweezers_lock_mark==False:
                         self.scoring['measuring_score_rider_tweezers'] = 1
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
