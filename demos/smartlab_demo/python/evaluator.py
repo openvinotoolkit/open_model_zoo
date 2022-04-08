@@ -136,8 +136,7 @@ class Evaluator(object):
             display_frame_counter = 0
             action_seg_results = None
 
-        return self.state, self.scoring, self.keyframe, action_seg_results, \
-            top_det_results, side_det_results, frame_top, frame_side, display_frame_counter
+        return self.state, self.scoring, self.keyframe
 
     def check_consecutive(self):
         '''
