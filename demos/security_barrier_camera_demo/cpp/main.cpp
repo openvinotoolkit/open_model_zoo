@@ -121,6 +121,8 @@ struct Context {
         detectorsInfers.assign(detectorInferRequests);
         attributesInfers.assign(attributesInferRequests);
         platesInfers.assign(lprInferRequests);
+        totalInferFrameCounter = 0;
+        totalFrameCount = 0;
     }
 
     struct {
@@ -172,6 +174,11 @@ struct Context {
     bool isVideo;
     std::atomic<std::vector<ov::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
+
+    // Record the inferred frames count
+    std::atomic<uint32_t> totalInferFrameCounter;
+    std::atomic<uint32_t> totalFrameCount;
+
     InferRequestsContainer detectorsInfers, attributesInfers, platesInfers;
     PerformanceMetrics metrics;
 };
@@ -292,10 +299,6 @@ ReborningVideoFrame::~ReborningVideoFrame() {
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].lock();
         const auto frameId = ++context.videoFramesContext.lastframeIds[sourceID];
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].unlock();
-
-        // Stop reborning when frame ID reached to input queue size
-        if (!context.isVideo && frameId >= FLAGS_n_iqs)
-            return;
         std::shared_ptr<ReborningVideoFrame> reborn = std::make_shared<ReborningVideoFrame>(context, sourceID, frameId, frame);
         worker->push(std::make_shared<Reader>(reborn));
     } catch (const std::bad_weak_ptr&) {}
@@ -384,7 +387,7 @@ void Drawer::process() {
             if (!context.isVideo) {
                 try {
                     // Exit only when inferences on all of frames are finished.
-                    if (context.frameCounter >= FLAGS_n_iqs * context.readersContext.inputChannels.size())
+                    if (context.totalInferFrameCounter >= FLAGS_ni * context.totalFrameCount)
                         std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
                 }
                 catch (const std::bad_weak_ptr&) {}
@@ -569,6 +572,8 @@ void DetectionsProcessor::process() {
         tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
             std::make_shared<DetectionsProcessor>(sharedVideoFrame, std::move(classifiersAggregator), std::move(vehicleRects), std::move(plateRects)));
     }
+    // Count the frames passed inference
+    context.totalInferFrameCounter++;
 }
 
 bool InferTask::isReady() {
@@ -591,10 +596,10 @@ void InferTask::process() {
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
     std::reference_wrapper<ov::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
+
     detectorsInfers.inferRequests.mutex.unlock();
 
     context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
-
     inferRequest.get().set_callback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
@@ -635,6 +640,12 @@ void Reader::process() {
         context.readersContext.lastCapturedFrameIds[sourceID]++;
         context.readersContext.lastCapturedFrameIdsMutexes[sourceID].unlock();
         try {
+            if (context.totalInferFrameCounter < FLAGS_ni * context.totalFrameCount)
+            {
+                // Rebron this invalid frame to end the worker at next time
+                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->push(std::make_shared<Reader>(sharedVideoFrame));
+                return;
+            }
             std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
         } catch (const std::bad_weak_ptr&) {}
     }
@@ -674,6 +685,8 @@ int main(int argc, char* argv[]) {
                 videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             }
         }
+
+        uint32_t totalFrameCount = 0;
         for (const std::string& file : files) {
             cv::Mat frame = cv::imread(file, cv::IMREAD_COLOR);
             if (frame.empty()) {
@@ -683,8 +696,12 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
                 videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
+                // Get the total frame count from this video
+                totalFrameCount = static_cast<uint32_t>(videoCapture.get(cv::CAP_PROP_FRAME_COUNT));
             } else {
                 imageSourcess.push_back(std::make_shared<ImageSource>(frame, true));
+                // Get the total frame count from the inputting images
+                totalFrameCount++;
             }
         }
         uint32_t channelsNum = 0 == FLAGS_ni ? videoCapturSourcess.size() + imageSourcess.size() : FLAGS_ni;
@@ -802,6 +819,8 @@ int main(int argc, char* argv[]) {
                         nireq,
                         isVideo,
                         nclassifiersireq, nrecognizersireq};
+        // initilize the inputting frames count
+        context.totalFrameCount = totalFrameCount;
         // Create a worker after a context because the context has only weak_ptr<Worker>, but the worker is going to
         // indirectly store ReborningVideoFrames which have a reference to the context. So there won't be a situation
         // when the context is destroyed and the worker still lives with its ReborningVideoFrames referring to the
