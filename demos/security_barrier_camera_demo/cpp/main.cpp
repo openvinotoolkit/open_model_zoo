@@ -386,9 +386,7 @@ void Drawer::process() {
         } else {
             if (!context.isVideo) {
                 try {
-                    // Exit only when inferences on all of frames are finished.
-                    if (context.totalInferFrameCounter >= FLAGS_ni * context.totalFrameCount)
-                        std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
                 }
                 catch (const std::bad_weak_ptr&) {}
             }

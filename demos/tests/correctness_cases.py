@@ -62,47 +62,54 @@ class CorrectnessCheckerBase(ABC):
     def check_difference(self):
         flag = True
         devices_list = {
-                        #"AUTO:GPU,CPU" : ["CPU", "GPU"],
-                        "AUTO:CPU" : ["CPU"],
+                        "AUTO:GPU,CPU" : ["CPU", "GPU"],
+                        "MULTI:CPU,GPU" : ["CPU", "GPU"],
+                        "AUTO:CPU" : ["CPU"]
                         #"AUTO:GPU" : ["GPU"],
-                        "MULTI:CPU,GPU" : ["CPU", "GPU"]}
+                        }
         err_msg = ''
         multi_correctness = {'CPU': True, 'GPU': True}
         for device in devices_list:
+            tmp_msg = ''
             for target in devices_list[device]:
                 if device not in self.results or target not in self.results:
                         flag = False
                         err_msg += "\tMiss the results of device {} or device {}.\n".format(device, target)
                 if device in self.results and target in self.results:
+                    inconsist_flag = False
                     if self.results[device] != self.results[target]:
-                        err_msg += "\tInconsistent results between device {} and {} \n".format(device, target)
+                        tmp_msg += "\tInconsistent results between device {} and {} \n".format(device, target)
                         # Show the detailed inconsistent results
                         for case in self.results[target]:
                             if self.results[device][case] != self.results[target][case]:
-                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(device, case))
+                                tmp_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(device, case))
                                 for channel in self.results[device][case]:
                                     for frame in self.results[device][case][channel]:
                                         if channel not in self.results[target][case] or (channel in self.results[target][case] and frame not in self.results[target][case][channel]):
                                             err_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[device][case][channel][frame]))
-                                err_msg += ('\t\t---------------------------------------------------------\n')
-                                err_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(target, case))
+                                tmp_msg += ('\t\t---------------------------------------------------------\n')
+                                tmp_msg += ("\t\t---* Device: {} - Case: {} *----\n".format(target, case))
                                 for channel in self.results[target][case]:
                                     for frame in self.results[target][case][channel]:
                                         if channel not in self.results[device][case] or (channel in self.results[device][case] and frame not in self.results[device][case][channel]):
-                                            err_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
+                                            tmp_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
                                         else:
                                             for obj in self.results[target][case][channel][frame]:
                                                 if obj not in self.results[device][case][channel][frame]:
                                                     flag = False
-                                                    err_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
+                                                    tmp_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
                                                 elif not self.compare_roi(self.results[device][case][channel][frame][obj],self.results[target][case][channel][frame][obj]):
                                                     if device != 'MULTI:CPU,GPU':
                                                         flag = False
                                                     else:
                                                         multi_correctness[target] = False
-                                                    err_msg += ("\t\t\tInconsist result:\n\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[target][case][channel][frame]))
-                                                    err_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[device][case][channel][frame]))
-                                err_msg += ('\t\t---------------------------------------------------------\n')
+                                                    inconsist_flag = True
+                                                    tmp_msg += ("\t\t\tInconsist result:\n\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[target][case][channel][frame]))
+                                                    tmp_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[device][case][channel][frame]))
+                                tmp_msg += ('\t\t---------------------------------------------------------\n')
+                    if inconsist_flag:
+                        err_msg += tmp_msg
+                        tmp_msg = ''
         # Check correctness for MULTI device
         for device in devices_list:
             if 'MULTI:' not in device:
@@ -183,6 +190,6 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
 
 DEMOS = [
     deepcopy(BASE['security_barrier_camera_demo/cpp'])
-    .update_option({'-r': None,'-ni': '16', '-n_iqs': '1', '-i': '/home/wy/data_for_security_barrier_camera_demo/images_10/output.mp4'})
+    .update_option({'-r': None,'-ni': '16', '-n_iqs': '1', '-i': '10_images.mp4'})
     .add_parser(DemoSecurityBarrierCamera)
 ]
