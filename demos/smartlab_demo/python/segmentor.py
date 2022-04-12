@@ -1,12 +1,9 @@
 """
  Copyright (C) 2021-2022 Intel Corporation
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +14,7 @@
 import cv2
 import numpy as np
 import copy
+from scipy.special import softmax
 
 
 class Segmentor:
@@ -76,12 +74,12 @@ class Segmentor:
 
         ### run ###
         self.infer_encoder_side_request.infer(inputs=
-            {self.encoder_side_input_keys['input_image']: buffer_side,
-            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
+                                              {self.encoder_side_input_keys['input_image']: buffer_side,
+                                               self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
         self.infer_encoder_top_request.infer(inputs=
-            {self.encoder_top_input_keys['input_image']: buffer_top,
-            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
+                                             {self.encoder_top_input_keys['input_image']: buffer_top,
+                                              self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         ### get tensors ###
         feature_vector_side = self.infer_encoder_side_request.get_tensor(
@@ -137,7 +135,8 @@ class Segmentor:
 
                 output = self.infer_decoder_request.infer(inputs={
                     self.decoder_input_keys['input_feature_1']: feature_vector_side.data,
-                    self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[self.decoder_output_key['output']]
+                    self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[
+                    self.decoder_output_key['output']]
 
                 ### yoclo classifier ###
                 isAction = (output.squeeze()[0] >= .5).astype(int)
@@ -180,6 +179,7 @@ class SegmentorMstcn:
         self.mobileNet_request = self.mobileNet.create_infer_request()
 
         self.mstcn_net = core.read_model(mstcn_path)
+        self.mstcn_net.reshape({"input": [1, 1152, self.SegBatchSize]})
         self.mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_input_keys = self.mstcn.inputs
         self.mstcn_output_keys = self.mstcn.outputs
@@ -201,10 +201,7 @@ class SegmentorMstcn:
         self.feature_embedding(frame_top, frame_side)
         feature = self.mobileNet_request.get_tensor(self.mobileNet_output_key[0]).data.reshape(1152, 1)
         ### run mstcn++ ###
-        temp = self.action_segmentation(feature)
-        if temp and frame_index >= 264:
-            print(frame_index, temp)
-        return temp
+        return self.action_segmentation(feature)
 
     def feature_embedding(self, frame_top, frame_side):
 
@@ -223,10 +220,19 @@ class SegmentorMstcn:
             # reset bufferCombined
             self.EmbedBufferCombined = []
             feed_dict = {'input': input_mstcn, 'fhis_in_0': self.his_fea[0], 'fhis_in_1': self.his_fea[1],
-                        feed_dict[string] = self.his_fea[string]
-                self.mstcn_infer_request.infer(feed_dict)
-                if 'fhis_in_' in str(key.names): # fhis_in_0 to 3
-                    self.his_fea[string] = self.mstcn_infer_request.get_tensor(key).data
+                         'fhis_in_2': self.his_fea[2], 'fhis_in_3': self.his_fea[3]}
+
+            # inference MSTCN
+            self.mstcn_infer_request.infer(feed_dict)
+
+            # get predicted output
+            predictions = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[0]).data
+            for i in range(4):
+                self.his_fea[i] = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[i + 1]).data
+
+            pred_actions = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
+            pred_softmax = softmax(pred_actions[-1], 1)  # 1x16xN
+            temporal_logits = pred_softmax.transpose((0, 2, 1)).squeeze(axis=0)
             # ### get label ###
-            self.TemporalLogits = np.concatenate((self.TemporalLogits, temporal_logits), axis=0)
-            raise ValueError(f"unexpected batch size: {num_batch}")
+            frame_predictions = [self.ActionTerms[i] for i in np.argmax(temporal_logits, axis=1)]
+            return frame_predictions
