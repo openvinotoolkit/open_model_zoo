@@ -227,15 +227,26 @@ public:
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (FLAGS_r && !rawDetections.empty()) {
-            for (const std::string& rawDetection : rawDetections)
-                slog::debug << rawDetection << slog::endl;
+            slog::debug << "ChannelId:" << sharedVideoFrame->sourceID << "," << "FrameId:" <<sharedVideoFrame->frameId << ",";
+            for (auto it = rawDetections.begin(); it !=  rawDetections.end(); ++it) {
+                if(it + 1 == rawDetections.end())
+                    slog::debug << *it;
+                else
+                    slog::debug << *it << ",";
+            }
             // destructor assures that none uses the container
+            // Format: ChannleId,FrameId,ObjectId,ObjectLable,Prob,roi_x,roi_y,roi_width,roi_high,[Vehicle Attributes],[License Plate]
             for (const std::string& rawAttribute : rawAttributes.container) {
-                slog::debug << rawAttribute << slog::endl;
+                auto pos = rawAttribute.find(":");
+                if(pos != std::string::npos)
+                    slog::debug << "," << rawAttribute.substr(pos + 1);
             }
             for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-                slog::debug << rawDecodedPlate << slog::endl;
+                auto pos = rawDecodedPlate.find(":");
+                if(pos != std::string::npos)
+                    slog::debug << "," << rawDecodedPlate.substr(pos + 1);
             }
+            slog::debug << slog::endl;
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
@@ -435,7 +446,7 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<Detector::Result> results;
-        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->sourceID, sharedVideoFrame->frameId, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
 
         for (Detector::Result result : results) {
             switch (result.label) {

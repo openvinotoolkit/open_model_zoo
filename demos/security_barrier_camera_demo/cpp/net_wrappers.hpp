@@ -121,7 +121,7 @@ public:
         }
     }
 
-    std::list<Result> getResults(ov::InferRequest& inferRequest, const int64_t channelID, const int64_t frameID, cv::Size upscale, std::vector<std::string>& rawResults) {
+    std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         ov::Tensor output_tensor = inferRequest.get_tensor(m_detectorOutputName);
@@ -145,8 +145,7 @@ public:
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
             results.push_back(Result{label, confidence, rect});
             std::ostringstream rawResultsStream;
-            rawResultsStream << "ChannelId:" << channelID << ",FrameId:" << frameID << ",";
-            rawResultsStream << "ObjId:" << i << "," << label << "," << confidence
+            rawResultsStream << i << "," << label << "," << confidence
                         << "," << rect.x << "," << rect.y << "," << rect.width << "," << rect.height;
             rawResults.push_back(rawResultsStream.str());
         }

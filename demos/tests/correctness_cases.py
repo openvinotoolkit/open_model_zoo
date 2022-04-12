@@ -33,42 +33,49 @@ class CorrectnessCheckerBase(ABC):
         source = []
         dest = []
         if len(source_roi) != len(dest_roi):
-            print (source)
-            print (dest)
             return False
+        # Expected ROI format: lable, prob, x, y, w, h,...., Vehicle attribute, License plate 
         for item in source_roi:
-            source.append(float(item))
+            try:
+                source.append(float(item))
+            except ValueError:
+                source.append(item)
 
         for item in dest_roi:
-            dest.append(float(item))
+            try:
+                dest.append(float(item))
+            except ValueError:
+                dest.append(item)
         flag = True
-        prob_gap = 0.01
-        pos_gap = 5
+        prob_gap = 0.1
+        pos_gap = 20
         for index in range(len(source)):
-            if index <= 1:
-                if abs(source[index] - dest[index]) > prob_gap:
-                    flag = False
-                    print (source)
-                    print (dest)
-                    break
+            if type(source[index]) == float:
+                if source[index] > 0 and source[index] < 1:
+                    if abs(source[index] - dest[index]) > prob_gap:
+                        flag = False
+                        break
+                else:
+                    if abs(source[index] - dest[index]) > pos_gap:
+                        flag = False
+                        break
             else:
-                if abs(source[index] - dest[index]) > pos_gap:
+                if source[index] != dest[index]:
                     flag = False
-                    print (source)
-                    print (dest)
                     break
+
         return flag
 
     def check_difference(self):
         flag = True
         devices_list = {
-                        "AUTO:GPU,CPU" : ["CPU", "GPU"],
+                        "AUTO:CPU,GPU" : ["CPU", "GPU"],
                         "MULTI:CPU,GPU" : ["CPU", "GPU"],
-                        "AUTO:CPU" : ["CPU"]
-                        #"AUTO:GPU" : ["GPU"],
+                        "AUTO:CPU" : ["CPU"],
+                        "AUTO:GPU" : ["GPU"],
                         }
         err_msg = ''
-        multi_correctness = {'CPU': True, 'GPU': True}
+        multi_correctness = {'MULTI:CPU,GPU':{'CPU': True, 'GPU': True},'AUTO:CPU,GPU':{'CPU': True, 'GPU': True}}
         for device in devices_list:
             tmp_msg = ''
             for target in devices_list[device]:
@@ -99,22 +106,25 @@ class CorrectnessCheckerBase(ABC):
                                                     flag = False
                                                     tmp_msg += ("\t\t\t[Not Found on {}]Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[target][case][channel][frame]))
                                                 elif not self.compare_roi(self.results[device][case][channel][frame][obj],self.results[target][case][channel][frame][obj]):
-                                                    if device != 'MULTI:CPU,GPU':
+                                                    if device != 'MULTI:CPU,GPU' and device != 'AUTO:CPU,GPU':
                                                         flag = False
                                                     else:
-                                                        multi_correctness[target] = False
+                                                        multi_correctness[device][target] = False
                                                     inconsist_flag = True
                                                     tmp_msg += ("\t\t\tInconsist result:\n\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[target][case][channel][frame]))
                                                     tmp_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[device][case][channel][frame]))
                                 tmp_msg += ('\t\t---------------------------------------------------------\n')
+                            if not inconsist_flag:
+                                tmp_msg = ''
                     if inconsist_flag:
                         err_msg += tmp_msg
                         tmp_msg = ''
+                        inconsist_flag = False
         # Check correctness for MULTI device
         for device in devices_list:
-            if 'MULTI:' not in device:
+            if 'MULTI:CPU,GPU' != device and 'AUTO:CPU,GPU' != device:
                 continue
-            if multi_correctness['CPU'] == False and multi_correctness['GPU'] == False:
+            if multi_correctness[device]['CPU'] == False and multi_correctness[device]['GPU'] == False:
                 flag = False
         if not flag:
             print("Correctness checking: Failure\n{}".format(err_msg))
@@ -151,7 +161,6 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
         #                       .....
         #                   }
         #               }
-
         # Generate case id for each device
         if device not in self.case_index:
             self.case_index[device] = 0
@@ -181,7 +190,7 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
 
             # Object ID
             label_prob_pos_results = []
-            objid = item[2].split(':')[1]
+            objid = item[2]
             if objid not in self.results[device][case_index][channel][frame]:
                 self.results[device][case_index][channel][frame][objid] = label_prob_pos_results
             self.results[device][case_index][channel][frame][objid] = item[3:]
