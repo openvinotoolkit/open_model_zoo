@@ -20,11 +20,13 @@
 struct InputData {
     virtual ~InputData() {}
 
-    template<class T> T& asRef() {
+    template <class T>
+    T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
-    template<class T> const T& asRef() const {
+    template <class T>
+    const T& asRef() const {
         return dynamic_cast<const T&>(*this);
     }
 };

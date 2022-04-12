@@ -7,8 +7,8 @@ models:
           probability_out: logits
           logarithmic_prob: False
           beam_size: 32
-          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to lm.binary.
-          lm_file: mozilla-deepspeech-0.6.1/deepspeech-0.6.1-models/lm.binary
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to lm.binary.
+          lm_file: deepspeech-0.6.1-models/lm.binary
           lm_alpha: 0.75
           lm_beta: 1.85
           lm_oov_score: -1000.

@@ -14,13 +14,16 @@
 // limitations under the License.
 */
 
+#include "utils/config_factory.h"
 
 #include <set>
 #include <string>
+#include <utility>
+#include <vector>
+
 #include <openvino/runtime/intel_gpu/properties.hpp>
+
 #include "utils/args_helper.hpp"
-#include "utils/common.hpp"
-#include "utils/config_factory.h"
 
 std::set<std::string> ModelConfig::getDevices() {
     if (devices.empty()) {
@@ -33,7 +36,9 @@ std::set<std::string> ModelConfig::getDevices() {
 }
 
 ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
-    uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads) {
+                                         uint32_t flags_nireq,
+                                         const std::string& flags_nstreams,
+                                         uint32_t flags_nthreads) {
     auto config = getCommonConfig(flags_d, flags_nireq);
 
     std::map<std::string, int> deviceNstreams = parseValuePerDevice(config.getDevices(), flags_nstreams);
@@ -45,16 +50,19 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
 
             config.compiledModelConfig.emplace(ov::affinity.name(), ov::Affinity::NONE);
 
-            ov::streams::Num nstreams = deviceNstreams.count(device) > 0 ? ov::streams::Num(deviceNstreams[device]) : ov::streams::AUTO;
+            ov::streams::Num nstreams =
+                deviceNstreams.count(device) > 0 ? ov::streams::Num(deviceNstreams[device]) : ov::streams::AUTO;
             config.compiledModelConfig.emplace(ov::streams::num.name(), nstreams);
         } else if (device == "GPU") {
-            ov::streams::Num nstreams = deviceNstreams.count(device) > 0 ? ov::streams::Num(deviceNstreams[device]) : ov::streams::AUTO;
+            ov::streams::Num nstreams =
+                deviceNstreams.count(device) > 0 ? ov::streams::Num(deviceNstreams[device]) : ov::streams::AUTO;
             config.compiledModelConfig.emplace(ov::streams::num.name(), nstreams);
-            if (flags_d.find("MULTI") != std::string::npos && config.getDevices().find("CPU") != config.getDevices().end()) {
+            if (flags_d.find("MULTI") != std::string::npos &&
+                config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.compiledModelConfig.emplace(ov::intel_gpu::hint::queue_throttle.name(),
-                    ov::intel_gpu::hint::ThrottleLevel(1));
+                                                   ov::intel_gpu::hint::ThrottleLevel(1));
             }
         }
     }
@@ -66,8 +74,7 @@ ModelConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, uint3
     for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
-        }
-        else if (device == "GPU") {
+        } else if (device == "GPU") {
             config.compiledModelConfig.emplace(ov::streams::num.name(), 1);
         }
     }

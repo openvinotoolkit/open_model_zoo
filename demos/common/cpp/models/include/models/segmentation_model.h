@@ -15,10 +15,17 @@
 */
 
 #pragma once
+#include <memory>
 #include <string>
-#include <openvino/openvino.hpp>
+#include <vector>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct ResultBase;
 
 #pragma once
 class SegmentationModel : public ImageModel {

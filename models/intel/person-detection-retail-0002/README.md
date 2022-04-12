@@ -36,7 +36,7 @@ curve. Validation dataset consists of ~50K of images from ~100 different scenes.
 
     The expected channel order is `BGR`.
 
-2. name: `im_info`, shape: `1x6` - An image information
+2. name: `im_info`, shape: `1, 6` - An image information
     [544, 992, 992/`frame_width`, 544/`frame_height`, 992/`frame_width`, 544/`frame_height`]
 
 ## Outputs

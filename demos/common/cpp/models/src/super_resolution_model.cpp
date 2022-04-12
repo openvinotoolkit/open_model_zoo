@@ -14,20 +14,33 @@
 // limitations under the License.
 */
 
+#include "models/super_resolution_model.h"
+
+#include <stddef.h>
+
+#include <map>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
-#include <opencv2/opencv.hpp>
+
+#include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
+
 #include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-#include "models/super_resolution_model.h"
+
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
 #include "models/results.h"
 
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout) :
-    ImageModel(modelFileName, false, layout) {
-        netInputHeight = inputImgSize.height;
-        netInputWidth = inputImgSize.width;
+SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName,
+                                           const cv::Size& inputImgSize,
+                                           const std::string& layout)
+    : ImageModel(modelFileName, false, layout) {
+    netInputHeight = inputImgSize.height;
+    netInputWidth = inputImgSize.width;
 }
 
 void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
@@ -69,15 +82,13 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
             inputsNames[0].swap(inputsNames[1]);
         } else if (!(lrShape[widthId] <= bicShape[widthId] && lrShape[heightId] <= bicShape[heightId])) {
             throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
-                "dimension of another input");
+                                   "dimension of another input");
         }
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
     for (const auto& input : inputs) {
-        ppp.input(input.get_any_name()).tensor().
-            set_element_type(ov::element::u8).
-            set_layout("NHWC");
+        ppp.input(input.get_any_name()).tensor().set_element_type(ov::element::u8).set_layout("NHWC");
 
         ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
@@ -132,14 +143,15 @@ void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, in
     model->reshape(shapes);
 }
 
-std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, ov::InferRequest& request) {
+std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData,
+                                                                    ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
     const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
     const ov::Layout layout("NHWC");
 
-    if (img.channels() != (int)lrInputTensor.get_shape()[ov::layout::channels_idx(layout)]) {
+    if (img.channels() != static_cast<int>(lrInputTensor.get_shape()[ov::layout::channels_idx(layout)])) {
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
     }
 
@@ -153,8 +165,8 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 
     if (inputsNames.size() == 2) {
         const ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
-        const int h = (int)bicInputTensor.get_shape()[ov::layout::height_idx(layout)];
-        const int w = (int)bicInputTensor.get_shape()[ov::layout::width_idx(layout)];
+        const int h = static_cast<int>(bicInputTensor.get_shape()[ov::layout::height_idx(layout)]);
+        const int w = static_cast<int>(bicInputTensor.get_shape()[ov::layout::width_idx(layout)]);
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
         request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
@@ -170,15 +182,14 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
 
     std::vector<cv::Mat> imgPlanes;
     const ov::Shape& outShape = infResult.getFirstOutputTensor().get_shape();
-    const size_t outChannels = (int)(outShape[1]);
-    const size_t outHeight = (int)(outShape[2]);
-    const size_t outWidth = (int)(outShape[3]);
+    const size_t outChannels = static_cast<int>(outShape[1]);
+    const size_t outHeight = static_cast<int>(outShape[2]);
+    const size_t outWidth = static_cast<int>(outShape[3]);
     const size_t numOfPixels = outWidth * outHeight;
     if (outChannels == 3) {
-        imgPlanes = std::vector<cv::Mat>{
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
-              cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
+        imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),
+                                         cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
+                                         cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
     } else {
         imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0]))};
         // Post-processing for text-image-super-resolution models

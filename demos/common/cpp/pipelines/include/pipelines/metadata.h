@@ -20,11 +20,13 @@
 struct MetaData {
     virtual ~MetaData() {}
 
-    template<class T> T& asRef() {
+    template <class T>
+    T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
-    template<class T> const T& asRef() const {
+    template <class T>
+    const T& asRef() const {
         return dynamic_cast<const T&>(*this);
     }
 };
@@ -33,20 +35,17 @@ struct ImageMetaData : public MetaData {
     cv::Mat img;
     std::chrono::steady_clock::time_point timeStamp;
 
-    ImageMetaData() {
-    }
+    ImageMetaData() {}
 
-    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) :
-        img(img),
-        timeStamp(timeStamp) {
-    }
+    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) : img(img), timeStamp(timeStamp) {}
 };
 
 struct ClassificationImageMetaData : public ImageMetaData {
     unsigned int groundTruthId;
 
-    ClassificationImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp, unsigned int groundTruthId) :
-        ImageMetaData(img, timeStamp),
-        groundTruthId(groundTruthId) {
-    }
+    ClassificationImageMetaData(cv::Mat img,
+                                std::chrono::steady_clock::time_point timeStamp,
+                                unsigned int groundTruthId)
+        : ImageMetaData(img, timeStamp),
+          groundTruthId(groundTruthId) {}
 };

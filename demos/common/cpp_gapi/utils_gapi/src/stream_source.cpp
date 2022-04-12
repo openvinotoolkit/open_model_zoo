@@ -1,12 +1,17 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <utils_gapi/stream_source.hpp>
+#include "utils_gapi/stream_source.hpp"
+
+#include <opencv2/gapi/garg.hpp>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/own/assert.hpp>
+
+#include <utils/images_capture.h>
 
 namespace custom {
-CommonCapSrc::CommonCapSrc(std::shared_ptr<ImagesCapture>& imagesCapture)
-    : cap(imagesCapture) {
+CommonCapSrc::CommonCapSrc(std::shared_ptr<ImagesCapture>& imagesCapture) : cap(imagesCapture) {
     preparation();
 }
 
@@ -19,7 +24,7 @@ void CommonCapSrc::preparation() {
     first = tmp.clone();
 }
 
-bool CommonCapSrc::pull(cv::gapi::wip::Data &data) {
+bool CommonCapSrc::pull(cv::gapi::wip::Data& data) {
     if (!first_pulled) {
         GAPI_Assert(!first.empty());
         first_pulled = true;
@@ -36,6 +41,6 @@ bool CommonCapSrc::pull(cv::gapi::wip::Data &data) {
 
 cv::GMetaArg CommonCapSrc::descr_of() const {
     GAPI_Assert(!first.empty());
-    return cv::GMetaArg{ cv::descr_of(first) };
+    return cv::GMetaArg{cv::descr_of(first)};
 }
-} // namespace custom
+}  // namespace custom

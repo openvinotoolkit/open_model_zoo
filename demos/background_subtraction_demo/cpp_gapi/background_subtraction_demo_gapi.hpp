@@ -4,8 +4,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
+#include <iostream>
 
 #include <gflags/gflags.h>
+
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
@@ -15,17 +17,21 @@ static const char help_message[] = "Print a usage message.";
 static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
 static const char at_message[] = "Required. Architecture type: maskrcnn, background-matting.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char kernel_package_message[] = "Optional. G-API kernel package type: opencv, fluid (by default opencv is used).";
-static const char device_message[] = "Optional. Target device for network (the list of available devices is shown below). "
-                                            "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+static const char kernel_package_message[] =
+    "Optional. G-API kernel package type: opencv, fluid (by default opencv is used).";
+static const char device_message[] =
+    "Optional. Target device for network (the list of available devices is shown below). "
+    "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer "
+                                    "requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
-"throughput mode (for HETERO and MULTI device cases use format "
-"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+                                          "throughput mode (for HETERO and MULTI device cases use format "
+                                          "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char blur_bgr_message[] = "Optional. Blur background.";
-static const char target_bgr_message[] = "Optional. Background onto which to composite the output (by default to green field).";
+static const char target_bgr_message[] =
+    "Optional. Background onto which to composite the output (by default to green field).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
@@ -43,8 +49,8 @@ DEFINE_uint32(blur_bgr, 0, blur_bgr_message);
 DEFINE_string(u, "", utilization_monitors_message);
 
 /**
-* \brief This function shows a help message
-*/
+ * \brief This function shows a help message
+ */
 
 static void showUsage() {
     std::cout << std::endl;

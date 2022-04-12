@@ -15,14 +15,20 @@
 */
 
 #pragma once
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
-#include "models/detection_model.h"
-#include "models/results.h"
 
-class ModelRetinaFace
-    : public DetectionModel {
+#include "models/detection_model.h"
+
+namespace ov {
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct ResultBase;
+
+class ModelRetinaFace : public DetectionModel {
 public:
     struct Anchor {
         float left;
@@ -30,10 +36,18 @@ public:
         float right;
         float bottom;
 
-        float getWidth() const { return (right - left) + 1.0f; }
-        float getHeight() const { return (bottom - top) + 1.0f; }
-        float getXCenter() const { return left + (getWidth() - 1.0f) / 2.0f; }
-        float getYCenter() const { return top + (getHeight() - 1.0f) / 2.0f; }
+        float getWidth() const {
+            return (right - left) + 1.0f;
+        }
+        float getHeight() const {
+            return (bottom - top) + 1.0f;
+        }
+        float getXCenter() const {
+            return left + (getWidth() - 1.0f) / 2.0f;
+        }
+        float getYCenter() const {
+            return top + (getHeight() - 1.0f) / 2.0f;
+        }
     };
 
     static const int LANDMARKS_NUM = 5;
@@ -45,8 +59,11 @@ public:
     /// @param useAutoResize - if true, image will be resized by openvino.
     /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
     /// @param layout - model input layout
-    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize,
-        float boxIOUThreshold, const std::string& layout = "");
+    ModelRetinaFace(const std::string& model_name,
+                    float confidenceThreshold,
+                    bool useAutoResize,
+                    float boxIOUThreshold,
+                    const std::string& layout = "");
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
@@ -63,17 +80,11 @@ protected:
     const float maskThreshold;
     float landmarkStd;
 
-    enum OutputType {
-        OUT_BOXES,
-        OUT_SCORES,
-        OUT_LANDMARKS,
-        OUT_MASKSCORES,
-        OUT_MAX
-    };
+    enum OutputType { OUT_BOXES, OUT_SCORES, OUT_LANDMARKS, OUT_MASKSCORES, OUT_MAX };
 
-    std::vector <std::string> separateOutputsNames[OUT_MAX];
+    std::vector<std::string> separateOutputsNames[OUT_MAX];
     const std::vector<AnchorCfgLine> anchorCfg;
-    std::map<int, std::vector <Anchor>> anchorsFpn;
+    std::map<int, std::vector<Anchor>> anchorsFpn;
     std::vector<std::vector<Anchor>> anchors;
 
     void generateAnchorsFpn();

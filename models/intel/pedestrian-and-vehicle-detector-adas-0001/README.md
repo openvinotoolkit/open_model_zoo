@@ -27,7 +27,7 @@ Tested on challenging internal datasets with 1001 pedestrian and 12585 vehicles 
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 384, 672` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 3, 384, 672` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

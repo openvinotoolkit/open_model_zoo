@@ -15,6 +15,7 @@
 | colorization-siggraph | YES | YES | YES |
 | colorization-v2 | YES | YES | YES |
 | common-sign-language-0001 | YES | YES |    |
+| convnext-tiny | YES |    |    |
 | ctdet_coco_dlav0_512 | YES | YES | YES |
 | ctpn | YES | YES | YES |
 | deblurgan-v2 | YES | YES | YES |

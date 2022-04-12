@@ -15,13 +15,26 @@
 */
 
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
+
+#include <opencv2/core.hpp>
+
 #include <utils/image_utils.h>
+
 #include "models/image_model.h"
-#include <models/results.h>
+
+namespace ov {
+class InferRequest;
+class Model;
+class Shape;
+}  // namespace ov
+struct HumanPose;
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class HpeAssociativeEmbedding : public ImageModel {
 public:
@@ -32,14 +45,17 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     /// @param layout - model input layout
-    HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize,
-                            float confidenceThreshold, const std::string& layout = "",
-                            float delta = 0.0, RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
+    HpeAssociativeEmbedding(const std::string& modelFileName,
+                            double aspectRatio,
+                            int targetSize,
+                            float confidenceThreshold,
+                            const std::string& layout = "",
+                            float delta = 0.0,
+                            RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
@@ -64,8 +80,7 @@ protected:
 
     void changeInputSize(std::shared_ptr<ov::Model>& model);
 
-    std::string findTensorByName(const std::string& tensorName,
-                                const std::vector<std::string>& outputsNames);
+    std::string findTensorByName(const std::string& tensorName, const std::vector<std::string>& outputsNames);
 
     std::vector<cv::Mat> split(float* data, const ov::Shape& shape);
 

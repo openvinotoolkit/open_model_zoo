@@ -2,28 +2,38 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "tracker.hpp"
+
+#include <stdlib.h>
+
+#include <algorithm>
+#include <cmath>
+#include <deque>
+#include <limits>
 #include <map>
+#include <ostream>
 #include <set>
-#include <string>
 #include <tuple>
 #include <unordered_map>
-#include <vector>
 #include <utility>
-#include <limits>
-#include <algorithm>
+#include <vector>
+
+#include <opencv2/imgproc.hpp>
+
+#include <utils/kuhn_munkres.hpp>
+#include <utils/ocv_common.hpp>
 
 #include "core.hpp"
-#include "tracker.hpp"
+#include "descriptor.hpp"
+#include "distance.hpp"
 #include "utils.hpp"
-#include <utils/kuhn_munkres.hpp>
 
 namespace {
 cv::Point Center(const cv::Rect& rect) {
-    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5),
-                     static_cast<int>(rect.y + rect.height * 0.5));
+    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5), static_cast<int>(rect.y + rect.height * 0.5));
 }
 
-std::vector<cv::Point> Centers(const TrackedObjects &detections) {
+std::vector<cv::Point> Centers(const TrackedObjects& detections) {
     std::vector<cv::Point> centers(detections.size());
     for (size_t i = 0; i < detections.size(); i++) {
         centers[i] = Center(detections[i].rect);
@@ -77,22 +87,22 @@ std::vector<cv::Scalar> GenRandomColors(int colors_num) {
 
 TrackerParams::TrackerParams()
     : min_track_duration(1000),
-    forget_delay(150),
-    aff_thr_fast(0.8f),
-    aff_thr_strong(0.75f),
-    shape_affinity_w(0.5f),
-    motion_affinity_w(0.2f),
-    time_affinity_w(0.0f),
-    min_det_conf(0.65f),
-    bbox_aspect_ratios_range(0.666f, 5.0f),
-    bbox_heights_range(40, 1000),
-    predict(25),
-    strong_affinity_thr(0.2805f),
-    reid_thr(0.61f),
-    drop_forgotten_tracks(true),
-    max_num_objects_in_track(300) {}
+      forget_delay(150),
+      aff_thr_fast(0.8f),
+      aff_thr_strong(0.75f),
+      shape_affinity_w(0.5f),
+      motion_affinity_w(0.2f),
+      time_affinity_w(0.0f),
+      min_det_conf(0.65f),
+      bbox_aspect_ratios_range(0.666f, 5.0f),
+      bbox_heights_range(40, 1000),
+      predict(25),
+      strong_affinity_thr(0.2805f),
+      reid_thr(0.61f),
+      drop_forgotten_tracks(true),
+      max_num_objects_in_track(300) {}
 
-void ValidateParams(const TrackerParams &p) {
+void ValidateParams(const TrackerParams& p) {
     PT_CHECK_GE(p.min_track_duration, static_cast<size_t>(500));
     PT_CHECK_LE(p.min_track_duration, static_cast<size_t>(10000));
 
@@ -133,7 +143,6 @@ void ValidateParams(const TrackerParams &p) {
     PT_CHECK_GE(p.reid_thr, 0.0f);
     PT_CHECK_LE(p.reid_thr, 1.0f);
 
-
     if (p.max_num_objects_in_track > 0) {
         int min_required_track_length = static_cast<int>(p.forget_delay);
         PT_CHECK_GE(p.max_num_objects_in_track, min_required_track_length);
@@ -141,75 +150,81 @@ void ValidateParams(const TrackerParams &p) {
     }
 }
 
-PedestrianTracker::PedestrianTracker(const TrackerParams &params)
+PedestrianTracker::PedestrianTracker(const TrackerParams& params)
     : params_(params),
-    descriptor_strong_(nullptr),
-    distance_strong_(nullptr),
-    tracks_counter_(0),
-    frame_size_(0, 0),
-    prev_timestamp_(std::numeric_limits<uint64_t>::max()) {
-        ValidateParams(params);
-    }
+      descriptor_strong_(nullptr),
+      distance_strong_(nullptr),
+      tracks_counter_(0),
+      frame_size_(0, 0),
+      prev_timestamp_(std::numeric_limits<uint64_t>::max()) {
+    ValidateParams(params);
+}
 
 // Pipeline parameters getter.
-const TrackerParams &PedestrianTracker::params() const { return params_; }
+const TrackerParams& PedestrianTracker::params() const {
+    return params_;
+}
 
 // Descriptor fast getter.
-const PedestrianTracker::Descriptor &PedestrianTracker::descriptor_fast() const {
+const PedestrianTracker::Descriptor& PedestrianTracker::descriptor_fast() const {
     return descriptor_fast_;
 }
 
 // Descriptor fast setter.
-void PedestrianTracker::set_descriptor_fast(const Descriptor &val) {
+void PedestrianTracker::set_descriptor_fast(const Descriptor& val) {
     descriptor_fast_ = val;
 }
 
 // Descriptor strong getter.
-const PedestrianTracker::Descriptor &PedestrianTracker::descriptor_strong() const {
+const PedestrianTracker::Descriptor& PedestrianTracker::descriptor_strong() const {
     return descriptor_strong_;
 }
 
 // Descriptor strong setter.
-void PedestrianTracker::set_descriptor_strong(const Descriptor &val) {
+void PedestrianTracker::set_descriptor_strong(const Descriptor& val) {
     descriptor_strong_ = val;
 }
 
 // Distance fast getter.
-const PedestrianTracker::Distance &PedestrianTracker::distance_fast() const { return distance_fast_; }
+const PedestrianTracker::Distance& PedestrianTracker::distance_fast() const {
+    return distance_fast_;
+}
 
 // Distance fast setter.
-void PedestrianTracker::set_distance_fast(const Distance &val) { distance_fast_ = val; }
+void PedestrianTracker::set_distance_fast(const Distance& val) {
+    distance_fast_ = val;
+}
 
 // Distance strong getter.
-const PedestrianTracker::Distance &PedestrianTracker::distance_strong() const { return distance_strong_; }
+const PedestrianTracker::Distance& PedestrianTracker::distance_strong() const {
+    return distance_strong_;
+}
 
 // Distance strong setter.
-void PedestrianTracker::set_distance_strong(const Distance &val) { distance_strong_ = val; }
+void PedestrianTracker::set_distance_strong(const Distance& val) {
+    distance_strong_ = val;
+}
 
 // Returns all tracks including forgotten (lost too many frames ago).
-const std::unordered_map<size_t, Track> &
-PedestrianTracker::tracks() const {
+const std::unordered_map<size_t, Track>& PedestrianTracker::tracks() const {
     return tracks_;
 }
 
 // Returns indexes of active tracks only.
-const std::set<size_t> &PedestrianTracker::active_track_ids() const {
+const std::set<size_t>& PedestrianTracker::active_track_ids() const {
     return active_track_ids_;
 }
-
 
 // Returns detection log which is used for tracks saving.
 DetectionLog PedestrianTracker::GetDetectionLog(const bool valid_only) const {
     return ConvertTracksToDetectionLog(all_tracks(valid_only));
 }
 
-TrackedObjects PedestrianTracker::FilterDetections(
-    const TrackedObjects &detections) const {
+TrackedObjects PedestrianTracker::FilterDetections(const TrackedObjects& detections) const {
     TrackedObjects filtered_detections;
-    for (const auto &det : detections) {
+    for (const auto& det : detections) {
         float aspect_ratio = static_cast<float>(det.rect.height) / det.rect.width;
-        if (det.confidence > params_.min_det_conf &&
-            IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
+        if (det.confidence > params_.min_det_conf && IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
             IsInRange(static_cast<float>(det.rect.height), params_.bbox_heights_range)) {
             filtered_detections.emplace_back(det);
         }
@@ -217,11 +232,13 @@ TrackedObjects PedestrianTracker::FilterDetections(
     return filtered_detections;
 }
 
-void PedestrianTracker::SolveAssignmentProblem(
-    const std::set<size_t> &track_ids, const TrackedObjects &detections,
-    const std::vector<cv::Mat> &descriptors, float thr,
-    std::set<size_t> *unmatched_tracks, std::set<size_t> *unmatched_detections,
-    std::set<std::tuple<size_t, size_t, float>> *matches) {
+void PedestrianTracker::SolveAssignmentProblem(const std::set<size_t>& track_ids,
+                                               const TrackedObjects& detections,
+                                               const std::vector<cv::Mat>& descriptors,
+                                               float thr,
+                                               std::set<size_t>* unmatched_tracks,
+                                               std::set<size_t>* unmatched_detections,
+                                               std::set<std::tuple<size_t, size_t, float>>* matches) {
     PT_CHECK(unmatched_tracks);
     PT_CHECK(unmatched_detections);
     unmatched_tracks->clear();
@@ -234,8 +251,7 @@ void PedestrianTracker::SolveAssignmentProblem(
     matches->clear();
 
     cv::Mat dissimilarity;
-    ComputeDissimilarityMatrix(track_ids, detections, descriptors,
-                               &dissimilarity);
+    ComputeDissimilarityMatrix(track_ids, detections, descriptors, &dissimilarity);
 
     std::vector<size_t> res = KuhnMunkres().Solve(dissimilarity);
 
@@ -259,14 +275,14 @@ const ObjectTracks PedestrianTracker::all_tracks(bool valid_only) const {
     size_t counter = 0;
 
     std::set<size_t> sorted_ids;
-    for (const auto &pair : tracks()) {
+    for (const auto& pair : tracks()) {
         sorted_ids.emplace(pair.first);
     }
 
     for (size_t id : sorted_ids) {
         if (!valid_only || IsTrackValid(id)) {
             TrackedObjects filtered_objects;
-            for (const auto &object : tracks().at(id).objects) {
+            for (const auto& object : tracks().at(id).objects) {
                 filtered_objects.emplace_back(object);
                 filtered_objects.back().object_id = counter;
             }
@@ -276,9 +292,8 @@ const ObjectTracks PedestrianTracker::all_tracks(bool valid_only) const {
     return all_objects;
 }
 
-cv::Rect PedestrianTracker::PredictRect(size_t id, size_t k,
-                                        size_t s) const {
-    const auto &track = tracks_.at(id);
+cv::Rect PedestrianTracker::PredictRect(size_t id, size_t k, size_t s) const {
+    const auto& track = tracks_.at(id);
     PT_CHECK(!track.empty());
 
     if (track.size() == 1) {
@@ -318,13 +333,12 @@ cv::Rect PedestrianTracker::PredictRect(size_t id, size_t k,
                     static_cast<int>(height));
 }
 
-
 bool PedestrianTracker::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     auto c = Center(tracks_.at(track_id).predicted_rect);
     if (!prev_frame_size_.empty() &&
-        (c.x < 0 || c.y < 0 || c.x > prev_frame_size_.width ||
-         c.y > prev_frame_size_.height)) {
+        (c.x < 0 || c.y < 0 || c.x > prev_frame_size_.width || c.y > prev_frame_size_.height)) {
         tracks_.at(track_id).lost = params_.forget_delay + 1;
         for (auto id : active_track_ids()) {
             size_t min_id = std::min(id, track_id);
@@ -337,9 +351,9 @@ bool PedestrianTracker::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
     return false;
 }
 
-bool PedestrianTracker::EraseTrackIfItWasLostTooManyFramesAgo(
-    size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+bool PedestrianTracker::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id) {
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     if (tracks_.at(track_id).lost > params_.forget_delay) {
         for (auto id : active_track_ids()) {
             size_t min_id = std::min(id, track_id);
@@ -353,27 +367,23 @@ bool PedestrianTracker::EraseTrackIfItWasLostTooManyFramesAgo(
     return false;
 }
 
-bool PedestrianTracker::UpdateLostTrackAndEraseIfItsNeeded(
-    size_t track_id) {
+bool PedestrianTracker::UpdateLostTrackAndEraseIfItsNeeded(size_t track_id) {
     tracks_.at(track_id).lost++;
-    tracks_.at(track_id).predicted_rect =
-        PredictRect(track_id, params().predict, tracks_.at(track_id).lost);
+    tracks_.at(track_id).predicted_rect = PredictRect(track_id, params().predict, tracks_.at(track_id).lost);
 
     bool erased = EraseTrackIfBBoxIsOutOfFrame(track_id);
-    if (!erased) erased = EraseTrackIfItWasLostTooManyFramesAgo(track_id);
+    if (!erased)
+        erased = EraseTrackIfItWasLostTooManyFramesAgo(track_id);
     return erased;
 }
 
-void PedestrianTracker::UpdateLostTracks(
-    const std::set<size_t> &track_ids) {
+void PedestrianTracker::UpdateLostTracks(const std::set<size_t>& track_ids) {
     for (auto track_id : track_ids) {
         UpdateLostTrackAndEraseIfItsNeeded(track_id);
     }
 }
 
-void PedestrianTracker::Process(const cv::Mat &frame,
-                                const TrackedObjects &input_detections,
-                                uint64_t timestamp) {
+void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& input_detections, uint64_t timestamp) {
     if (prev_timestamp_ != std::numeric_limits<uint64_t>::max())
         PT_CHECK_LT(prev_timestamp_, timestamp);
 
@@ -384,7 +394,7 @@ void PedestrianTracker::Process(const cv::Mat &frame,
     }
 
     TrackedObjects detections = FilterDetections(input_detections);
-    for (auto &obj : detections) {
+    for (auto& obj : detections) {
         obj.timestamp = timestamp;
     }
 
@@ -397,20 +407,22 @@ void PedestrianTracker::Process(const cv::Mat &frame,
         std::set<size_t> unmatched_tracks, unmatched_detections;
         std::set<std::tuple<size_t, size_t, float>> matches;
 
-        SolveAssignmentProblem(active_tracks, detections, descriptors_fast,
-                               params_.aff_thr_fast, &unmatched_tracks,
-                               &unmatched_detections, &matches);
+        SolveAssignmentProblem(active_tracks,
+                               detections,
+                               descriptors_fast,
+                               params_.aff_thr_fast,
+                               &unmatched_tracks,
+                               &unmatched_detections,
+                               &matches);
 
         std::map<size_t, std::pair<bool, cv::Mat>> is_matching_to_track;
 
         if (distance_strong_) {
-            std::vector<std::pair<size_t, size_t>> reid_track_and_det_ids =
-                GetTrackToDetectionIds(matches);
-            is_matching_to_track = StrongMatching(
-                frame, detections, reid_track_and_det_ids);
+            std::vector<std::pair<size_t, size_t>> reid_track_and_det_ids = GetTrackToDetectionIds(matches);
+            is_matching_to_track = StrongMatching(frame, detections, reid_track_and_det_ids);
         }
 
-        for (const auto &match : matches) {
+        for (const auto& match : matches) {
             size_t track_id = std::get<0>(match);
             size_t det_id = std::get<1>(match);
             float conf = std::get<2>(match);
@@ -419,21 +431,22 @@ void PedestrianTracker::Process(const cv::Mat &frame,
             last_det.rect = tracks_.at(track_id).predicted_rect;
 
             if (conf > params_.aff_thr_fast) {
-                AppendToTrack(frame, track_id, detections[det_id],
-                              descriptors_fast[det_id], cv::Mat());
+                AppendToTrack(frame, track_id, detections[det_id], descriptors_fast[det_id], cv::Mat());
                 unmatched_detections.erase(det_id);
             } else {
                 if (conf > params_.strong_affinity_thr) {
                     if (distance_strong_ && is_matching_to_track[track_id].first) {
-                        AppendToTrack(frame, track_id, detections[det_id],
+                        AppendToTrack(frame,
+                                      track_id,
+                                      detections[det_id],
                                       descriptors_fast[det_id],
                                       is_matching_to_track[track_id].second.clone());
                     } else {
                         if (UpdateLostTrackAndEraseIfItsNeeded(track_id)) {
-                            AddNewTrack(frame, detections[det_id], descriptors_fast[det_id],
-                                        distance_strong_
-                                        ? is_matching_to_track[track_id].second.clone()
-                                        : cv::Mat());
+                            AddNewTrack(frame,
+                                        detections[det_id],
+                                        descriptors_fast[det_id],
+                                        distance_strong_ ? is_matching_to_track[track_id].second.clone() : cv::Mat());
                         }
                     }
 
@@ -456,7 +469,8 @@ void PedestrianTracker::Process(const cv::Mat &frame,
     }
 
     prev_frame_size_ = frame.size();
-    if (params_.drop_forgotten_tracks) DropForgottenTracks();
+    if (params_.drop_forgotten_tracks)
+        DropForgottenTracks();
 
     tracks_dists_.clear();
     prev_timestamp_ = timestamp;
@@ -468,14 +482,13 @@ void PedestrianTracker::DropForgottenTracks() {
 
     size_t max_id = 0;
     if (!active_track_ids_.empty())
-        max_id =
-            *std::max_element(active_track_ids_.begin(), active_track_ids_.end());
+        max_id = *std::max_element(active_track_ids_.begin(), active_track_ids_.end());
 
     const size_t kMaxTrackID = 10000;
     bool reassign_id = max_id > kMaxTrackID;
 
     size_t counter = 0;
-    for (const auto &pair : tracks_) {
+    for (const auto& pair : tracks_) {
         if (!IsTrackForgotten(pair.first)) {
             new_tracks.emplace(reassign_id ? counter : pair.first, pair.second);
             new_active_tracks.emplace(reassign_id ? counter : pair.first);
@@ -488,41 +501,35 @@ void PedestrianTracker::DropForgottenTracks() {
     tracks_counter_ = reassign_id ? counter : tracks_counter_;
 }
 
-float PedestrianTracker::ShapeAffinity(float weight, const cv::Rect &trk,
-                                       const cv::Rect &det) {
+float PedestrianTracker::ShapeAffinity(float weight, const cv::Rect& trk, const cv::Rect& det) {
     float w_dist = static_cast<float>(std::abs(trk.width - det.width) / (trk.width + det.width));
     float h_dist = static_cast<float>(std::abs(trk.height - det.height) / (trk.height + det.height));
     return static_cast<float>(exp(static_cast<double>(-weight * (w_dist + h_dist))));
 }
 
-float PedestrianTracker::MotionAffinity(float weight, const cv::Rect &trk,
-                                        const cv::Rect &det) {
-    float x_dist = static_cast<float>(trk.x - det.x) * (trk.x - det.x) /
-        (det.width * det.width);
-    float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) /
-        (det.height * det.height);
+float PedestrianTracker::MotionAffinity(float weight, const cv::Rect& trk, const cv::Rect& det) {
+    float x_dist = static_cast<float>(trk.x - det.x) * (trk.x - det.x) / (det.width * det.width);
+    float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) / (det.height * det.height);
     return static_cast<float>(exp(static_cast<double>(-weight * (x_dist + y_dist))));
 }
 
-float PedestrianTracker::TimeAffinity(float weight, const float &trk_time,
-                                      const float &det_time) {
+float PedestrianTracker::TimeAffinity(float weight, const float& trk_time, const float& det_time) {
     return static_cast<float>(exp(static_cast<double>(-weight * std::fabs(trk_time - det_time))));
 }
 
-void PedestrianTracker::ComputeFastDesciptors(
-    const cv::Mat &frame, const TrackedObjects &detections,
-    std::vector<cv::Mat> *descriptors) {
+void PedestrianTracker::ComputeFastDesciptors(const cv::Mat& frame,
+                                              const TrackedObjects& detections,
+                                              std::vector<cv::Mat>* descriptors) {
     *descriptors = std::vector<cv::Mat>(detections.size(), cv::Mat());
     for (size_t i = 0; i < detections.size(); i++) {
-        descriptor_fast_->Compute(frame(detections[i].rect).clone(),
-                                  &((*descriptors)[i]));
+        descriptor_fast_->Compute(frame(detections[i].rect).clone(), &((*descriptors)[i]));
     }
 }
 
-void PedestrianTracker::ComputeDissimilarityMatrix(
-    const std::set<size_t> &active_tracks, const TrackedObjects &detections,
-    const std::vector<cv::Mat> &descriptors_fast,
-    cv::Mat *dissimilarity_matrix) {
+void PedestrianTracker::ComputeDissimilarityMatrix(const std::set<size_t>& active_tracks,
+                                                   const TrackedObjects& detections,
+                                                   const std::vector<cv::Mat>& descriptors_fast,
+                                                   cv::Mat* dissimilarity_matrix) {
     cv::Mat am(active_tracks.size(), detections.size(), CV_32F, cv::Scalar(0));
     size_t i = 0;
     for (auto id : active_tracks) {
@@ -530,19 +537,17 @@ void PedestrianTracker::ComputeDissimilarityMatrix(
         for (size_t j = 0; j < descriptors_fast.size(); j++) {
             auto last_det = tracks_.at(id).objects.back();
             last_det.rect = tracks_.at(id).predicted_rect;
-            ptr[j] = AffinityFast(tracks_.at(id).descriptor_fast, last_det,
-                                  descriptors_fast[j], detections[j]);
+            ptr[j] = AffinityFast(tracks_.at(id).descriptor_fast, last_det, descriptors_fast[j], detections[j]);
         }
         i++;
     }
     *dissimilarity_matrix = 1.0 - am;
 }
 
-std::vector<float> PedestrianTracker::ComputeDistances(
-    const cv::Mat &frame,
-    const TrackedObjects& detections,
-    const std::vector<std::pair<size_t, size_t>> &track_and_det_ids,
-    std::map<size_t, cv::Mat> *det_id_to_descriptor) {
+std::vector<float> PedestrianTracker::ComputeDistances(const cv::Mat& frame,
+                                                       const TrackedObjects& detections,
+                                                       const std::vector<std::pair<size_t, size_t>>& track_and_det_ids,
+                                                       std::map<size_t, cv::Mat>* det_id_to_descriptor) {
     std::map<size_t, size_t> det_to_batch_ids;
     std::map<size_t, size_t> track_to_batch_ids;
 
@@ -572,8 +577,7 @@ std::vector<float> PedestrianTracker::ComputeDistances(
         size_t det_id = track_and_det_ids[i].second;
 
         if (tracks_.at(track_id).descriptor_strong.empty()) {
-            tracks_.at(track_id).descriptor_strong =
-                descriptors[track_to_batch_ids[track_id]].clone();
+            tracks_.at(track_id).descriptor_strong = descriptors[track_to_batch_ids[track_id]].clone();
         }
         (*det_id_to_descriptor)[det_id] = descriptors[det_to_batch_ids[det_id]];
 
@@ -581,18 +585,16 @@ std::vector<float> PedestrianTracker::ComputeDistances(
         descriptors2.push_back(tracks_.at(track_id).descriptor_strong);
     }
 
-    std::vector<float> distances =
-        distance_strong_->Compute(descriptors1, descriptors2);
+    std::vector<float> distances = distance_strong_->Compute(descriptors1, descriptors2);
 
     return distances;
 }
 
-std::vector<std::pair<size_t, size_t>>
-PedestrianTracker::GetTrackToDetectionIds(
-    const std::set<std::tuple<size_t, size_t, float>> &matches) {
+std::vector<std::pair<size_t, size_t>> PedestrianTracker::GetTrackToDetectionIds(
+    const std::set<std::tuple<size_t, size_t, float>>& matches) {
     std::vector<std::pair<size_t, size_t>> track_and_det_ids;
 
-    for (const auto &match : matches) {
+    for (const auto& match : matches) {
         size_t track_id = std::get<0>(match);
         size_t det_id = std::get<1>(match);
         float conf = std::get<2>(match);
@@ -603,11 +605,10 @@ PedestrianTracker::GetTrackToDetectionIds(
     return track_and_det_ids;
 }
 
-std::map<size_t, std::pair<bool, cv::Mat>>
-PedestrianTracker::StrongMatching(
-    const cv::Mat &frame,
+std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker::StrongMatching(
+    const cv::Mat& frame,
     const TrackedObjects& detections,
-    const std::vector<std::pair<size_t, size_t>> &track_and_det_ids) {
+    const std::vector<std::pair<size_t, size_t>>& track_and_det_ids) {
     std::map<size_t, std::pair<bool, cv::Mat>> is_matching;
 
     if (track_and_det_ids.size() == 0) {
@@ -615,9 +616,7 @@ PedestrianTracker::StrongMatching(
     }
 
     std::map<size_t, cv::Mat> det_ids_to_descriptors;
-    std::vector<float> distances =
-        ComputeDistances(frame, detections,
-                         track_and_det_ids, &det_ids_to_descriptors);
+    std::vector<float> distances = ComputeDistances(frame, detections, track_and_det_ids, &det_ids_to_descriptors);
 
     for (size_t i = 0; i < track_and_det_ids.size(); i++) {
         auto reid_affinity = 1.0 - distances[i];
@@ -633,27 +632,26 @@ PedestrianTracker::StrongMatching(
 
         float affinity = static_cast<float>(reid_affinity) * Affinity(last_det, detection);
 
-        bool is_detection_matching =
-            reid_affinity > params_.reid_thr && affinity > params_.aff_thr_strong;
+        bool is_detection_matching = reid_affinity > params_.reid_thr && affinity > params_.aff_thr_strong;
 
-        is_matching[track_id] = std::pair<bool, cv::Mat>(
-            is_detection_matching, det_ids_to_descriptors[det_id]);
+        is_matching[track_id] = std::pair<bool, cv::Mat>(is_detection_matching, det_ids_to_descriptors[det_id]);
     }
     return is_matching;
 }
 
-void PedestrianTracker::AddNewTracks(
-    const cv::Mat &frame, const TrackedObjects &detections,
-    const std::vector<cv::Mat> &descriptors_fast) {
+void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
+                                     const TrackedObjects& detections,
+                                     const std::vector<cv::Mat>& descriptors_fast) {
     PT_CHECK(detections.size() == descriptors_fast.size());
     for (size_t i = 0; i < detections.size(); i++) {
         AddNewTrack(frame, detections[i], descriptors_fast[i]);
     }
 }
 
-void PedestrianTracker::AddNewTracks(
-    const cv::Mat &frame, const TrackedObjects &detections,
-    const std::vector<cv::Mat> &descriptors_fast, const std::set<size_t> &ids) {
+void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
+                                     const TrackedObjects& detections,
+                                     const std::vector<cv::Mat>& descriptors_fast,
+                                     const std::set<size_t>& ids) {
     PT_CHECK(detections.size() == descriptors_fast.size());
     for (size_t i : ids) {
         PT_CHECK(i < detections.size());
@@ -661,37 +659,35 @@ void PedestrianTracker::AddNewTracks(
     }
 }
 
-void PedestrianTracker::AddNewTrack(const cv::Mat &frame,
-                                    const TrackedObject &detection,
-                                    const cv::Mat &descriptor_fast,
-                                    const cv::Mat &descriptor_strong) {
+void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
+                                    const TrackedObject& detection,
+                                    const cv::Mat& descriptor_fast,
+                                    const cv::Mat& descriptor_strong) {
     auto detection_with_id = detection;
     detection_with_id.object_id = tracks_counter_;
     tracks_.emplace(std::pair<size_t, Track>(
-            tracks_counter_,
-            Track({detection_with_id}, frame(detection.rect).clone(),
-                  descriptor_fast.clone(), descriptor_strong.clone())));
+        tracks_counter_,
+        Track({detection_with_id}, frame(detection.rect).clone(), descriptor_fast.clone(), descriptor_strong.clone())));
 
     for (size_t id : active_track_ids_) {
-        tracks_dists_.emplace(std::pair<size_t, size_t>(id, tracks_counter_),
-                              std::numeric_limits<float>::max());
+        tracks_dists_.emplace(std::pair<size_t, size_t>(id, tracks_counter_), std::numeric_limits<float>::max());
     }
 
     active_track_ids_.insert(tracks_counter_);
     tracks_counter_++;
 }
 
-void PedestrianTracker::AppendToTrack(const cv::Mat &frame,
+void PedestrianTracker::AppendToTrack(const cv::Mat& frame,
                                       size_t track_id,
-                                      const TrackedObject &detection,
-                                      const cv::Mat &descriptor_fast,
-                                      const cv::Mat &descriptor_strong) {
+                                      const TrackedObject& detection,
+                                      const cv::Mat& descriptor_fast,
+                                      const cv::Mat& descriptor_strong) {
     PT_CHECK(!IsTrackForgotten(track_id));
 
     auto detection_with_id = detection;
     detection_with_id.object_id = track_id;
 
-    auto &cur_track = tracks_.at(track_id);
+    auto& cur_track = tracks_.at(track_id);
     cur_track.objects.emplace_back(detection_with_id);
     cur_track.predicted_rect = detection.rect;
     cur_track.lost = 0;
@@ -702,45 +698,42 @@ void PedestrianTracker::AppendToTrack(const cv::Mat &frame,
     if (cur_track.descriptor_strong.empty()) {
         cur_track.descriptor_strong = descriptor_strong.clone();
     } else if (!descriptor_strong.empty()) {
-        cur_track.descriptor_strong =
-            0.5 * (descriptor_strong + cur_track.descriptor_strong);
+        cur_track.descriptor_strong = 0.5 * (descriptor_strong + cur_track.descriptor_strong);
     }
 
-
     if (params_.max_num_objects_in_track > 0) {
-        while (cur_track.size() >
-               static_cast<size_t>(params_.max_num_objects_in_track)) {
+        while (cur_track.size() > static_cast<size_t>(params_.max_num_objects_in_track)) {
             cur_track.objects.erase(cur_track.objects.begin());
         }
     }
 }
 
-float PedestrianTracker::AffinityFast(const cv::Mat &descriptor1,
-                                      const TrackedObject &obj1,
-                                      const cv::Mat &descriptor2,
-                                      const TrackedObject &obj2) {
+float PedestrianTracker::AffinityFast(const cv::Mat& descriptor1,
+                                      const TrackedObject& obj1,
+                                      const cv::Mat& descriptor2,
+                                      const TrackedObject& obj2) {
     const float eps = 1e-6f;
     float shp_aff = ShapeAffinity(params_.shape_affinity_w, obj1.rect, obj2.rect);
-    if (shp_aff < eps) return 0.0f;
+    if (shp_aff < eps)
+        return 0.0f;
 
-    float mot_aff =
-        MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
-    if (mot_aff < eps) return 0.0f;
+    float mot_aff = MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
+    if (mot_aff < eps)
+        return 0.0f;
     float time_aff =
         TimeAffinity(params_.time_affinity_w, static_cast<float>(obj1.frame_idx), static_cast<float>(obj2.frame_idx));
 
-    if (time_aff < eps) return 0.0f;
+    if (time_aff < eps)
+        return 0.0f;
 
     float app_aff = 1.0f - distance_fast_->Compute(descriptor1, descriptor2);
 
     return shp_aff * mot_aff * app_aff * time_aff;
 }
 
-float PedestrianTracker::Affinity(const TrackedObject &obj1,
-                                  const TrackedObject &obj2) {
+float PedestrianTracker::Affinity(const TrackedObject& obj1, const TrackedObject& obj2) {
     float shp_aff = ShapeAffinity(params_.shape_affinity_w, obj1.rect, obj2.rect);
-    float mot_aff =
-        MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
+    float mot_aff = MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
     float time_aff =
         TimeAffinity(params_.time_affinity_w, static_cast<float>(obj1.frame_idx), static_cast<float>(obj2.frame_idx));
     return shp_aff * mot_aff * time_aff;
@@ -748,7 +741,7 @@ float PedestrianTracker::Affinity(const TrackedObject &obj1,
 
 bool PedestrianTracker::IsTrackValid(size_t id) const {
     const auto& track = tracks_.at(id);
-    const auto &objects = track.objects;
+    const auto& objects = track.objects;
     if (objects.empty()) {
         return false;
     }
@@ -762,12 +755,11 @@ bool PedestrianTracker::IsTrackForgotten(size_t id) const {
     return IsTrackForgotten(tracks_.at(id));
 }
 
-bool PedestrianTracker::IsTrackForgotten(const Track &track) const {
+bool PedestrianTracker::IsTrackForgotten(const Track& track) const {
     return (track.lost > params_.forget_delay);
 }
 
-std::unordered_map<size_t, std::vector<cv::Point>>
-PedestrianTracker::GetActiveTracks() const {
+std::unordered_map<size_t, std::vector<cv::Point>> PedestrianTracker::GetActiveTracks() const {
     std::unordered_map<size_t, std::vector<cv::Point>> active_tracks;
     for (size_t idx : active_track_ids()) {
         auto track = tracks().at(idx);
@@ -789,7 +781,7 @@ TrackedObjects PedestrianTracker::TrackedDetections() const {
     return detections;
 }
 
-cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
+cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat& frame) {
     cv::Mat out_frame = frame.clone();
 
     if (colors_.empty()) {
@@ -804,12 +796,16 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
         DrawPolyline(centers, colors_[idx % colors_.size()], &out_frame);
         std::stringstream ss;
         ss << idx;
-        putHighlightedText(out_frame, ss.str(), centers.back(), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 0.95,
-                    colors_[idx % colors_.size()], 2);
+        putHighlightedText(out_frame,
+                           ss.str(),
+                           centers.back(),
+                           cv::FONT_HERSHEY_SCRIPT_COMPLEX,
+                           0.95,
+                           colors_[idx % colors_.size()],
+                           2);
         auto track = tracks().at(idx);
         if (track.lost) {
-            cv::line(out_frame, active_track.second.back(),
-                     Center(track.predicted_rect), cv::Scalar(0, 0, 0), 4);
+            cv::line(out_frame, active_track.second.back(), Center(track.predicted_rect), cv::Scalar(0, 0, 0), 4);
         }
     }
 
