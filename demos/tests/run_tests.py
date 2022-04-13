@@ -362,7 +362,7 @@ def main():
     for test in failed_tests:
         print(test)
 
-    sys.exit(0 if num_failures == 0 else 1)
+    sys.exit(0 if num_failures == 0  and correctness_failures == 0 else 1)
 
 
 if __name__ == '__main__':
