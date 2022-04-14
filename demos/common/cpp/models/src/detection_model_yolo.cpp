@@ -152,14 +152,13 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::OutputVector& outputs = model->outputs();
     std::map<std::string, ov::Shape> outShapes;
     for (auto& out : outputs) {
-        ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
+        ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout("NCHW");
         if (out.get_shape().size() == 4) {
-            if (out.get_shape()[ov::layout::height_idx(yoloRegionLayout)] !=
-                    out.get_shape()[ov::layout::width_idx(yoloRegionLayout)] &&
-                out.get_shape()[ov::layout::height_idx({"NHWC"})] == out.get_shape()[ov::layout::width_idx({"NHWC"})]) {
-                yoloRegionLayout = {"NHWC"};
+            if (out.get_shape()[ov::layout::height_idx("NCHW")] != out.get_shape()[ov::layout::width_idx("NCHW")] &&
+                out.get_shape()[ov::layout::height_idx({ "NHWC" })] == out.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+                ppp.output(out.get_any_name()).model().set_layout("NHWC");
+                yoloRegionLayout = { "NHWC" };
             }
-            ppp.output(out.get_any_name()).tensor().set_layout(yoloRegionLayout);
         }
         outputsNames.push_back(out.get_any_name());
         outShapes[out.get_any_name()] = out.get_shape();
@@ -223,7 +222,7 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         for (const auto& name : outputsNames) {
             const auto& shape = outShapes[name];
             if (shape[ov::layout::channels_idx(yoloRegionLayout)] % num != 0) {
-                throw std::logic_error(std::string("Output tenosor ") + name + " has wrong 2nd dimension");
+                throw std::logic_error(std::string("Output tensor ") + name + " has wrong 2nd dimension");
             }
             regions.emplace(
                 name,
@@ -328,8 +327,8 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
         case YOLO_V4:
         case YOLO_V4_TINY:
         case YOLOF:
-            sideH = static_cast<int>(tensor.get_shape()[ov::layout::height_idx(yoloRegionLayout)]);
-            sideW = static_cast<int>(tensor.get_shape()[ov::layout::width_idx(yoloRegionLayout)]);
+            sideH = static_cast<int>(tensor.get_shape()[ov::layout::height_idx("NCHW")]);
+            sideW = static_cast<int>(tensor.get_shape()[ov::layout::width_idx("NCHW")]);
             scaleW = resized_im_w;
             scaleH = resized_im_h;
             break;
