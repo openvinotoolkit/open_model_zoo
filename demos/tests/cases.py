@@ -63,7 +63,11 @@ class Demo:
         if not updated_options: return
         new_options = case.options.copy()
         for key, value in updated_options.items():
-            new_options[key] = value
+            # Modify path to the new dataset if updating option '-i'
+            if key == '-i':
+                new_options[key] = TestDataArg(value)
+            else:
+                new_options[key] = value
         new_case = case._replace(options=new_options)
         if with_replacement:
             self.test_cases.remove(case)
