@@ -186,10 +186,10 @@ public:
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
         }
 
-        // color is the first output
-        m_outputNameForColor = outputs[0].get_any_name();
-        // type is the second output.
-        m_outputNameForType = outputs[1].get_any_name();
+        // type is the first output
+        m_outputNameForType = outputs[0].get_any_name();
+        // color is the second output.
+        m_outputNameForColor = outputs[1].get_any_name();
 
         ov::preprocess::PrePostProcessor ppp(model);
 

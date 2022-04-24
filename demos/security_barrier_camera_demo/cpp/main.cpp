@@ -754,7 +754,6 @@ int main(int argc, char* argv[]) {
                 }
                 core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
                 core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? ov::streams::Num(device_nstreams["CPU"]) : ov::streams::AUTO)));
-
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
             }
 
