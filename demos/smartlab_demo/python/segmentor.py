@@ -44,8 +44,10 @@ class Segmentor:
         self.decoder_input_keys = {list(item.get_names())[0]: item for item in self.decoder.inputs}
         self.decoder_output_key = {list(item.get_names())[0]: item for item in self.decoder.outputs}
 
-        self.shifted_tesor_side = np.zeros(85066)
-        self.shifted_tesor_top = np.zeros(85066)
+        # self.shifted_tesor_side = np.zeros(85066)
+        # self.shifted_tesor_top = np.zeros(85066)
+        self.shifted_tesor_side = np.zeros(170130)
+        self.shifted_tesor_top = np.zeros(170130)
 
         ### infer request node ###
         self.infer_encoder_side_request = self.encoder_side.create_infer_request()
