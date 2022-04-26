@@ -113,6 +113,11 @@ class CorrectnessCheckerBase(ABC):
                                                         multi_correctness[device][target] = False
                                                     inconsist_flag = True
                                                     tmp_msg += ("\t\t\tInconsist result:\n\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(target, channel, frame, self.results[target][case][channel][frame]))
+                                                    if target == 'CPU':
+                                                        tmp_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format('GPU', channel, frame, self.results['GPU'][case][channel][frame]))
+                                                    else:
+                                                        tmp_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format('CPU', channel, frame, self.results['CPU'][case][channel][frame]))
+
                                                     tmp_msg += ("\t\t\t\t[{}] Channel {} - Frame {} : {}\n".format(device, channel, frame, self.results[device][case][channel][frame]))
                                 tmp_msg += ('\t\t---------------------------------------------------------\n')
                             if not inconsist_flag:

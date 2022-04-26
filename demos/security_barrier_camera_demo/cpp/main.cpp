@@ -310,6 +310,9 @@ ReborningVideoFrame::~ReborningVideoFrame() {
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].lock();
         const auto frameId = ++context.videoFramesContext.lastframeIds[sourceID];
         context.videoFramesContext.lastFrameIdsMutexes[sourceID].unlock();
+        // Stop reborning if image frameId is invalid
+        if(!context.isVideo && frameId >= FLAGS_n_iqs)
+            return;
         std::shared_ptr<ReborningVideoFrame> reborn = std::make_shared<ReborningVideoFrame>(context, sourceID, frameId, frame);
         worker->push(std::make_shared<Reader>(reborn));
     } catch (const std::bad_weak_ptr&) {}

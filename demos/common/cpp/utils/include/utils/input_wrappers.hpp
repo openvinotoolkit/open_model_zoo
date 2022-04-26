@@ -126,11 +126,13 @@ public:
                 return false;
             } else {
                 subscribedInputChannels.erase(subscribedInputChannelsIt);
-                mat = im;
+                // clone to avoid that the image is shared and changed.
+                mat = im.clone();
                 return true;
             }
         } else {
-            mat = im;
+            // clone to avoid that the image is shared and changed.
+            mat = im.clone();
             return true;
         }
     }
