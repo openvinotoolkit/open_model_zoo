@@ -499,7 +499,7 @@ class OpenVINOLauncher(Launcher):
         if compiled_model:
             self.network = None
             with open(str(self._model), 'rb') as f: #pylint:disable=unspecified-encoding
-                self.exec_network = self.ie_core.import_model(io.BytesIO(f.read()), self._device)
+                self.exec_network = self.ie_core.import_model(io.BytesIO(f), self._device)
             self.original_outputs = self.exec_network.outputs
             model_batch = self._get_model_batch_size()
             self._batch = model_batch if model_batch is not None else 1
