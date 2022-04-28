@@ -229,22 +229,30 @@ public:
         if (FLAGS_r && !rawDetections.empty()) {
             slog::debug << "ChannelId:" << sharedVideoFrame->sourceID << "," << "FrameId:" <<sharedVideoFrame->frameId << ",";
             for (auto it = rawDetections.begin(); it !=  rawDetections.end(); ++it) {
-                if(it + 1 == rawDetections.end())
-                    slog::debug << *it;
+                if(it == std::prev(rawDetections.end()))
+                    slog::debug << *it << "\t";
                 else
                     slog::debug << *it << ",";
             }
             // destructor assures that none uses the container
             // Format: ChannleId,FrameId,ObjectId,ObjectLable,Prob,roi_x,roi_y,roi_width,roi_high,[Vehicle Attributes],[License Plate]
-            for (const std::string& rawAttribute : rawAttributes.container) {
-                auto pos = rawAttribute.find(":");
-                if(pos != std::string::npos)
-                    slog::debug << "," << rawAttribute.substr(pos + 1);
+            for (auto it = rawAttributes.container.begin(); it !=  rawAttributes.container.end(); ++it) {
+                auto pos = it->find(":");
+                if(pos != std::string::npos) {
+                    if(it == std::prev(rawAttributes.container.end())) 
+                        slog::debug << it->substr(pos + 1) << "\t";
+                    else
+                        slog::debug << it->substr(pos + 1) << ",";
+                }
             }
-            for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-                auto pos = rawDecodedPlate.find(":");
-                if(pos != std::string::npos)
-                    slog::debug << "," << rawDecodedPlate.substr(pos + 1);
+            for (auto it = rawDecodedPlates.container.begin(); it !=  rawDecodedPlates.container.end(); ++it) {
+                auto pos = it->find(":");
+                if(pos != std::string::npos) {
+                    if(it == std::prev(rawDecodedPlates.container.end())) 
+                        slog::debug << it->substr(pos + 1);
+                    else
+                        slog::debug << it->substr(pos + 1) << ",";
+                }
             }
             slog::debug << slog::endl;
         }
