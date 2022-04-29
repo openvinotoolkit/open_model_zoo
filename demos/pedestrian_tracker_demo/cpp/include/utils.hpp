@@ -3,17 +3,17 @@
 //
 
 #pragma once
-#include <map>
+#include <stdint.h>
+
 #include <deque>
-#include <set>
+#include <ostream>
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include <utility>
-#include <opencv2/opencv.hpp>
-#include <utils/common.hpp>
+#include <vector>
+
+#include <opencv2/core.hpp>
+
 #include <core.hpp>
-#include "logging.hpp"
 
 ///
 /// \brief The DetectionLogEntry struct
@@ -22,8 +22,8 @@
 ///
 struct DetectionLogEntry {
     TrackedObjects objects;  ///< Detected objects.
-    int64_t frame_idx;           ///< Processed frame index (-1 if N/A).
-    double time_ms;          ///< Frame processing time in ms (-1 if N/A).
+    int64_t frame_idx;  ///< Processed frame index (-1 if N/A).
+    double time_ms;  ///< Frame processing time in ms (-1 if N/A).
 
     ///
     /// \brief DetectionLogEntry default constructor.
@@ -34,33 +34,33 @@ struct DetectionLogEntry {
     /// \brief DetectionLogEntry copy constructor.
     /// \param other Detection entry.
     ///
-    DetectionLogEntry(const DetectionLogEntry &other)
+    DetectionLogEntry(const DetectionLogEntry& other)
         : objects(other.objects),
-        frame_idx(other.frame_idx),
-        time_ms(other.time_ms) {}
+          frame_idx(other.frame_idx),
+          time_ms(other.time_ms) {}
 
     ///
     /// \brief DetectionLogEntry move constructor.
     /// \param other Detection entry.
     ///
-    DetectionLogEntry(DetectionLogEntry &&other)
+    DetectionLogEntry(DetectionLogEntry&& other)
         : objects(std::move(other.objects)),
-        frame_idx(other.frame_idx),
-        time_ms(other.time_ms) {}
+          frame_idx(other.frame_idx),
+          time_ms(other.time_ms) {}
 
     ///
     /// \brief Assignment operator.
     /// \param other Detection entry.
     /// \return Detection entry.
     ///
-    DetectionLogEntry &operator=(const DetectionLogEntry &other) = default;
+    DetectionLogEntry& operator=(const DetectionLogEntry& other) = default;
 
     ///
     /// \brief Move assignment operator.
     /// \param other Detection entry.
     /// \return Detection entry.
     ///
-    DetectionLogEntry &operator=(DetectionLogEntry &&other) {
+    DetectionLogEntry& operator=(DetectionLogEntry&& other) {
         if (this != &other) {
             objects = std::move(other.objects);
             frame_idx = other.frame_idx;
@@ -80,8 +80,7 @@ using DetectionLog = std::vector<DetectionLogEntry>;
 /// \param[in] path -- path to a file to store
 /// \param[in] log  -- detection log to store
 ///
-void SaveDetectionLogToTrajFile(const std::string& path,
-                                const DetectionLog& log);
+void SaveDetectionLogToTrajFile(const std::string& path, const DetectionLog& log);
 
 ///
 /// \brief Print DetectionLog to stdout in the format
@@ -98,9 +97,7 @@ void PrintDetectionLog(const DetectionLog& log);
 /// \param[in,out] image Frame.
 /// \param[in] lwd Line width.
 ///
-void DrawPolyline(const std::vector<cv::Point>& polyline,
-                  const cv::Scalar& color, cv::Mat* image,
-                  int lwd = 5);
+void DrawPolyline(const std::vector<cv::Point>& polyline, const cv::Scalar& color, cv::Mat* image, int lwd = 5);
 
 ///
 /// \brief Stream output operator for deque of elements.
@@ -108,12 +105,13 @@ void DrawPolyline(const std::vector<cv::Point>& polyline,
 /// \param[in] v Vector of elements.
 ///
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const std::deque<T> &v) {
+std::ostream& operator<<(std::ostream& os, const std::deque<T>& v) {
     os << "[\n";
     if (!v.empty()) {
         auto itr = v.begin();
         os << *itr;
-        for (++itr; itr != v.end(); ++itr) os << ",\n" << *itr;
+        for (++itr; itr != v.end(); ++itr)
+            os << ",\n" << *itr;
     }
     os << "\n]";
     return os;
@@ -125,12 +123,13 @@ std::ostream &operator<<(std::ostream &os, const std::deque<T> &v) {
 /// \param[in] v Vector of elements.
 ///
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     os << "[\n";
     if (!v.empty()) {
         auto itr = v.begin();
         os << *itr;
-        for (++itr; itr != v.end(); ++itr) os << ",\n" << *itr;
+        for (++itr; itr != v.end(); ++itr)
+            os << ",\n" << *itr;
     }
     os << "\n]";
     return os;

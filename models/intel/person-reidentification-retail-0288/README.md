@@ -44,7 +44,7 @@ The expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs a blob with the `1, 256` shape named `descriptor` which can be
+The net outputs a blob with the `1, 256` shape named `reid_embedding` which can be
 compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 

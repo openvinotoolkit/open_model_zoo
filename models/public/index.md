@@ -45,6 +45,7 @@
    omz_models_model_alexnet
    omz_models_model_anti_spoof_mn3
    omz_models_model_caffenet
+   omz_models_model_convnext_tiny
    omz_models_model_densenet_121
    omz_models_model_densenet_121_tf
    omz_models_model_dla_34
@@ -337,6 +338,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/README.md)   | 56.598%/79.812% | 1.5 | 60.965 |
 | AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/README.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
+| ConvNeXt Tiny               | PyTorch\*                          | [convnext-tiny](./convnext-tiny/README.md) | 82.05%/95.86% | 8.9419 | 28.5892 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*| [densenet-121](./densenet-121/README.md)<br>[densenet-121-tf](./densenet-121-tf/README.md)| 74.42%/92.136%<br>74.46%/92.13%| 5.723~5.7287 | 7.971 |
 | DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/README.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
 | EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>77.70%/93.52% | 0.819 | 5.268 |

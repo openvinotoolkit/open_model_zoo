@@ -14,8 +14,7 @@
 
 import os
 import re
-from args import DataPatternArg
-from copy import deepcopy
+#from args import DataPatternArg
 
 from cases import BASE, single_option_cases
 
@@ -49,25 +48,46 @@ class PerformanceParser:
 
         if not os.path.isfile(self.filename):
             models_col = [f"Model {key}" for key in self.model_keys]
-            columns = ','.join(['Device', *models_col, *result.keys()])
+            precisions_col = [f"Precision {key}" for key in self.model_keys]
+            columns = ','.join(['Device', *precisions_col, *models_col, *result.keys()])
             with open(self.filename, 'w') as f:
                 print(columns, file=f)
 
+        precisions = [test_case.options[key].precision if key in test_case.options else '-'
+                      for key in self.model_keys]
         models_names = [test_case.options[key].name if key in test_case.options else '-'
                         for key in self.model_keys]
-        data = ','.join([device, *models_names, *result.values()])
+        data = ','.join([device, *precisions, *models_names, *result.values()])
         with open(self.filename, 'a') as f:
             print(data, file=f)
 
 
 DEMOS = [
-    deepcopy(BASE['interactive_face_detection_demo/cpp']).add_parser(PerformanceParser),
+    BASE['interactive_face_detection_demo/cpp_gapi'].add_parser(PerformanceParser),
 
-    deepcopy(BASE['object_detection_demo/python'])
+    BASE['interactive_face_detection_demo/cpp'].add_parser(PerformanceParser),
+
+    BASE['object_detection_demo/python']
         .only_models(['person-detection-0200', 'yolo-v2-tf'])
-        .update_option({'-i': DataPatternArg('action-recognition')})
+    # TODO: create large -i for performance scenario
+    #    .update_option({'-i': DataPatternArg('action-recognition')})
         .add_test_cases(single_option_cases('-nireq', '3', '5'),
                         single_option_cases('-nstreams', '3', '4'),
                         single_option_cases('-nthreads', str(THREADS_NUM), str(THREADS_NUM - 2)))
-        .add_parser(PerformanceParser)
+        .add_parser(PerformanceParser),
+
+    BASE['bert_named_entity_recognition_demo/python']
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU'])
+        .add_parser(PerformanceParser),
+
+    BASE['gpt2_text_prediction_demo/python']
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU'])
+        .add_parser(PerformanceParser),
+
+    BASE['speech_recognition_wav2vec_demo/python']
+        .update_option({'--dynamic_shape': None})
+        .only_devices(['CPU'])
+        .add_parser(PerformanceParser),
 ]

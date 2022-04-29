@@ -23,7 +23,7 @@ Average Precision metric described in [COCO Keypoint Evaluation site](https://co
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 448, 448` in the `B, C, H, W` format, where:
+Image, name: `image`, shape: `1, 3, 448, 448` in the `B, C, H, W` format, where:
 
 - `B` - batch size
 - `C` - number of channels

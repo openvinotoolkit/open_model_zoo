@@ -11,7 +11,7 @@ class Evaluator(object):
         self.video_eval_box = None
         self.front_scores_df = None
 
-        self.action_mode = 'skip_frame' #action mode can be 'skip_frame' (for mobilenet) or 'batch_mode' (for mstcn)
+        self.action_mode = 'skip_frame'  # action mode can be 'skip_frame' (for mobilenet) or 'batch_mode' (for mstcn)
         self.buffer_size = 40
         self.batch_mode_batchsize = 24
         self.batches_to_form_batchmode_buffer = 2
@@ -21,7 +21,7 @@ class Evaluator(object):
         self.frame_side_buffer = []
         self.action_buffer = []
         self.action_pool_buffer = []
-        self.pool_buffer_size = self.batch_mode_batchsize*self.batches_to_form_batchmode_buffer
+        self.pool_buffer_size = self.batch_mode_batchsize * self.batches_to_form_batchmode_buffer
         self.last_action = None
         self.top_obj_buffer = []
         self.side_obj_buffer = []
@@ -30,32 +30,32 @@ class Evaluator(object):
         self.side_object_dict = {}
         self.first_put_take = False
         self.state = "Initial"
-        self.buffer_rider = []    # buffer store coordinate of rider and tweezers to detect the move of rider, to evaluate the use of tweezers when adjust rider
+        self.buffer_rider = []  # buffer store coordinate of rider and tweezers to detect the move of rider, to evaluate the use of tweezers when adjust rider
         self.buffer_rider_size_limit = 30
-        self.use_tweezers_threshold = 350   #200    # if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
+        self.use_tweezers_threshold = 350  # 200    # if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
         self.tweezers_warning = None
         self.tweezers_warning_duration = 60
-        self.is_object_put = False # if battery is put on tray no matter left or right, return True
-        self.object_direction = None # if initially object put in left, then change to right or vice versa, use this parameter to know the change to give mark again
-        self.is_weights_put = False    # if weight is put on tray no matter left or right, return True
-        self.weights_direction = None # if initially weights put in right, then change to left or vice versa, use this parameter to know the change to give mark again
-        self.can_tidy = False # if battery and weight has been put on the tray(no matter left/right), then can tidy becomes true
-        self.rider_move_threshold = 20 # if rider moves more than this value, check if tweezers or hand is used to move rider
-        self.rider_zero=False
+        self.is_object_put = False  # if battery is put on tray no matter left or right, return True
+        self.object_direction = None  # if initially object put in left, then change to right or vice versa, use this parameter to know the change to give mark again
+        self.is_weights_put = False  # if weight is put on tray no matter left or right, return True
+        self.weights_direction = None  # if initially weights put in right, then change to left or vice versa, use this parameter to know the change to give mark again
+        self.can_tidy = False  # if battery and weight has been put on the tray(no matter left/right), then can tidy becomes true
+        self.rider_move_threshold = 20  # if rider moves more than this value, check if tweezers or hand is used to move rider
+        self.rider_zero = False
         self.rider_portion = 6  # divide the distance between 2 roundscrew1 into rider_portion portion, if rider falls in the first portion mean rider at zeroth position
-        self.num_weight_inside_tray = 0 # use in weight order evaluation -- only evaluate order when there is changes in this parameter
-        self.record_weight_inside_tray = [] # use in weight order evaluation -- only evaluate order when there is changes in this parameter
+        self.num_weight_inside_tray = 0  # use in weight order evaluation -- only evaluate order when there is changes in this parameter
+        self.record_weight_inside_tray = []  # use in weight order evaluation -- only evaluate order when there is changes in this parameter
         self.balance_threshold = 12
         self.rider_tweezers_lock_mark = False
         self.weight_order_lock_mark = False
         self.is_weight_tweezers_lock_mark = False
-        self.is_change_object_direction = False # mark given for object left will not change once given, except when this parameter become true 
+        self.is_change_object_direction = False  # mark given for object left will not change once given, except when this parameter become true
         self.is_change_weights_direction = False
         self.balance_persist_duration = 0
         self.balance_persist_duration_threshold = 60
         self.measuring_state_balance_lock_mark = False  # once this variable is True, even the balance is not balanced, measuring state balance mark still is given. \
-                                                        # it only turns true if balance persists more than self.balance_persist_duration_threshold frames
-                                                        # however, when weights are added to the tray, this lock will become False again
+        # it only turns true if balance persists more than self.balance_persist_duration_threshold frames
+        # however, when weights are added to the tray, this lock will become False again
         # scoring
         self.scoring = {
             "initial_score_rider": 0,
@@ -83,13 +83,13 @@ class Evaluator(object):
         }
 
     def inference(self,
-        top_det_results,
-        side_det_results,
-        action_seg_results,
-        frame_top,
-        frame_side,
-        frame_counter,
-        mode='skip_frame'):
+                  top_det_results,
+                  side_det_results,
+                  action_seg_results,
+                  frame_top,
+                  frame_side,
+                  frame_counter,
+                  mode='skip_frame'):
         """
         Args:
             top_det_results:
@@ -125,9 +125,9 @@ class Evaluator(object):
 
                 if action_seg_results == "adjust_rider":
                     self.evaluate_rider_tweezers()
-                    
-                if self.is_object_put == True and self.is_weights_put == True: # if object and weights are put no matter at left/right tray, 
-                    self.evaluate_end_tidy()                                # then can start evaluate whether they keep the apparatus
+
+                if self.is_object_put == True and self.is_weights_put == True:  # if object and weights are put no matter at left/right tray,
+                    self.evaluate_end_tidy()  # then can start evaluate whether they keep the apparatus
 
             self.check_score_validity()
             display_frame_counter = frame_counter - self.pool_buffer_size
@@ -148,19 +148,19 @@ class Evaluator(object):
         '''
         count_list = []
         count = 1
-        for i in range(len(self.action_buffer)-1):
+        for i in range(len(self.action_buffer) - 1):
 
             if self.action_buffer[i] == self.action_buffer[i + 1]:
-                count+=1
+                count += 1
             elif self.action_buffer[i] is not self.action_buffer[i + 1]:
                 count_list.append((self.action_buffer[i], count))
                 count = 1
-            if i == len(self.action_buffer) -2:
+            if i == len(self.action_buffer) - 2:
                 count_list.append((self.action_buffer[i], count))
         for i in range(len(count_list)):
             if count_list[i][1] >= self.filter_action_threshold:
                 return count_list[i][0]
-            elif i == len(count_list)-1:
+            elif i == len(count_list) - 1:
                 return 'noise_action'
 
     def filter_action(self, action_seg_results, mode):
@@ -181,15 +181,17 @@ class Evaluator(object):
         elif mode == 'batch_mode':
             if action_seg_results != []:
                 self.action_pool_buffer.extend(action_seg_results)
-            if len(self.action_pool_buffer) > self.pool_buffer_size: # 48
-                self.action_pool_buffer = self.action_pool_buffer[self.batch_mode_batchsize: ] # self.batch_mode_batchsize: 24
+            if len(self.action_pool_buffer) > self.pool_buffer_size:  # 48
+                self.action_pool_buffer = self.action_pool_buffer[
+                                          self.batch_mode_batchsize:]  # self.batch_mode_batchsize: 24
                 self.buffer_pointer = 0
 
             if len(self.action_pool_buffer) < self.pool_buffer_size:
                 return None
             elif len(self.action_pool_buffer) == self.pool_buffer_size:
                 self.buffer_pointer += 1
-                self.action_buffer = self.action_pool_buffer[self.buffer_pointer: self.buffer_pointer + self.batch_mode_batchsize]
+                self.action_buffer = self.action_pool_buffer[
+                                     self.buffer_pointer: self.buffer_pointer + self.batch_mode_batchsize]
                 if self.action_buffer[0] is not self.last_action:
                     self.last_action = self.check_consecutive()
 
@@ -199,7 +201,8 @@ class Evaluator(object):
         if len(self.top_obj_buffer) < self.buffer_size:
             self.top_obj_buffer.append(top_det_results)
             self.side_obj_buffer.append(side_det_results)
-            first_top_det_results = first_side_det_results = [np.array([[100, 500, 100, 500]]),[],np.array(['balance']),]
+            first_top_det_results = first_side_det_results = [np.array([[100, 500, 100, 500]]), [],
+                                                              np.array(['balance']), ]
         elif len(self.top_obj_buffer) == self.buffer_size:
             first_top_det_results = self.top_obj_buffer.pop(0)
             first_side_det_results = self.side_obj_buffer.pop(0)
@@ -232,7 +235,7 @@ class Evaluator(object):
         Most object return list of obj coordinate in dict except weight
         most object:
         return a dictionary of list of object coordinate, eg.[array([x_min,y_min,x_max,y_max]),...]
-        
+
         weight:
         weights_obj_coor return list of object name and coordinate, eg.[[[weights5_g,array([x_min,y_min,x_max,y_max])],...]
         as weight (5g,10g) etc is important for weight_order algo
@@ -299,7 +302,7 @@ class Evaluator(object):
                 weights_obj_coor.append([obj, coor])
             elif obj == 'weights':
                 weights_obj_coor.append([obj, coor])
-            
+
         if self.state == 'Initial':
             i_object = {'rider': rider_coor, 'pointer': pointer_coor, 'pointerhead': pointerhead_coor, \
                         'roundscrew1': roundscrew1_coor, 'roundscrew2': roundscrew2_coor, \
@@ -308,7 +311,8 @@ class Evaluator(object):
 
         elif self.state == 'Measuring':
             m_object = {'rider': rider_coor, 'pointer': pointer_coor, 'pointerhead': pointerhead_coor, \
-                        'roundscrew1': roundscrew1_coor, 'roundscrew2': roundscrew2_coor, 'battery': battery_coor, 'balance': balance_coor, \
+                        'roundscrew1': roundscrew1_coor, 'roundscrew2': roundscrew2_coor, 'battery': battery_coor,
+                        'balance': balance_coor, \
                         'support_sleeve': support_sleeve_coor, 'pointer_sleeve': pointer_sleeve_coor, 'tray': tray_coor, \
                         'tweezers': tweezers_coor, 'weights': weights_obj_coor}
             return (m_object)
@@ -329,9 +333,9 @@ class Evaluator(object):
     def classify_state(self, action_seg_results):
         if action_seg_results == "put_left" or action_seg_results == "put_right" or \
             action_seg_results == "take_left" or action_seg_results == "take_right" or \
-            action_seg_results == 'put_take':       #TODO:  filter input data for action so that only action persist  more than certain frame taken as true data
+            action_seg_results == 'put_take':  # TODO:  filter input data for action so that only action persist  more than certain frame taken as true data
             self.first_put_take = True
-        if self.first_put_take == True: 
+        if self.first_put_take == True:
             self.state = "Measuring"
         elif self.first_put_take == False:
             self.state = "Initial"
@@ -348,9 +352,9 @@ class Evaluator(object):
         [center_x, center_y] = center
 
         # theta is the angle need to be rotated so that two roundscrew2 is horizontal
-        if right_x - left_x != 0: # to avoid num/zero = infinity
+        if right_x - left_x != 0:  # to avoid num/zero = infinity
             if right_y <= left_y:
-                theta = abs(math.atan((right_y - left_y) / (right_x - left_x)))   # angle in rad by default
+                theta = abs(math.atan((right_y - left_y) / (right_x - left_x)))  # angle in rad by default
             elif right_y > left_y:
                 theta = -abs(math.atan((right_y - left_y) / (right_x - left_x)))
         else:
@@ -359,12 +363,18 @@ class Evaluator(object):
         offset_x = left_x
         offset_y = left_y
 
-        rotated_left_coor = int(((left_x - offset_x) * math.cos(theta) - (left_y - offset_y) * math.sin(theta)) + offset_x), \
-                                        int(((left_x - offset_x) * math.sin(theta) + (left_y - offset_y) * math.cos(theta)) + offset_y)
-        rotated_right_coor = int(((right_x - offset_x) * math.cos(theta) - (right_y - offset_y)*math.sin(theta)) + offset_x), \
-                                        int(((right_x - offset_x) * math.sin(theta) + (right_y - offset_y) * math.cos(theta)) + offset_y)
-        rotated_center_coor = int(((center_x-offset_x)*math.cos(theta) - (center_y - offset_y)*math.sin(theta)) + offset_x), \
-                                        int(((center_x - offset_x) * math.sin(theta) + (center_y - offset_y) * math.cos(theta)) + offset_y)
+        rotated_left_coor = int(
+            ((left_x - offset_x) * math.cos(theta) - (left_y - offset_y) * math.sin(theta)) + offset_x), \
+                            int(((left_x - offset_x) * math.sin(theta) + (left_y - offset_y) * math.cos(
+                                theta)) + offset_y)
+        rotated_right_coor = int(
+            ((right_x - offset_x) * math.cos(theta) - (right_y - offset_y) * math.sin(theta)) + offset_x), \
+                             int(((right_x - offset_x) * math.sin(theta) + (right_y - offset_y) * math.cos(
+                                 theta)) + offset_y)
+        rotated_center_coor = int(
+            ((center_x - offset_x) * math.cos(theta) - (center_y - offset_y) * math.sin(theta)) + offset_x), \
+                              int(((center_x - offset_x) * math.sin(theta) + (center_y - offset_y) * math.cos(
+                                  theta)) + offset_y)
 
         return rotated_left_coor, rotated_right_coor, rotated_center_coor
 
@@ -377,14 +387,16 @@ class Evaluator(object):
         rider_coor = self.side_object_dict['rider']
 
         # only evaluate rider_zero if 2 roundscrew1 and 1 rider are found
-        if len(roundscrew1_coor)== 2 and len(rider_coor) == 1:
+        if len(roundscrew1_coor) == 2 and len(rider_coor) == 1:
             # find center coordinate of rider and roundscrew1
             (x0, y0) = \
-                ((roundscrew1_coor[0][2] + roundscrew1_coor[0][0]) / 2,(roundscrew1_coor[0][3] + roundscrew1_coor[0][1]) / 2)
+                ((roundscrew1_coor[0][2] + roundscrew1_coor[0][0]) / 2,
+                 (roundscrew1_coor[0][3] + roundscrew1_coor[0][1]) / 2)
             (x1, y1) = \
-                ((roundscrew1_coor[1][2] + roundscrew1_coor[1][0]) / 2,(roundscrew1_coor[1][3] + roundscrew1_coor[1][1]) / 2)
+                ((roundscrew1_coor[1][2] + roundscrew1_coor[1][0]) / 2,
+                 (roundscrew1_coor[1][3] + roundscrew1_coor[1][1]) / 2)
             rider_center_coor = \
-                ((rider_coor[0][2] + rider_coor[0][0]) / 2,(rider_coor[0][3] + rider_coor[0][1]) / 2)
+                ((rider_coor[0][2] + rider_coor[0][0]) / 2, (rider_coor[0][3] + rider_coor[0][1]) / 2)
 
             # determine left/right roundscrew
             if x0 < x1:
@@ -396,22 +408,23 @@ class Evaluator(object):
 
             # rotate to make two roundscrew1 in a horizontal line
             rotated_left_coor, rotated_right_coor, rotated_center_coor = \
-                self.rotate(left=left_roundscrew1_center_coor, right=right_roundscrew1_center_coor, center=rider_center_coor)
+                self.rotate(left=left_roundscrew1_center_coor, right=right_roundscrew1_center_coor,
+                            center=rider_center_coor)
             limit = rotated_left_coor[0] + (rotated_right_coor[0] - rotated_left_coor[0]) / self.rider_portion
 
             # if rider center position < 1/10 of length between 2 roundscrew, consider rider is pushed to zero position
             if rotated_center_coor[0] < limit:
-                if self.state=="Initial":
+                if self.state == "Initial":
                     self.scoring["initial_score_rider"] = 1
                     self.keyframe["initial_score_rider"] = self.frame_counter
-                elif self.state=='Measuring':
-                    self.rider_zero=True    # self.rider_zero is to determine end_state score
+                elif self.state == 'Measuring':
+                    self.rider_zero = True  # self.rider_zero is to determine end_state score
             else:
-                if self.state=="Initial":
+                if self.state == "Initial":
                     self.scoring["initial_score_rider"] = 0
                     self.keyframe["initial_score_rider"] = self.frame_counter
-                elif self.state=='Measuring':
-                    self.rider_zero=False
+                elif self.state == 'Measuring':
+                    self.rider_zero = False
 
     def evaluate_rider_tweezers(self):
         """
@@ -438,18 +451,19 @@ class Evaluator(object):
                 tweezers_min_coordinate = np.array(tweezers_coor[0][0], tweezers_coor[0][1])
                 # if rider move more than rider_move_threshold compared with first element stored in the buffer, rider consider moved
                 if abs(rider_coor[0][0] - self.buffer_rider[0]) > self.rider_move_threshold:
-                    self.buffer_rider = []    # buffer is cleared and store from [] again
+                    self.buffer_rider = []  # buffer is cleared and store from [] again
 
                     # if rider move, check tweezers and rider distance
                     # if tweezers and rider are apart more than use_tweezers_threshold pixels (based on euclidean distance), consider not using tweezers
-                    if np.linalg.norm(rider_min_coordinate - tweezers_min_coordinate) <= self.use_tweezers_threshold and self.rider_tweezers_lock_mark==False:
+                    if np.linalg.norm(
+                        rider_min_coordinate - tweezers_min_coordinate) <= self.use_tweezers_threshold and self.rider_tweezers_lock_mark == False:
                         self.scoring['measuring_score_rider_tweezers'] = 1
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
 
                     elif np.linalg.norm(rider_min_coordinate - tweezers_min_coordinate) > self.use_tweezers_threshold:
                         self.scoring['measuring_score_rider_tweezers'] = 0
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
-                        self.rider_tweezers_lock_mark = True # once detected not using tweezers, will lose mark and not able to gain back this mark again
+                        self.rider_tweezers_lock_mark = True  # once detected not using tweezers, will lose mark and not able to gain back this mark again
 
     def evaluate_object_left(self):
         object_left_score, _ = self.evaluate_object_left_from_view(view='top')
@@ -510,10 +524,10 @@ class Evaluator(object):
                         self.is_change_object_direction = False
                         object_left_score = 1
                         object_left_keyframe = self.frame_counter
-                        # no matter how many battery detected, as long as 
+                        # no matter how many battery detected, as long as
                         # one object detected at left tray, consider get mark
                         return object_left_score, object_left_keyframe
-                else: # if object put happens on the right, then give zero score mark
+                else:  # if object put happens on the right, then give zero score mark
                     self.object_direction = 'right'
                     if self.is_object_put == False or self.is_change_object_direction:
                         self.is_object_put = True
@@ -544,7 +558,7 @@ class Evaluator(object):
                         object_left_keyframe = self.frame_counter
                 elif is_inside_left:
                     self.object_direction = 'left'
-                    # give mark when object is put first time, 
+                    # give mark when object is put first time,
                     # change mark only if student change direction afterward
                     if self.is_object_put == False or self.is_change_object_direction:
                         self.is_change_object_direction = False
@@ -578,7 +592,7 @@ class Evaluator(object):
         weights_obj_coor = self.top_object_dict['weights']
 
         if len(tray_coor) == 2 and len(weights_obj_coor) > 0:
-            # compare x_min of 2 tray to locate [left_tray, right_tray] instead of [right_tray,left_tray] 
+            # compare x_min of 2 tray to locate [left_tray, right_tray] instead of [right_tray,left_tray]
             if tray_coor[0][0] > tray_coor[1][0]:
                 left_tray = tray_coor[1]
                 right_tray = tray_coor[0]
@@ -586,7 +600,7 @@ class Evaluator(object):
                 left_tray = tray_coor[0]
                 right_tray = tray_coor[1]
 
-            weight_inside_right_tray = []   # weight_inside_right_tray = ['weight_5g','weight_10g',...]
+            weight_inside_right_tray = []  # weight_inside_right_tray = ['weight_5g','weight_10g',...]
             weight_inside_left_tray = []
 
             # if weights is inside left/right tray, store in respective list (weight_inside_left/right_tray)
@@ -604,7 +618,7 @@ class Evaluator(object):
             # once the first weight is put in left/right tray, self.is_weights_put become True to show weights have been put
             if not self.is_weights_put or self.is_change_weights_direction:
                 if len(weight_inside_right_tray) > 0:
-                    self.is_weights_put = True    # self.is_weights_put is prerequisites to enter end state
+                    self.is_weights_put = True  # self.is_weights_put is prerequisites to enter end state
                     self.weights_direction = 'right'
                     self.is_change_weights_direction = False
                     self.scoring["measuring_score_weights_right"] = 1
@@ -619,9 +633,9 @@ class Evaluator(object):
             # if user change the direction of weights, eg from right tray to left,
             # 'weights_right' mark will be re-evaluated
             if self.weights_direction == 'right' and len(weight_inside_left_tray) > 0:
-                    self.is_change_weights_direction = True
+                self.is_change_weights_direction = True
             elif self.weights_direction == 'left' and len(weight_inside_right_tray) > 0:
-                    self.is_change_weights_direction = True
+                self.is_change_weights_direction = True
 
             # check if students put/take weights using tweezers
             if self.weights_direction == 'right':
@@ -682,7 +696,7 @@ class Evaluator(object):
                         or self.is_inside(small_item_center_coor=battery_center_coor, big_item_coor=tray_coor[1]):
 
                         self.scoring["end_score_tidy"] = 0
-                        self.keyframe["end_score_tidy"] = self.frame_counter 
+                        self.keyframe["end_score_tidy"] = self.frame_counter
                     else:
                         self.evaluate_rider()
                         if self.rider_zero == True:
@@ -700,7 +714,7 @@ class Evaluator(object):
                     x_min, y_min, x_max, y_max = balance_coor[0]
                     left_balance = x_min, y_min, x_min + (x_max - x_min) / 2, y_max
                     right_balance = x_min + (x_max - x_min) / 2, y_min, x_max, y_max
-            
+
                     if self.is_inside(small_item_center_coor=battery_center_coor, big_item_coor=left_balance) \
                         or self.is_inside(small_item_center_coor=battery_center_coor, big_item_coor=right_balance):
                         self.scoring["end_score_tidy"] = 0
@@ -734,8 +748,8 @@ class Evaluator(object):
         pointerhead_coor = self.top_object_dict['pointerhead']
 
         # only evaluate balance when 2 roundscrew2, 1 scale, 1 pointerhead and 1 pointer are found
-        if len(roundscrew2_coor)==2 and len(pointerhead_coor)==1:
-            # figure out left/right roundscrew2  
+        if len(roundscrew2_coor) == 2 and len(pointerhead_coor) == 1:
+            # figure out left/right roundscrew2
             if roundscrew2_coor[0][0] < roundscrew2_coor[1][0]:
                 left_roundscrew2_coor = roundscrew2_coor[0]
                 right_roundscrew2_coor = roundscrew2_coor[1]
@@ -747,15 +761,15 @@ class Evaluator(object):
             left_roundscrew2_center_coor = [(left_roundscrew2_coor[0] + left_roundscrew2_coor[2]) / 2, \
                                             (left_roundscrew2_coor[1] + left_roundscrew2_coor[3]) / 2]
             right_roundscrew2_center_coor = [(right_roundscrew2_coor[0] + right_roundscrew2_coor[2]) / 2, \
-                                            (right_roundscrew2_coor[1] + right_roundscrew2_coor[3]) / 2]
-            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2,\
-                                            (pointerhead_coor[0][1] + pointerhead_coor[0][3]) / 2]
+                                             (right_roundscrew2_coor[1] + right_roundscrew2_coor[3]) / 2]
+            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2, \
+                                       (pointerhead_coor[0][1] + pointerhead_coor[0][3]) / 2]
 
             # rotate to make two roundscrew1 in a horizontal line
             rotated_left_coor, rotated_right_coor, rotated_center_coor = \
                 self.rotate(left=left_roundscrew2_center_coor,
-                right=right_roundscrew2_center_coor,
-                center=pointerhead_center_coor)
+                            right=right_roundscrew2_center_coor,
+                            center=pointerhead_center_coor)
 
             # if pointerhead center coordinate lies between [lower_limit,upper_limit], consider balance, where limit is middle point of two roundscrew2 +- balance_threshold
             lower_limit = (rotated_left_coor[0] + rotated_right_coor[0]) / 2 - self.balance_threshold

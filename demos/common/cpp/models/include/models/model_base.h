@@ -15,17 +15,27 @@
 */
 
 #pragma once
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <openvino/openvino.hpp>
+
 #include <utils/args_helper.hpp>
-#include <utils/ocv_common.hpp>
 #include <utils/config_factory.h>
-#include "models/input_data.h"
-#include "models/results.h"
+#include <utils/ocv_common.hpp>
+
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class ModelBase {
 public:
     ModelBase(const std::string& modelFileName, const std::string& layout = "")
-        : modelFileName(modelFileName), inputsLayouts(parseLayoutString(layout)) {}
+        : modelFileName(modelFileName),
+          inputsLayouts(parseLayoutString(layout)) {}
 
     virtual ~ModelBase() {}
 
@@ -34,12 +44,20 @@ public:
     virtual void onLoadCompleted(const std::vector<ov::InferRequest>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
 
-    const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
-    const std::vector<std::string>& getInputsNames() const { return inputsNames; }
+    const std::vector<std::string>& getOutputsNames() const {
+        return outputsNames;
+    }
+    const std::vector<std::string>& getInputsNames() const {
+        return inputsNames;
+    }
 
-    std::string getModelFileName() { return modelFileName; }
+    std::string getModelFileName() {
+        return modelFileName;
+    }
 
-    void setInputsPreprocessing(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
+    void setInputsPreprocessing(bool reverseInputChannels,
+                                const std::string& meanValues,
+                                const std::string& scaleValues) {
         this->inputTransform = InputTransform(reverseInputChannels, meanValues, scaleValues);
     }
 

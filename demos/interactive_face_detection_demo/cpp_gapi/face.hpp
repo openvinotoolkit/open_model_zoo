@@ -1,13 +1,19 @@
-// Copyright (C) 2020-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-# pragma once
+#pragma once
+
+#include <stddef.h>
 
 #include <list>
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
 // -------------------------Describe detected face on a frame-------------------
 
@@ -37,9 +43,9 @@ public:
     float _intensity_mean;
 
     size_t _id;
-    float  _age;
-    float  _maleScore;
-    float  _femaleScore;
+    float _age;
+    float _maleScore;
+    float _femaleScore;
     std::map<std::string, float> _emotions;
     float _yaw;
     float _pitch;

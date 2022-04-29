@@ -28,7 +28,7 @@ The quality metric was calculated on CONLL-2003 Named Entity Recognition dataset
 |---------------------------|---------------|
 | F1                        |        94.45% |
 
-Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_model` is a path to the folder, where the current model is downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
 
 ## Input
 

@@ -46,9 +46,9 @@ Expected color order is `BGR`.
 Each output contains one float value that represents value in Tait-Bryan angles
 (yaw, pitch or roll).
 
-1. name: `angle_y_fc`, shape: `1, 1` - Estimated yaw (in degrees).
-2. name: `angle_p_fc`, shape: `1, 1` - Estimated pitch (in degrees).
-3. name: `angle_r_fc`, shape: `1, 1` - Estimated roll (in degrees).
+1. name: `fc_y`, shape: `1, 1` - Estimated yaw (in degrees).
+2. name: `fc_p`, shape: `1, 1` - Estimated pitch (in degrees).
+3. name: `fc_r`, shape: `1, 1` - Estimated roll (in degrees).
 
 ## Demo usage
 

@@ -15,19 +15,32 @@
 */
 
 #pragma once
-#include <openvino/openvino.hpp>
+#include <memory>
+#include <string>
+
+#include <opencv2/core/types.hpp>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param layout - model input layout
-    SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout = "");
+    SuperResolutionModel(const std::string& modelFileName,
+                         const cv::Size& inputImgSize,
+                         const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

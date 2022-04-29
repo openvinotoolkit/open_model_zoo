@@ -21,8 +21,8 @@ class CocosnetModel:
 
         inputs = [node.get_any_name() for node in model.inputs]
         self.input_semantics, self.reference_image, self.reference_semantics = inputs
-        self.input_semantic_size = model.input(self.input_semantics).shape
-        self.input_image_size = model.input(self.reference_image).shape
+        self.input_semantic_size = list(model.input(self.input_semantics).shape)
+        self.input_image_size = list(model.input(self.reference_image).shape)
 
         compiled_model = core.compile_model(model, device)
         self.output_tensor = compiled_model.outputs[0]
@@ -46,7 +46,7 @@ class SegmentationModel:
             raise RuntimeError("The SegmentationModel expects 1 output layer")
 
         self.input_tensor_name = model.inputs[0].get_any_name()
-        self.input_size = model.inputs[0].shape
+        self.input_size = list(model.inputs[0].shape)
 
         compiled_model = core.compile_model(model, device)
         self.output_tensor = compiled_model.outputs[0]

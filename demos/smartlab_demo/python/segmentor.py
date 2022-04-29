@@ -1,12 +1,9 @@
 """
  Copyright (C) 2021-2022 Intel Corporation
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +13,8 @@
 
 import cv2
 import numpy as np
+import copy
+from scipy.special import softmax
 
 
 class Segmentor:
@@ -63,8 +62,8 @@ class Segmentor:
         """
 
         ### preprocess ###
-        buffer_side = buffer_side[120:, :, :] # remove date characters
-        buffer_top = buffer_top[120:, :, :] # remove date characters
+        buffer_side = buffer_side[120:, :, :]  # remove date characters
+        buffer_top = buffer_top[120:, :, :]  # remove date characters
         buffer_side = cv2.resize(buffer_side, (224, 224), interpolation=cv2.INTER_LINEAR)
         buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
         buffer_side = buffer_side / 255
@@ -75,12 +74,12 @@ class Segmentor:
 
         ### run ###
         self.infer_encoder_side_request.infer(inputs=
-            {self.encoder_side_input_keys['input_image']: buffer_side,
-            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
+                                              {self.encoder_side_input_keys['input_image']: buffer_side,
+                                               self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
         self.infer_encoder_top_request.infer(inputs=
-            {self.encoder_top_input_keys['input_image']: buffer_top,
-            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
+                                             {self.encoder_top_input_keys['input_image']: buffer_top,
+                                              self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         ### get tensors ###
         feature_vector_side = self.infer_encoder_side_request.get_tensor(
@@ -116,12 +115,12 @@ class Segmentor:
         buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         self.infer_encoder_side_request.start_async(inputs=
-            {self.encoder_side_input_keys['input_image']: buffer_side,
-            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
+                                                    {self.encoder_side_input_keys[0]: buffer_side,
+                                                     self.encoder_side_input_keys[1]: self.shifted_tesor_side})
 
         self.infer_encoder_top_request.start_async(inputs=
-            {self.encoder_top_input_keys['input_image']: buffer_top,
-            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
+                                                   {self.encoder_top_input_keys[0]: buffer_top,
+                                                    self.encoder_top_input_keys[1]: self.shifted_tesor_top})
 
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):
@@ -136,10 +135,104 @@ class Segmentor:
 
                 output = self.infer_decoder_request.infer(inputs={
                     self.decoder_input_keys['input_feature_1']: feature_vector_side.data,
-                    self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[self.decoder_output_key['output']]
+                    self.decoder_input_keys['input_feature_2']: feature_vector_top.data})[
+                    self.decoder_output_key['output']]
 
                 ### yoclo classifier ###
                 isAction = (output.squeeze()[0] >= .5).astype(int)
                 predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
                 return self.terms[predicted], self.terms[predicted]
+
+
+class SegmentorMstcn:
+    def __init__(self, core, device, encoder_path, mstcn_path):
+        self.ActionTerms = [
+            "background",
+            "noise_action",
+            "remove_support_sleeve",
+            "adjust_rider",
+            "adjust_nut",
+            "adjust_balancing",
+            "open_box",
+            "close_box",
+            "choose_weight",
+            "put_left",
+            "put_right",
+            "take_left",
+            "take_right",
+            "install_support_sleeve",
+        ]
+
+        self.ImgSizeHeight = 224
+        self.ImgSizeWidth = 224
+        self.SegBatchSize = 24
+        self.EmbedBufferCombined = []
+
+        # mobilenet-v3-small
+        net = core.read_model(encoder_path)
+        # set batch size 2 to make it accept top and front view at the same time
+        net.reshape([2, 3, 224, 224])
+        self.mobileNet = core.compile_model(model=net, device_name=device)
+        self.mobileNet_input_keys = self.mobileNet.inputs
+        self.mobileNet_output_key = self.mobileNet.outputs
+        self.mobileNet_request = self.mobileNet.create_infer_request()
+
+        self.mstcn_net = core.read_model(mstcn_path)
+        self.mstcn_net.reshape({"input": [1, 1152, self.SegBatchSize]})
+        self.mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
+        self.mstcn_input_keys = self.mstcn.inputs
+        self.mstcn_output_keys = self.mstcn.outputs
+        self.reshape_mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
+        self.mstcn_infer_request = self.reshape_mstcn.create_infer_request()
+        self.his_fea = [np.zeros((12, 64, 2048)), np.zeros((11, 64, 2048)), np.zeros((11, 64, 2048)),
+                        np.zeros((11, 64, 2048))]
+
+    def inference(self, frame_top, frame_side, frame_index):
+        """
+        Args:
+            buffer_top: buffers of the input image arrays for the top view
+            buffer_side: buffers of the input image arrays for the front view
+            frame_index: frame index of the latest frame
+        Returns: the temporal prediction results for each frame (including the historical predictions)，
+                 length of predictions == frame_index()
+        """
+        ### run mobilenet ###
+        self.feature_embedding(frame_top, frame_side)
+        feature = self.mobileNet_request.get_tensor(self.mobileNet_output_key[0]).data.reshape(1152, 1)
+        ### run mstcn++ ###
+        return self.action_segmentation(feature)
+
+    def feature_embedding(self, frame_top, frame_side):
+
+        img_top = cv2.resize(frame_top, (224, 224)) / 255.0
+        img_side = cv2.resize(frame_side, (224, 224)) / 255.0
+        combined_img = np.concatenate((np.expand_dims(img_top, axis=0), np.expand_dims(img_side, axis=0)),
+                                      axis=0).transpose((0, 3, 1, 2))
+        self.mobileNet_request.infer(inputs={self.mobileNet_input_keys[0]: combined_img})
+
+    def action_segmentation(self, feature):
+        # add up feature
+        feature = copy.copy(feature)
+        self.EmbedBufferCombined.append(feature)
+        if len(self.EmbedBufferCombined) == self.SegBatchSize:
+            input_mstcn = np.asarray(self.EmbedBufferCombined).transpose(2, 1, 0)
+            # reset bufferCombined
+            self.EmbedBufferCombined = []
+            feed_dict = {'input': input_mstcn, 'fhis_in_0': self.his_fea[0], 'fhis_in_1': self.his_fea[1],
+                         'fhis_in_2': self.his_fea[2], 'fhis_in_3': self.his_fea[3]}
+
+            # inference MSTCN
+            self.mstcn_infer_request.infer(feed_dict)
+
+            # get predicted output
+            predictions = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[0]).data
+            for i in range(4):
+                self.his_fea[i] = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[i + 1]).data
+
+            pred_actions = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
+            pred_softmax = softmax(pred_actions[-1], 1)  # 1x16xN
+            temporal_logits = pred_softmax.transpose((0, 2, 1)).squeeze(axis=0)
+            # ### get label ###
+            frame_predictions = [self.ActionTerms[i] for i in np.argmax(temporal_logits, axis=1)]
+            return frame_predictions

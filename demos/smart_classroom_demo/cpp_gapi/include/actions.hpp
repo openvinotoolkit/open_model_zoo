@@ -1,17 +1,19 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
+#include <vector>
+
 /**
-* @brief Class for action info
-*/
+ * @brief Class for action info
+ */
 using Action = int;
 
 /**
-* @brief Class for events on a single frame with action info
-*/
+ * @brief Class for events on a single frame with action info
+ */
 struct FrameEvent {
     /** @brief Frame index */
     int frame_id;
@@ -19,16 +21,15 @@ struct FrameEvent {
     Action action;
 
     /**
-  * @brief Constructor
-  */
-    FrameEvent(int frame_id, Action action)
-        : frame_id(frame_id), action(action) {}
+     * @brief Constructor
+     */
+    FrameEvent(int frame_id, Action action) : frame_id(frame_id), action(action) {}
 };
 using FrameEventsTrack = std::vector<FrameEvent>;
 
 /**
-* @brief Class for range of the same event with action info
-*/
+ * @brief Class for range of the same event with action info
+ */
 struct RangeEvent {
     /** @brief  Start frame index */
     int begin_frame_id;
@@ -38,10 +39,12 @@ struct RangeEvent {
     Action action;
 
     /**
-  * @brief Constructor
-  */
+     * @brief Constructor
+     */
     RangeEvent(int begin_frame_id, int end_frame_id, Action action)
-        : begin_frame_id(begin_frame_id), end_frame_id(end_frame_id), action(action) {}
+        : begin_frame_id(begin_frame_id),
+          end_frame_id(end_frame_id),
+          action(action) {}
 };
 using RangeEventsTrack = std::vector<RangeEvent>;
 

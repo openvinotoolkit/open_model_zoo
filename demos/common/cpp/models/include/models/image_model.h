@@ -1,4 +1,4 @@
-    /*
+/*
 // Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,18 @@
 */
 
 #pragma once
-#include <openvino/openvino.hpp>
+#include <stddef.h>
+
+#include <memory>
+#include <string>
+
 #include "models/model_base.h"
-#include "models/internal_model_data.h"
+
+namespace ov {
+class InferRequest;
+}  // namespace ov
+struct InputData;
+struct InternalModelData;
 
 class ImageModel : public ModelBase {
 public:
@@ -27,7 +36,7 @@ public:
     /// @param layout - model input layout
     ImageModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout = "");
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
 protected:
     bool useAutoResize;

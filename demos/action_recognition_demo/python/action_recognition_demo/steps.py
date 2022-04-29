@@ -101,6 +101,9 @@ class EncoderStep(PipelineStep):
         self.encoder = encoder
         self.async_model = AsyncWrapper(self.encoder, self.encoder.num_requests)
 
+    def __del__(self):
+        self.encoder.cancel()
+
     def process(self, frame):
         preprocessed = preprocess_frame(frame)
         preprocessed = preprocessed[np.newaxis, ...]  # add batch dimension
@@ -120,6 +123,9 @@ class DecoderStep(PipelineStep):
         self.decoder = decoder
         self.async_model = AsyncWrapper(self.decoder, self.decoder.num_requests)
         self._embeddings = deque(maxlen=self.sequence_size)
+
+    def __del__(self):
+        self.decoder.cancel()
 
     def process(self, item):
         if item is None:

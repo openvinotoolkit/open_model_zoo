@@ -15,12 +15,13 @@
 */
 
 #pragma once
+#include <stdint.h>
+
 #include <map>
 #include <set>
 #include <string>
 
 #include <openvino/openvino.hpp>
-#include "gflags/gflags.h"
 
 struct ModelConfig {
     std::string deviceName;
@@ -31,14 +32,17 @@ struct ModelConfig {
 
     std::set<std::string> getDevices();
     std::map<std::string, std::string> getLegacyConfig();
+
 protected:
     std::set<std::string> devices;
 };
 
 class ConfigFactory {
 public:
-    static ModelConfig getUserConfig(const std::string& flags_d, uint32_t flags_nireq,
-        const std::string& flags_nstreams, uint32_t flags_nthreads);
+    static ModelConfig getUserConfig(const std::string& flags_d,
+                                     uint32_t flags_nireq,
+                                     const std::string& flags_nstreams,
+                                     uint32_t flags_nthreads);
     static ModelConfig getMinLatencyConfig(const std::string& flags_d, uint32_t flags_nireq);
 
 protected:

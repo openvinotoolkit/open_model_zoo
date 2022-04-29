@@ -21,7 +21,7 @@ See Average Precision metric description at [COCO: Common Objects in Context](ht
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 800, 1280, 3` in the format `B, H, W, C`, where:
+Image, name: `image`, shape: `1, 800, 1280, 3` in the format `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - image height

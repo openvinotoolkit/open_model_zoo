@@ -1,15 +1,21 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-#include "kernel_packages.hpp"
 #include "custom_kernels.hpp"
 
+#include <stddef.h>
+
+#include <algorithm>
+#include <cmath>
+#include <memory>
+
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "kernel_packages.hpp"
+
 namespace {
-void rotateImageAroundCenter(const cv::Mat& srcImage,
-                             const float angle,
-                                   cv::Mat& dstImage) {
+void rotateImageAroundCenter(const cv::Mat& srcImage, const float angle, cv::Mat& dstImage) {
     const auto width = srcImage.cols;
     const auto height = srcImage.rows;
 
@@ -32,11 +38,11 @@ void toCHW(const cv::Mat& src, cv::Mat& dst) {
 
 void preprocessing(const cv::Mat& src, const cv::Size& new_size, const float roll, cv::Mat& dst) {
     cv::Mat rot, cvt, rsz;
-    rotateImageAroundCenter(src, roll, rot); // rotate
-    cv::resize(rot, rsz, new_size);          // resize
-    rsz.convertTo(cvt, CV_32F);              // convert to F32
-    toCHW(cvt, dst);                         // HWC to CHW
-    dst = dst.reshape(1, {1 , 3, new_size.height, new_size.width}); // reshape to CNN input
+    rotateImageAroundCenter(src, roll, rot);  // rotate
+    cv::resize(rot, rsz, new_size);  // resize
+    rsz.convertTo(cvt, CV_32F);  // convert to F32
+    toCHW(cvt, dst);  // HWC to CHW
+    dst = dst.reshape(1, {1, 3, new_size.height, new_size.width});  // reshape to CNN input
 }
 
 void adjustBoundingBox(cv::Rect& boundingBox) {
@@ -60,9 +66,7 @@ void adjustBoundingBox(cv::Rect& boundingBox) {
     }
 }
 
-cv::Rect createEyeBoundingBox(const cv::Point2i& p1,
-                              const cv::Point2i& p2,
-                                    float scale = 1.8f) {
+cv::Rect createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale = 1.8f) {
     cv::Rect result;
     float size = static_cast<float>(cv::norm(p1 - p2));
 
@@ -76,8 +80,9 @@ cv::Rect createEyeBoundingBox(const cv::Point2i& p1,
 
     return result;
 }
-} // anonymous namespace
+}  // anonymous namespace
 
+// clang-format off
 GAPI_OCV_KERNEL(OCVPrepareEyes, custom::PrepareEyes) {
     static void run(const cv::Mat& in,
                     const std::vector<cv::Rect>& left_rc,
@@ -116,9 +121,9 @@ GAPI_OCV_KERNEL(OCVParseSSD, custom::ParseSSD) {
 
         const int MAX_PROPOSALS = in_ssd_dims[2];
         const int OBJECT_SIZE   = in_ssd_dims[3];
-        CV_Assert(OBJECT_SIZE  == 7); // fixed SSD object size
+        CV_Assert(OBJECT_SIZE  == 7);  // fixed SSD object size
 
-        const cv::Rect surface({0,0}, upscale);
+        const cv::Rect surface({0, 0}, upscale);
         out_objects.clear();
 
         const float *data = in_ssd_result.ptr<float>();
@@ -130,7 +135,7 @@ GAPI_OCV_KERNEL(OCVParseSSD, custom::ParseSSD) {
                 break;    // marks end-of-detections
             }
             if (confidence < detectionThreshold) {
-                continue; // skip objects with low confidence
+                continue;  // skip objects with low confidence
             }
             const float rc_left    = data[i * OBJECT_SIZE + 3];
             const float rc_top     = data[i * OBJECT_SIZE + 4];
@@ -194,8 +199,10 @@ GAPI_OCV_KERNEL(OCVProcessLandmarks, custom::ProcessLandmarks) {
             std::vector<cv::Point2i> faceLandmarks;
 
             for (unsigned long i = 0; i < landmarks.at(idx).total() / 2; ++i) {
-                const int x = int(rawLandmarks[2 * i] * face_rois.at(idx).width + face_rois.at(idx).x);
-                const int y = int(rawLandmarks[2 * i + 1] * face_rois.at(idx).height + face_rois.at(idx).y);
+                const int x = static_cast<int>(rawLandmarks[2 * i] *
+                    face_rois.at(idx).width + face_rois.at(idx).x);
+                const int y = static_cast<int>(rawLandmarks[2 * i + 1] *
+                    face_rois.at(idx).height + face_rois.at(idx).y);
                 faceLandmarks.emplace_back(x, y);
             }
             leftEyeMidpoint.push_back((faceLandmarks[0] + faceLandmarks[1]) / 2);
@@ -258,12 +265,9 @@ GAPI_OCV_KERNEL(OCVProcessGazes, custom::ProcessGazes) {
         }
     }
 };
+// clang-format on
 
 cv::gapi::GKernelPackage custom::kernels() {
-    return cv::gapi::kernels<OCVPrepareEyes,
-                             OCVParseSSD,
-                             OCVProcessLandmarks,
-                             OCVProcessEyes,
-                             OCVProcessGazes,
-                             OCVProcessPoses>();
+    return cv::gapi::
+        kernels<OCVPrepareEyes, OCVParseSSD, OCVProcessLandmarks, OCVProcessEyes, OCVProcessGazes, OCVProcessPoses>();
 }

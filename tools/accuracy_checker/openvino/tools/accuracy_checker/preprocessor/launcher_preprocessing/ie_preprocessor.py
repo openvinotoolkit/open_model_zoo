@@ -21,8 +21,8 @@ try:
     from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant # pylint:disable=W9902
 except ImportError:
     ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant = None, None, None, None
-from ..utils import get_or_parse_value
-from ..config import ConfigError
+from ...utils import get_or_parse_value
+from ...config import ConfigError
 
 
 def ie_preprocess_available():

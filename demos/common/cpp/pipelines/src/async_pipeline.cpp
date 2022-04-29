@@ -14,15 +14,30 @@
 // limitations under the License.
 */
 
-#include <memory>
-#include <string>
-#include <openvino/openvino.hpp>
-#include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "pipelines/async_pipeline.h"
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core) :
-    model(std::move(modelInstance)) {
+#include <chrono>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <openvino/openvino.hpp>
+
+#include <models/model_base.h>
+#include <models/results.h>
+#include <utils/config_factory.h>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
+struct InputData;
+struct MetaData;
+
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const ModelConfig& config, ov::Core& core)
+    : model(std::move(modelInstance)) {
     compiledModel = model->compileModel(config, core);
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = config.maxAsyncRequests;
@@ -31,8 +46,10 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const M
             // +1 to use it as a buffer of the pipeline
             nireq = compiledModel.get_property(ov::optimal_number_of_infer_requests) + 1;
         } catch (const ov::Exception& ex) {
-            throw std::runtime_error(std::string("Every device used with the demo should support compiled model's property "
-                "'OPTIMAL_NUMBER_OF_INFER_REQUESTS'. Failed to query the property with error: ") + ex.what());
+            throw std::runtime_error(
+                std::string("Every device used with the demo should support compiled model's property "
+                            "'OPTIMAL_NUMBER_OF_INFER_REQUESTS'. Failed to query the property with error: ") +
+                ex.what());
         }
     }
     slog::info << "\tNumber of inference requests: " << nireq << slog::endl;
@@ -48,16 +65,11 @@ AsyncPipeline::~AsyncPipeline() {
 void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(
-        lock,
-        [&]()
-        {
-            return callbackException != nullptr ||
-                   requestsPool->isIdleRequestAvailable() ||
-                   (shouldKeepOrder ?
-                       completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
-                       !completedInferenceResults.empty());
-        });
+    condVar.wait(lock, [&]() {
+        return callbackException != nullptr || requestsPool->isIdleRequestAvailable() ||
+               (shouldKeepOrder ? completedInferenceResults.find(outputFrameId) != completedInferenceResults.end()
+                                : !completedInferenceResults.empty());
+    });
 
     if (callbackException) {
         std::rethrow_exception(callbackException);
@@ -98,15 +110,14 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 
                     completedInferenceResults.emplace(frameID, result);
                     requestsPool->setRequestIdle(request);
-                }
-                catch (...) {
+                } catch (...) {
                     if (!callbackException) {
                         callbackException = std::current_exception();
                     }
                 }
             }
             condVar.notify_one();
-    });
+        });
 
     inputFrameId++;
     if (inputFrameId < 0)
@@ -135,9 +146,8 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     {
         const std::lock_guard<std::mutex> lock(mtx);
 
-        const auto& it = shouldKeepOrder ?
-            completedInferenceResults.find(outputFrameId) :
-            completedInferenceResults.begin();
+        const auto& it =
+            shouldKeepOrder ? completedInferenceResults.find(outputFrameId) : completedInferenceResults.begin();
 
         if (it != completedInferenceResults.end()) {
             retVal = std::move(it->second);
@@ -145,7 +155,7 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
         }
     }
 
-    if(!retVal.IsEmpty()) {
+    if (!retVal.IsEmpty()) {
         outputFrameId = retVal.frameId;
         outputFrameId++;
         if (outputFrameId < 0) {

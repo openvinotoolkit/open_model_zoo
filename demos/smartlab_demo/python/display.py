@@ -1,12 +1,9 @@
 """
  Copyright (C) 2021-2022 Intel Corporation
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,7 +77,7 @@ class Display:
         return text_size
 
     def display_result(self, frame_top, frame_side, side_seg_results, top_seg_results, \
-        top_det_results, side_det_results, scoring, state, keyframe, frame_counter, fps):
+                       top_det_results, side_det_results, scoring, state, keyframe, frame_counter, fps):
 
         if state == 'Initial':
             display_status = 'Evaluating Initial Phase...'
@@ -127,7 +124,7 @@ class Display:
             cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
             fontScale=1.5, thickness=3)
 
-        #display obj detection result for both view
+        # display obj detection result for both view
         for row, obj_cls in zip(top_det_results[0], top_det_results[2]):
             x_min = int(row[0])
             y_min = int(row[1])
@@ -146,6 +143,7 @@ class Display:
             x_max = int(row[2])
             y_max = int(row[3])
 
+
             cv2.putText(frame_side, obj_cls, (x_min, y_min - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
                 fontScale=0.9, thickness=2)
@@ -160,6 +158,7 @@ class Display:
         m_object_left = scoring['measuring_score_object_left']
         m_weights_right = scoring['measuring_score_weights_right']
         m_weights_tweezers = scoring['measuring_score_weights_tweezers']
+        m_weights_order = scoring['measuring_score_weights_order']
         e_tidy = scoring['end_score_tidy']
 
         # display keyframe
@@ -170,6 +169,7 @@ class Display:
         m_object_left_k = keyframe['measuring_score_object_left']
         m_weights_right_k = keyframe['measuring_score_weights_right']
         m_weights_tweezers_k = keyframe['measuring_score_weights_tweezers']
+        m_weights_order_k = keyframe['measuring_score_weights_order']
         e_tidy_k = keyframe['end_score_tidy']
 
         # draw scores
@@ -206,5 +206,5 @@ class Display:
             frame_side, (int(frame_side.shape[1] / 2), int(frame_side.shape[0] / 2)))
         result_image = np.concatenate((frame_top, frame_side), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)
-
-        cv2.imshow("Smart Science Lab", result_image)
+        self.writer.write(result_image)
+        # cv2.imshow("Smart Science Lab", result_image)
