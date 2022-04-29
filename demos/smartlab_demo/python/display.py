@@ -102,7 +102,7 @@ class Display:
         cv2.putText(frame_top, side_seg_results, (700, 80),
             cv2.FONT_HERSHEY_SIMPLEX, color=self.colour_map[side_seg_results],
             fontScale=1.5, thickness=3)
-        cv2.putText(frame_side, top_seg_results,(700, 80),
+        cv2.putText(frame_side, top_seg_results, (700, 80),
             cv2.FONT_HERSHEY_SIMPLEX, color=self.colour_map[top_seg_results],
             fontScale=1.5, thickness=3)
 
@@ -162,7 +162,7 @@ class Display:
         w, h = self.draw_text_without_background(self.score_board, f"SCORE - {display_status}",\
              pos=(self.w1, 60), text_color_bg=initial_text_color_bg)
         w, h = self.draw_text(self.score_board, f"INITIALISE RIDER[{i_rider}]",\
-             pos=(self.w1, 130), text_color_bg=initial_text_color_bg, icon=initial_icon)
+             pos=(self.w1, 120), text_color_bg=initial_text_color_bg, icon=initial_icon)
         w, h = self.draw_text(self.score_board, f"INITIALISE BALANCE[{i_balance}]",\
              pos=(self.w2, 120), text_color_bg=initial_text_color_bg, icon=initial_icon)
         w, h = self.draw_text(self.score_board, f"PUT OBJECT ON LEFT TRAY[{m_object_left}]",\
@@ -174,9 +174,9 @@ class Display:
         w, h = self.draw_text(self.score_board, f"ADJUST RIDER WITH TWEEZER[{m_rider_tweezers}]",\
              pos=(self.w2, 240), text_color_bg=measuring_text_color_bg, icon=measuring_icon)
         w, h = self.draw_text(self.score_board, f"SCALE IS BALANCED[{m_balance}]",\
-             pos=(self.w1, 290), text_color_bg=measuring_text_color_bg, icon=measuring_icon)
+             pos=(self.w1, 300), text_color_bg=measuring_text_color_bg, icon=measuring_icon)
         w, h = self.draw_text(self.score_board, f"PUT EQUIPMENTS BACK[{e_tidy}]",\
-             pos=(self.w2, 290), text_color_bg=measuring_text_color_bg, icon=measuring_icon)
+             pos=(self.w2, 300), text_color_bg=measuring_text_color_bg, icon=measuring_icon)
 
         # draw action segmentation bar
         self.segmentationBar[:, :-1] = self.segmentationBar[:, 1:]

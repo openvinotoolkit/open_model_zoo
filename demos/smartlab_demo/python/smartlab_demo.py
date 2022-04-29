@@ -96,6 +96,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                                                   frame_index=frame_counter)
                 if seg_results is not None:
                     current_seg_result = seg_results[0]
+                    if args.mode == "multivew": seg_results = current_seg_result
+
             current_time = time.time()
             current_frame = frame_counter
             if (current_time - old_time > interval_second):
@@ -108,20 +110,28 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
             if detector_result is not None:
                 top_det_results, side_det_results = detector_result[0], detector_result[1]
                 if seg_results is not None:
-                    state, scoring, keyframe = evaluator.inference(
+                    state, scoring, keyframe, action_seg_results = evaluator.inference(
                         top_det_results=top_det_results,
                         side_det_results=side_det_results,
                         action_seg_results=seg_results,
                         frame_top=frame_top,
                         frame_side=frame_side,
                         frame_counter=frame_counter,
-                        mode='batch_mode')
+                        mode=args.mode)
+
                 if frame_counter > 24:
+                    if action_seg_results == None:
+                        action = None
+                    elif len(action_seg_results) == 2:
+                        action = action_seg_results[0]
+                    else:
+                        action = action_seg_results
+
                     display.display_result(
                         frame_top=frame_top,
                         frame_side=frame_side,
-                        side_seg_results=current_seg_result,
-                        top_seg_results=current_seg_result,
+                        side_seg_results=action,
+                        top_seg_results=action,
                         top_det_results=top_det_results,
                         side_det_results=side_det_results,
                         scoring=scoring,
