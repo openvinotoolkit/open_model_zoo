@@ -92,7 +92,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                     seg_results, _ = segmentor_result[0], segmentor_result[1]
             else:  # mstcn
                 detector_result = detector.inference(frame_top, frame_side)
-                seg_results = segmentor.inference(frame_top=frame_top, frame_side=frame_side,
+                seg_results = segmentor.inference(frame_top, frame_side,
                                                   frame_index=frame_counter)
                 if seg_results is not None:
                     current_seg_result = seg_results[0]
@@ -147,7 +147,7 @@ def main():
 
     '''Video Segmentation Variables'''
     if (args.mode == "multiview"):
-        segmentor = Segmentor(core, args.device, args.m_encoder, args.m_encoder_extra, args.m_decoder)
+        segmentor = Segmentor(core, args.device, args.m_encoder_top, args.m_encoder_side, args.m_decoder)
     elif (args.mode == "mstcn"):
         segmentor = SegmentorMstcn(core, args.device, args.m_encoder, args.m_decoder)
     else:

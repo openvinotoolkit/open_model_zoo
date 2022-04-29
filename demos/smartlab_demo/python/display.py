@@ -206,5 +206,4 @@ class Display:
             frame_side, (int(frame_side.shape[1] / 2), int(frame_side.shape[0] / 2)))
         result_image = np.concatenate((frame_top, frame_side), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)
-        self.writer.write(result_image)
-        # cv2.imshow("Smart Science Lab", result_image)
+        cv2.imshow("Smart Science Lab", result_image)
