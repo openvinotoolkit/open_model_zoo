@@ -27,9 +27,8 @@ class Display:
             "noise_action": [127, 127, 127],
             "put_take": [255, 0, 0],
             "adjust_rider": [0, 0, 255]}
-        self.segmentationBar = np.zeros((100, 1920, 3))
-        self.segmentationBar[:50, :] = 255
-        self.segmentationBar[70:73, ::10] = 255
+        self.segmentationBar = np.zeros((50, 1920, 3))
+        self.segmentationBar[20:23, ::10] = 255
         self.segmentationBar[:, -1] = 255
 
     def draw_text(self,img, text,
@@ -104,12 +103,12 @@ class Display:
         #renew score board so that when put cv2.puttext text will not overlap
         self.score_board = np.zeros([450, 1920, 3], dtype=np.uint8)
 
-        #add action name of each frame at middle top
+        # Add action name of each frame at middle top
         cv2.putText(frame_top, side_seg_results, (700, 80),
-            cv2.FONT_HERSHEY_SIMPLEX, color = (0, 0, 255),
+            cv2.FONT_HERSHEY_SIMPLEX, color=self.colour_map[side_seg_results],
             fontScale=1.5, thickness=3)
         cv2.putText(frame_side, top_seg_results,(700, 80),
-            cv2.FONT_HERSHEY_SIMPLEX, color = (0, 0, 255),
+            cv2.FONT_HERSHEY_SIMPLEX, color=self.colour_map[top_seg_results],
             fontScale=1.5, thickness=3)
 
         #display frame_number at top left corner
@@ -194,18 +193,11 @@ class Display:
             pos=(self.w2, 350), text_color_bg=measuring_text_color_bg)
 
         # draw action segmentation bar
-        cv2.putText(self.segmentationBar, 'Noise Actions', (0, 15),
-            cv2.FONT_HERSHEY_SIMPLEX, color = (127, 127, 127), fontScale=.5, thickness=2)
-        cv2.putText(self.segmentationBar, 'Put Take', (0, 30),
-            cv2.FONT_HERSHEY_SIMPLEX, color = (255, 0, 0), fontScale=.5, thickness=2)
-        cv2.putText(self.segmentationBar, 'Adjust Rider', (0, 45),
-            cv2.FONT_HERSHEY_SIMPLEX, color = (0, 0, 255), fontScale=.5, thickness=2)
-
-        self.segmentationBar[50:101, :-1] = self.segmentationBar[50:101, 1:]
-        self.segmentationBar[50:, -1] = np.asarray(self.colour_map[top_seg_results])
+        self.segmentationBar[:, :-1] = self.segmentationBar[:, 1:]
+        self.segmentationBar[:, -1] = np.asarray(self.colour_map[top_seg_results])
         if frame_counter % 10 == 0: # add keyframe
-            self.segmentationBar[80: 83, -1, :] = 255
-        self.score_board[:100, :] = self.segmentationBar[:, :]
+            self.segmentationBar[20: 23, -1, :] = 255
+        self.score_board[:50, :] = self.segmentationBar[:, :]
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks
         frame_top = cv2.resize(
