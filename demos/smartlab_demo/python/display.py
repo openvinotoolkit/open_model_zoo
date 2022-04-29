@@ -23,6 +23,14 @@ class Display:
         '''Score Evaluation Variables'''
         self.w1 = 150
         self.w2 = 950
+        self.colour_map = {
+            "noise_action": [127, 127, 127],
+            "put_take": [255, 0, 0],
+            "adjust_rider": [0, 0, 255]}
+        self.segmentationBar = np.zeros((100, 1920, 3))
+        self.segmentationBar[:50, :] = 255
+        self.segmentationBar[70:73, ::10] = 255
+        self.segmentationBar[:, -1] = 255
 
     def draw_text(self,img, text,
         font=cv2.FONT_HERSHEY_TRIPLEX,
@@ -94,7 +102,7 @@ class Display:
             measuring_text_color_bg = (0, 180, 0)
 
         #renew score board so that when put cv2.puttext text will not overlap
-        self.score_board = np.zeros([350, 1920, 3], dtype=np.uint8)
+        self.score_board = np.zeros([450, 1920, 3], dtype=np.uint8)
 
         #add action name of each frame at middle top
         cv2.putText(frame_top, side_seg_results, (700, 80),
@@ -167,23 +175,37 @@ class Display:
 
         # draw scores
         w, h = self.draw_text_without_background(self.score_board, f"Score - {display_status}",
-            pos=(self.w1, 10), text_color_bg=initial_text_color_bg)
+            pos=(self.w1, 110), text_color_bg=initial_text_color_bg)
         w, h = self.draw_text(self.score_board, f"initialise rider[{i_rider}]",
-            pos=(self.w1, 70), text_color_bg=initial_text_color_bg)
+            pos=(self.w1, 170), text_color_bg=initial_text_color_bg)
         w, h = self.draw_text(self.score_board, f"initialise balance[{i_balance}]",
-            pos=(self.w2, 70), text_color_bg=initial_text_color_bg)
+            pos=(self.w2, 170), text_color_bg=initial_text_color_bg)
         w, h = self.draw_text(self.score_board, f"put object in left tray[{m_object_left}]",
-            pos=(self.w1, 130), text_color_bg=measuring_text_color_bg)
+            pos=(self.w1, 230), text_color_bg=measuring_text_color_bg)
         w, h = self.draw_text(self.score_board, f"put weights in right tray[{m_weights_right}]",
-            pos=(self.w2, 130), text_color_bg=measuring_text_color_bg)
+            pos=(self.w2, 230), text_color_bg=measuring_text_color_bg)
         w, h = self.draw_text(self.score_board, f"move weights with tweezers[{m_weights_tweezers}]",
-            pos=(self.w1, 190), text_color_bg=measuring_text_color_bg)
+            pos=(self.w1, 290), text_color_bg=measuring_text_color_bg)
         w, h = self.draw_text(self.score_board, f"move rider with tweezers[{m_rider_tweezers}]",
-            pos=(self.w2, 190), text_color_bg=measuring_text_color_bg)
+            pos=(self.w2, 290), text_color_bg=measuring_text_color_bg)
         w, h = self.draw_text(self.score_board, f"scale balanced[{m_balance}]",
-            pos=(self.w1, 250), text_color_bg=measuring_text_color_bg)
+            pos=(self.w1, 350), text_color_bg=measuring_text_color_bg)
         w, h = self.draw_text(self.score_board, f"put equipments back[{e_tidy}]",
-            pos=(self.w2, 250), text_color_bg=measuring_text_color_bg)
+            pos=(self.w2, 350), text_color_bg=measuring_text_color_bg)
+
+        # draw action segmentation bar
+        cv2.putText(self.segmentationBar, 'Noise Actions', (0, 15),
+            cv2.FONT_HERSHEY_SIMPLEX, color = (127, 127, 127), fontScale=.5, thickness=2)
+        cv2.putText(self.segmentationBar, 'Put Take', (0, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, color = (255, 0, 0), fontScale=.5, thickness=2)
+        cv2.putText(self.segmentationBar, 'Adjust Rider', (0, 45),
+            cv2.FONT_HERSHEY_SIMPLEX, color = (0, 0, 255), fontScale=.5, thickness=2)
+
+        self.segmentationBar[50:101, :-1] = self.segmentationBar[50:101, 1:]
+        self.segmentationBar[50:, -1] = np.asarray(self.colour_map[top_seg_results])
+        if frame_counter % 10 == 0: # add keyframe
+            self.segmentationBar[80: 83, -1, :] = 255
+        self.score_board[:100, :] = self.segmentationBar[:, :]
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks
         frame_top = cv2.resize(
