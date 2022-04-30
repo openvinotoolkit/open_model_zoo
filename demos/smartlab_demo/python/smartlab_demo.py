@@ -14,12 +14,12 @@
 import cv2
 import time
 import concurrent.futures
-from collections import deque
-from argparse import ArgumentParser, SUPPRESS
 
+from ast import Assert
 from display import Display
 from evaluator import Evaluator
 from openvino.runtime import Core
+from argparse import ArgumentParser, SUPPRESS
 from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
 
@@ -71,32 +71,30 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
     future_segmentor = None
+
     while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()
         ret_side, frame_side = cap_side.read()
 
-        frame_counter += 1
         if not ret_top or not ret_side:
             break
         else:
-            if args.mode == "multiview" and frame_counter % 10 == 0:
-                future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
-                future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
-                if future_detector is not None and future_detector.done():
-                    print("multiview detector done")
-                    detector_result = future_detector.result()
-                    future_detector = None
-                if future_segmentor is not None and future_segmentor.done():
-                    print("multiview segmentor done")
-                    segmentor_result = future_segmentor.result()
-                    seg_results, _ = segmentor_result[0], segmentor_result[1]
-            else:  # mstcn
+            if args.mode == "mstcn":
                 detector_result = detector.inference(frame_top, frame_side)
                 seg_results = segmentor.inference(frame_top, frame_side,
                                                   frame_index=frame_counter)
-                if seg_results is not None:
-                    current_seg_result = seg_results[0]
-                    if args.mode == "multivew": seg_results = current_seg_result
+            elif args.mode == "multiview" and frame_counter % 10 == 0:
+                future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
+                future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
+
+            # get obj result
+            if future_detector is not None and future_detector.done():
+                detector_result = future_detector.result()
+                future_detector = None
+            # get segment result
+            if future_segmentor is not None and future_segmentor.done():
+                segmentor_result = future_segmentor.result()
+                seg_results, _ = segmentor_result[0], segmentor_result[1]
 
             current_time = time.time()
             current_frame = frame_counter
@@ -139,10 +137,10 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         keyframe=keyframe,
                         frame_counter=frame_counter,
                         fps=fps)
+        frame_counter += 1
 
         if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}:  # Esc
             break
-
 
 def main():
     args = build_argparser().parse_args()

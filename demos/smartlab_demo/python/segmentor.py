@@ -12,8 +12,9 @@
 """
 
 import cv2
-import numpy as np
 import copy
+import numpy as np
+
 from scipy.special import softmax
 
 
