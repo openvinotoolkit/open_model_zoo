@@ -69,13 +69,14 @@ class CorrectnessCheckerBase(ABC):
                         "AUTO:CPU" : ["CPU"],
                         "AUTO:GPU" : ["GPU"],
                         }
+        # Record the results for the single device inputting like AUTO:CPU, AUTO:GPU
         # {
         #   device 0: { target 0: {case 0: True/False, case 1: True/False, ...},...,target n:{} },
         #   device 1: { target 1: {case 0: True/False, case 1: True/False, ...},...,target n:{} },
         # }
         multi_correctness = {}
 
-        # For multi devices like AUTO:GPU,CPU, MULTI:GPU,CPU 
+        # Record the results for the multi devices inputting like AUTO:GPU,CPU, MULTI:GPU,CPU
         #{
         #   device 0:{
         #          case 0: {
@@ -94,7 +95,8 @@ class CorrectnessCheckerBase(ABC):
         #}
         multi_correctness_devices = {}
 
-        #{
+        # Record the detailed msg for the inconsistent results
+        # {
         #   device 0: {case 0: "error msg", case 1: "error msg", ...}, 
         #   device 1: {case 0: "error msg", case 1: "error msg", ...}, 
         #   ....
@@ -115,11 +117,15 @@ class CorrectnessCheckerBase(ABC):
                     multi_correctness[device][target] = {}
                     multi_correctness_errmsg[device]['-1'] = "\tMiss the results of device {} or device {}.\n".format(device, target)
                     continue
+                #if self.results[device] != self.results[target]:
+                #    # Show the detailed inconsistent results
                 for case in self.results[target]:
                     if case not in multi_correctness[device][target]:
                         multi_correctness[device][target][case] = True 
                     if case not in multi_correctness_errmsg[device]:
                         multi_correctness_errmsg[device][case] = ''
+
+                    #if self.results[device][case] != self.results[target][case]:
                     for channel in self.results[device][case]:
                         for frame in self.results[device][case][channel]:
                             if channel not in self.results[target][case] or (channel in self.results[target][case] and frame not in self.results[target][case][channel]):
@@ -131,6 +137,15 @@ class CorrectnessCheckerBase(ABC):
                                         multi_correctness[device][target][case] = False
                                         multi_correctness_errmsg[device][case] += "[Device: {}- Case: {}][Not Found on {}]Channel {} - Frame {} : {}\n".format(device, case, device, channel, frame, self.results[target][case][channel][frame])
                                     else:
+                                        #print("======Case:{} - Device: {} - Target: {} - channel: {} - frame: {}=======".format(case, device, target, channel, frame))
+                                        #print("Device {}: {}".format(device, self.results[device][case][channel][frame][obj]))
+                                        #print("{}: {}".format(target, self.results[target][case][channel][frame][obj]))
+                                        #if 'CPU' in device and 'GPU' in device:
+                                        #    if target == 'CPU':
+                                        #        print("GPU: {}".format(self.results['GPU'][case][channel][frame][obj]))
+                                        #    elif target == 'GPU':
+                                        #        print("CPU: {}".format(self.results['CPU'][case][channel][frame][obj]))
+
                                         if 'CPU' in device and 'GPU' in device:
                                             if case not in multi_correctness_devices[device][target]:
                                                 multi_correctness_devices[device][target][case] = {}
@@ -162,6 +177,14 @@ class CorrectnessCheckerBase(ABC):
                                                 else:
                                                     if device_vehicle_attr != target_vehicle_attr: 
                                                         multi_correctness[device][target][case] = False 
+                                                        tmp_msg = ("[Device: {}- Case: {} on {}] Channel {} - Frame {} : {}\n".format(device, case, device, channel, frame, self.results[device][case][channel][frame]))
+                                                        tmp_msg += ("[Device: {}- Case: {} on {}] Channel {} - Frame {} : {}\n".format(device, case, target, channel, frame, self.results[target][case][channel][frame]))
+                                                        multi_correctness_errmsg[device][case] += tmp_msg
+                                        #if 'CPU' in device and 'GPU' in device:
+                                        #    print(multi_correctness_devices[device][target][case][channel][frame])
+                                        #else:
+                                        #    print(multi_correctness[device][target][case])
+                                        #print("======================================")
                                         if 'CPU' in device and 'GPU' in device:
                                             # Check if correctness result between device and target for multi devices
                                             consistent_flag = False 
@@ -178,6 +201,18 @@ class CorrectnessCheckerBase(ABC):
                                                     tmp_msg += ("[Device: {}- Case: {} on {}] Channel {} - Frame {} : {}\n".format(device, case, device, channel, frame, self.results[device][case][channel][frame]))
                                                     multi_correctness_errmsg[device][case] += tmp_msg
 
+        #print("=====================================")
+        #print(multi_correctness)
+        #print("=====================================")
+        print(multi_correctness_errmsg)
+        #print("=====================================")
+        #for device in multi_correctness_devices: 
+        #    for target in multi_correctness_devices[device]:
+        #        for case in multi_correctness_devices[device][target]:
+        #            for channel in multi_correctness_devices[device][target][case]: 
+        #                print("===== Device:{} - target: {} - Case: {} - channel: {}=====".format(device, target, case, channel))
+        #                print(multi_correctness_devices[device][target][case][channel])
+        #print("=====================================")
         final_correctness_flag = True 
         for device in devices_list:
             if 'MULTI:GPU,CPU' != device and 'AUTO:GPU,CPU' != device:
@@ -197,39 +232,48 @@ class CorrectnessCheckerBase(ABC):
                                 consistent_flag = False
                                 err_msg += multi_correctness_errmsg[device][case] 
                     if not consistent_flag:
-                        print("Checking correctness between {} and {} : Failure.\n{}".format(device, devices_list[device], err_msg))
+                        print("Checking device: {} - target : {} - : Fail.\n{}".format(device, devices_list[device], err_msg))
                     else:
-                        print("Checking correctness between {} and {} : PASS.\n".format(device, devices_list[device]))
+                        print("Checking device: {} - target : {} - : PASS.\n".format(device, devices_list[device]))
             else:
                 consistent_flag = True
                 err_msg = ''
-                for case in multi_correctness[device]['CPU']:
-                    if multi_correctness[device]['CPU'][case] == False:
-                        final_correctness_flag = False
-                        consistent_flag = False 
-                        err_msg += multi_correctness_errmsg[device][case] 
-                    else:
-                        for channel in multi_correctness_devices[device]['GPU'][case]:
-                            for frame in multi_correctness_devices[device]['GPU'][case][channel]:
-                                frame_flag = True
-                                for i in range(len(multi_correctness_devices[device]['GPU'][case][channel][frame])):
-                                    gpu_frame_consistent_flag = multi_correctness_devices[device]['GPU'][case][channel][frame][i]
-                                    cpu_frame_consistent_flag = multi_correctness_devices[device]['CPU'][case][channel][frame][i]
-                                    if gpu_frame_consistent_flag == False and cpu_frame_consistent_flag == False:
-                                        frame_flag = False 
-                                if not frame_flag:
-                                    final_correctness_flag = False
-                                    consistent_flag = False 
-                                    err_msg += "\tDevice: {} - case: {} - channel: {} - frame: {}: {}\n".format(device, case, channel, frame, self.results[device][case][channel][frame][obj])
-                                    for target in devices_list[device]:
-                                        err_msg += "\tDevice: {} - case: {} - channel: {} - frame: {}: {}\n".format(target, case, channel, frame, self.results[device][case][channel][frame][obj])
-                                    for target in devices_list[device]:
-                                        err_msg += "\tDevice : {} - case: {} - channel: {} - frame: {}: {}\n".format(target, case, channel, frame, multi_correctness_devices[device]['GPU'][case][channel][frame]) 
+                if len(multi_correctness[device][target]) == 0:
+                    final_correctness_flag = False 
+                    consistent_flag = False
+                    # Miss results for device
+                    err_msg += multi_correctness_errmsg[device]['-1'] 
+                else:
+                    for case in multi_correctness[device]['CPU']:
+                        if multi_correctness[device]['CPU'][case] == False:
+                            final_correctness_flag = False
+                            consistent_flag = False 
+                            err_msg += multi_correctness_errmsg[device][case] 
+                            #print(multi_correctness_errmsg[device][target][case])
+                        else:
+                            for channel in multi_correctness_devices[device]['GPU'][case]:
+                                for frame in multi_correctness_devices[device]['GPU'][case][channel]:
+                                    frame_flag = True
+                                    for i in range(len(multi_correctness_devices[device]['GPU'][case][channel][frame])):
+                                        gpu_frame_consistent_flag = multi_correctness_devices[device]['GPU'][case][channel][frame][i]
+                                        cpu_frame_consistent_flag = multi_correctness_devices[device]['CPU'][case][channel][frame][i]
+                                        if gpu_frame_consistent_flag == False and cpu_frame_consistent_flag == False:
+                                            frame_flag = False 
+                                    #print("checking result: {}\nDevice : GPU - case: {} - channel: {} - frame: {}: {}".format(frame_flag, case, channel, frame, multi_correctness_devices[device]['GPU'][case][channel][frame]))
+                                    #print("Device : CPU - case: {} - channel: {} - frame: {}: {}".format(case, channel, frame, multi_correctness_devices[device]['CPU'][case][channel][frame]))
+                                    if not frame_flag:
+                                        final_correctness_flag = False
+                                        consistent_flag = False 
+                                        err_msg += "Inconsistent result:\n\tDevice: {} - case: {} - channel: {} - frame: {}: {}\n".format(device, case, channel, frame, self.results[device][case][channel][frame])
+                                        for target in devices_list[device]:
+                                            err_msg += "\tDevice: {} - case: {} - channel: {} - frame: {}: {}\n".format(target, case, channel, frame, self.results[target][case][channel][frame])
+                                        for target in devices_list[device]:
+                                            err_msg += "\tDevice: {} - case: {} - channel: {} - frame: {}: {}\n".format(target, case, channel, frame, multi_correctness_devices[device][target][case][channel][frame]) 
 
                 if not consistent_flag:
-                    print("Checking correctness between {} and {} : Failure.\n{}".format(device, devices_list[device], err_msg))
+                    print("Checking device: {} - target : {} - : Fail.\n{}".format(device, devices_list[device], err_msg))
                 else:
-                    print("Checking correctness between {} and {} : PASS.\n".format(device, devices_list[device]))
+                    print("Checking device: {} - target : {} - : PASS.\n".format(device, devices_list[device]))
         return final_correctness_flag 
 
     def write_to_log(self, result, test_case, device):
@@ -303,12 +347,12 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
                     self.results[device][case_index][channel][frame][objid].append(item)
                 else:
                     self.results[device][case_index][channel][frame][objid].append(roi_attr_license[index])
-
+            #print("Device: {}- case: {} - channel: {} - frame: {}: {}".format(device, case_index, channel, frame, self.results[device][case_index][channel][frame]))
         self.case_index[device] += 1
 
 DEMOS = [
     deepcopy(BASE['security_barrier_camera_demo/cpp'])
-    .update_option({'-r': None,'-ni': '16', '-n_iqs': '1', '-i': '10_images.mp4'})
+    .update_option({'-r': None,'-ni': '16', '-n_iqs': '1', '-i': '204_images.mp4'})
     .add_parser(DemoSecurityBarrierCamera)
 ]
 

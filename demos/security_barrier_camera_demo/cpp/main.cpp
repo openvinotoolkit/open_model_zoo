@@ -519,6 +519,8 @@ void DetectionsProcessor::process() {
             const cv::Rect vehicleRect = *vehicleRectsIt;
             ov::InferRequest& attributesRequest = *attributesRequestIt;
             context.detectionsProcessorsContext.vehicleAttributesClassifier.setImage(attributesRequest, sharedVideoFrame->frame, vehicleRect);
+            // Decrease total inferred frames count by 1 when the ROI of frame has availiable attributes.
+            context.totalInferFrameCounter--;
 
             attributesRequest.set_callback(
                 std::bind(
@@ -538,6 +540,8 @@ void DetectionsProcessor::process() {
                             classifiersAggregator->push(
                                 BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
+                            // Increased the total inferred frames count by 1 when attributes classification is done.
+                            context.totalInferFrameCounter++;
                         }, classifiersAggregator,
                            std::ref(attributesRequest),
                            vehicleRect,
@@ -558,7 +562,8 @@ void DetectionsProcessor::process() {
             const cv::Rect plateRect = *plateRectsIt;
             ov::InferRequest& lprRequest = *lprRequestsIt;
             context.detectionsProcessorsContext.lpr.setImage(lprRequest, sharedVideoFrame->frame, plateRect);
-
+            // Decrease the total inferred frames count by 1 when the ROI of frame has license plate.
+            context.totalInferFrameCounter--;
             lprRequest.set_callback(
                 std::bind(
                     [](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
@@ -574,6 +579,8 @@ void DetectionsProcessor::process() {
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
                             context.platesInfers.inferRequests.lockedPushBack(lprRequest);
+                            // Increased by 1 total inferred frames count by 1 when license plate recognization is done.
+                            context.totalInferFrameCounter++;
                         }, classifiersAggregator,
                            std::ref(lprRequest),
                            plateRect,

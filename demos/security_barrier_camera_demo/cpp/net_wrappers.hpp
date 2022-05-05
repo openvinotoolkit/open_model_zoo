@@ -140,9 +140,17 @@ public:
 
             cv::Rect rect;
             rect.x = static_cast<int>(detections[i * objectSize + 3] * upscale.width);
+            if(rect.x < 0)
+                rect.x = 0;
             rect.y = static_cast<int>(detections[i * objectSize + 4] * upscale.height);
+            if(rect.y < 0)
+                rect.y = 0;
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
+            if(rect.width > upscale.width)
+                rect.width = upscale.width;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
+            if(rect.height > upscale.height)
+                rect.height = upscale.height;
             results.push_back(Result{label, confidence, rect});
             std::ostringstream rawResultsStream;
             rawResultsStream << i << "," << label << "," << confidence
