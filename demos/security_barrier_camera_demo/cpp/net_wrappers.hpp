@@ -194,10 +194,15 @@ public:
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
         }
 
-        // type is the first output
-        m_outputNameForType = outputs[0].get_any_name();
-        // color is the second output.
-        m_outputNameForColor = outputs[1].get_any_name();
+        // Get the names within the output layer
+        if(outputs[0].get_any_name().find("color") != std::string::npos) {
+            m_outputNameForColor = outputs[0].get_any_name();
+            m_outputNameForType = outputs[1].get_any_name();
+        }
+        else {
+            m_outputNameForColor = outputs[1].get_any_name();
+            m_outputNameForType = outputs[0].get_any_name();
+        }
 
         ov::preprocess::PrePostProcessor ppp(model);
 
@@ -239,14 +244,14 @@ public:
         ov::Tensor inputTensor = inferRequest.get_tensor(m_attributesInputName);
         ov::Shape shape = inputTensor.get_shape();
         if (m_autoResize) {
-            ov::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Tensor frameTensor = wrapMat2Tensor(img.clone());
             ov::Coordinate p00({ 0, (size_t)vehicleRect.y, (size_t)vehicleRect.x, 0 });
             ov::Coordinate p01({ 1, (size_t)(vehicleRect.y + vehicleRect.height), (size_t)vehicleRect.x + vehicleRect.width, 3 });
             ov::Tensor roiTensor(frameTensor, p00, p01);
 
             inferRequest.set_tensor(m_attributesInputName, roiTensor);
         } else {
-            const cv::Mat& vehicleImage = img(vehicleRect);
+            const cv::Mat vehicleImage = img(vehicleRect).clone();
             resize2tensor(vehicleImage, inputTensor);
         }
     }
@@ -262,10 +267,11 @@ public:
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
         ov::Tensor colorsTensor = inferRequest.get_tensor(m_outputNameForColor);
         const float* colorsValues = colorsTensor.data<float>();
-
+        assert(7 == colorsTensor.get_size());
         // 4 possible types for each vehicle and we should select the one with the maximum probability
         ov::Tensor typesTensor = inferRequest.get_tensor(m_outputNameForType);
         const float* typesValues = typesTensor.data<float>();
+        assert(4 == typesTensor.get_size());
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto  type_id = std::max_element(typesValues,  typesValues  + 4) - typesValues;

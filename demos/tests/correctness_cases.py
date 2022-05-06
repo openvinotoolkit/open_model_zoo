@@ -319,35 +319,41 @@ class DemoSecurityBarrierCamera(CorrectnessCheckerBase):
             self.results[device][case_index] = {}
 
         # Parsing the raw data
-        output = [i.rstrip() for i in output.split('\n') if "DEBUG" in i and "ChannelId" in i]
-        for item in output:
-            item = item[item.find('ChannelId'):].split(',')
-            # Channel ID
-            frame_results = {}
-            channel = item[0].split(':')[1]
-            if channel not in self.results[device][case_index]:
-                self.results[device][case_index][channel] = frame_results
+        try:
+            output = [i.rstrip() for i in output.split('\n') if "DEBUG" in i and "ChannelId" in i]
+            for item in output:
+                line = item
+                item = item[item.find('ChannelId'):].split(',')
+                # Channel ID
+                frame_results = {}
+                channel = item[0].split(':')[1]
+                if channel not in self.results[device][case_index]:
+                    self.results[device][case_index][channel] = frame_results
 
-            # Frame ID
-            object_results = {}
-            frame = item[1].split(':')[1]
-            if frame not in self.results[device][case_index][channel]:
-                self.results[device][case_index][channel][frame] = object_results
+                # Frame ID
+                object_results = {}
+                frame = item[1].split(':')[1]
+                if frame not in self.results[device][case_index][channel]:
+                    self.results[device][case_index][channel][frame] = object_results
 
-            # Object ID
-            label_prob_pos_results = []
-            objid = item[2]
-            if objid not in self.results[device][case_index][channel][frame]:
-                self.results[device][case_index][channel][frame][objid] = label_prob_pos_results
-            #self.results[device][case_index][channel][frame][objid] = item[3:]
-            roi_attr_license = ",".join(item[3:]).split('\t')
-            for index in range(len(roi_attr_license)):
-                if index == 0:
-                    item = roi_attr_license[index].split(',')
-                    self.results[device][case_index][channel][frame][objid].append(item)
-                else:
-                    self.results[device][case_index][channel][frame][objid].append(roi_attr_license[index])
-            #print("Device: {}- case: {} - channel: {} - frame: {}: {}".format(device, case_index, channel, frame, self.results[device][case_index][channel][frame]))
+                # Object ID
+                label_prob_pos_results = []
+                objid = item[2]
+                if objid not in self.results[device][case_index][channel][frame]:
+                    self.results[device][case_index][channel][frame][objid] = label_prob_pos_results
+                #self.results[device][case_index][channel][frame][objid] = item[3:]
+                roi_attr_license = ",".join(item[3:]).split('\t')
+                for index in range(len(roi_attr_license)):
+                    if index == 0:
+                        item = roi_attr_license[index].split(',')
+                        self.results[device][case_index][channel][frame][objid].append(item)
+                    else:
+                        self.results[device][case_index][channel][frame][objid].append(roi_attr_license[index])
+                #print("Device: {}- case: {} - channel: {} - frame: {}: {}".format(device, case_index, channel, frame, self.results[device][case_index][channel][frame]))
+        except IndexError:
+            raise IndexError ("Rawdata format is invalid:\n\t{}".format(line))
+            
+
         self.case_index[device] += 1
 
 DEMOS = [
