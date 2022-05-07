@@ -268,10 +268,16 @@ public:
         ov::Tensor colorsTensor = inferRequest.get_tensor(m_outputNameForColor);
         const float* colorsValues = colorsTensor.data<float>();
         assert(7 == colorsTensor.get_size());
+        if (colorsTensor.get_size() != 7) {
+            throw std::logic_error("Vehicle Color output size should be 7.");
+        }
         // 4 possible types for each vehicle and we should select the one with the maximum probability
         ov::Tensor typesTensor = inferRequest.get_tensor(m_outputNameForType);
         const float* typesValues = typesTensor.data<float>();
         assert(4 == typesTensor.get_size());
+        if (typesTensor.get_size() != 4) {
+            throw std::logic_error("Vehicle Types output size should be 4.");
+        }
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto  type_id = std::max_element(typesValues,  typesValues  + 4) - typesValues;
