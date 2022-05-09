@@ -115,7 +115,7 @@ class CorrectnessCheckerBase(ABC):
             for target in devices_list[device]:
                 if device not in self.results or target not in self.results:
                     multi_correctness[device][target] = {}
-                    multi_correctness_errmsg[device]['-1'] = "\tMiss the results of device {} or device {}.\n".format(device, target)
+                    multi_correctness_errmsg[device]['-1'] = "\tMiss the results from device {} or from device {}.\n".format(device, target)
                     continue
                 #if self.results[device] != self.results[target]:
                 #    # Show the detailed inconsistent results
@@ -218,11 +218,12 @@ class CorrectnessCheckerBase(ABC):
             if 'MULTI:GPU,CPU' != device and 'AUTO:GPU,CPU' != device:
                 for target in multi_correctness[device]:
                     consistent_flag = True
-                    err_msg = ''
+                    err_msg = 'Inconsistent result:\n'
                     if len(multi_correctness[device][target]) == 0:
                         final_correctness_flag = False 
                         consistent_flag = False
                         # Miss results for device
+                        err_msg += '\t'
                         err_msg += multi_correctness_errmsg[device]['-1'] 
                     else:
                         for case in multi_correctness[device][target]:
@@ -230,6 +231,7 @@ class CorrectnessCheckerBase(ABC):
                             if flag == False:
                                 final_correctness_flag = False
                                 consistent_flag = False
+                                err_msg += '\t'
                                 err_msg += multi_correctness_errmsg[device][case] 
                     if not consistent_flag:
                         print("Checking device: {} - target : {} - : Fail.\n{}".format(device, devices_list[device], err_msg))

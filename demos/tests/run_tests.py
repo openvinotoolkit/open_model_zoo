@@ -355,10 +355,11 @@ def main():
                 print("Demo {} correctness checking....".format(demo.subdirectory))
                 if not demo.check_difference():
                     correctness_failures += 1
+                    num_failures += 1
             print()
     if args.scope == "correctness":
-        print("Correctness Failures: {}".format(correctness_failures))
-    print("{} failures:".format(num_failures))
+        print("{} correctness checking failures".format(correctness_failures))
+    print("{} execution failures:".format(num_failures))
     for test in failed_tests:
         print(test)
 
