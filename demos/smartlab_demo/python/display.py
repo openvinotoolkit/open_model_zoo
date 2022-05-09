@@ -26,8 +26,8 @@ class Display:
         self.w2 = 950
         self.colour_map = {
             "noise_action": [127, 127, 127],
-            "put_take": [255, 0, 0],
-            "adjust_rider": [0, 0, 255],
+            "put_take": [0, 0, 255],
+            "adjust_rider": [255, 0, 0],
             None: [0, 0, 0]}
         self.segmentationBar = np.zeros((50, 1920, 3))
         self.segmentationBar[20:23, ::10] = 255

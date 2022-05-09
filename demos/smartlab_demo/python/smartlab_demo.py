@@ -15,7 +15,6 @@ import cv2
 import time
 import concurrent.futures
 
-from ast import Assert
 from display import Display
 from evaluator import Evaluator
 from openvino.runtime import Core
@@ -57,7 +56,6 @@ def build_argparser():
 
     return parser
 
-
 def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display):
     old_time = time.time()
     frame_counter = 0  # Frame index counter
@@ -67,6 +65,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     total_frame_processed_in_interval = 0.0
     detector_result = None
     segmentor_result = None
+    seg_results = None
     # multithread setup
     executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
@@ -85,16 +84,16 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                                                   frame_index=frame_counter)
             elif args.mode == "multiview" and frame_counter % 10 == 0:
                 future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
-                future_segmentor = executor.submit(segmentor.inference, frame_top, frame_side, frame_counter)
+                future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
 
-            # get obj result
-            if future_detector is not None and future_detector.done():
-                detector_result = future_detector.result()
-                future_detector = None
-            # get segment result
-            if future_segmentor is not None and future_segmentor.done():
-                segmentor_result = future_segmentor.result()
-                seg_results, _ = segmentor_result[0], segmentor_result[1]
+                # get obj result
+                if future_detector is not None and future_detector.done():
+                    detector_result = future_detector.result()
+                    future_detector = None
+                # get segment result
+                if future_segmentor is not None and future_segmentor.done():
+                    segmentor_result = future_segmentor.result()
+                    seg_results, _ = segmentor_result[0], segmentor_result[1]
 
             current_time = time.time()
             current_frame = frame_counter
@@ -155,7 +154,7 @@ def main():
 
     '''Video Segmentation Variables'''
     if (args.mode == "multiview"):
-        segmentor = Segmentor(core, args.device, args.m_encoder_top, args.m_encoder_side, args.m_decoder)
+        segmentor = Segmentor(core, args.device, args.m_encoder_side, args.m_encoder_top, args.m_decoder)
     elif (args.mode == "mstcn"):
         segmentor = SegmentorMstcn(core, args.device, args.m_encoder, args.m_decoder)
     else:

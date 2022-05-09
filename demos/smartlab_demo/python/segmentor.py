@@ -52,34 +52,34 @@ class Segmentor:
         self.infer_encoder_top_request = self.encoder_top.create_infer_request()
         self.infer_decoder_request = self.decoder.create_infer_request()
 
-    def inference(self, buffer_top, buffer_side, frame_index):
+    def inference(self, frame_top, frame_side, frame_index):
         """
         Args:
-            buffer_top: buffers of the input image arrays for the top view
-            buffer_side: buffers of the input image arrays for the front view
+            frame_top: buffers of the input image arrays for the top view
+            frame_side: buffers of the input image arrays for the front view
             frame_index: frame index of the latest frame
         Returns: the temporal prediction results for each frame (including the historical predictions)，
                  length of predictions == frame_index()
         """
 
         ### preprocess ###
-        buffer_side = buffer_side[120:, :, :]  # remove date characters
-        buffer_top = buffer_top[120:, :, :]  # remove date characters
-        buffer_side = cv2.resize(buffer_side, (224, 224), interpolation=cv2.INTER_LINEAR)
-        buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
-        buffer_side = buffer_side / 255
-        buffer_top = buffer_top / 255
+        frame_side = frame_side[120:, :, :]  # remove date characters
+        frame_top = frame_top[120:, :, :]  # remove date characters
+        frame_side = cv2.resize(frame_side, (224, 224), interpolation=cv2.INTER_LINEAR)
+        frame_top = cv2.resize(frame_top, (224, 224), interpolation=cv2.INTER_LINEAR)
+        frame_side = frame_side / 255
+        frame_top = frame_top / 255
 
-        buffer_side = buffer_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
-        buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        frame_side = frame_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        frame_top = frame_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
         ### run ###
         self.infer_encoder_side_request.infer(inputs=
-                                              {self.encoder_side_input_keys['input_image']: buffer_side,
+                                              {self.encoder_side_input_keys['input_image']: frame_side,
                                                self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
         self.infer_encoder_top_request.infer(inputs=
-                                             {self.encoder_top_input_keys['input_image']: buffer_top,
+                                             {self.encoder_top_input_keys['input_image']: frame_top,
                                               self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         ### get tensors ###
@@ -103,25 +103,25 @@ class Segmentor:
 
         return self.terms[predicted], self.terms[predicted]
 
-    def inference_async(self, buffer_top, buffer_side, frame_index):
+    def inference_async(self, frame_top, frame_side, frame_index):
         ### preprocess ###
-        buffer_side = buffer_side[120:, :, :]  # remove date characters
-        buffer_top = buffer_top[120:, :, :]  # remove date characters
-        buffer_side = cv2.resize(buffer_side, (224, 224), interpolation=cv2.INTER_LINEAR)
-        buffer_top = cv2.resize(buffer_top, (224, 224), interpolation=cv2.INTER_LINEAR)
-        buffer_side = buffer_side / 255
-        buffer_top = buffer_top / 255
+        frame_side = frame_side[120:, :, :]  # remove date characters
+        frame_top = frame_top[120:, :, :]  # remove date characters
+        frame_side = cv2.resize(frame_side, (224, 224), interpolation=cv2.INTER_LINEAR)
+        frame_top = cv2.resize(frame_top, (224, 224), interpolation=cv2.INTER_LINEAR)
+        frame_side = frame_side / 255
+        frame_top = frame_top / 255
 
-        buffer_side = buffer_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
-        buffer_top = buffer_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        frame_side = frame_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
+        frame_top = frame_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
-        self.infer_encoder_side_request.start_async(inputs=
-                                                    {self.encoder_side_input_keys[0]: buffer_side,
-                                                     self.encoder_side_input_keys[1]: self.shifted_tesor_side})
+        self.infer_encoder_side_request.start_async(inputs={\
+            self.encoder_side_input_keys['input_image']: frame_side,
+            self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
-        self.infer_encoder_top_request.start_async(inputs=
-                                                   {self.encoder_top_input_keys[0]: buffer_top,
-                                                    self.encoder_top_input_keys[1]: self.shifted_tesor_top})
+        self.infer_encoder_top_request.start_async(inputs=\
+            {self.encoder_top_input_keys['input_image']: frame_top,
+            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):
@@ -192,8 +192,8 @@ class SegmentorMstcn:
     def inference(self, frame_top, frame_side, frame_index):
         """
         Args:
-            buffer_top: buffers of the input image arrays for the top view
-            buffer_side: buffers of the input image arrays for the front view
+            frame_top: buffers of the input image arrays for the top view
+            frame_side: buffers of the input image arrays for the front view
             frame_index: frame index of the latest frame
         Returns: the temporal prediction results for each frame (including the historical predictions)，
                  length of predictions == frame_index()
