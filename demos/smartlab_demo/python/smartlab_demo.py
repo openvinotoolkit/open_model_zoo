@@ -86,14 +86,15 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
                 future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
 
-                # get obj result
-                if future_detector is not None and future_detector.done():
-                    detector_result = future_detector.result()
-                    future_detector = None
-                # get segment result
-                if future_segmentor is not None and future_segmentor.done():
-                    segmentor_result = future_segmentor.result()
-                    seg_results, _ = segmentor_result[0], segmentor_result[1]
+            # get obj result
+            if future_detector is not None and future_detector.done():
+                detector_result = future_detector.result()
+                future_detector = None
+            # get segment result
+            if future_segmentor is not None and future_segmentor.done():
+                segmentor_result = future_segmentor.result()
+                seg_results, _ = segmentor_result[0], segmentor_result[1]
+                future_segmentor = None
 
             current_time = time.time()
             current_frame = frame_counter
