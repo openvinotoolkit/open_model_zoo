@@ -75,18 +75,21 @@ class Display:
                        top_det_results, side_det_results, scoring, state, keyframe, frame_counter, fps):
 
         if state == 'Initial':
+            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
             display_status = 'Setting Up ...'
             initial_text_color_bg = (255, 0 , 0)
             measuring_text_color_bg = (128, 128, 128)
             initial_icon = self.wait_icon
             measuring_icon = self.no_icon
         elif state == 'Measuring':
+            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
             display_status = 'Set Up Done. Evaluating Measuring Phase...'
             initial_text_color_bg = (0, 180, 0)
             measuring_text_color_bg = (255, 0, 0)
             initial_icon = self.done_icon
             measuring_icon =self.wait_icon
         elif state == 'Finish':
+            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
             count = 0
             for item in scoring.values():
                 if item == 1:
