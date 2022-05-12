@@ -27,32 +27,33 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                      help='Show this help message and exit.')
+                    help='Show this help message and exit.')
     args.add_argument("-d", "--device", type=str, default='CPU', required=False,
-                      help="Optional. Specify the target to infer on CPU or GPU.")
+                    help="Optional. Specify the target to infer on CPU or GPU.")
     args.add_argument('-tv', '--topview', required=True,
-                      help='Required. Topview stream to be processed. The input must be a single image, '
+                    help='Required. Topview stream to be processed. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-sv', '--sideview', required=True,
-                      help='Required. SideView to be processed. The input must be a single image, '
+                    help='Required. SideView to be processed. The input must be a single image, '
                            'a folder of images, video file or camera id.')
-    args.add_argument('-m_ta', '--m_topall', help='Required. Path to topview all class model.', required=True, type=str)
-    args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.', required=True,
-                      type=str)
-    args.add_argument('-m_sa', '--m_sideall', help='Required. Path to sidetview all class model.', required=True,
-                      type=str)
-    args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.', required=True,
-                      type=str)
+    args.add_argument('-m_ta', '--m_topall', help='Required. Path to topview all class model.',
+                    required=True, type=str)
+    args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.',
+                    required=True, type=str)
+    args.add_argument('-m_sa', '--m_sideall', help='Required. Path to sidetview all class model.',
+                    required=True, type=str)
+    args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.',
+                    required=True, type=str)
     args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn',
-                      type=str)
-    args.add_argument('-m_en', '--m_encoder', help='Required for mstcn mode. Path to encoder model.', required=False,
-                      type=str)
+                    type=str)
+    args.add_argument('-m_en', '--m_encoder', help='Required for mstcn mode. Path to encoder model.',
+                    required=False, type=str)
     args.add_argument('-m_en_t', '--m_encoder_top', help='Required for multivew mode. Path to encoder model.',
-                      required=False, type=str)
+                    required=False, type=str)
     args.add_argument('-m_en_s', '--m_encoder_side', help='Required for multivew mode. Path to encoder model.',
-                      required=False, type=str)
-    args.add_argument('-m_de', '--m_decoder', help='Required for multivew mode. Path to decoder model.', required=False,
-                      type=str)
+                    required=False, type=str)
+    args.add_argument('-m_de', '--m_decoder', help='Required for multivew mode. Path to decoder model.',
+                    required=False, type=str)
 
     return parser
 
@@ -179,7 +180,6 @@ def main():
 
     video_loop(
         args, cap_top, cap_side, detector, segmentor, evaluator, display)
-
 
 if __name__ == "__main__":
     main()

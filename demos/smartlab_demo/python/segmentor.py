@@ -145,7 +145,6 @@ class Segmentor:
 
                 return self.terms[predicted], self.terms[predicted]
 
-
 class SegmentorMstcn:
     def __init__(self, core, device, encoder_path, mstcn_path):
         self.ActionTerms = [
@@ -186,8 +185,10 @@ class SegmentorMstcn:
         self.mstcn_output_keys = self.mstcn.outputs
         self.reshape_mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_infer_request = self.reshape_mstcn.create_infer_request()
-        self.his_fea = [np.zeros((12, 64, 2048)), np.zeros((11, 64, 2048)), np.zeros((11, 64, 2048)),
-                        np.zeros((11, 64, 2048))]
+        self.his_fea = [np.zeros((12, 64, 2560)), np.zeros((11, 64, 2560)), np.zeros((11, 64, 2560)),
+                        np.zeros((11, 64, 2560))]
+        # self.his_fea = [np.zeros((12, 64, 1152)), np.zeros((11, 64, 1152)), np.zeros((11, 64, 1152)),
+        #                 np.zeros((11, 64, 1152))]
 
     def inference(self, frame_top, frame_side, frame_index):
         """
@@ -201,15 +202,15 @@ class SegmentorMstcn:
         ### run mobilenet ###
         self.feature_embedding(frame_top, frame_side)
         feature = self.mobileNet_request.get_tensor(self.mobileNet_output_key[0]).data.reshape(1152, 1)
-        ### run mstcn++ ###
+        # ### run mstcn++ ###
         return self.action_segmentation(feature)
 
     def feature_embedding(self, frame_top, frame_side):
-
         img_top = cv2.resize(frame_top, (224, 224)) / 255.0
         img_side = cv2.resize(frame_side, (224, 224)) / 255.0
-        combined_img = np.concatenate((np.expand_dims(img_top, axis=0), np.expand_dims(img_side, axis=0)),
-                                      axis=0).transpose((0, 3, 1, 2))
+        combined_img = np.concatenate(
+            (np.expand_dims(img_top, axis=0), np.expand_dims(img_side, axis=0)),
+            axis=0).transpose((0, 3, 1, 2))
         self.mobileNet_request.infer(inputs={self.mobileNet_input_keys[0]: combined_img})
 
     def action_segmentation(self, feature):
