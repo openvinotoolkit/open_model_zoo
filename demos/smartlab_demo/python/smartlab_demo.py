@@ -119,18 +119,18 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         mode=args.mode)
 
                 if frame_counter > 24:
-                    if action_seg_results == None:
-                        action = None
-                    elif len(action_seg_results) == 2:
-                        action = action_seg_results[0]
-                    else:
-                        action = action_seg_results
+                    # if action_seg_results == None:
+                    #     action = None
+                    # elif len(action_seg_results) == 2:
+                    #     action = action_seg_results[0]
+                    # else:
+                    #     action = action_seg_results
 
                     display.display_result(
                         frame_top=frame_top,
                         frame_side=frame_side,
-                        side_seg_results=action,
-                        top_seg_results=action,
+                        side_seg_results=seg_results,
+                        top_seg_results=seg_results,
                         top_det_results=top_det_results,
                         side_det_results=side_det_results,
                         scoring=scoring,
