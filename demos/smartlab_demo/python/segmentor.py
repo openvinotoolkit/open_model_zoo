@@ -185,10 +185,8 @@ class SegmentorMstcn:
         self.mstcn_output_keys = self.mstcn.outputs
         self.reshape_mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_infer_request = self.reshape_mstcn.create_infer_request()
-        self.his_fea = [np.zeros((12, 64, 2560)), np.zeros((11, 64, 2560)), np.zeros((11, 64, 2560)),
-                        np.zeros((11, 64, 2560))]
-        # self.his_fea = [np.zeros((12, 64, 1152)), np.zeros((11, 64, 1152)), np.zeros((11, 64, 1152)),
-        #                 np.zeros((11, 64, 1152))]
+        self.his_fea = [np.zeros((12, 64, 2048)), np.zeros((11, 64, 2048)),
+            np.zeros((11, 64, 2048)), np.zeros((11, 64, 2048))]
 
     def inference(self, frame_top, frame_side, frame_index):
         """
@@ -220,7 +218,7 @@ class SegmentorMstcn:
         if len(self.EmbedBufferCombined) == self.SegBatchSize:
             input_mstcn = np.asarray(self.EmbedBufferCombined).transpose(2, 1, 0)
             # reset bufferCombined
-            self.EmbedBufferCombined = []
+            self.EmbedBufferCombined.clear()
             feed_dict = {'input': input_mstcn, 'fhis_in_0': self.his_fea[0], 'fhis_in_1': self.his_fea[1],
                          'fhis_in_2': self.his_fea[2], 'fhis_in_3': self.his_fea[3]}
 
@@ -229,12 +227,14 @@ class SegmentorMstcn:
 
             # get predicted output
             predictions = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[0]).data
+
             for i in range(4):
                 self.his_fea[i] = self.mstcn_infer_request.get_tensor(self.mstcn_output_keys[i + 1]).data
 
-            pred_actions = predictions[:, :, :len(self.ActionTerms), :]  # 4x1x16xN
-            pred_softmax = softmax(pred_actions[-1], 1)  # 1x16xN
-            temporal_logits = pred_softmax.transpose((0, 2, 1)).squeeze(axis=0)
-            # ### get label ###
+            pred_actions = predictions[:, :, :len(self.ActionTerms), :]  # 4x3xKxN
+            pred_softmax = softmax(pred_actions[-1, 0], 0)  # KxN
+            temporal_logits = pred_softmax.transpose((1, 0))# NxK
+
+            ### get label ###
             frame_predictions = [self.ActionTerms[i] for i in np.argmax(temporal_logits, axis=1)]
             return frame_predictions
