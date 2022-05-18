@@ -236,5 +236,17 @@ class SegmentorMstcn:
             temporal_logits = pred_softmax.transpose((1, 0))# NxK
 
             ### get label ###
-            frame_predictions = [self.ActionTerms[i] for i in np.argmax(temporal_logits, axis=1)]
+            # 0 - noise_action: [0,1,2,3,5,10,11,12,13,14]
+            # 1 - put_take: [4,6,7,9]
+            # 2 - adjust_rider: [8]
+            frame_predictions = []
+            for i in np.argmax(temporal_logits, axis=1):
+                if i == 8:
+                    frame_predictions.append("adjust_rider")
+                elif i == 4 or i == 6 or i == 7 or i == 9:
+                    frame_predictions.append("put_take")
+                else:
+                    frame_predictions.append("noise_action")
+            # frame_predictions = [self.ActionTerms[i] for i in action_idx] # N
+
             return frame_predictions
