@@ -119,8 +119,11 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         mode=args.mode)
 
                 if frame_counter >= 96:
-                    if args.mode == "multiview":
-                        action_seg_results = seg_results
+                    if seg_results is not None:
+                        if args.mode == "mstcn":
+                            action_seg_results = seg_results[-1]
+                        else:
+                            action_seg_results = seg_results
 
                     display.display_result(
                         frame_top=frame_top,
