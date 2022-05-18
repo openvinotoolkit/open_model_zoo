@@ -118,7 +118,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         frame_counter=frame_counter,
                         mode=args.mode)
 
-                if frame_counter > 24:
+                if frame_counter >= 96:
                     if args.mode == "multiview":
                         action_seg_results = seg_results
 
@@ -134,6 +134,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         keyframe=keyframe,
                         frame_counter=frame_counter,
                         fps=fps)
+
         frame_counter += 1
 
         if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}:  # Esc

@@ -105,7 +105,6 @@ class Evaluator(object):
         else: # mstcn
             self.buffer_size = self.mstcn_buffer_size
         action_seg_results = self.filter_action(action_seg_results, mode=mode)
-        print(action_seg_results)
 
         top_det_results, side_det_results = self.filter_object(top_det_results, side_det_results)
         frame_top, frame_side = self.filter_image(frame_top, frame_side)
