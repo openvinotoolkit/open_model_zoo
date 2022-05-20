@@ -108,15 +108,14 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             if detector_result is not None:
                 top_det_results, side_det_results = detector_result[0], detector_result[1]
-                if seg_results is not None:
-                    state, scoring, keyframe, action_seg_results = evaluator.inference(
-                        top_det_results=top_det_results,
-                        side_det_results=side_det_results,
-                        action_seg_results=seg_results,
-                        frame_top=frame_top,
-                        frame_side=frame_side,
-                        frame_counter=frame_counter,
-                        mode=args.mode)
+                state, scoring, keyframe, action_seg_results = evaluator.inference(
+                    top_det_results=top_det_results,
+                    side_det_results=side_det_results,
+                    action_seg_results=seg_results,
+                    frame_top=frame_top,
+                    frame_side=frame_side,
+                    frame_counter=frame_counter,
+                    mode=args.mode)
 
                 if frame_counter >= 96:
                     if seg_results is not None:
