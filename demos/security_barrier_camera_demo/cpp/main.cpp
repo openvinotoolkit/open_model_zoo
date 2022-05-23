@@ -407,6 +407,13 @@ void Drawer::process() {
             }
         } else {
             if (!context.isVideo) {
+                // Calculate the inference count for the inputting images.
+                uint32_t totalInferFrameCounter = FLAGS_ni == 0 ? FLAGS_n_iqs * context.totalFrameCount  : FLAGS_ni * FLAGS_n_iqs;
+                if (context.totalInferFrameCounter < totalInferFrameCounter)
+                {
+                    context.drawersContext.drawerMutex.unlock();
+                    return;
+                }
                 try {
                     std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
                 }
@@ -416,6 +423,15 @@ void Drawer::process() {
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
         gridMats.erase(firstGridIt);
+    }
+    if (!context.isVideo) {
+        uint32_t totalInferFrameCounter = FLAGS_ni == 0 ? FLAGS_n_iqs * context.totalFrameCount  : FLAGS_ni * FLAGS_n_iqs;
+        if (context.totalInferFrameCounter == totalInferFrameCounter) {
+            try {
+                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+            }
+            catch (const std::bad_weak_ptr&) {}
+        }
     }
     context.drawersContext.drawerMutex.unlock();
 }
@@ -667,7 +683,14 @@ void Reader::process() {
         context.readersContext.lastCapturedFrameIds[sourceID]++;
         context.readersContext.lastCapturedFrameIdsMutexes[sourceID].unlock();
         try {
-            if (context.totalInferFrameCounter < FLAGS_ni * context.totalFrameCount)
+            // Calculate the inference count for the inputting video.
+            uint32_t totalInferFrameCounter = 0;
+            if (FLAGS_ni == 0)
+                totalInferFrameCounter =  context.totalFrameCount;
+            else
+                totalInferFrameCounter = FLAGS_ni * context.totalFrameCount;
+
+            if (context.totalInferFrameCounter < totalInferFrameCounter)
             {
                 // Rebron this invalid frame to end the worker at next time
                 std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->push(std::make_shared<Reader>(sharedVideoFrame));
