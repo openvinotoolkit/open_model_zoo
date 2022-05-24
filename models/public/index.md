@@ -198,8 +198,8 @@
    omz_models_model_mobilenet_ssd
    omz_models_model_mobilenet_yolo_v4_syg
    omz_models_model_mtcnn
-   omz_models_model_nanodet_m_1.5x_416
-   omz_models_model_nanodet_plus_m_1.5x_416
+   omz_models_model_nanodet_m_1_5x_416
+   omz_models_model_nanodet_plus_m_1_5x_416
    omz_models_model_pelee_coco
    omz_models_model_retinaface_resnet50_pytorch
    omz_models_model_retinanet_tf
