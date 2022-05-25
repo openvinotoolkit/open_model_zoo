@@ -213,7 +213,7 @@ class CorrectnessCheckerBase(ABC):
         #print("=====================================")
         #print(multi_correctness)
         #print("=====================================")
-        print(multi_correctness_errmsg)
+        #print(multi_correctness_errmsg)
         #print("=====================================")
         #for device in multi_correctness_devices: 
         #    for target in multi_correctness_devices[device]:
