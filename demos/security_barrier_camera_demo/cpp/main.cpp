@@ -334,6 +334,15 @@ bool Drawer::isReady() {
         if (std::chrono::steady_clock::now() - prevShow > showPeriod) {
             return true;
         } else {
+            if (!context.isVideo) {
+                uint32_t totalInferFrameCounter = FLAGS_ni == 0 ? FLAGS_n_iqs * context.totalFrameCount  : FLAGS_ni * FLAGS_n_iqs;
+                if (context.totalInferFrameCounter == totalInferFrameCounter) {
+                    try {
+                        std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                    }
+                    catch (const std::bad_weak_ptr&) {}
+                }
+            }
             return false;
         }
     } else {
@@ -343,6 +352,15 @@ bool Drawer::isReady() {
             if (2 > gridMats.size()) {  // buffer size
                 return true;
             } else {
+                if (!context.isVideo) {
+                    uint32_t totalInferFrameCounter = FLAGS_ni == 0 ? FLAGS_n_iqs * context.totalFrameCount  : FLAGS_ni * FLAGS_n_iqs;
+                    if (context.totalInferFrameCounter == totalInferFrameCounter) {
+                        try {
+                            std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                        }
+                        catch (const std::bad_weak_ptr&) {}
+                    }
+                }
                 return false;
             }
         } else {
@@ -351,6 +369,15 @@ bool Drawer::isReady() {
                     && std::chrono::steady_clock::now() - prevShow > showPeriod) {
                     return true;
                 } else {
+                    if (!context.isVideo) {
+                        uint32_t totalInferFrameCounter = FLAGS_ni == 0 ? FLAGS_n_iqs * context.totalFrameCount  : FLAGS_ni * FLAGS_n_iqs;
+                        if (context.totalInferFrameCounter == totalInferFrameCounter) {
+                            try {
+                                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                            }
+                            catch (const std::bad_weak_ptr&) {}
+                        }
+                    }
                     return false;
                 }
             } else {
