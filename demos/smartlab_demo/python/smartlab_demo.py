@@ -1,3 +1,4 @@
+
 """
  Copyright (C) 2021-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,13 +72,42 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
     future_segmentor = None
-
+    buffer_display = None
+    loop_switch = True
+    
     while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()
         ret_side, frame_side = cap_side.read()
 
         if not ret_top or not ret_side:
-            break
+            state = 'Finish'
+            action_seg_results, top_det_results, side_det_results, frame_top, frame_side, frame_counter = buffer_display
+            if frame_counter > 96:
+                if seg_results is not None:
+                    if args.mode == "mstcn":
+                        action_seg_results = seg_results[-1]
+                    else:
+                        action_seg_results = seg_results
+
+                display.display_result(
+                    frame_top=frame_top,
+                    frame_side=frame_side,
+                    side_seg_results=action_seg_results,
+                    top_seg_results=action_seg_results,
+                    top_det_results=top_det_results,
+                    side_det_results=side_det_results,
+                    scoring=scoring,
+                    state=state,
+                    keyframe=keyframe,
+                    frame_counter=frame_counter,
+                    fps=fps)
+
+            if loop_switch:
+                cap_top.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                cap_side.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                frame_counter = 0
+            else:
+                break
         else:
             if args.mode == "mstcn":
                 detector_result = detector.inference(frame_top, frame_side)
@@ -116,6 +146,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                     frame_side=frame_side,
                     frame_counter=frame_counter,
                     mode=args.mode)
+                buffer_display = action_seg_results, top_det_results, side_det_results, frame_top, frame_side, frame_counter
 
                 if frame_counter >= 96:
                     if seg_results is not None:

@@ -22,19 +22,24 @@ class Display:
         self.wait_icon = cv2.imread(f'{os.getcwd()}/icon/wait.jpg',cv2.IMREAD_UNCHANGED)
         self.no_icon = cv2.imread(f'{os.getcwd()}/icon/no.jpg',cv2.IMREAD_UNCHANGED)
         self.done_icon = cv2.imread(f'{os.getcwd()}/icon/done.jpg',cv2.IMREAD_UNCHANGED)
-        self.w1 = 150
-        self.w2 = 950
         self.colour_map = {
             "noise_action": [127, 127, 127],
             "put_take": [0, 0, 255],
             "adjust_rider": [255, 0, 0],
             None: [0, 0, 0]}
-        self.segmentationBar = np.zeros((50, 1920, 3))
+        self.screen_width = 1920
+        self.screen_height = 1080
+        self.screen_width_half = 960
+        self.screen_height_half = 540
+        self.barHeight = 50
+        self.segmentationBar = np.zeros((self.barHeight, self.screen_width, 3))
         self.segmentationBar[20:23, ::10] = 255
         self.segmentationBar[:, -1] = 255
+        self.w1 = self.screen_width // 16
+        self.w2 = self.screen_width_half + self.w1
 
         # renew score board so that when put cv2.puttext text will not overlap
-        self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
+        self.score_board = np.zeros([self.screen_height_half, self.screen_width, 3], dtype=np.uint8)
 
     def draw_text(self,img, text,
             font=cv2.FONT_HERSHEY_TRIPLEX,
@@ -75,21 +80,21 @@ class Display:
                        top_det_results, side_det_results, scoring, state, keyframe, frame_counter, fps):
 
         if state == 'Initial':
-            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
+            self.score_board = np.zeros([self.screen_height_half, self.screen_width, 3], dtype=np.uint8)
             display_status = 'Setting Up ...'
             initial_text_color_bg = (255, 0 , 0)
             measuring_text_color_bg = (128, 128, 128)
             initial_icon = self.wait_icon
             measuring_icon = self.no_icon
         elif state == 'Measuring':
-            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
+            self.score_board = np.zeros([self.screen_height_half, self.screen_width, 3], dtype=np.uint8)
             display_status = 'Set Up Done. Evaluating Measuring Phase...'
             initial_text_color_bg = (0, 180, 0)
-            measuring_text_color_bg = (255, 0, 0)
+            measuring_text_color_bg = (self.screen_height_half, 0, 0)
             initial_icon = self.done_icon
             measuring_icon =self.wait_icon
         elif state == 'Finish':
-            self.score_board = np.zeros([400, 1920, 3], dtype=np.uint8)
+            self.score_board = np.zeros([self.screen_height_half, self.screen_width, 3], dtype=np.uint8)
             count = 0
             for item in scoring.values():
                 if item == 1:
@@ -186,13 +191,15 @@ class Display:
         self.segmentationBar[:, -1] = np.asarray(self.colour_map[top_seg_results])
         if frame_counter % 10 == 0: # add keyframe
             self.segmentationBar[20: 23, -1, :] = 255
-        self.score_board[:50, :] = self.segmentationBar[:, :]
+        self.score_board[:self.barHeight, :] = self.segmentationBar[:, :]
 
         # resize images and display them side by side, then concatenate with a scoring board to display marks
         frame_top = cv2.resize(
-            frame_top, (int(frame_top.shape[1] / 2), int(frame_top.shape[0] / 2)))
+            frame_top, (self.screen_width_half, self.screen_height_half))
         frame_side = cv2.resize(
-            frame_side, (int(frame_side.shape[1] / 2), int(frame_side.shape[0] / 2)))
+            frame_side, (self.screen_width_half, self.screen_height_half))
+
         result_image = np.concatenate((frame_top, frame_side), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)
+
         cv2.imshow("Smart Science Lab", result_image)
