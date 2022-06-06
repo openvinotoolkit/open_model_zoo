@@ -110,7 +110,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 break
         else:
             if args.mode == "mstcn":
-                detector_result = detector.inference(frame_top, frame_side)
+                if frame_counter % 10 == 0:
+                    future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
                 seg_results = segmentor.inference(frame_top, frame_side,
                                                   frame_index=frame_counter)
             elif args.mode == "multiview" and frame_counter % 10 == 0:
