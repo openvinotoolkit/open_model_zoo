@@ -150,11 +150,12 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 buffer_display = action_seg_results, top_det_results, side_det_results, frame_top, frame_side, frame_counter
 
                 if frame_counter >= 96:
-                    if seg_results is not None:
-                        if args.mode == "mstcn":
-                            action_seg_results = seg_results[-1]
-                        else:
-                            action_seg_results = seg_results
+                    # need to show raw results?
+                    # if seg_results is not None:
+                    #     if args.mode == "mstcn":
+                    #         action_seg_results = seg_results[-1]
+                    #     else:
+                    #         action_seg_results = seg_results
 
                     display.display_result(
                         frame_top=frame_top,
