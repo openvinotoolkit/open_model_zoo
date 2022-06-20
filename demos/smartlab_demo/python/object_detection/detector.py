@@ -83,7 +83,7 @@ class Detector:
             device=device,
             num_classes = 10,
             model_path  = side_models[0],
-            conf_thresh= 0.2,
+            conf_thresh= 0.5,
             nms_thresh = 0.3)
 
         ###           frontview.global_subdetector2          ###
