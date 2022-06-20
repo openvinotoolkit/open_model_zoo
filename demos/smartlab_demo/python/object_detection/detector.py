@@ -139,7 +139,7 @@ class Detector:
 
         # global detector inference
         preds, _ = glb_subdet.inference(img) # Nx7 (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-        if len(preds) == 0: return None, None, None
+        if preds is None or len(preds) == 0: return None, None, None
         all_preds = preds
 
         # local detector inference
@@ -205,8 +205,12 @@ class Detector:
         side_bboxes, side_cls_ids, side_scores = tdetSide.join()
 
         # get class label
-        top_labels = [self.all_classes[int(i) - 1] for i in top_cls_ids]
-        side_labels = [self.all_classes[int(i) - 1] for i in side_cls_ids]
+        top_labels = None
+        side_labels = None
+        if top_cls_ids is not None and len(top_cls_ids) > 0:
+            top_labels = [self.all_classes[int(i) - 1] for i in top_cls_ids]
+        if side_cls_ids is not None and len(side_cls_ids) > 0:
+            side_labels = [self.all_classes[int(i) - 1] for i in side_cls_ids]
 
         return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
 

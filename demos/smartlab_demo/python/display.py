@@ -114,38 +114,40 @@ class Display:
             cv2.FONT_HERSHEY_SIMPLEX, color=self.colour_map[top_seg_results],
             fontScale=1.5, thickness=3)
 
-        # display frame_number at top left corner
-        cv2.putText(frame_top, f"frame{frame_counter: 6d}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                    fontScale=1.5, thickness=3)
-        cv2.putText(frame_side, f"frame{frame_counter: 6d}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                    fontScale=1.5, thickness=3)
+        # # display frame_number at top left corner
+        # cv2.putText(frame_top, f"frame{frame_counter: 6d}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+        #             fontScale=1.5, thickness=3)
+        # cv2.putText(frame_side, f"frame{frame_counter: 6d}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+        #             fontScale=1.5, thickness=3)
 
-        # display FPS at top left corner
-        cv2.putText(frame_top, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                    fontScale=1.5, thickness=3)
-        cv2.putText(frame_side, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                    fontScale=1.5, thickness=3)
+        # # display FPS at top left corner
+        # cv2.putText(frame_top, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+        #             fontScale=1.5, thickness=3)
+        # cv2.putText(frame_side, f"FPS: {fps: .2f}", (50, 160), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+        #             fontScale=1.5, thickness=3)
 
         # display obj detection result for both view
-        for row, obj_cls in zip(top_det_results[0], top_det_results[2]):
-            x_min = int(row[0])
-            y_min = int(row[1])
-            x_max = int(row[2])
-            y_max = int(row[3])
+        if top_det_results[0] is not None:
+            for row, obj_cls in zip(top_det_results[0], top_det_results[2]):
+                x_min = int(row[0])
+                y_min = int(row[1])
+                x_max = int(row[2])
+                y_max = int(row[3])
 
-            cv2.putText(frame_top, obj_cls, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                        fontScale=0.9, thickness=2)
-            frame_top = cv2.rectangle(frame_top, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
+                cv2.putText(frame_top, obj_cls, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+                            fontScale=0.9, thickness=2)
+                frame_top = cv2.rectangle(frame_top, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
 
-        for row, obj_cls in zip(side_det_results[0], side_det_results[2]):
-            x_min = int(row[0])
-            y_min = int(row[1])
-            x_max = int(row[2])
-            y_max = int(row[3])
+        if side_det_results[0] is not None:
+            for row, obj_cls in zip(side_det_results[0], side_det_results[2]):
+                x_min = int(row[0])
+                y_min = int(row[1])
+                x_max = int(row[2])
+                y_max = int(row[3])
 
-            cv2.putText(frame_side, obj_cls, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
-                        fontScale=0.9, thickness=2)
-            frame_side = cv2.rectangle(frame_side, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
+                cv2.putText(frame_side, obj_cls, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, color=(0, 0, 255),
+                            fontScale=0.9, thickness=2)
+                frame_side = cv2.rectangle(frame_side, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=2)
 
         # display scoring
         i_rider = scoring['initial_score_rider']

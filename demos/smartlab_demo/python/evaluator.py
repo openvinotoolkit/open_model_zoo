@@ -309,51 +309,52 @@ class Evaluator(object):
         tweezers_coor = []
         weights_obj_coor = []
 
-        for obj, coor in zip(det_results[2], det_results[0]):
-            if obj == 'rider':
-                rider_coor.append(coor)
-            elif obj == 'balance':
-                balance_coor.append(coor)
-            elif obj == 'pointerhead':
-                pointerhead_coor.append(coor)
-            elif obj == 'pointer':
-                pointer_coor.append(coor)
-            elif obj == 'roundscrew1':
-                roundscrew1_coor.append(coor)
-            elif obj == 'roundscrew2':
-                roundscrew2_coor.append(coor)
-            elif obj == 'tray':
-                tray_coor.append(coor)
-            elif obj == 'pointer_sleeve':
-                pointer_sleeve_coor.append(coor)
-            elif obj == 'support_sleeve':
-                support_sleeve_coor.append(coor)
-            elif obj == 'ruler':
-                ruler_coor.append(coor)
-            elif obj == 'scale':
-                scale_coor.append(coor)
-            elif obj == 'battery':
-                battery_coor.append(coor)
-            elif obj == 'balance':
-                balance_coor.append(coor)
-            elif obj == 'box':
-                box_coor.append(coor)
-            elif obj == 'tweezers':
-                tweezers_coor.append(coor)
-            elif obj == 'tray':
-                tray_coor.append(coor)
-            elif obj == 'weight_5g':
-                weights_obj_coor.append([obj, coor])
-            elif obj == 'weight_10g':
-                weights_obj_coor.append([obj, coor])
-            elif obj == 'weight_20g':
-                weights_obj_coor.append([obj, coor])
-            elif obj == 'weight_50g':
-                weights_obj_coor.append([obj, coor])
-            elif obj == 'weight_100g':
-                weights_obj_coor.append([obj, coor])
-            elif obj == 'weights':
-                weights_obj_coor.append([obj, coor])
+        if det_results[0] is not None:
+            for obj, coor in zip(det_results[2], det_results[0]):
+                if obj == 'rider':
+                    rider_coor.append(coor)
+                elif obj == 'balance':
+                    balance_coor.append(coor)
+                elif obj == 'pointerhead':
+                    pointerhead_coor.append(coor)
+                elif obj == 'pointer':
+                    pointer_coor.append(coor)
+                elif obj == 'roundscrew1':
+                    roundscrew1_coor.append(coor)
+                elif obj == 'roundscrew2':
+                    roundscrew2_coor.append(coor)
+                elif obj == 'tray':
+                    tray_coor.append(coor)
+                elif obj == 'pointer_sleeve':
+                    pointer_sleeve_coor.append(coor)
+                elif obj == 'support_sleeve':
+                    support_sleeve_coor.append(coor)
+                elif obj == 'ruler':
+                    ruler_coor.append(coor)
+                elif obj == 'scale':
+                    scale_coor.append(coor)
+                elif obj == 'battery':
+                    battery_coor.append(coor)
+                elif obj == 'balance':
+                    balance_coor.append(coor)
+                elif obj == 'box':
+                    box_coor.append(coor)
+                elif obj == 'tweezers':
+                    tweezers_coor.append(coor)
+                elif obj == 'tray':
+                    tray_coor.append(coor)
+                elif obj == 'weight_5g':
+                    weights_obj_coor.append([obj, coor])
+                elif obj == 'weight_10g':
+                    weights_obj_coor.append([obj, coor])
+                elif obj == 'weight_20g':
+                    weights_obj_coor.append([obj, coor])
+                elif obj == 'weight_50g':
+                    weights_obj_coor.append([obj, coor])
+                elif obj == 'weight_100g':
+                    weights_obj_coor.append([obj, coor])
+                elif obj == 'weights':
+                    weights_obj_coor.append([obj, coor])
 
         if self.state == 'Initial':
             i_object = {'rider': rider_coor,
