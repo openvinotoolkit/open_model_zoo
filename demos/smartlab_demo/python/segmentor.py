@@ -101,7 +101,7 @@ class Segmentor:
         isAction = (output.squeeze()[0] >= .5).astype(int)
         predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
-        return self.terms[predicted], self.terms[predicted]
+        return self.terms[predicted], self.terms[predicted], frame_index
 
     def inference_async(self, frame_top, frame_side, frame_index):
         ### preprocess ###
@@ -143,7 +143,7 @@ class Segmentor:
                 isAction = (output.squeeze()[0] >= .5).astype(int)
                 predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
-                return self.terms[predicted], self.terms[predicted]
+                return self.terms[predicted], self.terms[predicted], frame_index
 
 class SegmentorMstcn:
     def __init__(self, core, device, encoder_path, mstcn_path):

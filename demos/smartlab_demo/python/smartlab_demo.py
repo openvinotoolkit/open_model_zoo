@@ -74,7 +74,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     future_segmentor = None
     buffer_display = None
     loop_switch = True
-    
+    det_frame_id = None
+    seg_frame_id = None
     while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()
         ret_side, frame_side = cap_side.read()
@@ -110,22 +111,29 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 break
         else:
             if args.mode == "mstcn":
-                if frame_counter % 10 == 0:
-                    future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
-                seg_results = segmentor.inference(frame_top, frame_side,
+                if frame_counter % 10 == 0 and future_detector is None:
+                    future_detector = executor.submit(
+                        detector.inference_multithread, frame_top, frame_side, frame_counter)
+                seg_results, seg_frame_id = segmentor.inference(frame_top, frame_side,
                                                   frame_index=frame_counter)
             elif args.mode == "multiview" and frame_counter % 10 == 0:
-                future_detector = executor.submit(detector.inference_multithread, frame_top, frame_side)
-                future_segmentor = executor.submit(segmentor.inference_async, frame_top, frame_side, frame_counter)
+                if future_detector is None:
+                    future_detector = executor.submit(
+                        detector.inference_multithread, frame_top, frame_side, frame_counter)
+                if future_segmentor is None:
+                    future_segmentor = executor.submit(
+                        segmentor.inference_async, frame_top, frame_side, frame_counter)
 
             # get obj result
             if future_detector is not None and future_detector.done():
                 detector_result = future_detector.result()
+                det_frame_id = detector_result[2]
                 future_detector = None
             # get segment result
             if future_segmentor is not None and future_segmentor.done():
                 segmentor_result = future_segmentor.result()
                 seg_results, _ = segmentor_result[0], segmentor_result[1]
+                seg_frame_id = segmentor_result[2]
                 future_segmentor = None
 
             current_time = time.time()

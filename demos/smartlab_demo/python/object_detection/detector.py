@@ -183,7 +183,7 @@ class Detector:
 
         return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
 
-    def inference_multithread(self, img_top, img_side):
+    def inference_multithread(self, img_top, img_side, frame_index):
         """
         Given input arrays for two view, need to generate and save the corresponding detection results
             in the specific data structure.
@@ -212,7 +212,9 @@ class Detector:
         if side_cls_ids is not None and len(side_cls_ids) > 0:
             side_labels = [self.all_classes[int(i) - 1] for i in side_cls_ids]
 
-        return [top_bboxes, top_cls_ids, top_labels, top_scores], [side_bboxes, side_cls_ids, side_labels, side_scores]
+        return [top_bboxes, top_cls_ids, top_labels, top_scores], \
+                [side_bboxes, side_cls_ids, side_labels, side_scores], \
+                frame_index
 
     async def inference_async(self, img_top, img_side):
         return await self.inference_multithread(img_top, img_side)
