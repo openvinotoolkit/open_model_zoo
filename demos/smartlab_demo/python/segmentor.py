@@ -201,7 +201,7 @@ class SegmentorMstcn:
         self.feature_embedding(frame_top, frame_side)
         feature = self.mobileNet_request.get_tensor(self.mobileNet_output_key[0]).data.reshape(1152, 1)
         # ### run mstcn++ ###
-        return self.action_segmentation(feature)
+        return self.action_segmentation(feature), frame_index
 
     def feature_embedding(self, frame_top, frame_side):
         img_top = cv2.resize(frame_top, (224, 224)) / 255.0

@@ -114,8 +114,9 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 if frame_counter % 10 == 0 and future_detector is None:
                     future_detector = executor.submit(
                         detector.inference_multithread, frame_top, frame_side, frame_counter)
-                seg_results, seg_frame_id = segmentor.inference(frame_top, frame_side,
-                                                  frame_index=frame_counter)
+                seg_results, seg_frame_id = segmentor.inference(
+                    frame_top, frame_side, frame_counter)
+                print(seg_frame_id)
             elif args.mode == "multiview" and frame_counter % 10 == 0:
                 if future_detector is None:
                     future_detector = executor.submit(
