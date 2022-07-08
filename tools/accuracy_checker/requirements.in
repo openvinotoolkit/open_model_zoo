@@ -36,7 +36,7 @@ tokenizers>=0.10.1;python_version>="3.7"
 transformers>=4.5,<4.17;python_version<"3.7"
 transformers>=4.5;python_version>="3.7"
 
-nltk>=3.5
+nltk>=3.6.6
 
 # DNA sequence matching
 parasail>=1.2.4
