@@ -15,8 +15,14 @@
 """
 
 import cv2
-import numpy as np
 import math
+import inspect
+import typing
+import itertools
+from functools import wraps
+from collections.abc import Sequence
+import numpy as np
+from numpy import floating
 
 
 class Detection:
@@ -103,6 +109,250 @@ def load_labels(label_file):
     with open(label_file, 'r') as f:
         labels_map = [x.strip() for x in f]
     return labels_map
+
+def create_hard_prediction_from_soft_prediction(
+    soft_prediction: np.ndarray, soft_threshold: float, blur_strength: int = 5
+) -> np.ndarray:
+    """
+    Creates a hard prediction containing the final label index per pixel
+
+    :param soft_prediction: Output from segmentation network. Assumes floating point
+                            values, between 0.0 and 1.0. Can be a 2d-array of shape
+                            (height, width) or per-class segmentation logits of shape
+                            (height, width, num_classes)
+    :param soft_threshold: minimum class confidence for each pixel.
+                            The higher the value, the more strict the segmentation is
+                            (usually set to 0.5)
+    :param blur_strength: The higher the value, the smoother the segmentation output
+                            will be, but less accurate
+    :return: Numpy array of the hard prediction
+    """
+    soft_prediction_blurred = cv2.blur(soft_prediction, (blur_strength, blur_strength))
+    if len(soft_prediction.shape) == 3:
+        # Apply threshold to filter out `unconfident` predictions, then get max along
+        # class dimension
+        soft_prediction_blurred[soft_prediction_blurred < soft_threshold] = 0
+        hard_prediction = np.argmax(soft_prediction_blurred, axis=2)
+    elif len(soft_prediction.shape) == 2:
+        # In the binary case, simply apply threshold
+        hard_prediction = soft_prediction_blurred > soft_threshold
+    else:
+        raise ValueError(
+            f"Invalid prediction input of shape {soft_prediction.shape}. "
+            f"Expected either a 2D or 3D array."
+        )
+    return hard_prediction
+
+def get_bases(parameter) -> set:
+    """Function to get set of all base classes of parameter"""
+
+    def __get_bases(parameter_type):
+        return [parameter_type.__name__] + list(
+            itertools.chain.from_iterable(
+                __get_bases(t1) for t1 in parameter_type.__bases__
+            )
+        )
+
+    return set(__get_bases(type(parameter)))
+
+
+def get_parameter_repr(parameter) -> str:
+    """Function to get parameter representation"""
+    try:
+        parameter_str = repr(parameter)
+    # pylint: disable=broad-except
+    except Exception:
+        parameter_str = "<unable to get parameter repr>"
+    return parameter_str
+
+
+def raise_value_error_if_parameter_has_unexpected_type(
+    parameter, parameter_name, expected_type
+):
+    """Function raises ValueError exception if parameter has unexpected type"""
+    if isinstance(expected_type, typing.ForwardRef):
+        expected_type = expected_type.__forward_arg__
+    if isinstance(expected_type, str):
+        parameter_types = get_bases(parameter)
+        if not any(t == expected_type for t in parameter_types):
+            parameter_str = get_parameter_repr(parameter)
+            raise ValueError(
+                f"Unexpected type of '{parameter_name}' parameter, expected: {expected_type}, "
+                f"actual value: {parameter_str}"
+            )
+        return
+    if expected_type == float:
+        expected_type = (int, float, floating)
+    if not isinstance(parameter, expected_type):
+        parameter_type = type(parameter)
+        parameter_str = get_parameter_repr(parameter)
+        raise ValueError(
+            f"Unexpected type of '{parameter_name}' parameter, expected: {expected_type}, actual: {parameter_type}, "
+            f"actual value: {parameter_str}"
+        )
+
+
+def check_nested_elements_type(iterable, parameter_name, expected_type):
+    """Function raises ValueError exception if one of elements in collection has unexpected type"""
+    for element in iterable:
+        check_parameter_type(
+            parameter=element,
+            parameter_name=f"nested {parameter_name}",
+            expected_type=expected_type,
+        )
+
+
+def check_dictionary_keys_values_type(
+    parameter, parameter_name, expected_key_class, expected_value_class
+):
+    """Function raises ValueError exception if dictionary key or value has unexpected type"""
+    for key, value in parameter.items():
+        check_parameter_type(
+            parameter=key,
+            parameter_name=f"key in {parameter_name}",
+            expected_type=expected_key_class,
+        )
+        check_parameter_type(
+            parameter=value,
+            parameter_name=f"value in {parameter_name}",
+            expected_type=expected_value_class,
+        )
+
+
+def check_nested_classes_parameters(
+    parameter, parameter_name, origin_class, nested_elements_class
+):
+    """Function to check type of parameters with nested elements"""
+    # Checking origin class
+    raise_value_error_if_parameter_has_unexpected_type(
+        parameter=parameter, parameter_name=parameter_name, expected_type=origin_class
+    )
+    # Checking nested elements
+    if origin_class == dict:
+        if len(nested_elements_class) != 2:
+            raise TypeError(
+                "length of nested expected types for dictionary should be equal to 2"
+            )
+        key, value = nested_elements_class
+        check_dictionary_keys_values_type(
+            parameter=parameter,
+            parameter_name=parameter_name,
+            expected_key_class=key,
+            expected_value_class=value,
+        )
+    if origin_class in [list, set, tuple, Sequence]:
+        if origin_class == tuple:
+            tuple_length = len(nested_elements_class)
+            if tuple_length > 2:
+                raise NotImplementedError(
+                    "length of nested expected types for Tuple should not exceed 2"
+                )
+            if tuple_length == 2:
+                if nested_elements_class[1] != Ellipsis:
+                    raise NotImplementedError("expected homogeneous tuple annotation")
+                nested_elements_class = nested_elements_class[0]
+        else:
+            if len(nested_elements_class) != 1:
+                raise TypeError(
+                    "length of nested expected types for Sequence should be equal to 1"
+                )
+        check_nested_elements_type(
+            iterable=parameter,
+            parameter_name=parameter_name,
+            expected_type=nested_elements_class,
+        )
+
+
+def check_parameter_type(parameter, parameter_name, expected_type):
+    """Function extracts nested expected types and raises ValueError exception if parameter has unexpected type"""
+    # pylint: disable=W0212
+    if expected_type in [typing.Any, inspect._empty]:  # type: ignore
+        return
+    if not isinstance(expected_type, typing._GenericAlias):  # type: ignore
+        raise_value_error_if_parameter_has_unexpected_type(
+            parameter=parameter,
+            parameter_name=parameter_name,
+            expected_type=expected_type,
+        )
+        return
+    expected_type_dict = expected_type.__dict__
+    origin_class = expected_type_dict.get("__origin__")
+    nested_elements_class = expected_type_dict.get("__args__")
+    # Union type with nested elements check
+    if origin_class == typing.Union:
+        expected_args = expected_type_dict.get("__args__")
+        checks_counter = 0
+        errors_counter = 0
+        for expected_arg in expected_args:
+            try:
+                checks_counter += 1
+                check_parameter_type(parameter, parameter_name, expected_arg)
+            except ValueError:
+                errors_counter += 1
+        if errors_counter == checks_counter:
+            actual_type = type(parameter)
+            raise ValueError(
+                f"Unexpected type of '{parameter_name}' parameter, expected: {expected_args}, "
+                f"actual type: {actual_type}, actual value: {parameter}"
+            )
+    # Checking parameters with nested elements
+    elif issubclass(origin_class, typing.Iterable):
+        check_nested_classes_parameters(
+            parameter=parameter,
+            parameter_name=parameter_name,
+            origin_class=origin_class,
+            nested_elements_class=nested_elements_class,
+        )
+
+
+def check_input_parameters_type(custom_checks: typing.Optional[dict] = None):
+    """
+    Decorator to check input parameters type
+    :param custom_checks: dictionary where key - name of parameter and value - custom check class
+    """
+    if custom_checks is None:
+        custom_checks = {}
+
+    def _check_input_parameters_type(function):
+        @wraps(function)
+        def validate(*args, **kwargs):
+            # Forming expected types dictionary
+            signature = inspect.signature(function)
+            expected_types_map = signature.parameters
+            if len(expected_types_map) < len(args):
+                raise TypeError("Too many positional arguments")
+            # Forming input parameters dictionary
+            input_parameters_values_map = dict(zip(signature.parameters.keys(), args))
+            for key, value in kwargs.items():
+                if key in input_parameters_values_map:
+                    raise TypeError(
+                        f"Duplication of the parameter {key} -- both in args and kwargs"
+                    )
+                input_parameters_values_map[key] = value
+            # Checking input parameters type
+            for parameter_name in expected_types_map:
+                parameter = input_parameters_values_map.get(parameter_name)
+                if parameter_name not in input_parameters_values_map:
+                    default_value = expected_types_map.get(parameter_name).default
+                    # pylint: disable=protected-access
+                    if default_value != inspect._empty:  # type: ignore
+                        parameter = default_value
+                if parameter_name in custom_checks:
+                    custom_check = custom_checks[parameter_name]
+                    if custom_check is None:
+                        continue
+                    custom_check(parameter, parameter_name).check()
+                else:
+                    check_parameter_type(
+                        parameter=parameter,
+                        parameter_name=parameter_name,
+                        expected_type=expected_types_map.get(parameter_name).annotation,
+                    )
+            return function(**input_parameters_values_map)
+
+        return validate
+
+    return _check_input_parameters_type
 
 
 def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
