@@ -11,18 +11,18 @@ More detailed information about using predefined configuration files you can fin
 
 ## ImageNet
 
-### How download dataset
+### Download dataset
 
-To download images from ImageNet, you need to have an account and agree to the Terms of Access. Follow the steps below:
-1. Go to the [ImageNet](http://www.image-net.org/) homepage
-2. If you have an account, click `Login`. Otherwise, click `Signup` in the right upper corner, provide your data, and wait for a confirmation email
-3. Log in after receiving the confirmation email and go to the `Download` tab
-4. Select `Download Original Images`
-5. You will be redirected to the Terms of Access page. If you agree to the Terms, continue by clicking Agree and Sign
-6. Click one of the links in the `Download as one tar file` section to select it
-7. Unpack archive
+To download images from ImageNet, you need to have an account and agree to the Terms of Access.
+1. Go to the [ImageNet home page](http://www.image-net.org/).
+2. If you have an account, click `Login`. Otherwise, click `Signup` in the right upper corner, provide your data, and wait for a confirmation email.
+3. Log in after receiving the confirmation email and go to the `Download` tab.
+4. Select `Download Original Images`.
+5. You will be redirected to the Terms of Access page. If you agree to the Terms, continue by clicking Agree and Sign.
+6. Click one of the links in the `Download as one tar file` section to select it.
+7. Unpack archive.
 
-To download annotation files, you need to follow the steps below:
+To download annotation files:
 * `val.txt`
   1. Download [archive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
   2. Unpack `val.txt` from the archive `caffe_ilsvrc12.tar.gz`
@@ -45,11 +45,12 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## Common Objects in Context (COCO)
 
-### How download dataset
+### Download dataset
 
-To download COCO dataset, you need to follow the steps below:
-1. Download [2017 Val images](http://images.cocodataset.org/zips/val2017.zip) and [2017 Train/Val annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
-2. Unpack archives
+1. Go to the [COCO home page](https://cocodataset.org/#home).
+2. Click `Dataset` in the menu and select `Download`.
+3. Download [2017 Val images](http://images.cocodataset.org/zips/val2017.zip) and [2017 Train/Val annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip).
+4. Unpack archives.
 
 ### Files layout
 
@@ -70,14 +71,13 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## WIDER FACE
 
-### How download dataset
+### Download dataset
 
-To download WIDER Face dataset, you need to follow the steps below:
-1. Go to the [WIDER FACE](http://shuoyang1213.me/WIDERFACE/) website
-2. Go to the `Download` section
-3. Select `WIDER Face Validation images` and download them from [Google Drive](https://drive.google.com/file/d/0B6eKvaijfFUDd3dIRmpvSk8tLUk/view) or [Tencent Drive](https://share.weiyun.com/5ot9Qv1)
-4. Select and download `Face annotations`
-5. Unpack archives
+1. Go to the [WIDER FACE home page](http://shuoyang1213.me/WIDERFACE/).
+2. Go to the `Download` section.
+3. Select `WIDER Face Validation images` and download them from [Google Drive](https://drive.google.com/file/d/0B6eKvaijfFUDd3dIRmpvSk8tLUk/view) or [Tencent Drive](https://share.weiyun.com/5ot9Qv1).
+4. Select and download `Face annotations`.
+5. Unpack archives.
 
 ### Files layout
 
@@ -92,15 +92,14 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model example: [mtcnn](../models/public/mtcnn/README.md))
 * `wider_without_bkgr` used for evaluation models on WIDER Face dataset where the face is class zero. (model examples: [mobilefacedet-v1-mxnet](../models/public/mobilefacedet-v1-mxnet/README.md))
 
-## [Visual Object Classes Challenge 2012 (VOC2012)](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/)
+## Visual Object Classes Challenge 2012 (VOC2012)
 
-### How download dataset
+### Download dataset
 
-To download VOC2012 dataset, you need to follow the steps below:
-1. Go to the [VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/) website
-2. Go to the [Development Kit](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/#devkit) section
-3. Select [Download the training/validation data](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar) and download archive
-4. Unpack archive
+1. Go to the [VOC2012 home page](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/).
+2. Go to the [Development Kit](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/#devkit) section.
+3. Click [Download the training/validation data](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar) to download archive.
+4. Unpack archive.
 
 ### Files layout
 
@@ -121,13 +120,12 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## Visual Object Classes Challenge 2007 (VOC2007)
 
-### How download dataset
+### Download dataset
 
-To download VOC2007 dataset, you need to follow the steps below:
-1. Go to the [VOC2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) website
-2. Go to the [Development Kit](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/#devkit) section
-3. Select [Download the training/validation data](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar) and download archive
-4. Unpack archive
+1. Go to the [VOC2007 website](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/).
+2. Go to the [Development Kit](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/#devkit) section.
+3. Click [Download the training/validation data](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar) to download archive.
+4. Unpack archive.
 
 ### Files layout
 
@@ -145,15 +143,15 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## SYGData0829
 
-### How download dataset
+### Download dataset
 
-To download SYGData0829 dataset, you need to follow the steps below:
-1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
-2. Select [SYGData0829.z01](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01)
-Select ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02)
-Select ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03)
-Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip)
-3. Unpack archive
+1. Go to the [SYGData0829 Github repository](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly).
+2. Select:
+    - [SYGData0829.z01](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z01),
+    - ['SYGData0829.z02'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z02),
+    - ['SYGData0829.z03'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.z03),
+    - ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip).
+3. Unpack archive.
 
 ### Files layout
 * `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
@@ -167,11 +165,12 @@ Select ['SYGData0829.zip'](https://github.com/ermubuzhiming/OMZ-files-download/r
 
 ## PASCAL-S
 
-### How download dataset
+### Download dataset
 
-To download PASCAL-S dataset, you need to follow the steps below:
-1. Download [archive](http://cbs.ic.gatech.edu/salobj/download/salObj.zip) from the [The Secrets of Salient Object Segmentation](http://cbs.ic.gatech.edu/salobj/) website
-2. Unpack archive
+1. Go to the [The Secrets of Salient Object Segmentation home page](http://cbs.ic.gatech.edu/salobj/).
+2. Go to the `Download` section.
+3. Click [Dataset & Code](http://cbs.ic.gatech.edu/salobj/download/salObj.zip) to download archive.
+4. Unpack archive.
 
 ### Files layout
 
@@ -186,11 +185,12 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## CoNLL2003 Named Entity Recognition
 
-### How download dataset
+See the [CoNLL2003 Named Entity Recognition website](https://www.aclweb.org/anthology/W03-0419/).
 
-To download CoNLL2003 dataset, you need to follow the steps below:
-1. Download [archive](https://data.deepai.org/conll2003.zip) from the [CoNLL 2003 (English) Dataset](https://deepai.org/dataset/conll-2003-english) page in the [DeepAI Datasets](https://deepai.org/datasets) website
-2. Unpack archive
+### Download dataset
+
+1. Download [archive](https://data.deepai.org/conll2003.zip) from the [CoNLL 2003 (English) Dataset](https://deepai.org/dataset/conll-2003-english) page in the [DeepAI Datasets](https://deepai.org/datasets) website.
+2. Unpack archive.
 
 ### Files layout
 
@@ -203,11 +203,11 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## MRL Eye
 
-### How download dataset
+### Download dataset
 
-To download MRL Eye dataset, you need to follow the steps below:
-1. Download [archive](http://mrl.cs.vsb.cz/data/eyedataset/mrlEyes_2018_01.zip) from the [MRL Eye Dataset](http://mrl.cs.vsb.cz/eyedataset) website
-2. Unpack archive
+1. Go to the [MRL Eye Dataset website](http://mrl.cs.vsb.cz/eyedataset).
+2. Download [archive](http://mrl.cs.vsb.cz/data/eyedataset/mrlEyes_2018_01.zip).
+3. Unpack archive.
 
 ### Files layout
 
@@ -220,16 +220,15 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## Labeled Faces in the Wild (LFW)
 
-### How download dataset
+### Download dataset
 
-To download LFW dataset, you need to follow the steps below:
-1. Go to the [Labeled Faces in the Wild](http://vis-www.cs.umass.edu/lfw/) website
-2. Go to the `Download the database` section
-3. Select `All images as gzipped tar file` and download archive
-4. Unpack archive
-5. Go to the `Training, Validation, and Testing` section
-6. Select `pairs.txt` and download pairs file
-7. Download [lfw_landmark](https://raw.githubusercontent.com/clcarwin/sphereface_pytorch/master/data/lfw_landmark.txt) file
+1. Go to the [Labeled Faces in the Wild home page](http://vis-www.cs.umass.edu/lfw/).
+2. Go to the `Download the database` section.
+3. Click `All images as gzipped tar file` to download archive.
+4. Unpack archive.
+5. Go to the `Training, Validation, and Testing` section.
+6. Select `pairs.txt` and download pairs file.
+7. Download [lfw_landmark](https://raw.githubusercontent.com/clcarwin/sphereface_pytorch/master/data/lfw_landmark.txt) file.
 
 ### Files layout
 
@@ -246,11 +245,13 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ## NYU Depth Dataset V2
 
-### How download dataset
+See the the [NYU Depth Dataset V2 website](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html).
 
-To download NYU Depth Dataset V2 preprocessed data stored in HDF5 format, you need to follow the steps below:
-1. Download [archive](http://datasets.lids.mit.edu/fastdepth/data/nyudepthv2.tar.gz) from the [website](http://datasets.lids.mit.edu/fastdepth/data/)
-2. Unpack archive
+### Download dataset
+
+To download NYU Depth Dataset V2 preprocessed data stored in HDF5 format:
+1. Download [archive](http://datasets.lids.mit.edu/fastdepth/data/nyudepthv2.tar.gz) from the [website](http://datasets.lids.mit.edu/fastdepth/data/).
+2. Unpack archive.
 
 ### Files layout
 
@@ -262,7 +263,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `images` - directory with converted images
         * `depth` -  directory with depth maps
 
-Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `convert_annotation` command line interface:
+Note: If dataset is used in the first time, set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `convert_annotation` command line interface:
 
 ```sh
 convert_annotation nyu_depth_v2 --data_dir <DATASET_DIR>/nyudepthv2/val/official --allow_convert_data True
