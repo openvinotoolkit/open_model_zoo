@@ -96,7 +96,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ### Download dataset
 
-1. Go to the [VOC2012 home page](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/).
+1. Go to the [VOC2012 website](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/).
 2. Go to the [Development Kit](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/#devkit) section.
 3. Click [Download the training/validation data](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar) to download archive.
 4. Unpack archive.
