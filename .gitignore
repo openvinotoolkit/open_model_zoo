@@ -1,3 +1,4 @@
 *.pyc
 bin/
 build/
+napps/
