@@ -15,16 +15,14 @@ set(HEADERS
 source_group("src" FILES ${SOURCES})
 source_group("include" FILES ${HEADERS})
 
-# Wahtari nCam Controller Lib.
-set(nCamCtrl_CPP_DIR controller-libs/cpp)
-set(nCamCtrl_LIBS nlab-ctrl nlab-ctrl-cpp)
-INCLUDE_DIRECTORIES(${nCamCtrl_CPP_DIR})
-LINK_DIRECTORIES(${nCamCtrl_CPP_DIR})
-
-# Vimba
+# AlliedVision Vimba SDK.
 set(Vimba_LIBS VimbaC VimbaCPP)
-INCLUDE_DIRECTORIES("/usr/local/include/VimbaCPP/Include")
+include_directories("/usr/local/include/VimbaCPP/Include")
+
+# Wahtari Controller-libs.
+set(nLab_Ctrl_LIBS nlab-ctrl nlab-ctrl-cpp)
+include_directories("/usr/local/include/controller-libs")
 
 add_library(ncam STATIC ${SOURCES} ${HEADERS})
 target_include_directories(ncam PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(ncam PRIVATE opencv_core opencv_imgproc ${nCamCtrl_LIBS} ${Vimba_LIBS})
+target_link_libraries(ncam PRIVATE opencv_core opencv_imgproc ${Vimba_LIBS} ${nLab_Ctrl_LIBS})

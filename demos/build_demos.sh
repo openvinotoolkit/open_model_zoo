@@ -94,7 +94,7 @@ NUM_THREADS="-j2"
 
 if [ "$OS_PATH" == "x86_64" ]; then
     OS_PATH="intel64"
-    NUM_THREADS="-j8"
+    NUM_THREADS="-j12"
 fi
 
 if [ -e "$build_dir/CMakeCache.txt" ]; then
@@ -105,4 +105,4 @@ mkdir -p "$build_dir"
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
 cmake --build "$build_dir" ${build_targets[@]} -- "$NUM_THREADS"
 
-printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
+printf "\nBuild completed, you can find binaries for all demos in the bin subfolder.\n\n"

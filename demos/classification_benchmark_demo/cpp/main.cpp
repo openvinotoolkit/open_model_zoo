@@ -28,6 +28,7 @@
 #include <models/input_data.h>
 #include <models/model_base.h>
 #include <models/results.h>
+#include <ncam/Camera.hpp>
 #include <monitors/presenter.h>
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>

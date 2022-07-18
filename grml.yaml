@@ -1,0 +1,43 @@
+version: 1
+project: wahtari-open-model-zoo-demos
+
+env:
+    GOPRIVATE:  git.wahtari.m
+    DOCKERHOST: docker.wahtari.m
+    DOCKERREPO: nlab
+    DOCKERVER:  v0.0.28
+    BINDIR:     ${ROOT}/bin
+    BUILDDIR:   ${ROOT}/build
+
+commands:
+    clean:
+        help: clean the build files
+        exec: |
+            rm -rf "${BINDIR}" "${BUILDDIR}"
+
+    build:
+        help: build targets.
+        commands:
+            docker:
+                help: build docker image.
+                exec: |
+                    # Build the docker container.
+                    docker build \
+                        --tag wahtari/openvino_openmodelzoo_demos \
+                        --build-arg dockerversion=${DOCKERVER} \
+                        "${ROOT}/demos"
+            demo:
+                help: build demo targets
+                commands:
+                    classification_benchmark:
+                        help: classification benchmark
+                        exec: |
+                            mkdir -p ${BINDIR} ${BUILDDIR}
+
+                            docker run -it --rm \
+                                -e USER="1000:1000" \
+                                -v "${ROOT}:/work:ro" \
+                                -v "${BUILDDIR}:/home/builder/omz_demos_build" \
+                                -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
+                                wahtari/openvino_openmodelzoo_demos \
+                                demos/build_demos.sh --target=classification_benchmark_demo

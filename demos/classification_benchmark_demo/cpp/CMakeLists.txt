@@ -8,4 +8,4 @@ file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_demo(NAME classification_benchmark_demo
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPENDENCIES monitors models pipelines)
+    DEPENDENCIES monitors models pipelines ncam)

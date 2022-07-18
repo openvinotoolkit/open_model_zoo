@@ -22,18 +22,18 @@ typedef std::function<void (const cv::Mat&)> FrameCallback;
 
 // The FrameObserver class implements the vimba IFrameObserver interface and provides
 // a callback to handle new frames read off of the camera.
-class FrameObserver : public IFrameObserver {
+class FrameObserver : public AVT::VmbAPI::IFrameObserver {
 public:
-    FrameObserver(CameraPtr cam, VmbPixelFormatType pxFmt, FrameCallback cb);
+    FrameObserver(AVT::VmbAPI::CameraPtr cam, VmbPixelFormatType pxFmt, FrameCallback cb);
 
     // FrameReceived is the callback that handles newly read frames.
     // We convert the frame to an OpenCV Mat and distribute it to both the 
     // jpeg encoding routines, as well as the inference routines.
-    void FrameReceived(const FramePtr frame);
+    void FrameReceived(const AVT::VmbAPI::FramePtr frame);
 
 private:
-    AVT::VmbAPICameraPtr          cam_;
-    AVT::VmbAPIVmbPixelFormatType pxFmt_;
+    AVT::VmbAPI::CameraPtr cam_;
+    VmbPixelFormatType     pxFmt_;
 
     FrameCallback cb_;
 };
@@ -59,8 +59,8 @@ public:
     void stop();
 
 private:
-    AVT::VmbAPIVimbaSystem& avtSystem_;
-    AVT::VmbAPICameraPtr    avt_;
+    AVT::VmbAPI::VimbaSystem& avtSystem_;
+    AVT::VmbAPI::CameraPtr    avt_;
 
     bool opened_;
     bool grabbing_;
