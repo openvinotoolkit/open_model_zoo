@@ -30,7 +30,7 @@ commands:
             classification_benchmark:
                 help: classification benchmark
                 exec: |
-                    mkdir -p ${BINDIR} ${BUILDDIR}
+                    mkdir -p ${BINDIR} ${BUILDDIR}/omz_demos_build ${BUILDDIR}/intel64/Release
 
                     docker run -it --rm \
                         -e USER="1000:1000" \
@@ -58,7 +58,7 @@ commands:
             human_pose_estimation_demo:
                 help: human pose estimation demo
                 exec: |
-                    mkdir -p ${BINDIR} ${BUILDDIR}
+                    mkdir -p ${BINDIR} ${BUILDDIR}/omz_demos_build ${BUILDDIR}/intel64/Release
 
                     docker run -it --rm \
                         -e USER="1000:1000" \
