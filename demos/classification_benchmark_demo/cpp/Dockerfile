@@ -1,4 +1,4 @@
-FROM docker.wahtari.m/nlab/runtime:v0.0.28
+FROM wahtari/nlab:v0.0.28-runtime
 
 LABEL maintainer="team@wahtari.io"
 

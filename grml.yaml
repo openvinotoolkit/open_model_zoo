@@ -19,42 +19,51 @@ commands:
     build:
         help: build targets.
         commands:
-            docker:
-                help: build docker image.
+            builder:
+                help: build the builder docker image.
                 exec: |
                     # Build the docker container.
                     docker build \
                         --tag wahtari/openvino_openmodelzoo_demos \
                         --build-arg dockerversion=${DOCKERVER} \
                         "${ROOT}/demos"
-            demo:
-                help: build demo targets
+            classification_benchmark:
+                help: classification benchmark
+                exec: |
+                    mkdir -p ${BINDIR} ${BUILDDIR}
+
+                    docker run -it --rm \
+                        -e USER="1000:1000" \
+                        -v "${ROOT}:/work:ro" \
+                        -v "${BUILDDIR}:/home/builder/omz_demos_build" \
+                        -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
+                        wahtari/openvino_openmodelzoo_demos \
+                        demos/build_demos.sh --target=classification_benchmark_demo
                 commands:
-                    classification_benchmark:
-                        help: classification benchmark
+                    napp:
+                        help: build the nApp container
+                        deps:
+                            - build.demo.classification_benchmark
                         exec: |
-                            mkdir -p ${BINDIR} ${BUILDDIR}
+                            docker build \
+                                --tag wahtari/omz-demos-class-bench \
+                                --file "${ROOT}/demos/classification_benchmark_demo/cpp/Dockerfile" \
+                                "${BINDIR}"
 
-                            docker run -it --rm \
-                                -e USER="1000:1000" \
-                                -v "${ROOT}:/work:ro" \
-                                -v "${BUILDDIR}:/home/builder/omz_demos_build" \
-                                -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
-                                wahtari/openvino_openmodelzoo_demos \
-                                demos/build_demos.sh --target=classification_benchmark_demo
-                        commands:
-                            napp:
-                                help: build the nApp container
-                                deps:
-                                    - build.demo.classification_benchmark
-                                exec: |
-                                    docker build \
-                                        --tag wahtari/omz-demos-class-bench \
-                                        --file "${ROOT}/demos/classification_benchmark_demo/cpp/Dockerfile" \
-                                        "${BINDIR}"
+                            # Save the docker container as tar archive.
+                            mkdir -p ${NAPPDIR}
+                            docker save \
+                                --output "${NAPPDIR}/wahtari-omz-demos-class-bench.docker.tar" \
+                                wahtari/omz-demos-class-bench
+            human_pose_estimation_demo:
+                help: human pose estimation demo
+                exec: |
+                    mkdir -p ${BINDIR} ${BUILDDIR}
 
-                                    # Save the docker container as tar archive.
-                                    mkdir -p ${NAPPDIR}
-                                    docker save \
-                                        --output "${NAPPDIR}/wahtari-omz-demos-class-bench.docker.tar" \
-                                        wahtari/omz-demos-class-bench
+                    docker run -it --rm \
+                        -e USER="1000:1000" \
+                        -v "${ROOT}:/work:ro" \
+                        -v "${BUILDDIR}:/home/builder/omz_demos_build" \
+                        -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
+                        wahtari/openvino_openmodelzoo_demos \
+                        demos/build_demos.sh --target=human_pose_estimation_demo

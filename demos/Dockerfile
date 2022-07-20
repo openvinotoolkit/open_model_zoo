@@ -1,4 +1,4 @@
-FROM docker.wahtari.m/nlab/builder:v0.0.28
+FROM wahtari/nlab:v0.0.28-builder
 
 # Install OpenVINO and OpenCV.
 RUN export DEBIAN_FRONTEND=noninteractive && \
