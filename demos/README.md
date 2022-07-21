@@ -298,7 +298,7 @@ python -mpip install --user -r <omz_dir>/demos/requirements.txt
 
 ### <a name="python_model_api"></a>Python\* model API package
 
-To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
+To run Python demo applications, you need to install the Python* Model API package. Refer to the [Python Model API documentation](https://github.com/openvinotoolkit/open_model_zoo/blob/master/demos/common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package)) to learn about its installation.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
