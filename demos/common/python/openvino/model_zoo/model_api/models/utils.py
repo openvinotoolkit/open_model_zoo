@@ -209,5 +209,5 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=Non
 
 
 def softmax(logits, axis=None, keepdims=False):
-    exp = np.exp(logits)
+    exp = np.exp(logits - np.max(logits))
     return exp / np.sum(exp, axis=axis, keepdims=keepdims)
