@@ -8,6 +8,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <iostream>
 
@@ -16,27 +17,10 @@
 
 #include <VimbaCPP/Include/VimbaCPP.h>
 
+#include "BufferedChannel.hpp"
+
+
 namespace ncam {
-
-typedef std::function<void (const cv::Mat&)> FrameCallback;
-
-// The FrameObserver class implements the vimba IFrameObserver interface and provides
-// a callback to handle new frames read off of the camera.
-class FrameObserver : public AVT::VmbAPI::IFrameObserver {
-public:
-    FrameObserver(AVT::VmbAPI::CameraPtr cam, VmbPixelFormatType pxFmt, FrameCallback cb);
-
-    // FrameReceived is the callback that handles newly read frames.
-    // We convert the frame to an OpenCV Mat and distribute it to both the 
-    // jpeg encoding routines, as well as the inference routines.
-    void FrameReceived(const AVT::VmbAPI::FramePtr frame);
-
-private:
-    AVT::VmbAPI::CameraPtr cam_;
-    VmbPixelFormatType     pxFmt_;
-
-    FrameCallback cb_;
-};
 
 // The Camera class is a thin wrapper around a vimba Camera.
 // It encapsulates the setup and teardown code and provides easy to use methods
@@ -51,17 +35,21 @@ public:
     void printSystemVersion();
 
     // start opens the first found camera and starts the image acquisition on it.
-    bool start(int numFrameBuffers, FrameCallback cb);
+    bool start(int numFrameBuffers);
 
     // stop stops the image acquisition of the started camera.
     // It is valid to call stop multiple times. 
     // The destructor makes sure to call stop as well.
     void stop();
 
+    // read the camera frame from the queue.
+    bool read(cv::Mat& dst, std::chrono::milliseconds timeout = std::chrono::milliseconds(std::chrono::seconds(3)));
+
 private:
     AVT::VmbAPI::VimbaSystem& avtSystem_;
     AVT::VmbAPI::CameraPtr    avt_;
 
+    std::shared_ptr<BufferedChannel<cv::Mat>> bufChan_;
     bool opened_;
     bool grabbing_;
 };

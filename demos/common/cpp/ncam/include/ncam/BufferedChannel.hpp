@@ -18,7 +18,7 @@ namespace ncam {
 template<typename T>
 class BufferedChannel {
 public:
-    BufferedChannel(int size) : size_(size) { }
+    BufferedChannel(size_t size) : size_(size) { }
 
     bool read(T& out, std::chrono::milliseconds timeout = std::chrono::milliseconds(0)) {
         std::unique_lock<std::mutex> lock(mx_);
@@ -45,7 +45,7 @@ private:
     std::mutex              mx_;
     std::queue<T>           queue_;
     std::condition_variable cond_;
-    int                     size_;    
+    size_t                     size_;    
 };
 
 } // End of namespace.

@@ -8,4 +8,4 @@ file(GLOB H_FILES ./*.h)
 add_demo(NAME human_pose_estimation_demo
     SOURCES ${SRC_FILES}
     HEADERS ${H_FILES}
-    DEPENDENCIES monitors models pipelines)
+    DEPENDENCIES monitors models pipelines ncam)

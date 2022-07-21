@@ -1,4 +1,5 @@
-FROM wahtari/nlab:v0.0.28-runtime
+ARG dockerversion
+FROM wahtari/nlab:$dockerversion-runtime-ncam-myriad
 
 LABEL maintainer="team@wahtari.io"
 
@@ -36,7 +37,3 @@ RUN cd /tmp && \
         /usr/local/lib/ && \
     cd /tmp && \
     rm -rf /tmp/controller-libs
-
-COPY classification_benchmark_demo /demo
-
-ENTRYPOINT ["/demo"]

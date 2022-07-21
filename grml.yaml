@@ -10,60 +10,49 @@ env:
     BUILDDIR:   ${ROOT}/build
     NAPPDIR:    ${ROOT}/napps
 
+import:
+    - grml.sh
+
 commands:
     clean:
         help: clean the build files
         exec: |
             rm -rf "${BINDIR}" "${BUILDDIR}"
 
-    build:
-        help: build targets.
+    docker:
+        help: docker targets.
         commands:
             builder:
                 help: build the builder docker image.
                 exec: |
-                    # Build the docker container.
                     docker build \
-                        --tag wahtari/openvino_openmodelzoo_demos \
+                        --tag wahtari/openvino_openmodelzoo_demos:builder \
                         --build-arg dockerversion=${DOCKERVER} \
-                        "${ROOT}/demos"
-            classification_benchmark:
-                help: classification benchmark
+                        --file docker/builder.dockerfile \
+                        "${ROOT}"
+            runtime:
+                help: build the runtime docker image.
                 exec: |
-                    mkdir -p ${BINDIR} ${BUILDDIR}
+                    docker build \
+                        --tag wahtari/openvino_openmodelzoo_demos:runtime \
+                        --build-arg dockerversion=${DOCKERVER} \
+                        --file docker/runtime.dockerfile \
+                        "${ROOT}"
 
-                    docker run -it --rm \
-                        -e USER="1000:1000" \
-                        -v "${ROOT}:/work:ro" \
-                        -v "${BUILDDIR}:/home/builder/omz_demos_build" \
-                        -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
-                        wahtari/openvino_openmodelzoo_demos \
-                        demos/build_demos.sh --target=classification_benchmark_demo
-                commands:
-                    napp:
-                        help: build the nApp container
-                        deps:
-                            - build.demo.classification_benchmark
-                        exec: |
-                            docker build \
-                                --tag wahtari/omz-demos-class-bench \
-                                --file "${ROOT}/demos/classification_benchmark_demo/cpp/Dockerfile" \
-                                "${BINDIR}"
-
-                            # Save the docker container as tar archive.
-                            mkdir -p ${NAPPDIR}
-                            docker save \
-                                --output "${NAPPDIR}/wahtari-omz-demos-class-bench.docker.tar" \
-                                wahtari/omz-demos-class-bench
-            human_pose_estimation_demo:
-                help: human pose estimation demo
+    human_pose_estimation_demo:
+        help: human pose estimation demo
+        commands:
+            build:
+                help: build demo
                 exec: |
-                    mkdir -p ${BINDIR} ${BUILDDIR}
-
-                    docker run -it --rm \
-                        -e USER="1000:1000" \
-                        -v "${ROOT}:/work:ro" \
-                        -v "${BUILDDIR}:/home/builder/omz_demos_build" \
-                        -v "${BINDIR}:/home/builder/omz_demos_build/intel64/Release" \
-                        wahtari/openvino_openmodelzoo_demos \
-                        demos/build_demos.sh --target=human_pose_estimation_demo
+                    build_demo human_pose_estimation_demo
+            run:
+                help: run the application
+                exec: |
+                    run_demo human_pose_estimation_demo
+            napp:
+                help: build the nApp container
+                deps:
+                    - human_pose_estimation_demo.build
+                exec: |
+                    build_napp human_pose_estimation_demo

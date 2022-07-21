@@ -48,6 +48,8 @@ SOFTWARE.
 #include <string>
 #include <unordered_map>
 
+#include <opencv2/core.hpp>
+
 namespace ncam {
 
 struct HTTPMessage {
@@ -178,6 +180,13 @@ public:
         if (thread_listener_.joinable()) {
             thread_listener_.join();
         }
+    }
+
+    void publish(const std::string& path, const cv::Mat& mat) {
+        static const std::vector<int> encodeParams = {cv::IMWRITE_JPEG_QUALITY, 90};
+        std::vector<uchar> buf;
+        cv::imencode(".jpg", mat, buf, encodeParams);
+        this->publish(path, std::string(buf.begin(), buf.end()));
     }
 
     void publish(const std::string& path, const std::string& buffer) {

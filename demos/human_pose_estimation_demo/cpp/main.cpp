@@ -51,6 +51,37 @@
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
+#include <atomic>
+#include <stdio.h>
+#include <queue>
+#include <thread>
+#include <condition_variable>
+
+#include <opencv2/dnn/dnn.hpp>
+#include <opencv2/imgcodecs.hpp>
+
+//#include <libnlab-ctrl.hpp>
+#include <VimbaCPP/Include/VimbaCPP.h>
+
+#include <ncam/MJPEGStreamer.hpp>
+#include <ncam/BufferedChannel.hpp>
+#include <ncam/Camera.hpp>
+
+using cv::Mat;
+using std::vector;
+
+#define INFERENCE_CHANNEL_SIZE 3
+#define JPEG_ENCODING_CHANNEL_SIZE 3
+#define MAX_FRAME_BUFFERS 5
+
+// The local port for the MJPEG server.
+#define MJPEG_PORT 8080
+
+ncam::BufferedChannel<Mat>           jpegEncodeChan(JPEG_ENCODING_CHANNEL_SIZE);
+//ncam::BufferedChannel<vector<uchar>> videoChan(VIDEO_CHANNEL_SIZE);
+ncam::BufferedChannel<Mat>           infChan(INFERENCE_CHANNEL_SIZE);
+//ncam::BufferedChannel<vector<Rect>>  infResChan(INFERENCE_RESULT_CHANNEL_SIZE);
+
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
@@ -253,6 +284,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
     return outputImg;
 }
 
+
 int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics, renderMetrics;
@@ -263,11 +295,22 @@ int main(int argc, char* argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
-        auto startTime = std::chrono::steady_clock::now();
-        cv::Mat curr_frame = cap->read();
 
-        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
+        // Create camera.
+        ncam::Camera cam = ncam::Camera();
+        cam.printSystemVersion();
+
+        // Start the camera.
+        bool ok = cam.start(MAX_FRAME_BUFFERS);
+        if (!ok) {
+            return 1;
+        }
+
+        auto startTime = std::chrono::steady_clock::now();
+        cv::Mat curr_frame;
+        if (!cam.read(curr_frame)) {
+            return 1;
+        }
 
         OutputTransform outputTransform = OutputTransform();
         cv::Size outputResolution = curr_frame.size();
@@ -279,6 +322,11 @@ int main(int argc, char* argv[]) {
             outputTransform = OutputTransform(curr_frame.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
         }
+
+        // Our motion jpeg server.
+        ncam::MJPEGStreamer streamer;
+        streamer.start(MJPEG_PORT, 1);
+        std::cout << "MJPEG server listening on port " << std::to_string(MJPEG_PORT) << std::endl;
 
         //------------------------------ Running Human Pose Estimation routines
         //----------------------------------------------
@@ -326,8 +374,8 @@ int main(int argc, char* argv[]) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame
                 startTime = std::chrono::steady_clock::now();
-                curr_frame = cap->read();
-                if (curr_frame.empty()) {
+                if (!cam.read(curr_frame) || curr_frame.empty()) {
+                    std::cout << "no frame received" << std::endl;
                     // Input stream is over
                     break;
                 }
@@ -353,7 +401,7 @@ int main(int argc, char* argv[]) {
                                {10, 22},
                                cv::FONT_HERSHEY_COMPLEX,
                                0.65);
-                videoWriter.write(outFrame);
+                streamer.publish("/stream", outFrame);
                 framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Human Pose Estimation Results", outFrame);
@@ -382,7 +430,7 @@ int main(int argc, char* argv[]) {
                            {10, 22},
                            cv::FONT_HERSHEY_COMPLEX,
                            0.65);
-            videoWriter.write(outFrame);
+            streamer.publish("/stream", outFrame);
             if (!FLAGS_no_show) {
                 cv::imshow("Human Pose Estimation Results", outFrame);
                 //--- Updating output window
@@ -392,11 +440,14 @@ int main(int argc, char* argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        logLatencyPerStage(cap->getMetrics().getTotal().latency,
-                           pipeline.getPreprocessMetrics().getTotal().latency,
-                           pipeline.getInferenceMetircs().getTotal().latency,
-                           pipeline.getPostprocessMetrics().getTotal().latency,
-                           renderMetrics.getTotal().latency);
+        //logLatencyPerStage(cam.getTotal().latency,
+        //                   pipeline.getPreprocessMetrics().getTotal().latency,
+        //                   pipeline.getInferenceMetircs().getTotal().latency,
+        //                   pipeline.getPostprocessMetrics().getTotal().latency,
+        //                   renderMetrics.getTotal().latency);
+
+        // Stop video streamer.
+        streamer.stop();
 
         slog::info << presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {

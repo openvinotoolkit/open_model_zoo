@@ -48,67 +48,84 @@ void avtErrorCheck(const VmbErrorType err, const std::string& msg) {
 //### FrameObserver ###//
 //#####################//
 
-FrameObserver::FrameObserver(AVT::VmbAPI::CameraPtr cam, VmbPixelFormatType pxFmt, FrameCallback cb) : 
-    IFrameObserver(cam),
-    cam_(cam),
-    pxFmt_(pxFmt),
-    cb_(cb)
-{}
+// The FrameObserver class implements the vimba IFrameObserver interface and provides
+// a callback to handle new frames read off of the camera.
+class FrameObserver : public AVT::VmbAPI::IFrameObserver {
+public:
+    FrameObserver(AVT::VmbAPI::CameraPtr cam, VmbPixelFormatType pxFmt, std::shared_ptr<BufferedChannel<cv::Mat>> bufChan) :
+        IFrameObserver(cam),
+        cam_(cam),
+        pxFmt_(pxFmt),
+        bufChan_(bufChan)
+    {}
 
-void FrameObserver::FrameReceived(const AVT::VmbAPI::FramePtr frame) {
-    if (frame == nullptr) {
-        std::cout << "frameReceived: frame was null" << std::endl;
-        return;
+    // FrameReceived is the callback that handles newly read frames.
+    // We convert the frame to an OpenCV Mat and distribute it to both the 
+    // jpeg encoding routines, as well as the inference routines.
+    void FrameReceived(const AVT::VmbAPI::FramePtr frame) {
+        if (frame == nullptr) {
+            std::cout << "frameReceived: frame was null" << std::endl;
+            return;
+        }
+
+        // Convert frame to a OpenCV matrix.
+        // Retrieve size and image.
+        VmbUint32_t nImageSize = 0; 
+        VmbErrorType err = frame->GetImageSize(nImageSize);
+        if (err != VmbErrorSuccess) {
+            std::cout << "frameReceived: get image size " << vimbaErrorCodeMessage(err) << std::endl;
+            return;
+        }
+        VmbUint32_t nWidth = 0;
+        err = frame->GetWidth(nWidth);
+        if (err != VmbErrorSuccess) {
+            std::cout << "frameReceived: get width " << vimbaErrorCodeMessage(err) << std::endl;
+            return;
+        }
+        VmbUint32_t nHeight = 0;
+        err = frame->GetHeight(nHeight);
+        if (err != VmbErrorSuccess) {
+            std::cout << "frameReceived: get height " << vimbaErrorCodeMessage(err) << std::endl;
+            return;
+        }
+        VmbUchar_t* pImage = NULL;
+        err = frame->GetImage(pImage);
+        if (err != VmbErrorSuccess) {
+            std::cout << "frameReceived: get image " << vimbaErrorCodeMessage(err) << std::endl;
+            return;
+        }
+
+        // convert image to OpenCV Mat.
+        int srcType;
+        if (pxFmt_ == VmbPixelFormatMono8 || pxFmt_ == VmbPixelFormatBayerRG8) {
+            srcType = CV_8UC1;
+        } else {
+            srcType = CV_8UC3;
+        }
+        // Warning: Do not release frame until copied. Has reference to frame buffer.
+        cv::Mat matFrame(cv::Size(nWidth, nHeight), srcType, (void*)pImage);
+
+        // Prepare final matrix.
+        cv::Mat mat;
+        if (pxFmt_ == VmbPixelFormatBayerRG8) {
+            cv::cvtColor(matFrame, mat, cv::COLOR_BayerRG2RGB_EA); // Hint: 2RGB ist required for a valid BGR image. This seems to be an OpenCV bug.
+        } else {
+            mat = matFrame.clone();
+        }
+
+        // Queue frame back to camera for next acquisition.
+        cam_->QueueFrame(frame);
+        
+        // Execute the callback.
+        bufChan_->write(mat);
     }
 
-    // Convert frame to a OpenCV matrix.
-    // Retrieve size and image.
-    VmbUint32_t nImageSize = 0; 
-    VmbErrorType err = frame->GetImageSize(nImageSize);
-    if (err != VmbErrorSuccess) {
-        std::cout << "frameReceived: get image size " << vimbaErrorCodeMessage(err) << std::endl;
-        return;
-    }
-    VmbUint32_t nWidth = 0;
-    err = frame->GetWidth(nWidth);
-    if (err != VmbErrorSuccess) {
-        std::cout << "frameReceived: get width " << vimbaErrorCodeMessage(err) << std::endl;
-        return;
-    }
-    VmbUint32_t nHeight = 0;
-    err = frame->GetHeight(nHeight);
-    if (err != VmbErrorSuccess) {
-        std::cout << "frameReceived: get height " << vimbaErrorCodeMessage(err) << std::endl;
-        return;
-    }
-    VmbUchar_t* pImage = NULL;
-    err = frame->GetImage(pImage);
-    if (err != VmbErrorSuccess) {
-        std::cout << "frameReceived: get image " << vimbaErrorCodeMessage(err) << std::endl;
-        return;
-    }
+private:
+    AVT::VmbAPI::CameraPtr cam_;
+    VmbPixelFormatType     pxFmt_;
+    std::shared_ptr<BufferedChannel<cv::Mat>> bufChan_;
+};
 
-    // convert image to OpenCV Mat.
-    int srcType;
-    if (pxFmt_ == VmbPixelFormatMono8 || pxFmt_ == VmbPixelFormatBayerRG8) {
-        srcType = CV_8UC1;
-    } else {
-        srcType = CV_8UC3;
-    }
-    cv::Mat mat(cv::Size(nWidth, nHeight), srcType, (void*)pImage);
-
-    // Queue frame back to camera for next acquisition.
-    cam_->QueueFrame(frame);
-
-    // Resize and convert, if necessary.
-    if (pxFmt_ == VmbPixelFormatBayerRG8) {
-        cv::cvtColor(mat, mat, cv::COLOR_BayerRG2RGB_EA); // Hint: 2RGB ist required for a valid BGR image. This seems to be an OpenCV bug.
-    }
-    cv::resize(mat, mat, cv::Size(), 0.5, 0.5, 0);
-
-    // Execute the callback.
-    cb_(mat);
-}
 
 //##############//
 //### Camera ###//
@@ -116,6 +133,7 @@ void FrameObserver::FrameReceived(const AVT::VmbAPI::FramePtr frame) {
 
 Camera::Camera() : 
     avtSystem_(AVT::VmbAPI::VimbaSystem::GetInstance()),
+    bufChan_(std::make_shared<BufferedChannel<cv::Mat>>(1)),
     opened_(false),
     grabbing_(false)
 {
@@ -136,7 +154,7 @@ void Camera::printSystemVersion() {
     std::cout << "Vimba C++ API Version " << info.major << "." << info.minor << "." << info.patch << std::endl;
 }
 
-bool Camera::start(int numFrameBuffers, FrameCallback cb) {
+bool Camera::start(int numFrameBuffers) {
     // Retrieve a list of found cameras.
     std::string camID;
     AVT::VmbAPI::CameraPtrVector cams;
@@ -174,7 +192,7 @@ bool Camera::start(int numFrameBuffers, FrameCallback cb) {
     avtErrorCheck(expAutoFtr->SetValue("Continuous"), "vimba set exposure auto");
 
     // Create FrameObserver and start asynchronous image acquisiton.
-    err = avt_->StartContinuousImageAcquisition(numFrameBuffers, AVT::VmbAPI::IFrameObserverPtr(new FrameObserver(avt_, pxFmt, cb)));
+    err = avt_->StartContinuousImageAcquisition(numFrameBuffers, AVT::VmbAPI::IFrameObserverPtr(new FrameObserver(avt_, pxFmt, bufChan_)));
     avtErrorCheck(err, "vimba start continuous image acquisition");
     grabbing_ = true;
 
@@ -195,6 +213,10 @@ void Camera::stop() {
     avt_->Close();
     std::cout << "Camera closed" << std::endl;
     opened_ = false;
+}
+
+bool Camera::read(cv::Mat& dst, std::chrono::milliseconds timeout) {
+    return bufChan_->read(dst, timeout);
 }
 
 } // End of namespace.
