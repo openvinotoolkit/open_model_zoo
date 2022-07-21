@@ -23,11 +23,11 @@ from .image_model import ImageModel
 
 
 class Classification(ImageModel):
-    __model__ = 'Classification'
+    __model__ = 'ote_classification'
 
     def __init__(self, model_adapter, configuration=None, preload=False):
         super().__init__(model_adapter, configuration, preload)
-        self._check_io_number(1, 1)
+        self._check_io_number(1, 3)
         if self.path_to_labels:
             self.labels = self._load_labels(self.path_to_labels)
         self.out_layer_name = self._get_outputs()
