@@ -290,7 +290,7 @@ int main(int argc, char* argv[]) {
         PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv)) {
+        if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 

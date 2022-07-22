@@ -150,7 +150,7 @@ DEFINE_string(output_resolution, "", output_resolution_message);
  */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "human_pose_estimation_demo [OPTION]" << std::endl;
+    std::cout << "face_detection_mtcnn_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
@@ -230,17 +230,112 @@ int main(int argc, char* argv[]) {
         if (!cam.read(curr_frame)) {
             return 1;
         }
+
+                OutputTransform outputTransform = OutputTransform();
+        cv::Size outputResolution = curr_frame.size();
+        size_t found = FLAGS_output_resolution.find("x");
+        if (found != std::string::npos) {
+            outputResolution =
+                cv::Size{std::stoi(FLAGS_output_resolution.substr(0, found)),
+                         std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))};
+            outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+            outputResolution = outputTransform.computeResolution();
+        }
+
+        // Our motion jpeg server.
+        ncam::MJPEGStreamer streamer;
+        streamer.start(MJPEG_PORT, 1);
+        std::cout << "MJPEG server listening on port " << std::to_string(MJPEG_PORT) << std::endl;
         
-/*      const auto tmp = cap->read();
-        cap.reset();
-        cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap = openImagesCapture(FLAGS_i,
-                                FLAGS_loop,
-                                read_type::safe,
-                                0,
-                                std::numeric_limits<size_t>::max(),
-                                stringToSize(FLAGS_res));
-*/
+
+        //------------------------------ Running Face Detection routines
+        //----------------------------------------------
+
+        double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
+        std::unique_ptr<ModelBase> model;
+        if (FLAGS_at == "openpose") {
+            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, static_cast<float>(FLAGS_t), FLAGS_layout));
+        } else if (FLAGS_at == "ae") {
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m,
+                                                    aspectRatio,
+                                                    FLAGS_tsize,
+                                                    static_cast<float>(FLAGS_t),
+                                                    FLAGS_layout));
+        } else if (FLAGS_at == "higherhrnet") {
+            float delta = 0.5f;
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m,
+                                                    aspectRatio,
+                                                    FLAGS_tsize,
+                                                    static_cast<float>(FLAGS_t),
+                                                    FLAGS_layout,
+                                                    delta,
+                                                    RESIZE_KEEP_ASPECT_LETTERBOX));
+        } else {
+            slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
+            return -1;
+        }
+
+        slog::info << ov::get_openvino_version() << slog::endl;
+        ov::Core core;
+
+        AsyncPipeline pipeline(std::move(model),
+                               ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+                               core);
+        Presenter presenter(FLAGS_u);
+
+        int64_t frameNum =
+            pipeline.submitData(ImageInputData(curr_frame), std::make_shared<ImageMetaData>(curr_frame, startTime));
+
+        uint32_t framesProcessed = 0;
+        bool keepRunning = true;
+        std::unique_ptr<ResultBase> result;
+
+        while (keepRunning) {
+            if (pipeline.isReadyToProcess()) {
+                //--- Capturing frame
+                startTime = std::chrono::steady_clock::now();
+                if (!cam.read(curr_frame) || curr_frame.empty()) {
+                    std::cout << "no frame received" << std::endl;
+                    // Input stream is over
+                    break;
+                }
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
+            }
+
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them
+            // are available.
+            pipeline.waitForData();
+
+            //--- Checking for results and rendering data if it's ready
+            //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
+            //    and use your own processing instead of calling renderHumanPose().
+            while (keepRunning && (result = pipeline.getResult())) {
+                auto renderingStart = std::chrono::steady_clock::now();
+            //    cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                               outFrame,
+                               {10, 22},
+                               cv::FONT_HERSHEY_COMPLEX,
+                               0.65);
+                streamer.publish("/stream", outFrame);
+                framesProcessed++;
+                if (!FLAGS_no_show) {
+                    cv::imshow("Face Detection Results", outFrame);
+                    //--- Processing keyboard events
+                    int key = cv::waitKey(1);
+                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                        keepRunning = false;
+                    } else {
+                        presenter.handleKey(key);
+                    }
+                }
+            }
+        }
+
         /** Calculate scales, number of pyramid levels and sizes for PNet pyramid **/
         std::vector<cv::Size> level_size;
         std::vector<double> scales;

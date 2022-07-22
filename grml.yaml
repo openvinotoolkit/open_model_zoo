@@ -74,3 +74,39 @@ commands:
                     - face_detection_mtcnn_demo.build
                 exec: |
                     build_napp face_detection_mtcnn_demo
+
+    text_detection_demo:
+        help: text detection demo
+        commands:
+            build:
+                help: build demo
+                exec: |
+                    build_demo text_detection_demo
+            run:
+                help: run the application
+                exec: |
+                    run_demo text_detection_demo
+            napp:
+                help: build the nApp container
+                deps:
+                    - text_detection_demo.build
+                exec: |
+                    build_napp text_detection_demo
+
+    pedestrian_tracker_demo:
+        help: pedestrian tracker demo
+        commands:
+            build:
+                help: build demo
+                exec: |
+                    build_demo pedestrian_tracker_demo
+            run:
+                help: run the application
+                exec: |
+                    run_demo pedestrian_tracker_demo
+            napp:
+                help: build the nApp container
+                deps:
+                    - pedestrian_tracker_demo.build
+                exec: |
+                    build_napp pedestrian_tracker_demo
