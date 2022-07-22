@@ -53,11 +53,10 @@ public:
     std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_tracks);
 };
 
-#define SCR_CHECK(cond) IE_ASSERT(cond) << " "
+#define SCR_CHECK(cond) CV_Assert(cond);
 
 #define SCR_CHECK_BINARY(actual, expected, op) \
-    IE_ASSERT(actual op expected) << ". " \
-        << actual << " vs " << expected << ".  "
+    CV_Assert(actual op expected);
 
 #define SCR_CHECK_EQ(actual, expected) SCR_CHECK_BINARY(actual, expected, ==)
 #define SCR_CHECK_NE(actual, expected) SCR_CHECK_BINARY(actual, expected, !=)
