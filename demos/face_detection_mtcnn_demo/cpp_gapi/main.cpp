@@ -3,6 +3,7 @@
 //
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <algorithm>
 #include <chrono>
@@ -48,7 +49,128 @@
 #include "gflags/gflags.h"
 #include "utils.hpp"
 
+#include <gflags/gflags.h>
+#include <models/hpe_model_associative_embedding.h>
+#include <models/hpe_model_openpose.h>
+#include <models/input_data.h>
+#include <models/model_base.h>
+#include <models/results.h>
+#include <monitors/presenter.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/common.hpp>
+#include <utils/config_factory.h>
+#include <utils/default_flags.hpp>
+#include <utils/image_utils.h>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
+
+#include <atomic>
+#include <stdio.h>
+#include <queue>
+#include <thread>
+#include <condition_variable>
+
+#include <opencv2/dnn/dnn.hpp>
+#include <opencv2/imgcodecs.hpp>
+
+//#include <libnlab-ctrl.hpp>
+#include <VimbaCPP/Include/VimbaCPP.h>
+
+#include <ncam/MJPEGStreamer.hpp>
+#include <ncam/BufferedChannel.hpp>
+#include <ncam/Camera.hpp>
+
+using cv::Mat;
+using std::vector;
+
+using namespace nlab;
+using namespace std::chrono;
+
+#define INFERENCE_CHANNEL_SIZE 3
+#define JPEG_ENCODING_CHANNEL_SIZE 3
+#define MAX_FRAME_BUFFERS 5
+
+// The local port for the MJPEG server.
+#define MJPEG_PORT 8080
+
+ncam::BufferedChannel<Mat>           jpegEncodeChan(JPEG_ENCODING_CHANNEL_SIZE);
+//ncam::BufferedChannel<vector<uchar>> videoChan(VIDEO_CHANNEL_SIZE);
+ncam::BufferedChannel<Mat>           infChan(INFERENCE_CHANNEL_SIZE);
+//ncam::BufferedChannel<vector<Rect>>  infResChan(INFERENCE_RESULT_CHANNEL_SIZE);
+
+DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
+
 const int MAX_PYRAMID_LEVELS = 13;
+
+static const char help_message[] = "Print a usage message.";
+static const char at_message[] = "Required. Type of the model, either 'ae' for Associative Embedding, 'higherhrnet' "
+                                 "for HigherHRNet models based on ae "
+                                 "or 'openpose' for OpenPose.";
+static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+                                     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
+static const char target_size_message[] = "Optional. Target input size.";
+static const char target_device_message[] =
+    "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+    "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+    "The demo will look for a suitable plugin for a specified device.";
+static const char thresh_output_message[] = "Optional. Probability threshold for poses filtering.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer "
+                                    "requests is determined automatically.";
+static const char num_threads_message[] = "Optional. Number of threads.";
+static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
+                                          "throughput mode (for HETERO and MULTI device cases use format "
+                                          "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+static const char no_show_message[] = "Optional. Don't show output.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_resolution_message[] =
+    "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+
+DEFINE_bool(h, false, help_message);
+DEFINE_string(at, "", at_message);
+DEFINE_string(m, "", model_message);
+DEFINE_string(layout, "", layout_message);
+DEFINE_uint32(tsize, 0, target_size_message);
+DEFINE_string(d, "CPU", target_device_message);
+DEFINE_double(t, 0.1, thresh_output_message);
+DEFINE_uint32(nireq, 0, nireq_message);
+DEFINE_uint32(nthreads, 0, num_threads_message);
+DEFINE_string(nstreams, "", num_streams_message);
+DEFINE_bool(no_show, false, no_show_message);
+DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(output_resolution, "", output_resolution_message);
+
+/**
+ * \brief This function shows a help message
+ */
+static void showUsage() {
+    std::cout << std::endl;
+    std::cout << "human_pose_estimation_demo [OPTION]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    -h                        " << help_message << std::endl;
+    std::cout << "    -at \"<type>\"              " << at_message << std::endl;
+    std::cout << "    -i                        " << input_message << std::endl;
+    std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
+    std::cout << "    -o \"<path>\"               " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
+    std::cout << "    -tsize                    " << target_size_message << std::endl;
+    std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -t                        " << thresh_output_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
+    std::cout << "    -nstreams                 " << num_streams_message << std::endl;
+    std::cout << "    -loop                     " << loop_message << std::endl;
+    std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
+    std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+}
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
@@ -93,7 +215,23 @@ int main(int argc, char* argv[]) {
                                                                0,
                                                                std::numeric_limits<size_t>::max(),
                                                                stringToSize(FLAGS_res));
-        const auto tmp = cap->read();
+        // Create camera.
+        ncam::Camera cam = ncam::Camera();
+        cam.printSystemVersion();
+
+        // Start the camera.
+        bool ok = cam.start(MAX_FRAME_BUFFERS);
+        if (!ok) {
+            return 1;
+        }
+
+        auto startTime = std::chrono::steady_clock::now();
+        cv::Mat curr_frame;
+        if (!cam.read(curr_frame)) {
+            return 1;
+        }
+        
+/*      const auto tmp = cap->read();
         cap.reset();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i,
@@ -102,7 +240,7 @@ int main(int argc, char* argv[]) {
                                 0,
                                 std::numeric_limits<size_t>::max(),
                                 stringToSize(FLAGS_res));
-
+*/
         /** Calculate scales, number of pyramid levels and sizes for PNet pyramid **/
         std::vector<cv::Size> level_size;
         std::vector<double> scales;
@@ -184,7 +322,7 @@ int main(int argc, char* argv[]) {
         auto rendered =
             cv::gapi::wip::draw::render3ch(in_original, custom::BoxesAndMarks::on(in_original, final_faces_onet));
 
-        cv::GComputation graph_mtcnn(cv::GIn(in_original), cv::GOut(rendered));
+  ?      cv::GComputation graph_mtcnn(cv::GIn(in_original), cv::GOut(rendered));
         /** ---------------- End of graph ---------------- **/
         /** Configure networks **/
 

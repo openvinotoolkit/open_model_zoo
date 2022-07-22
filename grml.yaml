@@ -56,3 +56,21 @@ commands:
                     - human_pose_estimation_demo.build
                 exec: |
                     build_napp human_pose_estimation_demo
+
+    face_detection_mtcnn_demo:
+        help: face detection demo
+        commands:
+            build:
+                help: build demo
+                exec: |
+                    build_demo face_detection_mtcnn_demo
+            run:
+                help: run the application
+                exec: |
+                    run_demo face_detection_mtcnn_demo
+            napp:
+                help: build the nApp container
+                deps:
+                    - face_detection_mtcnn_demo.build
+                exec: |
+                    build_napp face_detection_mtcnn_demo

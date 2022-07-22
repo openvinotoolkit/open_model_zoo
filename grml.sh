@@ -14,7 +14,7 @@ build_demo() {
 
     docker build \
         --tag wahtari/openvino_openmodelzoo_demos:$1 \
-        --file "${ROOT}/demos/$1/cpp/Dockerfile" \
+        --file "${ROOT}/demos/$1/cpp_gapi/Dockerfile" \
         "${BINDIR}"
 }
 
