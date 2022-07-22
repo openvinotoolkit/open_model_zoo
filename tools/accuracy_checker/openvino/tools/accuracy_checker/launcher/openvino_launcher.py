@@ -966,8 +966,7 @@ class OpenVINOLauncher(Launcher):
             debug('Prepared async infer queue with {} requests'.format(len(queue)))
         return queue
 
-    def prepare_data_for_request(self,
-                                 inputs, batch_meta, batch_id, batch_input_ids,
+    def prepare_data_for_request(self, inputs, batch_meta, batch_id, batch_input_ids,
                                  batch_annotation, batch_identifiers):
         infer_inputs = inputs[0]
         feed_dict = {self.input_to_tensor_name[name]: data for name, data in infer_inputs.items()}

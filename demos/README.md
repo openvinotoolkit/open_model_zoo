@@ -253,7 +253,7 @@ build_demos_msvc.bat VS2019
 ```
 
 By default, the demo applications binaries are build into the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
-The default build folder can be changed with `-b` option. For example, following command will buid Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
+The default build folder can be changed with `-b` option. For example, following command will build Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
 
 ```bat
 build_demos_msvc.bat -b c:\temp\omz-demos-build
