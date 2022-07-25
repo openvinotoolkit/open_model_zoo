@@ -85,7 +85,7 @@ ncam::BufferedChannel<Mat>           infChan(INFERENCE_CHANNEL_SIZE);
 //DEFINE_INPUT_FLAGS
 //DEFINE_OUTPUT_FLAGS
 
-/*
+
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the model, either 'ae' for Associative Embedding, 'higherhrnet' "
                                  "for HigherHRNet models based on ae "
@@ -126,8 +126,8 @@ DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 
  * \brief This function shows a help message
- */
-/*static void showUsage() {
+
+static void showUsage() {
     std::cout << std::endl;
     std::cout << "pedestrian_tracker_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
@@ -150,7 +150,7 @@ DEFINE_string(output_resolution, "", output_resolution_message);
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
-*/
+
 
 std::unique_ptr<PedestrianTracker> CreatePedestrianTracker(const std::string& reid_model,
                                                            const ov::Core& core,
@@ -242,14 +242,14 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        auto startTime = std::chrono::steady_clock::now();
+        //auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame;
         if (!cam.read(curr_frame)) {
             return 1;
         }
 
-        OutputTransform outputTransform = OutputTransform();
-        cv::Size outputResolution = curr_frame.size();
+        //OutputTransform outputTransform = OutputTransform();
+        //cv::Size outputResolution = curr_frame.size();
         //size_t found = FLAGS_output_resolution.find("x");
         //if (found != std::string::npos) {
         //    outputResolution =
@@ -301,7 +301,7 @@ int main(int argc, char** argv) {
         //                       core);
         Presenter presenter(FLAGS_u);
 
-        int64_t frameNum; 
+        //int64_t frameNum; 
         //int64_t frameNum =
         //    pipeline.submitData(ImageInputData(curr_frame), std::make_shared<ImageMetaData>(curr_frame, startTime));
 
@@ -310,6 +310,7 @@ int main(int argc, char** argv) {
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
+            {
         //    if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame
 //                startTime = std::chrono::steady_clock::now();
@@ -384,7 +385,7 @@ int main(int argc, char** argv) {
         //}
 
         // Reading command line parameters.
-        auto det_model = FLAGS_m_det;
+        auto catch det_model = FLAGS_m_det;
         auto reid_model = FLAGS_m_reid;
 
         auto detlog_out = FLAGS_out;
@@ -521,7 +522,7 @@ int main(int argc, char** argv) {
                                    2);
             }
             presenter.drawGraphs(frame);
-            metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            //metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             if (should_save_det_log && (frameIdx % 100 == 0)) {
                 DetectionLog log = tracker->GetDetectionLog(true);
