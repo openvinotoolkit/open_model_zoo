@@ -13,7 +13,7 @@
 struct PersonReIdentification : BaseDetection {
     std::vector<std::vector<float>> globalReIdVec; // contains vectors characterising all detected persons
 
-    PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Re-Identification Retail") {}
+    PersonReIdentification() : BaseDetection(FLAGS_mpr, "Person Re-Identification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float>& newReIdVec) {
         auto size = globalReIdVec.size();
@@ -24,7 +24,7 @@ struct PersonReIdentification : BaseDetection {
             if (FLAGS_r) {
                 slog::debug << "cosineSimilarity: " << cosSim << slog::endl;
             }
-            if (cosSim > FLAGS_t_reid) {
+            if (cosSim > FLAGS_tpr) {
                 // We substitute previous person's vector by a new one characterising
                 // last person's position
                 globalReIdVec[i] = newReIdVec;
@@ -70,8 +70,8 @@ struct PersonReIdentification : BaseDetection {
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override {
         // Read network model
-        slog::info << "Reading model: " << FLAGS_m_reid << slog::endl;
-        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_m_reid);
+        slog::info << "Reading model: " << FLAGS_mpr << slog::endl;
+        std::shared_ptr<ov::Model> model = core.read_model(FLAGS_mpr);
         logBasicModelInfo(model);
 
         // set batch size 1
