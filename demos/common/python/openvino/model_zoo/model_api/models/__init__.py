@@ -17,9 +17,8 @@
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting
-from .blur import BlurSegmentation
 from .centernet import CenterNet
-from .classification import Classification
+from .classification import Classification, OteClassification
 from .deblurring import Deblurring
 from .detection_model import DetectionModel
 from .detr import DETR
@@ -42,7 +41,6 @@ __all__ = [
     'BertEmbedding',
     'BertNamedEntityRecognition',
     'BertQuestionAnswering',
-    'BlurSegmentation',
     'CenterNet',
     'Classification',
     'CTPN',
@@ -59,6 +57,7 @@ __all__ = [
     'Model',
     'MonoDepthModel',
     'OpenPose',
+    'OteClassification',
     'OutputTransform',
     'RESIZE_TYPES',
     'RetinaFace',
