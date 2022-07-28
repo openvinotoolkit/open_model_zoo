@@ -14,11 +14,15 @@ models:
         preprocessing:
           - type: resize
             size: 1200
-            interpolation: LINEAR
+            interpolation: BILINEAR
+            use_pillow: True
 
         postprocessing:
           - type: resize_prediction_boxes
 
         metrics:
           - type: coco_precision
-            reference: 0.207198
+            reference: 0.2073
+          - type: coco_orig_precision
+            include_boundaries: False
+            reference: 0.1997
