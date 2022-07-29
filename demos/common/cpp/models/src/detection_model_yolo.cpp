@@ -152,13 +152,16 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::OutputVector& outputs = model->outputs();
     std::map<std::string, ov::Shape> outShapes;
     for (auto& out : outputs) {
-        ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout("NCHW");
+        ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
         if (out.get_shape().size() == 4) {
             if (out.get_shape()[ov::layout::height_idx("NCHW")] != out.get_shape()[ov::layout::width_idx("NCHW")] &&
-                out.get_shape()[ov::layout::height_idx({ "NHWC" })] == out.get_shape()[ov::layout::width_idx({ "NHWC" })]) {
+                out.get_shape()[ov::layout::height_idx("NHWC")] == out.get_shape()[ov::layout::width_idx("NHWC")]) {
                 ppp.output(out.get_any_name()).model().set_layout("NHWC");
-                yoloRegionLayout = { "NHWC" };
+                // outShapes are saved before ppp.build() thus set yoloRegionLayout as it is in model before ppp.build()
+                yoloRegionLayout = "NHWC";
             }
+            // yolo-v1-tiny-tf out shape is [1, 21125] thus set layout only for 4 dim tensors
+            ppp.output(out.get_any_name()).tensor().set_layout("NCHW");
         }
         outputsNames.push_back(out.get_any_name());
         outShapes[out.get_any_name()] = out.get_shape();
@@ -222,7 +225,7 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         for (const auto& name : outputsNames) {
             const auto& shape = outShapes[name];
             if (shape[ov::layout::channels_idx(yoloRegionLayout)] % num != 0) {
-                throw std::logic_error(std::string("Output tensor ") + name + " has wrong 2nd dimension");
+                throw std::logic_error(std::string("Output tensor ") + name + " has wrong channel dimension");
             }
             regions.emplace(
                 name,
