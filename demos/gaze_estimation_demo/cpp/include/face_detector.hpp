@@ -4,16 +4,18 @@
 
 #pragma once
 
+#include <iosfwd>
 #include <string>
 #include <vector>
-#include <map>
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+#include <openvino/openvino.hpp>
 
-#include "face_inference_results.hpp"
 #include "ie_wrapper.hpp"
 
 namespace gaze_estimation {
+struct FaceInferenceResults;
+
 class FaceDetector {
 public:
     FaceDetector(ov::Core& core,

@@ -5,15 +5,18 @@
 #pragma once
 
 #include <iostream>
-#include "gflags/gflags.h"
+
+#include <gflags/gflags.h>
 
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a .bmp image.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
-                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
-                                            "The demo will look for a suitable plugin for a specified device (CPU by default)";
-static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"reshape_do_2d\"";
+static const char target_device_message[] =
+    "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+    "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+    "The demo will look for a suitable plugin for a specified device (CPU by default)";
+static const char detection_output_layer_name_message[] =
+    "Optional. The name of detection output layer. Default value is \"reshape_do_2d\"";
 static const char masks_layer_name_message[] = "Optional. The name of masks layer. Default value is \"masks\"";
 
 DEFINE_bool(h, false, help_message);
@@ -24,8 +27,8 @@ DEFINE_string(detection_output_name, "reshape_do_2d", detection_output_layer_nam
 DEFINE_string(masks_name, "masks", masks_layer_name_message);
 
 /**
-* @brief This function show a help message
-*/
+ * @brief This function show a help message
+ */
 static void showUsage() {
     std::cout << std::endl;
     std::cout << "mask_rcnn_demo [OPTION]" << std::endl;

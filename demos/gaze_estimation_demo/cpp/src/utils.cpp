@@ -1,20 +1,14 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <cstdio>
-#include <string>
-
 #define _USE_MATH_DEFINES
-#include <cmath>
-
-#include <utility>
-#include <memory>
-#include <map>
-#include <vector>
-#include <set>
 
 #include "utils.hpp"
+
+#include <cmath>
+
+#include <opencv2/core.hpp>
 
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {

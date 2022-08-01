@@ -4,10 +4,11 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <vector>
+
 #include <gflags/gflags.h>
-#include <iostream>
 
 static const char help_message[] = "Print a usage message.";
 static const char input_message[] = "Required. Path to input .npy file with MRI scan data.";
@@ -25,8 +26,8 @@ DEFINE_string(p, "", pattern_message);
 DEFINE_bool(no_show, false, no_show_message);
 
 /**
-* @brief This function show a help message
-*/
+ * @brief This function show a help message
+ */
 static void showUsage() {
     std::cout << std::endl;
     std::cout << "mri_reconstruction_demo [OPTION]" << std::endl;

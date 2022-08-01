@@ -6,8 +6,8 @@
 
 #include "results_marker.hpp"
 
-#include <cmath>
 #include <cctype>
+#include <cmath>
 #include <vector>
 
 #include <opencv2/core.hpp>

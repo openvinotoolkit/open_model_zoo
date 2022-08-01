@@ -1,21 +1,33 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <string>
-#include <map>
-#include <utility>
-#include <list>
-#include <vector>
-
 #include "face.hpp"
 
-Face::Face(size_t id, cv::Rect& location):
-    _location(location), _intensity_mean(0.f), _id(id), _age(-1),
-    _maleScore(0), _femaleScore(0), _headPose({0.f, 0.f, 0.f}), _realFaceConfidence(0),
-    _isAgeGenderEnabled(false), _isEmotionsEnabled(false),
-    _isHeadPoseEnabled(false), _isLandmarksEnabled(false), _isAntispoofingEnabled(false) {
-}
+#include <algorithm>
+#include <cmath>
+#include <list>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <opencv2/imgproc.hpp>
+
+Face::Face(size_t id, cv::Rect& location)
+    : _location(location),
+      _intensity_mean(0.f),
+      _id(id),
+      _age(-1),
+      _maleScore(0),
+      _femaleScore(0),
+      _headPose({0.f, 0.f, 0.f}),
+      _realFaceConfidence(0),
+      _isAgeGenderEnabled(false),
+      _isEmotionsEnabled(false),
+      _isHeadPoseEnabled(false),
+      _isLandmarksEnabled(false),
+      _isAntispoofingEnabled(false) {}
 
 void Face::updateAge(float value) {
     _age = (_age == -1) ? value : 0.95f * _age + 0.05f * value;
@@ -71,9 +83,11 @@ std::map<std::string, float> Face::getEmotions() {
 }
 
 std::pair<std::string, float> Face::getMainEmotion() {
-    auto x = std::max_element(_emotions.begin(), _emotions.end(),
-        [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
-            return p1.second < p2.second; });
+    auto x = std::max_element(_emotions.begin(),
+                              _emotions.end(),
+                              [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
+                                  return p1.second < p2.second;
+                              });
 
     return std::make_pair(x->first, x->second);
 }

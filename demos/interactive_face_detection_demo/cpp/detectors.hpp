@@ -2,12 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-# pragma once
+#pragma once
 
-#include <utils/common.hpp>
+#include <stddef.h>
 
+#include <chrono>
+#include <map>
+#include <memory>
+#include <ratio>
+#include <string>
+#include <vector>
+
+#include <opencv2/core.hpp>
 #include <openvino/openvino.hpp>
-#include <opencv2/opencv.hpp>
 
 struct BaseDetection {
     ov::InferRequest request;
@@ -15,7 +22,7 @@ struct BaseDetection {
     ov::Shape inShape;
     const bool doRawOutputMessages;
 
-    BaseDetection(const std::string &pathToModel, bool doRawOutputMessages);
+    BaseDetection(const std::string& pathToModel, bool doRawOutputMessages);
     virtual ~BaseDetection() = default;
     virtual std::shared_ptr<ov::Model> read(const ov::Core& core) = 0;
     bool enabled() const;
@@ -40,13 +47,15 @@ struct FaceDetection : BaseDetection {
     float bb_dx_coefficient;
     float bb_dy_coefficient;
 
-    FaceDetection(const std::string &pathToModel,
-                  double detectionThreshold, bool doRawOutputMessages,
-                  float bb_enlarge_coefficient, float bb_dx_coefficient,
+    FaceDetection(const std::string& pathToModel,
+                  double detectionThreshold,
+                  bool doRawOutputMessages,
+                  float bb_enlarge_coefficient,
+                  float bb_dx_coefficient,
                   float bb_dy_coefficient);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
-    void submitRequest(const cv::Mat &frame);
+    void submitRequest(const cv::Mat& frame);
     std::vector<Result> fetchResults();
 };
 
@@ -60,13 +69,12 @@ struct AgeGenderDetection : BaseDetection {
     std::string outputGender;
     size_t enquedFaces;
 
-    AgeGenderDetection(const std::string &pathToModel,
-                       bool doRawOutputMessages);
+    AgeGenderDetection(const std::string& pathToModel, bool doRawOutputMessages);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
     void submitRequest();
 
-    void enqueue(const cv::Mat &face);
+    void enqueue(const cv::Mat& face);
     Result operator[](int idx);
 };
 
@@ -83,26 +91,24 @@ struct HeadPoseDetection : BaseDetection {
     size_t enquedFaces;
     cv::Mat cameraMatrix;
 
-    HeadPoseDetection(const std::string &pathToModel,
-                      bool doRawOutputMessages);
+    HeadPoseDetection(const std::string& pathToModel, bool doRawOutputMessages);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
     void submitRequest();
 
-    void enqueue(const cv::Mat &face);
+    void enqueue(const cv::Mat& face);
     Results operator[](int idx);
 };
 
 struct EmotionsDetection : BaseDetection {
     size_t enquedFaces;
 
-    EmotionsDetection(const std::string &pathToModel,
-                      bool doRawOutputMessages);
+    EmotionsDetection(const std::string& pathToModel, bool doRawOutputMessages);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
     void submitRequest();
 
-    void enqueue(const cv::Mat &face);
+    void enqueue(const cv::Mat& face);
     std::map<std::string, float> operator[](int idx);
 
     const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
@@ -113,21 +119,19 @@ struct FacialLandmarksDetection : BaseDetection {
     std::vector<std::vector<float>> landmarks_results;
     std::vector<cv::Rect> faces_bounding_boxes;
 
-    FacialLandmarksDetection(const std::string &pathToModel,
-                             bool doRawOutputMessages);
+    FacialLandmarksDetection(const std::string& pathToModel, bool doRawOutputMessages);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
     void submitRequest();
 
-    void enqueue(const cv::Mat &face);
+    void enqueue(const cv::Mat& face);
     std::vector<float> operator[](int idx);
 };
 
 struct AntispoofingClassifier : BaseDetection {
     size_t enquedFaces;
 
-    AntispoofingClassifier(const std::string &pathToModel,
-        bool doRawOutputMessages);
+    AntispoofingClassifier(const std::string& pathToModel, bool doRawOutputMessages);
 
     std::shared_ptr<ov::Model> read(const ov::Core& core) override;
     void submitRequest();
@@ -141,7 +145,7 @@ struct Load {
 
     explicit Load(BaseDetection& detector);
 
-    void into(ov::Core& core, const std::string & deviceName) const;
+    void into(ov::Core& core, const std::string& deviceName) const;
 };
 
 class CallStat {

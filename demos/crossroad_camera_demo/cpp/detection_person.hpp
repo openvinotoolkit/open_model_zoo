@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <memory>
 #include <string>
+#include <vector>
 
-#include "openvino/openvino.hpp"
+#include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
 
-#include "gflags/gflags.h"
-#include "utils/slog.hpp"
-#include "detection_base.hpp"
+#include <utils/slog.hpp>
+
 #include "crossroad_camera_demo.hpp"
+#include "detection_base.hpp"
 
 struct PersonDetection : BaseDetection {
     size_t maxProposalCount;
@@ -86,25 +89,25 @@ struct PersonDetection : BaseDetection {
             throw std::logic_error("Incorrect output dimensions for SSD");
         }
 
-        const ov::Layout tensor_layout{ "NHWC" };
+        const ov::Layout tensor_layout{"NHWC"};
 
         ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_spatial_dynamic_shape().
-                set_layout(tensor_layout);
-            ppp.input().preprocess().
-                convert_element_type(ov::element::f32).
-                convert_layout("NCHW").
-                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+            ppp.input()
+                .tensor()
+                .set_element_type(ov::element::u8)
+                .set_spatial_dynamic_shape()
+                .set_layout(tensor_layout);
+            ppp.input()
+                .preprocess()
+                .convert_element_type(ov::element::f32)
+                .convert_layout("NCHW")
+                .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
             ppp.output().tensor().set_element_type(ov::element::f32);
         } else {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_layout({ "NCHW" });
+            ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
         }
 
         model = ppp.build();
@@ -125,7 +128,7 @@ struct PersonDetection : BaseDetection {
         const float* detections = m_infer_request.get_output_tensor().data<float>();
         // pretty much regular SSD post-processing
         for (size_t i = 0; i < maxProposalCount; i++) {
-            float image_id = detections[i * objectSize + 0]; // in case of batch
+            float image_id = detections[i * objectSize + 0];  // in case of batch
             if (image_id < 0) {
                 // end of detections
                 break;
@@ -145,11 +148,10 @@ struct PersonDetection : BaseDetection {
             }
 
             if (FLAGS_r) {
-                slog::debug <<
-                    "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
-                    "    (" << r.location.x << "," << r.location.y <<
-                    ")-(" << r.location.width << "," << r.location.height << ")" <<
-                    ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << slog::endl;
+                slog::debug << "[" << i << "," << r.label << "] element, prob = " << r.confidence << "    ("
+                            << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
+                            << r.location.height << ")" << ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "")
+                            << slog::endl;
             }
             results.push_back(r);
         }

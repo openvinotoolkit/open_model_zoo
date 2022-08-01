@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <algorithm>
+#include <memory>
 #include <string>
+#include <vector>
 
-#include "openvino/openvino.hpp"
+#include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
 
-#include "gflags/gflags.h"
-#include "utils/slog.hpp"
+#include <utils/slog.hpp>
+
 #include "detection_base.hpp"
 
 struct PersonAttribsDetection : BaseDetection {
@@ -15,7 +19,6 @@ struct PersonAttribsDetection : BaseDetection {
     std::string outputNameForTopColorPoint;
     std::string outputNameForBottomColorPoint;
     bool hasTopBottomColor;
-
 
     PersonAttribsDetection() : BaseDetection(FLAGS_m_pa, "Person Attributes Recognition"), hasTopBottomColor(false) {}
 
@@ -37,8 +40,13 @@ struct PersonAttribsDetection : BaseDetection {
         image.convertTo(image32f, CV_32F);
         image32f = image32f.reshape(1, image32f.rows * image32f.cols);
         clusterCount = std::min(clusterCount, image32f.rows);
-        cv::kmeans(image32f, clusterCount, labels, cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::MAX_ITER, 10, 1.0),
-                    10, cv::KMEANS_RANDOM_CENTERS, centers);
+        cv::kmeans(image32f,
+                   clusterCount,
+                   labels,
+                   cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 10, 1.0),
+                   10,
+                   cv::KMEANS_RANDOM_CENTERS,
+                   centers);
         centers.convertTo(centers, CV_8U);
         centers = centers.reshape(3, clusterCount);
         std::vector<int> freq(clusterCount);
@@ -53,12 +61,16 @@ struct PersonAttribsDetection : BaseDetection {
     }
 
     AttributesAndColorPoints GetPersonAttributes() {
-        static const char* const attributeStringsFor7Attributes[] = {
-                "is male", "has_bag", "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
-        };
-        static const char* const attributeStringsFor8Attributes[] = {
-                "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
-        };
+        static const char* const attributeStringsFor7Attributes[] =
+            {"is male", "has_bag", "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"};
+        static const char* const attributeStringsFor8Attributes[] = {"is male",
+                                                                     "has_bag",
+                                                                     "has_backpack",
+                                                                     "has hat",
+                                                                     "has longsleeves",
+                                                                     "has longpants",
+                                                                     "has longhair",
+                                                                     "has coat_jacket"};
 
         ov::Tensor attribsTensor = m_infer_request.get_tensor(outputNameForAttributes);
         size_t numOfAttrChannels = attribsTensor.get_shape()[1];
@@ -69,12 +81,12 @@ struct PersonAttribsDetection : BaseDetection {
         } else if (numOfAttrChannels == arraySize(attributeStringsFor8Attributes)) {
             attributeStrings = attributeStringsFor8Attributes;
         } else {
-            throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
+            throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) +
+                                   ") of the "
                                    "Person Attributes Recognition network is not equal to expected "
-                                   "number of attributes ("
-                                   + std::to_string(arraySize(attributeStringsFor7Attributes))
-                                   + " or "
-                                   + std::to_string(arraySize(attributeStringsFor7Attributes)) + ")");
+                                   "number of attributes (" +
+                                   std::to_string(arraySize(attributeStringsFor7Attributes)) + " or " +
+                                   std::to_string(arraySize(attributeStringsFor7Attributes)) + ")");
         }
 
         AttributesAndColorPoints returnValue;
@@ -92,11 +104,13 @@ struct PersonAttribsDetection : BaseDetection {
             size_t numOfTCPointChannels = topColorPointTensor.get_shape()[1];
             size_t numOfBCPointChannels = bottomColorPointTensor.get_shape()[1];
             if (numOfTCPointChannels != 2) {
-                throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
+                throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) +
+                                       ") of the "
                                        "Person Attributes Recognition network is not equal to point coordinates(2)");
             }
             if (numOfBCPointChannels != 2) {
-                throw std::logic_error("Output size (" + std::to_string(numOfBCPointChannels) + ") of the "
+                throw std::logic_error("Output size (" + std::to_string(numOfBCPointChannels) +
+                                       ") of the "
                                        "Person Attributes Recognition network is not equal to point coordinates (2)");
             }
 
@@ -118,8 +132,9 @@ struct PersonAttribsDetection : BaseDetection {
     }
 
     bool CheckOutputNameExist(const ov::OutputVector& outputs, const std::string name) {
-        if (std::find_if(outputs.begin(), outputs.end(),
-            [&](const ov::Output<ov::Node>& output) {return output.get_any_name() == name; }) == outputs.end()) {
+        if (std::find_if(outputs.begin(), outputs.end(), [&](const ov::Output<ov::Node>& output) {
+                return output.get_any_name() == name;
+            }) == outputs.end()) {
             return false;
         }
         return true;
@@ -144,19 +159,15 @@ struct PersonAttribsDetection : BaseDetection {
         ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_spatial_dynamic_shape().
-                set_layout({ "NHWC" });
-            ppp.input().preprocess().
-                convert_element_type(ov::element::f32).
-                convert_layout("NCHW").
-                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+            ppp.input().tensor().set_element_type(ov::element::u8).set_spatial_dynamic_shape().set_layout({"NHWC"});
+            ppp.input()
+                .preprocess()
+                .convert_element_type(ov::element::f32)
+                .convert_layout("NCHW")
+                .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
         } else {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_layout({ "NCHW" });
+            ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
         }
 
         model = ppp.build();
@@ -189,8 +200,9 @@ struct PersonAttribsDetection : BaseDetection {
             }
             hasTopBottomColor = true;
         } else {
-            throw std::logic_error("Person Attribs Network expects either a network having one output (person attributes), "
-                                   "or a network having three outputs (person attributes, top color point, bottom color point)");
+            throw std::logic_error(
+                "Person Attribs Network expects either a network having one output (person attributes), "
+                "or a network having three outputs (person attributes, top color point, bottom color point)");
         }
 
         m_enabled = true;

@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <memory>
 #include <string>
+#include <vector>
 
-#include "openvino/openvino.hpp"
+#include <gflags/gflags.h>
+#include <openvino/openvino.hpp>
 
-#include "gflags/gflags.h"
-#include "utils/slog.hpp"
+#include <utils/slog.hpp>
+
 #include "detection_base.hpp"
 
 struct PersonReIdentification : BaseDetection {
-    std::vector<std::vector<float>> globalReIdVec; // contains vectors characterising all detected persons
+    std::vector<std::vector<float>> globalReIdVec;  // contains vectors characterising all detected persons
 
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Re-Identification Retail") {}
 
@@ -48,8 +51,8 @@ struct PersonReIdentification : BaseDetection {
     float cosineSimilarity(const std::vector<T>& vecA, const std::vector<T>& vecB) {
         if (vecA.size() != vecB.size()) {
             throw std::logic_error("cosine similarity can't be called for the vectors of different lengths: "
-                                   "vecA size = " + std::to_string(vecA.size()) +
-                                   "vecB size = " + std::to_string(vecB.size()));
+                                   "vecA size = " +
+                                   std::to_string(vecA.size()) + "vecB size = " + std::to_string(vecB.size()));
         }
 
         T mul, denomA, denomB, A, B;
@@ -88,19 +91,15 @@ struct PersonReIdentification : BaseDetection {
         ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(model);
 
         if (FLAGS_auto_resize) {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_spatial_dynamic_shape().
-                set_layout({ "NHWC" });
-            ppp.input().preprocess().
-                convert_element_type(ov::element::f32).
-                convert_layout("NCHW").
-                resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+            ppp.input().tensor().set_element_type(ov::element::u8).set_spatial_dynamic_shape().set_layout({"NHWC"});
+            ppp.input()
+                .preprocess()
+                .convert_element_type(ov::element::f32)
+                .convert_layout("NCHW")
+                .resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
             ppp.input().model().set_layout("NCHW");
         } else {
-            ppp.input().tensor().
-                set_element_type(ov::element::u8).
-                set_layout({ "NCHW" });
+            ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NCHW"});
         }
 
         model = ppp.build();

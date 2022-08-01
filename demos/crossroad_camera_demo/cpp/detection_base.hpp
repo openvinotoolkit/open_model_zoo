@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include <memory>
 #include <string>
-#include "openvino/openvino.hpp"
-#include "utils/slog.hpp"
+
+#include <opencv2/core/types.hpp>
+#include <openvino/openvino.hpp>
+
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 #pragma once
 
@@ -17,8 +22,9 @@ struct BaseDetection {
     std::string m_inputName;
     std::string m_outputName;
 
-    BaseDetection(std::string& commandLineFlag, const std::string& detectorName) :
-        m_commandLineFlag(commandLineFlag), m_detectorName(detectorName) {}
+    BaseDetection(std::string& commandLineFlag, const std::string& detectorName)
+        : m_commandLineFlag(commandLineFlag),
+          m_detectorName(detectorName) {}
 
     ov::CompiledModel* operator->() {
         return &m_compiled_model;
@@ -53,7 +59,7 @@ struct BaseDetection {
     }
 
     virtual void wait() {
-        if (!enabled()|| !m_infer_request)
+        if (!enabled() || !m_infer_request)
             return;
 
         m_infer_request.wait();
@@ -62,7 +68,7 @@ struct BaseDetection {
     mutable bool m_enablingChecked = false;
     mutable bool m_enabled = false;
 
-    bool enabled() const  {
+    bool enabled() const {
         if (!m_enablingChecked) {
             m_enabled = !m_commandLineFlag.empty();
             if (!m_enabled) {
@@ -81,7 +87,10 @@ struct Load {
     void into(ov::Core& core, const std::string& deviceName) const {
         if (m_detector.enabled()) {
             m_detector.m_compiled_model = core.compile_model(m_detector.read(core), deviceName);
-            logCompiledModelInfo(m_detector.m_compiled_model, m_detector.m_commandLineFlag, deviceName, m_detector.m_detectorName);
+            logCompiledModelInfo(m_detector.m_compiled_model,
+                                 m_detector.m_commandLineFlag,
+                                 deviceName,
+                                 m_detector.m_detectorName);
         }
     }
 };

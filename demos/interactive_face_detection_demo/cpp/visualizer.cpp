@@ -1,36 +1,57 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <memory>
-#include <string>
-#include <list>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <utils/ocv_common.hpp>
-
 #include "visualizer.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <list>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <opencv2/imgproc.hpp>
+
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+
 // EmotionBarVisualizer
-EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames, cv::Size size, cv::Size padding,
-                                     double opacity, double textScale, int textThickness):
-                                     emotionNames(emotionNames), size(size), padding(padding),
-                                     opacity(opacity), textScale(textScale), textThickness(textThickness)
-{
-    auto itMax = std::max_element(emotionNames.begin(), emotionNames.end(), [] (std::string const& lhs, std::string const& rhs) {
-        return lhs.length() < rhs.length();
-    });
+EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames,
+                                           cv::Size size,
+                                           cv::Size padding,
+                                           double opacity,
+                                           double textScale,
+                                           int textThickness)
+    : emotionNames(emotionNames),
+      size(size),
+      padding(padding),
+      opacity(opacity),
+      textScale(textScale),
+      textThickness(textThickness) {
+    auto itMax =
+        std::max_element(emotionNames.begin(), emotionNames.end(), [](std::string const& lhs, std::string const& rhs) {
+            return lhs.length() < rhs.length();
+        });
 
     textSize = cv::getTextSize(*itMax, cv::FONT_HERSHEY_COMPLEX_SMALL, textScale, textThickness, &textBaseline);
-    ystep = (emotionNames.size() < 2) ? 0 : (size.height - 2 * padding.height - textSize.height) / (emotionNames.size() - 1);
+    ystep = (emotionNames.size() < 2)
+                ? 0
+                : (size.height - 2 * padding.height - textSize.height) / (emotionNames.size() - 1);
 }
 
 cv::Size EmotionBarVisualizer::getSize() {
     return size;
 }
 
-void EmotionBarVisualizer::draw(cv::Mat& img, std::map<std::string, float> emotions, cv::Point org, cv::Scalar fgcolor, cv::Scalar bgcolor) {
+void EmotionBarVisualizer::draw(cv::Mat& img,
+                                std::map<std::string, float> emotions,
+                                cv::Point org,
+                                cv::Scalar fgcolor,
+                                cv::Scalar bgcolor) {
     cv::Mat tmp = img(cv::Rect(org.x, org.y, size.width, size.height));
     cv::addWeighted(tmp, 1.f - opacity, bgcolor, opacity, 0, tmp);
 
@@ -38,7 +59,10 @@ void EmotionBarVisualizer::draw(cv::Mat& img, std::map<std::string, float> emoti
         cv::Point torg(org.x + padding.width, org.y + n * ystep + textSize.height + padding.height);
 
         int textWidth = textSize.width + 10;
-        cv::Rect r(torg.x + textWidth, torg.y - textSize.height, size.width - 2 * padding.width - textWidth, textSize.height + textBaseline / 2);
+        cv::Rect r(torg.x + textWidth,
+                   torg.y - textSize.height,
+                   size.width - 2 * padding.width - textWidth,
+                   textSize.height + textBaseline / 2);
 
         cv::putText(img, text, torg, cv::FONT_HERSHEY_COMPLEX_SMALL, textScale, fgcolor, textThickness);
         cv::rectangle(img, r, fgcolor, 1);
@@ -46,15 +70,16 @@ void EmotionBarVisualizer::draw(cv::Mat& img, std::map<std::string, float> emoti
         cv::rectangle(img, r, fgcolor, cv::FILLED);
     };
 
-    for (size_t i = 0; i< emotionNames.size(); i++) {
+    for (size_t i = 0; i < emotionNames.size(); i++) {
         drawEmotion(i, emotionNames[i], emotions[emotionNames[i]]);
     }
 }
 
 // PhotoFrameVisualizer
-PhotoFrameVisualizer::PhotoFrameVisualizer(int bbThickness, int photoFrameThickness, float photoFrameLength):
-    bbThickness(bbThickness), photoFrameThickness(photoFrameThickness), photoFrameLength(photoFrameLength) {
-}
+PhotoFrameVisualizer::PhotoFrameVisualizer(int bbThickness, int photoFrameThickness, float photoFrameLength)
+    : bbThickness(bbThickness),
+      photoFrameThickness(photoFrameThickness),
+      photoFrameLength(photoFrameLength) {}
 
 void PhotoFrameVisualizer::draw(cv::Mat& img, cv::Rect& bb, cv::Scalar color) {
     cv::rectangle(img, bb, color, bbThickness);
@@ -74,12 +99,20 @@ void PhotoFrameVisualizer::draw(cv::Mat& img, cv::Rect& bb, cv::Scalar color) {
 }
 
 // HeadPoseVisualizer
-HeadPoseVisualizer::HeadPoseVisualizer(float scale, cv::Scalar xAxisColor, cv::Scalar yAxisColor, cv::Scalar zAxisColor, int axisThickness):
-                        xAxisColor(xAxisColor), yAxisColor(yAxisColor), zAxisColor(zAxisColor), axisThickness(axisThickness), scale(scale) {
-}
+HeadPoseVisualizer::HeadPoseVisualizer(float scale,
+                                       cv::Scalar xAxisColor,
+                                       cv::Scalar yAxisColor,
+                                       cv::Scalar zAxisColor,
+                                       int axisThickness)
+    : xAxisColor(xAxisColor),
+      yAxisColor(yAxisColor),
+      zAxisColor(zAxisColor),
+      axisThickness(axisThickness),
+      scale(scale) {}
 
 void HeadPoseVisualizer::buildCameraMatrix(cv::Mat& cameraMatrix, int cx, int cy, float focalLength) {
-    if (!cameraMatrix.empty()) return;
+    if (!cameraMatrix.empty())
+        return;
     cameraMatrix = cv::Mat::zeros(3, 3, CV_32F);
     cameraMatrix.at<float>(0) = focalLength;
     cameraMatrix.at<float>(2) = static_cast<float>(cx);
@@ -89,28 +122,45 @@ void HeadPoseVisualizer::buildCameraMatrix(cv::Mat& cameraMatrix, int cx, int cy
 }
 
 void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, HeadPoseDetection::Results headPose) {
-    double yaw   = headPose.angle_y;
+    double yaw = headPose.angle_y;
     double pitch = headPose.angle_p;
-    double roll  = headPose.angle_r;
+    double roll = headPose.angle_r;
 
     pitch *= CV_PI / 180.0;
-    yaw   *= CV_PI / 180.0;
-    roll  *= CV_PI / 180.0;
+    yaw *= CV_PI / 180.0;
+    roll *= CV_PI / 180.0;
 
-    cv::Matx33f Rx(1, 0, 0,
-                   0, static_cast<float>(cos(pitch)), static_cast<float>(-sin(pitch)),
-                   0, static_cast<float>(sin(pitch)), static_cast<float>(cos(pitch)));
+    cv::Matx33f Rx(1,
+                   0,
+                   0,
+                   0,
+                   static_cast<float>(cos(pitch)),
+                   static_cast<float>(-sin(pitch)),
+                   0,
+                   static_cast<float>(sin(pitch)),
+                   static_cast<float>(cos(pitch)));
 
-    cv::Matx33f Ry(static_cast<float>(cos(yaw)), 0, static_cast<float>(-sin(yaw)),
-                   0, 1, 0,
-                   static_cast<float>(sin(yaw)), 0, static_cast<float>(cos(yaw)));
+    cv::Matx33f Ry(static_cast<float>(cos(yaw)),
+                   0,
+                   static_cast<float>(-sin(yaw)),
+                   0,
+                   1,
+                   0,
+                   static_cast<float>(sin(yaw)),
+                   0,
+                   static_cast<float>(cos(yaw)));
 
-    cv::Matx33f Rz(static_cast<float>(cos(roll)), static_cast<float>(-sin(roll)), 0,
-                   static_cast<float>(sin(roll)),  static_cast<float>(cos(roll)), 0,
-                   0, 0, 1);
+    cv::Matx33f Rz(static_cast<float>(cos(roll)),
+                   static_cast<float>(-sin(roll)),
+                   0,
+                   static_cast<float>(sin(roll)),
+                   static_cast<float>(cos(roll)),
+                   0,
+                   0,
+                   0,
+                   1);
 
-
-    auto r = cv::Mat(Rz*Ry*Rx);
+    auto r = cv::Mat(Rz * Ry * Rx);
     cv::Mat cameraMatrix;
     buildCameraMatrix(cameraMatrix, frame.cols / 2, frame.rows / 2, 950.0);
 
@@ -160,11 +210,20 @@ void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, HeadPoseDetect
 }
 
 // Visualizer
-Visualizer::Visualizer(cv::Size const& imgSize, int leftPadding, int rightPadding, int topPadding, int bottomPadding):
-        emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
-        headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
-        nxcells(0), nycells(0), xstep(0), ystep(0), imgSize(imgSize), leftPadding(leftPadding),
-        rightPadding(rightPadding), topPadding(topPadding), bottomPadding(bottomPadding), frameCounter(0) {}
+Visualizer::Visualizer(cv::Size const& imgSize, int leftPadding, int rightPadding, int topPadding, int bottomPadding)
+    : emotionVisualizer(nullptr),
+      photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
+      headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
+      nxcells(0),
+      nycells(0),
+      xstep(0),
+      ystep(0),
+      imgSize(imgSize),
+      leftPadding(leftPadding),
+      rightPadding(rightPadding),
+      topPadding(topPadding),
+      bottomPadding(bottomPadding),
+      frameCounter(0) {}
 
 void Visualizer::enableEmotionBar(std::vector<std::string> const& emotionNames) {
     emotionVisualizer = std::make_shared<EmotionBarVisualizer>(emotionNames);
@@ -188,10 +247,8 @@ void Visualizer::enableEmotionBar(std::vector<std::string> const& emotionNames) 
 }
 
 void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
-    auto genderColor = (f->isAgeGenderEnabled()) ?
-        ((f->isMale()) ? cv::Scalar(255, 0, 0) :
-            cv::Scalar(147, 20, 255)) :
-            cv::Scalar(192, 192, 192);
+    auto genderColor = (f->isAgeGenderEnabled()) ? ((f->isMale()) ? cv::Scalar(255, 0, 0) : cv::Scalar(147, 20, 255))
+                                                 : cv::Scalar(192, 192, 192);
 
     std::ostringstream out;
     if (f->isAgeGenderEnabled()) {
@@ -227,7 +284,11 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
 
             int x_lm = f->_location.x + static_cast<int>(f->_location.width * normed_x);
             int y_lm = f->_location.y + static_cast<int>(f->_location.height * normed_y);
-            cv::circle(img, cv::Point(x_lm, y_lm), 1 + static_cast<int>(0.012 * f->_location.width), cv::Scalar(0, 255, 255), -1);
+            cv::circle(img,
+                       cv::Point(x_lm, y_lm),
+                       1 + static_cast<int>(0.012 * f->_location.width),
+                       cv::Scalar(0, 255, 255),
+                       -1);
         }
     }
 
@@ -235,7 +296,8 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
 
     if (drawEmotionBar) {
         DrawParams& dp = drawParams[f->getId()];
-        cv::Point org(dp.cell.x * xstep + leftPadding, imgSize.height - dp.cell.y * ystep - emotionBarSize.height - bottomPadding);
+        cv::Point org(dp.cell.x * xstep + leftPadding,
+                      imgSize.height - dp.cell.y * ystep - emotionBarSize.height - bottomPadding);
 
         emotionVisualizer->draw(img, f->getEmotions(), org, cv::Scalar(255, 255, 255), genderColor);
 
@@ -315,7 +377,7 @@ void Visualizer::draw(cv::Mat img, std::list<Face::Ptr> faces) {
     if (!newFaces.empty()) {
         auto it = drawParams.begin();
         auto endIt = drawParams.end();
-        for (; it != endIt; ) {
+        for (; it != endIt;) {
             if (it->second.frameIdx != frameCounter) {
                 it = drawParams.erase(it);
             } else {

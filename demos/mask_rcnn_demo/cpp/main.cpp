@@ -7,22 +7,30 @@
  * @file mask_rcnn_demo/main.cpp
  * @example mask_rcnn_demo/main.cpp
  */
+
+#include <stddef.h>
+
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <iomanip>
-#include <iostream>
-#include <memory>
 #include <map>
+#include <memory>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "openvino/openvino.hpp"
+#include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include "gflags/gflags.h"
-#include "utils/common.hpp"
-#include "utils/ocv_common.hpp"
-#include "utils/performance_metrics.hpp"
-#include "utils/slog.hpp"
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "mask_rcnn_demo.h"
 
@@ -140,7 +148,7 @@ int main(int argc, char* argv[]) {
 
     std::string boxes_tensor_name;
     std::string masks_tensor_name;
-    ov::Layout masks_tensor_layout = {"NCHW"}; // expected by mask processing logic
+    ov::Layout masks_tensor_layout = {"NCHW"};  // expected by mask processing logic
 
     for (ov::Output<ov::Node> output : outputs) {
         ov::Shape shape = output.get_shape();
@@ -157,27 +165,20 @@ int main(int argc, char* argv[]) {
     std::vector<cv::Mat> images;
 
     if (modelBatchSize > imagePaths.size()) {
-        slog::warn << "Model batch size is greater than number of images (" << imagePaths.size() <<
-            "), some input files will be duplicated" << slog::endl;
-    }
-    else if (modelBatchSize < imagePaths.size()) {
+        slog::warn << "Model batch size is greater than number of images (" << imagePaths.size()
+                   << "), some input files will be duplicated" << slog::endl;
+    } else if (modelBatchSize < imagePaths.size()) {
         modelBatchSize = imagePaths.size();
-        slog::warn << "Model batch size is less than number of images (" << imagePaths.size() <<
-            "), model will be reshaped" << slog::endl;
+        slog::warn << "Model batch size is less than number of images (" << imagePaths.size()
+                   << "), model will be reshaped" << slog::endl;
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
 
-    ppp.input(image_tensor_name)
-        .tensor()
-        .set_element_type(ov::element::u8)
-        .set_layout(desired_tensor_layout);
-    ppp.input(info_tensor_name)
-        .tensor()
-        .set_layout(info_tensor_layout);
+    ppp.input(image_tensor_name).tensor().set_element_type(ov::element::u8).set_layout(desired_tensor_layout);
+    ppp.input(info_tensor_name).tensor().set_layout(info_tensor_layout);
 
-    ppp.input(image_tensor_name).model()
-        .set_layout(image_tensor_layout);
+    ppp.input(image_tensor_name).model().set_layout(image_tensor_layout);
 
     model = ppp.build();
     slog::info << "Preprocessor configuration: " << slog::endl;
@@ -219,11 +220,9 @@ int main(int argc, char* argv[]) {
 
         if (shape.size() == 4) {
             for (size_t batchId = 0; batchId < modelBatchSize; ++batchId) {
-                cv::Size size = {
-                    int(image_tensor_width),
-                    int(image_tensor_height)
-                };
-                unsigned char* data = tensor.data<unsigned char>() + batchId * image_tensor_width * image_tensor_height * 3;
+                cv::Size size = {static_cast<int>(image_tensor_width), static_cast<int>(image_tensor_height)};
+                unsigned char* data =
+                    tensor.data<unsigned char>() + batchId * image_tensor_width * image_tensor_height * 3;
                 cv::Mat image_resized(size, CV_8UC3, data);
                 cv::resize(images[batchId], image_resized, size);
             }
@@ -231,8 +230,8 @@ int main(int argc, char* argv[]) {
 
         if (shape.size() == 2) {
             float* data = tensor.data<float>();
-            data[0] = static_cast<float>(image_tensor_height); // height
-            data[1] = static_cast<float>(image_tensor_width); // width
+            data[0] = static_cast<float>(image_tensor_height);  // height
+            data[1] = static_cast<float>(image_tensor_width);  // width
             data[2] = 1;
         }
     }
@@ -321,8 +320,10 @@ int main(int argc, char* argv[]) {
             cv::Mat resized_mask_mat(box_height, box_width, CV_32FC1);
             cv::resize(mask_mat, resized_mask_mat, cv::Size(box_width, box_height));
 
-            cv::Mat uchar_resized_mask(box_height, box_width, CV_8UC3,
-                cv::Scalar(color.blue(), color.green(), color.red()));
+            cv::Mat uchar_resized_mask(box_height,
+                                       box_width,
+                                       CV_8UC3,
+                                       cv::Scalar(color.blue(), color.green(), color.red()));
             roi_input_img.copyTo(uchar_resized_mask, resized_mask_mat <= MASK_THRESHOLD);
 
             cv::addWeighted(uchar_resized_mask, alpha, roi_input_img, 1.0 - alpha, 0.0f, roi_input_img);
@@ -334,13 +335,14 @@ int main(int argc, char* argv[]) {
 
     for (size_t i = 0; i < output_images.size(); i++) {
         std::string imgName = "out" + std::to_string(i) + ".png";
-        if(!cv::imwrite(imgName, output_images[i]))
+        if (!cv::imwrite(imgName, output_images[i]))
             throw std::runtime_error("Can't write image to file: " + imgName);
         slog::info << "Image " << imgName << " created!" << slog::endl;
     }
 
     slog::info << "Metrics report:" << slog::endl;
-    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms" << slog::endl;
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms"
+               << slog::endl;
 
     return 0;
 }

@@ -2,24 +2,30 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "eye_state_estimator.hpp"
+
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "eye_state_estimator.hpp"
+#include <opencv2/imgproc.hpp>
+
+#include "face_inference_results.hpp"
+
+namespace ov {
+class Core;
+}  // namespace ov
 
 namespace gaze_estimation {
 
-EyeStateEstimator::EyeStateEstimator(
-    ov::Core& ie, const std::string& modelPath, const std::string& deviceName) :
-        ieWrapper(ie, modelPath, modelType, deviceName)
-{
+EyeStateEstimator::EyeStateEstimator(ov::Core& ie, const std::string& modelPath, const std::string& deviceName)
+    : ieWrapper(ie, modelPath, modelType, deviceName) {
     inputTensorName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputTensorName);
     outputTensorName = ieWrapper.expectSingleOutput();
 }
 
-cv::Rect EyeStateEstimator::createEyeBoundingBox(
-    const cv::Point2i& p1, const cv::Point2i& p2, float scale) const {
+cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale) const {
     cv::Rect result;
     float size = static_cast<float>(cv::norm(p1 - p2));
 
@@ -34,8 +40,7 @@ cv::Rect EyeStateEstimator::createEyeBoundingBox(
     return result;
 }
 
-void EyeStateEstimator::rotateImageAroundCenter(
-    const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const {
+void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const {
     auto w = srcImage.cols;
     auto h = srcImage.rows;
 
@@ -47,8 +52,7 @@ void EyeStateEstimator::rotateImageAroundCenter(
     cv::warpAffine(srcImage, dstImage, rotMatrix, size, 1, cv::BORDER_REPLICATE);
 }
 
-void EyeStateEstimator::estimate(
-    const cv::Mat& image, FaceInferenceResults& outputResults) {
+void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto roll = outputResults.headPoseAngles.z;
     std::vector<cv::Point2f> eyeLandmarks = outputResults.getEyeLandmarks();
 
@@ -89,6 +93,5 @@ void EyeStateEstimator::estimate(
     }
 }
 
-EyeStateEstimator::~EyeStateEstimator() {
-}
+EyeStateEstimator::~EyeStateEstimator() {}
 }  // namespace gaze_estimation

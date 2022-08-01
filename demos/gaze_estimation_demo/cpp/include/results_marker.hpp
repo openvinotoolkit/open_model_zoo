@@ -4,12 +4,13 @@
 
 #pragma once
 
-#include <cstdio>
-#include <string>
-
-#include "face_inference_results.hpp"
+namespace cv {
+class Mat;
+}  // namespace cv
 
 namespace gaze_estimation {
+struct FaceInferenceResults;
+
 class ResultsMarker {
 public:
     ResultsMarker(bool showFaceBoundingBox,
