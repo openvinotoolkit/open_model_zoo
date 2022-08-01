@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -19,6 +19,10 @@ source_group("include" FILES ${MAIN_HEADERS})
 
 # Create library file from sources.
 add_library(${TARGET_NAME} STATIC ${MAIN_SRC} ${MAIN_HEADERS})
+
+check_code_style(NAME ${TARGET_NAME}
+    CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+    CPPLINT ${ENABLE_CPPLINT})
 
 set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 

@@ -4,14 +4,22 @@
 
 find_package(OpenCV 4 REQUIRED COMPONENTS core imgproc)
 
-set(target_name pose_extractor)
-add_library(${target_name} MODULE wrapper.cpp
-                                  src/extract_poses.hpp src/extract_poses.cpp
-                                  src/human_pose.hpp src/human_pose.cpp
-                                  src/peak.hpp src/peak.cpp)
-target_include_directories(${target_name} PRIVATE src/ ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR})
-target_link_libraries(${target_name} ${PYTHON_LIBRARIES} opencv_core opencv_imgproc)
-set_target_properties(${target_name} PROPERTIES PREFIX "")
+set(TARGET_NAME pose_extractor)
+add_library(${TARGET_NAME} MODULE  ${CMAKE_CURRENT_SOURCE_DIR}/wrapper.cpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/extract_poses.hpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/extract_poses.cpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/human_pose.hpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/human_pose.cpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/peak.hpp
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/src/peak.cpp)
+
+check_code_style(NAME ${TARGET_NAME}
+    CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+    CPPLINT ${ENABLE_CPPLINT})
+
+target_include_directories(${TARGET_NAME} PRIVATE src/ ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR})
+target_link_libraries(${TARGET_NAME} ${PYTHON_LIBRARIES} opencv_core opencv_imgproc)
+set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
 if(WIN32)
-    set_target_properties(${target_name} PROPERTIES SUFFIX ".pyd")
+    set_target_properties(${TARGET_NAME} PROPERTIES SUFFIX ".pyd")
 endif()

@@ -1,8 +1,8 @@
-# Copyright (C) 2020 Intel Corporation
+# Copyright (C) 2020-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
-set(target_name ctcdecode_numpy_impl)
+set(TARGET_NAME ctcdecode_numpy_impl)
 
 file(GLOB_RECURSE HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
@@ -11,31 +11,35 @@ file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 source_group("include" FILES ${HEADERS})
 source_group("src" FILES ${SOURCES})
 
-add_library(${target_name} MODULE ${HEADERS} ${SOURCES})
+add_library(${TARGET_NAME} MODULE ${HEADERS} ${SOURCES})
 
-target_include_directories(${target_name} PRIVATE
+# check_code_style(NAME ${TARGET_NAME}
+#     CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+#     CPPLINT ${ENABLE_CPPLINT})
+
+target_include_directories(${TARGET_NAME} PRIVATE
     ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR} third_party/ThreadPool)
-target_link_libraries(${target_name} ${PYTHON_LIBRARIES})
+target_link_libraries(${TARGET_NAME} ${PYTHON_LIBRARIES})
 
-set_target_properties(${target_name} PROPERTIES
+set_target_properties(${TARGET_NAME} PROPERTIES
     PREFIX ""
     OUTPUT_NAME _impl
 )
 
 if(WIN32)
-    set_target_properties(${target_name} PROPERTIES SUFFIX ".pyd")
+    set_target_properties(${TARGET_NAME} PROPERTIES SUFFIX ".pyd")
 endif()
 
 foreach(artifact IN ITEMS ARCHIVE LIBRARY PDB RUNTIME)
-    set_property(TARGET ${target_name} APPEND_STRING
+    set_property(TARGET ${TARGET_NAME} APPEND_STRING
         PROPERTY "${artifact}_OUTPUT_DIRECTORY" "/ctcdecode_numpy")
 endforeach()
 
 # SWIG-generated code causes some warnings; disable them.
 if(COMPILER_IS_GCC_LIKE)
-    target_compile_options(${target_name} PRIVATE -Wno-narrowing)
+    target_compile_options(${TARGET_NAME} PRIVATE -Wno-narrowing)
 elseif(MSVC)
-    target_compile_options(${target_name} PRIVATE
+    target_compile_options(${TARGET_NAME} PRIVATE
         /wd4244  # Disable conversion warning =
         /wd4838  # Disable conversion warning in aggregate or list initialization
     )
@@ -52,8 +56,8 @@ add_custom_target(ctcdecode_numpy ALL
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
         "${CMAKE_CURRENT_SOURCE_DIR}/ctcdecode_numpy/__init__.py"
         "${CMAKE_CURRENT_SOURCE_DIR}/ctcdecode_numpy/impl.py"
-        "$<TARGET_FILE_DIR:${target_name}>"
+        "$<TARGET_FILE_DIR:${TARGET_NAME}>"
     VERBATIM
 )
 
-add_dependencies(ctcdecode_numpy ${target_name})
+add_dependencies(ctcdecode_numpy ${TARGET_NAME})

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Intel Corporation
+# Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -15,6 +15,10 @@ endif()
 
 project(Demos)
 
+include (CMakeDependentOption)
+
+cmake_dependent_option(ENABLE_CLANG_FORMAT "Enable clang-format checks during the build" ON "UNIX" OFF)
+option(ENABLE_CPPLINT "Enable cpplint checks during the build" OFF)
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
@@ -94,6 +98,19 @@ endfunction()
 
 include(CMakeParseArguments)
 
+macro(check_code_style)
+    set(oneValueArgs NAME CLANG_FORMAT CPPLINT)
+    cmake_parse_arguments(CHECK "${options}" "${oneValueArgs}"
+        "${multiValueArgs}" ${ARGN})
+    if(CHECK_CLANG_FORMAT)
+        add_clang_format_target(${CHECK_NAME}_clang FOR_TARGETS ${CHECK_NAME})
+    endif()
+    if(CHECK_CPPLINT)
+        add_cpplint_target(${CHECK_NAME}_cpplint FOR_TARGETS ${CHECK_NAME})
+    endif()
+endmacro()
+
+
 # add_demo(NAME <target name>
 #     SOURCES <source files>
 #     [HEADERS <header files>]
@@ -121,6 +138,10 @@ macro(add_demo)
     # Create executable file from sources
     add_executable(${OMZ_DEMO_NAME} ${OMZ_DEMO_SOURCES} ${OMZ_DEMO_HEADERS})
 
+    check_code_style(NAME ${OMZ_DEMO_NAME}
+        CLANG_FORMAT ${ENABLE_CLANG_FORMAT}
+        CPPLINT ${ENABLE_CPPLINT})
+
     if(WIN32)
         set_target_properties(${OMZ_DEMO_NAME} PROPERTIES COMPILE_PDB_NAME ${OMZ_DEMO_NAME})
     endif()
@@ -137,10 +158,18 @@ macro(add_demo)
     endif()
 endmacro()
 
+find_package(CMakeScripts REQUIRED
+             PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake"
+             NO_CMAKE_FIND_ROOT_PATH
+             NO_DEFAULT_PATH)
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
+set (TMP_IWYU_VAR ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE})
+set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "" CACHE STRING "WA to disable IWYU for thirdparty/gflags" FORCE)
 add_subdirectory(thirdparty/gflags)
+set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${TMP_IWYU_VAR} CACHE STRING "Enable" FORCE)
+
 add_subdirectory(common/cpp)
 add_subdirectory(common/cpp_gapi)
 add_subdirectory(multi_channel_common/cpp)
@@ -150,6 +179,13 @@ file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
 list(REMOVE_ITEM samples_dirs common thirdparty multi_channel_common)
 add_demos_to_build(${samples_dirs})
+
+if(ENABLE_CPPLINT)
+    message(STATUS "Enabled Cpplint checks")
+endif()
+if(ENABLE_CLANG_FORMAT)
+    message(STATUS "Enabled ClangFormat checks")
+endif()
 
 if(ENABLE_PYTHON)
     find_package(PythonInterp 3.6 REQUIRED)
