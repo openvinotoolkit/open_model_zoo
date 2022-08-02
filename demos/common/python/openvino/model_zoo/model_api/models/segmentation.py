@@ -16,10 +16,11 @@
 
 import cv2
 import numpy as np
-
+from typing import Any, Dict, Optional
 from .image_model import ImageModel
-from .types import ListValue, StringValue
-from .utils import load_labels
+from .types import ListValue, StringValue, NumericalValue
+from .utils import load_labels, check_input_parameters_type, create_hard_prediction_from_soft_prediction
+from ..adapters.model_adapter import ModelAdapter
 
 
 class SegmentationModel(ImageModel):
@@ -69,6 +70,55 @@ class SegmentationModel(ImageModel):
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result
 
+class BlurSegmentation(SegmentationModel):
+    __model__ = 'blur_segmentation'
+
+    @check_input_parameters_type()
+    def __init__(self, model_adapter: ModelAdapter, configuration: Optional[dict] = None, preload: bool = False):
+        super().__init__(model_adapter, configuration, preload)
+        self._check_io_number(1, 1)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'soft_threshold': NumericalValue(default_value=0.5, min=0.0, max=1.0),
+            'blur_strength': NumericalValue(value_type=int, default_value=1, min=0, max=25)
+        })
+
+        return parameters
+
+    def _get_outputs(self):
+        layer_name = 'output'
+        layer_shape = self.outputs[layer_name].shape
+
+        if len(layer_shape) == 3:
+            self.out_channels = 0
+        elif len(layer_shape) == 4:
+            self.out_channels = layer_shape[1]
+        else:
+            raise Exception("Unexpected output layer shape {}. Only 4D and 3D output layers are supported".format(layer_shape))
+
+        return layer_name
+
+    @check_input_parameters_type()
+    def postprocess(self, outputs: Dict[str, np.ndarray], metadata: Dict[str, Any]):
+        predictions = outputs[self.output_blob_name].squeeze()
+        soft_prediction = np.transpose(predictions, axes=(1, 2, 0))
+        feature_vector = outputs.get('repr_vector', None)  # Optional output
+
+        hard_prediction = create_hard_prediction_from_soft_prediction(
+            soft_prediction=soft_prediction,
+            soft_threshold=self.soft_threshold,
+            blur_strength=self.blur_strength
+        )
+        hard_prediction = cv2.resize(hard_prediction, metadata['original_shape'][1::-1], 0, 0, interpolation=cv2.INTER_NEAREST)
+        soft_prediction = cv2.resize(soft_prediction, metadata['original_shape'][1::-1], 0, 0, interpolation=cv2.INTER_NEAREST)
+
+        metadata['soft_predictions'] = soft_prediction
+        metadata['feature_vector'] = feature_vector
+
+        return hard_prediction
 
 class SalientObjectDetectionModel(SegmentationModel):
     __model__ = 'Salient_Object_Detection'

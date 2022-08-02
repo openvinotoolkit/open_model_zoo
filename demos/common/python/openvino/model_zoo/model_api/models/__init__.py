@@ -31,7 +31,7 @@ from .model import Model
 from .monodepth import MonoDepthModel
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
-from .segmentation import SegmentationModel, SalientObjectDetectionModel
+from .segmentation import SegmentationModel, BlurSegmentation, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
@@ -41,6 +41,7 @@ __all__ = [
     'BertEmbedding',
     'BertNamedEntityRecognition',
     'BertQuestionAnswering',
+    'BlurSegmentation',
     'CenterNet',
     'Classification',
     'CTPN',
