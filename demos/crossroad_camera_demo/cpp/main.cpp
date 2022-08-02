@@ -179,9 +179,9 @@ int main(int argc, char* argv[]) {
 
                             bc_rect = bc_rect & person_rect;
 
-                            if (!tc_rect.empty())
+                            if (!isRectEmpty(tc_rect))
                                 resPersAttrAndColor.top_color = PersonAttribsDetection::GetAvgColor(person(tc_rect));
-                            if (!bc_rect.empty())
+                            if (!isRectEmpty(bc_rect))
                                 resPersAttrAndColor.bottom_color = PersonAttribsDetection::GetAvgColor(person(bc_rect));
                         }
                     }

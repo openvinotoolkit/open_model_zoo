@@ -150,6 +150,16 @@ inline void putHighlightedText(const cv::Mat& frame,
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
 
+// TODO: replace with Size::empty() after OpenCV3 is dropped
+static inline bool isSizeEmpty(const cv::Size& size) {
+    return size.width <= 0 || size.height <= 0;
+}
+
+// TODO: replace with Rect::empty() after OpenCV3 is dropped
+static inline bool isRectEmpty(const cv::Rect& rect) {
+    return rect.width <= 0 || rect.height <= 0;
+}
+
 class OutputTransform {
 public:
     OutputTransform() : doResize(false), scaleFactor(1) {}
@@ -240,7 +250,10 @@ public:
         if (reverseInputChannels) {
             cv::cvtColor(result, result, cv::COLOR_BGR2RGB);
         }
-        return (result - means) / stdScales;
+        // TODO: merge the two following lines after OpenCV3 is droppped
+        result -= means;
+        result /= cv::Mat{stdScales};
+        return result;
     }
 
 private:
@@ -260,7 +273,7 @@ public:
 
     LazyVideoWriter(const std::string& filenames, double fps, unsigned lim) :
         nwritten{1}, filenames{filenames}, fps{fps}, lim{lim} {}
-    void write(cv::InputArray im) {
+    void write(const cv::Mat& im) {
         if (writer.isOpened() && (nwritten < lim || 0 == lim)) {
             writer.write(im);
             ++nwritten;
