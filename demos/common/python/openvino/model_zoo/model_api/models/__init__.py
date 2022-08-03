@@ -17,9 +17,8 @@
 
 from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .background_matting import ImageMattingWithBackground, VideoBackgroundMatting, PortraitBackgroundMatting
-from .blur import BlurSegmentation
 from .centernet import CenterNet
-from .classification import Classification
+from .classification import Classification, OteClassification
 from .deblurring import Deblurring
 from .detection_model import DetectionModel
 from .detr import DETR
@@ -33,7 +32,7 @@ from .monodepth import MonoDepthModel
 from .nanodet import NanoDet, NanoDetPlus
 from .open_pose import OpenPose
 from .retinaface import RetinaFace, RetinaFacePyTorch
-from .segmentation import SegmentationModel, SalientObjectDetectionModel
+from .segmentation import SegmentationModel, BlurSegmentation, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks, InputTransform, OutputTransform, RESIZE_TYPES
@@ -62,6 +61,7 @@ __all__ = [
     'NanoDet',
     'NanoDetPlus',
     'OpenPose',
+    'OteClassification',
     'OutputTransform',
     'PortraitBackgroundMatting',
     'RESIZE_TYPES',
