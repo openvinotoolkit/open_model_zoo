@@ -73,8 +73,9 @@ class BlurSegmentation(SegmentationModel):
     __model__ = 'blur_segmentation'
 
     def __init__(self, model_adapter, configuration=None, preload=False):
-        super().__init__(model_adapter, configuration, preload)
+        super(SegmentationModel, self).__init__(model_adapter, configuration, preload)
         self._check_io_number(1, -1)
+        self.output_blob_name = self._get_outputs()
 
     @classmethod
     def parameters(cls):
