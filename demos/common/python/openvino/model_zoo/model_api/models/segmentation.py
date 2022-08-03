@@ -72,6 +72,10 @@ class SegmentationModel(ImageModel):
 class BlurSegmentation(SegmentationModel):
     __model__ = 'blur_segmentation'
 
+    def __init__(self, model_adapter, configuration=None, preload=False):
+        super().__init__(model_adapter, configuration, preload)
+        self._check_io_number(1, -1)
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
