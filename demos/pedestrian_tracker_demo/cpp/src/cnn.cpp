@@ -81,20 +81,18 @@ VectorCNN::VectorCNN(const Config& config,
     result_size = std::accumulate(std::next(output_shape.begin(), 1), output_shape.end(), 1, std::multiplies<int>());
 }
 
-void VectorCNN::Compute(const cv::Mat& frame,
-    cv::Mat* vector, cv::Size out_shape) const {
+void VectorCNN::Compute(const cv::Mat& frame, cv::Mat* vector) const {
     std::vector<cv::Mat> output;
-    Compute({ frame }, &output, out_shape);
+    Compute({ frame }, &output);
     *vector = output[0];
 }
 
-void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors,
-    cv::Size out_shape) const {
+void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors) const {
     if (images.empty()) {
         return;
     }
     vectors->clear();
-    auto results_fetcher = [vectors, out_shape](const ov::Tensor& tensor, size_t batch_size) {
+    auto results_fetcher = [vectors](const ov::Tensor& tensor, size_t batch_size) {
         ov::Shape shape = tensor.get_shape();
         std::vector<int> tensor_sizes(shape.size(), 0);
         for (size_t i = 0; i < tensor_sizes.size(); ++i) {
@@ -105,9 +103,6 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             cv::Mat tensor_wrapper(out_tensor.size[1], 1, CV_32F,
                 reinterpret_cast<void*>((out_tensor.ptr<float>(0) + b * out_tensor.size[1])));
             vectors->emplace_back();
-            if (out_shape != cv::Size()) {
-                tensor_wrapper = tensor_wrapper.reshape(1, { out_shape.height, out_shape.width });
-            }
             tensor_wrapper.copyTo(vectors->back());
         }
 
