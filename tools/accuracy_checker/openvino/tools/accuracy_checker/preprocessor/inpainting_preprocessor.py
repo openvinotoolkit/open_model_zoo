@@ -41,6 +41,8 @@ class FreeFormMask(Preprocessor):
                 optional=True, default=20, description="Maximum number vertex to draw mask.", value_type=int
             ),
             'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask"),
+            'concat_mask': BoolField(
+                optional=True, default=False, description='concatenate masked image and mask to one tensor')
         })
         return parameters
 
@@ -50,6 +52,7 @@ class FreeFormMask(Preprocessor):
         self.max_length = self.get_value_from_config('max_length')
         self.max_vertex = self.get_value_from_config('max_vertex')
         self.inverse_mask = self.get_value_from_config('inverse_mask')
+        self.concat_mask = self.get_value_from_config('concat_mask')
 
     @staticmethod
     def _free_form_mask(mask, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
@@ -87,6 +90,10 @@ class FreeFormMask(Preprocessor):
         img = img * (1 - mask) + 255 * mask
         if self.inverse_mask:
             mask = 1 - mask
+        if self.concat_mask:
+            image.identifier = image.identifier[0]
+            image.data = np.concatenate([img, mask], axis=2)
+            return image
         image.data = [img, mask]
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
@@ -110,7 +117,9 @@ class RectMask(Preprocessor):
                 optional=True, default=128,
                 description="Size of mask, used if both dimensions are equal", value_type=int
             ),
-            'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask")
+            'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask"),
+            'concat_mask': BoolField(
+                optional=True, default=False, description='concatenate masked image and mask to one tensor')
 
         })
         return parameters
@@ -122,6 +131,7 @@ class RectMask(Preprocessor):
         if self.mask_width is None:
             self.mask_width = 128
         self.inverse_mask = self.get_value_from_config('inverse_mask')
+        self.concat_mask = self.get_value_from_config('concat_mask')
 
     def process(self, image, annotation_meta=None):
         if len(image.data) == 2:
@@ -139,6 +149,10 @@ class RectMask(Preprocessor):
         img = img * (1 - mask) + 255 * mask
         if self.inverse_mask:
             mask = 1 - mask
+        if self.concat_mask:
+            image.identifier = image.identifier[0]
+            image.data = np.concatenate([img, mask], axis=2)
+            return image
         image.data = [img, mask]
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
@@ -154,7 +168,9 @@ class CustomMask(Preprocessor):
         parameters.update({
             'mask_dir': PathField(is_directory=True, optional=False, description="Path to mask dataset directory"),
             'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask"),
-            'mask_loader': StringField(optional=True, default='numpy_reader', description="Mask loader")
+            'mask_loader': StringField(optional=True, default='numpy_reader', description="Mask loader"),
+            'concat_mask': BoolField(
+                optional=True, default=False, description='concatenate masked image and mask to one tensor')
         })
         return parameters
 
@@ -162,6 +178,7 @@ class CustomMask(Preprocessor):
         self.mask_dir = self.get_value_from_config('mask_dir')
         self.inverse_mask = self.get_value_from_config('inverse_mask')
         self.mask_loader = self.get_value_from_config('mask_loader')
+        self.concat_mask = self.get_value_from_config('concat_mask')
 
     def process(self, image, annotation_meta=None):
         if len(image.data) == 2:
@@ -188,6 +205,10 @@ class CustomMask(Preprocessor):
             mask = np.expand_dims(mask, axis=2)
 
         img = img * (1 - mask) + 255 * mask
+        if self.concat_mask:
+            image.identifier = image.identifier[0]
+            image.data = np.concatenate([img, mask], axis=2)
+            return image
         image.data = [img, mask]
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
