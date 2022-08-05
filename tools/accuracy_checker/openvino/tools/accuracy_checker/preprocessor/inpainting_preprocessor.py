@@ -92,7 +92,7 @@ class FreeFormMask(Preprocessor):
             mask = 1 - mask
         if self.concat_mask:
             image.identifier = image.identifier[0]
-            image.data = np.concatenate([img, mask], axis=2)
+            image.data = np.concatenate([img, mask * 255], axis=2)
             return image
         image.data = [img, mask]
         identifier = image.identifier[0]
@@ -151,7 +151,7 @@ class RectMask(Preprocessor):
             mask = 1 - mask
         if self.concat_mask:
             image.identifier = image.identifier[0]
-            image.data = np.concatenate([img, mask], axis=2)
+            image.data = np.concatenate([img, mask * 255], axis=2)
             return image
         image.data = [img, mask]
         identifier = image.identifier[0]
@@ -207,7 +207,7 @@ class CustomMask(Preprocessor):
         img = img * (1 - mask) + 255 * mask
         if self.concat_mask:
             image.identifier = image.identifier[0]
-            image.data = np.concatenate([img, mask], axis=2)
+            image.data = np.concatenate([img, mask * 255], axis=2)
             return image
         image.data = [img, mask]
         identifier = image.identifier[0]
