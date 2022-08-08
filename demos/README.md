@@ -164,7 +164,7 @@ You can download the [Intel pre-trained models](../models/intel/index.md) or [pu
 
 ## Build the Demo Applications
 
-To build the demos, you need to source OpenVINO™ environment and [get OpenCV](https://github.com/opencv/opencv/wiki/BuildOpenCV4OpenVINO). You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
+To build the demos, you need to source OpenVINO™ environment and [acquire OpenCV](https://github.com/openvinotoolkit/open_model_zoo/blob/master/demos/acquire_opencv.md). You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
 For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download prebuilt OpenCV and set environment variables before building the demos:
 
 ```sh
