@@ -3,7 +3,7 @@ models:
     launchers:
       - framework: onnx_runtime
         device: CPU
-        model: torch-save.onnx
+        model: erfnet.onnx
         adapter:
           type: segmentation
           make_argmax: True
@@ -38,8 +38,8 @@ models:
     launchers:
       - framework: dlsdk
         device: CPU
-        model: erfnet_save.xml
-        weights: erfnet_save.bin
+        model: erfnet.xml
+        weights: erfnet.bin
         adapter:
           type: segmentation
           make_argmax: True
