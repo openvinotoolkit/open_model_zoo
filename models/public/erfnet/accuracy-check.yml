@@ -1,0 +1,71 @@
+models:
+  - name: ERFNet
+    launchers:
+      - framework: onnx_runtime
+        device: CPU
+        model: torch-save.onnx
+        adapter:
+          type: segmentation
+          make_argmax: True
+    datasets:
+      - name: erfnet_data
+        preprocessing:
+          - type: crop
+            dst_width: 1640
+            dst_height: 350
+          - type: resize
+            dst_width: 976
+            dst_height: 208 
+        postprocessing:
+          - type: resize_segmentation_mask
+            dst_width: 1640
+            dst_height: 590
+            apply_to: prediction
+        annotation_conversion:
+          converter: voc_segmentation
+          imageset_file: val.txt
+          images_dir: JPEGImages/
+          mask_dir: Annotations/
+          dataset_meta_file: erfnet_meta_zxw.json
+        data_source: ./JPEGImages/
+        additional_data_source: ./Annotations/
+        metrics:
+          - type: segmentation_accuracy
+            use_argmax: false
+            presenter:  print_scalar
+
+  - name: ERFNet
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        model: erfnet_save.xml
+        weights: erfnet_save.bin
+        adapter:
+          type: segmentation
+          make_argmax: True
+    datasets:
+      - name: erfnet_data
+        preprocessing:
+          - type: crop
+            dst_width: 1640
+            dst_height: 350
+          - type: resize
+            dst_width: 976
+            dst_height: 208
+        postprocessing:
+          - type: resize_segmentation_mask
+            dst_width: 1640
+            dst_height: 590
+            apply_to: prediction
+        annotation_conversion:
+          converter: voc_segmentation
+          imageset_file: val.txt
+          images_dir: JPEGImages/
+          mask_dir: Annotations/
+          dataset_meta_file: erfnet_meta_zxw.json
+        data_source: ./JPEGImages/
+        additional_data_source: ./Annotations/
+        metrics:
+          - type: segmentation_accuracy
+            use_argmax: false
+            presenter: print_scalar
