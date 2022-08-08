@@ -63,7 +63,7 @@ libswscale4
 2. Create build directory and enter into it:
 > mkdir ~/build-opencv && cd ~/build-opencv
 3. Compile and install OpenCV:
-> cmake -G Ninja \
+> cmake \
 -D BUILD_INFO_SKIP_EXTRA_MODULES=ON \
 -D BUILD_EXAMPLES=OFF \
 -D BUILD_JASPER=OFF \
@@ -138,7 +138,8 @@ libswscale4
 -D VIDEOIO_PLUGIN_LIST=ffmpeg,gstreamer,mfx \
 -D CMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined \
 -D CMAKE_BUILD_TYPE=Release <OpenCV_ROOT_REPO_DIRECTORY> && \
-ninja && cmake --install .
+cmake --build . --config Release -- -j && \
+cmake --install .
 
 OpenCV package is available at `~/build-opencv/install` directory. 
 
@@ -151,19 +152,19 @@ export PYTHONPATH="<OpenCV_INSTALL_DIR>/python${PYTHONPATH:+:$PYTHONPATH}"
 ## Building on Windows
 
 ### Prerequisites 
-1. Install Microsoft Visual Studio 
+1. Install Microsoft Visual Studio* 2019
 2. Install [cmake](https://cmake.org/download/)
 1. Install OpenVINO according to the [instruction](https://docs.openvino.ai/latest/openvino_docs_install_guides_installing_openvino_windows.html)
 2. Install [Intel® Media SDK for Windows](https://www.intel.com/content/www/us/en/developer/tools/media-sdk/choose-download-client.html)
 
 ### Procedure
-1. Copy OpenCV repository:
+1. Clone OpenCV repository:
 > git clone --recurse-submodules https://github.com/opencv/opencv.git
 2. Create build directory and enter into it:
 > mkdir "build-opencv" && cd "build-opencv"
 3. Setup MSVC environment by running `vcvars64.bat`
 4. Compile and install OpenCV:
-> cmake -G Ninja ^
+> cmake ^
 -DBUILD_INFO_SKIP_EXTRA_MODULES=ON ^
 -DBUILD_EXAMPLES=OFF ^
 -DBUILD_JASPER=OFF ^
@@ -236,7 +237,7 @@ export PYTHONPATH="<OpenCV_INSTALL_DIR>/python${PYTHONPATH:+:$PYTHONPATH}"
 -DINF_ENGINE_RELEASE=2022010000 ^
 -DVIDEOIO_PLUGIN_LIST=mfx,msmf ^
 -DCMAKE_BUILD_TYPE=Release <OpenCV_ROOT_REPO_DIRECTORY> &&
-ninja &&
+cmake --build . --config Release -j &&
 cmake --install .
 
 OpenCV package is available at `build-opencv/install` directory. 
