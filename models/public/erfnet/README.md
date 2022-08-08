@@ -2,10 +2,10 @@
 
 ## Use Case and High-Level Description
 
-  This is a ONNX* version of `ERFNet` model designed to perform real-time vehicle detection.
-  This model is pre-trained in Torch* framework and retrained by CULane.
-  For details see repository <https://github.com/Zhangxianwen2021/ERFNet>,
-  paper of ERFNet<https://doi.org/10.1109/TITS.2017.2750080>and repository <https://github.com/cardwing/Codes-for-Lane-Detection/tree/master/ERFNet-CULane-PyTorch>
+  This is a ONNX* version of `erfnet` model designed to perform real-time lane detection.
+  This model is pre-trained in PyTorch* framework and retrained by CULane.
+  For details see [repository](https://github.com/Zhangxianwen2021/ERFNet),
+  paper of [ERFNet](https://doi.org/10.1109/TITS.2017.2750080)and [repository](https://github.com/cardwing/Codes-for-Lane-Detection/tree/master/ERFNet-CULane-PyTorch)
 
 ## Specification
 
@@ -14,7 +14,7 @@
 | Type              | Semantic segmentation |
 | GFLOPs            | 11.13                 |
 | MParams           | 7.87                  |
-| Source framework  | Onnx*                 |
+| Source framework  | PyTorch*              |
 
 ## Accuracy
 
@@ -85,7 +85,7 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
 
-* [Lane Detection Python\* Demo](../../../demos/lane_detection/python/README.md)
+* [Lane Detection Python\* Demo](../../../demos/lane_detection_demo/python/README.md)
 ## Legal Information
 
 The original model is distributed under the following [license1](https://raw.githubusercontent.com/onnx/models/master/LICENSE).
