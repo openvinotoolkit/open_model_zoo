@@ -137,12 +137,16 @@ macro(add_demo)
     endif()
 endmacro()
 
-find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
+find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
-add_subdirectory(common/cpp_gapi)
+# TODO: remove wrapping if after OpenCV3 is dropped
+if(OpenCV_VERSION VERSION_GREATER_EQUAL 4.5.3)
+    find_package(OpenCV REQUIRED COMPONENTS gapi)
+    add_subdirectory(common/cpp_gapi)
+endif()
 add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories

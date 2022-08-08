@@ -91,7 +91,9 @@ int main(int argc, char** argv) {
         cv::Mat kspace = cv::Mat(height, width, CV_64FC2, mri.data.ptr<double>(i)).clone();
 
         kspace.setTo(0, mri.samplingMask);
-        kspace = (kspace - cv::Scalar(mri.stats[0], mri.stats[0])) / cv::Scalar(mri.stats[1], mri.stats[1]);
+        // TODO: merge the two following lines after OpenCV3 is droppped
+        kspace -= cv::Scalar(mri.stats[0], mri.stats[0]);
+        kspace /= cv::Mat{cv::Scalar(mri.stats[1], mri.stats[1])};
         kspace.reshape(1, 1).convertTo(inputBlob.reshape(1, 1), CV_32F);
         // Forward pass
         infReq.infer();
@@ -145,9 +147,9 @@ void callback(int sliceId, void* userdata) {
     cv::hconcat(std::vector<cv::Mat>({img, masked, rec}), render);
     cv::copyMakeBorder(render, render, kBorderSize, 0, 0, 0, cv::BORDER_CONSTANT, 255);
     cv::putText(render, "Original", cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
-    cv::putText(render, cv::format("Sampled (PSNR %.1f)", cv::PSNR(img, masked, 255)),
+    cv::putText(render, cv::format("Sampled (PSNR %.1f)", cv::PSNR(img, masked)),
                 cv::Point(width, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
-    cv::putText(render, cv::format("Reconstructed (PSNR %.1f)", cv::PSNR(img, rec, 255)),
+    cv::putText(render, cv::format("Reconstructed (PSNR %.1f)", cv::PSNR(img, rec)),
                 cv::Point(width*2, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5, 0);
 
     cv::imshow(kWinName, render);
@@ -155,8 +157,8 @@ void callback(int sliceId, void* userdata) {
 }
 
 cv::Mat kspaceToImage(const cv::Mat& kspace) {
-    CV_CheckEQ(kspace.dims, 2, "");
-    CV_CheckEQ(kspace.channels(), 2, "");
+    assert(kspace.dims == 2);
+    assert(kspace.channels() == 2);
 
     cv::Mat img;
 
