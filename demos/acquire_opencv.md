@@ -58,7 +58,7 @@ libgstreamer1.0-0 \
 libswscale4
 
 ### Procedure
-1. Copy OpenCV repository:
+1. Clone OpenCV repository:
 > git clone --recurse-submodules https://github.com/opencv/opencv.git
 2. Create build directory and enter into it:
 > mkdir ~/build-opencv && cd ~/build-opencv
