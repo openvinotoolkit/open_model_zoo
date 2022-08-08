@@ -44,7 +44,18 @@ libssl-dev \
 libva-dev \
 libmfx-dev \
 libgstreamer1.0-dev \
-libgstreamer-plugins-base1.0-dev
+libgstreamer-plugins-base1.0-dev \
+gstreamer1.0-plugins-bad \
+gstreamer1.0-plugins-base \
+gstreamer1.0-plugins-good \
+gstreamer1.0-plugins-ugly \
+gstreamer1.0-tools \
+libavcodec57  # libavcodec58 for UBuntu20-22 \
+libavformat57  # libavformat58 for UBuntu20-22 \
+libavresample3 \
+libavutil55  # libavutil55 for Ubuntu20-22 \
+libgstreamer1.0-0 \
+libswscale4
 
 ### Procedure
 1. Copy OpenCV repository:
