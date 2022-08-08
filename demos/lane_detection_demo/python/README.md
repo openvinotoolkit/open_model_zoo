@@ -66,7 +66,7 @@ To run the demo, please provide paths to the model in the IR format, to director
 
 ```bash
 python3 lane_detection_demo.py \
-  -m <path_to_model>/torch-save.xml \
+  -m <path_to_model>/erfnet.xml \
   -i <path_to_file>/lane_detection.jpg \
 ```
 ## Demo Output
