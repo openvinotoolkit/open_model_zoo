@@ -13,20 +13,20 @@
 # limitations under the License.
 
 description: >-
-  This is a ONNX* version of `ERFNet` model designed to perform real-time vehicle detection.
-  This model is pre-trained in Torch* framework and retrained by CULane.
+  This is a ONNX* version of `ERFNet` model designed to perform real-time lane detection.
+  This model is pre-trained in PyTorch* framework and retrained by CULane.
   For details see repository <https://github.com/Zhangxianwen2021/ERFNet>,
   paper of ERFNet<https://doi.org/10.1109/TITS.2017.2750080>and repository <https://github.com/cardwing/Codes-for-Lane-Detection/tree/master/ERFNet-CULane-PyTorch>
 task_type: instance_segmentation
 files:
-  - name: torch-save.onnx
+  - name: erfnet.onnx
     size: 8253755 
     checksum: f6597d416f02b8218b557c4f673a0837fc215213055f9957267667003578e76507515d7c2be5d6983549f81cb96a0a66
     source: https://github.com/Zhangxianwen2021/ERFNet/raw/main/erfnet.onnx
 model_optimizer_args:
   - --input=input
   - --input_shape=[1, 3, 208, 976]
-  - --input_model=$dl_dir/torch-save.onnx
+  - --input_model=$dl_dir/erfnet.onnx
   - --reverse_input_channels
 framework: onnx
 quantizable: yes
