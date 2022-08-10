@@ -20,7 +20,7 @@
 
 |  Metric  |  Value |
 |  ------  | -------|
-| accuracy | 97.71% |
+| mean_iou | 76.47% |
 
 ## Input
 
