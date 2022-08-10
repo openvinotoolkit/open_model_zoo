@@ -151,7 +151,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         elif self.validation:
             start = samples // 2
 
-        for i in range(start, samples):
+        for i in range(int(start), int(samples)):
             c_input = input_folder / "{:02d}".format(subfolder)
             c_input = c_input / "{:06d}.npz".format(i)
 
