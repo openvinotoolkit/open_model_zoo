@@ -246,7 +246,7 @@ detect areas with complex shape.
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |
 | PSPNet R-50-D8  | PyTorch\*      | [pspnet-pytorch](./pspnet-pytorch/README.md) | 70.6% | 357.1719 | 46.5827 |
 | OCRNet HRNet_w48 | Paddle\*      | [ocrnet-hrnet-w48-paddle](./ocrnet-hrnet-w48-paddle/README.md)| 82.15% | 324.66 | 70.47 |
-| Erfnet | PyTorch\*      | [erfnet](./erfnet/README.md)| 97.71% | 11.13 | 7.87 |
+| Erfnet | PyTorch\*      | [erfnet](./erfnet/README.md)| 76.47% | 11.13 | 7.87 |
 
 ### Instance Segmentation Models
 
