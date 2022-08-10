@@ -6,7 +6,6 @@
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Device Support
 
    omz_models_public_device_support
    omz_models_model_aclnet
@@ -22,7 +21,6 @@
    omz_models_model_colorization_siggraph
    omz_models_model_colorization_v2
    omz_models_model_common_sign_language_0001
-   omz_models_model_convnext_tiny
    omz_models_model_ctdet_coco_dlav0_512
    omz_models_model_ctpn
    omz_models_model_deblurgan_v2
@@ -68,7 +66,6 @@
    omz_models_model_hybrid_cs_model_mri
    omz_models_model_i3d_rgb_tf
    omz_models_model_inception_resnet_v2_tf
-   omz_models_model_levit_128s
    omz_models_model_license_plate_recognition_barrier_0007
    omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
    omz_models_model_mask_rcnn_resnet50_atrous_coco
@@ -83,18 +80,12 @@
    omz_models_model_mobilenet_v2_1_0_224
    omz_models_model_mobilenet_v2_1_4_224
    omz_models_model_mobilenet_v2_pytorch
-   omz_models_model_mobilenet_v3_large_1_0_224_paddle
    omz_models_model_mobilenet_v3_large_1_0_224_tf
-   omz_models_model_mobilenet_v3_small_1_0_224_paddle
    omz_models_model_mobilenet_v3_small_1_0_224_tf
    omz_models_model_mobilenet_yolo_v4_syg
-   omz_models_model_modnet_photographic_portrait_matting
-   omz_models_model_modnet_webcam_portrait_matting
    omz_models_model_mozilla_deepspeech_0_6_1
    omz_models_model_mozilla_deepspeech_0_8_2
    omz_models_model_mtcnn
-   omz_models_model_nanodet_m_1_5x_416
-   omz_models_model_nanodet_plus_m_1_5x_416
    omz_models_model_netvlad_tf
    omz_models_model_nfnet_f0
    omz_models_model_ocrnet_hrnet_w48_paddle
@@ -157,7 +148,6 @@
    omz_models_model_yolof
    omz_models_model_yolox_tiny
 
-
 .. raw:: html
 
    <script>
@@ -181,10 +171,9 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/README.md)   | 56.598%/79.812% | 1.5 | 60.965 |
 | AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/README.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
-| ConvNeXt Tiny               | PyTorch\*                          | [convnext-tiny](./convnext-tiny/README.md) | 82.05%/95.86% | 8.9419 | 28.5892 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*| [densenet-121](./densenet-121/README.md)<br>[densenet-121-tf](./densenet-121-tf/README.md)| 74.42%/92.136%<br>74.46%/92.13%| 5.723~5.7287 | 7.971 |
 | DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/README.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
-| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>77.70%/93.52% | 0.819 | 5.268 |
+| EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/README.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/README.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
 | EfficientNet V2 B0          | PyTorch\*                          | [efficientnet-v2-b0](./efficientnet-v2-b0/README.md) | 78.36%/94.02% | 1.4641 | 7.1094 |
 | EfficientNet V2 Small       | PyTorch\*                          | [efficientnet-v2-s](./efficientnet-v2-s/README.md) | 84.29%/97.26% | 16.9406  | 21.3816  |
 | HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/README.md)  | 73.1%/91.0% | 0.6208 | 4.5443 |
@@ -194,14 +183,13 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 77.82%/94.03% | 22.227 | 30.223 |
-| LeViT 128S                  | PyTorch\*                          | [levit-128s](./levit-128s/README.md) | 76.54%/92.85% | 0.6177 | 8.2199 |
 | MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 1.0 224        | Caffe\*<br>TensorFlow\*            | [mobilenet-v1-1.0-224](./mobilenet-v1-1.0-224/README.md)<br>[mobilenet-v1-1.0-224-tf](./mobilenet-v1-1.0-224-tf/README.md)| 69.496%/89.224%<br>71.03%/89.94% | 1.148 | 4.221 |
 | MobileNet V2 1.0 224        | Caffe\*<br>TensorFlow\*<br>PyTorch\*| [mobilenet-v2](./mobilenet-v2/README.md) <br>[mobilenet-v2-1.0-224](./mobilenet-v2-1.0-224/README.md)<br>[mobilenet-v2-pytorch](./mobilenet-v2-pytorch/README.md) | 71.218%/90.178%<br>71.85%/90.69%<br>71.81%/90.396% | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/README.md) | 74.09%/91.97% | 1.183  | 6.087 |
-| MobileNet V3 Small 1.0      | TensorFlow\*<br>Paddle\* | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) <br> [mobilenet-v3-small-1.0-paddle](./mobilenet-v3-small-1.0-224-paddle/README.md) | 67.36%/87.44%<br>68.21%/88.04% | 0.1168<br>0.1269 | 2.537<br>2.9339 |
-| MobileNet V3 Large 1.0      | TensorFlow\*<br>Paddle\*                   | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md)<br>[mobilenet-v3-large-1.0-224-paddle](./mobilenet-v3-large-1.0-224-paddle/README.md) | 75.30%/92.62%<br>75.248%/92.32% | 0.4450<br>0.4565 | 5.4721<br>5.468 |
+| MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/README.md) | 67.36%/87.44% | 0.1168 | 2.537 |
+| MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md) | 75.30%/92.62% | 0.4450 | 5.4721 |
 | NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/README.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/README.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/README.md)     | 76.076%/92.584%| 3.768 | 15.99 |
@@ -212,7 +200,7 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | ResNeSt 50                  | PyTorch\*                          | [resnest-50-pytorch](./resnest-50-pytorch/README.md) | 81.11%/95.36% | 10.8148 |  27.4493|
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/README.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/README.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
-| ResNet 50                   | PyTorch\*<br>TensorFlow\*| [resnet-50-pytorch](./resnet-50-pytorch/README.md)[resnet-50-tf](./resnet-50-tf/README.md)| 75.168%/92.212%<br>76.38%/93.188%<br>76.17%/92.98% | 6.996~8.216 | 25.53 |
+| ResNet 50                   | PyTorch\*<br>TensorFlow\*          | [resnet-50-pytorch](./resnet-50-pytorch/README.md)[resnet-50-tf](./resnet-50-tf/README.md)| 75.168%/92.212%<br>76.38%/93.188%<br>76.17%/92.98% | 6.996~8.216 | 25.53 |
 | ReXNet V1 x1.0              | PyTorch\*                          | [rexnet-v1-x1.0](./rexnet-v1-x1.0/README.md) | 77.86%/93.87% | 0.8325 | 4.7779 |
 | SE-Inception                | Caffe\*                            | [se-inception](./se-inception/README.md) | 75.996%/92.964% | 4.091 | 11.922 |
 | SE-ResNet 50                | Caffe\*                            | [se-resnet-50](./se-resnet-50/README.md) | 77.596%/93.85% | 7.775 | 28.061 |
@@ -220,11 +208,11 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | Shufflenet V2 x0.5          | Caffe\*                            | [shufflenet-v2-x0.5](./shufflenet-v2-x0.5/README.md) | 58.80%/81.13% | 0.08465 | 1.363 |
 | Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/README.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
-| SqueezeNet v1.1             | Caffe\*| [squeezenet1.1](./squeezenet1.1/README.md)| 58.382%/81% | 0.785 | 1.236 |
+| SqueezeNet v1.1             | Caffe\*                            | [squeezenet1.1](./squeezenet1.1/README.md)| 58.382%/81% | 0.785 | 1.236 |
 | Swin Transformer Tiny, window size=7| PyTorch\*                  | [swin-tiny-patch4-window7-224](./swin-tiny-patch4-window7-224/README.md) | 81.38%/95.51% | 9.0280 | 28.8173 |
 | T2T-ViT, transformer layers number=14| PyTorch\*                 | [t2t-vit-14](./t2t-vit-14/README.md) | 81.44%/95.66% | 9.5451 | 21.5498 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/README.md) | 70.968%/89.878% | 30.974 | 138.358 |
-| VGG 19                      | Caffe\*              | [vgg19](./vgg19/README.md) | 71.062%/89.832% | 39.3 | 143.667  |
+| VGG 19                      | Caffe\*                            | [vgg19](./vgg19/README.md) | 71.062%/89.832% | 39.3 | 143.667  |
 
 ## Segmentation Models
 
@@ -286,8 +274,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
-| NanoDet with ShuffleNetV2 1.5x, size=416 | PyTorch\*            | [nanodet-m-1.5x-416](./nanodet-m-1.5x-416/README.md) | 27.38%/26.63% | 2.3895 | 2.0534 |
-| NanoDet Plus with ShuffleNetV2 1.5x, size=416 | PyTorch\*       | [nanodet-plus-m-1.5x-416](./nanodet-plus-m-1.5x-416/README.md) | 34.53%/33.77% | 3.0147 | 2.4614 |
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
@@ -499,8 +485,6 @@ or mixed pixels. This distinguishes background matting from segmentation approac
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | background-matting-mobilenetv2 | PyTorch\* | [background-matting-mobilenetv2](./background-matting-mobilenetv2/README.md) | 4.32/1.0/2.48/2.7 | 6.7419 | 5.052 |
-| modnet-photographic-portrait-matting | PyTorch\* | [modnet-photographic-portrait-matting](./modnet-photographic-portrait-matting/README.md) | 5.21/727.95 | 31.1564 | 6.4597 |
-| modnet-webcam-portrait-matting | PyTorch\* | [modnet-webcam-portrait-matting](./modnet-webcam-portrait-matting/README.md) | 5.66/762.52 | 31.1564 | 6.4597 |
 | robust-video-matting-mobilenetv3 | PyTorch\* | [robust-video-matting-mobilenetv3](./robust-video-matting-mobilenetv3/README.md) | 20.8/15.1/4.42/4.05 | 9.3892 | 3.7363 |
 
 ## See Also
