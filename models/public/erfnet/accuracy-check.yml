@@ -10,16 +10,13 @@ models:
     datasets:
       - name: erfnet_data
         preprocessing:
-          - type: crop
-            dst_width: 1640
-            dst_height: 350
           - type: resize
             dst_width: 976
             dst_height: 208 
         postprocessing:
           - type: resize_segmentation_mask
             dst_width: 1640
-            dst_height: 590
+            dst_height: 350
             apply_to: prediction
         annotation_conversion:
           converter: voc_segmentation
@@ -31,6 +28,9 @@ models:
         additional_data_source: ./Annotations/
         metrics:
           - type: segmentation_accuracy
+            use_argmax: false
+            presenter:  print_scalar
+          - type: mean_iou
             use_argmax: false
             presenter:  print_scalar
 
@@ -46,16 +46,13 @@ models:
     datasets:
       - name: erfnet_data
         preprocessing:
-          - type: crop
-            dst_width: 1640
-            dst_height: 350
           - type: resize
             dst_width: 976
             dst_height: 208
         postprocessing:
           - type: resize_segmentation_mask
             dst_width: 1640
-            dst_height: 590
+            dst_height: 350
             apply_to: prediction
         annotation_conversion:
           converter: voc_segmentation
@@ -69,3 +66,6 @@ models:
           - type: segmentation_accuracy
             use_argmax: false
             presenter: print_scalar
+          - type: mean_iou
+            use_argmax: false
+            presenter:  print_scalar
