@@ -27,7 +27,6 @@ model_optimizer_args:
   - --input=input
   - --input_shape=[1, 3, 208, 976]
   - --input_model=$dl_dir/erfnet.onnx
-  - --reverse_input_channels
 framework: onnx
 quantizable: yes
 license: https://raw.githubusercontent.com/onnx/models/master/LICENSE
