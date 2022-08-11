@@ -162,6 +162,38 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ### Datasets in dataset_definitions.yml
 * `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [mobilenet-yolo-v4-syg](../models/public/mobilenet-yolo-v4-syg/README.md))
+# Dataset Preparation Guide
+
+If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize `<DATASET_DIR>` folder with validation datasets in a certain way. Instructions for preparing validation data are described in this document.
+
+Each dataset description consists of the following sections:
+* instruction for downloading the dataset
+* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file (`<omz_dir>/data/dataset_definitions.yml`)
+* examples of using and presenting the dataset in the global configuration file
+
+More detailed information about using predefined configuration files you can find [here](../tools/accuracy_checker/configs/README.md).
+
+## [erfnet_data](https://github.com/Zhangxianwen2021/ERFNet/releases/tag/erfnet)
+
+### How to download dataset
+
+To download erfnet_data dataset, you need to follow the steps below:
+1. Go to the [github repo](https://github.com/Zhangxianwen2021/ERFNet/releases/tag/erfnet)
+2. Select [`Annotations.rar`](https://github.com/Zhangxianwen2021/ERFNet/releases/download/erfnet/Annotations.rar)
+Select ['JPEGImages.rar'](https://github.com/Zhangxianwen2021/ERFNet/releases/download/erfnet/JPEGImages.rar)
+Select ['erfnet_meta_zxw.json'](https://github.com/Zhangxianwen2021/ERFNet/releases/download/erfnet/erfnet_meta_zxw.json)
+Select ['val.txt'](https://github.com/Zhangxianwen2021/ERFNet/releases/download/erfnet/val.txt)
+3. Unpack archive
+
+### Files layout
+* `erfnet_data` - directory containing annotations, images, image sets and dataset meta files directories
+    * `Annotations` - directory containing the erfnet_data annotation files
+    * `JPEGImages` - directory containing the erfnet_data images
+    * `erfnet_meta_zxw.json` - directory containing the erfnet_data text files specifying lists of images for different tasks
+    * `val.txt` - image sets file for validation of detection tasks
+
+### Datasets in dataset_definitions.yml
+* `erfnet_data` used for evaluation models on erfnet_data dataset for object segmentation task. (model examples: [`erfnet`](../models/public/erfnet/README.md))
 
 ## PASCAL-S
 

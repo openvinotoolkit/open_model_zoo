@@ -1341,6 +1341,16 @@ datasets:
       images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
       has_background: False
 
+  - name: erfnet_data
+    annotation_conversion:
+      converter: voc_segmentation
+      imageset_file: val.txt
+      images_dir: JPEGImages/
+      mask_dir: Annotations/
+      dataset_meta_file: erfnet_meta_zxw.json
+    data_source: ./JPEGImages/
+    additional_data_source: ./Annotations/
+
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
     reader:
