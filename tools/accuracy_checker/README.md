@@ -104,12 +104,18 @@ python setup.py install_core
 
 #### Installation Troubleshooting
 
-When previous version of the tool is already installed in the environment, in some cases, it can broke the new installation.
+1. When previous version of the tool is already installed in the environment, in some cases, it can broke the new installation.
 If you get a directory/file not found error, try manually removing the previous tool version from your environment or install the tool using following command in Accuracy Checker directory instead of setup.py install:
 
 ```bash
 pip install --upgrade --force-reinstall .
 ```
+2. If `accuracy_check` command failed with following error:
+```
+from .cv2 import *
+ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+```
+try to uninstall `opencv-python` and install `opencv-python-headless` package. More detils about the error and approaches how to fix can be found [here](https://github.com/opencv/opencv-python/issues/370)
 
 #### Running the Tool inside IDE for Development Purposes
 
