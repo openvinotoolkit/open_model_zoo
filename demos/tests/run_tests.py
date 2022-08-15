@@ -326,6 +326,7 @@ def main():
                             for arg in fixed_args + dev_arg + case_args))
                         print(test_descr)
                         print(flush=True)
+                        execution_time = 1.0
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
