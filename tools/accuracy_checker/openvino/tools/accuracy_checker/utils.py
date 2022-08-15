@@ -954,7 +954,8 @@ def postprocess_output_name(
             preprocessed_output_name = output_name.replace(matches[0], '')
         else:
             suffix_regex = re.compile(output_name + suffix_ + r'\d+')
-            preprocessed_output_name = [layer_name for layer_name in outputs if suffix_regex.match(layer_name)][0]
+            preprocessed_output_name = [layer_name for layer_name in outputs if suffix_regex.match(layer_name)]
+            preprocessed_output_name = preprocessed_output_name[0] if preprocessed_output_name else ''
         if preprocessed_output_name in outputs:
             return preprocessed_output_name
     if raise_error:

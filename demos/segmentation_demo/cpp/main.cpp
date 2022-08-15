@@ -143,13 +143,67 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-static const Color PASCAL_VOC_COLORS[] = {
-    {0, 0, 0},       {128, 0, 0},     {0, 128, 0}, {128, 128, 0}, {0, 0, 128},   {128, 0, 128}, {0, 128, 128},
-    {128, 128, 128}, {64, 0, 0},      {192, 0, 0}, {64, 128, 0},  {192, 128, 0}, {64, 0, 128},  {192, 0, 128},
-    {64, 128, 128},  {192, 128, 128}, {0, 64, 0},  {128, 64, 0},  {0, 192, 0},   {128, 192, 0}, {0, 64, 128}};
+// TODO: replace with cv::applyColorMap() after OpenCV3 is dropped
+class ParallelLoopBodyLambda : public cv::ParallelLoopBody {
+    std::function<void(const cv::Range &)> f;
+public:
+    explicit ParallelLoopBodyLambda(std::function<void(const cv::Range &)> f): f{f} {}
+    void operator()(const cv::Range& range) const override {f(range);}
+};
+
+void applyColorMapOpenCV(const cv::Mat& src, cv::Mat& dstMat, const cv::Mat& _lut) {
+    const int lut_type = _lut.type();
+
+    cv::Mat srcGray;
+    if (src.channels() == 1)
+        srcGray = src;
+    else
+        cv::cvtColor(src, srcGray, cv::COLOR_BGR2GRAY);//BGR because of historical cv::LUT() usage
+
+    dstMat.create(src.size(), lut_type);
+
+    //we do not use cv::LUT() which requires src.channels() == dst.channels()
+    const int rows = srcGray.rows;
+    const int cols = srcGray.cols;
+    const int minimalPixelsPerPacket = 1<<12;
+    const int rowsPerPacket = std::max(1, minimalPixelsPerPacket/cols);
+    const int rowsPacketsCount = (rows+rowsPerPacket-1)/rowsPerPacket;
+    const cv::Range all(0, rows);
+
+    if (lut_type == CV_8UC1) {
+        typedef unsigned char lut_pixel_t;
+        const lut_pixel_t* srcLUT = _lut.ptr<lut_pixel_t>(0);
+        ParallelLoopBodyLambda body([&, cols](const cv::Range& range) -> void {
+            for(int row = range.start ; row<range.end ; ++row)  {
+                const unsigned char* srcRow = srcGray.ptr<unsigned char>(row);
+                lut_pixel_t* dstRow = dstMat.ptr<lut_pixel_t>(row);
+                for(int col = 0 ; col<cols ; ++col)
+                    *dstRow++ = srcLUT[*srcRow++];
+            }
+        });
+        cv::parallel_for_(all, body, rowsPacketsCount);
+    }
+    else if (lut_type == CV_8UC3) {
+        typedef cv::Vec3b lut_pixel_t;
+        const lut_pixel_t* srcLUT = _lut.ptr<lut_pixel_t>(0);
+        ParallelLoopBodyLambda body([&, cols](const cv::Range& range) -> void {
+            for(int row = range.start ; row<range.end ; ++row)  {
+                const unsigned char* srcRow = srcGray.ptr<unsigned char>(row);
+                lut_pixel_t* dstRow = dstMat.ptr<lut_pixel_t>(row);
+                for(int col = 0 ; col<cols ; ++col)
+                    *dstRow++ = srcLUT[*srcRow++];
+            }
+        });
+        cv::parallel_for_(all, body, rowsPacketsCount);
+    }
+}
 
 cv::Mat applyColorMap(cv::Mat input) {
     // Initializing colors array if needed
+    static const Color PASCAL_VOC_COLORS[] = {
+        {0, 0, 0},       {128, 0, 0},     {0, 128, 0}, {128, 128, 0}, {0, 0, 128},   {128, 0, 128}, {0, 128, 128},
+        {128, 128, 128}, {64, 0, 0},      {192, 0, 0}, {64, 128, 0},  {192, 128, 0}, {64, 0, 128},  {192, 0, 128},
+        {64, 128, 128},  {192, 128, 128}, {0, 64, 0},  {128, 64, 0},  {0, 192, 0},   {128, 192, 0}, {0, 64, 128}};
     static cv::Mat colors;
     static std::mt19937 rng;
     static std::uniform_int_distribution<int> distr(0, 255);
@@ -169,7 +223,7 @@ cv::Mat applyColorMap(cv::Mat input) {
 
     // Converting class to color
     cv::Mat out;
-    cv::applyColorMap(input, out, colors);
+    applyColorMapOpenCV(input, out, colors);
     return out;
 }
 

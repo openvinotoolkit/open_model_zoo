@@ -80,9 +80,7 @@ The Open Model Zoo demo applications are console applications that provide robus
 Source code of the demos can be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
 
 ```sh
-git clone https://github.com/openvinotoolkit/open_model_zoo.git
-cd open_model_zoo
-git submodule update --init --recursive
+git clone --recurse-submodules https://github.com/openvinotoolkit/open_model_zoo.git
 ```
 
 C++, C++ G-API and Python\* versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
@@ -166,11 +164,10 @@ You can download the [Intel pre-trained models](../models/intel/index.md) or [pu
 
 ## Build the Demo Applications
 
-To build the demos, you need to source OpenVINO™ and OpenCV environment. You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
+To build the demos, you need to source OpenVINO™ environment and [get OpenCV](https://github.com/opencv/opencv/wiki/BuildOpenCV4OpenVINO). You can install the OpenVINO™ toolkit using the installation package for [Intel® Distribution of OpenVINO™ toolkit](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit-download.html) or build the open-source version available in the [OpenVINO GitHub repository](https://github.com/openvinotoolkit/openvino) using the [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode).
 For the Intel® Distribution of OpenVINO™ toolkit installed to the `<INSTALL_DIR>` directory on your machine, run the following commands to download prebuilt OpenCV and set environment variables before building the demos:
 
 ```sh
-<INSTALL_DIR>/extras/scripts/download_opencv.sh
 source <INSTALL_DIR>/setupvars.sh
 ```
 
@@ -253,7 +250,7 @@ build_demos_msvc.bat VS2019
 ```
 
 By default, the demo applications binaries are build into the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
-The default build folder can be changed with `-b` option. For example, following command will buid Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
+The default build folder can be changed with `-b` option. For example, following command will build Open Model Zoo demos into `c:\temp\omz-demos-build` folder:
 
 ```bat
 build_demos_msvc.bat -b c:\temp\omz-demos-build
@@ -298,7 +295,7 @@ python -mpip install --user -r <omz_dir>/demos/requirements.txt
 
 ### <a name="python_model_api"></a>Python\* model API package
 
-To run Python demo applications, you need to install the Python* Model API package. Refer to [Python* Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python*-model-api-package) to learn about its installation.
+To run Python demo applications, you need to install the Python* Model API package. Refer to the [Python Model API documentation](https://github.com/openvinotoolkit/open_model_zoo/blob/master/demos/common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package)) to learn about its installation.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 

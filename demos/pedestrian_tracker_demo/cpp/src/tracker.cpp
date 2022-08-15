@@ -337,7 +337,7 @@ bool PedestrianTracker::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
     if (tracks_.find(track_id) == tracks_.end())
         return true;
     auto c = Center(tracks_.at(track_id).predicted_rect);
-    if (!prev_frame_size_.empty() &&
+    if (!isSizeEmpty(prev_frame_size_) &&
         (c.x < 0 || c.y < 0 || c.x > prev_frame_size_.width || c.y > prev_frame_size_.height)) {
         tracks_.at(track_id).lost = params_.forget_delay + 1;
         for (auto id : active_track_ids()) {

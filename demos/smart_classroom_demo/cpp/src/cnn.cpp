@@ -129,8 +129,8 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
                 cv::Mat tensor_wrapper(out_tensor.size[1], 1, CV_32F,
                                      reinterpret_cast<void*>((out_tensor.ptr<float>(0) + b * out_tensor.size[1])));
                 vectors->emplace_back();
-                if (outp_shape != cv::Size())
-                    tensor_wrapper = tensor_wrapper.reshape(1, {outp_shape.height, outp_shape.width});
+                if (!isSizeEmpty(outp_shape))
+                    tensor_wrapper = tensor_wrapper.reshape(1, outp_shape.height);
                 tensor_wrapper.copyTo(vectors->back());
             }
         }
