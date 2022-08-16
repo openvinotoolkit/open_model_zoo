@@ -326,7 +326,6 @@ def main():
                             for arg in fixed_args + dev_arg + case_args))
                         print(test_descr)
                         print(flush=True)
-                        execution_time = 1.0
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
@@ -344,6 +343,7 @@ def main():
                             print(output)
                             failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
+                            execution_time = -1
 
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
