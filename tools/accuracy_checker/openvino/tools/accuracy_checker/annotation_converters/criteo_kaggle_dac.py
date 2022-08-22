@@ -154,9 +154,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         for i in range(int(start), int(samples)):
             c_input = input_folder / "{:02d}".format(subfolder)
             c_input = c_input / "{:06d}.npz".format(i)
+            x_int, x_cat, y = self.get_data(i)
 
             if self.save_preprocessed_features:
-                x_int, x_cat, y = self.get_data(i)
                 if not c_input.parent.exists():
                     c_input.parent.mkdir(parents=True)
 
