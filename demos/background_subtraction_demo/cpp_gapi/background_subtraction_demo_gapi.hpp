@@ -33,6 +33,11 @@ static const char blur_bgr_message[] = "Optional. Blur background.";
 static const char target_bgr_message[] =
     "Optional. Background onto which to composite the output (by default to green field).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char use_onevpl_message[] = "Optional. Use onevpl video decoding.";
+static const char onevpl_params_message[] = "Optional. Parameters for onevpl video decoding. "
+                                            "Format: <prop name>:<value>;<prop name>:<value> "
+                                            "Semicolon separated list of oneVPL mfxVariants which is used for configuring source "
+                                            "(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
@@ -47,6 +52,8 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(target_bgr, "", target_bgr_message);
 DEFINE_uint32(blur_bgr, 0, blur_bgr_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_bool(use_onevpl, false, use_onevpl_message);
+DEFINE_string(onevpl_params, "", onevpl_params_message);
 
 /**
  * \brief This function shows a help message

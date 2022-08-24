@@ -132,6 +132,12 @@ inline std::string fileNameNoExt(const std::string& filepath) {
     return filepath.substr(0, pos);
 }
 
+inline std::string fileExt(const std::string& filepath) {
+    auto pos = filepath.rfind('.');
+    if (pos == std::string::npos) return filepath;
+    return filepath.substr(pos+1, filepath.size());
+}
+
 inline void logCompiledModelInfo(
     const ov::CompiledModel& compiledModel,
     const std::string& modelName,
