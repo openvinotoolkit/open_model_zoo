@@ -89,7 +89,6 @@ The model can be used in the following demos provided by the Open Model Zoo to s
 ## Legal Information
 
 The original model is distributed under the following [license1](https://raw.githubusercontent.com/onnx/models/master/LICENSE).
-A copy of the license is provided in <omz_dir>/models/public/licenses/APACHE-2.0.txt.
 
 ```
 MIT License
