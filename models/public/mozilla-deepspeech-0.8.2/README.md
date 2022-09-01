@@ -66,9 +66,9 @@ Chunk processing order must be from early to late audio positions.
 
     See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
- 2. LSTM in-state vector, name: `previous_state_c`, shape: `1, 2048`, format: `B, C`.
+ 2. LSTM in-state vector, name: `previous_state_c:0`, shape: `1, 2048`, format: `B, C`.
 
- 3. LSTM input vector, name: `previous_state_h`, shape: `1, 2048`, format: `B, C`.
+ 3. LSTM input vector, name: `previous_state_h:0`, shape: `1, 2048`, format: `B, C`.
 
 When splitting a long audio into chunks, these two last inputs must be fed with the corresponding outputs from the previous chunk.
 Chunk processing order must be from early to late audio positions.
@@ -105,9 +105,9 @@ Chunk processing order must be from early to late audio positions.
 
     *NB*: `logits` is probabilities after softmax, despite its name.
 
- 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd'` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
- 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
 ## Download a Model and Convert it into OpenVINO™ IR Format
 
