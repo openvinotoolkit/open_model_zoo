@@ -17,17 +17,7 @@ limitations under the License.
 import json
 import sys
 from datetime import datetime
-import warnings
-try:
-    import cv2
-except ImportError:
-    warnings.warn('failed to import opencv, opencv-python-headless will be installed')
-    try:
-        from pip._internal import main as pip_main
-    except ImportError:
-        from pip import main as pip_main
-    pip_main(['install', 'opencv-python-headless'])
-    import  cv2
+import cv2
 
 from .argparser import build_arguments_parser
 from .config import ConfigReader
