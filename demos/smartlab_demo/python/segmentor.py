@@ -115,13 +115,14 @@ class Segmentor:
         frame_side = frame_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
         frame_top = frame_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
-        self.infer_encoder_side_request.start_async(inputs={\
+        self.infer_encoder_side_request.start_async(inputs={ \
             self.encoder_side_input_keys['input_image']: frame_side,
             self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
-        self.infer_encoder_top_request.start_async(inputs=\
-            {self.encoder_top_input_keys['input_image']: frame_top,
-            self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
+        self.infer_encoder_top_request.start_async(inputs= \
+                                                       {self.encoder_top_input_keys['input_image']: frame_top,
+                                                        self.encoder_top_input_keys[
+                                                            'shifted_input']: self.shifted_tesor_top})
 
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):
@@ -144,6 +145,7 @@ class Segmentor:
                 predicted = isAction * (np.argmax(output.squeeze()[1:]) + 1)
 
                 return self.terms[predicted], self.terms[predicted], frame_index
+
 
 class SegmentorMstcn:
     def __init__(self, core, device, encoder_path, mstcn_path):
@@ -186,7 +188,7 @@ class SegmentorMstcn:
         self.reshape_mstcn = core.compile_model(model=self.mstcn_net, device_name=device)
         self.mstcn_infer_request = self.reshape_mstcn.create_infer_request()
         self.his_fea = [np.zeros((12, 64, 2048)), np.zeros((11, 64, 2048)),
-            np.zeros((11, 64, 2048)), np.zeros((11, 64, 2048))]
+                        np.zeros((11, 64, 2048)), np.zeros((11, 64, 2048))]
 
     def inference(self, frame_top, frame_side, frame_index):
         """
@@ -201,7 +203,7 @@ class SegmentorMstcn:
         self.feature_embedding(frame_top, frame_side)
         feature = self.mobileNet_request.get_tensor(self.mobileNet_output_key[0]).data.reshape(1152, 1)
         # ### run mstcn++ ###
-        return self.action_segmentation(feature), frame_index
+        return self.action_segmentation(feature)
 
     def feature_embedding(self, frame_top, frame_side):
         img_top = cv2.resize(frame_top, (224, 224)) / 255.0
@@ -233,7 +235,7 @@ class SegmentorMstcn:
 
             pred_actions = predictions[:, :, :len(self.ActionTerms), :]  # 4x3xKxN
             pred_softmax = softmax(pred_actions[-1, 0], 0)  # KxN
-            temporal_logits = pred_softmax.transpose((1, 0))# NxK
+            temporal_logits = pred_softmax.transpose((1, 0))  # NxK
 
             ### get label ###
             # 0 - noise_action: others
@@ -247,6 +249,7 @@ class SegmentorMstcn:
                     frame_predictions.append("put_take")
                 else:
                     frame_predictions.append("noise_action")
+            frame_predictions.append(self.ActionTerms[i])
             # frame_predictions = [self.ActionTerms[i] for i in action_idx] # N
 
             return frame_predictions

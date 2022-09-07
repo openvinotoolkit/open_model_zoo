@@ -1,4 +1,3 @@
-
 """
  Copyright (C) 2021-2022 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,35 +27,36 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                    help='Show this help message and exit.')
+                      help='Show this help message and exit.')
     args.add_argument("-d", "--device", type=str, default='CPU', required=False,
-                    help="Optional. Specify the target to infer on CPU or GPU.")
+                      help="Optional. Specify the target to infer on CPU or GPU.")
     args.add_argument('-tv', '--topview', required=True,
-                    help='Required. Topview stream to be processed. The input must be a single image, '
+                      help='Required. Topview stream to be processed. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-sv', '--sideview', required=True,
-                    help='Required. SideView to be processed. The input must be a single image, '
+                      help='Required. SideView to be processed. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-m_ta', '--m_topall', help='Required. Path to topview all class model.',
-                    required=True, type=str)
+                      required=True, type=str)
     args.add_argument('-m_tm', '--m_topmove', help='Required. Path to topview moving class model.',
-                    required=True, type=str)
+                      required=True, type=str)
     args.add_argument('-m_sa', '--m_sideall', help='Required. Path to sidetview all class model.',
-                    required=True, type=str)
+                      required=True, type=str)
     args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.',
-                    required=True, type=str)
+                      required=True, type=str)
     args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn',
-                    type=str)
+                      type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required for mstcn mode. Path to encoder model.',
-                    required=False, type=str)
+                      required=False, type=str)
     args.add_argument('-m_en_t', '--m_encoder_top', help='Required for multivew mode. Path to encoder model.',
-                    required=False, type=str)
+                      required=False, type=str)
     args.add_argument('-m_en_s', '--m_encoder_side', help='Required for multivew mode. Path to encoder model.',
-                    required=False, type=str)
+                      required=False, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required for multivew mode. Path to decoder model.',
-                    required=False, type=str)
+                      required=False, type=str)
 
     return parser
+
 
 def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display):
     old_time = time.time()
@@ -64,18 +64,14 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     fps = 0.0
     interval_second = 1
     interval_start_frame = 0
-    total_frame_processed_in_interval = 0.0
     detector_result = None
-    segmentor_result = None
     seg_results = None
     # multithread setup
     executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
     future_segmentor = None
     buffer_display = None
-    loop_switch = True
-    det_frame_id = None
-    seg_frame_id = None
+
     while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()
         ret_side, frame_side = cap_side.read()
@@ -102,21 +98,18 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                     keyframe=keyframe,
                     frame_counter=frame_counter,
                     fps=fps)
-
-            if loop_switch:
-                cap_top.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                cap_side.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                frame_counter = 0
-            else:
-                break
+            break
         else:
             if args.mode == "mstcn":
                 if frame_counter % 10 == 0 and future_detector is None:
                     future_detector = executor.submit(
                         detector.inference_multithread, frame_top, frame_side, frame_counter)
-                seg_results, seg_frame_id = segmentor.inference(
+                seg_results = segmentor.inference(
                     frame_top, frame_side, frame_counter)
-                print(seg_frame_id)
+                if seg_results is not None:
+                    # show 14 types
+                    display_seg_result = seg_results[-1]
+                    seg_results = seg_results[:-1]
             elif args.mode == "multiview" and frame_counter % 10 == 0:
                 if future_detector is None:
                     future_detector = executor.submit(
@@ -128,13 +121,11 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
             # get obj result
             if future_detector is not None and future_detector.done():
                 detector_result = future_detector.result()
-                det_frame_id = detector_result[2]
                 future_detector = None
             # get segment result
             if future_segmentor is not None and future_segmentor.done():
                 segmentor_result = future_segmentor.result()
                 seg_results, _ = segmentor_result[0], segmentor_result[1]
-                seg_frame_id = segmentor_result[2]
                 future_segmentor = None
 
             current_time = time.time()
@@ -159,12 +150,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 buffer_display = action_seg_results, top_det_results, side_det_results, frame_top, frame_side, frame_counter
 
                 if frame_counter >= 96:
-                    # need to show raw results?
-                    # if seg_results is not None:
-                    #     if args.mode == "mstcn":
-                    #         action_seg_results = seg_results[-1]
-                    #     else:
-                    #         action_seg_results = seg_results
+                    if args.mode == 'mstcn':
+                        action_seg_results = display_seg_result
 
                     display.display_result(
                         frame_top=frame_top,
@@ -183,6 +170,7 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
 
         if cv2.waitKey(1) in {ord('q'), ord('Q'), 27}:  # Esc
             break
+
 
 def main():
     args = build_argparser().parse_args()
@@ -221,6 +209,7 @@ def main():
 
     video_loop(
         args, cap_top, cap_side, detector, segmentor, evaluator, display)
+
 
 if __name__ == "__main__":
     main()

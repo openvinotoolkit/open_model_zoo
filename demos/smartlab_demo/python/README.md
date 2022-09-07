@@ -2,11 +2,13 @@
 
 This is the demo application with smartlab action recognition and smartlab object detection algorithms.
 This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
+The UI is shown as:
+![image](readme_UI.png)
 Action recognition architecture uses two encoders for front-view and top-view respectively, and a single decoder.
 Object detection uses two models for each view to detect large and small objects, respectively.
 The following pre-trained models are delivered with the product:
 
-* `i3d-rgb-tf` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
+* `xxx` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
 
 * `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
@@ -40,7 +42,7 @@ omz_downloader --list models.lst
 * smartlab-object-detection-0003
 * smartlab-object-detection-0004
 * smartlab-sequence-modelling-0001
-* i3d-rgb-tf
+* XXX
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
