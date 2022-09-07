@@ -81,4 +81,6 @@ static void showUsage() {
     std::cout << "    -blur_bgr \"<integer>\"      " << blur_bgr_message << std::endl;
     std::cout << "    -target_bgr                " << target_bgr_message << std::endl;
     std::cout << "    -u                         " << utilization_monitors_message << std::endl;
+    std::cout << "    -use_onevpl                " << use_onevpl_message << std::endl;
+    std::cout << "    -onevpl_params             " << onevpl_params_message << std::endl;
 }

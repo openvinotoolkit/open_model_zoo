@@ -82,6 +82,8 @@ Options:
     -blur_bgr                  Optional. Blur background.
     -target_bgr                Optional. Background onto which to composite the output (by default to green field).
     -u                         Optional. List of monitors to show initially.
+    -use_onevpl                Optional. Use onevpl video decoding.
+    -onevpl_params             Optional. Parameters for onevpl video decoding. Format: <prop name>:<value>;<prop name>:<value> Semicolon separated list of oneVPL mfxVariants which is used for configuring source (see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
 
 Available target devices:  <targets>
 ```
