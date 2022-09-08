@@ -101,9 +101,9 @@ try:
 except ImportError as opencv_import_error:
     if platform.processor() != 'aarch64':
         warnings.warn(
-            "Problem with cv2 import: \n{}\n opencv-python-headless will be added to requirements".format(opencv_import_error)
+            "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
         )
-        _requirements.append('opencv-python-headless')
+        _requirements.append('opencv-python')
     else:
         warnings.warn(
             "Problem with cv2 import: \n{}".format(opencv_import_error)
