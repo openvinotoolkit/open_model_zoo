@@ -122,7 +122,7 @@ from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression, KaldiFeatsRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
-from .dna_seq_recognition import DNASeqRecognition
+from .dna_seq_recognition import DNASeqRecognition, DNASequenceWithCRFAdapter
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
 from .noise_suppression import NoiseSuppressionAdapter
@@ -263,6 +263,7 @@ __all__ = [
     'QualityAssessmentAdapter',
 
     'DNASeqRecognition',
+    'DNASequenceWithCRFAdapter',
 
     'PWCNetAdapter',
 
