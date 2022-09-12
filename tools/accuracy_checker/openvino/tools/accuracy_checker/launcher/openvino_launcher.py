@@ -318,6 +318,11 @@ class OpenVINOLauncher(Launcher):
             self.infer_request = None
         partial_shapes = {}
         for name, shape in shapes.items():
+            initial_partial_shape = self.inputs[name].partial_shape
+            if len(shape) < int(str(initial_partial_shape.rank)):
+                required_shape = list(parse_partial_shape(initial_partial_shape))
+                required_shape[-1*len(shape):] = shape
+                shape = required_shape
             p_shape = PartialShape(
                 [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
             partial_shapes[self.input_to_index[name]] = p_shape
@@ -788,6 +793,11 @@ class OpenVINOLauncher(Launcher):
     @staticmethod
     def _data_to_blob_dyn(layer_rang, data, layout, template=None):
         data_shape = np.shape(data)
+        if layer_rang - len(data_shape) == 1:
+            data = np.expand_dims(data, 0)
+            data_shape = np.shape(data)
+            if template is not None:
+                template = [1].extend(template)
         if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
             if len(data_shape) == len(layout):
                 data = np.transpose(data, layout)
