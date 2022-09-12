@@ -154,7 +154,7 @@ The Open Model Zoo includes the following demos:
 
 ## Media Files Available for Demos
 
-To run the demo applications, you can use videos from https://github.com/intel-iot-devkit/sample-videos.
+To run the demo applications, you can use videos from https://storage.openvinotoolkit.org/data/test_data/videos.
 
 ## Demos that Support Pre-Trained Models
 
