@@ -333,10 +333,9 @@ def main():
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-                            if type(e) == subprocess.TimeoutExpired:
+                            output = e.output
+                            if not isinstance(output, str):
                                 output = e.output.decode('utf-8')
-                            else:
-                                output = e.output
                             if isinstance(e, subprocess.CalledProcessError):
                                 exit_msg = f'Exit code: {e.returncode}\n'
                             elif isinstance(e, subprocess.TimeoutExpired):
