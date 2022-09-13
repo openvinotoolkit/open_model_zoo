@@ -150,6 +150,15 @@ int main(int argc, char* argv[]) {
                                                                stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
+        // NB: oneVPL source rounds up frame size by 16
+        // so size might be different from what ImagesCapture read.
+        if (FLAGS_use_onevpl) {
+            auto round16 = [](size_t v) {
+                return ((v + 15) / 16) * 16;
+            };
+            frame_size.width  = round16(frame_size.width);
+            frame_size.height = round16(frame_size.height);
+        }
 
         cv::GComputation comp([&] {
             cv::GFrame in;
