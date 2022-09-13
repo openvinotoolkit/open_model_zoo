@@ -335,6 +335,8 @@ def main():
                             demo.parse_output(output, test_case, device)
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                             output = e.output
+                            if not isinstance(output, str):
+                                output = e.output.decode('utf-8')
                             if isinstance(e, subprocess.CalledProcessError):
                                 exit_msg = f'Exit code: {e.returncode}\n'
                             elif isinstance(e, subprocess.TimeoutExpired):
