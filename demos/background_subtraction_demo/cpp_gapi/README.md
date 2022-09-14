@@ -102,7 +102,7 @@ Options:
     -target_bgr                Optional. Background onto which to composite the output (by default to green field).
     -u                         Optional. List of monitors to show initially.
     -use_onevpl                Optional. Use onevpl video decoding.
-    -onevpl_params             Optional. Parameters for onevpl video decoding. Format: <prop name>:<value>;<prop name>:<value> Semicolon separated list of oneVPL mfxVariants which is used for configuring source (see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
+    -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>;<prop name>:<value> Several important configuration parameters: -mfxImplDescription.mfxDecoderDescription.decoder.CodecID values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc-mfxImplDescription.AccelerationMode values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
 
 Available target devices:  <targets>
 ```
