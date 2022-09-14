@@ -67,7 +67,7 @@ In order to provide additional configuration paramaters use `-onevpl_params`:
 ```sh
 ./background_subtraction_demo_gapi/ -m <path_to_model> -i <path_to_raw_file> -use_onevpl -onevpl_params="mfxImplDescription.mfxDecoderDescription.decoder.CodecID:MFX_CODEC_HEVC;"
 ```
-Note: Only raw formats such as `h264`, `h265` etc are supported on Linux.
+>**NOTE**: Only raw formats such as `h264`, `h265` etc are supported on Linux.
 Working with raw formats user always must specify `codec` type via `-onevpl_params`. See example below.
 
 To build OpenCV G-API with `oneVPL` support follow instruction:
