@@ -119,7 +119,7 @@ Minimum command examples to run the demo for person tracking (for vehicle tracki
 # videos
 python multi_camera_multi_target_tracking_demo.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
-    --m <path_to_model>/person-detection-retail-0013.xml \
+    --m_detector <path_to_model>/person-detection-retail-0013.xml \
     --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 
