@@ -115,10 +115,6 @@ static std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::st
     return source_cfgs;
 }
 
-static bool checkIfVPLSupportExt(const std::string& ext) {
-    return ext == "mp4" || ext == "avi";
-}
-
 }  // namespace util
 
 int main(int argc, char* argv[]) {
@@ -216,12 +212,7 @@ int main(int argc, char* argv[]) {
                                 stringToSize(FLAGS_res));
         cv::gapi::wip::IStreamSource::Ptr media_cap;
         if (FLAGS_use_onevpl) {
-            const auto ext = fileExt(FLAGS_i);
-            if (!util::checkIfVPLSupportExt(ext)) {
-                throw std::logic_error("Unsupported format: " + ext + " for OneVPL source!");
-            }
-            auto source_cfgs = util::parseVPLParams(FLAGS_onevpl_params);
-            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, source_cfgs);
+            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, util::parseVPLParams(FLAGS_onevpl_params));
         } else {
             media_cap = cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap);
         }

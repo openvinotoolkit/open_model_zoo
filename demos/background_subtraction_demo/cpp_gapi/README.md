@@ -5,7 +5,7 @@ This demo shows how to perform background subtraction using G-API.
 > **NOTE**: Only batch size of 1 is supported.
 
 ## How It Works
-The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format.
+The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format. Please note, that there aren't background matting models in `OMZ` collection.
 
 1. for instance segmentation models based on `Mask RCNN` approach:
     * One input: `image` for input image.
@@ -53,6 +53,25 @@ omz_converter --list models.lst
 * instance-segmentation-person-????
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+
+### OneVPL Support
+
+Demo provides functionality to use [OneVPL](https://github.com/oneapi-src/oneVPL#-video-processing-library) video decoding.
+Example:
+```sh
+./background_subtraction_demo_gapi/ -m <path_to_model> -i <path_to_video_file> -use_onevpl
+```
+
+In order to provide additional configuration paramaters use `-onevpl_params`:
+```sh
+./background_subtraction_demo_gapi/ -m <path_to_model> -i <path_to_raw_file> -use_onevpl -onevpl_params="mfxImplDescription.mfxDecoderDescription.decoder.CodecID:MFX_CODEC_HEVC;"
+```
+Note: Only raw formats such as `h264`, `h265` etc are supported on Linux.
+Working with raw formats user always must specify `codec` type via `-onevpl_params`. See example below.
+
+To build OpenCV G-API with `oneVPL` support follow instruction:
+[Building G-API with oneVPL Toolkit support](https://github.com/opencv/opencv/wiki/Graph-API#building-with-onevpl-toolkit-support)
 
 ## Running
 

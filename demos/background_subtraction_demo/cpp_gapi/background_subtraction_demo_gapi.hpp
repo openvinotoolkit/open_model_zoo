@@ -35,8 +35,13 @@ static const char target_bgr_message[] =
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char use_onevpl_message[] = "Optional. Use onevpl video decoding.";
 static const char onevpl_params_message[] = "Optional. Parameters for onevpl video decoding. "
+                                            "OneVPL source can be fine-grained by providing configuration parameters.
                                             "Format: <prop name>:<value>;<prop name>:<value> "
-                                            "Semicolon separated list of oneVPL mfxVariants which is used for configuring source "
+                                            "Several important configuration parameters: "
+                                            "-mfxImplDescription.mfxDecoderDescription.decoder.CodecID"
+                                            "values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc"
+                                            "-mfxImplDescription.AccelerationMode"
+                                            "values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode"
                                             "(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)";
 
 DEFINE_bool(h, false, help_message);
