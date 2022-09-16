@@ -1,37 +1,42 @@
 # Smartlab Python\* Demo
 
-This is the demo application with smartlab action recognition and smartlab object detection algorithms.
-This demo takes multi-view video inputs to identify actions and objects, then evaluates scores of current state.
+This is the demo application with smartlab object detection and smartlab action recognition algorithms.
+This demo takes multi-view video inputs to identify objects and actions, then evaluates scores for teacher's reference.
 The UI is shown as:
-![image](readme_UI.png)
-Action recognition architecture uses two encoders for front-view and top-view respectively, and a single decoder.
-Object detection uses two models for each view to detect large and small objects, respectively.
+![image](smartlab.gif)
+**The left picture** and **right picture** show top view and side view on the test bench respectively. For object detection part,
+**blue bounding boxes** are shown. Below these pictures, **progress bar** is shown for action types, and the colors of actions correspond to
+the **action names** above. Scoring part is below the entire UI and there are 8 score points. `[1]` means student can
+get 1 point while `[0]` means student loses the point. `[-]` means under evaluation.
+
+## Algorithms
+Architecture of smart science lab contains object detection, action recognition and scoring evaluator.
 The following pre-trained models are delivered with the product:
 
-* `xxx` + `smartlab-sequence-modelling-0001`, which are other models for identifying actions 2 actions of smartlab (adjust_rider, put_take).
+* `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models
+  to detect 10 objects including: balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
-* `smartlab-object-detection-0001` + `smartlab-object-detection-0002` + `smartlab-object-detection-0003` + `smartlab-object-detection-0004`, which are models for detecting smartlab objects (10 objects). They detect balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
+Action recognition include two options:
+* --mode multiview: `smartlab-sequence-modelling-0001` + `smartlab-sequence-modelling-0002`, identifying actions 13 action types.
+* --mode mstcn: `smartlab-action-recognition-0001-encoder-top` + `smartlab-action-recognition-0001-encoder-side` +
+  `smartlab-action-recognition-0001-decoder` , identifying actions 3 action types.
 
 ## How It works
 
 The demo pipeline consists of several steps:
 
-* `Decode` reads frames from the input videos
-* `Detector` detects smartlab objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)
-* `Segmentor` segments video frames based on action of the frame
-* `Evaluator` calculates scores of the current state
-* `Display` displays detected objects, recognized action, calculated scores on the current frame
-
-
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+* `Decode` read frames from the two input videos
+* `Detector` detect objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)
+* `Segmentor` segment and classify video frames based on action type of the frame
+* `Evaluator` give scores of the current state
+* `Display` displays the whole UI
 
 ## Preparing to Run
-For demo input image or video files, you need to provide smartlab videos (https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/).
+Example input video: https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/v3).
+
 The list of models supported by the demo is in `<omz_dir>/demos/smartlab_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO format (\*.xml + \*.bin).
-
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) to download.
 An example of using the Model Downloader:
-
 ```sh
 omz_downloader --list models.lst
 ```
@@ -42,16 +47,21 @@ omz_downloader --list models.lst
 * smartlab-object-detection-0003
 * smartlab-object-detection-0004
 * smartlab-sequence-modelling-0001
-* XXX
+* smartlab-sequence-modelling-0002
+* smartlab-action-recognition-0001-encoder-top
+* smartlab-action-recognition-0001-encoder-side
+* smartlab-action-recognition-0001-decoder
 
-> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) for
+> the details on models inference support at different devices.
 
 ## Running
 
 Running the demo with `-h` shows this help message:
 ```
-usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -fv FRONTVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_fa M_FRONTALL
-                        -m_fm M_FRONTMOVE -m_en M_ENCODER -m_de M_DECODER
+usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -sv SIDEVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_sa M_SIDEALL
+                        -m_sm M_SIDEMOVE -m_de M_DECODER -m_en M_ENCODER [-m_en_t M_ENCODER_TOP -m_en_s M_ENCODER_SIDE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -71,36 +81,48 @@ Options:
                         Required. Path to sidetview all class model.
   -m_sm M_SIDEMOVE, --m_sidemove M_SIDEMOVE
                         Required. Path to sidetview moving class model.
-  --mode MODE           Optional. Action recognition mode: multiview
+  --mode MODE           Optional. Action recognition mode: multiview or mstcn
   -m_en_t M_ENCODER_TOP, --m_encoder_top M_ENCODER_TOP
-                        Required. Path to encoder model.
+                        Required for multiview mode. Path to encoder model for topview.
   -m_en_s M_ENCODER_SIDE, --m_encoder_side M_ENCODER_SIDE
-                        Required. Path to encoder model.
+                        Required for multiview mode. Path to encoder model for sideview.
   -m_de M_DECODER, --m_decoder M_DECODER
-                        Required. Path to decoder model.
+                        Required for both multiview and mstcn mode. Path to decoder model.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required for mstcn mode. Path to encoder model.
 ```
 
-**For example**, to run the demo, please provide the model paths and two input streams:
-
+For example, run the demo with multiview mode:
 ```sh
 python3 smartlab_demo.py
     -tv stream_1_top.mp4
-    -sv stream_1_high.mp4
+    -sv stream_1_left.mp4
     -m_ta "./intel/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.xml"
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
-    -m_fa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
-    -m_fm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
-    -m_en_t "./intel/smartlab-action-recognition-0002-encoder-top/FP32/smartlab-action-recognition-0002-encoder-top.xml"
-    -m_en_s "./intel/smartlab-action-recognition-0002-encoder-side/FP32/smartlab-action-recognition-0002-encoder-side.xml"
-    -m_de "./intel/smartlab-action-recognition-0002-decoder/FP32/smartlab-action-recognition-0002-decoder.xml"
+    -m_sa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
+    -m_sm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
+    -m_en_t "./intel/smartlab-action-recognition-0001-encoder-top/FP32/smartlab-action-recognition-0001-encoder-top.xml"
+    -m_en_s "./intel/smartlab-action-recognition-0001-encoder-side/FP32/smartlab-action-recognition-0001-encoder-side.xml"
+    -m_de "./intel/smartlab-action-recognition-0001-decoder/FP32/smartlab-action-recognition-0001-decoder.xml"
+```
+run the demo with mstcn mode:
+```sh
+python3 smartlab_demo.py
+    -tv stream_1_top.mp4
+    -sv stream_1_left.mp4
+    -m_ta "./intel/smartlab-object-detection-0001/FP32/smartlab-object-detection-0001.xml"
+    -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
+    -m_sa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
+    -m_sm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
+    -m_en "./intel/sequence_modelling/FP32/smartlab-sequence-modelling-0001.xml"
+    -m_de "./intel/sequence_modelling/FP32/smartlab-sequence-modelling-0002.xml"
 ```
 
 ## Demo Output
 
-The application uses OpenCV to display the real-time object detection, action recognition results and evaluation results.
+The application uses OpenCV to display the online results.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)

@@ -1,9 +1,12 @@
 """
- Copyright (C) 2021-2022 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,15 +16,15 @@
 
 import numpy as np
 import cv2
-import os
+from pathlib import Path
 
 
 class Display:
     def __init__(self):
         '''Score Evaluation Variables'''
-        self.wait_icon = cv2.imread(f'{os.getcwd()}/icon/wait.png', cv2.IMREAD_UNCHANGED)
-        self.no_icon = cv2.imread(f'{os.getcwd()}/icon/no.png', cv2.IMREAD_UNCHANGED)
-        self.done_icon = cv2.imread(f'{os.getcwd()}/icon/done.png', cv2.IMREAD_UNCHANGED)
+        self.wait_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/wait.png'), cv2.IMREAD_UNCHANGED)
+        self.no_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/no.png'), cv2.IMREAD_UNCHANGED)
+        self.done_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/done.png'), cv2.IMREAD_UNCHANGED)
         self.colour_map = {
             "noise_action": [127, 127, 127],
             "put_take": [0, 0, 255],

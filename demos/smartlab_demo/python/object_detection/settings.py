@@ -1,4 +1,3 @@
-# Copyright (c) Megvii, Inc. and its affiliates.
 """
  Copyright (C) 2021-2022 Intel Corporation
 

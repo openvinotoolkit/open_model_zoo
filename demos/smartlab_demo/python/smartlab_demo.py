@@ -1,9 +1,14 @@
+#!/usr/bin/env python3
+
 """
- Copyright (C) 2021-2022 Intel Corporation
+ Copyright (c) 2021-2022 Intel Corporation
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,14 +57,14 @@ def build_argparser():
                       required=False, type=str)
     args.add_argument('-m_en_s', '--m_encoder_side', help='Required for multivew mode. Path to encoder model.',
                       required=False, type=str)
-    args.add_argument('-m_de', '--m_decoder', help='Required for multivew mode. Path to decoder model.',
-                      required=False, type=str)
+    args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.',
+                      required=True, type=str)
 
     return parser
 
 
 def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display):
-    old_time = time.time()
+    start_time = time.perf_counter()
     frame_counter = 0  # Frame index counter
     fps = 0.0
     interval_second = 1
@@ -128,13 +133,13 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                 seg_results, _ = segmentor_result[0], segmentor_result[1]
                 future_segmentor = None
 
-            current_time = time.time()
+            current_time = time.perf_counter()
             current_frame = frame_counter
-            if (current_time - old_time > interval_second):
+            if current_time - start_time > interval_second:
                 total_frame_processed_in_interval = current_frame - interval_start_frame
-                fps = total_frame_processed_in_interval / (current_time - old_time)
+                fps = total_frame_processed_in_interval / (current_time - start_time)
                 interval_start_frame = current_frame
-                old_time = current_time
+                start_time = current_time
 
             ''' The score evaluation module need to merge the results of the two modules and generate the scores '''
             if detector_result is not None:
