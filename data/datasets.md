@@ -162,7 +162,6 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 ### Datasets in dataset_definitions.yml
 * `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [mobilenet-yolo-v4-syg](../models/public/mobilenet-yolo-v4-syg/README.md))
-# Dataset Preparation Guide
 
 If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize `<DATASET_DIR>` folder with validation datasets in a certain way. Instructions for preparing validation data are described in this document.
 

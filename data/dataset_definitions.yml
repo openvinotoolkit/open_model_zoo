@@ -1348,8 +1348,8 @@ datasets:
       images_dir: JPEGImages/
       mask_dir: Annotations/
       dataset_meta_file: erfnet_meta_zxw.json
-    data_source: ./JPEGImages/
-    additional_data_source: ./Annotations/
+    data_source: JPEGImages/
+    additional_data_source: Annotations/
 
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
