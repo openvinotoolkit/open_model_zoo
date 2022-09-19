@@ -29,7 +29,5 @@ input_info:
     layout: NCHW
 model_optimizer_args:
   - --input_model=$dl_dir/erfnet.onnx
-  - --reverse_input_channels
-  - --scale=255
 framework: onnx
-license: https://raw.githubusercontent.com/Zhangxianwen2021/ERFNet/main/License
+license: https://raw.githubusercontent.com/onnx/models/master/LICENSE
