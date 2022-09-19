@@ -17,16 +17,19 @@ description: >-
   This model is pre-trained in PyTorch* framework and retrained by CULane.
   For details see repository <https://github.com/Zhangxianwen2021/ERFNet>,
   paper of ERFNet<https://doi.org/10.1109/TITS.2017.2750080>and repository <https://github.com/cardwing/Codes-for-Lane-Detection/tree/master/ERFNet-CULane-PyTorch>
-task_type: instance_segmentation
+task_type: semantic_segmentation
 files:
   - name: erfnet.onnx
     size: 8253755 
     checksum: f6597d416f02b8218b557c4f673a0837fc215213055f9957267667003578e76507515d7c2be5d6983549f81cb96a0a66
     source: https://github.com/Zhangxianwen2021/ERFNet/raw/main/erfnet.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 208, 976]
+    layout: NCHW
 model_optimizer_args:
-  - --input=input
-  - --input_shape=[1, 3, 208, 976]
   - --input_model=$dl_dir/erfnet.onnx
+  - --reverse_input_channels
+  - --scale=255
 framework: onnx
-quantizable: yes
-license: https://raw.githubusercontent.com/onnx/models/master/LICENSE
+license: https://raw.githubusercontent.com/Zhangxianwen2021/ERFNet/main/License

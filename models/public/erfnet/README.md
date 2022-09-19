@@ -29,9 +29,10 @@
 Image, name - `input_1`, shape - `1,3,208,976`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
+
 
 Channel order is `RGB`.
 Scale value - 255.
@@ -41,34 +42,33 @@ Scale value - 255.
 Image, name - `input_1`, shape - `1,3,208,976`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
-Channel order is `BGR`.
+
+Channel order is `RGB`.
 
 ## Output
 
 ### Original model
-Image, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
+Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
-Channel order is `BGR`.
 
 ### Converted model
 
-Image, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
+Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
-Channel order is `BGR`.
 
 ## Download a Model and Convert it into Inference Engine Format
 
@@ -85,10 +85,10 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
 
-* [Lane Detection Python\* Demo](../../../demos/lane_detection_demo/python/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
 ## Legal Information
 
-The original model is distributed under the following [license1](https://raw.githubusercontent.com/onnx/models/master/LICENSE).
+The original model is distributed under the following [license1](https://raw.githubusercontent.com/Zhangxianwen2021/ERFNet/main/License).
 
 ```
 MIT License
