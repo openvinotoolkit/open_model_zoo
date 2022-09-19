@@ -79,8 +79,8 @@ class Detector(IEModel, DetectorInterface):
 
             left = int(max(detection[3], 0) * frame_shape[1])
             top = int(max(detection[4], 0) * frame_shape[0])
-            right = int(max(detection[5], 0) * frame_shape[1])
-            bottom = int(max(detection[6], 0) * frame_shape[0])
+            right = int(min(detection[5], 1) * frame_shape[1])
+            bottom = int(min(detection[6], 1) * frame_shape[0])
             if self.expand_ratio != (1., 1.):
                 w = (right - left)
                 h = (bottom - top)

@@ -256,13 +256,13 @@ class MaskRCNNAdapter(Adapter):
 
     def _process_masks_pytorch(self, boxes, raw_masks, identifiers, original_image_size, classes):
         masks = []
-        raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+        raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers) and np.ndim(raw_masks) == 4
         if raw_mask_for_all_classes:
             per_obj_raw_masks = []
             for cls, raw_mask in zip(classes, raw_masks):
                 per_obj_raw_masks.append(raw_mask[cls, ...] if self.scores_out else raw_mask)
         else:
-            per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+            per_obj_raw_masks = np.squeeze(raw_masks, axis=1) if np.ndim(raw_masks) == 4 else raw_masks
 
         for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
             mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)

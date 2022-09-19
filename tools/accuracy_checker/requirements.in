@@ -2,6 +2,9 @@
 tqdm>=4.54.1
 
 # image reading and preprocessing
+# networkx version upperbound in scikit-image is conflicted
+networkx~=2.5;python_version<"3.7"
+networkx<2.8.1;python_version>="3.7"
 # note: python 3.6 wheels is not available since 0.18
 scikit-image~=0.17.2;python_version<"3.7"
 scikit-image>=0.19.2;python_version>="3.7"
@@ -24,7 +27,7 @@ pyclipper>=1.2.1
 
 # brain tumor segmentation
 nibabel>=3.2.1
-scipy~=1.5.4
+scipy >=1.5.4,<=1.8.0
 
 # dicom images reading
 pydicom>=2.1.2
@@ -39,7 +42,8 @@ transformers>=4.5;python_version>="3.7"
 nltk>=3.5
 
 # DNA sequence matching
-parasail>=1.2.4
+parasail>=1.2.4;platform_system!="Windows"
+parasail~=1.2.4;platform_system=="Windows"
 fast-ctc-decode>=0.2.5
 
 # raw image formats processing

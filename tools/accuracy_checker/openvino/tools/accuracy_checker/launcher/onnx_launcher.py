@@ -110,7 +110,7 @@ class ONNXLauncher(Launcher):
         self.device = device or 'CPU'
         kwargs = {}
         if device:
-            kwargs['provider_options'] = {[{'device_type': self.device}]}
+            kwargs['provider_options'] = [{'device_type': self.device}]
         session = onnx_rt.InferenceSession(
             model, providers=self.execution_providers, **kwargs)
 

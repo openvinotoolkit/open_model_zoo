@@ -160,12 +160,15 @@ Accuracy Checker supports following set of preprocessors:
   * `max_length` - Maximum line length to draw mask.
   * `max_vertex` - Maximum number vertex to draw mask.
   * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked area).
+  * `concat_mask` - Allows concatenate generated mask and image to one tensor by channels. Optional, default `False`.
 * `rect_mask` - Applies rectangle mask to the image.
   * `dst_width` and `dst_height` are width, and height of mask. You can also use `size` instead in case when destination sizes are equal.
-* `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked areaa).
+  * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked area).
+  * `concat_mask` - Allows concatenate generated mask and image to one tensor by channels. Optional, default `False`.
 * `custom_mask` - Applies masks from custom mask dataset.
   * `mask_dir` - path to mask dataset to be used for inpainting.
   * `inverse_mask` - inverse mask before apply
+  * `concat_mask` - Allows concatenate generated mask and image to one tensor by channels. Optional, default `False`.
   * `mask_loader` - which reader to use to load masks. The following readers can be used:
     * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
     * `pillow_imread` - read images using Pillow library. Default color space is RGB.

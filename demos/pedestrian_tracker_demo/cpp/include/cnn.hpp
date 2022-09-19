@@ -85,10 +85,9 @@ class VectorCNN : public BaseModel {
 public:
     VectorCNN(const ModelConfigTracker& config, const ov::Core& core, const std::string& deviceName);
 
-    void Compute(const cv::Mat& image, cv::Mat* vector, cv::Size outp_shape = cv::Size()) const;
+    void Compute(const cv::Mat& image, cv::Mat* vector) const;
     void Compute(const std::vector<cv::Mat>& images,
-                 std::vector<cv::Mat>* vectors,
-                 cv::Size outp_shape = cv::Size()) const;
+                 std::vector<cv::Mat>* vectors) const;
 
     int size() const {
         return result_size;

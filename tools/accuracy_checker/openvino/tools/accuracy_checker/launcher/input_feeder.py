@@ -259,6 +259,10 @@ class InputFeeder:
 
     def fill_non_constant_inputs_with_template(self, data_representation_batch, template):
         def match_by_regex(data, identifiers, input_regex, templates):
+            if isinstance(identifiers, AnnotationDataIdentifier):
+                identifiers = identifiers.data_id
+                if not isinstance(identifiers, list):
+                    data = [data]
             if not isinstance(identifiers, list):
                 identifiers = [identifiers]
             input_data = None
