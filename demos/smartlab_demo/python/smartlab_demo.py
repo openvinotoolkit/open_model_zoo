@@ -81,13 +81,13 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
         ret_top, frame_top = cap_top.read()
         ret_side, frame_side = cap_side.read()
         if not ret_top or not ret_side:
-            print('yufei0')
             state = 'Finish'
             action_seg_results, top_det_results, side_det_results, frame_top, frame_side, frame_counter = buffer_display
             if frame_counter > 96:
                 if seg_results is not None:
                     if args.mode == "mstcn":
                         action_seg_results = seg_results[-1]
+                    # mode==multiview
                     else:
                         action_seg_results = seg_results
 
