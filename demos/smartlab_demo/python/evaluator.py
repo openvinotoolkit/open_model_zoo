@@ -933,10 +933,6 @@ class Evaluator(object):
             else:
                 self.lose_balance_mark()
 
-        else:
-            print(
-                f'frame{self.frame_counter} {len(roundscrew2_coor)} roundscrew2 & {len(pointerhead_coor)} pointerhead found & {len(scale_coor)} scale & {len(pointer_coor)} pointer found')
-
     def check_score_validity(self):
         for score_item, keyframe in self.keyframe.items():
             if keyframe == 0:

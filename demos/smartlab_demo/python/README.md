@@ -17,9 +17,9 @@ The following pre-trained models are delivered with the product:
   to detect 10 objects including: balance, weights, tweezers, box, battery, tray, ruler, rider, scale, hand.
 
 Action recognition include two options:
-* --mode multiview: `smartlab-sequence-modelling-0001` + `smartlab-sequence-modelling-0002`, identifying actions 13 action types.
-* --mode mstcn: `smartlab-action-recognition-0001-encoder-top` + `smartlab-action-recognition-0001-encoder-side` +
-  `smartlab-action-recognition-0001-decoder` , identifying actions 3 action types.
+* --mode multiview: `smartlab-action-recognition-0001-encoder-top` + `smartlab-action-recognition-0001-encoder-side` +
+  `smartlab-action-recognition-0001-decoder` , identifying 3 action types.
+* --mode mstcn: `smartlab-sequence-modelling-0001` + `smartlab-sequence-modelling-0002`, identifying 14 action types.
 
 ## How It works
 
@@ -29,10 +29,10 @@ The demo pipeline consists of several steps:
 * `Detector` detect objects (balance, weights, tweezers, box, battery, tray, ruler, rider scale, hand)
 * `Segmentor` segment and classify video frames based on action type of the frame
 * `Evaluator` give scores of the current state
-* `Display` displays the whole UI
+* `Display` display the whole UI
 
 ## Preparing to Run
-Example input video: https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/v3).
+Example input video: https://storage.openvinotoolkit.org/data/test_data/videos/smartlab/v3.
 
 The list of models supported by the demo is in `<omz_dir>/demos/smartlab_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) to download.
@@ -114,6 +114,7 @@ python3 smartlab_demo.py
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_sa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_sm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
+    --mode mstcn
     -m_en "./intel/sequence_modelling/FP32/smartlab-sequence-modelling-0001.xml"
     -m_de "./intel/sequence_modelling/FP32/smartlab-sequence-modelling-0002.xml"
 ```

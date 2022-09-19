@@ -26,6 +26,7 @@ from openvino.runtime import Core
 from argparse import ArgumentParser, SUPPRESS
 from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
+import copy
 
 
 def build_argparser():
@@ -105,6 +106,9 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                     fps=fps)
             break
         else:
+            frame_top_copied = copy.deepcopy(frame_top)
+            frame_side_copied = copy.deepcopy(frame_side)
+
             if args.mode == "mstcn":
                 if frame_counter % 10 == 0 and future_detector is None:
                     future_detector = executor.submit(
@@ -159,8 +163,8 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
                         action_seg_results = display_seg_result
 
                     display.display_result(
-                        frame_top=frame_top,
-                        frame_side=frame_side,
+                        frame_top=frame_top_copied,
+                        frame_side=frame_side_copied,
                         side_seg_results=action_seg_results,
                         top_seg_results=action_seg_results,
                         top_det_results=top_det_results,
