@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
         const auto tmp = cap->read();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         // NB: oneVPL source rounds up frame size by 16
-        // so size might be different from what ImagesCapture read.
+        // so size might be different from what ImagesCapture reads.
         if (FLAGS_use_onevpl) {
             auto round16 = [](size_t v) {
                 return ((v + 15) / 16) * 16;
