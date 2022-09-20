@@ -18,7 +18,6 @@ from argparse import Namespace
 import copy
 from pathlib import Path
 import os
-from tkinter.messagebox import NO
 
 import warnings
 
