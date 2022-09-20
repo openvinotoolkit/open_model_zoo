@@ -303,6 +303,11 @@ def add_openvino_specific_args(parser):
         required=False, default='default'
     )
     openvino_specific_args.add_argument(
+        '--inference_precision_hint',
+        help='Inference Precision hint for device',
+        required=False
+    )
+    openvino_specific_args.add_argument(
         '--use_new_api', type=cast_to_bool, help='switch to processing using OpenVINO 2.0 API', required=False,
         default=ov_new_api_available()
     )

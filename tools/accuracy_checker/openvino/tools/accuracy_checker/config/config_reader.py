@@ -18,6 +18,7 @@ from argparse import Namespace
 import copy
 from pathlib import Path
 import os
+from tkinter.messagebox import NO
 
 import warnings
 
@@ -840,10 +841,12 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
     kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
     kaldi_logs = arguments.kaldi_log_file if 'kaldi_log_file' in arguments else None
+    precision_hint = arguments.inference_precision_hint if 'inference_precision_hint' in arguments else None
     if kaldi_binaries:
         launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
         launcher_entry['_kaldi_log_file'] = kaldi_logs
-
+    if precision_hint:
+        launcher_entry['_inference_precision_hint'] = precision_hint
     if launcher_entry['framework'].lower() not in ['dlsdk', 'openvino']:
         return launcher_entry
 
@@ -936,6 +939,7 @@ def provide_model_type(launcher, arguments):
 def provide_models(launchers, arguments):
     input_precisions = arguments.input_precision if 'input_precision' in arguments else None
     input_layout = arguments.layout if 'layout' in arguments else None
+    
     provide_precision_and_layout(launchers, input_precisions, input_layout)
     if 'models' not in arguments or not arguments.models:
         return launchers
