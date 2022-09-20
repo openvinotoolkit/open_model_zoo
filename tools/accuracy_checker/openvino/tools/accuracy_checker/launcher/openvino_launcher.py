@@ -19,7 +19,6 @@ import io
 import multiprocessing
 from pathlib import Path
 import re
-import warnings
 import numpy as np
 from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from openvino.preprocess import PrePostProcessor
@@ -32,7 +31,6 @@ from .dlsdk_launcher_config import (
     ov_set_config
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
-
 from ..config import ConfigError
 from ..logging import warning, debug, print_info
 from ..utils import (
@@ -49,13 +47,12 @@ from .launcher import Launcher
 format_map = {
       'f32': np.float32, 'i32': np.int32, 'i64': np.int64,
       'fp16': np.float16, 'f16': np.float16, 'i16': np.int16, 'u16': np.uint16,
-      'i8': np.int8, 'u8': np.uint8,
-      'boolean': np.uint8
+      'i8': np.int8, 'u8': np.uint8, 'boolean': np.uint8
 }
 
 PRECISION_STR_TO_TYPE = {
     'FP32': Type.f32, 'FP16': Type.f16, 'U8': Type.u8, 'U16': Type.u16, 'I8': Type.i8, 'I16': Type.i16,
-    'I32': Type.i32, 'I64': Type.i64, 'BOOL': Type.boolean
+    'I32': Type.i32, 'I64': Type.i64, 'BOOL': Type.boolean, 'INT8': Type.u8, 'BF16': Type.bf16
 }
 
 
@@ -177,19 +174,14 @@ class OpenVINOLauncher(Launcher):
         raw_results = []
         for infer_inputs in inputs:
             if self._do_reshape:
-                input_shapes = {
-                    layer_name: data.shape for layer_name, data in infer_inputs.items()
-                }
+                input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
             if self.infer_request is None:
                 self.infer_request = self.exec_network.create_infer_request()
             feed_dict = {self.input_to_tensor_name[layer_name]: data for layer_name, data in infer_inputs.items()}
             outputs = self.infer_request.infer(inputs=feed_dict)
             raw_results.append(outputs)
-            results.append({
-                out_node.get_node().friendly_name: out_res
-                for out_node, out_res in outputs.items()
-            })
+            results.append({out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()})
         if self.reset_memory_state:
             for state in self.infer_request.query_state():
                 state.reset()
@@ -211,10 +203,7 @@ class OpenVINOLauncher(Launcher):
             feed_dict.update(lstm_inputs_feed)
             infer_inputs = {self.input_to_tensor_name[layer_name]: data for layer_name, data in feed_dict.items()}
             out_tensors = self.infer_request.infer(infer_inputs)
-            output_result = {
-                out_node.get_node().friendly_name: out_tensor
-                for out_node, out_tensor in out_tensors.items()
-            }
+            output_result = {out_node.get_node().friendly_name: out_tensor for out_node, out_tensor in out_tensors.items()}
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
             if return_raw:
@@ -318,6 +307,11 @@ class OpenVINOLauncher(Launcher):
             self.infer_request = None
         partial_shapes = {}
         for name, shape in shapes.items():
+            initial_partial_shape = self.inputs[name].partial_shape
+            if len(shape) < int(str(initial_partial_shape.rank)):
+                required_shape = list(parse_partial_shape(initial_partial_shape))
+                required_shape[-1*len(shape):] = shape
+                shape = required_shape
             p_shape = PartialShape(
                 [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
             partial_shapes[self.input_to_index[name]] = p_shape
@@ -390,6 +384,7 @@ class OpenVINOLauncher(Launcher):
         device_config = self.config.get('device_config')
         if device_config:
             self._set_device_config(device_config)
+        self._set_infer_precision_hint()
 
     def _set_nireq(self):
         num_requests = self.config.get('num_requests')
@@ -470,14 +465,29 @@ class OpenVINOLauncher(Launcher):
                 if isinstance(value, dict):
                     if key in self._devices_list():
                         if key not in self.ie_core.available_devices:
-                            warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
+                            warning('{} device is unknown. Config loading may lead to error.'.format(key))
                         ov_set_config(self.ie_core, dict(value), device=key)
                     else:
-                        warnings.warn(
+                        warning(
                             f'Configuration for {key} will be skipped as device is not listed in evaluation device')
                 else:
-                    warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
-                                  'applied is not specified or option is not a dict-like'.format(key=key, value=value))
+                    warning(f'Option {key}: {value} will be skipped because device to which it should be '
+                                  f'applied is not specified or option is not a dict-like')
+
+    def _set_infer_precision_hint(self):
+        precision_hint = self.config.get('_inference_precision_hint')
+        if precision_hint is None:
+            return
+        supported_props = self.ie_core.get_property(self._device, 'SUPPORTED_PROPERTIES')
+        if 'INFERENCE_PRECISION_HINT' not in supported_props:
+            warning(f'inference precision hint is not supported for device {self._device}, option will be ingnored')
+            return
+        if not precision_hint.upper() in PRECISION_STR_TO_TYPE and not precision_hint in format_map:
+            raise ConfigError(f'Unknown precision {precision_hint} for inference precision hint')
+        precision_type = PRECISION_STR_TO_TYPE.get(precision_hint.upper(), precision_hint)
+        self.ie_core.set_property(self._device, {'INFERENCE_PRECISION_HINT': precision_type})
+        current_precision = self.ie_core.get_property(self._device, 'INFERENCE_PRECISION_HINT')
+        print_info(f'Inference precision: {current_precision.get_type_name()}')
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)
@@ -788,6 +798,11 @@ class OpenVINOLauncher(Launcher):
     @staticmethod
     def _data_to_blob_dyn(layer_rang, data, layout, template=None):
         data_shape = np.shape(data)
+        if layer_rang - len(data_shape) == 1:
+            data = np.expand_dims(data, 0)
+            data_shape = np.shape(data)
+            if template is not None:
+                template = [1].extend(template)
         if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
             if len(data_shape) == len(layout):
                 data = np.transpose(data, layout)

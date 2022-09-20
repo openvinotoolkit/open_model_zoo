@@ -75,7 +75,7 @@
 @endsphinxdirective
 -->
 
-The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
+Open Model Zoo demos are console applications that provide templates to help implement specific deep learning inference scenarios. These applications show how to preprocess and postrpocess data for model inference and organize processing pipelines. Some pipelines collect analysis data from several models being inferred simultaneously. For example, [detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state](./interactive_face_detection_demo/cpp/README.md).
 
 Source code of the demos can be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
 
@@ -154,7 +154,7 @@ The Open Model Zoo includes the following demos:
 
 ## Media Files Available for Demos
 
-To run the demo applications, you can use images and videos from the media files collection available at https://github.com/intel-iot-devkit/sample-videos.
+To run the demo applications, you can use videos from https://storage.openvinotoolkit.org/data/test_data/videos.
 
 ## Demos that Support Pre-Trained Models
 
