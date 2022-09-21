@@ -34,8 +34,7 @@ Image, name - `input_1`, shape - `1,3,208,976`, format is `B,C,H,W` where:
 - `W` - width
 
 
-Channel order is `RGB`.
-Scale value - 255.
+Channel order is `BGR`.
 
 ### Converted model
 
@@ -47,7 +46,7 @@ Image, name - `input_1`, shape - `1,3,208,976`, format is `B,C,H,W` where:
 - `W` - width
 
 
-Channel order is `RGB`.
+Channel order is `BGR`.
 
 ## Output
 
@@ -75,11 +74,11 @@ Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 You can download models and if necessary convert them into Inference Engine format using the Model Downloader and other automation tools as shown in the examples below.
 An example of using the Model Downloader:
 
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 
 An example of using the Model Converter:
 
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 
 ## Demo usage
 
