@@ -31,8 +31,9 @@ class Evaluator(object):
         self.rider_portion = 6  # [IS_rider & MS_rider] divide the distance between 2 roundscrew1 into rider_portion portion, if rider falls in the first portion mean rider at zeroth position
         self.rider_move_threshold = 20  # [MS_rider_tweezers] if rider moves more than this value, check if tweezers or hand is used to move rider
         self.buffer_rider_size_limit = 30  # [MS_rider_tweezers]
-        self.use_tweezers_threshold = 350  # [MS_rider_tweezers & MS_weights_tweezers] if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
+        self.use_tweezers_threshold = 100  # [MS_rider_tweezers & MS_weights_tweezers] if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
         self.tweezers_warning_duration = 60  # [MS_rider_tweezers & MS_weights_tweezers] if score related to tweezers is 0 more than this duration/frames, score is 0 and unrevertible; else still revertible
+        self.battery_aspect_ratio = 1.9
         self.reset()
 
     def reset(self):
@@ -122,7 +123,7 @@ class Evaluator(object):
         action_seg_results = self.filter_action(action_seg_results, mode=mode)
 
         top_det_results, side_det_results = self.filter_object(top_det_results, side_det_results)
-        frame_top, frame_side = self.filter_image(frame_top, frame_side)
+        self.filter_image(frame_top, frame_side)
 
         if frame_counter > self.buffer_size:
             self.classify_state(action_seg_results)
@@ -134,9 +135,8 @@ class Evaluator(object):
                 self.evaluate_scale_balance()
 
             elif self.state == "Measuring":
-                object_left_score, _ = self.evaluate_object_left_from_view(view='top')
-                if action_seg_results == "put_take" or action_seg_results == "put_left" or action_seg_results == "put_right" or \
-                    action_seg_results == "take_left" or action_seg_results == "take_right":
+                # self.evaluate_object_left_from_view(view='top')
+                if action_seg_results in ["put_take", "put_left", "put_right", "take_left", "take_right"]:
                     self.evaluate_object_left()
                     self.evaluate_weights_right()
                     if not self.can_tidy:
@@ -199,7 +199,7 @@ class Evaluator(object):
                 self.action_buffer.append(action_seg_results)
                 return self.last_action
         elif mode == 'mstcn':
-            if action_seg_results != None:
+            if action_seg_results is not None:
                 self.action_mstcn_buffer.extend(action_seg_results)
             if len(self.action_mstcn_buffer) > self.mstcn_buffer_size:  # 48
                 self.action_mstcn_buffer = self.action_mstcn_buffer[self.mstcn_batchsize:]  # self.mstcn_batchsize: 24
@@ -217,6 +217,24 @@ class Evaluator(object):
 
     def filter_object(self, top_det_results, side_det_results):
         first_top_det_results = first_side_det_results = None
+        # --- corner case 1, top_det_results: battery is detected as weight. Use aspect ratio to remove wrong battery
+        battery_index = [i for i in range(len(top_det_results[2])) if top_det_results[2][i] == 'battery']
+        if len(battery_index) > 1:
+            removed_index = []
+            for i in battery_index:
+                width = top_det_results[0][i][0] - top_det_results[0][i][2]
+                height = top_det_results[0][i][1] - top_det_results[0][i][3]
+                ratio = max(width / height, height / width)
+                # should remove wrong battery
+                if ratio < self.battery_aspect_ratio:
+                    removed_index.append(i)
+            for i in range(len(removed_index) - 1, -1, -1):
+                for index, item in enumerate(top_det_results):
+                    if index == 2:
+                        item.pop(removed_index[i])
+                    else:
+                        np.delete(item, removed_index[i])
+        # --- corner case 1, top_det_results: battery is detected as weight. Use aspect ratio to remove wrong battery
         if self.mode == 'multiview':
             if len(self.top_obj_buffer) < self.buffer_size:
                 self.top_obj_buffer.append(top_det_results)
@@ -478,7 +496,6 @@ class Evaluator(object):
         """
         roundscrew1_coor = self.side_object_dict['roundscrew1']
         rider_coor = self.side_object_dict['rider']
-
         # only evaluate rider_zero if 2 roundscrew1 and 1 rider are found
         if len(roundscrew1_coor) == 2 and len(rider_coor) == 1:
             # find center coordinate of rider and roundscrew1
@@ -567,9 +584,12 @@ class Evaluator(object):
                 # change mark only if student changes direction afterward
                 self.is_change_object_direction = False
                 self.is_object_put = True
-                self.scoring['measuring_score_object_left'] = object_left_score
+                self.scoring['measuring_score_object_left'] = 1
                 self.keyframe['measuring_score_object_left'] = self.frame_counter
             elif not self.is_object_put:
+                self.keyframe['measuring_score_object_left'] = self.frame_counter
+            elif self.is_object_put:
+                self.scoring['measuring_score_object_left'] = object_left_score
                 self.keyframe['measuring_score_object_left'] = self.frame_counter
 
     def evaluate_object_left_from_view(self, view):
@@ -621,8 +641,6 @@ class Evaluator(object):
                     object_left_keyframe = self.frame_counter
                     # no matter how many battery detected, as long as
                     # one object detected at left tray, consider get mark
-                    return object_left_score, object_left_keyframe
-
                 else:  # if object put happens on the right, then give zero score mark
                     self.object_direction = 'right'
                     self.object_is_in_tray_now = True
@@ -631,12 +649,12 @@ class Evaluator(object):
                         self.is_change_object_direction = False
                         object_left_score = 0
                         object_left_keyframe = self.frame_counter
-
                 # if object is put at left initially, but change to right tray afterward, will reevaluate object_left mark
                 if self.object_direction == 'left' and is_inside_right > 0:
                     self.is_change_object_direction = True
                 if self.object_direction == 'right' and is_inside_left > 0:
                     self.is_change_object_direction = True
+                return object_left_score, object_left_keyframe
 
         elif len(battery_coors) > 0 and len(balance_coor) == 1:
             # divide balance into 2 parts, left balance and right balance
@@ -710,9 +728,9 @@ class Evaluator(object):
                 is_inside_left = self.is_inside(weight_center_coor, left_tray)
 
                 if is_inside_right:
-                    weight_inside_right_tray.append(weight[0])
+                    weight_inside_right_tray.append(weight)
                 elif is_inside_left:
-                    weight_inside_left_tray.append(weight[0])
+                    weight_inside_left_tray.append(weight)
 
             # mark will be given if users put the weight at right tray, mark will be kept constant except if users change tray (eg right to left tray)
             # once the first weight is put in left/right tray, self.is_weights_put become True to show weights have been put
@@ -739,22 +757,21 @@ class Evaluator(object):
 
             # check if students put/take weights using tweezers
             if self.weights_direction == 'right':
-                self.evaluate_weights_tweezers(num_weight_inside_tray=len(weight_inside_right_tray))
+                self.evaluate_weights_tweezers(weight_inside_right_tray)
             elif self.weights_direction == 'left':
-                self.evaluate_weights_tweezers(num_weight_inside_tray=len(weight_inside_right_tray))
+                self.evaluate_weights_tweezers(weight_inside_left_tray)
 
-    def evaluate_weights_tweezers(self, num_weight_inside_tray):
-        weights_coors = self.top_object_dict['weights']
+    def evaluate_weights_tweezers(self, weight_inside_tray):
         tweezers_coor = self.top_object_dict['tweezers']
         # if number of weights inside tray increase/decrease,
         # check relative position (euclidean distance) of tweezers and all weights (top_left)
-        if self.num_weight_inside_tray != num_weight_inside_tray and len(tweezers_coor) == 1:
-            self.num_weight_inside_tray = num_weight_inside_tray
+        if self.num_weight_inside_tray != len(weight_inside_tray) and len(tweezers_coor) == 1:
+            self.num_weight_inside_tray = len(weight_inside_tray)
 
             if not self.is_weight_tweezers_lock_mark:
                 use_tweezers_bool = []
-                for weight_coor in weights_coors:
-                    a = np.array(weight_coor[1][0], weight_coor[1][1])
+                for weight in weight_inside_tray:
+                    a = np.array(weight[1][0], weight[1][1])
                     b = np.array(tweezers_coor[0][0], tweezers_coor[0][0])
                     if np.linalg.norm(a - b) <= self.use_tweezers_threshold:
                         use_tweezers_bool.append(True)
@@ -764,8 +781,12 @@ class Evaluator(object):
                 if not self.tweezers_warning \
                     or self.frame_counter - self.tweezers_warning < self.tweezers_warning_duration:
                     self.tweezers_warning = None
-                    self.scoring['measuring_score_weights_tweezers'] = 1
-                    self.keyframe['measuring_score_weights_tweezers'] = self.frame_counter
+                    if all(use_tweezers_bool):
+                        self.scoring['measuring_score_weights_tweezers'] = 1
+                        self.keyframe['measuring_score_weights_tweezers'] = self.frame_counter
+                    else:
+                        self.scoring['measuring_score_weights_tweezers'] = 0
+                        self.keyframe['measuring_score_weights_tweezers'] = self.frame_counter
                 else:
                     self.is_weight_tweezers_lock_mark = True
             else:
