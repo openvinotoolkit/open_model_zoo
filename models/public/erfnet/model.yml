@@ -30,4 +30,4 @@ input_info:
 model_optimizer_args:
   - --input_model=$dl_dir/erfnet.onnx
 framework: onnx
-license: https://raw.githubusercontent.com/onnx/models/master/LICENSE
+license: https://raw.githubusercontent.com/Zhangxianwen2021/ERFNet/main/License
