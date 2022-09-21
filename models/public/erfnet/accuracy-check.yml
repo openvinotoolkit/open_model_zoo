@@ -25,7 +25,7 @@ models:
             presenter:  print_scalar
   - name: ERFNet
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: segmentation
           make_argmax: True
@@ -41,9 +41,7 @@ models:
             dst_height: 350
             apply_to: prediction
         metrics:
-          - type: segmentation_accuracy
-            use_argmax: false
-            presenter: print_scalar
           - type: mean_iou
             use_argmax: false
             presenter:  print_scalar
+            reference: 0.7647
