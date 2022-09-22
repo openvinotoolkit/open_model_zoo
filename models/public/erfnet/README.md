@@ -1,8 +1,8 @@
-# ERFNet
+# erfnet
 
 ## Use Case and High-Level Description
 
-  This is a ONNX* version of `erfnet` model designed to perform real-time lane detection.
+  This is a ONNX\* version of `erfnet` model designed to perform real-time lane detection.
   This model is pre-trained in PyTorch* framework and retrained by CULane.
   For details see [repository](https://github.com/Zhangxianwen2021/ERFNet),
   paper of [ERFNet](https://doi.org/10.1109/TITS.2017.2750080) and [repository](https://github.com/cardwing/Codes-for-Lane-Detection/tree/master/ERFNet-CULane-PyTorch)
@@ -14,7 +14,7 @@
 | Type              | Semantic segmentation |
 | GFLOPs            | 11.13                 |
 | MParams           | 7.87                  |
-| Source framework  | PyTorch*              |
+| Source framework  | PyTorch\*             |
 
 ## Accuracy
 
