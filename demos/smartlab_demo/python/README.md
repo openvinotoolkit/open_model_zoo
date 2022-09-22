@@ -46,11 +46,13 @@ omz_downloader --list models.lst
 * smartlab-object-detection-0002
 * smartlab-object-detection-0003
 * smartlab-object-detection-0004
-* smartlab-sequence-modelling-0001
-* smartlab-sequence-modelling-0002
-* smartlab-action-recognition-0001-encoder-top
-* smartlab-action-recognition-0001-encoder-side
-* smartlab-action-recognition-0001-decoder
+* mode mtcnn
+  - smartlab-sequence-modelling-0001
+  - smartlab-sequence-modelling-0002
+* mode multiview
+  - smartlab-action-recognition-0001-encoder-top
+  - smartlab-action-recognition-0001-encoder-side
+  - smartlab-action-recognition-0001-decoder
 
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) for
