@@ -146,7 +146,7 @@ class Evaluator(object):
                 if action_seg_results == "adjust_rider":
                     self.evaluate_rider_tweezers()
 
-                if self.is_object_put == True and self.is_weights_put == True:  # if object and weights are put no matter at left/right tray,
+                if self.is_object_put and self.is_weights_put:  # if object and weights are put no matter at left/right tray,
                     self.evaluate_end_tidy()  # then can start evaluate whether they keep the apparatus
 
             self.check_score_validity()
@@ -429,6 +429,13 @@ class Evaluator(object):
         else:
             return False
 
+    def is_behind(self, small_item_coor, big_item_coor):
+        [big_x_min, big_y_min, big_x_max, big_y_max] = big_item_coor
+        [small_x_min, small_y_min, small_x_max, small_y_max] = small_item_coor
+        if (big_y_min + big_y_max) / 2 < small_y_min:
+            return True
+        return False
+
     def classify_state(self, action_seg_results):
         """
         filter input data for action so that only action persists
@@ -439,16 +446,10 @@ class Evaluator(object):
         action_seg_results: str
             action label
         """
-        if action_seg_results == "put_left" or \
-            action_seg_results == "put_right" or \
-            action_seg_results == "take_left" or \
-            action_seg_results == "take_right" or \
-            action_seg_results == 'put_take':
+        if action_seg_results in ["put_left", "put_right", "take_left", "take_right", "put_take"]:
             self.is_put_take_observed = True
-
-        if self.is_put_take_observed == True:
             self.state = "Measuring"
-        elif self.is_put_take_observed == False:
+        elif not self.is_put_take_observed:
             self.state = "Initial"
 
     def rotate(self, left, right, center):
@@ -574,6 +575,13 @@ class Evaluator(object):
                         self.scoring['measuring_score_rider_tweezers'] = 0
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
                         self.rider_tweezers_lock_mark = True  # once detected not using tweezers, will lose mark and not able to gain back this mark again
+        # corner case: rider and tweezer can't found correctly at the same time. we only detect tweezer_coor whether under balance
+        elif len(tweezers_coor) == 1 and len(self.side_object_dict['balance']) == 1:
+            tweezers_coor = self.side_object_dict['tweezers'][0]
+            balance_coor = self.side_object_dict['balance'][0]
+            if self.is_behind(tweezers_coor, balance_coor):
+                self.scoring['measuring_score_rider_tweezers'] = 1
+                self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
 
     def evaluate_object_left(self):
         object_left_score, _ = self.evaluate_object_left_from_view(view='top')
@@ -862,7 +870,7 @@ class Evaluator(object):
         if self.state == 'Initial':
             self.scoring['initial_score_balance'] = 1
             self.keyframe['initial_score_balance'] = self.frame_counter
-        elif self.state == "Measuring" and self.is_object_put == True and self.scoring['end_score_tidy'] == 0:
+        elif self.state == "Measuring" and self.is_object_put and self.scoring['end_score_tidy'] == 0:
             # double check object left in case 'end_score_tidy' not getting marks but object has been removed
             object_left_score, _ = self.evaluate_object_left_from_view(view='top')
             if object_left_score is not None and object_left_score >= 0:
