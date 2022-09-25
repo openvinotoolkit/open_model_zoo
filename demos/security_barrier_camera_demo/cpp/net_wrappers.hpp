@@ -122,8 +122,7 @@ public:
     }
 
     std::list<Result> getResults(ov::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
-        // there is no big difference if InferReq of detector from another device is passed
-        // because the processing is the same for the same topology
+        // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         ov::Tensor output_tensor = inferRequest.get_tensor(m_detectorOutputName);
         const float* const detections = output_tensor.data<float>();
@@ -141,13 +140,21 @@ public:
 
             cv::Rect rect;
             rect.x = static_cast<int>(detections[i * objectSize + 3] * upscale.width);
+            if(rect.x < 0)
+                rect.x = 0;
             rect.y = static_cast<int>(detections[i * objectSize + 4] * upscale.height);
+            if(rect.y < 0)
+                rect.y = 0;
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
+            if(rect.width > upscale.width)
+                rect.width = upscale.width;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
+            if(rect.height > upscale.height)
+                rect.height = upscale.height;
             results.push_back(Result{label, confidence, rect});
             std::ostringstream rawResultsStream;
-            rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
-                        << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
+            rawResultsStream << i << "," << label << "," << confidence
+                        << "," << rect.x << "," << rect.y << "," << rect.width << "," << rect.height;
             rawResults.push_back(rawResultsStream.str());
         }
         return results;
@@ -187,10 +194,15 @@ public:
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
         }
 
-        // color is the first output
-        m_outputNameForColor = outputs[0].get_any_name();
-        // type is the second output.
-        m_outputNameForType = outputs[1].get_any_name();
+        // Get the names within the output layer
+        if(outputs[0].get_any_name().find("color") != std::string::npos) {
+            m_outputNameForColor = outputs[0].get_any_name();
+            m_outputNameForType = outputs[1].get_any_name();
+        }
+        else {
+            m_outputNameForColor = outputs[1].get_any_name();
+            m_outputNameForType = outputs[0].get_any_name();
+        }
 
         ov::preprocess::PrePostProcessor ppp(model);
 
@@ -232,14 +244,14 @@ public:
         ov::Tensor inputTensor = inferRequest.get_tensor(m_attributesInputName);
         ov::Shape shape = inputTensor.get_shape();
         if (m_autoResize) {
-            ov::Tensor frameTensor = wrapMat2Tensor(img);
+            ov::Tensor frameTensor = wrapMat2Tensor(img.clone());
             ov::Coordinate p00({ 0, (size_t)vehicleRect.y, (size_t)vehicleRect.x, 0 });
             ov::Coordinate p01({ 1, (size_t)(vehicleRect.y + vehicleRect.height), (size_t)vehicleRect.x + vehicleRect.width, 3 });
             ov::Tensor roiTensor(frameTensor, p00, p01);
 
             inferRequest.set_tensor(m_attributesInputName, roiTensor);
         } else {
-            const cv::Mat& vehicleImage = img(vehicleRect);
+            const cv::Mat vehicleImage = img(vehicleRect).clone();
             resize2tensor(vehicleImage, inputTensor);
         }
     }
@@ -255,10 +267,17 @@ public:
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
         ov::Tensor colorsTensor = inferRequest.get_tensor(m_outputNameForColor);
         const float* colorsValues = colorsTensor.data<float>();
-
+        assert(7 == colorsTensor.get_size());
+        if (colorsTensor.get_size() != 7) {
+            throw std::logic_error("Vehicle Color output size should be 7.");
+        }
         // 4 possible types for each vehicle and we should select the one with the maximum probability
         ov::Tensor typesTensor = inferRequest.get_tensor(m_outputNameForType);
         const float* typesValues = typesTensor.data<float>();
+        assert(4 == typesTensor.get_size());
+        if (typesTensor.get_size() != 4) {
+            throw std::logic_error("Vehicle Types output size should be 4.");
+        }
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto  type_id = std::max_element(typesValues,  typesValues  + 4) - typesValues;

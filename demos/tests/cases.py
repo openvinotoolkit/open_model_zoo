@@ -63,7 +63,11 @@ class Demo:
         if not updated_options: return
         new_options = case.options.copy()
         for key, value in updated_options.items():
-            new_options[key] = value
+            # Modify path to the new dataset if updating option '-i'
+            if key == '-i':
+                new_options[key] = TestDataArg(value)
+            else:
+                new_options[key] = value
         new_case = case._replace(options=new_options)
         if with_replacement:
             self.test_cases.remove(case)
@@ -76,6 +80,10 @@ class Demo:
     def parse_output(self, output, test_case, device):
         if self.parser:
             self.parser(output, test_case, device)
+
+    def check_difference(self):
+        if self.parser:
+            return self.parser.check_difference()
 
     def update_option(self, updated_options):
         for case in self.test_cases[:]:
@@ -602,7 +610,8 @@ DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataDirectoryArg('vehicle-license-plate-detection-barrier')}),
-        TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
+        # Update to this model in order to obtain the ROI data
+        TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0123')}),
         single_option_cases('-m_lpr',
             None,
             ModelArg('license-plate-recognition-barrier-0001'),

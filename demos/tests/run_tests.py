@@ -50,6 +50,7 @@ from data_sequences import DATA_SEQUENCES
 scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
+    'correctness': importlib.import_module('correctness_cases').DEMOS,
 }
 
 
@@ -71,7 +72,7 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
     parser.add_argument('--scope', default='base',
-        help='The scenario for testing demos.', choices=('base', 'performance'))
+        help='The scenario for testing demos.', choices=('base', 'performance', 'correctness'))
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
@@ -243,6 +244,7 @@ def main():
             dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
 
         num_failures = 0
+        correctness_failures = 0
 
         try:
             pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
@@ -261,7 +263,6 @@ def main():
             print(header)
             print()
             demo.set_precisions(args.precisions, model_info)
-
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
                     [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
@@ -338,8 +339,7 @@ def main():
                                 exit_msg = f'Exit code: {e.returncode}\n'
                             elif isinstance(e, subprocess.TimeoutExpired):
                                 exit_msg = f'Command timed out after {e.timeout} seconds\n'
-                            output += exit_msg
-                            print(output)
+                            print('{}\n{}'.format(output, exit_msg))
                             failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
                             execution_time = -1
@@ -351,14 +351,19 @@ def main():
                                 write_log(header, args.log_file)
                             write_log(test_descr, args.log_file)
                             write_log(output, args.log_file)
-
+            if args.scope == "correctness":
+                print("Demo {} correctness checking....".format(demo.subdirectory))
+                if not demo.check_difference():
+                    correctness_failures += 1
+                    num_failures += 1
             print()
-
-    print("{} failures:".format(num_failures))
+    if args.scope == "correctness":
+        print("{} correctness checking failures".format(correctness_failures))
+    print("{} execution failures:".format(num_failures))
     for test in failed_tests:
         print(test)
 
-    sys.exit(0 if num_failures == 0 else 1)
+    sys.exit(0 if num_failures == 0  and correctness_failures == 0 else 1)
 
 
 if __name__ == '__main__':
