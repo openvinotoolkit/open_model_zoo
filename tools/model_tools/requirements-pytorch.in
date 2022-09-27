@@ -1,4 +1,4 @@
-onnx<=1.12,>=1.8.1
+onnx==1.12.0
 scipy~=1.5.4           # via torchvision
 torch==1.8.1
 torchvision==0.9.1
