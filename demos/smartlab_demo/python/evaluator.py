@@ -424,7 +424,7 @@ class Evaluator(object):
     def is_inside(self, small_item_center_coor, big_item_coor):
         [big_x_min, big_y_min, big_x_max, big_y_max] = big_item_coor
         [small_center_x, small_center_y] = small_item_center_coor
-        if small_center_x >= big_x_min and small_center_x <= big_x_max and small_center_y > big_y_min and small_center_y < big_y_max:
+        if big_x_min <= small_center_x <= big_x_max and big_y_min < small_center_y < big_y_max:
             return True
         else:
             return False
@@ -574,12 +574,15 @@ class Evaluator(object):
                     elif np.linalg.norm(rider_min_coordinate - tweezers_min_coordinate) > self.use_tweezers_threshold:
                         self.scoring['measuring_score_rider_tweezers'] = 0
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
-                        self.rider_tweezers_lock_mark = True  # once detected not using tweezers, will lose mark and not able to gain back this mark again
-        # corner case: rider and tweezer can't found correctly at the same time. we only detect tweezer_coor whether under balance
+                        # once detected not using tweezers, will lose mark and not able to gain back this mark again
+                        self.rider_tweezers_lock_mark = True
+        # corner case: rider and tweezer can't found correctly at the same time.
+        # we only detect tweezer_coor whether under balance
         elif len(tweezers_coor) == 1 and len(self.side_object_dict['balance']) == 1:
             tweezers_coor = self.side_object_dict['tweezers'][0]
             balance_coor = self.side_object_dict['balance'][0]
-            if self.is_behind(tweezers_coor, balance_coor):
+            if self.is_behind(tweezers_coor, balance_coor) and self.is_inside(self.get_center_coordinate(tweezers_coor),
+                                                                              balance_coor):
                 self.scoring['measuring_score_rider_tweezers'] = 1
                 self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
 
