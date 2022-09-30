@@ -15,7 +15,7 @@ models:
           - name: input
             type: INPUT
             value: .*input
-            shape: [1, 2048, 24]
+            shape: [1, 1152, 24]
             layout: NHWC
           - name: fhis_in_0
             type: INPUT
