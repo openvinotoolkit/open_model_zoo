@@ -45,7 +45,7 @@ models:
             max_error: True
             presenter: print_vector
             abs_threshold: 0.1
-            rel_threshold: 1
+            rel_threshold: 1.01
             reference:
               output@max_error: 1e-5
               output@mean: 1e-5

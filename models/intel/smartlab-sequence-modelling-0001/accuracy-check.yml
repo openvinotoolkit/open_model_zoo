@@ -3,7 +3,7 @@ models:
     launchers:
       - framework: openvino
         adapter:
-          type: regression    
+          type: regression
         inputs:
           - name: input
             type: INPUT
@@ -11,14 +11,12 @@ models:
             shape: [1, 3, 224, 224]
             layout: NCHW
     datasets:
-      - name: online_mstcn_plus_dataset
+      - name: online_mstcn_plus_encoder_dataset
         metrics:
           - type: mae
-            max_error: True
             presenter: print_vector
             abs_threshold: 0.1
             rel_threshold: 1
             reference:
-              output@max_error: 1e-5
-              output@mean: 1e-5
-              output@std: 0
+              mean: 0.05
+              std: 0.1
