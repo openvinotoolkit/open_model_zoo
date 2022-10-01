@@ -109,7 +109,7 @@ static std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::st
     std::vector<cv::gapi::wip::onevpl::CfgParam> source_cfgs;
     std::stringstream params_list(cfg_params);
     std::string line;
-    while (std::getline(params_list, line, ';')) {
+    while (std::getline(params_list, line, ',')) {
         source_cfgs.push_back(createFromString(line));
     }
     return source_cfgs;
