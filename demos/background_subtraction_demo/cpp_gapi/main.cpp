@@ -153,11 +153,8 @@ int main(int argc, char* argv[]) {
         // NB: oneVPL source rounds up frame size by 16
         // so size might be different from what ImagesCapture reads.
         if (FLAGS_use_onevpl) {
-            auto round16 = [](size_t v) {
-                return ((v + 15) / 16) * 16;
-            };
-            frame_size.width  = round16(frame_size.width);
-            frame_size.height = round16(frame_size.height);
+            frame_size.width  = cv::alignSize(frame_size.width, 16);
+            frame_size.height = cv::alignSize(frame_size.height, 16);
         }
 
         cv::GComputation comp([&] {

@@ -5,7 +5,7 @@ This demo shows how to perform background subtraction using G-API.
 > **NOTE**: Only batch size of 1 is supported.
 
 ## How It Works
-The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format. Please note, that there aren't background matting models in `OMZ` collection.
+The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format. Please note, that there aren't background matting models in `OpenModelZoo` collection.
 
 1. for instance segmentation models based on `Mask RCNN` approach:
     * One input: `image` for input image.
@@ -73,7 +73,10 @@ Working with raw formats user always must specify `codec` type via `-onevpl_para
 To build OpenCV G-API with `oneVPL` support follow instruction:
 [Building G-API with oneVPL Toolkit support](https://github.com/opencv/opencv/wiki/Graph-API#building-with-onevpl-toolkit-support)
 
+#### Troubleshooting
 During execution `oneVPL` might report warnings that tell the user that source can be configurable more accurate.
+
+For example:
 ```
  cv::gapi::wip::onevpl::VPLLegacyDecodeEngine::process_error [000001CED3851C70] error: cv::gapi::wip::onevpl::CachedPool::find_free - cannot get free surface from pool, size: 5
 ```
