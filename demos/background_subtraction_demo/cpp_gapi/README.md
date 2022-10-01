@@ -73,6 +73,12 @@ Working with raw formats user always must specify `codec` type via `-onevpl_para
 To build OpenCV G-API with `oneVPL` support follow instruction:
 [Building G-API with oneVPL Toolkit support](https://github.com/opencv/opencv/wiki/Graph-API#building-with-onevpl-toolkit-support)
 
+During execution `oneVPL` might report warnings that tell the user that source can be configurable more accurate.
+```
+ cv::gapi::wip::onevpl::VPLLegacyDecodeEngine::process_error [000001CED3851C70] error: cv::gapi::wip::onevpl::CachedPool::find_free - cannot get free surface from pool, size: 5
+```
+This might be fixed by increasing pool size using `-onevpl_pool_size` parameter.
+
 ## Running
 
 Run the application with the `-h` option to see the following usage message:
@@ -103,6 +109,7 @@ Options:
     -u                         Optional. List of monitors to show initially.
     -use_onevpl                Optional. Use onevpl video decoding.
     -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>;<prop name>:<value> Several important configuration parameters: -mfxImplDescription.mfxDecoderDescription.decoder.CodecID values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc-mfxImplDescription.AccelerationMode values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
+    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size.
 
 Available target devices:  <targets>
 ```

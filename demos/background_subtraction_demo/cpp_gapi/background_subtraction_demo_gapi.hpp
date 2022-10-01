@@ -43,6 +43,7 @@ static const char onevpl_params_message[] = "Optional. Parameters for onevpl vid
                                             "-mfxImplDescription.AccelerationMode "
                                             "values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode"
                                             "(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)";
+static const char onevpl_pool_size_message[] = "OneVPL source applies this parameter as preallocated frames pool size.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(res, "1280x720", camera_resolution_message);
@@ -59,6 +60,7 @@ DEFINE_uint32(blur_bgr, 0, blur_bgr_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(use_onevpl, false, use_onevpl_message);
 DEFINE_string(onevpl_params, "", onevpl_params_message);
+DEFINE_uint32(onevpl_pool_size, 0, onevpl_pool_size_message);
 
 /**
  * \brief This function shows a help message
@@ -88,4 +90,5 @@ static void showUsage() {
     std::cout << "    -u                         " << utilization_monitors_message << std::endl;
     std::cout << "    -use_onevpl                " << use_onevpl_message << std::endl;
     std::cout << "    -onevpl_params             " << onevpl_params_message << std::endl;
+    std::cout << "    -onevpl_pool_size          " << onevpl_pool_size_message << std::endl;
 }

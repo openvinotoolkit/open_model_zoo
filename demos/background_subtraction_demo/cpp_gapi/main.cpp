@@ -221,7 +221,12 @@ int main(int argc, char* argv[]) {
                                 stringToSize(FLAGS_res));
         cv::gapi::wip::IStreamSource::Ptr media_cap;
         if (FLAGS_use_onevpl) {
-            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, util::parseVPLParams(FLAGS_onevpl_params));
+            auto onevpl_params = util::parseVPLParams(FLAGS_onevpl_params);
+            if (FLAGS_onevpl_pool_size != 0) {
+                onevpl_params.push_back(
+                    cv::gapi::wip::onevpl::CfgParam::create_frames_pool_size(FLAGS_onevpl_pool_size));
+            }
+            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, std::move(onevpl_params));
         } else {
             media_cap = cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap);
         }
