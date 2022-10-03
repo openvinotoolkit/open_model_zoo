@@ -36,7 +36,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 static const char use_onevpl_message[] = "Optional. Use onevpl video decoding.";
 static const char onevpl_params_message[] = "Optional. Parameters for onevpl video decoding. "
                                             "OneVPL source can be fine-grained by providing configuration parameters. "
-                                            "Format: <prop name>:<value>;<prop name>:<value> "
+                                            "Format: <prop name>:<value>,<prop name>:<value> "
                                             "Several important configuration parameters: "
                                             "-mfxImplDescription.mfxDecoderDescription.decoder.CodecID "
                                             "values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc"
