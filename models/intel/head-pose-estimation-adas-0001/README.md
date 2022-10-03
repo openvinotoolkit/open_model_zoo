@@ -6,7 +6,7 @@ Head pose estimation network based on simple, handmade CNN architecture. Angle r
 layers are convolutions + ReLU + batch norm + fully connected with
 one output.
 
-The estimator outputs yaw pitch and roll angels measured in degrees. Suppose the following coordinate system:
+The estimator outputs yaw pitch and roll angles measured in degrees. Suppose the following coordinate system:
 * OX points from face center to camera
 * OY points from face center to right
 * OZ points from face center to up
