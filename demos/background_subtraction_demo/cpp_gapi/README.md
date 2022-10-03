@@ -112,7 +112,7 @@ Options:
     -u                         Optional. List of monitors to show initially.
     -use_onevpl                Optional. Use onevpl video decoding.
     -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>,<prop name>:<value> Several important configuration parameters: 'mfxImplDescription.mfxDecoderDescription.decoder.CodecID' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc and 'mfxImplDescription.AccelerationMode' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
-    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size. 0 leaves frames pool size default for your system. This parameter doesn't have a god value. It must be adjusted for specific execution (video, model, system ...).
+    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size. 0 leaves frames pool size default for your system. This parameter doesn't have a god default value. It must be adjusted for specific execution (video, model, system ...).
 
 Available target devices:  <targets>
 ```
