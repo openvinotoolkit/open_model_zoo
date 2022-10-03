@@ -66,27 +66,38 @@ void ResultsMarker::mark(cv::Mat& image, const FaceInferenceResults& faceInferen
         auto xCenter = faceBoundingBox.x + faceBoundingBoxWidth / 2;
         auto yCenter = faceBoundingBox.y + faceBoundingBoxHeight / 2;
 
-        // center to right
-        cv::line(image,
-                 cv::Point(xCenter, yCenter),
-                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * cosY + sinY * sinP * sinR)),
-                           static_cast<int>(yCenter + axisLength * cosP * sinR)),
-                 cv::Scalar(0, 0, 255),
-                 2);
-        // center to top
-        cv::line(image,
-                 cv::Point(xCenter, yCenter),
-                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * sinY * sinP + cosY * sinR)),
+        // OX points from face center to camera
+        // OY points from face center to right
+        // OZ points from face center to up
+
+        // Rotation matrix:
+        //       Yaw             Pitch            Roll
+        // [cosY -sinY 0]   [ cosP 0 sinP]   [1   0    0  ]
+        // [sinY  cosY 0] * [  0   1  0  ] * [0 cosR -sinR] =
+        // [  0    0   1]   [-sinP 0 cosP]   [0 sinR  cosR]
+
+        //   [cosY*cosP cosY*sinP*sinR-sinY*cosR cosY*sinP*cosR+sinY*sinR]
+        // = [sinY*cosP sinY*sinP*sinR+cosY*cosR sinY*sinP*cosR-cosY*sinR]
+        //   [  -cosP           cosP*sinR                cosP*cosR       ]
+
+        // Multiply third row by -1 because screen drawing axis points down
+        // Drop first row to project to a screen plane
+
+        // OY: center to right
+        cv::line(image, cv::Point(xCenter, yCenter),
+                 cv::Point(static_cast<int>(xCenter + axisLength * (sinY * sinP * sinR + cosY * cosR)),
+                           static_cast<int>(yCenter - axisLength * cosP * sinR)),
+                 cv::Scalar(0, 0, 255), 2);
+        // OZ: center to top
+        cv::line(image, cv::Point(xCenter, yCenter),
+                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * sinY * sinP - cosY * sinR)),
                            static_cast<int>(yCenter - axisLength * cosP * cosR)),
-                 cv::Scalar(0, 255, 0),
-                 2);
-        // center to forward
-        cv::line(image,
-                 cv::Point(xCenter, yCenter),
+                 cv::Scalar(0, 255, 0), 2);
+        // OX: center to camera
+        cv::line(image, cv::Point(xCenter, yCenter),
                  cv::Point(static_cast<int>(xCenter + axisLength * sinY * cosP),
                            static_cast<int>(yCenter + axisLength * sinP)),
-                 cv::Scalar(255, 0, 255),
-                 2);
+                 cv::Scalar(255, 0, 255), 2);
 
         putHighlightedText(
             image,
