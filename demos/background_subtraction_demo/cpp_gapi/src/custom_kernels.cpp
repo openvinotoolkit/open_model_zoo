@@ -169,7 +169,7 @@ custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path) : 
     }
 }
 
-cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GMat in, const cv::Size& in_size, cv::GMat background) {
+cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GFrame in, cv::GMat bgr, const cv::Size& in_size, cv::GMat background) {
     cv::GInferInputs inputs;
     inputs[m_input_name] = in;
     auto outputs = cv::gapi::infer<cv::gapi::Generic>(m_tag, inputs);
@@ -181,7 +181,7 @@ cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GMat in, const cv::Size& in_siz
     GAPI_Assert(dims.size() == 4u);
     auto mask = custom::GCalculateMaskRCNNBGMask::on(in_size, cv::Size(dims[3], dims[2]), labels, boxes, masks);
     auto mask3ch = cv::gapi::medianBlur(cv::gapi::merge3(mask, mask, mask), 11);
-    return (mask3ch & in) + (~mask3ch & background);
+    return (mask3ch & bgr) + (~mask3ch & background);
 }
 
 custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path) : NNBGReplacer(model_path) {
@@ -196,14 +196,14 @@ custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path) : NN
     m_output_name = m_outputs.begin()->first;
 }
 
-cv::GMat custom::BGMattingReplacer::replace(cv::GMat in, const cv::Size& in_size, cv::GMat background) {
+cv::GMat custom::BGMattingReplacer::replace(cv::GFrame in, cv::GMat bgr, const cv::Size& in_size, cv::GMat background) {
     cv::GInferInputs inputs;
     inputs[m_input_name] = in;
     auto outputs = cv::gapi::infer<cv::gapi::Generic>(m_tag, inputs);
 
     auto alpha = cv::gapi::resize(custom::GTensorToImg::on(outputs.at(m_output_name)), in_size);
     auto alpha3ch = cv::gapi::merge3(alpha, alpha, alpha);
-    auto in_fp = cv::gapi::convertTo(in, CV_32F);
+    auto in_fp = cv::gapi::convertTo(bgr, CV_32F);
     auto bgr_fp = cv::gapi::convertTo(background, CV_32F);
 
     cv::GScalar one(cv::Scalar::all(1.));

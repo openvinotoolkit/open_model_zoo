@@ -35,8 +35,10 @@
 #include <opencv2/gapi/own/assert.hpp>
 #include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/gapi/util/optional.hpp>
+#include <opencv2/gapi/streaming/onevpl/source.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+
 #include <openvino/openvino.hpp>
 
 #include <monitors/presenter.h>
@@ -82,6 +84,37 @@ static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
     GAPI_Assert(false && "Unreachable code!");
 }
 
+cv::gapi::wip::onevpl::CfgParam createFromString(const std::string &line) {
+    using namespace cv::gapi::wip;
+
+    if (line.empty()) {
+        throw std::runtime_error("Cannot parse CfgParam from emply line");
+    }
+
+    std::string::size_type name_endline_pos = line.find(':');
+    if (name_endline_pos == std::string::npos) {
+        throw std::runtime_error("Cannot parse CfgParam from: " + line +
+                                 "\nExpected separator \":\"");
+    }
+
+    std::string name = line.substr(0, name_endline_pos);
+    std::string value = line.substr(name_endline_pos + 1);
+
+    return cv::gapi::wip::onevpl::CfgParam::create(name, value,
+                                                   /* vpp params strongly optional */
+                                                   name.find("vpp.") == std::string::npos);
+}
+
+static std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::string& cfg_params) {
+    std::vector<cv::gapi::wip::onevpl::CfgParam> source_cfgs;
+    std::stringstream params_list(cfg_params);
+    std::string line;
+    while (std::getline(params_list, line, ',')) {
+        source_cfgs.push_back(createFromString(line));
+    }
+    return source_cfgs;
+}
+
 }  // namespace util
 
 int main(int argc, char* argv[]) {
@@ -117,9 +150,16 @@ int main(int argc, char* argv[]) {
                                                                stringToSize(FLAGS_res));
         const auto tmp = cap->read();
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
+        // NB: oneVPL source rounds up frame size by 16
+        // so size might be different from what ImagesCapture reads.
+        if (FLAGS_use_onevpl) {
+            frame_size.width  = cv::alignSize(frame_size.width, 16);
+            frame_size.height = cv::alignSize(frame_size.height, 16);
+        }
 
         cv::GComputation comp([&] {
-            cv::GMat in;
+            cv::GFrame in;
+            cv::GMat bgr = cv::gapi::streaming::BGR(in);
             // NB: target_bgr is optional second input which implies a background
             // that will change user video background. If user don't specify
             // it and specifies --bgr_blur then second input won't be used since
@@ -128,7 +168,7 @@ int main(int argc, char* argv[]) {
 
             cv::GMat bgr_resized;
             if (is_blur && FLAGS_target_bgr.empty()) {
-                bgr_resized = in;
+                bgr_resized = bgr;
             } else {
                 target_bgr = cv::util::make_optional<cv::GMat>(cv::GMat());
                 bgr_resized = cv::gapi::resize(target_bgr.value(), frame_size);
@@ -137,7 +177,7 @@ int main(int argc, char* argv[]) {
             auto background =
                 is_blur ? cv::gapi::blur(bgr_resized, cv::Size(FLAGS_blur_bgr, FLAGS_blur_bgr)) : bgr_resized;
 
-            auto result = model->replace(in, frame_size, background);
+            auto result = model->replace(in, bgr, frame_size, background);
 
             auto graph_inputs = cv::GIn(in);
             if (target_bgr.has_value()) {
@@ -176,7 +216,19 @@ int main(int argc, char* argv[]) {
                                 0,
                                 std::numeric_limits<size_t>::max(),
                                 stringToSize(FLAGS_res));
-        auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap));
+        cv::gapi::wip::IStreamSource::Ptr media_cap;
+        if (FLAGS_use_onevpl) {
+            auto onevpl_params = util::parseVPLParams(FLAGS_onevpl_params);
+            if (FLAGS_onevpl_pool_size != 0) {
+                onevpl_params.push_back(
+                    cv::gapi::wip::onevpl::CfgParam::create_frames_pool_size(FLAGS_onevpl_pool_size));
+            }
+            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, std::move(onevpl_params));
+        } else {
+            media_cap = cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap);
+        }
+
+        auto pipeline_inputs = cv::gin(std::move(media_cap));
         if (!is_blur && FLAGS_target_bgr.empty()) {
             cv::Scalar default_color(155, 255, 120);
             pipeline_inputs += cv::gin(cv::Mat(frame_size, CV_8UC3, default_color));
