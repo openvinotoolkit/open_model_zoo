@@ -31,7 +31,7 @@ class Evaluator(object):
         self.rider_portion = 6  # [IS_rider & MS_rider] divide the distance between 2 roundscrew1 into rider_portion portion, if rider falls in the first portion mean rider at zeroth position
         self.rider_move_threshold = 20  # [MS_rider_tweezers] if rider moves more than this value, check if tweezers or hand is used to move rider
         self.buffer_rider_size_limit = 30  # [MS_rider_tweezers]
-        self.use_tweezers_threshold = 100  # [MS_rider_tweezers & MS_weights_tweezers] if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
+        self.use_tweezers_threshold = 99  # [MS_rider_tweezers & MS_weights_tweezers] if tweezer and rider/weight distance more than tweezer treshold, consider use hand instead of use tweezer
         self.tweezers_warning_duration = 60  # [MS_rider_tweezers & MS_weights_tweezers] if score related to tweezers is 0 more than this duration/frames, score is 0 and unrevertible; else still revertible
         self.battery_aspect_ratio = 1.9
         self.reset()
@@ -792,7 +792,7 @@ class Evaluator(object):
                 if not self.tweezers_warning \
                     or self.frame_counter - self.tweezers_warning < self.tweezers_warning_duration:
                     self.tweezers_warning = None
-                    if all(use_tweezers_bool):
+                    if all(use_tweezers_bool) and len(use_tweezers_bool) > 0:
                         self.scoring['measuring_score_weights_tweezers'] = 1
                         self.keyframe['measuring_score_weights_tweezers'] = self.frame_counter
                     else:
