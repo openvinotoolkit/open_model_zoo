@@ -89,12 +89,15 @@ version = find_version("openvino/tools/accuracy_checker", "__init__.py")
 def prepare_requirements():
     requirements_core = read('requirements-core.in').split('\n')
     if 'install_core' in sys.argv:
-        return requirements_core
-    requirements = read("requirements.in").split('\n')
-    return requirements_core + requirements
+        warnings.warn(
+            '"install_core" command is deprecated and will be removed in 2023.1 release, please use "install" instead',
+            DeprecationWarning
+            )
+    requirements = read("requirements-extra.in").split('\n')
+    return requirements_core, requirements
 
 
-_requirements = prepare_requirements()
+_requirements, _extras = prepare_requirements()
 
 try:
     importlib.import_module('cv2')
@@ -128,6 +131,6 @@ setup(
     install_requires=_requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile',
+    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile',
                               'kenlm @ git+https://github.com/kpu/kenlm.git@f01e12d83c7fd03ebe6656e0ad6d73a3e022bd50#egg=kenlm']}
 )
