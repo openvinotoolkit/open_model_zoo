@@ -62,13 +62,6 @@ def check_and_update_numpy(min_acceptable='1.15'):
         subprocess.call([sys.executable, '-m', 'pip', 'install', 'numpy>={}'.format(min_acceptable)])
 
 
-def install_dependencies_with_pip(dependencies):
-    for dep in dependencies:
-        if dep.startswith('#'):
-            continue
-        subprocess.call([sys.executable, '-m', 'pip', 'install', str(dep)])
-
-
 class CoreInstall(install_command):
     pass
 
@@ -81,7 +74,6 @@ def find_version(*path):
 
     raise RuntimeError("Unable to find version string.")
 
-is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
 version = find_version("openvino/tools/accuracy_checker", "__init__.py")
 
@@ -113,8 +105,6 @@ except ImportError as opencv_import_error:
             + "\n Probably due to unsuitable numpy version, will be updated")
         check_and_update_numpy()
 
-if is_arm:
-    install_dependencies_with_pip(_requirements)
 
 setup(
     name="accuracy_checker",
@@ -128,7 +118,7 @@ setup(
             "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main"]},
     zip_safe=False,
     python_requires='>=3.5',
-    install_requires=_requirements if not is_arm else '',
+    install_requires=_requirements,
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
     extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile',
