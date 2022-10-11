@@ -50,7 +50,10 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName,
     : ImageModel(modelFileName, false, layout),
       aspectRatio(aspectRatio),
       targetSize(targetSize),
-      confidenceThreshold(confidenceThreshold) {}
+      confidenceThreshold(confidenceThreshold) {
+        resizeMode = RESIZE_KEEP_ASPECT;
+        interpolationMode = CUBIC;
+      }
 
 void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -139,7 +142,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage =
-        resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);
+        resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, interpolationMode, &roi);
     if (inputLayerSize.width < roi.width)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
 

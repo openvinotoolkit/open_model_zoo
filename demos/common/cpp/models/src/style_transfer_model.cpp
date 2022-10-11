@@ -81,17 +81,6 @@ void StyleTransferModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model)
     model = ppp.build();
 }
 
-std::shared_ptr<InternalModelData> StyleTransferModel::preprocess(const InputData& inputData,
-                                                                  ov::InferRequest& request) {
-    auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
-
-    cv::Mat resizedImage;
-    resizedImage = resizeImageExt(img, netInputWidth, netInputHeight);
-    request.set_input_tensor(wrapMat2Tensor(resizedImage));
-    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
-}
-
 std::unique_ptr<ResultBase> StyleTransferModel::postprocess(InferenceResult& infResult) {
     ImageResult* result = new ImageResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);

@@ -53,8 +53,10 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
       aspectRatio(aspectRatio),
       targetSize(targetSize),
       confidenceThreshold(confidenceThreshold),
-      delta(delta),
-      resizeMode(resizeMode) {}
+      delta(delta) {
+        resizeMode = resizeMode;
+        interpolationMode = CUBIC;
+      }
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -136,7 +138,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
                                                                        ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
-    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
+    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, interpolationMode, &roi);
     if (inputLayerSize.height - stride >= roi.height || inputLayerSize.width - stride >= roi.width) {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }

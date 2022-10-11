@@ -65,7 +65,6 @@ protected:
     int targetSize;
     float confidenceThreshold;
     float delta;
-    RESIZE_MODE resizeMode;
 
     std::string embeddingsTensorName;
     std::string heatmapsTensorName;
