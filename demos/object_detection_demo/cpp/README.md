@@ -143,6 +143,11 @@ omz_converter --list models.lst
   - yolo-v4-tf
   - yolo-v4-tiny-tf
   - yolof
+* architecture_type = yolov3-onnx
+  - yolo-v3-onnx
+  - yolo-v3-tiny-onnx
+* architecture_type = yolox
+  - yolox-tiny
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -154,7 +159,7 @@ object_detection_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo
+    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd, yolo, yolov3-onnx or yolox
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
