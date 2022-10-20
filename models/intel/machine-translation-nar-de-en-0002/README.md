@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a Deutsch-English machine translation model based on non-autoregressive Transformer topology.
+This is a Deutsch-English machine translation model based on non-autoregressive Transformer topology. The model is [trained](https://github.com/openvinotoolkit/training_extensions/tree/089de2f24667329a58e8560ed4e01ef203e99def/misc/pytorch_toolkit/machine_translation) on internal dataset.
 
 Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for implementation details) and the enclosed tokenizer_src and tokenizer_tgt folders.
 
