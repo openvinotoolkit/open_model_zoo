@@ -293,10 +293,6 @@ The dependencies for Python demos must be installed before running. It can be ac
 python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-### <a name="python_model_api"></a>Python\* model API package
-
-To run Python demo applications, you need to install the Python* Model API package. Refer to the [Python Model API documentation](https://github.com/openvinotoolkit/open_model_zoo/blob/master/demos/common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package)) to learn about its installation.
-
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
