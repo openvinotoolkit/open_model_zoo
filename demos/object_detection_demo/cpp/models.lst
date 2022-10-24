@@ -48,3 +48,8 @@ yolo-v3-tiny-tf
 yolo-v4-tf
 yolo-v4-tiny-tf
 yolof
+# For -at yolov3-onnx
+yolo-v3-onnx
+yolo-v3-tiny-onnx
+# For -at yolox
+yolox-tiny
