@@ -13,10 +13,10 @@ The estimator outputs yaw pitch and roll angles measured in degrees. Suppose the
 
 The predicted angles show how the face is rotated according to a rotation matrix:
 ```
-      Yaw             Pitch            Roll
-[cosY -sinY 0]   [ cosP 0 sinP]   [1   0    0  ]   [cosY*cosP cosY*sinP*sinR-sinY*cosR cosY*sinP*cosR+sinY*sinR]
-[sinY  cosY 0] * [  0   1  0  ] * [0 cosR -sinR] = [sinY*cosP sinY*sinP*sinR+cosY*cosR sinY*sinP*cosR-cosY*sinR]
-[  0    0   1]   [-sinP 0 cosP]   [0 sinR  cosR]   [  -cosP           cosP*sinR                cosP*cosR       ]
+Yaw - counterclockwise Pitch - counterclockwise Roll - clockwise
+    [cosY -sinY 0]          [ cosP 0 sinP]       [1    0    0 ]   [cosY*cosP cosY*sinP*sinR-sinY*cosR cosY*sinP*cosR+sinY*sinR]
+    [sinY  cosY 0]    *     [  0   1  0  ]   *   [0  cosR sinR] = [sinY*cosP cosY*cosR-sinY*sinP*sinR sinY*sinP*cosR+cosY*sinR]
+    [  0    0   1]          [-sinP 0 cosP]       [0 -sinR cosR]   [  -sinP          -cosP*sinR                cosP*cosR       ]
 ```
 
 ## Validation Dataset
