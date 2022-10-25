@@ -71,26 +71,26 @@ void ResultsMarker::mark(cv::Mat& image, const FaceInferenceResults& faceInferen
         // OZ points from face center to up
 
         // Rotation matrix:
-        //       Yaw             Pitch            Roll
-        // [cosY -sinY 0]   [ cosP 0 sinP]   [1   0    0  ]
-        // [sinY  cosY 0] * [  0   1  0  ] * [0 cosR -sinR] =
-        // [  0    0   1]   [-sinP 0 cosP]   [0 sinR  cosR]
+        // Yaw - counterclockwise Pitch - counterclockwise Roll - clockwise
+        //     [cosY -sinY 0]          [ cosP 0 sinP]       [1    0    0 ]
+        //     [sinY  cosY 0]    *     [  0   1  0  ]   *   [0  cosR sinR] =
+        //     [  0    0   1]          [-sinP 0 cosP]       [0 -sinR cosR]
 
         //   [cosY*cosP cosY*sinP*sinR-sinY*cosR cosY*sinP*cosR+sinY*sinR]
-        // = [sinY*cosP sinY*sinP*sinR+cosY*cosR sinY*sinP*cosR-cosY*sinR]
-        //   [  -cosP           cosP*sinR                cosP*cosR       ]
+        // = [sinY*cosP cosY*cosR-sinY*sinP*sinR sinY*sinP*cosR+cosY*sinR]
+        //   [  -sinP          -cosP*sinR                cosP*cosR       ]
 
         // Multiply third row by -1 because screen drawing axis points down
         // Drop first row to project to a screen plane
 
         // OY: center to right
         cv::line(image, cv::Point(xCenter, yCenter),
-                 cv::Point(static_cast<int>(xCenter + axisLength * (sinY * sinP * sinR + cosY * cosR)),
-                           static_cast<int>(yCenter - axisLength * cosP * sinR)),
+                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * cosY - sinY * sinP * sinR)),
+                           static_cast<int>(yCenter + axisLength * cosP * sinR)),
                  cv::Scalar(0, 0, 255), 2);
         // OZ: center to top
         cv::line(image, cv::Point(xCenter, yCenter),
-                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * sinY * sinP - cosY * sinR)),
+                 cv::Point(static_cast<int>(xCenter + axisLength * (cosR * sinY * sinP + cosY * sinR)),
                            static_cast<int>(yCenter - axisLength * cosP * cosR)),
                  cv::Scalar(0, 255, 0), 2);
         // OX: center to camera
