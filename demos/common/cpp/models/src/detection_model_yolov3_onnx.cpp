@@ -34,7 +34,6 @@
 #include "models/results.h"
 #include "utils/image_utils.h"
 
-
 ModelYoloV3ONNX::ModelYoloV3ONNX(const std::string& modelFileName,
                                  float confidenceThreshold,
                                  const std::vector<std::string>& labels,
@@ -77,7 +76,7 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Layout& infoLayout = getInputLayout(inputs.at(1));
 
     if (infoShape.size() != 2 && infoShape[ov::layout::channels_idx(infoLayout)] != 2) {
-            throw std::logic_error("Expected 2D info input with 2 channels");
+            throw std::logic_error("Expected 2D image info input with 2 channels");
         }
 
     ppp.input(infoInputName).tensor().set_element_type(ov::element::i32);
@@ -106,8 +105,9 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         } else if (currentShape[1] == numberOfClasses) {
             scoresOutputName = currentName;
             ppp.output(currentName).tensor().set_element_type(ov::element::f32);
-        } else
+        } else {
             throw std::logic_error("Expected shapes [:,:,4], [:,numClasses,:] and [:,3] for outputs");
+        }
         outputsNames.push_back(currentName);
     }
     model = ppp.build();
@@ -116,6 +116,7 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
 std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& inputData,
                                                                ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
+
     int* img_size = new int[2];
     img_size[0] = origImg.rows;
     img_size[1] = origImg.cols;
@@ -127,7 +128,7 @@ std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& 
 }
 
 float ModelYoloV3ONNX::getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd) {
-    float* scoresPtr = scoresTensor.data<float>();
+    const float* scoresPtr = scoresTensor.data<float>();
     const auto shape = scoresTensor.get_shape();
     int N = shape[2];
 
@@ -160,9 +161,10 @@ std::unique_ptr<ResultBase> ModelYoloV3ONNX::postprocess(InferenceResult& infRes
         int classInd = indicesData[i * indicesStride + 1];
         int boxInd = indicesData[i * indicesStride + 2];
 
-        if (batchInd == -1)
+        if (batchInd == -1) {
             break;
-        
+        }
+
         float score = getScore(scores, classInd, boxInd);
 
         if (score > confidenceThreshold) {
@@ -183,11 +185,10 @@ std::unique_ptr<ResultBase> ModelYoloV3ONNX::postprocess(InferenceResult& infRes
             obj.labelID = classInd;
             obj.label = getLabelName(classInd);
 
-
             result->objects.push_back(obj);
 
         }
     }
-    
+
     return std::unique_ptr<ResultBase>(result);
 }

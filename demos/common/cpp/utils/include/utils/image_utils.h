@@ -32,4 +32,4 @@ enum INTERPOLATION_MODE {
 };
 
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode = RESIZE_FILL,
-                       INTERPOLATION_MODE interpolationMode = LINEAR, cv::Rect* roi = nullptr);
+                       INTERPOLATION_MODE interpolationMode = LINEAR, cv::Rect* roi = nullptr, cv::Scalar BorderConstant = cv::Scalar(0, 0, 0));

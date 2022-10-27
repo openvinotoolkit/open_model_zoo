@@ -29,8 +29,6 @@
 #include "utils/image_utils.h"
 #include "utils/nms.hpp"
 
-
-
 class ModelYoloX: public DetectionModel {
 public:
     /// Constructor.
@@ -47,17 +45,16 @@ public:
                     float boxIOUThreshold = 0.5,
                     const std::vector<std::string>& labels = std::vector<std::string>(),
                     const std::string& layout = "");
-    
+
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
     std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
     void prepareGridsAndStrides();
-    Anchor xywh2xyxy(float x, float y, float width, float height);
 
     double boxIOUThreshold;
-    std::vector<std::pair<int, int>> grids;
-    std::vector<int> expandedStrides;
-    static const int numberOfClasses = 80;
+    std::vector<std::pair<size_t, size_t>> grids;
+    std::vector<size_t> expandedStrides;
+    static const size_t numberOfClasses = 80;
 };

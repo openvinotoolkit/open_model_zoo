@@ -17,7 +17,7 @@
 #include "utils/image_utils.h"
 
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode,
-                       INTERPOLATION_MODE interpolationMode, cv::Rect* roi) {
+                       INTERPOLATION_MODE interpolationMode, cv::Rect* roi, cv::Scalar BorderConstant) {
     if (width == mat.cols && height == mat.rows) {
         return mat;
     }
@@ -44,7 +44,7 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
         int dy = resizeMode == RESIZE_KEEP_ASPECT ? 0 : (height - resizedImage.rows) / 2;
 
         cv::copyMakeBorder(resizedImage, dst, dy, height - resizedImage.rows - dy,
-            dx, width - resizedImage.cols - dx, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+            dx, width - resizedImage.cols - dx, cv::BORDER_CONSTANT, BorderConstant);
         if (roi) {
             *roi = cv::Rect(dx, dy, resizedImage.cols, resizedImage.rows);
         }

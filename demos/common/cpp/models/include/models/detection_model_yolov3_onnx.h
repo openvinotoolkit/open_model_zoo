@@ -24,8 +24,6 @@
 #include "models/detection_model.h"
 #include "utils/image_utils.h"
 
-
-
 class ModelYoloV3ONNX: public DetectionModel {
 public:
     /// Constructor.
@@ -39,7 +37,7 @@ public:
                     float confidenceThreshold,
                     const std::vector<std::string>& labels = std::vector<std::string>(),
                     const std::string& layout = "");
-    
+
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
     std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 

@@ -35,15 +35,15 @@
 #include "utils/image_utils.h"
 #include "utils/nms.hpp"
 
-
 ModelYoloX::ModelYoloX(const std::string& modelFileName,
                                  float confidenceThreshold,
                                  float boxIOUThreshold,
                                  const std::vector<std::string>& labels,
                                  const std::string& layout)
     : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout),
-      boxIOUThreshold(boxIOUThreshold) {}
-
+      boxIOUThreshold(boxIOUThreshold) {
+        resizeMode = RESIZE_KEEP_ASPECT;
+      }
 
 void ModelYoloX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -89,11 +89,10 @@ void ModelYoloX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     model = ppp.build();
 }
 
-
 void ModelYoloX::prepareGridsAndStrides() {
-    std::vector<int> strides = {8, 16, 32};
-    std::vector<int> hsizes(3);
-    std::vector<int> wsizes(3);
+    std::vector<size_t> strides = {8, 16, 32};
+    std::vector<size_t> hsizes(3);
+    std::vector<size_t> wsizes(3);
 
     for (size_t i = 0; i < strides.size(); ++i) {
         hsizes[i] = netInputHeight / strides[i];
@@ -113,29 +112,14 @@ void ModelYoloX::prepareGridsAndStrides() {
 std::shared_ptr<InternalModelData> ModelYoloX::preprocess(const InputData& inputData,
                                                           ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
-    double scaleX = static_cast<double>(netInputWidth) / origImg.cols;
-    double scaleY = static_cast<double>(netInputHeight) / origImg.rows;
-    double scale = std::min(scaleX, scaleY);
-    cv::Mat resizedImage;
-    cv::resize(origImg, resizedImage, cv::Size(0, 0), scale, scale);
+    double scale = std::min(static_cast<double>(netInputWidth) / origImg.cols,
+                            static_cast<double>(netInputHeight) / origImg.rows);
 
-    cv::Mat paddedImg;
-    cv::copyMakeBorder(resizedImage, paddedImg, 0, netInputHeight - resizedImage.rows,
-                       0, netInputWidth - resizedImage.cols, cv::BORDER_CONSTANT, cv::Scalar(114, 114, 114));
-    paddedImg = inputTransform(paddedImg);
+    cv::Mat resizedImage = resizeImageExt(origImg, netInputWidth, netInputHeight, resizeMode,
+                                          interpolationMode, nullptr, cv::Scalar(114, 114, 114));
 
-    request.set_input_tensor(wrapMat2Tensor(paddedImg));
+    request.set_input_tensor(wrapMat2Tensor(resizedImage));
     return std::make_shared<InternalScaleData>(origImg.cols, origImg.rows, scale, scale);
-}
-
-
-Anchor ModelYoloX::xywh2xyxy(float x, float y, float width, float height){
-    Anchor result;
-    result.left = x - width / 2;
-    result.top = y - height / 2;
-    result.right = x + width / 2;
-    result.bottom = y + height / 2;
-    return result;
 }
 
 std::unique_ptr<ResultBase> ModelYoloX::postprocess(InferenceResult& infResult) {
@@ -146,7 +130,7 @@ std::unique_ptr<ResultBase> ModelYoloX::postprocess(InferenceResult& infResult) 
     const ov::Tensor& output = infResult.outputsData[outputsNames[0]];
     const auto& outputShape = output.get_shape();
     float* outputPtr = output.data<float>();
-    
+
     // Generate detection results
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
 
@@ -181,14 +165,15 @@ std::unique_ptr<ResultBase> ModelYoloX::postprocess(InferenceResult& infResult) 
         score *= maxClassScore;
         if (score < confidenceThreshold)
             continue;
-        
+
         // Add successful boxes
         scores.push_back(score);
         classes.push_back(mainClass);
-        Anchor trueBox = xywh2xyxy(outputPtr[startPos + 0], outputPtr[startPos + 1], outputPtr[startPos + 2], outputPtr[startPos + 3]);
+        Anchor trueBox = {outputPtr[startPos + 0] - outputPtr[startPos + 2] / 2, outputPtr[startPos + 1] - outputPtr[startPos + 3] / 2,
+                          outputPtr[startPos + 0] + outputPtr[startPos + 2] / 2, outputPtr[startPos + 1] + outputPtr[startPos + 3] / 2};
         validBoxes.push_back(Anchor({trueBox.left / scale.scaleX, trueBox.top / scale.scaleY,
                                      trueBox.right / scale.scaleX, trueBox.bottom / scale.scaleY}));
-    } 
+    }
 
     // NMS for valid boxes
     std::vector<int> keep = nms(validBoxes, scores, boxIOUThreshold, true);
@@ -204,6 +189,6 @@ std::unique_ptr<ResultBase> ModelYoloX::postprocess(InferenceResult& infResult) 
         obj.label = getLabelName(classes[index]);
         result->objects.push_back(obj);
     }
-    
+
     return std::unique_ptr<ResultBase>(result);
 }

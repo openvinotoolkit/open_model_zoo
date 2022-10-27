@@ -19,26 +19,25 @@
 #include "opencv2/core.hpp"
 #include <vector>
 
-
 struct Anchor {
-        float left;
-        float top;
-        float right;
-        float bottom;
+    float left;
+    float top;
+    float right;
+    float bottom;
 
-        float getWidth() const {
-            return (right - left) + 1.0f;
-        }
-        float getHeight() const {
-            return (bottom - top) + 1.0f;
-        }
-        float getXCenter() const {
-            return left + (getWidth() - 1.0f) / 2.0f;
-        }
-        float getYCenter() const {
-            return top + (getHeight() - 1.0f) / 2.0f;
-        }
-    };
+    float getWidth() const {
+        return (right - left) + 1.0f;
+    }
+    float getHeight() const {
+        return (bottom - top) + 1.0f;
+    }
+    float getXCenter() const {
+        return left + (getWidth() - 1.0f) / 2.0f;
+    }
+    float getYCenter() const {
+        return top + (getHeight() - 1.0f) / 2.0f;
+    }
+};
 
 template <typename Anchor>
 std::vector<int> nms(const std::vector<Anchor>& boxes, const std::vector<float>& scores,
