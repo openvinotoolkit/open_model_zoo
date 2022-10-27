@@ -117,10 +117,11 @@ std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& 
                                                                ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
 
-    int* img_size = new int[2];
-    img_size[0] = origImg.rows;
-    img_size[1] = origImg.cols;
-    ov::Tensor infoInput = ov::Tensor(ov::element::i32, ov::Shape({1, 2}), img_size);
+    cv::Mat info(cv::Size(1, 2), CV_32SC1);
+    info.at<int>(0, 0) = origImg.rows;
+    info.at<int>(0, 1) = origImg.cols;
+    auto allocator = std::make_shared<SharedTensorAllocator>(info);
+    ov::Tensor infoInput = ov::Tensor(ov::element::i32, ov::Shape({1, 2}),  ov::Allocator(allocator));
 
     request.set_tensor(inputsNames[1], infoInput);
 
