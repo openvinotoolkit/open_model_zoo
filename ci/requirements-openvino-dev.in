@@ -61,9 +61,9 @@ tensorflow (~=1.15.5) ; extra == 'tensorflow'
 tensorflow (~=2.4.1) ; extra == 'tensorflow2'
 texttable (~=1.6.3)
 tokenizers (>=0.10.1)
-torch (==1.8.1) ; extra == 'caffe2'
-torch (==1.8.1) ; extra == 'pytorch'
-torchvision (==0.9.1) ; extra == 'pytorch'
+torch (==1.12.1) ; extra == 'caffe2'
+torch (==1.12.1) ; extra == 'pytorch'
+torchvision (==0.13.1) ; extra == 'pytorch'
 tqdm (>=4.54.1)
 urllib3 (>=1.26.4) ; extra == 'mxnet'
 yacs (>=0.1.8) ; extra == 'pytorch'

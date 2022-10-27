@@ -146,11 +146,11 @@ tensorflow-estimator==2.4.0
     # via tensorflow
 termcolor==1.1.0
     # via tensorflow
-torch==1.8.1
+torch==1.12.1
     # via
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
-torchvision==0.9.1
+torchvision==0.13.1
     # via -r tools/model_tools/requirements-pytorch.in
 typing-extensions==3.7.4.3
     # via
