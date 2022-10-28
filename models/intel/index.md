@@ -475,8 +475,11 @@ Deep Learning models for online sequence modeling.
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
-
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.11   | 2.537    |
+| [smartlab-sequence-modelling-0002](./smartlab-sequence-modelling-0002/README.md) | 0.049   | 1.02    |
+| [smartlab-action-recognition-0001](./smartlab-action-recognition-0001/README.md) |    -   |   -      |
+|   smartlab-action-recognition-encoder-0001                                       | 0.611   | 3.387   |
+|   smartlab-action-recognition-decoder-0001                                       | 0.008   | 4.099   |
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)

@@ -140,5 +140,6 @@
 | smartlab-object-detection-0002 | YES | YES |  |
 | smartlab-object-detection-0003 | YES | YES |  |
 | smartlab-object-detection-0004 | YES | YES |  |
+| smartlab-action-recognition-0001 | YES | YES |  |
 | smartlab-sequence-modelling-0001 | YES | YES |  |
 | smartlab-sequence-modelling-0002 | YES | YES |  |
