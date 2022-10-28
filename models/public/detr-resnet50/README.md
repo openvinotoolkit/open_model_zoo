@@ -66,7 +66,7 @@ Expected color order is `BGR`.
     - `w` - width of bounding box(values are in normalized format, in range [0, 1])
     - `h` - height of bounding box(values are in normalized format, in range [0, 1])
 
-2. Scores, name: `scores`, shape - `1, 100, 92`. Contains scores for 91 [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes. The last class is `no-object` class.
+2. Scores, name: `scores`, shape - `1, 100, 92`. Contains scores in logits format for 91 [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes. The last class is `no-object` class.
 
 ### Converted model
 
@@ -81,7 +81,7 @@ Expected color order is `BGR`.
     - `w` - width of bounding box(values are in normalized format, in range [0, 1])
     - `h` - height of bounding box(values are in normalized format, in range [0, 1])
 
-2. Scores, name: `scores`, shape - `1, 100, 92`. Contains scores for 91 [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes. The last class is `no-object` class.
+2. Scores, name: `scores`, shape - `1, 100, 92`. Contains scores in logits format for 91 [Common Objects in Context (COCO)](https://cocodataset.org/#home) object classes. The last class is `no-object` class.
 
 ## Download a Model and Convert it into OpenVINO™ IR Format
 
