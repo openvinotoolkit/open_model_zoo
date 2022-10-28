@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-This is an smartlab action recogntion model that recognizes smartlab actions.
-The model uses smartlab dataset to predict actions.
-The model is classfier for 3 class actions.
+There are 3 models for smartlab action recogntion including two encoder models and one decoder model. 
+
+These models are fine-tuned with smartlab dataset to predict actions and can classfy 3 types of action including "noise_action", "put_take" and "adjust_rider".
 
 ## Example of the input data
 ![](./assets/frame0001.jpg)
