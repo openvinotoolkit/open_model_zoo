@@ -45,7 +45,7 @@ Expected color order is `BGR`
 
 ## Decoder model specification
 
-The smartlab-action-recognition-decoder-0001 is a fully connected decoder part which accepts features from top and front views, computed by encoder and predicts score for action across following label list: `no_action`, `noise_action`,  `adjust_rider`
+The smartlab-action-recognition-0001-decoder is a fully connected decoder part which accepts features from top and front views, computed by encoder and predicts score for action across following label list: `no_action`, `noise_action`,  `adjust_rider`
 
 | Metric  | Value |
 | ------- | ----- |
