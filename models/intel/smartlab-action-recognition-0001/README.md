@@ -18,11 +18,11 @@ Output `put_take` action
 | Accuracy on the DSI1867                        | TODO               |
 | Source framework                               | PyTorch\*          |
 
-## Encoder model specification
+## Encoder models specification
 
-The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone with convolutional encoder part of the action recognition. 
+The smartlab-action-recognition-0001-encoder-* have Mobilenet-V2 like backbone with convolutional encoder part of the action recognition. 
 
-To use both top-view and side-view features, there are two similar models called: `smartlab-action-recognition-0001-encoder-side` and `smartlab-action-recognition-0001-encoder-top`, which have the same strcuture but different weights.
+There are two models called: `smartlab-action-recognition-0001-encoder-side` and `smartlab-action-recognition-0001-encoder-top`, which have the same strcuture but different weights.
 
 | Metric  | Value |
 | ------- | ----- |
