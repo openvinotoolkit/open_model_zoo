@@ -10,12 +10,65 @@ These models are fine-tuned with smartlab dataset to predict actions and can cla
 ![](./assets/frame0001.jpg)
 
 ## Example of the output
-Name: `decoder_hidden`, shape: `1, 3`. The foramt is:
+Output `put_take` action
 
-[`has_action_conf_score`, `action_1_logits`, `action_2_logits`].
+## Composite model specification
+| Metric                                         | Value              |
+| ---------------------------------------------- | ------------------ |
+| Accuracy on the DSI1867                        | TODO               |
+| Source framework                               | PyTorch\*          |
 
-Detailed explaination is available in [smartlab-action-recognition-0001-decoder](./smartlab-action-recognition-0001-decoder/README.md)
+## Encoder model specification
 
+The smartlab-action-recognition-encoder-0001 is a Mobilenet-V2 like backbone with convolutional encoder part of the action recognition. 
+
+To use both top-view and side-view features, there are two similar models called: `smartlab-action-recognition-0001-encoder-side` and `smartlab-action-recognition-0001-encoder-top`, which have the same strcuture but different weights.
+
+| Metric  | Value |
+| ------- | ----- |
+| GFlops  | 0.611 |
+| MParams | 3.387 |
+
+### Inputs
+
+Image, name: `input_image`, shape: `1, 3, 224, 224` in the `B, C, H, W` format, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+Expected color order is `BGR`
+
+### Outputs
+
+1. Name: `output_feature`, shape: `1, 1280`. Features from encoder part of action recogntion head.
+
+## Decoder model specification
+
+The smartlab-action-recognition-decoder-0001 is a fully connected decoder part which accepts features from top and front views, computed by encoder and predicts score for action across following label list: `no_action`, `noise_action`,  `adjust_rider`
+
+| Metric  | Value |
+| ------- | ----- |
+| GFlops  | 0.008 |
+| MParams | 4.099 |
+
+### Inputs
+
+1. Name: `input_feature_1`, shape: `1, 1280`. Encoded features from topview.
+2. Name: `input_feature_2`, shape: `1, 1280`. Encoded features from frontview.
+
+### Outputs
+
+1. Name: `decoder_hidden`, shape: `1, 3`. The foramt [`has_action_conf_score`, `action_1_logits`, `action_2_logits`]
+    * `has_action_conf_score` - confidence for action frame. If>0.5, there is specified action.
+    * `action_1_logits` - confidence for the put_take action class
+    * `action_2_logits` - confidence for the adjust_rider action class
+
+Classification confidence scores in the [0, 1] range.
+## Demo usage
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+- [smartlab_demo/python](../../../demos/smartlab_demo/python/README.md)
 
 ## Legal Information
 
