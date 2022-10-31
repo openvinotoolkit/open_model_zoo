@@ -135,11 +135,16 @@ class OpenVINOFeedbackModel(FeedbackModel, BaseOpenVINOModel):
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if self.input_blob is None:
             self.input_blob = input_blob
-            self.output_blob = next(iter(self.outputs)).get_any_name()
+            self.output_blob = next(iter(self.outputs))
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
-        self.output_blob = postprocess_output_name(self.output_blob, self.outputs, raise_error=False)
-
+        self.output_blob = postprocess_output_name(
+            self.output_blob, self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+        if self.output_blob not in self.outputs:
+            self.output_blob = postprocess_output_name(
+            generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix),
+            self.outputs, additional_mapping=self.additional_output_mapping, raise_error=False)
+        self.adapter.output_blob = self.output_blob
         self.with_prefix = with_prefix
 
     def load_network(self, network, launcher):

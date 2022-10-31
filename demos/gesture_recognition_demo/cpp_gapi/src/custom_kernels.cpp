@@ -1,41 +1,49 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "custom_kernels.hpp"
+
+#include <algorithm>
+#include <atomic>
+#include <cstdint>
+#include <vector>
+
+#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <opencv2/gapi/gcommon.hpp>
 #include <opencv2/imgproc.hpp>
-#include <list>
+
+#include "tracker.hpp"
 
 const float BOUNDING_BOX_THRESHOLD = 0.4f;
 const int ACTION_IMAGE_SCALE = 256;
 
 namespace {
-cv::Rect convert_to_central_roi(const cv::Rect& person_roi,
-                                const cv::Size& in_size,
-                                const size_t scale) {
+cv::Rect convert_to_central_roi(const cv::Rect& person_roi, const cv::Size& in_size, const size_t scale) {
     const int roi_height = person_roi.height;
     const int roi_width = person_roi.width;
 
-    const int src_roi_center_x = int(0.5 * (person_roi.tl().x + person_roi.br().x));
-    const int src_roi_center_y = int(0.5 * (person_roi.tl().y + person_roi.br().y));
+    const int src_roi_center_x = static_cast<int>(0.5 * (person_roi.tl().x + person_roi.br().x));
+    const int src_roi_center_y = static_cast<int>(0.5 * (person_roi.tl().y + person_roi.br().y));
 
-    const float height_scale = float(in_size.height) / float(scale);
-    const float width_scale = float(in_size.width) / float(scale);
+    const float height_scale = static_cast<float>(in_size.height) / static_cast<float>(scale);
+    const float width_scale = static_cast<float>(in_size.width) / static_cast<float>(scale);
 
     CV_DbgAssert(height_scale < 1.0f);
     CV_DbgAssert(width_scale < 1.0f);
 
     const int min_roi_size = std::min(roi_height, roi_width);
-    const int trg_roi_height = int(height_scale * min_roi_size);
-    const int trg_roi_width  = int(width_scale * min_roi_size);
+    const int trg_roi_height = static_cast<int>(height_scale * min_roi_size);
+    const int trg_roi_width = static_cast<int>(width_scale * min_roi_size);
 
-    return cv::Rect(int(src_roi_center_x - 0.5 * trg_roi_width),
-                    int(src_roi_center_y - 0.5 * trg_roi_height),
+    return cv::Rect(static_cast<int>(src_roi_center_x - 0.5 * trg_roi_width),
+                    static_cast<int>(src_roi_center_y - 0.5 * trg_roi_height),
                     trg_roi_width,
                     trg_roi_height);
 }
-} // anonymous namespace
+}  // anonymous namespace
 
+// clang-format off
 GAPI_OCV_KERNEL(OCVGetFastFrame, custom::GetFastFrame) {
     static void run(const std::vector<cv::Mat>& batch,
                     const cv::Size& image_size,
@@ -50,8 +58,8 @@ GAPI_OCV_KERNEL(OCVExtractBoundingBox, custom::ExtractBoundingBox) {
                     const cv::Mat& in_frame,
                     const cv::Scalar& net_size,
                           TrackedObjects& detections) {
-        float scaling_x = float(in_frame.size().width / net_size[3]);
-        float scaling_y = float(in_frame.size().height / net_size[2]);
+        float scaling_x = static_cast<float>(in_frame.size().width / net_size[3]);
+        float scaling_y = static_cast<float>(in_frame.size().height / net_size[2]);
 
         detections.clear();
         const float *data = in_ssd_result.ptr<float>();
@@ -100,7 +108,7 @@ GAPI_OCV_KERNEL_ST(OCVTrackPerson, custom::TrackPerson, Tracker) {
         tracked_actions = tracker_action.trackedDetectionsWithLabels();
     }
 };
-
+// clang-format on
 namespace BatchState {
 struct Params {
     cv::Mat current_frame;
@@ -119,8 +127,9 @@ struct Params {
         return *this;
     }
 };
-} // namespace BatchState
+}  // namespace BatchState
 
+// clang-format off
 GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) {
     static void setup(const cv::GArrayDesc&,
                       const cv::GArrayDesc&,
@@ -131,10 +140,10 @@ GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) 
         BatchState::Params params;
         params.last_id = 0;
         params.prepared_mat.create(std::vector<int>{1,
-                                                    int(net_size[0]),
-                                                    int(net_size[1]),
-                                                    int(net_size[2]),
-                                                    int(net_size[3])}, CV_32F);
+                                                    static_cast<int>(net_size[0]),
+                                                    static_cast<int>(net_size[1]),
+                                                    static_cast<int>(net_size[2]),
+                                                    static_cast<int>(net_size[3])}, CV_32F);
         state = std::make_shared<BatchState::Params>(params);
     }
     static void run(const std::vector<cv::Mat>& batch,
@@ -144,16 +153,16 @@ GAPI_OCV_KERNEL_ST(OCVConstructClip, custom::ConstructClip, BatchState::Params) 
                     const std::shared_ptr<size_t>& current_person_id,
                           std::vector<cv::Mat>& wrapped_mat,
                     BatchState::Params& state) {
-        const int duration = int(net_size[1]);
-        const int height = int(net_size[2]);
-        const int width = int(net_size[3]);
+        const int duration = static_cast<int>(net_size[1]);
+        const int height = static_cast<int>(net_size[2]);
+        const int width = static_cast<int>(net_size[3]);
         const auto ptr = batch[batch.size() - 1].ptr<uint8_t>();
         auto p_pm = state.prepared_mat.ptr<float>();
 
-        if (ptr[1] > 0) { // is filled and updated
-            int step = ptr[0]; // first
+        if (ptr[1] > 0) {  // is filled and updated
+            int step = ptr[0];  // first
             size_t& person_id = *current_person_id;
-            if (person_id < tracked_persons.size()) { // wrong number protection
+            if (person_id < tracked_persons.size()) {  // wrong number protection
                 state.last_id = person_id;
             }
             for (int i = 0; i < duration; ++i) {
@@ -202,13 +211,15 @@ GAPI_OCV_KERNEL(OCVGestureRecognitionPostprocessing, custom::GestureRecognitionP
             int minIdx = 0, maxIdx = 0;
             const float* data = asl_result[0].ptr<float>();
             // Find more suitable action
-            cv::minMaxIdx(asl_result[0].reshape(1, {int(asl_result[0].total())}), &min, &max, &minIdx, &maxIdx);
+            cv::minMaxIdx(asl_result[0].reshape(1,
+                static_cast<int>(asl_result[0].total())), &min, &max, &minIdx, &maxIdx);
             if (data[maxIdx] > ar_threshold) {
                 label_number = maxIdx;
             }
         }
     }
 };
+// clang-format on
 
 cv::gapi::GKernelPackage custom::kernels() {
     return cv::gapi::kernels<OCVExtractBoundingBox,

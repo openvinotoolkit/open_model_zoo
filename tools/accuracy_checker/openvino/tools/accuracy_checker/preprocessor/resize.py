@@ -114,6 +114,15 @@ def ppocr_max_aspect_ratio(dst_width, dst_height, image_width, image_height):
     return int(image_width * ratio), int(image_height * ratio)
 
 
+def ppocr_cls_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    ratio = image_width / float(image_height)
+    if np.ceil(dst_height * ratio) > dst_width:
+        resized_w = dst_width
+    else:
+        resized_w = int(np.ceil(dst_height * ratio))
+    return resized_w, dst_height
+
+
 class ScaleFactor:
     def __init__(self, config, parameters):
         self.scale = get_parameter_value_from_config(config, parameters, 'scale')
@@ -147,7 +156,8 @@ ASPECT_RATIO_SCALE = {
     'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio,
     'scale_factor': ScaleFactor,
     'ppcrnn_ratio': ppocr_aspect_ratio,
-    'ppocr_max_ratio': ppocr_max_aspect_ratio
+    'ppocr_max_ratio': ppocr_max_aspect_ratio,
+    'ppocr_cls_ratio': ppocr_cls_aspect_ratio
 }
 
 
@@ -213,27 +223,6 @@ class _PillowResizer(_Resizer):
     __provider__ = 'pillow'
     default_interpolation = 'BILINEAR'
 
-    def __init__(self, interpolation):
-        self._supported_interpolations = {
-            'NEAREST': Image.NEAREST,
-            'NONE': Image.NONE,
-            'BILINEAR': Image.BILINEAR,
-            'LINEAR': Image.LINEAR,
-            'BICUBIC': Image.BICUBIC,
-            'CUBIC': Image.CUBIC,
-            'ANTIALIAS': Image.ANTIALIAS,
-        }
-        try:
-            optional_interpolations = {
-                'BOX': Image.BOX,
-                'LANCZOS': Image.LANCZOS,
-                'HAMMING': Image.HAMMING,
-            }
-            self._supported_interpolations.update(optional_interpolations)
-        except AttributeError:
-            pass
-        super().__init__(interpolation)
-
     def resize(self, data, new_height, new_width):
         data = Image.fromarray(data)
         data = data.resize((new_width, new_height), self.interpolation)
@@ -245,20 +234,22 @@ class _PillowResizer(_Resizer):
     def supported_interpolations(cls):
         if Image is None:
             return {}
+        resampling = Image.Resampling if hasattr(Image, 'Resampling') else Image
+        dither = Image.Dither if hasattr(Image, 'Dither') else Image
         intrp = {
-            'NEAREST': Image.NEAREST,
-            'NONE': Image.NONE,
-            'BILINEAR': Image.BILINEAR,
-            'LINEAR': Image.LINEAR,
-            'BICUBIC': Image.BICUBIC,
-            'CUBIC': Image.CUBIC,
-            'ANTIALIAS': Image.ANTIALIAS
+            'NEAREST': resampling.NEAREST,
+            'NONE': dither.NONE,
+            'BILINEAR': resampling.BILINEAR,
+            'LINEAR': resampling.LINEAR if hasattr(resampling, 'LINEAR') else resampling.BILINEAR,
+            'BICUBIC': resampling.BICUBIC,
+            'CUBIC': resampling.CUBIC if hasattr(resampling, 'CUBIC') else resampling.BICUBIC,
         }
         try:
             optional_interpolations = {
-                'BOX': Image.BOX,
-                'LANCZOS': Image.LANCZOS,
-                'HAMMING': Image.HAMMING,
+                'BOX': resampling.BOX,
+                'LANCZOS': resampling.LANCZOS,
+                'ANTIALIAS': resampling.ANTIALIAS if hasattr(resampling, 'ANTIALIAS') else resampling.LANCZOS,
+                'HAMMING': resampling.HAMMING,
             }
             intrp.update(optional_interpolations)
         except AttributeError:
@@ -280,11 +271,6 @@ class _TFResizer(_Resizer):
             self._resize = tf.image.resize_images
         else:
             self._resize = tf.image.resize
-        self._supported_interpolations = {
-            'BILINEAR': tf.image.ResizeMethod.BILINEAR,
-            'AREA': tf.image.ResizeMethod.AREA,
-            'BICUBIC': tf.image.ResizeMethod.BICUBIC,
-        }
         self.default_interpolation = 'BILINEAR'
         super().__init__(interpolation)
 
@@ -294,7 +280,17 @@ class _TFResizer(_Resizer):
 
     @classmethod
     def supported_interpolations(cls):
-        return {}
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            return {}
+        if tf.__version__ < '2.0.0':
+            tf.enable_eager_execution()
+        return {
+            'BILINEAR': tf.image.ResizeMethod.BILINEAR,
+            'AREA': tf.image.ResizeMethod.AREA,
+            'BICUBIC': tf.image.ResizeMethod.BICUBIC,
+        }
 
 
 def create_resizer(config):

@@ -14,18 +14,23 @@
 // limitations under the License.
 */
 
+#include "models/detection_model.h"
+
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include "models/detection_model.h"
+
 #include "models/image_model.h"
 
-DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    const std::vector<std::string>& labels, const std::string& layout) :
-    ImageModel(modelFileName, useAutoResize, layout),
-    confidenceThreshold(confidenceThreshold),
-    labels(labels) {
-}
+DetectionModel::DetectionModel(const std::string& modelFileName,
+                               float confidenceThreshold,
+                               bool useAutoResize,
+                               const std::vector<std::string>& labels,
+                               const std::string& layout)
+    : ImageModel(modelFileName, useAutoResize, layout),
+      confidenceThreshold(confidenceThreshold),
+      labels(labels) {}
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;

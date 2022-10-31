@@ -31,7 +31,7 @@ For details on this model, see [repository](https://github.com/mozilla/DeepSpeec
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
 Increasing beam_width improves WER metric and slows down decoding. Speech Recognition DeepSpeech Demo has a faster C++ CTC decoder module.
 
-Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_models` is a path to the folder, where models are downloaded and converted by [Model Downloader and other automation tools](../../../tools/model_tools/README.md).
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_model` is a path to the folder, where the current model is downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
 
 ## Input
 
@@ -66,9 +66,9 @@ Chunk processing order must be from early to late audio positions.
 
     See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
- 2. LSTM in-state vector, name: `previous_state_c`, shape: `1, 2048`, format: `B, C`.
+ 2. LSTM in-state vector, name: `previous_state_c:0`, shape: `1, 2048`, format: `B, C`.
 
- 3. LSTM input vector, name: `previous_state_h`, shape: `1, 2048`, format: `B, C`.
+ 3. LSTM input vector, name: `previous_state_h:0`, shape: `1, 2048`, format: `B, C`.
 
 When splitting a long audio into chunks, these two last inputs must be fed with the corresponding outputs from the previous chunk.
 Chunk processing order must be from early to late audio positions.
@@ -105,9 +105,9 @@ Chunk processing order must be from early to late audio positions.
 
     *NB*: `logits` is probabilities after softmax, despite its name.
 
- 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd'` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
- 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
 ## Download a Model and Convert it into OpenVINO™ IR Format
 

@@ -32,7 +32,7 @@ from openvino.tools.accuracy_checker.preprocessor import (
     PointAligner,
     GeometricOperationMetadata
 )
-from openvino.tools.accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
+from openvino.tools.accuracy_checker.preprocessor.launcher_preprocessing import get_preprocessor, preprocessing_available
 from openvino.tools.accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
 from openvino.tools.accuracy_checker.preprocessor.resize import _OpenCVResizer
 from openvino.tools.accuracy_checker.data_readers import DataRepresentation
@@ -894,31 +894,31 @@ class TestPreprocessorExtraArgs:
             Preprocessor.provide('point_alignment', {'type': 'point_alignment', 'something_extra': 'extra'})
 
 
-@pytest.mark.skipif(not ie_preprocess_available(), reason='IE version does not support preprocessing')
+@pytest.mark.skipif(not preprocessing_available('dlsdk'), reason='IE version does not support preprocessing')
 class TestIEPreprocessor:
     def test_warn_on_no_supported_ops(self):
         config = [{'type': 'crop'}]
         with pytest.warns(UserWarning):
-            preprocessor = IEPreprocessor(config)
+            preprocessor = get_preprocessor('dlsdk')(config)
             assert not preprocessor.steps
 
     def test_aspect_ratio_resize(self):
         config = [{'type': 'resize', 'aspect_ratio': 'higher'}]
         with pytest.warns(UserWarning):
-            preprocessor = IEPreprocessor(config)
+            preprocessor = get_preprocessor('dlsdk')(config)
             assert not preprocessor.steps
             assert preprocessor.keep_preprocessing_info == config
 
     def test_unsupported_interpolation_resize(self):
         config = [{'type': 'resize', 'interpolation': 'unknown'}]
         with pytest.warns(UserWarning):
-            preprocessor = IEPreprocessor(config)
+            preprocessor = get_preprocessor('dlsdk')(config)
             assert not preprocessor.steps
             assert preprocessor.keep_preprocessing_info == config
 
     def test_resize_no_interpolation_specified(self):
         config = [{'type': 'resize'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'resize_algorithm'
@@ -929,7 +929,7 @@ class TestIEPreprocessor:
 
     def test_resize_bilinear_interpolation_specified(self):
         config = [{'type': 'resize', 'interpolation': 'bilinear'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'resize_algorithm'
@@ -940,7 +940,7 @@ class TestIEPreprocessor:
 
     def test_resize_area_interpolation_specified(self):
         config = [{'type': 'resize', 'interpolation': 'area'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'resize_algorithm'
@@ -951,7 +951,7 @@ class TestIEPreprocessor:
 
     def test_particular_preprocessing_transition(self):
         config = [{'type': 'crop'}, {'type': 'resize'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'resize_algorithm'
@@ -964,7 +964,7 @@ class TestIEPreprocessor:
     def test_no_transit_preprocessing_if_last_operation_is_not_supported(self):
         config = [{'type': 'resize'}, {'type': 'crop'}]
         with pytest.warns(UserWarning):
-            preprocessor = IEPreprocessor(config)
+            preprocessor = get_preprocessor('dlsdk')(config)
             assert not preprocessor.has_resize()
             assert not preprocessor.steps
             assert preprocessor.keep_preprocessing_info == config
@@ -972,14 +972,14 @@ class TestIEPreprocessor:
     def test_unsupported_color_format(self):
         config = [{'type': 'bgr_to_gray'}]
         with pytest.warns(UserWarning):
-            preprocessor = IEPreprocessor(config)
+            preprocessor = get_preprocessor('dlsdk')(config)
             assert not preprocessor.has_resize()
             assert not preprocessor.steps
             assert preprocessor.keep_preprocessing_info == config
 
     def test_rgb_color_format(self):
         config = [{'type': 'rgb_to_bgr'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert not preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert not preprocessor.keep_preprocessing_info
@@ -990,7 +990,7 @@ class TestIEPreprocessor:
 
     def test_nv12_color_format(self):
         config = [{'type': 'nv12_to_bgr'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert not preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert not preprocessor.keep_preprocessing_info
@@ -1001,7 +1001,7 @@ class TestIEPreprocessor:
 
     def test_partial_color_format(self):
         config = [{'type': 'bgr_to_nv12'}, {'type': 'nv12_to_bgr'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert not preprocessor.has_resize()
         assert len(preprocessor.steps) == 1
         assert preprocessor.keep_preprocessing_info == [config[0]]
@@ -1012,7 +1012,7 @@ class TestIEPreprocessor:
 
     def test_several_supported_preprocessing_ops(self):
         config = [{'type': 'resize'}, {'type': 'bgr_to_rgb'}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_resize()
         assert len(preprocessor.steps) == 2
         assert not preprocessor.keep_preprocessing_info
@@ -1027,7 +1027,7 @@ class TestIEPreprocessor:
 
     def test_mean_values_only(self):
         config = [{'type': 'normalization', 'mean': 255}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_normalization()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'mean_variant'
@@ -1037,7 +1037,7 @@ class TestIEPreprocessor:
 
     def test_std_values_only(self):
         config = [{'type': 'normalization', 'std': 255}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_normalization()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'mean_variant'
@@ -1047,7 +1047,7 @@ class TestIEPreprocessor:
 
     def test_mean_and_std_values(self):
         config = [{'type': 'normalization', 'mean': 255, 'std': 255}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_normalization()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'mean_variant'
@@ -1057,7 +1057,7 @@ class TestIEPreprocessor:
 
     def test_mean_values_for_each_channel(self):
         config = [{'type': 'normalization', 'mean': [255, 255, 255], 'std': [255, 255, 255]}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_normalization()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'mean_variant'
@@ -1067,7 +1067,7 @@ class TestIEPreprocessor:
 
     def test_precomputed_mean_values(self):
         config = [{'type': 'normalization', 'mean': 'imagenet', 'std': 255}]
-        preprocessor = IEPreprocessor(config)
+        preprocessor = get_preprocessor('dlsdk')(config)
         assert preprocessor.has_normalization()
         assert len(preprocessor.steps) == 1
         assert preprocessor.steps[0].name == 'mean_variant'

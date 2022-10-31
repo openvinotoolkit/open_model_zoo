@@ -77,7 +77,7 @@ Model is supported by [text-detection c++ demo](../../../demos/text_detection_de
 ```
 -tr_pt_first
 -m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
--tr_o_blb_nm "logits"
+-tr_o_blb_nm "decoder_output"
 -tr_composite
 -dt simple -lower
 ```

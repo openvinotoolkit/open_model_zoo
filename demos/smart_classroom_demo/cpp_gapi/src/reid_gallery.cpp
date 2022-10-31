@@ -1,18 +1,28 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
+
+#include <stddef.h>
+
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <opencv2/core.hpp>
 
 #include "face_reid.hpp"
 #include "tracker.hpp"
 
 namespace {
-    float ComputeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
-        float xy = static_cast<float>(descr1.dot(descr2));
-        float xx = static_cast<float>(descr1.dot(descr1));
-        float yy = static_cast<float>(descr2.dot(descr2));
-        float norm = sqrt(xx * yy) + 1e-6f;
-        return 1.0f - xy / norm;
-    }
+float ComputeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
+    float xy = static_cast<float>(descr1.dot(descr2));
+    float xx = static_cast<float>(descr1.dot(descr1));
+    float yy = static_cast<float>(descr2.dot(descr2));
+    float norm = sqrt(xx * yy) + 1e-6f;
+    return 1.0f - xy / norm;
+}
 
 }  // namespace
 
@@ -58,13 +68,14 @@ size_t EmbeddingsGallery::size() const {
 std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const {
     std::vector<std::string> map;
     map.reserve(identities.size());
-    for (const auto& item : identities)  {
+    for (const auto& item : identities) {
         map.emplace_back(item.label);
     }
     return map;
 }
 
 bool EmbeddingsGallery::LabelExists(const std::string& label) const {
-    return identities.end() != std::find_if(identities.begin(), identities.end(),
-                                            [label](const GalleryObject& o) { return o.label == label; });
+    return identities.end() != std::find_if(identities.begin(), identities.end(), [label](const GalleryObject& o) {
+               return o.label == label;
+           });
 }

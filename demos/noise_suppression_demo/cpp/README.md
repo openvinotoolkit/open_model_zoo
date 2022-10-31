@@ -34,7 +34,15 @@ omz_converter --list models.lst
 
 ## Running
 
-Running the application with an empty list of options yields an error message.
+Running the demo with `-h` shows this help message:
+```
+  [ -h]               show this help message and exit
+  [--help]            print help on all arguments
+    -m <MODEL FILE>   path to an .xml file with a trained model
+    -i <WAV>          path to an input WAV file
+  [ -d <DEVICE>]      specify a device to infer on (the list of available devices is shown below). Default is CPU
+  [ -o <WAV>]         path to an output WAV file. Default is noise_suppression_demo_out.wav
+```
 
 For example, to do inference on a CPU, run the following command:
 

@@ -15,12 +15,22 @@
 */
 
 #pragma once
+#include <stddef.h>
+#include <stdint.h>
+
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <openvino/openvino.hpp>
+
 #include <openvino/op/region_yolo.hpp>
+#include <openvino/openvino.hpp>
+
 #include "models/detection_model.h"
-#include <models/results.h>
+
+struct DetectedObject;
+struct InferenceResult;
+struct ResultBase;
 
 class ModelYolo : public DetectionModel {
 protected:
@@ -34,17 +44,16 @@ protected:
         size_t outputHeight = 0;
 
         Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionYolo);
-        Region(size_t classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, size_t outputWidth, size_t outputHeight);
+        Region(size_t classes,
+               int coords,
+               const std::vector<float>& anchors,
+               const std::vector<int64_t>& masks,
+               size_t outputWidth,
+               size_t outputHeight);
     };
 
 public:
-    enum YoloVersion {
-        YOLO_V1V2,
-        YOLO_V3,
-        YOLO_V4,
-        YOLO_V4_TINY,
-        YOLOF
-    };
+    enum YoloVersion { YOLO_V1V2, YOLO_V3, YOLO_V4, YOLO_V4_TINY, YOLOF };
 
     /// Constructor.
     /// @param modelFileName name of model to load
@@ -61,19 +70,28 @@ public:
     /// @param anchors - vector of anchors coordinates. Required for YOLOv4, for other versions it may be omitted.
     /// @param masks - vector of masks values. Required for YOLOv4, for other versions it may be omitted.
     /// @param layout - model input layout
-    ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
-        const std::vector<float>& anchors = std::vector<float>(), const std::vector<int64_t>& masks = std::vector<int64_t>(),
-        const std::string& layout = "");
+    ModelYolo(const std::string& modelFileName,
+              float confidenceThreshold,
+              bool useAutoResize,
+              bool useAdvancedPostprocessing = true,
+              float boxIOUThreshold = 0.5,
+              const std::vector<std::string>& labels = std::vector<std::string>(),
+              const std::vector<float>& anchors = std::vector<float>(),
+              const std::vector<int64_t>& masks = std::vector<int64_t>(),
+              const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 
-    void parseYOLOOutput(const std::string& output_name, const ov::Tensor& tensor,
-        const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
-        const unsigned long original_im_w, std::vector<DetectedObject>& objects);
+    void parseYOLOOutput(const std::string& output_name,
+                         const ov::Tensor& tensor,
+                         const unsigned long resized_im_h,
+                         const unsigned long resized_im_w,
+                         const unsigned long original_im_h,
+                         const unsigned long original_im_w,
+                         std::vector<DetectedObject>& objects);
 
     static int calculateEntryIndex(int entriesNum, int lcoords, size_t lclasses, int location, int entry);
     static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);

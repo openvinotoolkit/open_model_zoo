@@ -24,11 +24,12 @@ from time import perf_counter
 import cv2
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from openvino.model_zoo.model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
-from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -77,6 +78,9 @@ def build_argparser():
     common_model_args.add_argument('--layout', type=str, default=None,
                                    help='Optional. Model inputs layouts. '
                                         'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')
+    common_model_args.add_argument('--num_classes', default=None, type=int,
+                                   help='Optional. Number of detected classes. Only for NanoDet, NanoDetPlus '
+                                        'architecture types.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -155,9 +159,11 @@ def print_raw_results(detections, labels, frame_id):
 def main():
     args = build_argparser().parse_args()
     if args.architecture_type != 'yolov4' and args.anchors:
-        log.warning('The "--anchors" options works only for "-at==yolov4". Option will be omitted')
+        log.warning('The "--anchors" option works only for "-at==yolov4". Option will be omitted')
     if args.architecture_type != 'yolov4' and args.masks:
-        log.warning('The "--masks" options works only for "-at==yolov4". Option will be omitted')
+        log.warning('The "--masks" option works only for "-at==yolov4". Option will be omitted')
+    if args.architecture_type not in ['nanodet', 'nanodet-plus'] and args.num_classes:
+        log.warning('The "--num_classes" option works only for "-at==nanodet" and "-at==nanodet-plus". Option will be omitted')
 
     cap = open_images_capture(args.input, args.loop)
 
@@ -176,6 +182,7 @@ def main():
         'path_to_labels': args.labels,
         'confidence_threshold': args.prob_threshold,
         'input_size': args.input_size, # The CTPN specific
+        'num_classes': args.num_classes, # The NanoDet and NanoDetPlus specific
     }
     model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)
     model.log_layers_info()

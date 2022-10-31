@@ -13,7 +13,7 @@
 
 import numpy as np
 
-from .model import Model, WrapperError
+from .model import Model
 from .types import DictValue, NumericalValue, StringValue, BooleanValue
 
 
@@ -27,7 +27,7 @@ class Bert(Model):
         self.token_pad = [self.vocab['[PAD]']]
         self.input_names = [i.strip() for i in self.input_names.split(',')]
         if self.inputs.keys() != set(self.input_names):
-            raise WrapperError(self.__model__, 'The Wrapper expects input names: {}, actual network input names: {}'.format(
+            self.raise_error('The Wrapper expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.inputs.keys())))
         self.max_length = self.inputs[self.input_names[0]].shape[1]
 
@@ -56,7 +56,7 @@ class Bert(Model):
     def pad_input(self, input_ids, attention_mask, token_type_ids):
         pad_len = self.max_length - len(input_ids)
         if pad_len < 0:
-            raise ValueError("The input request is longer than max number of tokens ({})"
+            self.raise_error("The input request is longer than max number of tokens ({})"
                              " processed by model".format(self.max_length))
         input_ids += self.token_pad * pad_len
         token_type_ids += [0] * pad_len
@@ -142,7 +142,7 @@ class BertQuestionAnswering(Bert):
 
         self.output_names = [o.strip() for o in self.output_names.split(',')]
         if self.outputs.keys() != set(self.output_names):
-            raise WrapperError(self.__model__, 'The Wrapper output names: {}, actual network output names: {}'.format(
+            self.raise_error('The Wrapper expects output names: {}, actual network output names: {}'.format(
                 self.output_names, list(self.outputs.keys())))
 
     @classmethod

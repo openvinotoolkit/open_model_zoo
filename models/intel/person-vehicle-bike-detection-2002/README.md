@@ -14,14 +14,14 @@ prior boxes for 512x512 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.248 (internal test set)                 |
+| AP @ [ IoU=0.50:0.95 ]          | 0.2459 (internal test set)                |
 | GFlops                          | 3.146                                     |
 | MParams                         | 1.821                                     |
 | Source framework                | PyTorch\*                                 |
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

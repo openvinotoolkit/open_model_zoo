@@ -15,12 +15,23 @@
 */
 
 #pragma once
+#include <stddef.h>
+
+#include <memory>
 #include <string>
-#include <vector>
-#include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
+
+#include <opencv2/core/types.hpp>
+
 #include "models/image_model.h"
-#include "models/results.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class DeblurringModel : public ImageModel {
 public:
@@ -30,8 +41,7 @@ public:
     /// @param layout - model input layout
     DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize, const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

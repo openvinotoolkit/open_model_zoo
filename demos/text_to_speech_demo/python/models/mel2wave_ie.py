@@ -191,7 +191,7 @@ class WaveRNNIE:
 
 
 class MelGANIE:
-    def __init__(self, model, core, device='CPU', default_width=800):
+    def __init__(self, model, core, device='CPU', default_width=80):
         """
         return class provided MelGAN inference.
 

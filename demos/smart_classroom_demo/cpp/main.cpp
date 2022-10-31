@@ -384,7 +384,9 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
 
         auto cur_obj_id = first_obj.object_id;
         auto cur_label = first_obj.label;
-        SCR_CHECK(face_track_id_to_label.count(cur_obj_id) == 0) << " Repeating face tracks";
+        if (face_track_id_to_label.count(cur_obj_id) == 1) {
+            throw std::runtime_error("Repeating face tracks");
+        }
         face_track_id_to_label[cur_obj_id] = cur_label;
     }
     return face_track_id_to_label;

@@ -1,10 +1,17 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <iomanip>
-
 #include "logger.hpp"
+
+#include <algorithm>
+#include <iomanip>
+#include <memory>
+#include <utility>
+
+#include <ie_common.h>
+
+#include "tracker.hpp"
 
 namespace {
 
@@ -23,15 +30,16 @@ std::string FrameIdxToString(const std::string& path, int frame_idx) {
 
 DetectionsLogger::DetectionsLogger() {}
 
-DetectionsLogger::DetectionsLogger(bool enabled)
-    : write_logs_(enabled) {}
+DetectionsLogger::DetectionsLogger(bool enabled) : write_logs_(enabled) {}
 
-void DetectionsLogger::CreateNextFrameRecord(const std::string& path, const int frame_idx,
-                                             const size_t width, const size_t height) {
+void DetectionsLogger::CreateNextFrameRecord(const std::string& path,
+                                             const int frame_idx,
+                                             const size_t width,
+                                             const size_t height) {
     if (write_logs_) {
         log_stream_.clear();
-        log_stream_ << "Frame_name: " << path << "@" << frame_idx << " width: "
-                    << width << " height: " << height << std::endl;
+        log_stream_ << "Frame_name: " << path << "@" << frame_idx << " width: " << width << " height: " << height
+                    << std::endl;
     }
 }
 
@@ -56,10 +64,11 @@ void DetectionsLogger::AddPersonToFrame(const cv::Rect& rect, const std::string&
 }
 
 void DetectionsLogger::AddDetectionToFrame(const TrackedObject& object, const int frame_idx) {
-        act_det_log_stream_ << "{" << "frame_id " << frame_idx;
-        act_det_log_stream_ << " det_conf " << object.confidence << std::endl;
-        act_det_log_stream_ << "label " << object.label << std::endl;
-        act_det_log_stream_ << "rect " << object.rect << "}" << std::endl;
+    act_det_log_stream_ << "{"
+                        << "frame_id " << frame_idx;
+    act_det_log_stream_ << " det_conf " << object.confidence << std::endl;
+    act_det_log_stream_ << "label " << object.label << std::endl;
+    act_det_log_stream_ << "rect " << object.rect << "}" << std::endl;
 }
 
 void DetectionsLogger::FinalizeFrameRecord() {
@@ -75,7 +84,7 @@ void DetectionsLogger::DumpDetections(const std::string& video_path,
                                       const std::map<int, int>& track_id_to_label_faces,
                                       const std::vector<std::string>& action_idx_to_label,
                                       const std::vector<std::string>& person_id_to_label,
-                                      const std::vector<std::map<int, int>>& frame_face_obj_id_to_action_maps)  {
+                                      const std::vector<std::map<int, int>>& frame_face_obj_id_to_action_maps) {
     std::map<int, std::vector<const TrackedObject*>> frame_idx_to_face_track_objs;
 
     for (const auto& tr : face_tracks) {
@@ -94,7 +103,7 @@ void DetectionsLogger::DumpDetections(const std::string& video_path,
     }
     act_stat_log_stream_ << std::endl;
 
-    for (size_t i = 0; i < num_frames; i++)  {
+    for (size_t i = 0; i < num_frames; i++) {
         CreateNextFrameRecord(video_path, i, frame_size.width, frame_size.height);
         const auto& frame_face_obj_id_to_action = frame_face_obj_id_to_action_maps.at(i);
         for (auto& kv : face_label_to_action) {
@@ -133,10 +142,8 @@ void DetectionsLogger::DumpTracks(const std::map<int, RangeEventsTrack>& obj_id_
             log_stream_ << "Person: " << face_label << std::endl;
             for (const auto& event : events) {
                 std::string action_label = GetUnknownOrLabel(action_idx_to_label, event.action);
-                log_stream_ << "   - " << action_label
-                            << ": from " << event.begin_frame_id
-                            << " to " << event.end_frame_id
-                            << " frames" <<std::endl;
+                log_stream_ << "   - " << action_label << ": from " << event.begin_frame_id << " to "
+                            << event.end_frame_id << " frames" << std::endl;
             }
         }
     }
@@ -147,8 +154,8 @@ std::tuple<std::string, std::string, std::string> DetectionsLogger::GetLogResult
 }
 
 void DetectionsLogger::ConvertActionMapsToFrameEventTracks(const std::vector<std::map<int, int>>& obj_id_to_action_maps,
-                                         int default_action,
-                                         std::map<int, FrameEventsTrack>* obj_id_to_actions_track) {
+                                                           int default_action,
+                                                           std::map<int, FrameEventsTrack>* obj_id_to_actions_track) {
     for (size_t frame_id = 0; frame_id < obj_id_to_action_maps.size(); ++frame_id) {
         for (const auto& tup : obj_id_to_action_maps[frame_id]) {
             if (tup.second != default_action) {
@@ -159,8 +166,8 @@ void DetectionsLogger::ConvertActionMapsToFrameEventTracks(const std::vector<std
 }
 
 void DetectionsLogger::ConvertRangeEventsTracksToActionMaps(int num_frames,
-                                      const std::map<int, RangeEventsTrack>& obj_id_to_events,
-                                      std::vector<std::map<int, int>>* obj_id_to_action_maps) {
+                                                            const std::map<int, RangeEventsTrack>& obj_id_to_events,
+                                                            std::vector<std::map<int, int>>* obj_id_to_action_maps) {
     obj_id_to_action_maps->resize(num_frames);
     for (const auto& tup : obj_id_to_events) {
         const int obj_id = tup.first;
@@ -174,8 +181,12 @@ void DetectionsLogger::ConvertRangeEventsTracksToActionMaps(int num_frames,
 }
 
 void DetectionsLogger::SmoothTracks(const std::map<int, FrameEventsTrack>& obj_id_to_actions_track,
-                  int start_frame, int end_frame, int window_size, int min_length, int default_action,
-                  std::map<int, RangeEventsTrack>* obj_id_to_events) {
+                                    int start_frame,
+                                    int end_frame,
+                                    int window_size,
+                                    int min_length,
+                                    int default_action,
+                                    std::map<int, RangeEventsTrack>* obj_id_to_events) {
     // Iterate over face tracks
     for (const auto& tup : obj_id_to_actions_track) {
         const auto& frame_events = tup.second;
@@ -258,7 +269,9 @@ std::map<int, int> DetectionsLogger::GetMapFaceTrackIdToLabel(const std::vector<
 
         auto cur_obj_id = first_obj.object_id;
         auto cur_label = first_obj.label;
-        SCR_CHECK(face_track_id_to_label.count(cur_obj_id) == 0) << " Repeating face tracks";
+        if (face_track_id_to_label.count(cur_obj_id) == 1) {
+            throw std::runtime_error("Repeating face tracks");
+        }
         face_track_id_to_label[cur_obj_id] = cur_label;
     }
     return face_track_id_to_label;

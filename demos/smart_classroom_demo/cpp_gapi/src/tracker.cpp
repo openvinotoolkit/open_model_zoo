@@ -1,9 +1,13 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "tracker.hpp"
-#include "logger.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <utility>
 
 const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 
@@ -11,7 +15,7 @@ class KuhnMunkres::Impl {
 public:
     explicit Impl(bool greedy) : n_(), greedy_(greedy) {}
 
-    std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix) {
+    std::vector<size_t> Solve(const cv::Mat& dissimilarity_matrix) {
         CV_Assert(dissimilarity_matrix.type() == CV_32F);
         double min_val;
         cv::minMaxLoc(dissimilarity_matrix, &min_val);
@@ -22,8 +26,7 @@ public:
         marked_ = cv::Mat(n_, n_, CV_8S, cv::Scalar(0));
         points_ = std::vector<cv::Point>(n_ * 2);
 
-        dissimilarity_matrix.copyTo(dm_(
-                                        cv::Rect(0, 0, dissimilarity_matrix.cols, dissimilarity_matrix.rows)));
+        dissimilarity_matrix.copyTo(dm_(cv::Rect(0, 0, dissimilarity_matrix.cols, dissimilarity_matrix.rows)));
 
         is_row_visited_ = std::vector<int>(n_, 0);
         is_col_visited_ = std::vector<int>(n_, 0);
@@ -97,8 +100,10 @@ public:
         for (int i = 0; i < n_; i++) {
             auto dm_ptr = dm_.ptr<float>(i);
             for (int j = 0; j < n_; j++) {
-                if (is_row_visited_[i]) dm_ptr[j] += val;
-                if (!is_col_visited_[j]) dm_ptr[j] -= val;
+                if (is_row_visited_[i])
+                    dm_ptr[j] += val;
+                if (!is_col_visited_[j])
+                    dm_ptr[j] -= val;
             }
         }
     }
@@ -157,7 +162,7 @@ public:
                         }
 
                         for (int i = 0; i < count + 1; i++) {
-                            auto &mark = marked_.at<char>(points_[i].y, points_[i].x);
+                            auto& mark = marked_.at<char>(points_[i].y, points_[i].x);
                             mark = mark == kStar ? 0 : kStar;
                         }
 
@@ -189,7 +194,7 @@ private:
 
 KuhnMunkres::KuhnMunkres(bool greedy) : impl_(std::make_shared<Impl>(greedy)) {}
 
-std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
+std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
     CV_Assert(impl_ != nullptr);
     CV_Assert(!dissimilarity_matrix.empty());
     CV_Assert(dissimilarity_matrix.type() == CV_32F);
@@ -197,9 +202,8 @@ std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
     return impl_->Solve(dissimilarity_matrix);
 }
 
-cv::Point Center(const cv::Rect &rect) {
-    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5),
-                     static_cast<int>(rect.y + rect.height * 0.5));
+cv::Point Center(const cv::Rect& rect) {
+    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5), static_cast<int>(rect.y + rect.height * 0.5));
 }
 
 TrackerParams::TrackerParams()
@@ -216,25 +220,29 @@ TrackerParams::TrackerParams()
       averaging_window_size_for_rects(1),
       averaging_window_size_for_labels(1) {}
 
-bool IsInRange(float x, const cv::Vec2f &v) { return v[0] <= x && x <= v[1]; }
-bool IsInRange(float x, float a, float b) { return a <= x && x <= b; }
+bool IsInRange(float x, const cv::Vec2f& v) {
+    return v[0] <= x && x <= v[1];
+}
+bool IsInRange(float x, float a, float b) {
+    return a <= x && x <= b;
+}
 
-void Tracker::FilterDetectionsAndStore(const TrackedObjects &detections) {
+void Tracker::FilterDetectionsAndStore(const TrackedObjects& detections) {
     detections_.clear();
-    for (const auto &det : detections) {
+    for (const auto& det : detections) {
         float aspect_ratio = static_cast<float>(det.rect.height) / det.rect.width;
-        if (det.confidence > params_.min_det_conf &&
-                IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
-                IsInRange(static_cast<float>(det.rect.height), params_.bbox_heights_range)) {
+        if (det.confidence > params_.min_det_conf && IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
+            IsInRange(static_cast<float>(det.rect.height), params_.bbox_heights_range)) {
             detections_.emplace_back(det);
         }
     }
 }
 
-void Tracker::SolveAssignmentProblem(
-        const std::set<size_t> &track_ids, const TrackedObjects &detections,
-        std::set<size_t> *unmatched_tracks, std::set<size_t> *unmatched_detections,
-        std::set<std::tuple<size_t, size_t, float>> *matches) {
+void Tracker::SolveAssignmentProblem(const std::set<size_t>& track_ids,
+                                     const TrackedObjects& detections,
+                                     std::set<size_t>* unmatched_tracks,
+                                     std::set<size_t>* unmatched_detections,
+                                     std::set<std::tuple<size_t, size_t, float>>* matches) {
     CV_Assert(unmatched_tracks);
     CV_Assert(unmatched_detections);
     unmatched_tracks->clear();
@@ -266,11 +274,10 @@ void Tracker::SolveAssignmentProblem(
 }
 
 bool Tracker::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     auto c = Center(tracks_.at(track_id).back().rect);
-    if (frame_size_ != cv::Size() &&
-            (c.x < 0 || c.y < 0 || c.x > frame_size_.width ||
-             c.y > frame_size_.height)) {
+    if (frame_size_ != cv::Size() && (c.x < 0 || c.y < 0 || c.x > frame_size_.width || c.y > frame_size_.height)) {
         tracks_.at(track_id).lost = params_.forget_delay + 1;
         active_track_ids_.erase(track_id);
         return true;
@@ -279,7 +286,8 @@ bool Tracker::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
 }
 
 bool Tracker::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id) {
-    if (tracks_.find(track_id) == tracks_.end()) return true;
+    if (tracks_.find(track_id) == tracks_.end())
+        return true;
     if (tracks_.at(track_id).lost > params_.forget_delay) {
         active_track_ids_.erase(track_id);
         return true;
@@ -290,17 +298,18 @@ bool Tracker::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id) {
 bool Tracker::UptateLostTrackAndEraseIfItsNeeded(size_t track_id) {
     tracks_.at(track_id).lost++;
     bool erased = EraseTrackIfBBoxIsOutOfFrame(track_id);
-    if (!erased) erased = EraseTrackIfItWasLostTooManyFramesAgo(track_id);
+    if (!erased)
+        erased = EraseTrackIfItWasLostTooManyFramesAgo(track_id);
     return erased;
 }
 
-void Tracker::UpdateLostTracks(const std::set<size_t> &track_ids) {
+void Tracker::UpdateLostTracks(const std::set<size_t>& track_ids) {
     for (auto track_id : track_ids) {
         UptateLostTrackAndEraseIfItsNeeded(track_id);
     }
 }
 
-void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections) {
+void Tracker::Process(const cv::Mat& frame, const TrackedObjects& detections) {
     if (frame_size_ == cv::Size()) {
         frame_size_ = frame.size();
     } else {
@@ -308,7 +317,7 @@ void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections) {
     }
 
     FilterDetectionsAndStore(detections);
-    for (auto &obj : detections_) {
+    for (auto& obj : detections_) {
         obj.frame_idx = pipeline_idx;
     }
     ++pipeline_idx;
@@ -318,10 +327,9 @@ void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections) {
         std::set<size_t> unmatched_tracks, unmatched_detections;
         std::set<std::tuple<size_t, size_t, float>> matches;
 
-        SolveAssignmentProblem(active_tracks, detections_, &unmatched_tracks,
-                               &unmatched_detections, &matches);
+        SolveAssignmentProblem(active_tracks, detections_, &unmatched_tracks, &unmatched_detections, &matches);
 
-        for (const auto &match : matches) {
+        for (const auto& match : matches) {
             size_t track_id = std::get<0>(match);
             size_t det_id = std::get<1>(match);
             float conf = std::get<2>(match);
@@ -344,7 +352,8 @@ void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections) {
         UpdateLostTracks(active_tracks);
     }
 
-    if (params_.drop_forgotten_tracks) DropForgottenTracks();
+    if (params_.drop_forgotten_tracks)
+        DropForgottenTracks();
 }
 
 void Tracker::DropForgottenTracks() {
@@ -353,14 +362,13 @@ void Tracker::DropForgottenTracks() {
 
     size_t max_id = 0;
     if (!active_track_ids_.empty())
-        max_id =
-                *std::max_element(active_track_ids_.begin(), active_track_ids_.end());
+        max_id = *std::max_element(active_track_ids_.begin(), active_track_ids_.end());
 
     const size_t kMaxTrackID = 10000;
     bool reassign_id = max_id > kMaxTrackID;
 
     size_t counter = 0;
-    for (const auto &pair : tracks_) {
+    for (const auto& pair : tracks_) {
         if (!IsTrackForgotten(pair.first)) {
             new_tracks.emplace(reassign_id ? counter : pair.first, pair.second);
             new_active_tracks.emplace(reassign_id ? counter : pair.first);
@@ -373,23 +381,21 @@ void Tracker::DropForgottenTracks() {
     tracks_counter_ = reassign_id ? counter : tracks_counter_;
 }
 
-float Tracker::ShapeAffinity(const cv::Rect &trk, const cv::Rect &det) {
+float Tracker::ShapeAffinity(const cv::Rect& trk, const cv::Rect& det) {
     float w_dist = static_cast<float>(std::fabs(trk.width - det.width)) / static_cast<float>(trk.width + det.width);
     float h_dist = static_cast<float>(std::fabs(trk.height - det.height)) / static_cast<float>(trk.height + det.height);
     return exp(-params_.shape_affinity_w * (w_dist + h_dist));
 }
 
-float Tracker::MotionAffinity(const cv::Rect &trk, const cv::Rect &det) {
-    float x_dist = static_cast<float>(trk.x - det.x) * (trk.x - det.x) /
-            (det.width * det.width);
-    float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) /
-            (det.height * det.height);
+float Tracker::MotionAffinity(const cv::Rect& trk, const cv::Rect& det) {
+    float x_dist = static_cast<float>(trk.x - det.x) * (trk.x - det.x) / (det.width * det.width);
+    float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) / (det.height * det.height);
     return exp(-params_.motion_affinity_w * (x_dist + y_dist));
 }
 
-void Tracker::ComputeDissimilarityMatrix(const std::set<size_t> &active_tracks,
-                                         const TrackedObjects &detections,
-                                         cv::Mat *dissimilarity_matrix) {
+void Tracker::ComputeDissimilarityMatrix(const std::set<size_t>& active_tracks,
+                                         const TrackedObjects& detections,
+                                         cv::Mat* dissimilarity_matrix) {
     dissimilarity_matrix->create(active_tracks.size(), detections.size(), CV_32F);
     size_t i = 0;
     for (auto id : active_tracks) {
@@ -402,64 +408,63 @@ void Tracker::ComputeDissimilarityMatrix(const std::set<size_t> &active_tracks,
     }
 }
 
-void Tracker::AddNewTracks(const TrackedObjects &detections) {
+void Tracker::AddNewTracks(const TrackedObjects& detections) {
     for (size_t i = 0; i < detections.size(); i++) {
         AddNewTrack(detections[i]);
     }
 }
 
-void Tracker::AddNewTracks(const TrackedObjects &detections,
-                           const std::set<size_t> &ids) {
+void Tracker::AddNewTracks(const TrackedObjects& detections, const std::set<size_t>& ids) {
     for (size_t i : ids) {
         CV_Assert(i < detections.size());
         AddNewTrack(detections[i]);
     }
 }
 
-void Tracker::AddNewTrack(const TrackedObject &detection) {
+void Tracker::AddNewTrack(const TrackedObject& detection) {
     auto detection_with_id = detection;
     detection_with_id.object_id = tracks_counter_;
-    tracks_.emplace(
-                std::pair<size_t, Track>(tracks_counter_, Track({detection_with_id})));
+    tracks_.emplace(std::pair<size_t, Track>(tracks_counter_, Track({detection_with_id})));
 
     active_track_ids_.insert(tracks_counter_);
     tracks_counter_++;
 }
 
-void Tracker::AppendToTrack(size_t track_id, const TrackedObject &detection) {
+void Tracker::AppendToTrack(size_t track_id, const TrackedObject& detection) {
     CV_Assert(!IsTrackForgotten(track_id));
 
     auto detection_with_id = detection;
     detection_with_id.object_id = track_id;
 
-    auto &track = tracks_.at(track_id);
+    auto& track = tracks_.at(track_id);
 
     track.objects.emplace_back(detection_with_id);
     track.lost = 0;
     track.length++;
 
     if (params_.max_num_objects_in_track > 0) {
-        while (track.size() >
-               static_cast<size_t>(params_.max_num_objects_in_track)) {
+        while (track.size() > static_cast<size_t>(params_.max_num_objects_in_track)) {
             track.objects.erase(track.objects.begin());
         }
     }
 }
 
-float Tracker::Distance(const TrackedObject &obj1, const TrackedObject &obj2) {
+float Tracker::Distance(const TrackedObject& obj1, const TrackedObject& obj2) {
     const float eps = 1e-6f;
     float shp_aff = ShapeAffinity(obj1.rect, obj2.rect);
-    if (shp_aff < eps) return 1.0;
+    if (shp_aff < eps)
+        return 1.0;
 
     float mot_aff = MotionAffinity(obj1.rect, obj2.rect);
-    if (mot_aff < eps) return 1.0;
+    if (mot_aff < eps)
+        return 1.0;
 
     return 1.0f - shp_aff * mot_aff;
 }
 
 bool Tracker::IsTrackValid(size_t id) const {
-    const auto &track = tracks_.at(id);
-    const auto &objects = track.objects;
+    const auto& track = tracks_.at(id);
+    const auto& objects = track.objects;
     if (objects.empty()) {
         return false;
     }
@@ -480,8 +485,9 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
         if (IsTrackValid(idx) && !track.lost) {
             TrackedObject object = track.objects.back();
             int counter = 1;
-            size_t start = static_cast<int>(track.objects.size()) >= params_.averaging_window_size_for_rects ?
-                        track.objects.size() - params_.averaging_window_size_for_rects : 0;
+            size_t start = static_cast<int>(track.objects.size()) >= params_.averaging_window_size_for_rects
+                               ? track.objects.size() - params_.averaging_window_size_for_rects
+                               : 0;
 
             for (size_t i = start; i < track.objects.size() - 1; i++) {
                 object.rect.width += track.objects[i].rect.width;
@@ -504,16 +510,17 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
     return detections;
 }
 
-int LabelWithMaxFrequencyInTrack(const Track &track, int window_size) {
+int LabelWithMaxFrequencyInTrack(const Track& track, int window_size) {
     std::unordered_map<int, int> frequencies;
     int max_frequent_count = 0;
     int max_frequent_id = TrackedObject::UNKNOWN_LABEL_IDX;
 
-    int start = static_cast<int>(track.objects.size()) >= window_size ?
-        static_cast<int>(track.objects.size()) - window_size : 0;
+    int start = static_cast<int>(track.objects.size()) >= window_size
+                    ? static_cast<int>(track.objects.size()) - window_size
+                    : 0;
 
     for (size_t i = start; i < track.objects.size(); i++) {
-        const auto & detection = track.objects[i];
+        const auto& detection = track.objects[i];
         if (detection.label == TrackedObject::UNKNOWN_LABEL_IDX)
             continue;
         int count = ++frequencies[detection.label];
@@ -544,7 +551,7 @@ std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector
     return new_tracks;
 }
 
-const std::unordered_map<size_t, Track> &Tracker::tracks() const {
+const std::unordered_map<size_t, Track>& Tracker::tracks() const {
     return tracks_;
 }
 

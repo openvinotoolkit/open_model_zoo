@@ -306,13 +306,12 @@ class TFLauncher(Launcher):
         ):
             if -1 not in layer_shape:
                 data = np.resize(data, layer_shape)
-
-        if len(np.shape(data)) == len(layout):
+        if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
         else:
             data = np.array(data)
 
-        if len(np.shape(data)) > len(layout):
+        if layout is not None and len(np.shape(data)) > len(layout):
             data = data[0, ...]
 
         return data.astype(precision) if precision else data

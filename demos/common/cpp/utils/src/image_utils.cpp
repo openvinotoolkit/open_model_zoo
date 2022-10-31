@@ -22,7 +22,7 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
     }
 
     cv::Mat dst;
-    int interpMode = hqResize ? cv::INTER_LINEAR : cv::INTER_CUBIC;
+    int interpMode = hqResize ? cv::INTER_CUBIC : cv::INTER_LINEAR;
 
     switch (resizeMode) {
     case RESIZE_FILL:

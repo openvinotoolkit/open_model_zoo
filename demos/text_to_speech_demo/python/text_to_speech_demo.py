@@ -154,9 +154,9 @@ def main():
             speaker_emb = forward_tacotron.get_pca_speaker_embedding(interactive_parameter["gender"],
                                                                      interactive_parameter["style"])
         else:
-            speaker_emb = forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]
+            speaker_emb = [forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]]
 
-    len_th = 512
+    len_th = 80
 
     input_data = parse_input(args.input)
 
@@ -173,7 +173,7 @@ def main():
         if len(line) > len_th:
             texts = []
             prev_begin = 0
-            delimiters = '.!?;:'
+            delimiters = '.!?;:,'
             for i, c in enumerate(line):
                 if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
                     texts.append(line[prev_begin:i + 1])

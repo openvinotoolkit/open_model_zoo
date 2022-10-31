@@ -72,6 +72,10 @@ omz_converter --list models.lst
   - detr-resnet50
 * architecture_type = faceboxes
   - faceboxes-pytorch
+* architecture_type = nanodet
+  - nanodet-m-1.5x-416
+* architecture_type = nanodet-plus
+  - nanodet-plus-m-1.5x-416
 * architecture_type = retinaface-pytorch
   - retinaface-resnet50-pytorch
 * architecture_type = ssd
@@ -159,12 +163,13 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
+                                {centernet,detr,ctpn,faceboxes,nanodet,nanodet-plus,retinaface,retinaface-pytorch,ssd,ultra_lightweight_face_detection,yolo,yolov4,yolof,yolox,yolov3-onnx}
                                 -i INPUT [--adapter {openvino,ovms}]
                                 [-d DEVICE] [--labels LABELS] [-t PROB_THRESHOLD]
                                 [--resize_type {standard,fit_to_window,fit_to_window_letterbox}]
                                 [--input_size INPUT_SIZE INPUT_SIZE] [--anchors ANCHORS [ANCHORS ...]]
-                                [--masks MASKS [MASKS ...]] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+                                [--masks MASKS [MASKS ...]] [--layout LAYOUT]
+                                [--num_classes NUM_CLASSES][-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                                 [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
                                 [--reverse_input_channels] [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
@@ -175,7 +180,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model or
                         address of model inference service if using OVMS adapter.
-  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {ssd,yolo,yolov3-onnx,yolov4,yolof,yolox,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}.
+  -at, --architecture_type  Required. Specify model' architecture type. Valid values are {centernet,detr,ctpn,faceboxes,nanodet,nanodet-plus,retinaface,retinaface-pytorch,ssd,ultra_lightweight_face_detection,yolo,yolov4,yolof,yolox,yolov3-onnx}.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -206,6 +211,11 @@ Common model options:
   --masks MASKS [MASKS ...]
                         Optional. A space separated list of mask for anchors. By default used default masks for model.
                         Only for YOLOV4 architecture type.
+  --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or
+                        input0:NCHW,input1:NC in case of more than one input.
+  --num_classes NUM_CLASSES
+                        Optional. Number of detected classes. Only for NanoDet, NanoDetPlus
+                        architecture types.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS

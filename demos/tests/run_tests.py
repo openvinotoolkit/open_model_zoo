@@ -34,7 +34,6 @@ import contextlib
 import csv
 import json
 import os
-import platform
 import shlex
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
@@ -59,33 +58,35 @@ def parser_paths_list(supported_devices):
     return [Path(p) for p in paths if Path(p).is_file()]
 
 
-def parse_args():
+def build_argparser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
     parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
         help='directory with demo binaries')
     parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
         help='directory with test data')
-    parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
-        help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
-    parser.add_argument('--scope', default='base',
-        help='The scenario for testing demos.', choices=('base', 'performance'))
-    parser.add_argument('--mo', type=Path, metavar='MO.PY',
-        help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
         help='list of devices to test')
+    parser.add_argument('--downloader-cache-dir', type=Path, metavar='DIR',
+        help='directory to use as the cache for the model downloader')
+    parser.add_argument('--log-file', type=Path,
+        help='path to log file')
+    parser.add_argument('--mo', type=Path, metavar='MO.PY',
+        help='Model Optimizer entry point script')
+    parser.add_argument('--models-dir', type=Path, metavar='DIR',
+        help='directory with pre-converted models (IRs)')
+    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
+        help='IR precisions for all models. By default, models are tested in FP16, FP16-INT8 precisions')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
-    parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
+    parser.add_argument('--scope', default='base', choices=('base', 'performance'),
+        help='The scenario for testing demos.')
+    parser.add_argument('--supported-devices', type=parser_paths_list,
         help='paths to Markdown files with supported devices for each model')
-    parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
-        help='IR precisions for all models. By default, models are tested in FP16 precision')
-    parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
-        help='directory with pre-converted models (IRs)')
-    return parser.parse_args()
+    return parser
 
 
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
@@ -96,6 +97,11 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
         if first_time:
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
+
+
+def write_log(test_log, log_file):
+    with log_file.open('a+', newline='') as txtfile:
+        txtfile.write(test_log + '\n')
 
 
 @contextlib.contextmanager
@@ -191,7 +197,7 @@ def get_models(case, keys):
 
 
 def main():
-    args = parse_args()
+    args = build_argparser().parse_args()
 
     DEMOS = scopes[args.scope]
     suppressed_devices = parse_supported_device_list(args.supported_devices)
@@ -238,18 +244,21 @@ def main():
 
         num_failures = 0
 
-        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         try:
-            pythonpath = "{os.environ['PYTHONPATH']}{os.pathsep}"
+            pythonpath = f"{os.environ['PYTHONPATH']}{os.pathsep}"
         except KeyError:
             pythonpath = ''
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}{python_module_subdir}",
+            'PYTHONPATH': f"{pythonpath}{args.demo_build_dir}",
         }
 
+        print('Demo Environment: {}'.format(demo_environment))
+
+        failed_tests = []
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.subdirectory))
+            header = 'Testing {}'.format(demo.subdirectory)
+            print(header)
             print()
             demo.set_precisions(args.precisions, model_info)
 
@@ -312,28 +321,42 @@ def main():
                                 print(flush=True)
                                 skip = True
                         if skip: continue
-                        print('Test case #{}/{}:'.format(test_case_index, device),
-                            ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                        test_descr = 'Test case #{}/{}:\n{}'.format(test_case_index, device, ' '.join(shlex.quote(str(arg))
+                            for arg in fixed_args + dev_arg + case_args))
+                        print(test_descr)
                         print(flush=True)
                         try:
                             start_time = timeit.default_timer()
                             output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment)
+                                env=demo_environment, timeout=600)
                             execution_time = timeit.default_timer() - start_time
                             demo.parse_output(output, test_case, device)
-                        except subprocess.CalledProcessError as e:
-                            print(e.output)
-                            print('Exit code:', e.returncode)
+                        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                            output = e.output
+                            if isinstance(e, subprocess.CalledProcessError):
+                                exit_msg = f'Exit code: {e.returncode}\n'
+                            elif isinstance(e, subprocess.TimeoutExpired):
+                                exit_msg = f'Command timed out after {e.timeout} seconds\n'
+                            output += exit_msg
+                            print(output)
+                            failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
                             execution_time = -1
 
                         if args.report_file:
                             collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                        if args.log_file:
+                            if test_case_index == 0:
+                                write_log(header, args.log_file)
+                            write_log(test_descr, args.log_file)
+                            write_log(output, args.log_file)
 
             print()
 
-    print("Failures: {}".format(num_failures))
+    print("{} failures:".format(num_failures))
+    for test in failed_tests:
+        print(test)
 
     sys.exit(0 if num_failures == 0 else 1)
 

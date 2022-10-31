@@ -29,7 +29,10 @@ The demo application expects an instance segmentation or background matting mode
     * At least two outputs including:
         * `fgr` with normalized in [0, 1] range foreground
         * `pha` with normalized in [0, 1] range alpha
-4. for video background matting models based on RNN architecture:
+4. for image background matting models without trimap (background segmentation):
+    * Single input for input image.
+    * Single output with normalized in [0, 1] range alpha
+5. for video background matting models based on RNN architecture:
     * Five inputs:
         * `src` for input image
         * recurrent inputs: `r1`, `r2`, `r3`, `r4`
@@ -55,6 +58,12 @@ The demo workflow is the following:
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different background subtraction model topologies in one demo.
+
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
@@ -75,10 +84,12 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* instance-segmentation-person-????
-* yolact-resnet50-fpn-pytorch
 * background-matting-mobilenetv2
+* instance-segmentation-person-????
+* modnet-photographic-portrait-matting
+* modnet-webcam-portrait-matting
 * robust-video-matting-mobilenetv3
+* yolact-resnet50-fpn-pytorch
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

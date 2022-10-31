@@ -80,10 +80,10 @@ class RnnSeqPipelineStage(BlockedSeqPipelineStage):
         self.infer_request.infer(inputs={
             self.p['in_state_c']: state_c,
             self.p['in_state_h']: state_h,
-            self.p['in_data']: [mfcc_features],
+            self.p['in_data']: mfcc_features[None],
         })
         output_names = {'out_state_c', 'out_state_h', 'out_data'}
-        infer_res = {name: self.infer_request.get_tensor(self.p[name]).data[:] for name in output_names}
+        infer_res = {name: self.infer_request.get_tensor(self.p[name]).data.copy() for name in output_names}
 
         state_c = infer_res['out_state_c']
         state_h = infer_res['out_state_h']

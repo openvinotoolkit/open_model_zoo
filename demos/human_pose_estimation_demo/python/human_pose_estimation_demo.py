@@ -25,11 +25,12 @@ import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from openvino.model_zoo.model_api.models import ImageModel, OutputTransform
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
-from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter
+from model_api.models import ImageModel, OutputTransform
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -183,7 +184,7 @@ def main():
         'aspect_ratio': frame.shape[1] / frame.shape[0],
         'confidence_threshold': args.prob_threshold,
         'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
-        'delta': 0.5 if 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
+        'delta': 0.5 if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
     }
     model = ImageModel.create_model(ARCHITECTURES[args.architecture_type], model_adapter, config)
     model.log_layers_info()

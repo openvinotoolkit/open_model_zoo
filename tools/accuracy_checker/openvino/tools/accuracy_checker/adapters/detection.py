@@ -147,11 +147,13 @@ class ClassAgnosticDetectionAdapter(Adapter):
         if not self.output_verified:
             self.select_output_blob(predictions)
         prediction_batch = predictions[self.out_blob_name]
+        if np.ndim(prediction_batch) == 2 and len(identifiers) == 1:
+            prediction_batch = np.expand_dims(prediction_batch, 0)
 
         result = []
-        for identifier in identifiers:
-            prediction_mask = np.where(prediction_batch[:, -1] > 0.0)
-            valid_detections = prediction_batch[prediction_mask]
+        for identifier, pred in zip(identifiers, prediction_batch):
+            prediction_mask = np.where(pred[:, -1] > 0.0)
+            valid_detections = pred[prediction_mask]
 
             bboxes = self.scale * valid_detections[:, :-1]
             scores = valid_detections[:, -1]
@@ -165,7 +167,7 @@ class ClassAgnosticDetectionAdapter(Adapter):
     def _find_output(predictions):
         filter_outputs = [
             output_name for output_name, out_data in predictions.items()
-            if len(np.shape(out_data)) == 2 and np.shape(out_data)[-1] == 5
+            if len(np.shape(out_data)) in [2, 3] and np.shape(out_data)[-1] == 5
         ]
         if not filter_outputs:
             raise ConfigError('Suitable output layer not found')

@@ -17,7 +17,7 @@ feature map outputs an embedding vector of 256 floats.
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
 | Market-1501 rank@1 accuracy       | 86.1 %                                    |
-| Market-1501 mAP                   | 59.7 %                                    |
+| Market-1501 mAP                   | 58.857 %                                  |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
@@ -44,7 +44,7 @@ The expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs a blob with the `1, 256` shape named `descriptor` which can be
+The net outputs a blob with the `1, 256` shape named `reid_embedding` which can be
 compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 

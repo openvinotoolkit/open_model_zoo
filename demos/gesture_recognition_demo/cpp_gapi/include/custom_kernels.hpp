@@ -1,16 +1,22 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/gapi.hpp>
-#include <opencv2/gapi/cpu/gcpukernel.hpp>
+#include <stddef.h>
+
+#include <memory>
+
+#include <opencv2/core.hpp>
+#include <opencv2/gapi/garray.hpp>
 #include <opencv2/gapi/gkernel.hpp>
-#include <atomic>
+#include <opencv2/gapi/gmat.hpp>
+#include <opencv2/gapi/gopaque.hpp>
 
-#include "tracker.hpp"
+struct TrackedObject;
 
+// clang-format off
 namespace custom {
 G_API_OP(GetFastFrame,
          <cv::GMat(cv::GArray<cv::GMat>, cv::Size)>, "custom.get_fast_frame") {
@@ -69,4 +75,5 @@ G_API_OP(GestureRecognitionPostprocessing,
 };
 
 cv::gapi::GKernelPackage kernels();
-} // namespace custom
+// clang-format on
+}  // namespace custom

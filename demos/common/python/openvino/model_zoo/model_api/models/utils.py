@@ -137,7 +137,7 @@ def resize_image_letterbox(image, size, interpolation=cv2.INTER_LINEAR):
     dx = (w - nw) // 2
     dy = (h - nh) // 2
     resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
-                           mode='constant', constant_values=128)
+                           mode='constant', constant_values=0)
     return resized_image
 
 
@@ -208,6 +208,6 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=False, keep_top_k=Non
     return keep
 
 
-def softmax(logits, axis=None):
+def softmax(logits, axis=None, keepdims=False):
     exp = np.exp(logits - np.max(logits))
-    return exp / np.sum(exp, axis=axis)
+    return exp / np.sum(exp, axis=axis, keepdims=keepdims)

@@ -51,7 +51,7 @@ class Adapter(ClassProvider):
     def configure(self):
         pass
 
-    def check_output_name(self, output_name, outputs, suffix=('/sink_port_0', ':0')):
+    def check_output_name(self, output_name, outputs, suffix=('/sink_port_', ':')):
         return postprocess_output_name(
             output_name, outputs, suffix, self.additional_output_mapping, raise_error=False)
 

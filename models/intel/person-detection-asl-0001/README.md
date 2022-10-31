@@ -22,7 +22,7 @@ Average Precision (AP) is defined as an area under the [precision/recall](https:
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 320, 320` in the format `1, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 320, 320` in the format `1, C, H, W`, where:
 
 - `C` - number of channels
 - `H` - image height

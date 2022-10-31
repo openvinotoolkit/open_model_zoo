@@ -1,8 +1,10 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "detector.hpp"
+
+#include <algorithm>
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
 
@@ -29,8 +31,8 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x, float coeff_y) {
     const cv::Point2f new_tl = c - new_diff;
     const cv::Point2f new_br = c + new_diff;
 
-    const cv::Point new_tl_int {static_cast<int>(std::floor(new_tl.x)), static_cast<int>(std::floor(new_tl.y))};
-    const cv::Point new_br_int {static_cast<int>(std::ceil(new_br.x)), static_cast<int>(std::ceil(new_br.y))};
+    const cv::Point new_tl_int{static_cast<int>(std::floor(new_tl.x)), static_cast<int>(std::floor(new_tl.y))};
+    const cv::Point new_br_int{static_cast<int>(std::ceil(new_br.x)), static_cast<int>(std::ceil(new_br.y))};
 
     return cv::Rect(new_tl_int, new_br_int);
 }
@@ -38,12 +40,10 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x, float coeff_y) {
 
 void FaceDetection::truncateRois(const cv::Mat& in,
                                  const std::vector<cv::Rect>& face_rois,
-                                       std::vector<cv::Rect>& valid_face_rois) {
+                                 std::vector<cv::Rect>& valid_face_rois) {
     for (const auto& roi : face_rois) {
-        valid_face_rois.emplace_back(TruncateToValidRect(IncreaseRect(roi,
-                                                         config_.increase_scale_x,
-                                                         config_.increase_scale_y),
-                                                         cv::Size(int(in.cols),
-                                                                  int(in.rows))));
+        valid_face_rois.emplace_back(
+            TruncateToValidRect(IncreaseRect(roi, config_.increase_scale_x, config_.increase_scale_y),
+                                cv::Size(static_cast<int>(in.cols), static_cast<int>(in.rows))));
     }
 }

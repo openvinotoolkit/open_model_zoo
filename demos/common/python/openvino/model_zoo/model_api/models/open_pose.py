@@ -42,14 +42,14 @@ class OpenPose(ImageModel):
 
         heatmap_shape = heatmap.output(0).get_shape()
         if len(paf_shape) != 4 and len(heatmap_shape) != 4:
-            raise RuntimeError('OpenPose outputs must be 4-dimensional')
+            self.raise_error('OpenPose outputs must be 4-dimensional')
         if paf_shape[2] != heatmap_shape[2] and paf_shape[3] != heatmap_shape[3]:
-            raise RuntimeError('Last two dimensions of OpenPose outputs must match')
+            self.raise_error('Last two dimensions of OpenPose outputs must match')
         if paf_shape[1] * 2 == heatmap_shape[1]:
             paf, heatmap = heatmap, paf
         elif paf_shape[1] != heatmap_shape[1] * 2:
-            raise RuntimeError('Size of second dimension of OpenPose of one output must be two times larger then size '
-                'of second dimension of another output')
+            self.raise_error('Size of second dimension of OpenPose of one output must be two times larger then size '
+                             'of second dimension of another output')
 
         paf = paf.inputs()[0].get_source_output().get_node()
         paf.get_output_tensor(0).set_names({self.pafs_blob_name})
@@ -113,7 +113,7 @@ class OpenPose(ImageModel):
         img = self._resize_image(inputs, self.h)
         h, w = img.shape[:2]
         if self.w < w:
-            raise RuntimeError("The image aspect ratio doesn't fit current model shape")
+            self.raise_error("The image aspect ratio doesn't fit current model shape")
         if not (self.w - self.size_divisor < w <= self.w):
             self.logger.warning("\tChosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)

@@ -4,21 +4,20 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
+#include <stddef.h>
+
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
-#include <opencv2/opencv.hpp>
+
+#include <opencv2/core.hpp>
 #include <openvino/openvino.hpp>
-#include <utils/ocv_common.hpp>
 
 /**
  * @brief Base class of config for model
  */
 struct ModelConfigTracker {
-    explicit ModelConfigTracker(const std::string& path_to_model)
-        : path_to_model(path_to_model) {}
+    explicit ModelConfigTracker(const std::string& path_to_model) : path_to_model(path_to_model) {}
 
     /** @brief Path to model description */
     std::string path_to_model;
@@ -36,9 +35,7 @@ public:
     /**
      * @brief Constructor
      */
-    BaseModel(const Config& config,
-            const ov::Core& core,
-            const std::string & deviceName);
+    BaseModel(const Config& config, const ov::Core& core, const std::string& deviceName);
 
     /**
      * @brief Descructor
@@ -68,7 +65,7 @@ protected:
     ov::Core core;
     /** @brief device */
     std::string device_name;
-     /** @brief Model input layout */
+    /** @brief Model input layout */
     ov::Layout input_layout;
     /** @brief Compiled model */
     ov::CompiledModel compiled_model;
@@ -86,16 +83,15 @@ protected:
 
 class VectorCNN : public BaseModel {
 public:
-    VectorCNN(const ModelConfigTracker& config,
-              const ov::Core & core,
-              const std::string & deviceName);
+    VectorCNN(const ModelConfigTracker& config, const ov::Core& core, const std::string& deviceName);
 
-    void Compute(const cv::Mat& image,
-                 cv::Mat* vector, cv::Size outp_shape = cv::Size()) const;
+    void Compute(const cv::Mat& image, cv::Mat* vector) const;
     void Compute(const std::vector<cv::Mat>& images,
-                 std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
+                 std::vector<cv::Mat>* vectors) const;
 
-    int size() const { return result_size; }
+    int size() const {
+        return result_size;
+    }
 
 private:
     int result_size;  // Length of result

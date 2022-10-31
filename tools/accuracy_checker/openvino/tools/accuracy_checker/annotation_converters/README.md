@@ -618,6 +618,7 @@ The main difference between this converter and `super_resolution` in data organi
    * `data_dir` - directory, where input images and annotation files in MATLAB format stored.
 * `style_transfer` - converts images to `StyleTransferAnnotation`.
   * `images_dir` - path to images directory.
+  * `annotation_file` - path to file with annotation in format: `[input_img1] [ref_img]` if you have single input model or `[input_img1] [input_img2] [ref_img]` if you have 2 inputs.
 * `ade20k` - converts ADE20K dataset to `SegmentationAnnotation`.
   * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).

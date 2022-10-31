@@ -1,11 +1,13 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
+#include <iostream>
 
 #include <gflags/gflags.h>
+
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
@@ -13,13 +15,18 @@ DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
-static const char person_detection_model_message[] = "Required. Path to an .xml file with a trained person detector model.";
-static const char action_recognition_model_message[] = "Required. Path to an .xml file with a trained gesture recognition model.";
-static const char target_device_message_d[] = "Optional. Target device for Person Detection network. "
-                                               "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char target_device_message_a[] = "Optional. Target device for Action Recognition network. "
-                                               "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char thresh_output_message[] = "Optional. Threshold for the predicted score of an action. The default value is 0.4.";
+static const char person_detection_model_message[] =
+    "Required. Path to an .xml file with a trained person detector model.";
+static const char action_recognition_model_message[] =
+    "Required. Path to an .xml file with a trained gesture recognition model.";
+static const char target_device_message_d[] =
+    "Optional. Target device for Person Detection network. "
+    "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+static const char target_device_message_a[] =
+    "Optional. Target device for Action Recognition network. "
+    "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
+static const char thresh_output_message[] =
+    "Optional. Threshold for the predicted score of an action. The default value is 0.4.";
 static const char class_map_message[] = "Required. Path to a file with gesture classes.";
 static const char samples_dir_message[] = "Optional. Path to a .json file that contains paths to samples of gestures.";
 static const char no_show_message[] = "Optional. Don't show output.";
@@ -38,8 +45,8 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 
 /**
-* \brief This function shows a help message
-*/
+ * \brief This function shows a help message
+ */
 
 static void showUsage() {
     std::cout << std::endl;

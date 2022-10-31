@@ -64,10 +64,10 @@ class Encoder:
             outputs, raw_outputs = outputs
         else:
             raw_outputs = outputs
-        encoder_output = np.array(outputs[self.encoder_out]).squeeze()
+        encoder_output = outputs[self.encoder_out]
         self.h0 = outputs[self.h0_out]
         self.c0 = outputs[self.c0_out]
-        return encoder_output, raw_outputs
+        return encoder_output.squeeze(), raw_outputs
 
     def fit_to_input(self, input_data):
         return {self.input: input_data, self.h0_input: self.h0, self.c0_input: self.c0}
@@ -127,7 +127,7 @@ class Decoder:
             raw_outputs = outputs
         self.h0 = outputs[self.h0_out]
         self.c0 = outputs[self.c0_out]
-        return np.array(outputs[self.decoder_out]).squeeze(), (self.h0, self.c0), raw_outputs
+        return outputs[self.decoder_out].squeeze(), (self.h0, self.c0), raw_outputs
 
     def fit_to_input(self, token_id, hidden):
         if hidden is None:
@@ -189,7 +189,7 @@ class Joint:
         else:
             raw_outputs = outputs
         joint_out = outputs[self.output]
-        return log_softmax(np.array(joint_out).squeeze()), raw_outputs
+        return log_softmax(joint_out), raw_outputs
 
     def fit_to_input(self, encoder_out, predictor_out):
         return {self.input1: encoder_out, self.input2: predictor_out}
@@ -339,7 +339,7 @@ class DLSDKJoint(Joint, CommonDLSDKModel):
 class OVJoint(Joint, CommonOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['0', '1']
-        self.default_outputs = ['8/sink_port']
+        self.default_outputs = ['8/sink_port_0']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -353,25 +353,22 @@ class CommonONNXModel(BaseONNXModel):
         results = self.inference_session.run(self.output_names, input_data)
         return dict(zip(self.output_names, results))
 
-    def select_inputs_outputs(self, network_info):
-        pass
 
-
-class ONNXEncoder(CommonONNXModel, Encoder):
+class ONNXEncoder(Encoder, CommonONNXModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['input_0', 'input_1', 'input_2']
         self.default_outputs = ['output_0', 'output_1', 'output_2']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
-class ONNXDecoder(CommonONNXModel, Decoder):
+class ONNXDecoder(Decoder, CommonONNXModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['input_0', 'input_1', 'input_2']
         self.default_outputs = ['output_0', 'output_1', 'output_2']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
-class ONNXJoint(CommonONNXModel, Joint):
+class ONNXJoint(Joint, CommonONNXModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_inputs = ['0', '1']
         self.default_outputs = ['8']
@@ -454,7 +451,7 @@ class ASRModel(BaseCascadeModel):
                 if len(B) >= self.beam_width and yb.log_prob >= y_hat.log_prob:
                     break
             B = heapq.nlargest(self.beam_width, B)
-            return self.adapter.process([B[0].sequence], identifiers, [{}]), {}
+        return [{}], self.adapter.process([B[0].sequence], identifiers, [{}])
 
     @staticmethod
     def prepare_records(features):

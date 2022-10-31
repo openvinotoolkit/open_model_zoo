@@ -126,7 +126,7 @@ class ForwardTacotronIE:
                       "input_mask": input_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = np.array([speaker_embedding])
+                inputs["speaker_embedding"] = np.array(speaker_embedding)
             self.duration_predictor_request.infer(inputs)
         else:
             self.duration_predictor_request.infer(inputs={"input_seq": sequence})
@@ -154,7 +154,7 @@ class ForwardTacotronIE:
                       "data_mask": data_mask,
                       "pos_mask": pos_mask}
             if speaker_embedding is not None:
-                inputs["speaker_embedding"] = np.array([speaker_embedding])
+                inputs["speaker_embedding"] = np.array(speaker_embedding)
             self.forward_request.infer(inputs)
         else:
             self.forward_request.infer(inputs={"data": aligned_emb})
@@ -215,7 +215,7 @@ class ForwardTacotronIE:
             if speaker_emb is not None:
                 speaker_embedding = speaker_emb
             else:
-                speaker_embedding = self.speaker_embeddings[speaker_id, :]
+                speaker_embedding = [self.speaker_embeddings[speaker_id, :]]
 
         aligned_emb = self.forward_duration_prediction_by_delimiters(text, speaker_embedding, alpha)
 
@@ -232,7 +232,7 @@ class ForwardTacotronIE:
             if self.verbose:
                 log.debug("SAEmb shape: {0}".format(sub_aligned_emb.shape))
             mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx, speaker_embedding)
-            mels.append(mel)
+            mels.append(np.copy(mel))
             start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)

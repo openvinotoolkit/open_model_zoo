@@ -25,7 +25,7 @@ Tested on a challenging internal dataset with 3000 images and 12585 vehicles to 
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 384, 672` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 3, 384, 672` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels

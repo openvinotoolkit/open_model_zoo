@@ -14,29 +14,47 @@
 // limitations under the License.
 */
 
+#include "models/hpe_model_associative_embedding.h"
+
+#include <stddef.h>
+
 #include <algorithm>
+#include <cmath>
+#include <map>
+#include <stdexcept>
 #include <string>
+#include <unordered_set>
+#include <utility>
 #include <vector>
-#include <opencv2/imgproc/imgproc.hpp>
+
 #include <openvino/openvino.hpp>
-#include <utils/common.hpp>
+
+#include <utils/image_utils.h>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+
 #include "models/associative_embedding_decoder.h"
-#include "models/hpe_model_associative_embedding.h"
+#include "models/input_data.h"
+#include "models/internal_model_data.h"
+#include "models/results.h"
 
 const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
-HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, const std::string& layout, float delta, RESIZE_MODE resizeMode) :
-    ImageModel(modelFileName, false, layout),
-    aspectRatio(aspectRatio),
-    targetSize(targetSize),
-    confidenceThreshold(confidenceThreshold),
-    delta(delta),
-    resizeMode(resizeMode) {}
+HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName,
+                                                 double aspectRatio,
+                                                 int targetSize,
+                                                 float confidenceThreshold,
+                                                 const std::string& layout,
+                                                 float delta,
+                                                 RESIZE_MODE resizeMode)
+    : ImageModel(modelFileName, false, layout),
+      aspectRatio(aspectRatio),
+      targetSize(targetSize),
+      confidenceThreshold(confidenceThreshold),
+      delta(delta),
+      resizeMode(resizeMode) {}
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
@@ -49,15 +67,13 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     const ov::Shape& inputShape = model->input().get_shape();
     const ov::Layout& inputLayout = getInputLayout(model->input());
 
-    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1
-        || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
+    if (inputShape.size() != 4 || inputShape[ov::layout::batch_idx(inputLayout)] != 1 ||
+        inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().
-        set_element_type(ov::element::u8).
-        set_layout({ "NHWC" });
+    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     ppp.input().model().set_layout(inputLayout);
 
@@ -69,8 +85,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
 
     for (const auto& output : model->outputs()) {
         const auto& outTensorName = output.get_any_name();
-        ppp.output(outTensorName).tensor().
-            set_element_type(ov::element::f32);
+        ppp.output(outTensorName).tensor().set_element_type(ov::element::f32);
 
         for (const auto& name : output.get_names()) {
             outputsNames.push_back(name);
@@ -80,8 +95,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
         if (outputShape.size() != 4 && outputShape.size() != 5) {
             throw std::logic_error("output tensors are expected to be 4-dimensional or 5-dimensional");
         }
-        if (outputShape[ov::layout::batch_idx("NC...")] != 1
-            || outputShape[ov::layout::channels_idx("NC...")] != 17) {
+        if (outputShape[ov::layout::batch_idx("NC...")] != 1 || outputShape[ov::layout::channels_idx("NC...")] != 17) {
             throw std::logic_error("output tensors are expected to have 1 batch size and 17 channels");
         }
     }
@@ -91,10 +105,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& m
     heatmapsTensorName = findTensorByName("heatmaps", outputsNames);
     try {
         nmsHeatmapsTensorName = findTensorByName("nms_heatmaps", outputsNames);
-    }
-    catch (const std::runtime_error&) {
-        nmsHeatmapsTensorName = heatmapsTensorName;
-    }
+    } catch (const std::runtime_error&) { nmsHeatmapsTensorName = heatmapsTensorName; }
 
     changeInputSize(model);
 }
@@ -107,7 +118,7 @@ void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model)
     const auto widthId = ov::layout::width_idx(layout);
 
     if (!targetSize) {
-        targetSize =  static_cast<int>(std::min(inputShape[heightId], inputShape[widthId]));
+        targetSize = static_cast<int>(std::min(inputShape[heightId], inputShape[widthId]));
     }
     int inputHeight = aspectRatio >= 1.0 ? targetSize : static_cast<int>(std::round(targetSize / aspectRatio));
     int inputWidth = aspectRatio >= 1.0 ? static_cast<int>(std::round(targetSize * aspectRatio)) : targetSize;
@@ -121,18 +132,20 @@ void HpeAssociativeEmbedding::changeInputSize(std::shared_ptr<ov::Model>& model)
     model->reshape(inputShape);
 }
 
-std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, ov::InferRequest& request) {
+std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData,
+                                                                       ov::InferRequest& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
-    if (inputLayerSize.height - stride >= roi.height
-        || inputLayerSize.width - stride >= roi.width) {
+    if (inputLayerSize.height - stride >= roi.height || inputLayerSize.width - stride >= roi.width) {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     request.set_input_tensor(wrapMat2Tensor(paddedImage));
 
-    return std::make_shared<InternalScaleData>(paddedImage.cols, paddedImage.rows,
-        image.size().width / static_cast<float>(roi.width), image.size().height / static_cast<float>(roi.height));
+    return std::make_shared<InternalScaleData>(paddedImage.cols,
+                                               paddedImage.rows,
+                                               image.size().width / static_cast<float>(roi.width),
+                                               image.size().height / static_cast<float>(roi.height));
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
@@ -189,17 +202,16 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
 }
 
 std::string HpeAssociativeEmbedding::findTensorByName(const std::string& tensorName,
-                                                     const std::vector<std::string>& outputsNames) {
+                                                      const std::vector<std::string>& outputsNames) {
     std::vector<std::string> suitableLayers;
-    for (auto& outputName: outputsNames) {
+    for (auto& outputName : outputsNames) {
         if (outputName.rfind(tensorName, 0) == 0) {
-           suitableLayers.push_back(outputName);
+            suitableLayers.push_back(outputName);
         }
     }
     if (suitableLayers.empty()) {
         throw std::runtime_error("Suitable tensor for " + tensorName + " output is not found");
-    }
-    else if (suitableLayers.size() > 1) {
+    } else if (suitableLayers.size() > 1) {
         throw std::runtime_error("More than 1 tensor matched to " + tensorName + " output");
     }
     return suitableLayers[0];
@@ -213,11 +225,9 @@ std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const ov::Shape
     return flattenData;
 }
 
-std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
-    std::vector<cv::Mat>& heatMaps,
-    const std::vector<cv::Mat>& aembdsMaps,
-    const std::vector<cv::Mat>& nmsHeatMaps) const {
-
+std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(std::vector<cv::Mat>& heatMaps,
+                                                             const std::vector<cv::Mat>& aembdsMaps,
+                                                             const std::vector<cv::Mat>& nmsHeatMaps) const {
     std::vector<std::vector<Peak>> allPeaks(numJoints);
     for (int i = 0; i < numJoints; i++) {
         findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople, detectionThreshold);

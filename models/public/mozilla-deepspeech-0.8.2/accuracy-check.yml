@@ -8,9 +8,9 @@ models:
           logarithmic_prob: False
           beam_size: 32
 
-          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to deepspeech-0.8.2-models.kenlm
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to deepspeech-0.8.2-models.kenlm
           # deepspeech-0.8.2-models.kenlm is generated from deepspeech-0.8.2-models.scorer by scorer_to_kenlm.py script.
-          lm_file: mozilla-deepspeech-0.8.2/deepspeech-0.8.2-models.kenlm
+          lm_file: deepspeech-0.8.2-models.kenlm
           lm_alpha: 0.93128901720047
           lm_beta: 1.1834137439727783
           lm_vocabulary_offset: 941209108

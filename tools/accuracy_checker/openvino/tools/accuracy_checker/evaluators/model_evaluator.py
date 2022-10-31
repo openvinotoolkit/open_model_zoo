@@ -71,17 +71,17 @@ class ModelEvaluator(BaseEvaluator):
         dataset = Dataset(dataset_config) if not delayed_annotation_loading else None
         dataset_metadata = dataset.metadata if dataset is not None else {}
         launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
-        enable_ie_preprocessing = (
-            dataset_config.get('_ie_preprocessing', False)
-            if launcher_config['framework'] == 'dlsdk' else False
-        )
+        runtime_framework = launcher_config['framework']
+        enable_runtime_preprocessing = False
+        if runtime_framework in ['dlsdk', 'gapi', 'openvino']:
+            enable_runtime_preprocessing = dataset_config.get('_ie_preprocessing', False)
         preprocessor = PreprocessingExecutor(
             dataset_config.get('preprocessing'), dataset_name, dataset_metadata,
-            enable_ie_preprocessing=enable_ie_preprocessing
+            enable_runtime_preprocessing=enable_runtime_preprocessing, runtime_framework=runtime_framework
         )
         input_precision = launcher_config.get('_input_precision', [])
         input_layouts = launcher_config.get('_input_layout', '')
-        if enable_ie_preprocessing:
+        if enable_runtime_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
             launcher_kwargs = {'identifiers': dataset.identifiers if dataset is not None else []}
@@ -705,12 +705,13 @@ class ModelEvaluator(BaseEvaluator):
             if self.launcher.dyn_batch_only:
                 self.launcher.resolve_undefined_batch()
                 return
-            if (
-                    (self.preprocessor.dynamic_shapes or not self.preprocessor.has_shape_modifications)
-                    and self.launcher.dynamic_shapes_policy != 'static'):
-                self._initialize_input_shape_with_data_range()
-                return
-            self._initialize_input_shape()
+            if getattr(self.launcher, 'need_dyn_resolving', True):
+                if (
+                        (self.preprocessor.dynamic_shapes or not self.preprocessor.has_shape_modifications)
+                        and self.launcher.dynamic_shapes_policy != 'static'):
+                    self._initialize_input_shape_with_data_range()
+                    return
+                self._initialize_input_shape()
 
     def _initialize_input_shape_with_data_range(self):
         input_shapes = []

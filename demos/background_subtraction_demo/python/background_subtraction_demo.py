@@ -25,12 +25,16 @@ import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from openvino.model_zoo.model_api.models import MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel, ImageMattingWithBackground, VideoBackgroundMatting
-from openvino.model_zoo.model_api.models.utils import load_labels
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
-from openvino.model_zoo.model_api.pipelines import get_user_config, AsyncPipeline
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from model_api.models import (
+    MaskRCNNModel, OutputTransform, RESIZE_TYPES, YolactModel,
+    ImageMattingWithBackground, VideoBackgroundMatting, PortraitBackgroundMatting
+)
+from model_api.models.utils import load_labels
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -122,6 +126,9 @@ def get_model(model_adapter, configuration, args):
             raise ValueError('The ImageMattingWithBackground model expects the specified "--background" option.')
         model = ImageMattingWithBackground(model_adapter, configuration)
         need_bgr_input = True
+        is_matting_model = True
+    elif len(inputs) == 1 and len(outputs) == 1:
+        model = PortraitBackgroundMatting(model_adapter, configuration)
         is_matting_model = True
     else:
         model = MaskRCNNModel(model_adapter, configuration)
