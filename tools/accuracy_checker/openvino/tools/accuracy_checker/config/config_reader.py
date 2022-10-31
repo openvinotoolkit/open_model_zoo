@@ -938,7 +938,7 @@ def provide_model_type(launcher, arguments):
 def provide_models(launchers, arguments):
     input_precisions = arguments.input_precision if 'input_precision' in arguments else None
     input_layout = arguments.layout if 'layout' in arguments else None
-    
+
     provide_precision_and_layout(launchers, input_precisions, input_layout)
     if 'models' not in arguments or not arguments.models:
         return launchers

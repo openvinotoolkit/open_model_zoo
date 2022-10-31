@@ -135,7 +135,7 @@
    omz_models_model_yolo_v2_tiny_ava_sparse_30_0001
    omz_models_model_yolo_v2_tiny_ava_sparse_60_0001
    omz_models_model_yolo_v2_tiny_vehicle_detection_0001
-   
+
 
 .. raw:: html
 
