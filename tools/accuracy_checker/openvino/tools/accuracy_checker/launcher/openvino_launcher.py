@@ -362,7 +362,7 @@ class OpenVINOLauncher(Launcher):
             if cpu_extensions:
                 selection_mode = self.config.get('_cpu_extensions_mode')
                 cpu_extensions = get_cpu_extension(cpu_extensions, selection_mode)
-                self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+                self.ie_core.add_extension(str(cpu_extensions))
             ov_set_config(
                 self.ie_core, {'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, device='CPU')
         gpu_extensions = self.config.get('gpu_extensions')
