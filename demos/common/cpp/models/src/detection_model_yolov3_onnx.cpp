@@ -97,7 +97,7 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         const ov::Shape& currentShape = output.get_partial_shape().get_max_shape();
         std::string currentName = output.get_any_name();
         if (currentShape[currentShape.size() - 1] == 3) {
-            indicesOuputName = currentName;
+            indicesOutputName = currentName;
             ppp.output(currentName).tensor().set_element_type(ov::element::i32);
         } else if (currentShape[2] == 4) {
             boxesOutputName = currentName;
@@ -146,7 +146,7 @@ std::unique_ptr<ResultBase> ModelYoloV3ONNX::postprocess(InferenceResult& infRes
     const float* boxesPtr = boxes.data<float>();
 
     const ov::Tensor& scores = infResult.outputsData[scoresOutputName];
-    const ov::Tensor& indices = infResult.outputsData[indicesOuputName];
+    const ov::Tensor& indices = infResult.outputsData[indicesOutputName];
 
     const int* indicesData = indices.data<int>();
     const auto indicesShape = indices.get_shape();

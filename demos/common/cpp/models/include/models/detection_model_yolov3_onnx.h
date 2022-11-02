@@ -47,6 +47,6 @@ protected:
 
     std::string boxesOutputName;
     std::string scoresOutputName;
-    std::string indicesOuputName;
+    std::string indicesOutputName;
     static const int numberOfClasses = 80;
 };
