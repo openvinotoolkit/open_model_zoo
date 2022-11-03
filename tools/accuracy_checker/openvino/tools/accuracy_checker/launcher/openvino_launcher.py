@@ -967,10 +967,10 @@ class OpenVINOLauncher(Launcher):
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def get_model_file_type(self):
-        if self._delayed_model_loading:
-            return None
-        else:
+        if hasattr(self, '_model'):
             return self._model.suffix
+        else:
+            return None
 
     def get_infer_queue(self, log=True):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':

@@ -931,10 +931,10 @@ class DLSDKLauncher(Launcher):
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def get_model_file_type(self):
-        if self._delayed_model_loading:
-            return None
-        else:
+        if hasattr(self, '_model'):
             return self._model.suffix
+        else:
+            return None
 
     def input_shape(self, input_name):
         if input_name in self._partial_shapes:
