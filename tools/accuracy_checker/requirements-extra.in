@@ -54,4 +54,4 @@ rawpy~=0.17.1;python_version>="3.7"
 lmdb>=1.2.1
 
 # pandas datasets support
-pandas~=1.1.5
+pandas>=1.1.5,<=1.3.5
