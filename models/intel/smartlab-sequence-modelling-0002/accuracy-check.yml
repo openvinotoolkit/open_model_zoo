@@ -1,0 +1,64 @@
+models:
+  - name: smartlab-sequence-modelling-0002
+    launchers:
+      - framework: openvino
+        adapter:
+          type: multi_output_regression
+          ignore_batch: True
+          outputs:
+            - output
+            - fhis_out_0
+            - fhis_out_1
+            - fhis_out_2
+            - fhis_out_3
+        inputs:
+          - name: input
+            type: INPUT
+            value: .*input
+            shape: [1, 1152, 24]
+            layout: NHWC
+          - name: fhis_in_0
+            type: INPUT
+            value: .*fhis_in_0
+            shape: [12, 64, 2048]
+            layout: NHWC
+          - name: fhis_in_1
+            type: INPUT
+            value: .*fhis_in_1
+            shape: [11, 64, 2048]
+            layout: NHWC
+          - name: fhis_in_2
+            type: INPUT
+            value: .*fhis_in_2
+            shape: [11, 64, 2048]
+            layout: NHWC
+          - name: fhis_in_3
+            type: INPUT
+            value: .*fhis_in_3
+            shape: [11, 64, 2048]
+            layout: NHWC
+        allow_reshape_input: True
+    datasets:
+      - name: online_mstcn_plus_dataset
+        metrics:
+          - type: mae
+            max_error: True
+            presenter: print_vector
+            abs_threshold: 0.1
+            rel_threshold: 1.01
+            reference:
+              output@max_error: 1e-5
+              output@mean: 1e-5
+              output@std: 0
+              fhis_out_0@max_error: 1e-5
+              fhis_out_0@mean: 1e-5
+              fhis_out_0@std: 0
+              fhis_out_1@max_error: 1e-5
+              fhis_out_1@mean: 1e-5
+              fhis_out_1@std: 0
+              fhis_out_2@max_error: 1e-5
+              fhis_out_2@mean: 1e-5
+              fhis_out_2@std: 0
+              fhis_out_3@max_error: 1e-5
+              fhis_out_3@mean: 1e-5
+              fhis_out_3@std: 0
