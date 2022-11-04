@@ -63,7 +63,7 @@ networkx==2.5.1
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
-numpy==1.19.5
+numpy>=1.19.5,<=1.23.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
     #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt

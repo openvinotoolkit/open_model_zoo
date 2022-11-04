@@ -60,7 +60,7 @@ nibabel==3.2.1
     # via -r tools/accuracy_checker/requirements.in
 nltk==3.6.2
     # via -r tools/accuracy_checker/requirements.in
-numpy==1.19.5
+numpy>=1.19.5,<=1.23.1
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imagecodecs

@@ -3,7 +3,7 @@ librosa>=0.8.0
 matplotlib>=3.3.4
 motmetrics>=1.2.0
 nibabel>=3.2.1
-numpy>=1.16.6,<=1.23.1
+numpy>=1.19.5,<=1.23.1
 opencv-python
 pillow>=8.1.2
 pyyaml>=5.4.1

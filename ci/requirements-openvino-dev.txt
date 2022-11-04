@@ -51,7 +51,7 @@ nibabel==3.2.1
     # via -r ci/requirements-openvino-dev.in
 nltk==3.6.5
     # via -r ci/requirements-openvino-dev.in
-numpy==1.19.5
+numpy>=1.19.5,<=1.23.1
     # via
     #   -r ci/requirements-openvino-dev.in
     #   hyperopt

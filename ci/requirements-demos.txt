@@ -53,7 +53,7 @@ numba==0.53.1
     # via
     #   librosa
     #   resampy
-numpy==1.19.5
+numpy>=1.19.5,<=1.23.1
     # via
     #   -r ${INTEL_OPENVINO_DIR}/python/requirements.txt
     #   -r demos/requirements.txt
