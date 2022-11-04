@@ -23,13 +23,13 @@ networkx (~=2.5) ; extra == 'tensorflow'
 networkx (~=2.5) ; extra == 'tensorflow2'
 nibabel (>=3.2.1)
 nltk (>=3.5)
-numpy (>=1.19.5,<=1.23.1) ; extra == 'tensorflow'
-numpy (>=1.19.5,<=1.23.1)
-numpy (>=1.19.5,<=1.23.1) ; extra == 'caffe'
-numpy (>=1.19.5,<=1.23.1) ; extra == 'kaldi'
-numpy (>=1.19.5,<=1.23.1) ; extra == 'mxnet'
-numpy (>=1.19.5,<=1.23.1) ; extra == 'onnx'
-numpy (>=1.19.5,<=1.23.1) ; extra == 'tensorflow2'
+numpy (>=1.16.6,<=1.23.1) ; extra == 'tensorflow'
+numpy (>=1.16.6,<=1.23.1)
+numpy (>=1.16.6,<=1.23.1) ; extra == 'caffe'
+numpy (>=1.16.6,<=1.23.1) ; extra == 'kaldi'
+numpy (>=1.16.6,<=1.23.1) ; extra == 'mxnet'
+numpy (>=1.16.6,<=1.23.1) ; extra == 'onnx'
+numpy (>=1.16.6,<=1.23.1) ; extra == 'tensorflow2'
 onnx (<=1.12,>=1.8.1) ; extra == 'caffe2'
 onnx (<=1.12,>=1.8.1) ; extra == 'onnx'
 onnx (<=1.12,>=1.8.1) ; extra == 'pytorch'
