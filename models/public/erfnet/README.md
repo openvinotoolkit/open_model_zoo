@@ -57,6 +57,7 @@ Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 - `C` - channel
 - `H` - height
 - `W` - width
+It can be treated as a five-channel feature map, where each channel is information of classes: background, road line, road line, road line, road line.
 
 
 ### Converted model
@@ -73,13 +74,13 @@ Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 
 You can download models and if necessary convert them into Inference Engine format using the Model Downloader and other automation tools as shown in the examples below.
 An example of using the Model Downloader:
-
+```
 omz_downloader --name <model_name>
-
+```
 An example of using the Model Converter:
-
+```
 omz_converter --name <model_name>
-
+```
 ## Demo usage
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
