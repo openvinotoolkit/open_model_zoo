@@ -57,6 +57,7 @@ Feature map, name - `output1`, shape - `1,5,208,976`, format is `B,C,H,W` where:
 - `C` - channel
 - `H` - height
 - `W` - width
+
 It can be treated as a five-channel feature map, where each channel is information of classes: background, road line, road line, road line, road line.
 
 
