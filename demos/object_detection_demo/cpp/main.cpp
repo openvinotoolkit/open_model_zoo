@@ -385,7 +385,7 @@ int main(int argc, char* argv[]) {
                                             static_cast<float>(FLAGS_t),
                                             labels,
                                             FLAGS_layout));
-        } else if (FLAGS_at == "yolox"){
+        } else if (FLAGS_at == "yolox") {
             model.reset(new ModelYoloX(FLAGS_m,
                                        static_cast<float>(FLAGS_t),
                                        static_cast<float>(FLAGS_iou_t),

@@ -43,7 +43,7 @@ ModelYoloX::ModelYoloX(const std::string& modelFileName,
     : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout),
       boxIOUThreshold(boxIOUThreshold) {
         resizeMode = RESIZE_KEEP_ASPECT;
-      }
+}
 
 void ModelYoloX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
