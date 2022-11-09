@@ -118,7 +118,7 @@ class CascadedSubDetector(SubDetector):
         self.children_cats = exp.children_cats
 
     def inference_in(self, img, roi_xyxy):
-        ### cook raw image => sub-img within ROI of parent object 
+        ### cook raw image => sub-img within ROI of parent object
         roi_xyxy = roi_xyxy.astype(int)
         img_resize, img_pad_size, pad_left, pad_top = \
             crop_pad_resize(img, roi_xyxy, self.dsize)

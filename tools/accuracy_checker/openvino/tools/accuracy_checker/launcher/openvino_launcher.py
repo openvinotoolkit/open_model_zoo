@@ -362,7 +362,7 @@ class OpenVINOLauncher(Launcher):
             if cpu_extensions:
                 selection_mode = self.config.get('_cpu_extensions_mode')
                 cpu_extensions = get_cpu_extension(cpu_extensions, selection_mode)
-                self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+                self.ie_core.add_extension(str(cpu_extensions))
             ov_set_config(
                 self.ie_core, {'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, device='CPU')
         gpu_extensions = self.config.get('gpu_extensions')
@@ -967,7 +967,10 @@ class OpenVINOLauncher(Launcher):
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def get_model_file_type(self):
-        return self._model.suffix
+        if hasattr(self, '_model'):
+            return self._model.suffix
+        else:
+            return None
 
     def get_infer_queue(self, log=True):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':
