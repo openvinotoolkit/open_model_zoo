@@ -5,7 +5,7 @@ This demo shows how to perform background subtraction using G-API.
 > **NOTE**: Only batch size of 1 is supported.
 
 ## How It Works
-The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format.
+The demo application expects an instance-segmentation-security-???? or trimap free background matting based on pixel-level segmentation approach model in the Intermediate Representation (IR) format. Please note, that there aren't background matting models in `OpenModelZoo` collection.
 
 1. for instance segmentation models based on `Mask RCNN` approach:
     * One input: `image` for input image.
@@ -54,6 +54,34 @@ omz_converter --list models.lst
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
+
+### OneVPL Support
+
+Demo provides functionality to use [OneVPL](https://github.com/oneapi-src/oneVPL#-video-processing-library) video decoding.
+Example:
+```sh
+./background_subtraction_demo_gapi/ -m <path_to_model> -i <path_to_video_file> -use_onevpl
+```
+
+In order to provide additional configuration paramaters use `-onevpl_params`:
+```sh
+./background_subtraction_demo_gapi/ -m <path_to_model> -i <path_to_raw_file> -use_onevpl -onevpl_params="mfxImplDescription.mfxDecoderDescription.decoder.CodecID:MFX_CODEC_HEVC"
+```
+>**NOTE**: Only raw formats such as `h264`, `h265` etc are supported on Linux.
+Working with raw formats user always must specify `codec` type via `-onevpl_params`. See example below.
+
+To build OpenCV G-API with `oneVPL` support follow instruction:
+[Building G-API with oneVPL Toolkit support](https://github.com/opencv/opencv/wiki/Graph-API#building-with-onevpl-toolkit-support)
+
+#### Troubleshooting
+During execution `oneVPL` might report warnings that tell the user that source can be configurable more accurate.
+
+For example:
+```
+ cv::gapi::wip::onevpl::VPLLegacyDecodeEngine::process_error [000001CED3851C70] error: cv::gapi::wip::onevpl::CachedPool::find_free - cannot get free surface from pool, size: 5
+```
+This might be fixed by increasing pool size using `-onevpl_pool_size` parameter.
+
 ## Running
 
 Run the application with the `-h` option to see the following usage message:
@@ -82,6 +110,9 @@ Options:
     -blur_bgr                  Optional. Blur background.
     -target_bgr                Optional. Background onto which to composite the output (by default to green field).
     -u                         Optional. List of monitors to show initially.
+    -use_onevpl                Optional. Use onevpl video decoding.
+    -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>,<prop name>:<value> Several important configuration parameters: 'mfxImplDescription.mfxDecoderDescription.decoder.CodecID' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc and 'mfxImplDescription.AccelerationMode' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
+    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size. 0 leaves frames pool size default for your system. This parameter doesn't have a god default value. It must be adjusted for specific execution (video, model, system ...).
 
 Available target devices:  <targets>
 ```

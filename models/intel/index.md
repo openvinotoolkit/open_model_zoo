@@ -103,11 +103,13 @@
    omz_models_model_semantic_segmentation_adas_0001
    omz_models_model_single_image_super_resolution_1032
    omz_models_model_single_image_super_resolution_1033
+   omz_models_model_smartlab_action_recognition_0001
    omz_models_model_smartlab_object_detection_0001
    omz_models_model_smartlab_object_detection_0002
    omz_models_model_smartlab_object_detection_0003
    omz_models_model_smartlab_object_detection_0004
    omz_models_model_smartlab_sequence_modelling_0001
+   omz_models_model_smartlab_sequence_modelling_0002
    omz_models_model_text_detection_0003
    omz_models_model_text_detection_0004
    omz_models_model_text_image_super_resolution_0001
@@ -135,7 +137,7 @@
    omz_models_model_yolo_v2_tiny_ava_sparse_30_0001
    omz_models_model_yolo_v2_tiny_ava_sparse_60_0001
    omz_models_model_yolo_v2_tiny_vehicle_detection_0001
-   
+
 
 .. raw:: html
 
@@ -475,8 +477,12 @@ Deep Learning models for online sequence modeling.
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.049   | 1.02    |
-
+| [smartlab-sequence-modelling-0001](./smartlab-sequence-modelling-0001/README.md) | 0.11   | 2.537    |
+| [smartlab-sequence-modelling-0002](./smartlab-sequence-modelling-0002/README.md) | 0.049   | 1.02    |
+| [smartlab-action-recognition-0001](./smartlab-action-recognition-0001/README.md) |      |        |
+|   smartlab-action-recognition-0001-encoder-side                                    | 0.611   | 3.387   |
+|   smartlab-action-recognition-0001-encoder-top                                    | 0.611   | 3.387   |
+|   smartlab-action-recognition-0001-decoder                                   | 0.008   | 4.099   |
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)

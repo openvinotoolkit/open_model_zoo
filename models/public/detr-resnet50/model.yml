@@ -68,6 +68,11 @@ postprocessing:
     file: models/backbone.py
     pattern: 'pretrained=is_main_process\(\)'
     replacement: 'pretrained=False'
+  - $type: regex_replace
+    file: util/misc.py
+    pattern: 'if float\(torchvision\.__version__\[\:3\]\) < 0\.7\:'
+    replacement: |
+        if float(torchvision.__version__.rsplit('.', 2)[1]) < 7:
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

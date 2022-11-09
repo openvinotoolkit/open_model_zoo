@@ -19,7 +19,10 @@ from timm.models.swin_transformer import swin_tiny_patch4_window7_224
 
 
 def create_model(weights):
-    torch.onnx.symbolic_registry.register_op('roll', roll, '', version=11)
+    try:
+        torch.onnx.symbolic_registry.register_op('roll', roll, '', version=11)
+    except AttributeError:
+        torch.onnx.register_custom_op_symbolic('::roll', roll, 11)
     model = swin_tiny_patch4_window7_224()
 
     checkpoint = torch.load(weights, map_location='cpu')['model']

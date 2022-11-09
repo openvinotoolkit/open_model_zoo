@@ -92,14 +92,13 @@ You can use any of them or several at a time. For correct work, Accuracy Checker
 If all prerequisite are installed, then you are ready to install **Accuracy Checker**:
 
 ```bash
-python3 setup.py install
+python3 -m pip install .
 ```
 
-Accuracy Checker is a modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements.in` file.
-Instead of the standard installation, you can install only the core part of the tool without additional dependencies and manage them by yourself using the following command:
-
+Accuracy Checker is a modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements-extra.in` file.
+Standard installation procedure includes only basic part, in order to obtain extra modules you can execute following command:
 ```bash
-python setup.py install_core
+python3 -m pip install .[extra]
 ```
 
 #### Installation Troubleshooting
@@ -108,7 +107,7 @@ python setup.py install_core
 If you get a directory/file not found error, try manually removing the previous tool version from your environment or install the tool using following command in Accuracy Checker directory instead of setup.py install:
 
 ```bash
-pip install --upgrade --force-reinstall .
+python3 -m pip install --upgrade --force-reinstall .
 ```
 2. If `accuracy_check` command failed with following error:
 ```

@@ -29,10 +29,11 @@ from openvino.runtime import Core, get_version, PartialShape
 import mtcnn_utils as utils
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
+from model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -122,10 +123,6 @@ def main():
     if len(o_net.outputs) != 3:
         raise RuntimeError("Onet supports three output topologies")
 
-    pnet_input_tensor_name = p_net.inputs[0].get_any_name()
-    rnet_input_tensor_name = r_net.inputs[0].get_any_name()
-    onet_input_tensor_name = o_net.inputs[0].get_any_name()
-
     for node in p_net.outputs:
         if node.shape[1] == 2:
             pnet_cls_name = node.get_any_name()
@@ -189,13 +186,13 @@ def main():
             ws = int(ow*scale)
             image = preprocess_image(rgb_image, ws, hs)
 
-            p_net.reshape({pnet_input_tensor_name: PartialShape([1, 3, ws, hs])})  # Change weidth and height of input blob
+            p_net.reshape(PartialShape([1, 3, ws, hs]))  # Change weidth and height of input blob
             compiled_pnet = core.compile_model(p_net, args.device)
             infer_request_pnet = compiled_pnet.create_infer_request()
             if i == 0 and not is_loaded_before:
                 log.info("The Proposal model {} is loaded to {}".format(args.model_pnet, args.device))
 
-            infer_request_pnet.infer(inputs={pnet_input_tensor_name: image})
+            infer_request_pnet.infer(image)
             p_res = {name: infer_request_pnet.get_tensor(name).data[:] for name in {pnet_roi_name, pnet_cls_name}}
             pnet_res.append(p_res)
 
@@ -213,8 +210,7 @@ def main():
 
         # Rnet stage
         if len(rectangles) > 0:
-
-            r_net.reshape({rnet_input_tensor_name: PartialShape([len(rectangles), 3, 24, 24])})  # Change batch size of input blob
+            r_net.reshape(PartialShape([len(rectangles), 3, 24, 24]))  # Change batch size of input blob
             compiled_rnet = core.compile_model(r_net, args.device)
             infer_request_rnet = compiled_rnet.create_infer_request()
             if not is_loaded_before:
@@ -226,7 +222,7 @@ def main():
                 crop_img = preprocess_image(crop_img, 24, 24)
                 rnet_input.extend(crop_img)
 
-            infer_request_rnet.infer(inputs={rnet_input_tensor_name: rnet_input})
+            infer_request_rnet.infer(np.array(rnet_input, np.float32))
             rnet_res = {name: infer_request_rnet.get_tensor(name).data[:] for name in {rnet_roi_name, rnet_cls_name}}
 
             roi = rnet_res[rnet_roi_name]
@@ -235,8 +231,7 @@ def main():
 
         # Onet stage
         if len(rectangles) > 0:
-
-            o_net.reshape({onet_input_tensor_name: PartialShape([len(rectangles), 3, 48, 48])})  # Change batch size of input blob
+            o_net.reshape(PartialShape([len(rectangles), 3, 48, 48]))  # Change batch size of input blob
             compiled_onet = core.compile_model(o_net, args.device)
             infer_request_onet = compiled_onet.create_infer_request()
             if not is_loaded_before:
@@ -249,7 +244,7 @@ def main():
                 crop_img = preprocess_image(crop_img, 48, 48)
                 onet_input.extend(crop_img)
 
-            infer_request_onet.infer(inputs={onet_input_tensor_name: onet_input})
+            infer_request_onet.infer(np.array(onet_input, np.float32))
             onet_res = {name: infer_request_onet.get_tensor(name).data[:] for name in {onet_roi_name, onet_cls_name, onet_pts_name}}
 
             roi = onet_res[onet_roi_name]
