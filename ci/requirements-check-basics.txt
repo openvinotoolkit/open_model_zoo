@@ -12,11 +12,6 @@ gitdb==4.0.7
     # via gitpython
 gitpython==3.1.18
     # via bandit
-importlib-metadata==4.8.1
-    # via
-    #   flake8
-    #   flake8-comprehensions
-    #   stevedore
 mccabe==0.6.1
     # via flake8
 mistune==2.0.0
@@ -40,14 +35,8 @@ smmap==4.0.0
     # via gitdb
 stevedore==3.4.0
     # via bandit
-typing-extensions==3.10.0.2
-    # via
-    #   gitpython
-    #   importlib-metadata
 yamllint==1.26.3
     # via -r ci/requirements-check-basics.in
-zipp==3.5.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
