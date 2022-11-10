@@ -102,7 +102,7 @@ void ModelYoloX::prepareGridsAndStrides() {
     for (size_t size_index = 0; size_index < hsizes.size(); ++size_index) {
         for (size_t h_index = 0; h_index < hsizes[size_index]; ++h_index) {
             for (size_t w_index = 0; w_index < wsizes[size_index]; ++w_index) {
-                grids.push_back({w_index, h_index});
+                grids.emplace_back(w_index, h_index);
                 expandedStrides.push_back(strides[size_index]);
             }
         }

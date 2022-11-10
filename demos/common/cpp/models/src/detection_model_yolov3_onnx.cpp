@@ -76,8 +76,8 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     const ov::Layout& infoLayout = getInputLayout(inputs.at(1));
 
     if (infoShape.size() != 2 && infoShape[ov::layout::channels_idx(infoLayout)] != 2) {
-            throw std::logic_error("Expected 2D image info input with 2 channels");
-        }
+        throw std::logic_error("Expected 2D image info input with 2 channels");
+    }
 
     ppp.input(infoInputName).tensor().set_element_type(ov::element::i32);
 
@@ -96,7 +96,7 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     for (auto& output : outputs) {
         const ov::Shape& currentShape = output.get_partial_shape().get_max_shape();
         std::string currentName = output.get_any_name();
-        if (currentShape[currentShape.size() - 1] == 3) {
+        if (currentShape.back() == 3) {
             indicesOutputName = currentName;
             ppp.output(currentName).tensor().set_element_type(ov::element::i32);
         } else if (currentShape[2] == 4) {
@@ -106,7 +106,8 @@ void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
             scoresOutputName = currentName;
             ppp.output(currentName).tensor().set_element_type(ov::element::f32);
         } else {
-            throw std::logic_error("Expected shapes [:,:,4], [:,numClasses,:] and [:,3] for outputs");
+            throw std::logic_error("Expected shapes [:,:,4], [:,"
+                + std::to_string(numberOfClasses) + ",:] and [:,3] for outputs");
         }
         outputsNames.push_back(currentName);
     }

@@ -22,7 +22,6 @@
 #include <openvino/openvino.hpp>
 
 #include "models/detection_model.h"
-#include "utils/image_utils.h"
 
 class ModelYoloV3ONNX: public DetectionModel {
 public:

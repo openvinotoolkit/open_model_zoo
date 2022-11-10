@@ -15,19 +15,13 @@
 */
 
 #pragma once
-#include <stddef.h>
-#include <stdint.h>
-
-#include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
-#include <openvino/op/region_yolo.hpp>
 #include <openvino/openvino.hpp>
 
 #include "models/detection_model.h"
-#include "utils/image_utils.h"
-#include "utils/nms.hpp"
 
 class ModelYoloX: public DetectionModel {
 public:

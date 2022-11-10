@@ -52,7 +52,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         }
         img = resizeImageExt(img, width, height, resizeMode, interpolationMode);
     }
-
     request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
     return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
 }
