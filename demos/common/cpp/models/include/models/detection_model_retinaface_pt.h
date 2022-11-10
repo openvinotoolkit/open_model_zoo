@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <opencv2/core/types.hpp>
+#include <utils/nms.hpp>
 
 #include "models/detection_model.h"
 
@@ -39,26 +40,6 @@ public:
         float cY;
         float width;
         float height;
-    };
-
-    struct Rect {
-        float left;
-        float top;
-        float right;
-        float bottom;
-
-        float getWidth() const {
-            return (right - left) + 1.0f;
-        }
-        float getHeight() const {
-            return (bottom - top) + 1.0f;
-        }
-        float getXCenter() const {
-            return left + (getWidth() - 1.0f) / 2.0f;
-        }
-        float getYCenter() const {
-            return top + (getHeight() - 1.0f) / 2.0f;
-        }
     };
 
     /// Loads model and performs required initialization
@@ -91,10 +72,10 @@ protected:
                                                   int imgWidth,
                                                   int imgHeight);
     std::vector<ModelRetinaFacePT::Box> generatePriorData();
-    std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const ov::Tensor& boxesTensor,
-                                                              const std::vector<size_t>& indicies,
-                                                              int imgWidth,
-                                                              int imgHeight);
+    std::vector<Anchor> getFilteredProposals(const ov::Tensor& boxesTensor,
+                                             const std::vector<size_t>& indicies,
+                                             int imgWidth,
+                                             int imgHeight);
 
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

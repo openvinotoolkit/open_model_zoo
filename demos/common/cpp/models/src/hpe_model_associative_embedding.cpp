@@ -55,7 +55,7 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
       confidenceThreshold(confidenceThreshold),
       delta(delta) {
         resizeMode = resizeMode;
-        interpolationMode = CUBIC;
+        interpolationMode = cv::INTER_CUBIC;
       }
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {

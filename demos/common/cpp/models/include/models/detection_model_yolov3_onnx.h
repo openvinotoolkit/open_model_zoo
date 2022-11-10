@@ -42,7 +42,6 @@ public:
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
-    float getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd);
 
     std::string boxesOutputName;
     std::string scoresOutputName;

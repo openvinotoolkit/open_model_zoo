@@ -17,7 +17,7 @@
 #include "utils/image_utils.h"
 
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode,
-                       INTERPOLATION_MODE interpolationMode, cv::Rect* roi, cv::Scalar BorderConstant) {
+                       cv::InterpolationFlags interpolationMode, cv::Rect* roi, cv::Scalar BorderConstant) {
     if (width == mat.cols && height == mat.rows) {
         return mat;
     }

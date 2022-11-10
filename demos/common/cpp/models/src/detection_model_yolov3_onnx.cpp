@@ -39,60 +39,50 @@ ModelYoloV3ONNX::ModelYoloV3ONNX(const std::string& modelFileName,
                                  const std::vector<std::string>& labels,
                                  const std::string& layout)
     : DetectionModel(modelFileName, confidenceThreshold, false, labels, layout) {
-        interpolationMode = CUBIC;
+        interpolationMode = cv::INTER_CUBIC;
         resizeMode = RESIZE_KEEP_ASPECT_LETTERBOX;
     }
 
 
 void ModelYoloV3ONNX::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input  ------------------------------------------------------
+    // --------------------------- Prepare inputs ------------------------------------------------------
     const ov::OutputVector& inputs = model->inputs();
     if (inputs.size() != 2) {
         throw std::logic_error("YoloV3ONNX model wrapper expects models that have 2 inputs");
     }
 
-    // Check first image input
-    std::string imageInputName = inputs.begin()->get_any_name();
-    inputsNames.push_back(imageInputName);
-
-    const ov::Shape& imageShape = inputs.begin()->get_shape();
-    const ov::Layout& imageLayout = getInputLayout(inputs.front());
-
-    if (imageShape.size() != 4 && imageShape[ov::layout::channels_idx(imageLayout)] != 3) {
-        throw std::logic_error("Expected 4D image input with 3 channels");
-    }
-
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input(imageInputName).tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
+    inputsNames.reserve(inputs.size());
+    for (auto& input : inputs) {
+        const ov::Shape& currentShape = input.get_shape();
+        std::string currentName = input.get_any_name();
+        const ov::Layout& currentLayout = getInputLayout(input);
 
-    ppp.input(imageInputName).model().set_layout(imageLayout);
-
-    // Check second info input
-    std::string infoInputName = (++inputs.begin())->get_any_name();
-    inputsNames.push_back(infoInputName);
-
-    const ov::Shape infoShape = (++inputs.begin())->get_shape();
-    const ov::Layout& infoLayout = getInputLayout(inputs.at(1));
-
-    if (infoShape.size() != 2 && infoShape[ov::layout::channels_idx(infoLayout)] != 2) {
-        throw std::logic_error("Expected 2D image info input with 2 channels");
+        if (currentShape.size() == 4) {
+            if (currentShape[ov::layout::channels_idx(currentLayout)] != 3) {
+                throw std::logic_error("Expected 4D image input with 3 channels");
+            }
+            inputsNames[0] = currentName;
+            netInputWidth = currentShape[ov::layout::width_idx(currentLayout)];
+            netInputHeight = currentShape[ov::layout::height_idx(currentLayout)];
+            ppp.input(currentName).tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
+        } else if (currentShape.size() == 2) {
+            if (currentShape[ov::layout::channels_idx(currentLayout)] != 2) {
+                throw std::logic_error("Expected 2D image info input with 2 channels");
+            }
+            inputsNames[1] = currentName;
+            ppp.input(currentName).tensor().set_element_type(ov::element::i32);
+        }
+        ppp.input(currentName).model().set_layout(currentLayout);
     }
 
-    ppp.input(infoInputName).tensor().set_element_type(ov::element::i32);
-
-    ppp.input(infoInputName).model().set_layout(infoLayout);
-
-    // --------------------------- Reading image input parameters -------------------------------------------
-    netInputWidth = imageShape[ov::layout::width_idx(imageLayout)];
-    netInputHeight = imageShape[ov::layout::height_idx(imageLayout)];
-
-    // --------------------------- Prepare output  -----------------------------------------------------
-    if (model->outputs().size() != 3) {
+    // --------------------------- Prepare outputs -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 3) {
         throw std::logic_error("YoloV3ONNX model wrapper expects models that have 3 outputs");
     }
 
-    const ov::OutputVector& outputs = model->outputs();
     for (auto& output : outputs) {
         const ov::Shape& currentShape = output.get_partial_shape().get_max_shape();
         std::string currentName = output.get_any_name();
@@ -129,7 +119,7 @@ std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& 
     return ImageModel::preprocess(inputData, request);
 }
 
-float ModelYoloV3ONNX::getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd) {
+float getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd) {
     const float* scoresPtr = scoresTensor.data<float>();
     const auto shape = scoresTensor.get_shape();
     int N = shape[2];

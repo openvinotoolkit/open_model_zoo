@@ -24,12 +24,6 @@ enum RESIZE_MODE {
     RESIZE_KEEP_ASPECT_LETTERBOX
 };
 
-enum INTERPOLATION_MODE {
-    NEAREST,
-    LINEAR,
-    CUBIC,
-    AREA
-};
-
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode = RESIZE_FILL,
-                       INTERPOLATION_MODE interpolationMode = LINEAR, cv::Rect* roi = nullptr, cv::Scalar BorderConstant = cv::Scalar(0, 0, 0));
+                       cv::InterpolationFlags interpolationMode = cv::INTER_LINEAR, cv::Rect* roi = nullptr,
+                       cv::Scalar BorderConstant = cv::Scalar(0, 0, 0));

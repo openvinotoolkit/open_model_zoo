@@ -100,7 +100,7 @@ void ModelFaceBoxes::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     priorBoxes(featureMaps);
 }
 
-void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors,
+void calculateAnchors(std::vector<Anchor>& anchors,
                       const std::vector<float>& vx,
                       const std::vector<float>& vy,
                       const int minSize,
@@ -126,7 +126,7 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors,
     }
 }
 
-void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>& anchors,
+void calculateAnchorsZeroLevel(std::vector<Anchor>& anchors,
                                const int fx,
                                const int fy,
                                const std::vector<int>& minSizes,
@@ -193,14 +193,14 @@ std::pair<std::vector<size_t>, std::vector<float>> filterScores(const ov::Tensor
     return {indices, scores};
 }
 
-std::vector<ModelFaceBoxes::Anchor> filterBoxes(const ov::Tensor& boxesTensor,
-                                                const std::vector<ModelFaceBoxes::Anchor>& anchors,
-                                                const std::vector<size_t>& validIndices,
-                                                const std::vector<float>& variance) {
+std::vector<Anchor> filterBoxes(const ov::Tensor& boxesTensor,
+                                const std::vector<Anchor>& anchors,
+                                const std::vector<size_t>& validIndices,
+                                const std::vector<float>& variance) {
     auto shape = boxesTensor.get_shape();
     const float* boxesPtr = boxesTensor.data<float>();
 
-    std::vector<ModelFaceBoxes::Anchor> boxes;
+    std::vector<Anchor> boxes;
     boxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     for (auto i : validIndices) {
         auto objStart = shape[2] * i;

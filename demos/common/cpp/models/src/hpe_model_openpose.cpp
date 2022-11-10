@@ -52,7 +52,7 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName,
       targetSize(targetSize),
       confidenceThreshold(confidenceThreshold) {
         resizeMode = RESIZE_KEEP_ASPECT;
-        interpolationMode = CUBIC;
+        interpolationMode = cv::INTER_CUBIC;
       }
 
 void HPEOpenPose::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {

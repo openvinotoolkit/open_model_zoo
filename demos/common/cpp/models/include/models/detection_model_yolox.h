@@ -45,7 +45,7 @@ public:
 
 protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
-    void prepareGridsAndStrides();
+    void setStridesGrids();
 
     double boxIOUThreshold;
     std::vector<std::pair<size_t, size_t>> grids;
