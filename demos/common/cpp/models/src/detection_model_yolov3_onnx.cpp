@@ -119,12 +119,14 @@ std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& 
     return ImageModel::preprocess(inputData, request);
 }
 
+namespace {
 float getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd) {
     const float* scoresPtr = scoresTensor.data<float>();
     const auto shape = scoresTensor.get_shape();
     int N = shape[2];
 
     return scoresPtr[classInd * N + boxInd];
+}
 }
 
 std::unique_ptr<ResultBase> ModelYoloV3ONNX::postprocess(InferenceResult& infResult) {
