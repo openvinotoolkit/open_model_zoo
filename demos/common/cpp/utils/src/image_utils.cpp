@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 #include "utils/image_utils.h"
 
-cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode, bool hqResize, cv::Rect* roi) {
+cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode,
+                       cv::InterpolationFlags interpolationMode, cv::Rect* roi, cv::Scalar BorderConstant) {
     if (width == mat.cols && height == mat.rows) {
         return mat;
     }
 
     cv::Mat dst;
-    int interpMode = hqResize ? cv::INTER_CUBIC : cv::INTER_LINEAR;
 
     switch (resizeMode) {
     case RESIZE_FILL:
     {
-        cv::resize(mat, dst, cv::Size(width, height), interpMode);
+        cv::resize(mat, dst, cv::Size(width, height), interpolationMode);
         if (roi) {
             *roi = cv::Rect(0, 0, width, height);
         }
@@ -38,13 +38,13 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
     {
         double scale = std::min(static_cast<double>(width) / mat.cols, static_cast<double>(height) / mat.rows);
         cv::Mat resizedImage;
-        cv::resize(mat, resizedImage, cv::Size(0, 0), scale, scale, interpMode);
+        cv::resize(mat, resizedImage, cv::Size(0, 0), scale, scale, interpolationMode);
 
         int dx = resizeMode == RESIZE_KEEP_ASPECT ? 0 : (width - resizedImage.cols) / 2;
         int dy = resizeMode == RESIZE_KEEP_ASPECT ? 0 : (height - resizedImage.rows) / 2;
 
         cv::copyMakeBorder(resizedImage, dst, dy, height - resizedImage.rows - dy,
-            dx, width - resizedImage.cols - dx, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+            dx, width - resizedImage.cols - dx, cv::BORDER_CONSTANT, BorderConstant);
         if (roi) {
             *roi = cv::Rect(dx, dy, resizedImage.cols, resizedImage.rows);
         }

@@ -46,6 +46,8 @@
 #include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
+#include <models/detection_model_yolov3_onnx.h>
+#include <models/detection_model_yolox.h>
 #include <models/input_data.h>
 #include <models/model_base.h>
 #include <models/results.h>
@@ -66,7 +68,7 @@ DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] =
-    "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo";
+    "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd, yolo, yolov3-onnx or yolox";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] =
     "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -378,6 +380,17 @@ int main(int argc, char* argv[]) {
                                       anchors,
                                       masks,
                                       FLAGS_layout));
+        } else if (FLAGS_at == "yolov3-onnx") {
+            model.reset(new ModelYoloV3ONNX(FLAGS_m,
+                                            static_cast<float>(FLAGS_t),
+                                            labels,
+                                            FLAGS_layout));
+        } else if (FLAGS_at == "yolox") {
+            model.reset(new ModelYoloX(FLAGS_m,
+                                       static_cast<float>(FLAGS_t),
+                                       static_cast<float>(FLAGS_iou_t),
+                                       labels,
+                                       FLAGS_layout));
         } else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;

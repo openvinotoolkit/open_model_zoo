@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <utils/nms.hpp>
+
 #include "models/detection_model.h"
 
 namespace ov {
@@ -30,26 +32,6 @@ struct ResultBase;
 
 class ModelRetinaFace : public DetectionModel {
 public:
-    struct Anchor {
-        float left;
-        float top;
-        float right;
-        float bottom;
-
-        float getWidth() const {
-            return (right - left) + 1.0f;
-        }
-        float getHeight() const {
-            return (bottom - top) + 1.0f;
-        }
-        float getXCenter() const {
-            return left + (getWidth() - 1.0f) / 2.0f;
-        }
-        float getYCenter() const {
-            return top + (getHeight() - 1.0f) / 2.0f;
-        }
-    };
-
     static const int LANDMARKS_NUM = 5;
     static const int INIT_VECTOR_SIZE = 200;
     /// Loads model and performs required initialization

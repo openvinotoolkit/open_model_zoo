@@ -197,11 +197,11 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     return anchors;
 }
 
-std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const ov::Tensor& boxesTensor,
+std::vector<Anchor> ModelRetinaFacePT::getFilteredProposals(const ov::Tensor& boxesTensor,
                                                                              const std::vector<size_t>& indicies,
                                                                              int imgWidth,
                                                                              int imgHeight) {
-    std::vector<ModelRetinaFacePT::Rect> rects;
+    std::vector<Anchor> rects;
     rects.reserve(indicies.size());
 
     const auto& shape = boxesTensor.get_shape();
@@ -218,10 +218,10 @@ std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(con
         const float cY = priors[i].cY + pRawBox->cY * variance[0] * prior.height;
         const float width = prior.width * exp(pRawBox->width * variance[1]);
         const float height = prior.height * exp(pRawBox->height * variance[1]);
-        rects.push_back(Rect{clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
-                             clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
-                             clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
-                             clamp(cY + height / 2, 0.f, 1.f) * imgHeight});
+        rects.push_back(Anchor{clamp(cX - width / 2, 0.f, 1.f) * imgWidth,
+                               clamp(cY - height / 2, 0.f, 1.f) * imgHeight,
+                               clamp(cX + width / 2, 0.f, 1.f) * imgWidth,
+                               clamp(cY + height / 2, 0.f, 1.f) * imgHeight});
     }
 
     return rects;
