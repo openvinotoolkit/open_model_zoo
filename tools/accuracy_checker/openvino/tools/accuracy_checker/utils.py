@@ -910,6 +910,8 @@ def end_telemetry(tm):
 
 def parse_partial_shape(partial_shape):
     ps = str(partial_shape)
+    if ps[0] == '[' and ps[-1] == ']':
+        ps = ps[1:-1]
     preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
     if '[' not in preprocessed:
         preprocessed = preprocessed.replace('(', '').replace(')', '')
