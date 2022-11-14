@@ -316,7 +316,7 @@ class EncoderDLSDKModel(CommonDLSDKModel):
 class EncoderOVMOdel(CommonOVModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_input_layers = []
-        self.default_output_layers = ['472/sink_port_0']
+        self.default_output_layers = ['encoder_472/sink_port_0']
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
@@ -330,7 +330,9 @@ class PredictionDLSDKModel(CommonDLSDKModel):
 class PredictionOVModel(CommonOVModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
         self.default_input_layers = ['input.1', '1', '2']
-        self.default_output_layers = ['151/sink_port_0', '152/sink_port_0', '153/sink_port_0']
+        self.default_output_layers = [
+            'prediction_151/sink_port_0', 'prediction_152/sink_port_0', 'prediction_153/sink_port_0'
+        ]
         super().__init__(network_info, launcher, suffix, delayed_model_loading)
 
 
