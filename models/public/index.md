@@ -38,6 +38,7 @@
    omz_models_model_efficientnet_b0_pytorch
    omz_models_model_efficientnet_v2_b0
    omz_models_model_efficientnet_v2_s
+   omz_models_model_erfnet
    omz_models_model_f3net
    omz_models_model_face_detection_retail_0044
    omz_models_model_face_recognition_resnet100_arcface_onnx
