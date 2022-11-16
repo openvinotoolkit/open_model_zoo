@@ -627,7 +627,9 @@ DEMOS = [
                     ModelArg('deeplabv3'),
                     ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
-                    ModelArg('drn-d-38'))),
+                    ModelArg('drn-d-38'),
+                    # ModelArg('erfnet'),  # TODO add after CI is up
+                    )),
         ],
     )),
 
@@ -1275,7 +1277,9 @@ DEMOS = [
                     ModelArg('deeplabv3'),
                     ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
-                    ModelArg('drn-d-38'))),
+                    ModelArg('drn-d-38'),
+                    # ModelArg('erfnet'),  # TODO add after CI is up
+                    )),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),

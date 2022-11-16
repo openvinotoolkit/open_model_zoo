@@ -38,6 +38,7 @@
    omz_models_model_efficientnet_b0_pytorch
    omz_models_model_efficientnet_v2_b0
    omz_models_model_efficientnet_v2_s
+   omz_models_model_erfnet
    omz_models_model_f3net
    omz_models_model_face_detection_retail_0044
    omz_models_model_face_recognition_resnet100_arcface_onnx
@@ -241,6 +242,7 @@ detect areas with complex shape.
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 68.41% | 11.469 | 23.819 |
 | DRN-D-38                  |  PyTorch\*     | [drn-d-38](./drn-d-38/README.md) | 71.31% | 1768.3276 | 25.9939 |
+| Erfnet | PyTorch\*      | [erfnet](./erfnet/README.md)| 76.47% | 11.13 | 7.87 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |
