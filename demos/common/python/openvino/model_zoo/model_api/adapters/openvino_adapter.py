@@ -172,6 +172,8 @@ def get_input_shape(input_tensor):
     if not input_tensor.partial_shape.is_dynamic:
         return list(input_tensor.shape)
     ps = str(input_tensor.partial_shape)
+    if ps[0] == '[' and ps[-1] == ']':
+        ps = ps[1:-1]
     preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
     preprocessed = preprocessed.replace('(', '').replace(')', '')
     if '..' in preprocessed:
