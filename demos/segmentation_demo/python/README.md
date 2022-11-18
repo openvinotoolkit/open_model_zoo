@@ -41,6 +41,7 @@ omz_converter --list models.lst
 * architecture_type = segmentation
   - deeplabv3
   - drn-d-38
+  - erfnet
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
