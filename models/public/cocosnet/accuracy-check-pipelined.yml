@@ -14,7 +14,7 @@ evaluations:
           additional_layers: ["InceptionV3/Logits/AvgPool_1a_8x8/AvgPool"]
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
           inputs:
             - name: "input_seg_map"
               type: INPUT

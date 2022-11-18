@@ -2,7 +2,7 @@ models:
   - name: instance-segmentation-security-0228
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: mask_rcnn
           classes_out: labels
@@ -19,6 +19,8 @@ models:
         metrics:
           - name: AP@masks
             type: coco_orig_segm_precision
+            reference: 0.339
 
           - name: AP@boxes
             type: coco_orig_precision
+            reference: 0.3885

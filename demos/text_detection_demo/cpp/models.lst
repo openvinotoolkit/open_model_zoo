@@ -8,3 +8,4 @@ text-recognition-????
 text-recognition-????-encoder
 text-recognition-????-decoder
 text-recognition-resnet-fc
+vitstr-small-patch16-224

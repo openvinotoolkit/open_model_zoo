@@ -33,7 +33,7 @@ std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
         const auto ptr = marked_.ptr<char>(i);
         for (int j = 0; j < dissimilarity_matrix.cols; j++) {
             if (ptr[j] == kStar) {
-                results[i] = j;
+                results[i] = (size_t)j;
             }
         }
     }

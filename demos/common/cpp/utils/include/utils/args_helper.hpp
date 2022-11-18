@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <opencv2/core/types.hpp>
+#include <openvino/openvino.hpp>
 
 /**
 * @brief This function checks input args and existence of specified files in a given folder
@@ -34,7 +35,9 @@ std::vector<std::string> split(const std::string& s, char delim);
 
 std::vector<std::string> parseDevices(const std::string& device_string);
 
-std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
-                                                    const std::string& values_string);
+std::map<std::string, int32_t> parseValuePerDevice(const std::set<std::string>& devices,
+                                                   const std::string& values_string);
 
 cv::Size stringToSize(const std::string& str);
+
+std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string);

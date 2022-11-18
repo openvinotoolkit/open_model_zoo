@@ -22,11 +22,7 @@ def _get_all_ast_nodes(ast_nodes):
     for node in ast_nodes:
         yield node
         if 'children' in node:
-            # workaround for https://github.com/lepture/mistune/issues/269
-            if isinstance(node['children'], str):
-                yield {'type': 'text', 'text': node['children']}
-            else:
-                yield from _get_all_ast_nodes(node['children'])
+            yield from _get_all_ast_nodes(node['children'])
 
 def _get_text_from_ast(ast_nodes):
     def get_text_from_node(node):

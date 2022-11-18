@@ -14,12 +14,12 @@
 // limitations under the License.
 */
 
-#include <iostream>
-#include <set>
 #include <string>
-#include <pipelines/metadata.h>
-#include <models/results.h>
-#include <utils/ocv_common.hpp>
+#include <utility>
+
+#include <opencv2/core.hpp>
+
+struct ImageResult;
 
 class Visualizer {
 private:
@@ -30,9 +30,9 @@ private:
     // images info
     cv::Size resolution = cv::Size(1000, 600);
     bool isResolutionSet = false;
-    cv::Mat inputImg = cv::Mat(resolution, CV_32FC3, 0.);;
-    cv::Mat resultImg = cv::Mat(resolution, CV_32FC3, 0.);;
-    cv::Mat displayImg = cv::Mat(resolution, CV_32FC3, 0.);;
+    cv::Mat inputImg = cv::Mat(resolution, CV_32FC3, 0.);
+    cv::Mat resultImg = cv::Mat(resolution, CV_32FC3, 0.);
+    cv::Mat displayImg = cv::Mat(resolution, CV_32FC3, 0.);
 
     // trackbar info
     std::string mode = "result";
@@ -51,15 +51,16 @@ private:
     void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha);
     void drawSweepLine(cv::Mat& image);
     void changeDisplayImg();
+
 public:
-    Visualizer(const std::string& type="");
+    Visualizer(const std::string& type = "");
     cv::Size getSize();
 
     // change display image for new input and result images
     cv::Mat renderResultData(ImageResult result, cv::Size& newResolution);
 
     // show display image or specified value
-    void show(cv::Mat img=cv::Mat());
+    void show(cv::Mat img = cv::Mat());
 
     void handleKey(int key);
 };

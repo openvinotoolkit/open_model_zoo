@@ -1,0 +1,47 @@
+models:
+  - name: ERFNet
+    launchers:
+      - framework: onnx_runtime
+        adapter:
+          type: segmentation
+          make_argmax: True
+    datasets:
+      - name: erfnet_data
+        preprocessing:
+          - type: resize
+            dst_width: 976
+            dst_height: 208 
+        postprocessing:
+          - type: resize_segmentation_mask
+            dst_width: 1640
+            dst_height: 350
+            apply_to: prediction
+        metrics:
+          - type: segmentation_accuracy
+            use_argmax: false
+            presenter:  print_scalar
+          - type: mean_iou
+            use_argmax: false
+            presenter:  print_scalar
+  - name: ERFNet
+    launchers:
+      - framework: openvino
+        adapter:
+          type: segmentation
+          make_argmax: True
+    datasets:
+      - name: erfnet_data
+        preprocessing:
+          - type: resize
+            dst_width: 976
+            dst_height: 208
+        postprocessing:
+          - type: resize_segmentation_mask
+            dst_width: 1640
+            dst_height: 350
+            apply_to: prediction
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter:  print_scalar
+            reference: 0.7647

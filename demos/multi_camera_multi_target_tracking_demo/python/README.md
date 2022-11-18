@@ -22,32 +22,24 @@ and then for each detected object it extracts embeddings using re-identification
 2. All embeddings are passed to tracker which assigns an ID to each object.
 3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
-### Installation of Dependencies
-
-To install required dependencies, run
-
-```bash
-pip3 install -r requirements.txt
-```
-
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -85,7 +77,6 @@ usage: multi_camera_multi_target_tracking_demo.py [-h] -i INPUT [INPUT ...]
                                                   [--history_file HISTORY_FILE]
                                                   [--save_detections SAVE_DETECTIONS]
                                                   [--no_show] [-d DEVICE]
-                                                  [-l CPU_EXTENSION]
                                                   [-u UTILIZATION_MONITORS]
 
 Multi camera multi object tracking live demo script
@@ -93,8 +84,8 @@ Multi camera multi object tracking live demo script
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Input sources (indexes of cameras or paths to video
-                        files)
+                        Required. Input sources (indexes of cameras or paths
+                        to video files)
   --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
@@ -107,7 +98,7 @@ optional arguments:
                         Path to the object instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for object instance segmentation model
-  --m_reid M_REID       Path to the object re-identification model
+  --m_reid M_REID       Required. Path to the object re-identification model
   --output_video OUTPUT_VIDEO
                         Optional. Path to output video
   --history_file HISTORY_FILE
@@ -118,9 +109,6 @@ optional arguments:
                         boxes
   --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        MKLDNN (CPU)-targeted custom layers.Absolute path to a
-                        shared library with the kernels impl.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
@@ -131,7 +119,7 @@ Minimum command examples to run the demo for person tracking (for vehicle tracki
 # videos
 python multi_camera_multi_target_tracking_demo.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
-    --m <path_to_model>/person-detection-retail-0013.xml \
+    --m_detector <path_to_model>/person-detection-retail-0013.xml \
     --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 
@@ -189,6 +177,12 @@ Such file with detections can be saved from the demo. Specify the argument `--sa
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
+
 To save output video with the result please use the option  `--output_video`,
 to change configuration parameters please open the `configs/person.py` (or `configs/vehicle.py` for vehicle tracking demo) file and edit it.
 
@@ -300,5 +294,5 @@ If it is `True` an image with object will be drawn for every embedding instead o
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

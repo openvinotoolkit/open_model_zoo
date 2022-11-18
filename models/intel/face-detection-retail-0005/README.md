@@ -8,7 +8,7 @@ head from 1/16 scale feature map has nine clustered prior boxes.
 
 ## Example
 
-![](./assets/face-detection-retail-0001.png)
+![](./assets/face-detection-retail-0005.png)
 
 ## Specification
 
@@ -26,7 +26,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 300, 300` in the format `B, C, H, W`, where:
+Image, name: `input.1`, shape: `1, 3, 300, 300` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -45,6 +45,18 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
+* [G-API Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp_gapi/README.md)
+* [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
+* [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
+* [Multi-Channel Face Detection C++ Demo](../../../demos/multi_channel_face_detection_demo/cpp/README.md)
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ limitations under the License.
 
 import pytest
 import numpy as np
-from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.presenters import EvaluationResult
+from openvino.tools.accuracy_checker.metrics import MetricsExecutor
+from openvino.tools.accuracy_checker.presenters import EvaluationResult
 from .common import single_class_dataset, multi_class_dataset, make_segmentation_representation
 
 

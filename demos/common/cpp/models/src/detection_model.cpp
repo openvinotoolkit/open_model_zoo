@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,22 @@
 */
 
 #include "models/detection_model.h"
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 
-using namespace InferenceEngine;
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
-    ImageModel(modelFileName, useAutoResize),
-    confidenceThreshold(confidenceThreshold),
-    labels(labels) {
-}
+#include "models/image_model.h"
+
+DetectionModel::DetectionModel(const std::string& modelFileName,
+                               float confidenceThreshold,
+                               bool useAutoResize,
+                               const std::vector<std::string>& labels,
+                               const std::string& layout)
+    : ImageModel(modelFileName, useAutoResize, layout),
+      confidenceThreshold(confidenceThreshold),
+      labels(labels) {}
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;

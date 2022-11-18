@@ -2,7 +2,7 @@ models:
   - name: common-sign-language-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
         inputs:
           - type: INPUT
@@ -24,3 +24,4 @@ models:
           - type: accuracy
             name: rank@1
             top_k: 1
+            reference: 0.9358

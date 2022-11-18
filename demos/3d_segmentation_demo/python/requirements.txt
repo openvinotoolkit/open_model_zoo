@@ -1,4 +1,0 @@
-#3d segmentation demo specific requirements
-nibabel>=3.2.1
-pillow>=8.1.2
-scipy~=1.5.4

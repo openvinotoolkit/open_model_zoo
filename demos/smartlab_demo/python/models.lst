@@ -1,0 +1,12 @@
+# This file can be used with the --list option of the model downloader.
+smartlab-object-detection-0001
+smartlab-object-detection-0002
+smartlab-object-detection-0003
+smartlab-object-detection-0004
+# For --mode=mstcn
+smartlab-sequence-modelling-0001
+smartlab-sequence-modelling-0002
+# For --mode=multiview
+smartlab-action-recognition-0001-encoder-top
+smartlab-action-recognition-0001-encoder-side
+smartlab-action-recognition-0001-decoder

@@ -1,5 +1,5 @@
 # [OpenVINO™ Toolkit](https://docs.openvino.ai/latest/index.html) - Open Model Zoo repository
-[![Stable release](https://img.shields.io/badge/version-2021.4.3-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2021.4.3)
+[![Stable release](https://img.shields.io/badge/version-2022.2.0-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.2.0)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
 
@@ -10,8 +10,8 @@ Intel is committed to the respect of human rights and avoiding complicity in hum
 ## Repository Components:
 * [Intel Pre-Trained Models](models/intel/index.md)
 * [Public Pre-Trained Models](models/public/index.md)
-* [Model Downloader](tools/downloader/README.md) and other automation tools
-* [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
+* [Model Downloader](tools/model_tools/README.md) and other automation tools
+* [Demos](demos/README.md) that demonstrate models usage with OpenVINO™ Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
 
 ## License
@@ -19,11 +19,11 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
 ## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
-* [Pre-Trained Models](https://docs.openvinotoolkit.org/latest/trained_models.html)
-* [Demos and Samples](https://docs.openvinotoolkit.org/latest/omz_demos.html)
+* [Pre-Trained Models](https://docs.openvino.ai/latest/model_zoo.html)
+* [Demos and Samples](https://docs.openvino.ai/latest/omz_demos.html)
 
 ## Other Usage Examples
-* [Open Visual Cloud](https://01.org/openvisualcloud)
+* [Open Visual Cloud](https://www.intel.com/content/www/us/en/developer/articles/technical/open-visual-cloud.html)
   * [Tutorial: Running AD Insertion on Public Cloud](https://github.com/OpenVisualCloud/Ad-Insertion-Sample/wiki/Tutorial:-Running-AD-Insertion-on-Public-Cloud)
   * [GitHub Repo for Ad Insertion Sample](https://github.com/OpenVisualCloud/Ad-Insertion-Sample)
 * [OpenVINO for Smart City](https://github.com/incluit/OpenVino-For-SmartCity)
@@ -47,7 +47,7 @@ Open Model Zoo is licensed under Apache License, Version 2.0. By contributing to
 Please report questions, issues and suggestions using:
 * [\#open_model_zoo](https://stackoverflow.com/search?q=%23open_model_zoo) tag on StackOverflow*
 * [GitHub* Issues](https://github.com/openvinotoolkit/open_model_zoo/issues)
-* [Forum](https://software.intel.com/en-us/forums/intel-distribution-of-openvino-toolkit)
+* [Forum](https://community.intel.com/t5/Intel-Distribution-of-OpenVINO/bd-p/distribution-openvino-toolkit)
 * [Gitter](https://gitter.im/open_model_zoo/community)
 
 ---

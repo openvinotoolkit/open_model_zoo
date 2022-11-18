@@ -5,13 +5,13 @@
 models:
   - name: mozilla-deepspeech-0.8.2
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: fast_ctc_beam_search_decoder_with_lm
           probability_out: logits
           logarithmic_prob: False
           beam_size: 500
-          # Use option "accuracy_check [...] --model_attributes <path_to_lm>" to provide path to deepspeech-0.8.2-models.kenlm
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to deepspeech-0.8.2-models.kenlm
           # deepspeech-0.8.2-models.kenlm is generated from deepspeech-0.8.2-models.scorer by scorer_to_kenlm.py script.
           lm_file: deepspeech-0.8.2-models.kenlm
           lm_alpha: 0.93128901720047
@@ -22,10 +22,10 @@ models:
             layout: NHWC
           - name: previous_state_c
             type: LSTM_INPUT
-            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2'
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd:0'
           - name: previous_state_h
             type: LSTM_INPUT
-            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1'
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0'
     datasets:
       - name: librispeech-test-clean
         reader:

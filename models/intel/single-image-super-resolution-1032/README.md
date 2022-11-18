@@ -52,5 +52,11 @@ For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
 
 The net output is a blob with shapes `1, 3, 1080, 1920` that contains image after super resolution.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Processing C++ Demo](../../../demos/image_processing_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -1,32 +1,29 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <vector>
-#include <deque>
-#include <set>
-#include <unordered_map>
-#include <map>
-#include <string>
+#include <fstream>
 #include <iostream>
-#include <opencv2/opencv.hpp>
-#include <sstream>
-#include <details/ie_exception.hpp>
-#include "tracker.hpp"
+#include <map>
+#include <vector>
 
+#include <opencv2/opencv.hpp>
+#include <utils/slog.hpp>
 #include "actions.hpp"
+#include "tracker.hpp"
 
 class DetectionsLogger {
 private:
-    bool write_logs_;
-    std::ofstream act_stat_log_stream_;
-    cv::FileStorage act_det_log_stream_;
-    std::ostream& log_stream_;
+    bool m_write_logs;
+    std::ofstream m_act_stat_log_stream;
+    cv::FileStorage m_act_det_log_stream;
+    slog::LogStream& m_log_stream;
+
 
 public:
-    explicit DetectionsLogger(std::ostream& stream, bool enabled,
+    explicit DetectionsLogger(slog::LogStream& stream, bool enabled,
                               const std::string& act_stat_log_file,
                               const std::string& act_det_log_file);
 
@@ -52,11 +49,10 @@ public:
 };
 
 
-#define SCR_CHECK(cond) IE_ASSERT(cond) << " "
+#define SCR_CHECK(cond) CV_Assert(cond);
 
 #define SCR_CHECK_BINARY(actual, expected, op) \
-    IE_ASSERT(actual op expected) << ". " \
-        << actual << " vs " << expected << ".  "
+    CV_Assert(actual op expected);
 
 #define SCR_CHECK_EQ(actual, expected) SCR_CHECK_BINARY(actual, expected, ==)
 #define SCR_CHECK_NE(actual, expected) SCR_CHECK_BINARY(actual, expected, !=)

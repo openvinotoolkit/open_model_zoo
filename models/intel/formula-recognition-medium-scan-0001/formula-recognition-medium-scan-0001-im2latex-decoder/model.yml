@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +16,41 @@ description: >-
   Decoder part of latex formula recognition model.
 task_type: token_recognition
 files:
+  - name: vocab.json
+    size: 3930
+    checksum: af08d997a4cfe1e42a58bf581ae6afda7fcb16ed6618609f3d891190bb812983a95ea240d82b913017a4779ccee36963
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 52273
-    sha256: f499cb1bcce8a7620c1259326332f2f961c759b642896144905426c4e20fa381
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 56442
+    checksum: e1ed95edc8fbaa80d92d0e79561a62eeca3e02bd73ca07cb884fd34030f2dcd55d54add92a42df244d558aaf0a865194
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
-    size: 10252352
-    sha256: 47313e32aacd678ebddb01fc288e67159bad2996fa92f53fd4711bc6564defcb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 10252364
+    checksum: e2645951b8541fb7281a1593fb4ef85ba97cd6fa7d0f53d56c2907e34910cb1dcd617813695b26ac65253828e04369a7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 52265
-    sha256: 32c20c8e1d9e712a0964de6538156eace7474f76d3014daa14e9ffa6629ffac6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 63641
+    checksum: 67601df0926d92ff1d55dd2acc6ffa3645636a8f80702a48454591d3d9de03f97c427699c92c979568c8c9613c3ab0e0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
-    size: 5126230
-    sha256: 85c96b6cf2bbfaa79fc505717070e15236386d3aacc868ce044e3139eb2421ba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 5126242
+    checksum: b56e7dc4b8b21c358846f1b9a8d79bc8c67952a08b674ad624370fe568ae216ffbf424ee380f152eba9f350ba34980c6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+input_info:
+  - name: dec_st_c
+    shape: [1, 512]
+    layout: ND
+  - name: dec_st_h
+    shape: [1, 512]
+    layout: ND
+  - name: output_prev
+    shape: [1, 256]
+    layout: NC
+  - name: row_enc_out
+    shape: [1, 20, 175, 512]
+    layout: NHWD
+  - name: tgt
+    shape: [1, 1]
+    layout: ND
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

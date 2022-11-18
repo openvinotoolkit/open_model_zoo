@@ -41,3 +41,28 @@ private:
 
     PerfTimer perfTimer;
 };
+
+template<class StreamType, class EndlType>
+void writeStats(StreamType& stream, EndlType endl, const VideoSources::Stats& inputStat,
+    const IEGraph::Stats& inferStat, const AsyncOutput::Stats& outputStat) {
+    stream << std::fixed << std::setprecision(2);
+    stream << "Input reading: ";
+    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
+        if (0 == (i % 4) && i != 0) {
+            stream << endl;
+        }
+        stream << inputStat.readTimes[i] << " ms ";
+    }
+    stream << endl;
+    stream << "Decoding: "
+        << inputStat.decodingLatency << " ms";
+    stream << endl;
+    stream << "Preprocess: "
+        << inferStat.preprocessTime << " ms";
+    stream << endl;
+    stream << "Inference: "
+        << inferStat.inferTime << " ms";
+    stream << endl;
+    stream << "Rendering: " << outputStat.renderTime
+        << " ms" << endl;
+}

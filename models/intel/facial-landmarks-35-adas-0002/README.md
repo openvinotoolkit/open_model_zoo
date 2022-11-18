@@ -68,5 +68,14 @@ Image, name: `data`, shape: `1, 3, 60, 60` in the format `B, C, H, W`, where:
 
 The net outputs a blob `align_fc3` with the shape: `1, 70`, containing row-vector of 70 floating point values for 35 landmarks' normed coordinates in the form (x0, y0, x1, y1, ..., x34, y34).
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
+* [G-API Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp_gapi/README.md)
+* [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
+* [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

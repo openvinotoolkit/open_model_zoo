@@ -1,0 +1,40 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Encoder part of text recognition model.
+task_type: feature_extraction
+files:
+  - name: FP32/text-recognition-0016-encoder.xml
+    size: 463023
+    checksum: d3cae708f49be7f59858cc4e9a8f90c8e77c6264c8bed531f6a92817e968973f525030cec737d8d983a20b6a825301f3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.xml
+  - name: FP32/text-recognition-0016-encoder.bin
+    size: 352511968
+    checksum: 5d4ce6bf1922e6d0f632f41d2e48c236c506f56bf745a9d50abb114c8ca829752dea7f17525f6755fc32638338104978
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.bin
+  - name: FP16/text-recognition-0016-encoder.xml
+    size: 582710
+    checksum: 0d7160b46b77d56f47a00e5b6483ebacaf65188349c01113b99ca98ce0c0d9bfccbbfcf48f378de96f28c506e10fb03b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.xml
+  - name: FP16/text-recognition-0016-encoder.bin
+    size: 176256104
+    checksum: 1f8b4b813461d2fcc55f5fc7e1449a7c1e49845299f514860758b0e4ba007a5c388aecb7976f96510ff13e28041946e1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
+input_info:
+  - name: imgs
+    shape: [1, 1, 64, 256]
+    layout: NCHW
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

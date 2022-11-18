@@ -21,19 +21,19 @@ The application has two modes:
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 Don't forget to configure Model Optimizer, which is a requirement for Model Downloader, as described in its documentation.
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 Please pay attention to the model license, **Mozilla Public License 2.0**.
@@ -71,22 +71,22 @@ Speech recognition DeepSpeech demo
 optional arguments:
   -h, --help            show this help message and exit
   -i FILENAME, --input FILENAME
-                        Path to an audio file in WAV PCM 16 kHz mono format
+                        Required. Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
-                        demo will look for a suitable IE plugin for this
+                        demo will look for a suitable OpenVINO Runtime plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
-                        Path to an .xml file with a trained model (required)
+                        Required. Path to an .xml file with a trained model
   -L FILENAME, --lm FILENAME
-                        path to language model file (optional)
+                        Optional. Path to language model file
   -p NAME, --profile NAME
-                        Choose pre/post-processing profile: mds06x_en for
-                        Mozilla DeepSpeech v0.6.x,
+                        Required. Choose pre/post-processing profile: mds06x_en
+                        for Mozilla DeepSpeech v0.6.x,
                         mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech
                         v0.7.x/v0.8.x/v0.9.x(English), other: filename of a
-                        YAML file (required)
+                        YAML file
   -b N, --beam-width N  Beam width for beam search in CTC decoder (default
                         500)
   -c N, --max-candidates N
@@ -106,9 +106,6 @@ optional arguments:
 The typical command line for offline mode is:
 
 ```shell
-pip install -r requirements.txt
-source <openvino_dir>/bin/setupvars.sh
-
 python3 speech_recognition_deepspeech_demo.py \
     -p mds08x_en \
     -m <path_to_model>/mozilla-deepspeech-0.8.2.xml \
@@ -130,14 +127,18 @@ To run in *simulated real-time mode* add command-line option `--realtime`.
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located in the Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
+Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located in the Model Downloader output folder after model downloading and conversion.
+An example audio file can be taken from OpenVINO [test data](https://storage.openvinotoolkit.org/data/test_data/) folder.
 
 ## Demo Output
 
 The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In real-time mode the current recognition result is shown while the app is running as well.
+In offline mode the demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

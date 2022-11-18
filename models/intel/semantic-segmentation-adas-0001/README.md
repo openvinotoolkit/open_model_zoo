@@ -84,5 +84,13 @@ The blob with `BGR` image and the shape `1, 3, 1024, 2048` in the format `B, C, 
 The net output is a blob with the shape `1, 1, 1024, 2048` in the format `B, C, H, W`. It can be treated as a
 one-channel feature map, where each pixel is a label of one of the classes.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
+* [Whiteboard Inpainting Python\* Demo](../../../demos/whiteboard_inpainting_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

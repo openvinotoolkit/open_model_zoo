@@ -1,7 +1,7 @@
 models:
   - name: ctdet_coco_dlav0_512
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: ctdet
           center_heatmap_out: center_heatmap
@@ -26,3 +26,4 @@ models:
           - type: map
             integral: 11point
             presenter: print_scalar
+            reference: 0.442

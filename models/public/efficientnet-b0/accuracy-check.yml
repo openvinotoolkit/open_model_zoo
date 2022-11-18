@@ -22,11 +22,20 @@ models:
             size: 224
             use_pillow: True
             interpolation: BICUBIC
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.757
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9276
 
   - name: efficientnet-b0
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -39,3 +48,12 @@ models:
             size: 224
             use_pillow: True
             interpolation: BICUBIC
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.757
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9276

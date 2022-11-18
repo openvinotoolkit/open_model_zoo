@@ -49,5 +49,12 @@ Expected color order is `BGR`.
 Name: `prob_emotion`, shape: `1, 5, 1, 1` - Softmax output across five emotions
 (0 - 'neutral', 1 - 'happy', 2 - 'sad', 3 - 'surprise', 4 - 'anger').
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
+* [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

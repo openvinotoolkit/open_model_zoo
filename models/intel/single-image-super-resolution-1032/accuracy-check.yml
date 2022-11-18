@@ -2,7 +2,7 @@ models:
   - name: single-image-super-resolution-1032
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: super_resolution
           reverse_channels: True
@@ -16,3 +16,9 @@ models:
 
     datasets:
       - name: super_resolution_x4
+        metrics:
+          - type: psnr
+            scale_border: 4
+            presenter: print_vector
+            reference:
+              mean: 29.29

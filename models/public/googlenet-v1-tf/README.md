@@ -38,12 +38,12 @@ Mean values - [127.5, 127.5, 127.5], scale value - 127.5
 
 ### Converted model
 
-Image,  name - `data`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
+Image,  name - `input`, shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`
 
@@ -63,26 +63,33 @@ Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Pred
 - `B` - batch size
 - `C` - predicted probabilities for each class in [0, 1] range
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Classification Benchmark C++ Demo](../../../demos/classification_benchmark_demo/cpp/README.md)
+* [Classification Python\* Demo](../../../demos/classification_demo/python/README.md)
 
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://github.com/tensorflow/models/blob/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-TF-Models.txt`.
 
 The original model uses the TF-Slim library, which is distributed under the
 [Apache License, Version 2.0](https://github.com/google-research/tf-slim/blob/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TFSlim.txt](../licenses/APACHE-2.0-TFSlim.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-TFSlim.txt`.

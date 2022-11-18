@@ -74,7 +74,7 @@ public:
     }
 
     void update(const cv::Mat& frame, const size_t sourceID) {
-        cv::Mat cell = outimg(cv::Rect(points[sourceID], cellSize));
+        const cv::Mat& cell = outimg(cv::Rect(points[sourceID], cellSize));
 
         if ((cellSize.width == frame.cols) && (cellSize.height == frame.rows)) {
             frame.copyTo(cell);

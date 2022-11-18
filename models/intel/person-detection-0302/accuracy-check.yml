@@ -1,0 +1,28 @@
+models:
+  - name: person-detection-0302
+
+    launchers:
+      - framework: openvino
+        adapter:
+
+          type: class_agnostic_detection
+          scale: [0.00078125, 0.0013888888]
+
+    datasets:
+      - name: crossroad_extra_untagged_person_hb
+        preprocessing:
+          - type: resize
+            dst_width: 1280
+            dst_height: 720
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: cast_to_int
+          - type: nms
+            overlap: 0.6
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: coco_orig_precision
+            reference: 0.447

@@ -38,17 +38,27 @@ The expected channel order is `BGR`
 
 ## Outputs
 
-1. Name: `labels`, shape: `100` - Contiguous integer class ID for every
+Model has outputs with dynamic shapes.
+
+1. Name: `labels`, shape: `-1` - Contiguous integer class ID for every
    detected object.
-2. Name: `boxes`, shape: `100, 5` - Bounding boxes around every detected objects
+2. Name: `boxes`, shape: `-1, 5` - Bounding boxes around every detected objects
    in (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format and its
    confidence score in range [0, 1].
-3. Name: `masks`, shape: `100, 28, 28]` - Segmentation heatmaps for every output
+3. Name: `masks`, shape: `-1, 28, 28` - Segmentation heatmaps for every output
     bounding box.
 
 ## Training Pipeline
 
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/instance_segmentation/model_templates/coco-instance-segmentation/readme.md), allowing to fine-tune the model on custom dataset.
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/instance_segmentation/model_templates/coco-instance-segmentation/readme.md), allowing to fine-tune the model on custom dataset.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Instance Segmentation Python\* Demo](../../../demos/instance_segmentation_demo/python/README.md)
+* [Multi Camera Multi Target Python\* Demo](../../../demos/multi_camera_multi_target_tracking_demo/python/README.md)
+* [Whiteboard Inpainting Python\* Demo](../../../demos/whiteboard_inpainting_demo/python/README.md)
 
 ## Legal Information
 

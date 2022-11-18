@@ -19,11 +19,12 @@ models:
             integral: 11point
             ignore_difficult: True
             presenter: print_scalar
+            reference: 0.9107
 
 
   - name: ssd512
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -38,3 +39,4 @@ models:
             integral: 11point
             ignore_difficult: True
             presenter: print_scalar
+            reference: 0.9107

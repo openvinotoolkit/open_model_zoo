@@ -1,176 +1,313 @@
 # use update-requirements.py to update this file
 
-absl-py==0.12.0
+absl-py==1.3.0
     # via
     #   tensorboard
     #   tensorflow
+addict==2.4.0
+    # via openvino-dev
+astor==0.8.1
+    # via paddlepaddle
 astunparse==1.6.3
     # via tensorflow
-cachetools==4.2.1
+cachetools==5.2.0
     # via google-auth
-certifi==2020.12.5
+certifi==2022.9.24
     # via requests
-chardet==4.0.0
+charset-normalizer==2.1.1
     # via requests
-dataclasses==0.8
-    # via torch
-decorator==4.4.2
-    # via networkx
+click==8.1.3
+    # via nltk
+decorator==5.1.1
+    # via paddlepaddle
 defusedxml==0.7.1
+    # via openvino-dev
+fast-ctc-decode==0.3.2
+    # via openvino-dev
+fastjsonschema==2.15.3
+    # via openvino-dev
+filelock==3.8.0
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
+    #   huggingface-hub
+    #   transformers
 flatbuffers==1.12
     # via tensorflow
-future==0.18.2
-    # via -r tools/downloader/requirements-caffe2.in
-gast==0.3.3
+gast==0.4.0
     # via tensorflow
-google-auth-oauthlib==0.4.3
-    # via tensorboard
-google-auth==1.28.0
+google-auth==2.14.1
     # via
     #   google-auth-oauthlib
     #   tensorboard
+google-auth-oauthlib==0.4.6
+    # via tensorboard
 google-pasta==0.2.0
     # via tensorflow
 graphviz==0.8.4
     # via mxnet
-grpcio==1.32.0
+grpcio==1.50.0
     # via
     #   tensorboard
     #   tensorflow
-h5py==2.10.0
+h5py==3.7.0
     # via tensorflow
-idna==2.10
+huggingface-hub==0.11.0
+    # via transformers
+idna==3.4
     # via requests
-importlib-metadata==3.7.3
+imagecodecs==2022.2.22
+    # via openvino-dev
+imageio==2.22.4
+    # via scikit-image
+importlib-metadata==5.0.0
     # via markdown
+joblib==1.2.0
+    # via
+    #   nltk
+    #   scikit-learn
+jstyleson==0.0.2
+    # via openvino-dev
+keras==2.9.0
+    # via tensorflow
 keras-preprocessing==1.1.2
     # via tensorflow
-markdown==3.3.4
+libclang==14.0.6
+    # via tensorflow
+lmdb==1.3.0
+    # via openvino-dev
+markdown==3.4.1
     # via tensorboard
-mxnet==1.2.0 ; sys_platform == 'win32'
-mxnet==1.7.0.post2 ; sys_platform != "win32"
-    # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
-networkx==2.5
+markupsafe==2.1.1
+    # via werkzeug
+mxnet==1.7.0.post2
+    # via openvino-dev
+networkx==2.8
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
-numpy==1.19.5
+    #   openvino-dev
+    #   scikit-image
+nibabel==4.0.2
+    # via openvino-dev
+nltk==3.7
+    # via openvino-dev
+numpy==1.23.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
     #   h5py
+    #   imagecodecs
+    #   imageio
     #   keras-preprocessing
     #   mxnet
+    #   nibabel
     #   onnx
+    #   opencv-python
+    #   openvino
+    #   openvino-dev
     #   opt-einsum
+    #   paddlepaddle
+    #   pandas
+    #   parasail
+    #   pywavelets
+    #   rawpy
+    #   scikit-image
+    #   scikit-learn
     #   scipy
     #   tensorboard
     #   tensorflow
-    #   torch
+    #   tifffile
     #   torchvision
-oauthlib==3.1.0
-    # via requests-oauthlib
-onnx==1.8.1
+    #   transformers
+nvidia-cublas-cu11==11.10.3.66
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r tools/downloader/requirements-caffe2.in
-    #   -r tools/downloader/requirements-pytorch.in
+    #   nvidia-cudnn-cu11
+    #   torch
+nvidia-cuda-nvrtc-cu11==11.7.99
+    # via torch
+nvidia-cuda-runtime-cu11==11.7.99
+    # via torch
+nvidia-cudnn-cu11==8.5.0.96
+    # via torch
+oauthlib==3.2.2
+    # via requests-oauthlib
+onnx==1.11.0
+    # via
+    #   -r tools/model_tools/requirements-pytorch.in
+    #   openvino-dev
+opencv-python==4.6.0.66
+    # via openvino-dev
+openvino==2022.2.0
+    # via openvino-dev
+openvino-dev[caffe,mxnet,onnx,tensorflow2]==2022.2.0
+    # via
+    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_caffe.txt
+    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_mxnet.txt
+    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_onnx.txt
+    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_tensorflow2.txt
+openvino-telemetry==2022.1.1
+    # via openvino-dev
 opt-einsum==3.3.0
     # via tensorflow
-pillow==8.1.2
-    # via torchvision
-protobuf==3.15.6
+packaging==21.3
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
+    #   huggingface-hub
+    #   nibabel
+    #   scikit-image
+    #   tensorflow
+    #   transformers
+paddlepaddle==2.2.2
+    # via -r tools/model_tools/requirements-paddle.in
+pandas==1.1.5
+    # via openvino-dev
+parasail==1.3.3
+    # via openvino-dev
+pillow==9.3.0
+    # via
+    #   imageio
+    #   openvino-dev
+    #   paddlepaddle
+    #   scikit-image
+    #   torchvision
+progress==1.6
+    # via openvino-dev
+protobuf==3.19.6
+    # via
     #   onnx
+    #   openvino-dev
+    #   paddlepaddle
     #   tensorboard
     #   tensorflow
-pyasn1-modules==0.2.8
-    # via google-auth
+py-cpuinfo==9.0.0
+    # via openvino-dev
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
     #   rsa
-pyyaml==5.4.1
-    # via yacs
-requests-oauthlib==1.3.0
-    # via google-auth-oauthlib
-requests==2.25.1
+pyasn1-modules==0.2.8
+    # via google-auth
+pyclipper==1.3.0.post4
+    # via openvino-dev
+pydicom==2.3.1
+    # via openvino-dev
+pyparsing==3.0.9
+    # via packaging
+python-dateutil==2.8.2
+    # via pandas
+pytz==2022.6
+    # via pandas
+pywavelets==1.4.1
+    # via scikit-image
+pyyaml==6.0
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
+    #   huggingface-hub
+    #   openvino-dev
+    #   transformers
+    #   yacs
+rawpy==0.17.3
+    # via openvino-dev
+regex==2022.10.31
+    # via
+    #   nltk
+    #   transformers
+requests==2.28.1
+    # via
+    #   huggingface-hub
     #   mxnet
+    #   openvino-dev
+    #   openvino-telemetry
+    #   paddlepaddle
     #   requests-oauthlib
     #   tensorboard
-rsa==4.7.2
+    #   torchvision
+    #   transformers
+requests-oauthlib==1.3.1
+    # via google-auth-oauthlib
+rsa==4.9
     # via google-auth
-scipy==1.5.4
-    # via -r tools/downloader/requirements-pytorch.in
-six==1.15.0
+scikit-image==0.19.3
+    # via openvino-dev
+scikit-learn==0.24.2
+    # via openvino-dev
+scipy==1.8.0
     # via
-    #   absl-py
+    #   -r tools/model_tools/requirements-pytorch.in
+    #   openvino-dev
+    #   scikit-image
+    #   scikit-learn
+sentencepiece==0.1.97
+    # via openvino-dev
+shapely==1.8.5.post1
+    # via openvino-dev
+six==1.16.0
+    # via
     #   astunparse
     #   google-auth
     #   google-pasta
     #   grpcio
-    #   h5py
     #   keras-preprocessing
-    #   onnx
-    #   protobuf
-    #   tensorboard
+    #   paddlepaddle
+    #   python-dateutil
     #   tensorflow
-tensorboard-plugin-wit==1.8.0
+tensorboard==2.9.1
+    # via tensorflow
+tensorboard-data-server==0.6.1
     # via tensorboard
-tensorboard==2.4.1
-    # via tensorflow
-tensorflow-estimator==2.4.0
-    # via tensorflow
-tensorflow==2.4.1
+tensorboard-plugin-wit==1.8.1
+    # via tensorboard
+tensorflow==2.9.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_tf2.txt
-    #   -r tools/downloader/requirements-tensorflow.in
-termcolor==1.1.0
+    #   -r tools/model_tools/requirements-tensorflow.in
+    #   openvino-dev
+tensorflow-estimator==2.9.0
     # via tensorflow
-torch==1.8.1
+tensorflow-io-gcs-filesystem==0.27.0
+    # via tensorflow
+termcolor==2.1.0
+    # via tensorflow
+texttable==1.6.4
+    # via openvino-dev
+threadpoolctl==3.1.0
+    # via scikit-learn
+tifffile==2022.10.10
+    # via scikit-image
+tokenizers==0.13.2
     # via
-    #   -r tools/downloader/requirements-caffe2.in
-    #   -r tools/downloader/requirements-pytorch.in
+    #   openvino-dev
+    #   transformers
+torch==1.13.0
+    # via
+    #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
-torchvision==0.9.1
-    # via -r tools/downloader/requirements-pytorch.in
-typing-extensions==3.7.4.3
+torchvision==0.14.0
+    # via -r tools/model_tools/requirements-pytorch.in
+tqdm==4.64.1
     # via
-    #   importlib-metadata
+    #   huggingface-hub
+    #   nltk
+    #   openvino-dev
+    #   transformers
+transformers==4.24.0
+    # via openvino-dev
+typing-extensions==4.4.0
+    # via
+    #   huggingface-hub
     #   onnx
     #   tensorflow
     #   torch
-urllib3==1.26.4
+    #   torchvision
+urllib3==1.26.12
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
+    #   openvino-dev
     #   requests
-werkzeug==1.0.1
+werkzeug==2.2.2
     # via tensorboard
-wheel==0.36.2
+wheel==0.38.4
     # via
     #   astunparse
+    #   nvidia-cublas-cu11
+    #   nvidia-cuda-runtime-cu11
     #   tensorboard
-    #   tensorflow
-wrapt==1.12.1
+wrapt==1.14.1
     # via tensorflow
 yacs==0.1.8
-    # via -r tools/downloader/requirements-pytorch.in
-zipp==3.4.1
+    # via -r tools/model_tools/requirements-pytorch.in
+zipp==3.10.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

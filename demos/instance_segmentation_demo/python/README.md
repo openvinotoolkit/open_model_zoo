@@ -35,28 +35,35 @@ The demo workflow is the following:
     * By default, tracking is used to show object instance with the same color throughout the whole video.
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+
+## Model API
+
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+
+The generalized interface of wrappers with its unified results representation provides the support of multiple different instance segmentation model topologies in one demo.
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/instance_segmentation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
+* instance-segmentation-person-0007
 * instance-segmentation-security-0002
 * instance-segmentation-security-0091
 * instance-segmentation-security-0228
@@ -68,68 +75,69 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ## Running
 
-Run the application with the `-h` option to see the following usage message:
-
+Running the demo with `-h` shows this help message:
 ```
-usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i INPUT
-                                     [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                                     [-d "<device>"] [-l "<absolute_path>"]
-                                     [--delay "<num>"] [-pt "<num>"]
-                                     [--no_keep_aspect_ratio] [--no_track]
-                                     [--show_scores] [--show_boxes] [-pc] [-r]
-                                     [--no_show] [-u UTILIZATION_MONITORS]
+usage: instance_segmentation_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT [-d DEVICE] --labels LABELS [-t PROB_THRESHOLD] [--no_track] [--show_scores]
+                                     [--show_boxes] [--layout LAYOUT] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
+                                     [-limit OUTPUT_LIMIT] [--no_show] [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS] [-r]
+
+optional arguments:
+  -h, --help            show this help message and exitz
 
 Options:
-  -h, --help            Show this help message and exit.
-  -m "<path>", --model "<path>"
-                        Required. Path to an .xml file with a trained model.
-  --labels "<path>"     Required. Path to a text file with class labels.
+  -m MODEL, --model MODEL
+                        Required. Path to an .xml file with a trained model or address of model inference service if using ovms adapter.
+  --adapter {openvino,ovms}
+                        Optional. Specify the model adapter. Default is openvino.
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a single image,
-                        a folder of images, video file or camera id.
+                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for device
+                        specified. Default value is CPU.
+
+Common model options:
+  --labels LABELS       Required. Path to a text file with class labels.
+  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
+                        Optional. Probability threshold for detections filtering.
+  --no_track            Optional. Disable object tracking for video/camera input.
+  --show_scores         Optional. Show detection scores.
+  --show_boxes          Optional. Show bounding boxes.
+  --layout LAYOUT       Optional. Model inputs layouts. Format "[<layout>]" or "<input1>[<layout1>],<input2>[<layout2>]" in case of more than one input. To define
+                        layout you should use only capital letters
+
+Inference options:
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
+
+Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output.
-                        If 0 is set, all frames are stored.
-  -d "<device>", --device "<device>"
-                        Optional. Specify the target device to infer on: CPU,
-                        GPU, HDDL or MYRIAD. The demo will look for a
-                        suitable plugin for device specified (by default, it
-                        is CPU).
-  -l "<absolute_path>", --cpu_extension "<absolute_path>"
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementation.
-  --delay "<num>"       Optional. Interval in milliseconds of waiting for a
-                        key to be pressed.
-  -pt "<num>", --prob_threshold "<num>"
-                        Optional. Probability threshold for detections
-                        filtering.
-  --no_keep_aspect_ratio
-                        Optional. Force image resize not to keep aspect ratio.
-  --no_track            Optional. Disable tracking.
-  --show_scores         Optional. Show detection scores.
-  --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
-  -r, --raw_output_message
-                        Optional. Output inference results raw values.
-  --no_show             Optional. Don't show output
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+  --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
-```
 
-Running the application with an empty list of options yields the short version of the usage message and an error message.
+Debug options:
+  -r, --raw_output_message
+                        Optional. Output inference results raw values showing.
+```
 
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
     -m <path_to_model>/instance-segmentation-security-0228.xml \
-    --label <omz_dir>/data/dataset_classes/coco_80cl.txt \
-    --no_keep_aspect_ratio \
-    -i 0 \
-    --delay 1
+    --label <omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt \
+    -i 0
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
@@ -142,12 +150,38 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 >**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
+## Running with OpenVINO Model Server
+
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+
+Exemplary command:
+
+```sh
+python3 instance_segmentation_demo/instance_segmentation_demo.py \
+    -m localhost:9000/models/instance_segmentation \
+    --label <omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt \
+    -i 0
+    --adapter ovms
+```
+
 ## Demo Output
 
-The application uses OpenCV to display resulting instance segmentation masks and current inference performance.
+The application uses OpenCV to display resulting instance segmentation masks.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+* Latency for each of the following pipeline stages:
+  * **Decoding** — capturing input data.
+  * **Preprocessing** — data preparation for inference.
+  * **Inference** — infering input data (images) and getting a result.
+  * **Postrocessing** — preparation inference result for output.
+  * **Rendering** — generating output image.
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

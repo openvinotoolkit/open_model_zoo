@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,29 +16,37 @@ description: >-
   YOLO Tiny v2 trained on VOC dataset by AVA team with 0.6 sparsity level.
 task_type: detection
 files:
+  - name: parameters.yml
+    size: 197
+    checksum: f7b5c6b3bfb0204f25c69d176125263db382b95cc754740bc1483f31f05e98354b67dc1655caa3b2f102a0a2180d9987
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/parameters.yml
   - name: FP32/yolo-v2-tiny-ava-sparse-60-0001.xml
-    size: 37080
-    sha256: 0f842e479b852c873a9fe5827968b05dacfebe0325efc213ce479a3f78142cde
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP32/yolo-v2-tiny-ava-sparse-60-0001.xml
+    size: 47904
+    checksum: c0cc8ee423bb60a60ff1e73021a54e431090af73331aa21aa19de84214637085e8da02d9f55eb334a7aab9918f22f6f1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP32/yolo-v2-tiny-ava-sparse-60-0001.xml
   - name: FP32/yolo-v2-tiny-ava-sparse-60-0001.bin
-    size: 63434896
-    sha256: a75760129ebfa1954aa8f244020193bab0a7f6f85450435f696f602155eb80b6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP32/yolo-v2-tiny-ava-sparse-60-0001.bin
+    size: 63434928
+    checksum: 45bb0a0ca741a2391d379150dfa6848b497f04e2dcb06d237d36302bf63417231e9072cf872e428c806e2e258e3461dc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP32/yolo-v2-tiny-ava-sparse-60-0001.bin
   - name: FP16/yolo-v2-tiny-ava-sparse-60-0001.xml
-    size: 37059
-    sha256: 9737ecd67ee790cf052dbbf8a41502e205983fe749ac97c75355ae9cd578d190
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16/yolo-v2-tiny-ava-sparse-60-0001.xml
+    size: 62847
+    checksum: aafaa8611cb8b4374f0e90eae35908af0210c6d4e60976126d4c01f1f2ba70968e7e4eff559fd19587c927af34bb3900
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16/yolo-v2-tiny-ava-sparse-60-0001.xml
   - name: FP16/yolo-v2-tiny-ava-sparse-60-0001.bin
-    size: 31717450
-    sha256: df0df94838247c45b8cd1918b52140aff0ffaa1cdecd5450e0f8ee261adaf757
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16/yolo-v2-tiny-ava-sparse-60-0001.bin
+    size: 31717480
+    checksum: b11251da2728fc406c281c0aa2b574dd68e2a9b77f9b54dd6691c9b14f58baec7180a4ed9ce89827869888a6bf09832f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16/yolo-v2-tiny-ava-sparse-60-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.xml
-    size: 76509
-    sha256: 3c24baf064e857ebd78304ca3014f4f9b664ea9270334318316364b3dfa4c2b3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.xml
+    size: 96304
+    checksum: 64e5c2092d282db52786ec5a6ac4e84dfeff6e1968ce2c18f47429e97b19376fdbf9c9ffcf024bd7d145e237374129f6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.bin
-    size: 15874674
-    sha256: 6ce0618f5b0aed6d74bada19dd61d6b0793eddae631dca0338fe5772aea3b70e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.bin
+    size: 15887464
+    checksum: 1bc726238818aab989b744e4e9872262876021614df69ea20732f3ef6a9d52870af53023cf6c56464c21262f3610a9a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-tiny-ava-sparse-60-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-60-0001.bin
+input_info:
+  - name: data
+    shape: [1, 416, 416, 3]
+    layout: NHWC
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

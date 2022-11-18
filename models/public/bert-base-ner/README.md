@@ -7,7 +7,7 @@
 Specifically, this model is a bert-base-cased model that was fine-tuned on the English version of the standard [CoNLL-2003 Named Entity Recognition](https://www.aclweb.org/anthology/W03-0419) dataset.
 For details about the original model, check out
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805),
-[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers and [repository](https://github.com/huggingface/transformers).
+[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers, [repository](https://github.com/huggingface/transformers) and [model card](https://huggingface.co/dslim/bert-base-NER).
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file.
 
@@ -27,6 +27,8 @@ The quality metric was calculated on CONLL-2003 Named Entity Recognition dataset
 | Metric                    | Value         |
 |---------------------------|---------------|
 | F1                        |        94.45% |
+
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_model` is a path to the folder, where the current model is downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
 
 ## Input
 
@@ -78,19 +80,25 @@ floating point-valued logit scores vectors that represents probability of belong
 
 Converted model has the same output like original.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [BERT Named Entity Recognition Python\* Demo](../../../demos/bert_named_entity_recognition_demo/python/README.md)
 
 ## Legal Information
 

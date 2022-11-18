@@ -17,8 +17,7 @@ The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backb
 
 | Metric         | Value    |
 | -------------- | -------- |
-| coco_precision | 20.7198% |
-| mAP            | 39.2752%	|
+| coco_precision | 20.73%   |
 
 ## Input
 
@@ -48,7 +47,7 @@ Channel order is `BGR`.
 
 ## Output
 
-> **NOTE** output format changes after Model Optimizer conversion. To find detailed explanation of changes, go to [Model Optimizer development guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
+> **NOTE** output format changes after Model Optimizer conversion. To find detailed explanation of changes, go to [Model Optimizer development guide](https://docs.openvino.ai/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
 
 ### Original model
 
@@ -62,22 +61,30 @@ Channel order is `BGR`.
 2. Probability, shape - `1, 200`, contains confidence of each detected bounding boxes.
 3. Detection boxes, shape - `1, 200, 4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
 
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/mlcommons/inference/master/LICENSE.md).
-A copy of the license is provided in [APACHE-2.0-MLPerf.txt](../licenses/APACHE-2.0-MLPerf.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-MLPerf.txt`.

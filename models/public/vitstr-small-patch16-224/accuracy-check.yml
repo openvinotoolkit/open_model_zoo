@@ -1,0 +1,127 @@
+models:
+  - name: vitstr-small-patch16-224-onnx
+    launchers:
+      - framework: onnx_runtime
+        model: vitstr-small-patch16-224.onnx
+        adapter:
+          type: simple_decoder
+          eos_label: '[s]'
+          start_label: '[GO]'
+          start_index: 1
+          do_lower: True
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to vocab.txt
+          vocabulary_file: vocab.txt
+
+    datasets:
+      - name: ICDAR2013
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+          - type: normalization
+            std: 255
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.9034
+
+      - name: SVT_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+          - type: normalization
+            std: 255
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.8547
+
+      - name: IIIT5K
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+          - type: normalization
+            std: 255
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.8707
+
+      - name: ICDAR2015_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+          - type: normalization
+            std: 255
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.7504
+
+      - name: ICDAR03_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+          - type: normalization
+            std: 255
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.9343
+
+  - name: vitstr-small-patch16-224
+    launchers:
+      - framework: openvino
+        adapter:
+          type: simple_decoder
+          eos_label: '[s]'
+          start_label: '[GO]'
+          start_index: 1
+          do_lower: True
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to vocab.txt
+          vocabulary_file: vitstr-small-patch16-224/vocab.txt
+
+    datasets:
+      - name: ICDAR2013
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.9034
+
+      - name: SVT_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.8547
+
+      - name: IIIT5K
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.8707
+
+      - name: ICDAR2015_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.7504
+
+      - name: ICDAR03_recognition
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            size: 224
+        metrics:
+          - type: character_recognition_accuracy
+            reference: 0.9343

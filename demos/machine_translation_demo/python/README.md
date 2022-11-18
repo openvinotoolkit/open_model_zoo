@@ -4,33 +4,33 @@ This README describes the Machine Translation demo application that uses a non-a
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 
 The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
 
 * machine-translation-nar-de-en-0002
 * machine-translation-nar-en-de-0002
-* machine-translation-nar-en-ru-0001
-* machine-translation-nar-ru-en-0001
+* machine-translation-nar-en-ru-0002
+* machine-translation-nar-ru-en-0002
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -83,9 +83,12 @@ python3 ./machine_translation_demo \
 ## Demo Output
 
 The application outputs translated sentences from source to target language.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

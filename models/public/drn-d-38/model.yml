@@ -1,0 +1,75 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "drn-d-38" model is a one of the Dilated Residual Networks (DRN) models for
+  semantic segmentation task. DRN models dilate ResNet models, DRN-C version additionally
+  removes residual connections from some of the added blocks and DRN-D version is
+  a simplified version of DRN-C.
+
+  This model pre-trained on Cityscapes <https://www.cityscapes-dataset.com> dataset
+  for 19 object classes, listed in "<omz_dir>/data/dataset_classes/cityscapes_19cl.txt"
+  file. See Cityscapes classes definition <https://www.cityscapes-dataset.com/dataset-overview>
+  for more details.
+
+  More details provided in the paper <https://arxiv.org/abs/1705.09914> and repository
+  <https://github.com/fyu/drn>.
+task_type: semantic_segmentation
+files:
+  - name: drn_d_38_cityscapes.pth
+    size: 104117210
+    checksum: 090859278d373c8ce160a21b256f6dcfa2a5d07b6d2aebbd18e598a1d3f2c48a97e188d13f1bc16751859a8ed8f8ec1a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/drn-d-38/drn_d_38_cityscapes.pth
+    original_source:
+      $type: google_drive
+      id: 1Ck5cE5o6wsS5ITjeyBkvUYHnw4bIR6eg
+  - name: models/drn.py
+    size: 14175
+    checksum: 065d2584b6fc9528138f94fe60244e24669ca2b9870143e252f5e78684d037bff7971c3afacf22b8d481672fe4ab6f55
+    source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/drn.py
+  - name: models/segment.py
+    size: 26909
+    checksum: d30346421bf9aee14fd72806fda6cc3acb857398b72b7e12715626e91eef4f39798fdde3bfea8c3f52a8cabd8bb32ffa
+    source: https://raw.githubusercontent.com/fyu/drn/d75db2ee7070426db7a9264ee61cf489f8cf178c/segment.py
+postprocessing:
+  - $type: regex_replace
+    file: models/segment.py
+    pattern: 'import data_transforms as transforms'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/segment.py
+    pattern: '        target = target.cuda\(async=True\)'
+    replacement: '# \g<0>'
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir/models
+  - --model-name=drn_d_38
+  - --import-module=model
+  - --weights=$dl_dir/drn_d_38_cityscapes.pth
+  - --input-shapes=1,3,1024,2048
+  - --input-names=input
+  - --output-names=output
+  - --output-file=$conv_dir/drn-d-38.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 1024, 2048]
+    layout: NCHW
+model_optimizer_args:
+  - --reverse_input_channels
+  - --output=output
+  - --mean_values=[73.975742869,83.660769353,73.175805779]
+  - --scale_values=[46.653282963,47.574230671,47.041147921]
+  - --input_model=$conv_dir/drn-d-38.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/fyu/drn/master/LICENSE

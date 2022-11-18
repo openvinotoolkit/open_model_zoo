@@ -1,0 +1,70 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "hybrid-cs-model-mri" model is a hybrid frequency-domain/image-domain deep network
+  for Magnetic Resonance Image (MRI) reconstruction. The model is composed of a k-space
+  network that essentially tries to fill missing k-space samples, an Inverse Discrete
+  Fourier Transformation (IDFT) operation, and an image-domain network that acts as
+  an anti-aliasing filter.
+
+  More details provided in the paper <https://arxiv.org/abs/1810.12473> and repository
+  <https://github.com/rmsouza01/Hybrid-CS-Model-MRI>.
+task_type: image_inpainting
+files:
+  - name: wnet_20.hdf5
+    checksum: d52fc1fd1d698443041db4837551c787a0fd3da78d76b3ab1d6794b47a1da1f6ce8edb6014b4a52f1453f85cef48c2e9
+    size: 45478680
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Models/wnet_20.hdf5
+  - name: stats_fs_unet_norm_20.npy
+    checksum: acf3e20ce39e94588981cbd7b6d9a642216c3ac2f689bb2a17a73819a3d2058705de6456d1a78d24df8dcb8fafab1f31
+    size: 160
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Data/stats_fs_unet_norm_20.npy
+  - name: sampling_mask_20perc.npy
+    checksum: 4a88932c723819aa11cd12a052dd6c54afcf489c7f601ffc092e6c28f7a0487015ef2364844a3aa9e8821a02150cf363
+    size: 65664
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Data/sampling_mask_20perc.npy
+  - name: frequency_spatial_network.py
+    checksum: 6b2b2542144617e3787ae6e3d1298a04b7171add0afe6fe2490bcb0a42a7af8a952454246071eb589f98ebfbad89cf88
+    size: 9735
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Modules/frequency_spatial_network.py
+framework: tf
+postprocessing:
+  - $type: regex_replace
+    file: frequency_spatial_network.py
+    pattern: 'import keras'
+    replacement: 'import tensorflow as tf'
+  - $type: regex_replace
+    file: frequency_spatial_network.py
+    pattern: 'from keras import backend as K'
+    replacement: 'from tensorflow import keras as K'
+  - $type: regex_replace
+    file: frequency_spatial_network.py
+    pattern: 'from keras'
+    replacement: 'from tensorflow.keras'
+  - $type: regex_replace
+    file: frequency_spatial_network.py
+    pattern: 'K.tf.ifft2d'
+    replacement: 'tf.signal.ifft2d'
+  - $type: regex_replace
+    file: frequency_spatial_network.py
+    pattern: 'K.tf'
+    replacement: 'tf'
+input_info:
+  - name: input_1
+    shape: [1, 256, 256, 2]
+    layout: NHWC
+model_optimizer_args:
+  - --saved_model_dir=$conv_dir/saved_model
+license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE

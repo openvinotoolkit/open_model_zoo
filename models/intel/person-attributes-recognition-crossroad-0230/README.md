@@ -39,7 +39,7 @@ This model presents a person attributes classification algorithm analysis scenar
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
+Image, name: `0`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
 
 - `C` - number of channels
 - `H` - image height
@@ -54,6 +54,12 @@ The expected color order is `BGR`.
      `has_coat_jacket`]. Value > 0.5 means that an attribute is present.
 2.  The net outputs a blob named `456` with shape: `1, 2, 1, 1`. It is location of point with top color.
 3.  The net outputs a blob named `459` with shape: `1, 2, 1, 1`. It is location of point with bottom color.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Crossroad Camera C++ Demo](../../../demos/crossroad_camera_demo/cpp/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

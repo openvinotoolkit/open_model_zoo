@@ -10,7 +10,7 @@ evaluations:
           adapter: classification
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: kinetics-400
@@ -25,3 +25,7 @@ evaluations:
           metrics:
             - type: clip_accuracy
               presenter: print_vector
+              reference:
+                clip_accuracy: 0.565
+                video_accuracy: 0.565283
+                mean: 0.565141

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetV2 encoder. It is able to recognize actions such as drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting. The full list of recognized actions is located [here](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/demos/action_recognition_demo/python/driver_actions.txt).
+This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetV2 encoder. It is able to recognize actions such as drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting. The full list of recognized actions is located at `<omz_dir>/demos/action_recognition_demo/python/driver_actions.txt`.
 
 ## Example
 
@@ -59,6 +59,12 @@ An embedding image, name: `0`, shape: `1, 16, 512` in the format `B, T, C`, wher
 ### Outputs
 
 The model outputs a tensor with the shape `1, 9`, each row is a logits vector of performed actions.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Action Recognition Python\* Demo](../../../demos/action_recognition_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

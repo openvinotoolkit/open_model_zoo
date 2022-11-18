@@ -38,5 +38,12 @@ The model outputs a tensor with the shape `1, 12` in the format `B, L`, where:
 - `B` - batch size
 - `L` - logits vector for each performed CSL gestures
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [G-API Gesture Recognition Demo](../../../demos/gesture_recognition_demo/cpp_gapi/README.md)
+* [Gesture Recognition Python\* Demo](../../../demos/gesture_recognition_demo/python/README.md)
+
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

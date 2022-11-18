@@ -1,0 +1,127 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "gpt-2" model is a one of Generative Pre-trained Transformer (GPT) model family,
+  pre-trained on a very large corpus of English data in a self-supervised fashion.
+  The GPT architecture implements a deep neural network, specifically a transformer
+  model, which uses attention in place of previous recurrence- and convolution-based
+  architectures. Attention mechanisms allow the model to selectively focus on segments
+  of input text it predicts to be the most relevant. GPT-2 is trained with a simple
+  objective: predict the next word, given all of the previous words within some text.
+
+  More details provided in the paper <https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf>,
+  repository <https://github.com/huggingface/transformers> and model card <https://huggingface.co/gpt2>.
+task_type: text_prediction
+files:
+  - name: transformers-4.9.1-py3-none-any.whl
+    size: 2586799
+    checksum: 6bafef459543eba13c7952082bfe89e4b969fc5a8e0524d0c7f659845bd3449586f13102e06cec85906be40d6a76a7c2
+    source: https://files.pythonhosted.org/packages/38/39/5238c128cef0f4405c568b1e8c9c7423202109dcbb1622333918d8de1cd3/transformers-4.9.1-py3-none-any.whl
+  - name: gpt2/pytorch_model.bin
+    size: 548118077
+    checksum: da7d73f86e4aaa2ea10ae5cca81af55f1914ad27a65127a8fe171c30fda2addb035bb81e02855c9ff7e4c0c411330d3d
+    original_source: https://huggingface.co/gpt2/resolve/main/pytorch_model.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/gpt-2/pytorch_model.bin
+  - name: gpt2/config.json
+    size: 665
+    checksum: 7a725057662831dd8db64fa85aa42426d26a667f2357546bb674388f5598ee5169f653429aff8a2e48819dc251f7648f
+    original_source: https://huggingface.co/gpt2/resolve/main/config.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/gpt-2/config.json
+  - name: gpt2/vocab.json
+    size: 1042301
+    checksum: 43e578a41ade90c90c71fdc4bfc1457c2e288c0450b872f3fb4a27e9521cadcf881aa6f24e5fae208277d4134991c7b0
+    original_source: https://huggingface.co/gpt2/resolve/main/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/gpt-2/vocab.json
+  - name: gpt2/merges.txt
+    size: 456318
+    checksum: f91aa09e8551d2e001b4d6d0bf9a350a194ffe19397b913094c5ad8da940093894fd4064fce8edde9792b3474c107038
+    original_source: https://huggingface.co/gpt2/resolve/main/merges.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/gpt-2/merges.txt
+  - name: packaging-21.0-py3-none-any.whl
+    size: 40357
+    checksum: 1c96c2a22c453058086c807e681af38377d9a78baeb79d9b189f82db2b04055a27b9748b7a24db9aa3e82786019c2182
+    source: https://files.pythonhosted.org/packages/3c/77/e2362b676dc5008d81be423070dd9577fa03be5da2ba1105811900fda546/packaging-21.0-py3-none-any.whl
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: transformers-4.9.1-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: packaging-21.0-py3-none-any.whl
+  - $type: regex_replace
+    file: transformers/__init__.py
+    pattern: 'from . import dependency_versions_check'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from tqdm.auto import tqdm'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: from filelock import FileLock
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/data/datasets/glue.py
+    pattern: from filelock import FileLock
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/data/datasets/squad.py
+    pattern: from filelock import FileLock
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/data/datasets/language_modeling.py
+    pattern: from filelock import FileLock
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: from huggingface_hub import HfApi, HfFolder, Repository
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: Repository
+    replacement: None
+  - $type: regex_replace
+    file: transformers/modelcard.py
+    pattern: from huggingface_hub import HfApi
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/deepspeed.py
+    pattern: from .dependency_versions_check import dep_version_check
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/trainer.py
+    pattern: from .dependency_versions_check import dep_version_check
+    replacement: '# \g<0>'
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=model_dir=r"$dl_dir/gpt2"
+  - --input-names=input
+  - --output-names=output
+  - --input-shapes=[1,1024]
+  - --output-file=$conv_dir/gpt-2.onnx
+  - --inputs-dtype=long
+  - '--conversion-param=dynamic_axes={"input": {0: "batch_size", 1: "sequence_len"},
+    "output": {0: "batch_size", 1: "sequence_len"}}'
+input_info:
+  - name: input
+    layout: NS
+model_optimizer_args:
+  - --input_model=$conv_dir/gpt-2.onnx
+  - --output=output
+framework: pytorch
+license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE

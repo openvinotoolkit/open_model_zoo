@@ -2,7 +2,7 @@ models:
   - name: vehicle-attributes-recognition-barrier-0042
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: vehicle_attributes
           color_out: color
@@ -27,9 +27,24 @@ models:
             annotation_source: color
             prediction_source: color
             label_map: color_label_map
+            reference:
+              black: 0.9684
+              blue: 0.8249
+              gray: 0.7747
+              green: 0.8182
+              mean: 0.8271
+              red: 0.9465
+              white: 0.842
+              yellow: 0.615
           - name: type_accuracy
             type: accuracy_per_class
             presenter: print_vector
             annotation_source: type
             prediction_source: type
             label_map: type_label_map
+            reference:
+              bus: 0.6857
+              car: 0.9744
+              mean: 0.8734
+              truck: 0.9695
+              van: 0.8641

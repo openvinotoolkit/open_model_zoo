@@ -1,7 +1,7 @@
 models:
   - name: efficientdet-d1-tf
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
     datasets:
       - name: ms_coco_detection_90_class_without_background
@@ -21,3 +21,4 @@ models:
 
         metrics:
           - type: coco_precision
+            reference: 0.3754

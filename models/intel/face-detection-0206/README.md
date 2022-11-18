@@ -25,7 +25,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 640, 640` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 640, 640` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -49,7 +49,14 @@ Expected color order: `BGR`.
 
 ## Training Pipeline
 
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/face-detection/readme.md), allowing to fine-tune the model on custom dataset.
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/object_detection/model_templates/face-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
 
 ## Legal Information
 

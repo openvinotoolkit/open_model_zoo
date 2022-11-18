@@ -1,0 +1,88 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "yolox-tiny" is a tiny version of YOLOX models family for object detection tasks.
+  YOLOX is an anchor-free version of YOLO, with a simpler design but better performance.This
+  model was pre-trained on Common Objects in Context <COCO> <https://cocodataset.org/#home>
+  dataset with 80 classes.
+
+  More details provided in the paper <https://arxiv.org/abs/2107.08430> and repository
+  <https://github.com/Megvii-BaseDetection/YOLOX>.
+task_type: detection
+files:
+  - name: models/yolox.py
+    size: 1374
+    checksum: eb0fe479a6b65b1292644955e7c3717dab1271d5854a4ec5b3d671f18805848cbddd8541b779394daeb96acb7e3fba06
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolox.py
+  - name: models/yolo_head.py
+    size: 23223
+    checksum: d48caa0874839ca3d45e5209db339733ecdafeb02af7216278544c995539beda6a07549a317cca0055ecba13c2b0ee50
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolo_head.py
+  - name: models/yolo_pafpn.py
+    size: 3540
+    checksum: 9037b1ec330b8071e9e8984410ebfc54119385a47fde1f02b9831a50f0383d5701b4e778a49be37d5252da029e956322
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/yolo_pafpn.py
+  - name: models/darknet.py
+    size: 6028
+    checksum: 77cb6df3b46d6d9d98c4bdccaba8faeab817110a8133b2a57595e3028697076ecea604724c71a983d1d37b930d5ab671
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/darknet.py
+  - name: models/network_blocks.py
+    size: 6102
+    checksum: 96f7f932abae06f57589c30e2e460a0c10064ca095c6a4a687271a19f0d38977dab1897db8f902c6883ba65477e6463d
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/network_blocks.py
+  - name: models/losses.py
+    size: 1663
+    checksum: 0c1373e269a1e99f9c77eb88cb9fc279f72cd4d0146d01ff108c10f3fd999a2fe15c1e56e31deeae92d26e5190d0c24c
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/models/losses.py
+  - name: utils/boxes.py
+    size: 4481
+    checksum: 6f92071f17c19f8bcac4cf7d38901b4d48e40cbba81ca53c455bd2e17895b3c98c03de6dbb8be9bd12f2ab34cfa7fa0c
+    source: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/69f1173a569f1e0cc41025146a32b5d5fa06dd26/yolox/utils/boxes.py
+  - name: yolox_tiny.pth
+    size: 40726661
+    checksum: 9083e8c9e2388c0c1ddde44a97f0304a10f8ffc2219943a4b5280d9791b96d9998129c8ba34b5dd2902cfd715fcd8138
+    original_source: https://github.com/Megvii-BaseDetection/storage/releases/download/0.0.1/yolox_tiny.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolox-tiny/yolox_tiny.pth
+postprocessing:
+  - $type: regex_replace
+    file: models/yolo_head.py
+    pattern: 'from loguru import logger'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/yolo_head.py
+    pattern: 'from yolox.utils import bboxes_iou'
+    replacement: 'from utils.boxes import bboxes_iou'
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/yolox_tiny.pth"
+  - --input-shape=1,3,416,416
+  - --input-names=images
+  - --output-names=output
+  - --output-file=$conv_dir/yolox-tiny.onnx
+input_info:
+  - name: images
+    shape: [1, 3, 416, 416]
+    layout: NCHW
+model_optimizer_args:
+  - --mean_values=images[123.675,116.28,103.53]
+  - --scale_values=images[58.395,57.12,57.375]
+  - --reverse_input_channels
+  - --output=output
+  - --input_model=$conv_dir/yolox-tiny.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/main/LICENSE

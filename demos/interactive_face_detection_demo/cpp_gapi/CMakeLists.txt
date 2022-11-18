@@ -8,4 +8,5 @@ file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h*)
 add_demo(NAME interactive_face_detection_demo_gapi
     SOURCES ${MAIN_SRC}
     HEADERS ${MAIN_HEADERS}
-    DEPENDENCIES monitors)
+    DEPENDENCIES monitors utils_gapi
+    OPENCV_VERSION_REQUIRED 4.5.3)

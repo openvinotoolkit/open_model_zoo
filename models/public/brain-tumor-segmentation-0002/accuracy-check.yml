@@ -2,7 +2,7 @@ models:
   - name: brain-tumor-segmentation-0002
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: brain_tumor_segmentation
 
@@ -26,3 +26,12 @@ models:
           - type: dice_index
             median: True
             presenter: print_vector
+            reference:
+              mean@overall tumor: 0.915
+              mean@necrotic and non-enhancing tumor: 0.611
+              mean@edema: 0.806
+              mean@enhancing tumor: 0.794
+              median@overall tumor: 0.927
+              median@necrotic and non-enhancing tumor: 0.645
+              median@edema: 0.835
+              median@enhancing tumor: 0.86

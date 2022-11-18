@@ -1,0 +1,26 @@
+models:
+  - name: facial-landmarks-98-detection-0001
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: facial_landmarks_detection
+          output_blob: 3851
+
+    datasets:
+      - name: facial_landmarks_98_db
+
+        preprocessing:
+
+          - type: crop_rect
+          - type: resize
+            dst_width: 64
+            dst_height: 64
+            interpolation: LINEAR
+
+        postprocessing:
+          - type: heatmap2keypoints
+
+        metrics:
+          - type: nme
+            only_2d: True

@@ -1,0 +1,43 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time
+  vehicle detection. The weights are pretrained by BDD100k and retrained by our own
+  dataset. For details see repository <https://github.com/legendary111/mobilenet-yolo-v4-syg/>,
+  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
+task_type: detection
+files:
+  - name: mobilenet-yolo-v4-syg.pb
+    size: 42004202
+    checksum: 8f931bc5bc0adcfaaaa2ddbad8c13838725fe61bfef24ff5ff23ad9268b392c40b3ecb2bbe736152060c7014ced80e6b
+    original_source: https://github.com/legendary111/mobilenet-yolo-v4-syg/releases/download/files/mobilenet-yolo-v4-syg.pb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-yolo-v4-syg/mobilenet-yolo-v4-syg.pb
+  - name: yolo_pb2ir.json
+    size: 414
+    checksum: 2c5236e29566a0d198e972630941840a98f2fcedce6d39b05dc61980166c29a7da9b55883c5dc8b568d682529c18430f
+    original_source: https://github.com/legendary111/mobilenet-yolo-syg/releases/download/mobilenet-yolo-v4-syg/yolo_pb2ir.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/mobilenet-yolo-v4-syg/yolo_pb2ir.json
+input_info:
+  - name: input_1
+    shape: [1, 416, 416, 3]
+    layout: NHWC
+model_optimizer_args:
+  - --input_model=$dl_dir/mobilenet-yolo-v4-syg.pb
+  - --scale_values=input_1[255]
+  - --transformations_config=$dl_dir/yolo_pb2ir.json
+  - --reverse_input_channels
+framework: tf
+quantizable: true
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

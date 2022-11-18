@@ -14,11 +14,8 @@
  limitations under the License.
 """
 
-import cv2
+import logging as log
 
-def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
-    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
-    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 def resolution(value):
     try:
@@ -28,3 +25,8 @@ def resolution(value):
     except ValueError:
         raise RuntimeError('Сorrect format of --output_resolution parameter is "width"x"height".')
     return result
+
+def log_latency_per_stage(*pipeline_metrics):
+    stages = ('Decoding', 'Preprocessing', 'Inference', 'Postprocessing', 'Rendering')
+    for stage, latency in zip(stages, pipeline_metrics):
+        log.info('\t{}:\t{:.1f} ms'.format(stage, latency))

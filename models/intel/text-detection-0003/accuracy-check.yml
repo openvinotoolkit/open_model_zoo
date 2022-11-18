@@ -2,7 +2,7 @@ models:
   - name: text-detection-0003
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
@@ -35,3 +35,4 @@ models:
           - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
+            reference: 0.8212

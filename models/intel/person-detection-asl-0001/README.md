@@ -12,7 +12,7 @@ This is a person detector for the ASL Recognition scenario. It is based on Shuff
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Persons AP on COCO              | 80.0%                                     |
+| Persons AP on COCO              | 79.35%                                    |
 | Minimal person height           | 100 pixel                                 |
 | GFlops                          | 0.986                                     |
 | MParams                         | 1.338                                     |
@@ -22,7 +22,7 @@ Average Precision (AP) is defined as an area under the [precision/recall](https:
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 320, 320` in the format `1, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 320, 320` in the format `1, C, H, W`, where:
 
 - `C` - number of channels
 - `H` - image height
@@ -38,6 +38,13 @@ bounding boxes. For each detection, the description has the format: [`x_min`, `y
  - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
  - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
  - `conf` - confidence for the predicted class
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [G-API Gesture Recognition Demo](../../../demos/gesture_recognition_demo/cpp_gapi/README.md)
+* [Gesture Recognition Python\* Demo](../../../demos/gesture_recognition_demo/python/README.md)
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

@@ -19,22 +19,28 @@ Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architectur
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 768, 1280` in the format `B, C, H, W`, where:
+Image, name: `Placeholder`, shape: `1, 768, 1280, 3` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
 ## Outputs
 
-1. name: `model/link\_logits\_/add`, shape: `1, 16, 192, 320` - logits related to linkage between pixels and their neighbors.
+1. name: `model/link_logits_/add`, shape: `1, 192, 320, 16` - logits related to linkage between pixels and their neighbors.
 
-2. name: `model/segm\_logits/add`, shape: `1, 2, 192, 320` - logits related to text/no-text classification for each pixel.
+2. name: `model/segm_logits/add`, shape: `1, 192, 320, 2` - logits related to text/no-text classification for each pixel.
 
 Refer to [PixelLink](https://arxiv.org/abs/1801.01315) and demos for details.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

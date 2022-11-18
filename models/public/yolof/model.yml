@@ -1,0 +1,189 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLOF is a simple, fast, and efficient object detector without FPN. Model based
+  on "You Only Look One-level Feature" <https://arxiv.org/abs/2103.09460> paper. It
+  was implemented in PyTorch* framework. Model used "DarkNet-53" with Cross Stage
+  Partial blocks as backbone. For details see repository <https://github.com/megvii-model/YOLOF>.
+  This model was pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset with 80 classes
+task_type: detection
+files:
+  # cvpods
+  - name: cvpods/__init__.py
+    size: 274
+    checksum: 89d7d3a6a8a220f9c6eb3420bfe93ee29f486051ee65cb0957fc9eb7422179f1a1d3574638e26a6006041ff3a8f6bab8
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/__init__.py
+  #  layers
+  - name: cvpods/layers/__init__.py
+    size: 1276
+    checksum: b5b34410c514a1e7b4e7c203b4b183b30b3a35fc18e6516da7b54b83ae236c6bdaea6b439f2c563171dc015c48287ce4
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/__init__.py
+  - name: cvpods/layers/batch_norm.py
+    size: 9872
+    checksum: b331702dfac0c680870e1c164442ab647be88e54258f6a4e3c7f777e471a4719ffa8ebd8fcdc7e4e8f8a1f15a726c005
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/batch_norm.py
+  - name: cvpods/layers/shape_spec.py
+    size: 672
+    checksum: ac251409d116121ee0acd10cd86a6c367d003169fd581e4f9c562bb20359e69642d8a720cf39bfd16cc2909782108172
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/shape_spec.py
+  - name: cvpods/layers/wrappers.py
+    size: 15619
+    checksum: f6caf877a6c1c593f911240eaf28e71880ab220b80653796455effa0d7d38d5241bcfd0357171fddd0431d65364b6920
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/layers/wrappers.py
+  #  modeling
+  - name: cvpods/modeling/anchor_generator.py
+    size: 15718
+    checksum: e55872f196946705bc66b82234a91d8b893810fe8f94bc72ef1be211334772904ed81aa0e3d89275dd3f93524dfe2b5e
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/anchor_generator.py
+  - name: cvpods/modeling/backbone/__init__.py
+    size: 905
+    checksum: d95a02c8a1bf4549892b3082ea0199902cdd9a614107c9042d48ed150b33eeecab8a199a7e40da337c42dff874efde2c
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/backbone/__init__.py
+  - name: cvpods/modeling/backbone/backbone.py
+    size: 1632
+    checksum: ade8d08b8f1d53a3c0f5ccbe40da905fc4f9222eab9955fa05246fc3bba309b40a17b9f63e7a199683f73aa5c1f433ea
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/backbone/backbone.py
+  - name: cvpods/modeling/nn_utils/__init__.py
+    size: 0
+    checksum: 38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/nn_utils/__init__.py
+  - name: cvpods/modeling/nn_utils/weight_init.py
+    size: 3756
+    checksum: 6b6982835f798c5e48077b3cc5cbda8ce1232742d2b360ef0b967dbb509e6f0dd5f496b4bd57c89f03b7d4477553dca0
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/modeling/nn_utils/weight_init.py
+  #  structures
+  - name: cvpods/structures/__init__.py
+    size: 520
+    checksum: 1fa10738d59a77e09c3df06ed2ed2c3f5943122daaf020a8d24db3754bf855e3c1a3687bc6ffc3320e2d18152dcefc97
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/structures/__init__.py
+  - name: cvpods/structures/boxes.py
+    size: 15620
+    checksum: faa7e2927da6eafee119acfa14b0b72ba312d9114dd7235388fbd86d900bbb1ac29595fe7038017588ae43986778e78e
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/cvpods/structures/boxes.py
+  # models
+  - name: models/cspdarknet.py
+    size: 11889
+    checksum: 8cf272cdcf6296bfc06271e0d113908b086a4242a50c777d6acfcfcbdf827351cae347983aa44d876461f613ab344da9
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof.cspdarknet53.DC5.9x.stage2.3x/cspdarknet.py
+  # yolof_base
+  - name: yolof_base/__init__.py
+    size: 156
+    checksum: f9a49cf1ba3eb106ba5d71f9c425e41410fb72e35b69cf38a1d0573b04926f9ee2af073bb548ba11f4fa422e0698894c
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/__init__.py
+  - name: yolof_base/decoder.py
+    size: 4473
+    checksum: c0c5c894887812b088919f2194bfc7a096c674760095afdff30a624f482073d7f1801930f12fae626fb96f3ea5976126
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/decoder.py
+  - name: yolof_base/encoder.py
+    size: 4588
+    checksum: a2ed22ceefac9c93e07e8a18936248b389856d0b7bbc8b048368eb2313726934b0c74656efd18049b89cb7a510d27e41
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/encoder.py
+  - name: yolof_base/utils.py
+    size: 1615
+    checksum: 5b21efa0002bd3b44f3af8cd85f021037110ef32ff5cd8e6418a512da57d2c2f7b9e381288acac086ed68293f164cadd
+    source: https://raw.githubusercontent.com/megvii-model/YOLOF/d09c5a64ff354e6f4141c26d68574f9f9f0b84a2/playground/detection/coco/yolof/yolof_base/utils.py
+  # ckpt
+  - name: ckpt/YOLOF_CSP_D_53_DC5_9x.pth
+    size: 385559524
+    checksum: 8bc639e0ce4825b0891e9ea50c4e7898c9eb7548de725490a135a2368162e637dc43658eb696e27f1d4a1649c2108e03
+    original_source: https://upzqqa.bn.files.1drv.com/y4mwk1QklsZktMCS8X9bmTcxB8cqyMbouGOKV_8fjN0-nISdWdiRAoZwkzOqKHSq7bOmFchzhWz52mHMRvXC6sa-rjEPwP_QqVxjc9dePvpE-7X3Lr5sDyV0zlLky_MClBOSfcpWPd_Fro-BKaE9KDC20_eukQJRREXf5uWp8w0CHHMZ2JN9wv38W17KkSy-EspmHSLvPrkw2BysFTeOTJJ6A
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/yolof/y4mwk1QklsZktMCS8X9bmTcxB8cqyMbouGOKV_8fjN0-nISdWdiRAoZwkzOqKHSq7bOmFchzhWz52mHMRvXC6sa-rjEPwP_QqVxjc9dePvpE-7X3Lr5sDyV0zlLky_MClBOSfcpWPd_Fro-BKaE9KDC20_eukQJRREXf5uWp8w0CHHMZ2JN9wv38W17KkSy-EspmHSLvPrkw2BysFTeOTJJ6A
+  # addict
+  - name: lib/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    checksum: 0b3d7c226551078ffcd70e4d512194f2cb67c6c06dc8c7a7b8001752b842b934990817f9236f73fb7c38cba5573205ab
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
+postprocessing:
+  # unpack
+  - $type: unpack_archive
+    format: zip
+    file: lib/addict-2.4.0-py3-none-any.whl
+  # cvpods
+  - $type: regex_replace
+    file: cvpods/__init__.py
+    pattern: 'from \.(utils) |setup_environment\(\)'
+    replacement: '# \g<0>'
+  #  layers
+  - $type: regex_replace
+    file: cvpods/layers/__init__.py
+    pattern: 'from \.(mask_ops|activation_funcs|deform_conv|deform_conv_with_off|larc|position_encoding|roi_align|roi_align_rotated|swap_align2nat|tree_filter_v2)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: cvpods/layers/__init__.py
+    pattern: 'from \.nms [^)]*\)'
+    replacement: ''
+  #  modeling
+  - $type: regex_replace
+    file: cvpods/modeling/anchor_generator.py
+    pattern: 'from cvpods.structures import Boxes, RotatedBoxes'
+    replacement: 'from cvpods.structures import Boxes #RotatedBoxes'
+  - $type: regex_replace
+    file: cvpods/modeling/anchor_generator.py
+    pattern: 'return anchors\n\n\n'
+    replacement: 'return anchors_over_all_feature_maps\n\n\n'
+  - $type: regex_replace
+    file: cvpods/modeling/backbone/__init__.py
+    pattern: 'from \.(bifpn) (.|\n)*'
+    replacement: ''
+  #  structures
+  - $type: regex_replace
+    file: cvpods/structures/__init__.py
+    pattern: 'from \.(image_list) (.|\n)*'
+    replacement: ''
+  - $type: regex_replace
+    file: cvpods/structures/__init__.py
+    pattern: 'from \.boxes import Boxes'
+    replacement: 'from .boxes import Boxes #'
+  #  batch_norm
+  - $type: regex_replace
+    file: cvpods/layers/batch_norm.py
+    pattern: 'from cvpods\.utils import comm|comm\.get_world_size\(\) == 1 or'
+    replacement: ''
+  # yolof_base
+  - $type: regex_replace
+    file: yolof_base/__init__.py
+    pattern: 'from \.(yolof)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: yolof_base/utils.py
+    pattern: 'from cvpods\.utils'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: yolof_base/utils.py
+    pattern: 'from cvpods\.utils import env|if env\.TORCH_VERSION <= \(\n.*1, 5\)
+      else nn\.SyncBatchNorm,'
+    replacement: ','
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-path=$dl_dir/lib/addict
+  - --model-name=get_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/ckpt/YOLOF_CSP_D_53_DC5_9x.pth"
+  - --input-shape=1,3,608,608
+  - --input-names=image
+  - --output-names=boxes
+  - --output-file=$conv_dir/yolof.onnx
+input_info:
+  - name: image
+    shape: [1, 3, 608, 608]
+    layout: NCHW
+model_optimizer_args:
+  - --mean_values=image[103.53,116.28,123.675]
+  - --output=boxes
+  - --input_model=$conv_dir/yolof.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/megvii-model/YOLOF/main/LICENSE

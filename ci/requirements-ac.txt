@@ -1,41 +1,48 @@
 # use update-requirements.py to update this file
 
-click==7.1.2
+certifi==2022.9.24
+    # via requests
+charset-normalizer==2.1.1
+    # via requests
+click==8.1.3
     # via nltk
-cycler==0.10.0
-    # via matplotlib
-decorator==4.4.2
-    # via networkx
 defusedxml==0.7.1
     # via -r tools/accuracy_checker/requirements-core.in
-editdistance==0.5.3
-    # via -r tools/accuracy_checker/requirements.in
-fast-ctc-decode==0.2.5
-    # via -r tools/accuracy_checker/requirements.in
-imageio==2.9.0
+fast-ctc-decode==0.3.2
+    # via -r tools/accuracy_checker/requirements-extra.in
+filelock==3.8.0
+    # via
+    #   huggingface-hub
+    #   transformers
+huggingface-hub==0.11.0
+    # via transformers
+idna==3.4
+    # via requests
+imagecodecs==2022.2.22 ; python_version >= "3.8"
+    # via -r tools/accuracy_checker/requirements-extra.in
+imageio==2.22.4
     # via scikit-image
-joblib==1.0.1
+joblib==1.2.0
     # via
     #   nltk
     #   scikit-learn
-kiwisolver==1.3.1
-    # via matplotlib
-lmdb==1.2.1
-    # via -r tools/accuracy_checker/requirements.in
-matplotlib==3.3.4
-    # via scikit-image
-networkx==2.5
-    # via scikit-image
-nibabel==3.2.1
-    # via -r tools/accuracy_checker/requirements.in
-nltk==3.5
-    # via -r tools/accuracy_checker/requirements.in
-numpy==1.19.5
+lmdb==1.3.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+networkx==2.8 ; python_version >= "3.7"
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   scikit-image
+nibabel==4.0.2
+    # via -r tools/accuracy_checker/requirements-extra.in
+nltk==3.7
+    # via -r tools/accuracy_checker/requirements-extra.in
+numpy==1.23.1
     # via
     #   -r tools/accuracy_checker/requirements-core.in
+    #   imagecodecs
     #   imageio
-    #   matplotlib
     #   nibabel
+    #   pandas
     #   parasail
     #   pywavelets
     #   rawpy
@@ -43,58 +50,89 @@ numpy==1.19.5
     #   scikit-learn
     #   scipy
     #   tifffile
-packaging==20.9
-    # via nibabel
-parasail==1.2.4
-    # via -r tools/accuracy_checker/requirements.in
-pillow==8.1.2
+    #   transformers
+openvino-telemetry==2022.1.1
+    # via -r tools/accuracy_checker/requirements-core.in
+packaging==21.3
+    # via
+    #   huggingface-hub
+    #   nibabel
+    #   scikit-image
+    #   transformers
+pandas==1.3.5
+    # via -r tools/accuracy_checker/requirements-extra.in
+parasail==1.3.3 ; platform_system != "Windows"
+    # via -r tools/accuracy_checker/requirements-extra.in
+pillow==9.3.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
-    #   matplotlib
     #   scikit-image
-py-cpuinfo==7.0.0
-    # via -r tools/accuracy_checker/requirements.in
-pydicom==2.1.2
-    # via -r tools/accuracy_checker/requirements.in
-pyparsing==2.4.7
-    # via
-    #   matplotlib
-    #   packaging
-python-dateutil==2.8.1
-    # via matplotlib
-pywavelets==1.1.1
+py-cpuinfo==9.0.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+pyclipper==1.3.0.post4
+    # via -r tools/accuracy_checker/requirements-extra.in
+pydicom==2.3.1
+    # via -r tools/accuracy_checker/requirements-extra.in
+pyparsing==3.0.9
+    # via packaging
+python-dateutil==2.8.2
+    # via pandas
+pytz==2022.6
+    # via pandas
+pywavelets==1.4.1
     # via scikit-image
-pyyaml==5.4.1
-    # via -r tools/accuracy_checker/requirements-core.in
-rawpy==0.16.0
-    # via -r tools/accuracy_checker/requirements.in
-regex==2021.3.17
-    # via nltk
-scikit-image==0.17.2
-    # via -r tools/accuracy_checker/requirements.in
-scikit-learn==0.24.1
-    # via -r tools/accuracy_checker/requirements.in
-scipy==1.5.4
+pyyaml==6.0
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-core.in
+    #   huggingface-hub
+    #   transformers
+rawpy==0.17.3 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
+regex==2022.10.31
+    # via
+    #   nltk
+    #   transformers
+requests==2.28.1
+    # via
+    #   huggingface-hub
+    #   openvino-telemetry
+    #   transformers
+scikit-image==0.19.3 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
+scikit-learn==0.24.2
+    # via -r tools/accuracy_checker/requirements-extra.in
+scipy==1.8.0
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
     #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.95
-    # via -r tools/accuracy_checker/requirements.in
-shapely==1.7.1
-    # via -r tools/accuracy_checker/requirements.in
-six==1.15.0
-    # via
-    #   cycler
-    #   python-dateutil
-threadpoolctl==2.1.0
+sentencepiece==0.1.97
+    # via -r tools/accuracy_checker/requirements-extra.in
+shapely==1.8.5.post1
+    # via -r tools/accuracy_checker/requirements-extra.in
+six==1.16.0
+    # via python-dateutil
+threadpoolctl==3.1.0
     # via scikit-learn
-tifffile==2020.9.3
+tifffile==2022.10.10
     # via scikit-image
-tokenizers==0.10.1
-    # via -r tools/accuracy_checker/requirements.in
-tqdm==4.59.0
+tokenizers==0.13.2 ; python_version >= "3.7"
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   transformers
+tqdm==4.64.1
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   huggingface-hub
     #   nltk
+    #   transformers
+transformers==4.24.0 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
+typing-extensions==4.4.0
+    # via huggingface-hub
+urllib3==1.26.12
+    # via requests
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

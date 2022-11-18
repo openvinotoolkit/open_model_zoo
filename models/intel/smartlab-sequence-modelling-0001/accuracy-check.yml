@@ -1,0 +1,22 @@
+models:
+  - name: smartlab-sequence-modelling-0001
+    launchers:
+      - framework: openvino
+        adapter:
+          type: regression
+        inputs:
+          - name: input
+            type: INPUT
+            value: .*input
+            shape: [1, 3, 224, 224]
+            layout: NCHW
+    datasets:
+      - name: online_mstcn_plus_encoder_dataset
+        metrics:
+          - type: mae
+            presenter: print_vector
+            abs_threshold: 0.1
+            rel_threshold: 1
+            reference:
+              mean: 0.05
+              std: 0.1

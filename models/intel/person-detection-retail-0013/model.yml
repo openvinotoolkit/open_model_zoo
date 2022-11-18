@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,32 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0013.xml
-    size: 382996
-    sha256: 1d41bac670ece033c5be9c5c3025e3c61080b6e36f32019ef68c654384a2542b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+    size: 470356
+    checksum: 0a346bc301457760eed3570a03a650529016505487c8f76bc4fb06d4a68d9ac901def7d5d7d4728b0699ab359dec4cfb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
   - name: FP32/person-detection-retail-0013.bin
     size: 2891364
-    sha256: 6f09cb7061328942f9d5e9fc81631a4234be66a26daa50cd672d4077ee82ad44
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+    checksum: 9e0fb51e3b9064657b14ddd8c190f7088fd561a184acd38ba7a7d4c491879e56a5a6d4619810cbbaef36a9653810486a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
   - name: FP16/person-detection-retail-0013.xml
-    size: 382841
-    sha256: 21f3e382674f1587d2677a97f25e7e1555b8b6f90fec036d752daac086c3183b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+    size: 647966
+    checksum: 3c8f83c3ef3c31d41dc1e91c6c43537d231f25e9a4e610ade3e4a8bf73a896aa64c86d6d8e3431578173ea5876da9284
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
   - name: FP16/person-detection-retail-0013.bin
-    size: 1445736
-    sha256: 56eeccbeb3f27144046edacb95b459d60f3930f54051ef5b9e5253923c07b672
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+    size: 1445734
+    checksum: 89cb1d9735d508b6d047fbafbed06babc3373d4da21cdb67873fed828aefdcf297b3594ef8219bf54b22af912b20f2d1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
   - name: FP16-INT8/person-detection-retail-0013.xml
-    size: 971255
-    sha256: 9ea547535cb9120af10bee5474d559b9f7f656bd4397349cdb798bd6af7c1593
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.xml
+    size: 1160838
+    checksum: b8a79e29079cb630344983e550e9c3ba05e0368e79c4ee94e4767015775e442872fcd19a5530bdcec7c72704629b2b7e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.xml
   - name: FP16-INT8/person-detection-retail-0013.bin
-    size: 770360
-    sha256: 68f0bb364e3642912d2f8bbfb8bba89e4c750a4f81b7abd3a110ca759fb6b24e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.bin
+    size: 809310
+    checksum: 8b84b40e79abb3baa742e5aa3073860dd3c582d53c665f0b61db93f75cf9d9a9500be332addd5c6459269dfa5c1cde13
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-detection-retail-0013/FP16-INT8/person-detection-retail-0013.bin
+input_info:
+  - name: data
+    shape: [1, 3, 320, 544]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

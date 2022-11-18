@@ -124,5 +124,11 @@ Audio, name: `audio`, shape: `32768`, format: `T`, where:
 
 - `T` - time in audio with sampling rate 22050 (~1.5 sec).
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text-to-speech Python\* Demo](../../../demos/text_to_speech_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

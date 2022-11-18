@@ -1,0 +1,78 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "ocrnet-hrnet-w48-paddle" is a semantic segmentation model, pre-trained on on Cityscapes
+  <https://www.cityscapes-dataset.com> dataset for 19 object classes, listed in "<omz_dir>/data/dataset_classes/cityscapes_19cl_bkgr.txt"
+  file. See Cityscapes classes definition <https://www.cityscapes-dataset.com/dataset-overview>
+  for more details. The model was built on HRNet <https://arxiv.org/abs/1904.04514>
+  backbone and address the semantic segmentation problem characterizing a pixel by
+  exploiting the representation of the corresponding object class using Object-Contextual
+  Representations. This model is used for pixel-level prediction tasks. For details
+  see repository <https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.3/configs/ocrnet>,
+  paper <https://arxiv.org/abs/1909.11065>.
+task_type: semantic_segmentation
+files:
+  - name: model.pdparams
+    size: 425067873
+    checksum: ffe6be29376beefea4a6031e5718f87f890faead48edd1ae895b9ebde2b967ad59a6102ca75799df7ac1c5f9619fb110
+    source: https://bj.bcebos.com/paddleseg/dygraph/cityscapes/ocrnet_hrnetw48_cityscapes_1024x512_160k/model.pdparams
+  - name: configs/ocrnet/ocrnet_hrnetw48_cityscapes_1024x512_160k.yml
+    size: 432
+    checksum: 4716c91c9908aa4583866a15d518bddb8b5bdd3d10c16ca6fc693c26eacc66f2567b6de9857ebd8d4552aa7221b84783
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/83a419ff92c54b01257c75d75a435df6d75e7515/configs/ocrnet/ocrnet_hrnetw48_cityscapes_1024x512_160k.yml
+  - name: configs/_base_/cityscapes_1024x1024.yml
+    size: 444
+    checksum: 82caab51626e79dd80904e823ab6089c522fb5c56a119c3701f0bd6bb237b61ec4ff8f3e5401611ffab7797b0b97f450
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/83a419ff92c54b01257c75d75a435df6d75e7515/configs/_base_/cityscapes_1024x1024.yml
+  - name: configs/_base_/cityscapes.yml
+    size: 778
+    checksum: 69f2f1767055630da2b6be18228d413e58ec6c45e12b14435d2a302f447368fb8585fc0afcb113054ba5fece29ae07bc
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/83a419ff92c54b01257c75d75a435df6d75e7515/configs/_base_/cityscapes.yml
+  - name: paddleseg-2.3.0-py3-none-any.whl
+    size: 236075
+    checksum: c07c5530539772265ff118245e5ed62be87b9481c95a4d9049570b61148d0ea13e862cf8e8347c99ed3b2d7b34c7b0cf
+    source: https://files.pythonhosted.org/packages/a6/f9/c42edf1e595478d9578595aa23dbae848b68553b98048f6457c3c4c9003d/paddleseg-2.3.0-py3-none-any.whl
+  - name: filelock-3.4.1-py3-none-any.whl
+    size: 9852
+    checksum: 4f46d9acefa1e93f1279e12fd800dfc3a3004a70130e34d29889bf461fa39293f3dd868214f7d306b72719584a27268d
+    source: https://files.pythonhosted.org/packages/84/ce/8916d10ef537f3f3b046843255f9799504aa41862bfa87844b9bdc5361cd/filelock-3.4.1-py3-none-any.whl
+  - name: export.py
+    size: 3982
+    checksum: fbb592915c00af2d466847ffdf6eb71f16a49b261e13da5c4c71a9601e88e1eab18c1c554b27ee76ee74362938bd9423
+    source: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/83a419ff92c54b01257c75d75a435df6d75e7515/export.py
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: paddleseg-2.3.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: filelock-3.4.1-py3-none-any.whl
+  # skip backbone downloading for weights intialization
+  - $type: regex_replace
+    file: paddleseg/models/backbones/hrnet.py
+    pattern: 'self.init_weight()'
+    replacement: '# \g<0>'
+input_info:
+  - name: x
+    shape: [1, 3, 1024, 2048]
+    layout: NCHW
+model_optimizer_args:
+  - --output=argmax_0.tmp_0
+  - --mean_values=x[127.5,127.5,127.5]
+  - --scale_values=x[127.5,127.5,127.5]
+  - --input_model=$conv_dir/inference_model/model.pdmodel
+  - --reverse_input_channels
+framework: paddle
+license: https://raw.githubusercontent.com/PaddlePaddle/PaddleSeg/release/2.3/LICENSE

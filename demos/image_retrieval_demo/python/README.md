@@ -25,31 +25,25 @@ The demo workflow is the following:
      - Top-10 most similar images from the gallery.
      - Performance characteristics.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
-The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
-
-The demo dependencies should be installed before run. That can be achieved with the following command:
-
-```sh
-python3 -mpip install --user -r <omz_dir>/demos/requirements.txt
-```
+The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f24667329a58e8560ed4e01ef203e99def/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
 The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -63,11 +57,10 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: image_retrieval_demo.py [-h] -m MODEL -i INPUT [--loop]
-                               [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                               -g GALLERY [-gt GROUND_TRUTH]
-                               [-d DEVICE] [-l CPU_EXTENSION]
-                               [--no_show] [-u UTILIZATION_MONITORS]
+usage: image_retrieval_demo.py [-h] -m MODEL -i INPUT [--loop] [-o OUTPUT]
+                               [-limit OUTPUT_LIMIT] -g GALLERY
+                               [-gt GROUND_TRUTH] [-d DEVICE] [--no_show]
+                               [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -91,10 +84,6 @@ Options:
                         GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   --no_show             Optional. Do not visualize inference results.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
@@ -122,10 +111,15 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The application uses OpenCV to display gallery searching result and current inference performance.
+The application uses OpenCV to display gallery searching result.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

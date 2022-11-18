@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 import pytest
-from accuracy_checker.config import ConfigError
-from accuracy_checker.metrics import ClassificationAccuracy, MetricsExecutor, PerImageMetricResult
-from accuracy_checker.metrics.metric import Metric
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.config import ConfigError
+from openvino.tools.accuracy_checker.metrics import ClassificationAccuracy, MetricsExecutor, PerImageMetricResult
+from openvino.tools.accuracy_checker.metrics.metric import Metric
+from openvino.tools.accuracy_checker.representation import (
     ClassificationAnnotation,
     ClassificationPrediction,
     ContainerAnnotation,
@@ -31,7 +31,7 @@ from .common import DummyDataset
 
 class TestMetric:
     def setup_method(self):
-        self.module = 'accuracy_checker.metrics.metric_evaluator'
+        self.module = 'openvino.tools.accuracy_checker.metrics.metric_evaluator'
 
     def test_missed_metrics_raises_config_error_exception(self):
         with pytest.raises(ConfigError):

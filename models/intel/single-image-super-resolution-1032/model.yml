@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,35 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
-    size: 82030
-    sha256: e4b8881cce1dd2ce2e14dbda75150d1aba9b5ab54531f82ecb7a2f6413d285d7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    size: 97389
+    checksum: 6ea8df93a2a24d77bdc32d171097909435f6a2234ca62817254256b359978bae688abf302dfccff485f3d38e0022eb33
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
     size: 119436
-    sha256: d09c215077e7a95d15636c79d006039ffaacfaf1889ea07668cbf21120295287
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    checksum: ec5a759c2d43eebf679040638ad765bc6ce5c16253421ddeb8acafd1ab6c8cb406f9f85b274771d9f670efc3d824e926
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
-    size: 81953
-    sha256: fd0b648583d32fcda7892a225c5bcfc6e79628e5cacd711fec18ddf5a2ca6fef
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    size: 109786
+    checksum: 254987bf3b41131a6803314a4a588386f802d7996aefe3fc587d011093e16a549c917d578d9edc36f25ac27eaf87b5fa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
     size: 59762
-    sha256: a52a4549011480d90246bbe6118718ee485c130480bbf5f7befdb3d5a2a1f057
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    checksum: 4cee28140fe9e171c023690dec8376eff8937d7cae39998ebcad317b96268fa8c9e8ec226af088ea45a7664a920a7d92
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
   - name: FP16-INT8/single-image-super-resolution-1032.xml
-    size: 166898
-    sha256: 8dcdcdd114a25eda9ddedf9eb2cd226f47ed4c4f2f6e545d2bb2ff2c49c2de2d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.xml
+    size: 186306
+    checksum: d01f4221624e7b64572fb7a15ad275a5b9bc023efd7b44974fc764c4258150a7922d64f7c789a20a37219bdf9d520b41
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.xml
   - name: FP16-INT8/single-image-super-resolution-1032.bin
-    size: 31042
-    sha256: 7f3b8e47b157810a82b135577d410df9f2d39edc081d9d64fcec644de12a9083
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
+    size: 32034
+    checksum: bb8ce184aa8fdd52f23aff1f7d8dc2f26401980f43590658ed0ce0129563a3d793f56003d16fd9167ff231ced4549fdf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
+input_info:
+  - name: '0'
+    shape: [1, 3, 270, 480]
+    layout: NCHW
+  - name: '1'
+    shape: [1, 3, 1080, 1920]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

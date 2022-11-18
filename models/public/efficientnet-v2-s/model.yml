@@ -1,0 +1,60 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "efficientnet-v2-s" model is a small variant of the EfficientNetV2 pre-trained
+  on ImageNet-21k dataset and fine-tuned on ImageNet-1k for image classification task.
+  EfficientNetV2 is a new family of convolutional networks that have faster training
+  speed and better parameter efficiency than previous models. A combination of training-aware
+  neural architecture search and scaling were used in the development to jointly optimize
+  training speed and parameter efficiency.
+
+  More details provided in the paper <https://arxiv.org/abs/2104.00298> and repository
+  <https://github.com/rwightman/pytorch-image-models>.
+task_type: classification
+files:
+  - name: timm-0.4.12-py3-none-any.whl
+    size: 376973
+    checksum: e5030b792501314113ca804b3b00d35d89c40d0a92d53aa0c41e2a83697d11ef5ea8c73ed1c0bec28c4791047c9dd1b3
+    source: https://files.pythonhosted.org/packages/90/fc/606bc5cf46acac3aa9bd179b3954433c026aaf88ea98d6b19f5d14c336da/timm-0.4.12-py3-none-any.whl
+  - name: tf_efficientnetv2_s_21ft1k-d7dafa41.pth
+    size: 86570281
+    checksum: e873871c7b7018a3d9c340de13077482d2b328a2ef6e583282f3f7ac22171919c9c3b21fddf9dd4806a0571ed8f130a6
+    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-effv2-weights/tf_efficientnetv2_s_21ft1k-d7dafa41.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/efficientnet-v2-s/tf_efficientnetv2_s_21ft1k-d7dafa41.pth
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: timm-0.4.12-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-name=tf_efficientnetv2_s_in21ft1k
+  - --import-module=timm.models.efficientnet
+  - --weights=$dl_dir/tf_efficientnetv2_s_21ft1k-d7dafa41.pth
+  - --input-shape=1,3,384,384
+  - --input-names=input
+  - --output-names=logits
+  - --output-file=$conv_dir/efficientnet-v2-s.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 384, 384]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/efficientnet-v2-s.onnx
+  - --mean_values=input[127.5,127.5,127.5]
+  - --scale_values=input[127.5,127.5,127.5]
+  - --reverse_input_channels
+  - --output=logits
+framework: pytorch
+license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

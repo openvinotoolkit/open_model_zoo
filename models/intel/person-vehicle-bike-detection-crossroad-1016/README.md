@@ -64,5 +64,12 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Crossroad Camera C++ Demo](../../../demos/crossroad_camera_demo/cpp/README.md)
+* [Single Human Pose Estimation Demo](../../../demos/single_human_pose_estimation_demo/python/README.md)
+
 ## Legal information
 [*] Other names and brands may be claimed as the property of others.

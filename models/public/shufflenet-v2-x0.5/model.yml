@@ -1,0 +1,52 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Shufflenet V2 x0.5 is a light-weight classification model based on "channel split"
+  and "channel shuffle" operations. This is Caffe* implementation based on architecture
+  described in paper "ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture
+  Design" <https://arxiv.org/abs/1807.11164>. For details about implementation, check
+  out the repository <https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe>. The
+  model was pre-trained on the ImageNet dataset.
+
+  The model input is a blob that consists of a single image of "1, 3, 224, 224" in
+  "RGB" order.
+
+  The model output is typical object classifier for the 1000 different classifications
+  matching with those in the ImageNet dataset.
+task_type: classification
+files:
+  - name: shufflenet-v2-x0.5.prototxt
+    size: 68502
+    checksum: a22e8fec3f60b313b4853d4beff651dfc856786974f3b888db967ddd1e943e42d7576a50b7bee7e14288498ff8f7155b
+    original_source: https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe/releases/download/v0.1.1/shufflenet_v2_x0.5.prototxt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/shufflenet-v2-x0.5/shufflenet_v2_x0.5.prototxt
+  - name: shufflenet-v2-x0.5.caffemodel
+    size: 5529092
+    checksum: b19fbc18030a80580c9fc1e67626486368b0090c283456e00f4e98cd5cdd66ebf942fec591a465b248b50e18e24d81a9
+    original_source: https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe/releases/download/v0.1.1/shufflenet_v2_x0.5.caffemodel
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/shufflenet-v2-x0.5/shufflenet_v2_x0.5.caffemodel
+input_info:
+  - name: data
+    shape: [1, 3, 224, 224]
+    layout: NCHW
+model_optimizer_args:
+  - --reverse_input_channels
+  - --output=fc
+  - --scale_values=data[255]
+  - --input_model=$dl_dir/shufflenet-v2-x0.5.caffemodel
+  - --input_proto=$dl_dir/shufflenet-v2-x0.5.prototxt
+framework: caffe
+quantizable: true
+license: https://raw.githubusercontent.com/miaow1988/ShuffleNet_V2_pytorch_caffe/master/LICENSE

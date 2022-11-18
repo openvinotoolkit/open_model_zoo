@@ -1,2 +1,6 @@
-openvino_linux: '2021.4.582'
-openvino_windows: '2021.4.582'
+opencv_linux: '20220311_0602-4.5.5_090'
+opencv_windows: '20220311_0602-4.5.5_090'
+openvino_linux: '2022.1.0.643'
+openvino_windows: '2022.1.0.643'
+wheel_linux: '2022.1.0-7019'
+wheel_windows: '2022.1.0-7019'

@@ -1,7 +1,7 @@
 models:
   - name: colorization-siggraph
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           std: 1
@@ -32,5 +32,9 @@ models:
         metrics:
           - type: psnr
             presenter: print_vector
+            reference:
+              mean: 27.73
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.92

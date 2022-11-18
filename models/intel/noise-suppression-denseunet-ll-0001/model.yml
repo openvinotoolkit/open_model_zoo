@@ -1,0 +1,159 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Model to suppress noise and keep speech with low latency (delay<40ms). The model
+  architecture looks like UNet with DenseNet blocks inside. The model is trained on
+  DNS-chalange datasets https://github.com/microsoft/DNS-Challenge/blob/master/README.md.
+task_type: noise_suppression
+files:
+  - name: FP32/noise-suppression-denseunet-ll-0001.xml
+    size: 724747
+    checksum: 07816a72c68db3fc9996d48f55cd9016a9320223f7318c77a37485e0c34380b2b12b919fc596c1bd1d460fb6dfb67b87
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.xml
+  - name: FP32/noise-suppression-denseunet-ll-0001.bin
+    size: 17250892
+    checksum: 9e2038d788acecd0076d31cc0ecfcc75129bff666ab77c8b427eb71a19c4771a24eb35415ff43e4812643028e650be69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.bin
+  - name: FP16/noise-suppression-denseunet-ll-0001.xml
+    size: 831626
+    checksum: 2427145fc6f96f5556b76294615dc44f6b5e47689a99d721025d0b3319650661538f8c23ba929ae8af9b09a6019f0825
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.xml
+  - name: FP16/noise-suppression-denseunet-ll-0001.bin
+    size: 8625568
+    checksum: 356a8628ce4fa90b062628dabb02d6066769cde0825b97eb83e8bd2dcd2ee6b4df28c204d8895cc2033e13a2e7e9de7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
+input_info:
+  - name: input
+    shape: [1, 128]
+    layout: NC
+  - name: inp_state_000
+    shape: [1, 128]
+    layout: NC
+  - name: inp_state_001
+    shape: [1, 2, 129, 2]
+    layout: NCHW
+  - name: inp_state_002
+    shape: [1, 18, 129, 2]
+    layout: NCHW
+  - name: inp_state_003
+    shape: [1, 34, 129, 2]
+    layout: NCHW
+  - name: inp_state_004
+    shape: [1, 50, 129, 2]
+    layout: NCHW
+  - name: inp_state_005
+    shape: [1, 32, 129, 1]
+    layout: NCHW
+  - name: inp_state_006
+    shape: [1, 32, 64, 4]
+    layout: NCHW
+  - name: inp_state_007
+    shape: [1, 48, 64, 4]
+    layout: NCHW
+  - name: inp_state_008
+    shape: [1, 64, 64, 4]
+    layout: NCHW
+  - name: inp_state_009
+    shape: [1, 80, 64, 4]
+    layout: NCHW
+  - name: inp_state_010
+    shape: [1, 64, 64, 1]
+    layout: NCHW
+  - name: inp_state_011
+    shape: [1, 64, 32, 8]
+    layout: NCHW
+  - name: inp_state_012
+    shape: [1, 96, 32, 8]
+    layout: NCHW
+  - name: inp_state_013
+    shape: [1, 128, 32, 8]
+    layout: NCHW
+  - name: inp_state_014
+    shape: [1, 128, 32, 1]
+    layout: NCHW
+  - name: inp_state_015
+    shape: [1, 128, 16, 16]
+    layout: NCHW
+  - name: inp_state_016
+    shape: [1, 192, 16, 16]
+    layout: NCHW
+  - name: inp_state_017
+    shape: [1, 256, 16, 1]
+    layout: NCHW
+  - name: inp_state_018
+    shape: [1, 256, 8, 32]
+    layout: NCHW
+  - name: inp_state_019
+    shape: [1, 384, 8, 32]
+    layout: NCHW
+  - name: inp_state_020
+    shape: [1, 512, 16, 16]
+    layout: NCHW
+  - name: inp_state_021
+    shape: [1, 256, 16, 16]
+    layout: NCHW
+  - name: inp_state_022
+    shape: [1, 384, 16, 16]
+    layout: NCHW
+  - name: inp_state_023
+    shape: [1, 256, 32, 8]
+    layout: NCHW
+  - name: inp_state_024
+    shape: [1, 128, 32, 8]
+    layout: NCHW
+  - name: inp_state_025
+    shape: [1, 192, 32, 8]
+    layout: NCHW
+  - name: inp_state_026
+    shape: [1, 256, 32, 8]
+    layout: NCHW
+  - name: inp_state_027
+    shape: [1, 128, 64, 4]
+    layout: NCHW
+  - name: inp_state_028
+    shape: [1, 64, 64, 4]
+    layout: NCHW
+  - name: inp_state_029
+    shape: [1, 96, 64, 4]
+    layout: NCHW
+  - name: inp_state_030
+    shape: [1, 128, 64, 4]
+    layout: NCHW
+  - name: inp_state_031
+    shape: [1, 160, 64, 4]
+    layout: NCHW
+  - name: inp_state_032
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_033
+    shape: [1, 32, 129, 2]
+    layout: NCHW
+  - name: inp_state_034
+    shape: [1, 48, 129, 2]
+    layout: NCHW
+  - name: inp_state_035
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_036
+    shape: [1, 80, 129, 2]
+    layout: NCHW
+  - name: inp_state_037
+    shape: [1, 2, 129, 2]
+    layout: NCHW
+  - name: inp_state_038
+    shape: [1, 1, 128]
+    layout: NHW
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

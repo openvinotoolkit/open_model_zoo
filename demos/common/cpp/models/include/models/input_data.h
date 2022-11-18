@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,18 @@
 */
 
 #pragma once
-#include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 
 struct InputData {
     virtual ~InputData() {}
 
-    template<class T> T& asRef() {
+    template <class T>
+    T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
-    template<class T> const T& asRef() const {
+    template <class T>
+    const T& asRef() const {
         return dynamic_cast<const T&>(*this);
     }
 };

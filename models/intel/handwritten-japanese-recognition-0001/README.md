@@ -8,7 +8,7 @@ The network is able to recognize Japanese text consisting of characters in the [
 
 ## Example
 
-![](./assets/test.png) -> 菊池朋子
+![](./assets/handwritten-japanese-recognition-0001.png) -> 菊池朋子
 
 ## Specification
 
@@ -43,6 +43,12 @@ Name - `output`, shape - `186, 1, 4442`, format is `W, B, L`, where:
 - `L` - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
 
 The network output can be decoded by CTC Greedy Decoder.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Handwritten Text Recognition Demo](../../../demos/handwritten_text_recognition_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -41,5 +41,11 @@ format: `B, T, Q`
 `T` - number of output timestamps.
 `Q` - number of output quantiles (0.1, 0.5, 0.9).
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Time Series Forecasting Python\* Demo](../../../demos/time_series_forecasting_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

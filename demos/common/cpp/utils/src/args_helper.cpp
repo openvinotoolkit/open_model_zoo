@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -45,15 +45,6 @@ void readInputFilesArguments(std::vector<std::string>& files, const std::string&
         closedir(dp);
     } else {
         files.push_back(arg);
-    }
-
-    if (files.size() < 20) {
-        slog::info << "Files were added: " << files.size() << slog::endl;
-        for (std::string filePath : files) {
-            slog::info << "    " << filePath << slog::endl;
-        }
-    } else {
-        slog::info << "Files were added: " << files.size() << ". Too many to display each of them." << slog::endl;
     }
 }
 
@@ -102,14 +93,14 @@ std::vector<std::string> parseDevices(const std::string& device_string) {
 }
 
 // Format: <device1>:<value1>,<device2>:<value2> or just <value>
-std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
-                                                    const std::string& values_string) {
+std::map<std::string, int32_t> parseValuePerDevice(const std::set<std::string>& devices,
+                                                   const std::string& values_string) {
     auto values_string_upper = values_string;
     std::transform(values_string_upper.begin(),
                    values_string_upper.end(),
                    values_string_upper.begin(),
                    [](unsigned char c){ return std::toupper(c); });
-    std::map<std::string, uint32_t> result;
+    std::map<std::string, int32_t> result;
     auto device_value_strings = split(values_string_upper, ',');
     for (auto& device_value_string : device_value_strings) {
         auto device_value_vec =  split(device_value_string, ':');
@@ -136,4 +127,29 @@ cv::Size stringToSize(const std::string& str) {
         throw std::invalid_argument("Can't convert std::string to cv::Size. The string must contain exactly one x");
     }
     return {std::stoi(strings[0]), std::stoi(strings[1])};
+}
+
+std::map<std::string, ov::Layout> parseLayoutString(const std::string& layout_string) {
+    // Parse parameter string like "input0:NCHW,input1:NC" or "NCHW" (applied to all
+    // inputs)
+    std::map<std::string, ov::Layout> layouts;
+    std::string searchStr = (layout_string.find_last_of(':') == std::string::npos && !layout_string.empty() ?
+        ":" : "") + layout_string;
+    auto colonPos = searchStr.find_last_of(':');
+    while (colonPos != std::string::npos) {
+        auto startPos = searchStr.find_last_of(',');
+        auto inputName = searchStr.substr(startPos + 1, colonPos - startPos - 1);
+        auto inputLayout = searchStr.substr(colonPos + 1);
+        layouts[inputName] = ov::Layout(inputLayout);
+        searchStr = searchStr.substr(0, startPos + 1);
+        if (searchStr.empty() || searchStr.back() != ',') {
+            break;
+        }
+        searchStr.pop_back();
+        colonPos = searchStr.find_last_of(':');
+    }
+    if (!searchStr.empty()) {
+        throw std::invalid_argument("Can't parse input layout string: " + layout_string);
+    }
+    return layouts;
 }

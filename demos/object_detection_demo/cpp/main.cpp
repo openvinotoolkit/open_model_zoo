@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,73 +14,103 @@
 // limitations under the License.
 */
 
+#include <stddef.h>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <exception>
+#include <iomanip>
 #include <iostream>
-#include <vector>
-#include <string>
-#include <numeric>
+#include <iterator>
+#include <limits>
+#include <memory>
 #include <random>
+#include <stdexcept>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
-#include <monitors/presenter.h>
-#include <utils/ocv_common.hpp>
-#include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
-#include <utils/images_capture.h>
-#include <utils/default_flags.hpp>
-#include <utils/performance_metrics.hpp>
-#include <unordered_map>
 #include <gflags/gflags.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <openvino/openvino.hpp>
 
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
+#include <models/detection_model.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
 #include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
+#include <models/detection_model_yolov3_onnx.h>
+#include <models/detection_model_yolox.h>
+#include <models/input_data.h>
+#include <models/model_base.h>
+#include <models/results.h>
+#include <monitors/presenter.h>
+#include <pipelines/async_pipeline.h>
+#include <pipelines/metadata.h>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
+#include <utils/config_factory.h>
+#include <utils/default_flags.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo";
+static const char at_message[] =
+    "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd, yolo, yolov3-onnx or yolox";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
-"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
-"The demo will look for a suitable plugin for a specified device.";
+static const char target_device_message[] =
+    "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+    "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+    "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
+static const char layout_message[] = "Optional. Specify inputs layouts."
+                                     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+static const char input_resizable_message[] =
+    "Optional. Enables resizable input with support of ROI crop & auto resize.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer "
+                                    "requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
-"throughput mode (for HETERO and MULTI device cases use format "
-"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+                                          "throughput mode (for HETERO and MULTI device cases use format "
+                                          "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
+static const char iou_thresh_output_message[] =
+    "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
-static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+static const char output_resolution_message[] =
+    "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 static const char anchors_message[] = "Optional. A comma separated list of anchors. "
-    "By default used default anchors for model. Only for YOLOV4 architecture type.";
+                                      "By default used default anchors for model. Only for YOLOV4 architecture type.";
 static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
-    "By default used default masks for model. Only for YOLOV4 architecture type.";
+                                    "By default used default masks for model. Only for YOLOV4 architecture type.";
+static const char reverse_input_channels_message[] = "Optional. Switch the input channels order from BGR to RGB.";
+static const char mean_values_message[] =
+    "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+                                           "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_string(layout, "", layout_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
@@ -94,10 +124,13 @@ DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 DEFINE_string(anchors, "", anchors_message);
 DEFINE_string(masks, "", masks_message);
+DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
-* \brief This function shows a help message
-*/
+ * \brief This function shows a help message
+ */
 static void showUsage() {
     std::cout << std::endl;
     std::cout << "object_detection_demo [OPTION]" << std::endl;
@@ -109,12 +142,9 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
+    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -127,8 +157,11 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
-    std::cout << "    -anchors                  "      << anchors_message << std::endl;
-    std::cout << "    -masks                    "      << masks_message << std::endl;
+    std::cout << "    -anchors                  " << anchors_message << std::endl;
+    std::cout << "    -masks                    " << masks_message << std::endl;
+    std::cout << "    -reverse_input_channels   " << reverse_input_channels_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }
 
 class ColorPalette {
@@ -149,12 +182,15 @@ private:
         return dh * dh + ds * ds + dv * dv;
     }
 
-    static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
+    static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet,
+                                     const std::vector<cv::Scalar>& colorCandidates) {
         std::vector<double> distances;
         distances.reserve(colorCandidates.size());
         for (auto& c1 : colorCandidates) {
-            auto min = *std::min_element(colorSet.begin(), colorSet.end(),
-                [&c1](const cv::Scalar& a, const cv::Scalar& b) { return distance(c1, a) < distance(c1, b); });
+            auto min =
+                *std::min_element(colorSet.begin(), colorSet.end(), [&c1](const cv::Scalar& a, const cv::Scalar& b) {
+                    return distance(c1, a) < distance(c1, b);
+                });
             distances.push_back(distance(c1, min));
         }
         auto max = std::max_element(distances.begin(), distances.end());
@@ -171,15 +207,16 @@ private:
 public:
     explicit ColorPalette(size_t n) {
         palette.reserve(n);
-        std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1. });
+        std::vector<cv::Scalar> hsvColors(1, {1., 1., 1.});
         std::vector<cv::Scalar> colorCandidates;
         size_t numCandidates = 100;
 
         hsvColors.reserve(n);
         colorCandidates.resize(numCandidates);
         for (size_t i = 1; i < n; ++i) {
-            std::generate(colorCandidates.begin(), colorCandidates.end(),
-                []() { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
+            std::generate(colorCandidates.begin(), colorCandidates.end(), []() {
+                return cv::Scalar{getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0)};
+            });
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
         }
 
@@ -193,12 +230,12 @@ public:
         }
     }
 
-    const cv::Scalar& operator[] (size_t index) const {
+    const cv::Scalar& operator[](size_t index) const {
         return palette[index % palette.size()];
     }
 };
 
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
@@ -206,7 +243,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -240,28 +276,28 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+        slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto& obj : result.objects) {
         if (FLAGS_r) {
-            slog::info << " "
-                << std::left << std::setw(9) << obj.label << " | "
-                << std::setw(10) << obj.confidence << " | "
-                << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
-                << slog::endl;
+            slog::debug << " " << std::left << std::setw(9) << obj.label << " | " << std::setw(10) << obj.confidence
+                        << " | " << std::setw(4) << int(obj.x) << " | " << std::setw(4) << int(obj.y) << " | "
+                        << std::setw(4) << int(obj.x + obj.width) << " | " << std::setw(4) << int(obj.y + obj.height)
+                        << slog::endl;
         }
         outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
-        auto color = palette[obj.labelID];
-        cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
-        cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, color);
+        const auto& color = palette[obj.labelID];
+        putHighlightedText(outputImg,
+                           obj.label + conf.str(),
+                           cv::Point2f(obj.x, obj.y - 5),
+                           cv::FONT_HERSHEY_COMPLEX_SMALL,
+                           1,
+                           color,
+                           2);
         cv::rectangle(outputImg, obj, color, 2);
     }
 
@@ -270,18 +306,14 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
             outputTransform.scaleCoord(lmark);
             cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
-    }
-    catch (const std::bad_cast&) {}
+    } catch (const std::bad_cast&) {}
 
     return outputImg;
 }
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     try {
         PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -297,22 +329,16 @@ int main(int argc, char *argv[]) {
             for (auto& str : strAnchors) {
                 anchors.push_back(std::stof(str));
             }
-        } catch(...) {
-            throw std::runtime_error("Invalid anchors list is provided.");
-        }
+        } catch (...) { throw std::runtime_error("Invalid anchors list is provided."); }
 
         try {
             for (auto& str : strMasks) {
                 masks.push_back(std::stoll(str));
             }
-        }
-        catch (...) {
-            throw std::runtime_error("Invalid masks list is provided.");
-        }
+        } catch (...) { throw std::runtime_error("Invalid masks list is provided."); }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_nireq == 1 ? read_type::efficient : read_type::safe);
         cv::Mat curr_frame;
 
         //------------------------------ Running Detection routines ----------------------------------------------
@@ -323,33 +349,60 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
-        }
-        else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
-        }
-        else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
-        }
-        else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
-        }
-        else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
-        }
-        else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
-        }
-        else {
+            model.reset(new ModelCenterNet(FLAGS_m, static_cast<float>(FLAGS_t), labels, FLAGS_layout));
+        } else if (FLAGS_at == "faceboxes") {
+            model.reset(new ModelFaceBoxes(FLAGS_m,
+                                           static_cast<float>(FLAGS_t),
+                                           FLAGS_auto_resize,
+                                           static_cast<float>(FLAGS_iou_t),
+                                           FLAGS_layout));
+        } else if (FLAGS_at == "retinaface") {
+            model.reset(new ModelRetinaFace(FLAGS_m,
+                                            static_cast<float>(FLAGS_t),
+                                            FLAGS_auto_resize,
+                                            static_cast<float>(FLAGS_iou_t),
+                                            FLAGS_layout));
+        } else if (FLAGS_at == "retinaface-pytorch") {
+            model.reset(new ModelRetinaFacePT(FLAGS_m,
+                                              static_cast<float>(FLAGS_t),
+                                              FLAGS_auto_resize,
+                                              static_cast<float>(FLAGS_iou_t),
+                                              FLAGS_layout));
+        } else if (FLAGS_at == "ssd") {
+            model.reset(new ModelSSD(FLAGS_m, static_cast<float>(FLAGS_t), FLAGS_auto_resize, labels, FLAGS_layout));
+        } else if (FLAGS_at == "yolo") {
+            model.reset(new ModelYolo(FLAGS_m,
+                                      static_cast<float>(FLAGS_t),
+                                      FLAGS_auto_resize,
+                                      FLAGS_yolo_af,
+                                      static_cast<float>(FLAGS_iou_t),
+                                      labels,
+                                      anchors,
+                                      masks,
+                                      FLAGS_layout));
+        } else if (FLAGS_at == "yolov3-onnx") {
+            model.reset(new ModelYoloV3ONNX(FLAGS_m,
+                                            static_cast<float>(FLAGS_t),
+                                            labels,
+                                            FLAGS_layout));
+        } else if (FLAGS_at == "yolox") {
+            model.reset(new ModelYoloX(FLAGS_m,
+                                       static_cast<float>(FLAGS_t),
+                                       static_cast<float>(FLAGS_iou_t),
+                                       labels,
+                                       FLAGS_layout));
+        } else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
+        model->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
+        slog::info << ov::get_openvino_version() << slog::endl;
 
-        InferenceEngine::Core core;
+        ov::Core core;
 
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+                               ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+                               core);
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
@@ -357,7 +410,7 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
 
-        cv::VideoWriter videoWriter;
+        LazyVideoWriter videoWriter{FLAGS_o, cap->fps(), FLAGS_limit};
 
         PerformanceMetrics renderMetrics;
 
@@ -373,16 +426,12 @@ int main(int argc, char *argv[]) {
                 curr_frame = cap->read();
 
                 if (curr_frame.empty()) {
-                    if (frameNum == -1) {
-                        throw std::logic_error("Can't read an image from the input");
-                    } else {
-                        // Input stream is over
-                        break;
-                    }
+                    // Input stream is over
+                    break;
                 }
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
             if (frameNum == 0) {
@@ -391,22 +440,14 @@ int main(int argc, char *argv[]) {
                 } else {
                     outputResolution = cv::Size{
                         std::stoi(FLAGS_output_resolution.substr(0, found)),
-                        std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
-                    };
+                        std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))};
                     outputTransform = OutputTransform(curr_frame.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
                 }
             }
 
-            // Preparing video writer if needed
-            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    cap->fps(), outputResolution)) {
-                    throw std::runtime_error("Can't open video writer");
-                }
-            }
-
-            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them
+            // are available.
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
@@ -420,11 +461,12 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(outFrame);
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                               outFrame,
+                               {10, 22},
+                               cv::FONT_HERSHEY_COMPLEX,
+                               0.65);
 
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                videoWriter.write(outFrame);
                 framesProcessed++;
 
                 if (!FLAGS_no_show) {
@@ -438,25 +480,25 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-        } // while(keepRunning)
+        }  // while(keepRunning)
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
         for (; framesProcessed <= frameNum; framesProcessed++) {
             result = pipeline.getResult();
-            if (result != nullptr)
-            {
+            if (result != nullptr) {
                 auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                               outFrame,
+                               {10, 22},
+                               cv::FONT_HERSHEY_COMPLEX,
+                               0.65);
+                videoWriter.write(outFrame);
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Updating output window
@@ -465,32 +507,21 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
-        metrics.printTotal();
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
-
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        logLatencyPerStage(cap->getMetrics().getTotal().latency,
+                           pipeline.getPreprocessMetrics().getTotal().latency,
+                           pipeline.getInferenceMetircs().getTotal().latency,
+                           pipeline.getPostprocessMetrics().getTotal().latency,
+                           renderMetrics.getTotal().latency);
         slog::info << presenter.reportMeans() << slog::endl;
-    }
-    catch (const std::exception& error) {
+    } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
         return 1;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

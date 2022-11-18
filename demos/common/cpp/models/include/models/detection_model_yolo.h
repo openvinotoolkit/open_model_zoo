@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,22 @@
 */
 
 #pragma once
-#include "ngraph/op/region_yolo.hpp"
-#include "detection_model.h"
+#include <stddef.h>
+#include <stdint.h>
+
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <openvino/op/region_yolo.hpp>
+#include <openvino/openvino.hpp>
+
+#include "models/detection_model.h"
+
+struct DetectedObject;
+struct InferenceResult;
+struct ResultBase;
 
 class ModelYolo : public DetectionModel {
 protected:
@@ -29,23 +43,23 @@ protected:
         size_t outputWidth = 0;
         size_t outputHeight = 0;
 
-        Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
-        Region(size_t classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, size_t outputWidth, size_t outputHeight);
+        Region(const std::shared_ptr<ov::op::v0::RegionYolo>& regionYolo);
+        Region(size_t classes,
+               int coords,
+               const std::vector<float>& anchors,
+               const std::vector<int64_t>& masks,
+               size_t outputWidth,
+               size_t outputHeight);
     };
 
 public:
-    enum YoloVersion {
-        YOLO_V1V2,
-        YOLO_V3,
-        YOLO_V4,
-        YOLO_V4_TINY
-    };
+    enum YoloVersion { YOLO_V1V2, YOLO_V3, YOLO_V4, YOLO_V4_TINY, YOLOF };
 
     /// Constructor.
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
-    /// @param useAutoResize - if true, image will be resized by IE.
+    /// @param useAutoResize - if true, image will be resized by openvino.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param useAdvancedPostprocessing - if true, an advanced algorithm for filtering/postprocessing will be used
     /// (with better processing of multiple crossing objects). Otherwise, classic algorithm will be used.
@@ -55,18 +69,29 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     /// @param anchors - vector of anchors coordinates. Required for YOLOv4, for other versions it may be omitted.
     /// @param masks - vector of masks values. Required for YOLOv4, for other versions it may be omitted.
-    ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
-        const std::vector<float>& anchors = std::vector<float>(), const std::vector<int64_t>& masks = std::vector<int64_t>());
+    /// @param layout - model input layout
+    ModelYolo(const std::string& modelFileName,
+              float confidenceThreshold,
+              bool useAutoResize,
+              bool useAdvancedPostprocessing = true,
+              float boxIOUThreshold = 0.5,
+              const std::vector<std::string>& labels = std::vector<std::string>(),
+              const std::vector<float>& anchors = std::vector<float>(),
+              const std::vector<int64_t>& masks = std::vector<int64_t>(),
+              const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 
-    void parseYOLOOutput(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
-        const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
-        const unsigned long original_im_w, std::vector<DetectedObject>& objects);
+    void parseYOLOOutput(const std::string& output_name,
+                         const ov::Tensor& tensor,
+                         const unsigned long resized_im_h,
+                         const unsigned long resized_im_w,
+                         const unsigned long original_im_h,
+                         const unsigned long original_im_w,
+                         std::vector<DetectedObject>& objects);
 
     static int calculateEntryIndex(int entriesNum, int lcoords, size_t lclasses, int location, int entry);
     static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
@@ -74,7 +99,9 @@ protected:
     std::map<std::string, Region> regions;
     double boxIOUThreshold;
     bool useAdvancedPostprocessing;
+    bool isObjConf = 1;
     YoloVersion yoloVersion;
     const std::vector<float> presetAnchors;
     const std::vector<int64_t> presetMasks;
+    ov::Layout yoloRegionLayout = "NCHW";
 };

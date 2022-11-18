@@ -37,11 +37,21 @@ models:
             mean: (0.485, 0.456, 0.406)
             std: (0.229, 0.224, 0.225)
 
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.719
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.903
+
   - name: mobilenet-v2-pytorch
 
     # list of launchers for MobileNetV2.
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: classification
 
     datasets:
@@ -62,3 +72,13 @@ models:
 
           # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
           - type: rgb_to_bgr
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.719
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.903

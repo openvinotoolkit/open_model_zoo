@@ -61,5 +61,11 @@ An embedding image, name: `0`, shape: `1, 16, 512` in the format `B, T, C`, wher
 
 The model outputs a tensor with the shape `1, 400`, each row is a logits vector of performed actions.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Action Recognition Python\* Demo](../../../demos/action_recognition_demo/python/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

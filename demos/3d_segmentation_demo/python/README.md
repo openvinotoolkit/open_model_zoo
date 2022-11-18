@@ -4,32 +4,26 @@ This topic demonstrates how to run the 3D Segmentation Demo, which segments 3D i
 
 ## How It Works
 
-On startup, the demo reads command-line parameters and loads a network and images to the Inference Engine plugin.
+On startup, the demo reads command-line parameters and loads a model and images to OpenVINO™ Runtime plugin.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
-The demo dependencies should be installed before run. That can be achieved with the following command:
-
-```sh
-python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
-```
-
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/3d_segmentation_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -45,11 +39,10 @@ Run the application with the `-h` or `--help` option to see the usage message:
 
 ```
 usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
-                               PATH_TO_OUTPUT [-d TARGET_DEVICE]
-                               [-l PATH_TO_EXTENSION] [-nii]
+                               PATH_TO_OUTPUT [-d TARGET_DEVICE] [-nii]
                                [-nthreads NUMBER_THREADS]
-                               [-s [SHAPE [SHAPE ...]]]
-                               [-c PATH_TO_CLDNN_CONFIG]
+                               [-s [SHAPE [SHAPE ...]]] [-ms N1,N2,N3,N4]
+                               [--full_intensities_range]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -65,18 +58,12 @@ Options:
                         Optional. Specify a target device to infer on: CPU, GPU.
                         Use "-d HETERO:<comma separated devices list>" format
                         to specify HETERO plugin.
-  -l PATH_TO_EXTENSION, --path_to_extension PATH_TO_EXTENSION
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementations.
   -nii, --output_nifti  Show output inference results as raw values
   -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases).
   -s [SHAPE [SHAPE ...]], --shape [SHAPE [SHAPE ...]]
                         Optional. Specify shape for a network
-  -c PATH_TO_CLDNN_CONFIG, --path_to_cldnn_config PATH_TO_CLDNN_CONFIG
-                        Required for GPU custom kernels. Absolute path to an
-                        .xml file with the kernels description.
   -ms N1,N2,N3,N4, --mri_sequence N1,N2,N3,N4
                         Optional. Transfer MRI-sequence from dataset order to the network order.
   --full_intensities_range
@@ -116,9 +103,12 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/bra
 ## Demo Output
 
 The demo outputs a multipage TIFF image and a NIFTI archive.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

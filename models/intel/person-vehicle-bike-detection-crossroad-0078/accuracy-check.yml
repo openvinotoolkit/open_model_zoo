@@ -2,7 +2,7 @@ models:
   - name: person-vehicle-bike-detection-crossroad-0078
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: ssd
 
     datasets:
@@ -32,3 +32,8 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: False
+            reference:
+              mean: 0.6512
+              non-vehicle: 0.4414
+              person: 0.7747
+              vehicle: 0.7494

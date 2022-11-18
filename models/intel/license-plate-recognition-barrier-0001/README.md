@@ -46,7 +46,7 @@ thoroughly. Other types of license plates may underperform.
 
 ## Outputs
 
-Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
+Encoded vector of floats, name: `dec`, shape: `1, 88, 1, 1`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0
@@ -119,6 +119,12 @@ is an integer number encoding a character according to this dictionary:
         67 X
         68 Y
         69 Z
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Security Barrier Camera C++ Demo](../../../demos/security_barrier_camera_demo/cpp/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

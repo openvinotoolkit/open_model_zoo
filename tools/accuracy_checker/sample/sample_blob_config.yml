@@ -3,9 +3,9 @@ models:
 
     # list of launchers for your topology.
     launchers:
-      # launcher framework (e.g. caffe, dlsdk)
-      - framework: dlsdk
-        # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
+      # launcher framework (e.g. caffe, openvino)
+      - framework: openvino
+        # device for infer (e.g. for openvino cpu, gpu, hetero:cpu,gpu ...)
         # Note: not all devices support blob execution, it is the reason why for sample we will use myriad.
         device: MYRIAD
         # exported executable network blob

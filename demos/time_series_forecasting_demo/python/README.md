@@ -6,31 +6,25 @@ This README describes the Time Series Forecasting demo application.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin.
 
 The program provides an interactive CLI interface that gets a test dataset in .pickle format as input and draws predicted quantiles and ground truth curves.
 
 ## Preparing to Run
 
-Install required dependencies with command:
-
-```sh
-pip install -r requirements.txt
-```
-
 The list of models supported by the demo is in `<omz_dir>/demos/whiteboard_inpainting_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -47,7 +41,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 The demo works with the test dataset in the .pickle format provided by accuracy_checker.
 
-* Install accuracy_checker following to the [instruction](../../../tools/accuracy_checker/README.md).
+* Install accuracy_checker following the [instruction](../../../tools/accuracy_checker/README.md).
 * Convert test dataset:
 
 ```sh
@@ -92,5 +86,5 @@ The application draws predicted quantiles and ground truth curves.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

@@ -2,7 +2,7 @@ models:
   - name: license-plate-recognition-barrier-0001
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: lpr
         inputs:
           - name: seq_ind
@@ -14,3 +14,4 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+            reference: 0.8858

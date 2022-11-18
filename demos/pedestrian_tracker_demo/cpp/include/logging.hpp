@@ -6,11 +6,10 @@
 
 #include <details/ie_exception.hpp>
 
-#define PT_CHECK(cond) IE_ASSERT(cond) << " "
+#define PT_CHECK(cond) CV_Assert(cond);
 
 #define PT_CHECK_BINARY(actual, expected, op) \
-    IE_ASSERT(actual op expected) << ". " \
-        << actual << " vs " << expected << ".  "
+    CV_Assert(actual op expected);
 
 #define PT_CHECK_EQ(actual, expected) PT_CHECK_BINARY(actual, expected, ==)
 #define PT_CHECK_NE(actual, expected) PT_CHECK_BINARY(actual, expected, !=)

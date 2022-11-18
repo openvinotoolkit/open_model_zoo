@@ -14,7 +14,7 @@ prior boxes for 512x512 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.328 (internal test set)                 |
+| AP @ [ IoU=0.50:0.95 ]          | 0.322 (internal test set)                 |
 | GFlops                          | 3.143                                     |
 | MParams                         | 1.817                                     |
 | Source framework                | PyTorch\*                                 |
@@ -25,7 +25,7 @@ curve.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 512, 512` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -47,7 +47,16 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 
 ## Training Pipeline
 
-The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/person-detection/readme.md), allowing to fine-tune the model on custom dataset.
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/misc/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/misc/models/object_detection/model_templates/person-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+* [Social Distance C++ Demo](../../../demos/social_distance_demo/cpp/README.md)
 
 ## Legal Information
 

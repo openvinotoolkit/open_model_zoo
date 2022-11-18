@@ -31,6 +31,8 @@ For details on this model, see [repository](https://github.com/mozilla/DeepSpeec
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
 Increasing beam_width improves WER metric and slows down decoding. Speech Recognition DeepSpeech Demo has a faster C++ CTC decoder module.
 
+Use `accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>` to specify the path to additional model attributes. `path_to_folder_with_downloaded_model` is a path to the folder, where the current model is downloaded by [Model Downloader](../../../tools/model_tools/README.md) tool.
+
 ## Input
 
 ### Original Model
@@ -42,7 +44,7 @@ Increasing beam_width improves WER metric and slows down decoding. Speech Recogn
     - `T` - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - `C` - 26 MFCC coefficients per each frame
 
-    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
+    See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
  2. Number of audio frames, INT32 value, name: `input_lengths`, shape `1`.
 
@@ -62,11 +64,11 @@ Chunk processing order must be from early to late audio positions.
     - `T` - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - `C` - 26 MFCC coefficients in each frame
 
-    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
+    See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
- 2. LSTM in-state vector, name: `previous_state_c`, shape: `1, 2048`, format: `B, C`.
+ 2. LSTM in-state vector, name: `previous_state_c:0`, shape: `1, 2048`, format: `B, C`.
 
- 3. LSTM input vector, name: `previous_state_h`, shape: `1, 2048`, format: `B, C`.
+ 3. LSTM input vector, name: `previous_state_h:0`, shape: `1, 2048`, format: `B, C`.
 
 When splitting a long audio into chunks, these two last inputs must be fed with the corresponding outputs from the previous chunk.
 Chunk processing order must be from early to late audio positions.
@@ -103,26 +105,32 @@ Chunk processing order must be from early to late audio positions.
 
     *NB*: `logits` is probabilities after softmax, despite its name.
 
- 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 2. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd'` (for `new_state_c`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
- 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
+ 3. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1` (for `new_state_h`), shape: `1, 2048`, format: `B, C`. See Inputs.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Speech Recognition DeepSpeech Python\* Demo](../../../demos/speech_recognition_deepspeech_demo/python/README.md)
 
 ## Legal Information
 
 The original model is distributed under the
 [Mozilla Public License, Version 2.0](https://raw.githubusercontent.com/mozilla/DeepSpeech/master/LICENSE).
-A copy of the license is provided in [MPL-2.0-Mozilla-Deepspeech.txt](../licenses/MPL-2.0-Mozilla-Deepspeech.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/MPL-2.0-Mozilla-Deepspeech.txt`.

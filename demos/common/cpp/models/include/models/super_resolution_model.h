@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,20 +15,35 @@
 */
 
 #pragma once
+#include <memory>
+#include <string>
 
-#include "image_model.h"
+#include <opencv2/core/types.hpp>
+
+#include "models/image_model.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize);
+    /// @param layout - model input layout
+    SuperResolutionModel(const std::string& modelFileName,
+                         const cv::Size& inputImgSize,
+                         const std::string& layout = "");
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork, int coeff);
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void changeInputSize(std::shared_ptr<ov::Model>& model, int coeff);
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 };

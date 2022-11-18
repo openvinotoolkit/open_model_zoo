@@ -17,7 +17,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 | Metric   | Value |
 | -------- | ----- |
-| mean_iou | 66.85%|
+| mean_iou | 68.41%|
 
 ## Input
 
@@ -34,12 +34,12 @@ Expected color order: `RGB`.
 
 ### Converted Model
 
-Image, name: `mul_1/placeholder_port_1`, shape: `1, 3, 513, 513`, format: `B, C, H, W`, where:
+Image, name: `mul_1/placeholder_port_1`, shape: `1, 513, 513, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order: `BGR`.
 
@@ -61,22 +61,29 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 - `H` - image height
 - `W` - image width
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
 
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-TF-Models.txt`.

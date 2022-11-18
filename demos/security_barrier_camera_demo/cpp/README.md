@@ -34,24 +34,24 @@ The pipeline of this demo executes the following sequence of `Task`s:
 
 At the end of the sequence, the `VideoFrame` is destroyed and the sequence starts again for the next frame.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/security_barrier_camera_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -70,9 +70,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-[ INFO ] InferenceEngine: <version>
-
-interactive_vehicle_detection [OPTION]
+security_barrier_camera_demo [OPTION]
 Options:
 
     -h                         Print a usage message.
@@ -80,13 +78,9 @@ Options:
     -m "<path>"                Required. Path to the Vehicle and License Plate Detection model .xml file.
     -m_va "<path>"             Optional. Path to the Vehicle Attributes model .xml file.
     -m_lpr "<path>"            Optional. Path to the License Plate Recognition model .xml file.
-      -l "<absolute_path>"     Required for CPU custom layers. Absolute path to a shared library with the kernels implementation.
-          Or
-      -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
     -d "<device>"              Optional. Specify the target device for Vehicle Detection (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_va "<device>"           Optional. Specify the target device for Vehicle Attributes (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_lpr "<device>"          Optional. Specify the target device for License Plate Recognition (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -pc                        Optional. Enables per-layer performance statistics.
     -r                         Optional. Output inference results as raw values.
     -t                         Optional. Probability threshold for vehicle and license plate detections.
     -no_show                   Optional. Don't show output.
@@ -131,7 +125,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
 ```
 
-> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
+> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/runtime/3rdparty/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
@@ -146,10 +140,15 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

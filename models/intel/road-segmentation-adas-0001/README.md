@@ -24,11 +24,11 @@ that was converted for four class classification task are:
 
 | Label    |       IOU |       ACC |
 |----------|-----------|-----------|
-| **mean** | **0.844** | **0.901** |
+| **mean** | **0.844** | **0.899** |
 | BG       |     0.986 |     0.994 |
 | road     |     0.954 |     0.974 |
-| curbs    |     0.727 |     0.831 |
-| marks    |     0.708 |     0.806 |
+| curbs    |     0.727 |     0.825 |
+| marks    |     0.707 |     0.803 |
 
 - `IOU=TP/(TP+FN+FP)`
 - `ACC=TP/GT`
@@ -49,6 +49,13 @@ A blob with a `BGR` image and the shape `1, 3, 512, 896` in the format `B, C, H,
 ## Outputs
 
 The output is a blob with the shape `1, 4, 512, 896` in the format `B, C, H, W`. It can be treated as a four-channel feature map, where each channel is a probability of one of the classes: BG, road, curb, mark.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Image Segmentation C++ Demo](../../../demos/segmentation_demo/cpp/README.md)
+* [Image Segmentation Python\* Demo](../../../demos/segmentation_demo/python/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

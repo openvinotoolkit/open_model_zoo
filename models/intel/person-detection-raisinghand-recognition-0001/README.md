@@ -27,7 +27,7 @@ curve.
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 400, 680` in the format `B, C, H, W`, where:
+Image, name: `data`, shape: `1, 3, 400, 680` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -43,16 +43,23 @@ The net outputs four branches:
 1. name: `mbox_loc1/out/conv/flat`, shape: `b, num_priors*4` - Box coordinates in SSD format
 2. name: `mbox_main_conf/out/conv/flat/softmax/flat`, shape: `b, num_priors*2` - Detection confidences
 3. name: `mbox/priorbox`, shape: `1, 2, num_priors*4` - Prior boxes in SSD format
-4. name: `out/anchor1`, shape: `b, 2, h, w` - Action confidences
-5. name: `out/anchor2`, shape: `b, 2, h, w` - Action confidences
-6. name: `out/anchor3`, shape: `b, 2, h, w` - Action confidences
-7. name: `out/anchor4`, shape: `b, 2, h, w` - Action confidences
+4. name: `out/anchor1`, shape: `b, h, w, 2` - Action confidences
+5. name: `out/anchor2`, shape: `b, h, w, 2` - Action confidences
+6. name: `out/anchor3`, shape: `b, h, w, 2` - Action confidences
+7. name: `out/anchor4`, shape: `b, h, w, 2` - Action confidences
 
 Where:
 
 - `b` - batch size
 - `num_priors` -  number of priors in SSD format (equal to 25x43x4=4300)
 - `h, w` - height and width of the output feature map (h=25, w=43)
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
+* [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

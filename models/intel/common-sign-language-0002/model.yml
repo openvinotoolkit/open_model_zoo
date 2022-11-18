@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,32 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/common-sign-language-0002.xml
-    size: 255979
-    sha256: 59b6cc570f443e091de2587d01685a80a8dd858e28acce58b88e77cff6fc06c5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.xml
+    size: 216302
+    checksum: 7b73ff93b2490b550dc23ab41c53259a55f203e91ddbbe683764727f197c637255fb88b2a654e186ae54d7954a7eb143
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.xml
   - name: FP32/common-sign-language-0002.bin
-    size: 16425108
-    sha256: cbf73a4596ece3cb6fcbdbfbe4ae119c59b3e072d82a6f9618238753400e038c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.bin
+    size: 16425088
+    checksum: e806e2f57892df99591f632197357ac6853613836d771a19351731bac2ba56d53ac669f2dda43953d621d4191e811561
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.bin
   - name: FP16/common-sign-language-0002.xml
-    size: 255847
-    sha256: a38d6d81cab7c77e25f822fcca04fcef6ba19e5c05cb27ada5993e593f81a852
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.xml
+    size: 292605
+    checksum: 9914f0f548fb10aef70196883341c7b2558a31abb7a7b045fb3f2a2cc84d190afbea5ce85865bebb9abc4099c6930136
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.xml
   - name: FP16/common-sign-language-0002.bin
-    size: 8212566
-    sha256: b28b6bf1151f1d9feea91a221f93a2adf494c727bf53a288c53ceed58ca653ba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.bin
+    size: 8212556
+    checksum: e3f8c92071ae43daf8a370512515d768d17b808f6c230dbb8193cb735799817532b8cdb637320ae5f8f92e34114a2a70
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.bin
   - name: FP16-INT8/common-sign-language-0002.xml
-    size: 597327
-    sha256: 60904c7c70c0d19447341ac2a48289fc197532f17f124248824c58f66632bc8e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.xml
+    size: 595031
+    checksum: e60324db2d3dfa211ec9ffaf9744372eeacf473795c7c4e387a5e136678cabb3fe7d14ed9f1e3f37f01ea670ce28387e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.xml
   - name: FP16-INT8/common-sign-language-0002.bin
-    size: 4214796
-    sha256: 6e15a39dec872fc33ae6b1d080dfc4f41801074cfe486e2ce8c00876e8f9676c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.bin
+    size: 4293740
+    checksum: 532fc1099ea731ef10cac1cd64f0298b302197b199b63e6495ac2c6e55be04ea119dedfd0ad1b6ebdd5cced2001c4c15
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.bin
+input_info:
+  - name: input
+    shape: [1, 3, 8, 224, 224]
+    layout: NCDHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

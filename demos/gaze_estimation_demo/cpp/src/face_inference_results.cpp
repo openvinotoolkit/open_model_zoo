@@ -7,25 +7,44 @@
 
 namespace gaze_estimation {
 
-std::ostream& operator<<(std::ostream& os, const FaceInferenceResults& faceInferenceResults) {
-    os << "--Inference results--" << std::endl;
+slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults) {
+    os << "--Inference results--" << slog::endl;
 
-    os << "Face detection confidence: " << faceInferenceResults.faceDetectionConfidence << std::endl;
-    os << "Face bounding box: " << faceInferenceResults.faceBoundingBox << std::endl;
+    os << "Face detection confidence: " << faceInferenceResults.faceDetectionConfidence << slog::endl;
+    os << "Face bounding box: " << faceInferenceResults.faceBoundingBox << slog::endl;
 
-    os << "Facial landmarks: " << std::endl;
+    os << "Facial landmarks: " << slog::endl;
     int lmCounter = 0;
     for (auto const& lm : faceInferenceResults.faceLandmarks) {
-        os << "\t landmark #" << lmCounter << ": " << lm << std::endl;
+        os << "\tlandmark #" << lmCounter << ": " << lm << slog::endl;
         ++lmCounter;
     }
 
-    os << "Head pose angles (yaw, pitch, roll): " << faceInferenceResults.headPoseAngles << std::endl;
-    os << "Gaze vector (x, y, z): " << faceInferenceResults.gazeVector << std::endl;
+    os << "Head pose angles (yaw, pitch, roll): " << faceInferenceResults.headPoseAngles << slog::endl;
+    os << "Gaze vector (x, y, z): " << faceInferenceResults.gazeVector << slog::endl;
 
-    os << "--End of inference results--" << std::endl;
+    os << "--End of inference results--" << slog::endl;
 
     return os;
 }
 
+std::vector<cv::Point2f> FaceInferenceResults::getEyeLandmarks() {
+    std::vector<cv::Point2f> result(4);
+    if (faceLandmarks.size() == 35) {
+        result[0] = faceLandmarks[0];
+        result[1] = faceLandmarks[1];
+        result[2] = faceLandmarks[2];
+        result[3] = faceLandmarks[3];
+    }
+    else if (faceLandmarks.size() == 98) {
+        result[0] = faceLandmarks[60];
+        result[1] = faceLandmarks[64];
+        result[2] = faceLandmarks[68];
+        result[3] = faceLandmarks[72];
+    }
+    else {
+        throw std::runtime_error("the network must output 35 or 98 points");
+    }
+    return result;
+}
 }  // namespace gaze_estimation

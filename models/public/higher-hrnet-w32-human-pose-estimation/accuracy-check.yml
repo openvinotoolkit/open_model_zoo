@@ -2,7 +2,7 @@ models:
   - name: higher-hrnet-w32-human-pose-estimation
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_hrnet
@@ -26,3 +26,4 @@ models:
         metrics:
           - name: AP
             type: coco_orig_keypoints_precision
+            reference: 0.6464

@@ -20,10 +20,12 @@ models:
         metrics:
           - type: salience_f-measure
             presenter: print_vector
+            reference:
+              f-measure: 0.8421
 
   - name: f3net
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter: salient_object_detection
     datasets:
       - name: PASCAL-S
@@ -37,3 +39,5 @@ models:
         metrics:
           - type: salience_f-measure
             presenter: print_vector
+            reference:
+              f-measure: 0.8421

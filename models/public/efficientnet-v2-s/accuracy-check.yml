@@ -1,0 +1,69 @@
+models:
+  - name: efficientnet-v2-s-onnx
+
+    launchers:
+      - framework: onnx_runtime
+        model: efficientnet-v2-s.onnx
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 384
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 384
+
+          - type: normalization
+            mean: [127.5, 127.5, 127.5]
+            std: [127.5, 127.5, 127.5]
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.84286
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.97256
+
+  - name: efficientnet-v2-s
+
+    launchers:
+      - framework: openvino
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: rgb_to_bgr
+
+          - type: resize
+            size: 384
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 384
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.84286
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.97256

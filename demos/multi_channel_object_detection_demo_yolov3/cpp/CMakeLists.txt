@@ -33,4 +33,4 @@ add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph monitors multi_channel_common)
+    openvino::runtime gflags ${OpenCV_LIBRARIES} monitors multi_channel_common)

@@ -1,10 +1,16 @@
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <opencv2/core/core.hpp>
+#include <vector>
+
+#include <opencv2/core.hpp>
+
+namespace slog {
+class LogStream;
+}  // namespace slog
 
 namespace gaze_estimation {
 struct FaceInferenceResults {
@@ -23,6 +29,6 @@ struct FaceInferenceResults {
 
     cv::Point3f gazeVector;
 
-    friend std::ostream& operator<<(std::ostream& os, const FaceInferenceResults& faceInferenceResults);
+    friend slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& faceInferenceResults);
 };
 }  // namespace gaze_estimation

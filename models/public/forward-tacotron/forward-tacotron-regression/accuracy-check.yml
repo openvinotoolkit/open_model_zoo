@@ -1,7 +1,7 @@
 models:
   - name: forward-tacotron-regression
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: multi_output_regression
           outputs:
@@ -15,3 +15,6 @@ models:
         metrics:
           - type: mae
             presenter: print_vector
+            reference:
+              mel@mean: 1.134815
+              mel@std: 0.048853

@@ -1,7 +1,7 @@
 models:
   - name: bert-large-uncased-whole-word-masking-squad-emb-0001
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         allow_reshape_input: True
         adapter:
           type: bert_question_answering_embedding
@@ -33,3 +33,4 @@ models:
           - name: 'top_5_acc'
             type: 'qa_embedding_accuracy'
             top_k: 5
+            reference: 0.905

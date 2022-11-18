@@ -1,0 +1,62 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "swin-tiny-patch4-window7-224" model is a "tiny" version of the Swin Transformer
+  image classification models pre-trained on ImageNet dataset. Swin Transformer is
+  Hierarchical Vision Transformer whose representation is computed with shifted windows.
+  Each patch is treated as a token with size of 4 and its feature is set as a concatenation
+  of the raw pixel RGB values. The model has 7 patches in each window. Stages of tiny
+  version of model have 2, 2, 6, 2 layers respectively. Number of channels of the
+  hidden layers in the first stage for tiny variant is 96.
+
+  More details provided in the paper <https://arxiv.org/pdf/2103.14030.pdf> and repository
+  <https://github.com/rwightman/pytorch-image-models>.
+task_type: classification
+files:
+  - name: timm-0.4.12-py3-none-any.whl
+    size: 376973
+    checksum: e5030b792501314113ca804b3b00d35d89c40d0a92d53aa0c41e2a83697d11ef5ea8c73ed1c0bec28c4791047c9dd1b3
+    source: https://files.pythonhosted.org/packages/90/fc/606bc5cf46acac3aa9bd179b3954433c026aaf88ea98d6b19f5d14c336da/timm-0.4.12-py3-none-any.whl
+  - name: swin_tiny_patch4_window7_224.pth
+    size: 114342173
+    checksum: 210021216e1f205617d885836b1ac59d725b8c41dbff8dc4c513e838911436b0b75e06529737e472d3167519a7c1a6ad
+    original_source: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/swin-tiny-patch4-window7-224/swin_tiny_patch4_window7_224.pth
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: timm-0.4.12-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/swin_tiny_patch4_window7_224.pth"
+  - --input-shape=1,3,224,224
+  - --input-names=input
+  - --output-names=probs
+  - --output-file=$conv_dir/swin-tiny-patch4-window7-224.onnx
+input_info:
+  - name: input
+    shape: [1, 3, 224, 224]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/swin-tiny-patch4-window7-224.onnx
+  - --mean_values=input[123.675,116.28,103.53]
+  - --scale_values=input[58.395,57.12,57.375]
+  - --reverse_input_channels
+  - --output=probs
+framework: pytorch
+license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

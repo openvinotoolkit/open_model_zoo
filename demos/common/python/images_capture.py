@@ -1,8 +1,14 @@
 import os
 import sys
+from pathlib import Path
 import copy
+from time import perf_counter
 
 import cv2
+
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+
+from model_api.performance_metrics import PerformanceMetrics
 
 
 class InvalidInput(Exception):
@@ -33,11 +39,14 @@ class ImreadWrapper(ImagesCapture):
 
     def __init__(self, input, loop):
         self.loop = loop
+        self.reader_metrics = PerformanceMetrics()
+        start_time = perf_counter()
         if not os.path.isfile(input):
             raise InvalidInput("Can't find the image by {}".format(input))
         self.image = cv2.imread(input, cv2.IMREAD_COLOR)
         if self.image is None:
             raise OpenError("Can't open the image from {}".format(input))
+        self.reader_metrics.update(start_time)
         self.can_read = True
 
     def read(self):
@@ -59,6 +68,7 @@ class DirReader(ImagesCapture):
 
     def __init__(self, input, loop):
         self.loop = loop
+        self.reader_metrics = PerformanceMetrics()
         self.dir = input
         if not os.path.isdir(self.dir):
             raise InvalidInput("Can't find the dir by {}".format(input))
@@ -74,11 +84,13 @@ class DirReader(ImagesCapture):
         raise OpenError("Can't read the first image from {}".format(input))
 
     def read(self):
+        start_time = perf_counter()
         while self.file_id < len(self.names):
             filename = os.path.join(self.dir, self.names[self.file_id])
             image = cv2.imread(filename, cv2.IMREAD_COLOR)
             self.file_id += 1
             if image is not None:
+                self.reader_metrics.update(start_time)
                 return image
         if self.loop:
             self.file_id = 0
@@ -87,6 +99,7 @@ class DirReader(ImagesCapture):
                 image = cv2.imread(filename, cv2.IMREAD_COLOR)
                 self.file_id += 1
                 if image is not None:
+                    self.reader_metrics.update(start_time)
                     return image
         return None
 
@@ -101,12 +114,14 @@ class VideoCapWrapper(ImagesCapture):
 
     def __init__(self, input, loop):
         self.loop = loop
+        self.reader_metrics = PerformanceMetrics()
         self.cap = cv2.VideoCapture()
         status = self.cap.open(input)
         if not status:
             raise InvalidInput("Can't open the video from {}".format(input))
 
     def read(self):
+        start_time = perf_counter()
         status, image = self.cap.read()
         if not status:
             if not self.loop:
@@ -115,6 +130,7 @@ class VideoCapWrapper(ImagesCapture):
             status, image = self.cap.read()
             if not status:
                 return None
+        self.reader_metrics.update(start_time)
         return image
 
     def fps(self):
@@ -127,6 +143,7 @@ class VideoCapWrapper(ImagesCapture):
 class CameraCapWrapper(ImagesCapture):
 
     def __init__(self, input, camera_resolution):
+        self.reader_metrics = PerformanceMetrics()
         self.cap = cv2.VideoCapture()
         try:
             status = self.cap.open(int(input))
@@ -142,9 +159,11 @@ class CameraCapWrapper(ImagesCapture):
             raise InvalidInput("Can't find the camera {}".format(input))
 
     def read(self):
+        start_time = perf_counter()
         status, image = self.cap.read()
         if not status:
             return None
+        self.reader_metrics.update(start_time)
         return image
 
     def fps(self):

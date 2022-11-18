@@ -1,11 +1,12 @@
 models:
   - name: machine-translation-nar-en-de-0002
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: narnmt
-          vocabulary_file: machine-translation-nar-en-de-0002/tokenizer_tgt/vocab.json
-          merges_file: machine-translation-nar-en-de-0002/tokenizer_tgt/merges.txt
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to vocabulary and merges files.
+          vocabulary_file: tokenizer_tgt/vocab.json
+          merges_file: tokenizer_tgt/merges.txt
           output_name: pred
         inputs:
           - name: "tokens"
@@ -21,8 +22,9 @@ models:
 
         preprocessing:
           - type: decode_by_sentence_piece_bpe_tokenizer
-            vocabulary_file: machine-translation-nar-en-de-0002/tokenizer_src/vocab.json
-            merges_file: machine-translation-nar-en-de-0002/tokenizer_src/merges.txt
+            # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_model>" to provide path to vocabulary and merges files.
+            vocabulary_file: tokenizer_src/vocab.json
+            merges_file: tokenizer_src/merges.txt
 
           - type: pad_with_eos
             eos_index: 1
@@ -35,3 +37,4 @@ models:
         metrics:
           - type: bleu
             smooth: True
+            reference: 0.177

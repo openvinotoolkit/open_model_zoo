@@ -42,12 +42,12 @@ Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
 ### Converted Model
 
-An input image, name: `input`, shape: `1, 3, 256, 256`, format `B, C, H, W`, where:
+An input image, name: `input`, shape: `1, 256, 256, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Expected color order is `BGR`.
 
@@ -77,23 +77,31 @@ bounding boxes. For each detection, the description has the format:
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
 
-## Download a Model and Convert it into Inference Engine Format
+## Download a Model and Convert it into OpenVINO™ IR Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+omz_downloader --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+omz_converter --name <model_name>
 ```
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Object Detection C++ Demo](../../../demos/object_detection_demo/cpp/README.md)
+* [Object Detection Python\* Demo](../../../demos/object_detection_demo/python/README.md)
+* [Security Barrier Camera C++ Demo](../../../demos/security_barrier_camera_demo/cpp/README.md)
 
 ## Legal Information
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
 
 [*] Other names and brands may be claimed as the property of others.

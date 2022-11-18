@@ -1,40 +1,41 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <cstdio>
 #include <string>
-
 #include <vector>
 #include <map>
+
+#include "openvino/openvino.hpp"
 
 #include "face_detector.hpp"
 
 namespace gaze_estimation {
-FaceDetector::FaceDetector(InferenceEngine::Core& ie,
-                           const std::string& modelPath,
-                           const std::string& deviceName,
-                           double detectionConfidenceThreshold,
-                           bool enableReshape):
-             ieWrapper(ie, modelPath, deviceName),
-             detectionThreshold(detectionConfidenceThreshold),
-             enableReshape(enableReshape) {
-    const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
 
-    inputBlobName = ieWrapper.expectSingleInput();
-    ieWrapper.expectImageInput(inputBlobName);
-    inputBlobDims = inputInfo.at(inputBlobName);
+FaceDetector::FaceDetector(
+    ov::Core& core, const std::string& modelPath, const std::string& deviceName,
+    double detectionConfidenceThreshold, bool enableReshape) :
+        ieWrapper(core, modelPath, modelType, deviceName),
+        detectionThreshold(detectionConfidenceThreshold),
+        enableReshape(enableReshape)
+{
+    const auto& inputInfo = ieWrapper.getInputTensorDimsInfo();
 
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+    inputTensorName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputTensorName);
+    inputTensorDims = inputInfo.at(inputTensorName);
 
-    outputBlobName = ieWrapper.expectSingleOutput();
-    const auto& outputBlobDims = outputInfo.at(outputBlobName);
+    const auto& outputInfo = ieWrapper.getOutputTensorDimsInfo();
 
-    if (outputBlobDims.size() != 4 || outputBlobDims[0] != 1 || outputBlobDims[1] != 1 || outputBlobDims[3] != 7) {
-        throw std::runtime_error(modelPath + ": expected \"" + outputBlobName + "\" to have shape 1x1xNx7");
+    outputTensorName = ieWrapper.expectSingleOutput();
+    const auto& outputTensorDims = outputInfo.at(outputTensorName);
+
+    if (outputTensorDims.size() != 4 || outputTensorDims[0] != 1 || outputTensorDims[1] != 1 || outputTensorDims[3] != 7) {
+        throw std::runtime_error(modelPath + ": expected \"" + outputTensorName + "\" to have shape 1x1xNx7");
     }
 
-    numTotalDetections = outputBlobDims[2];
+    numTotalDetections = outputTensorDims[2];
 }
 
 void FaceDetector::adjustBoundingBox(cv::Rect& boundingBox) const {
@@ -63,25 +64,23 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
 
     if (enableReshape) {
         double imageAspectRatio = std::round(100. * image.cols / image.rows) / 100.;
-        double networkAspectRatio = std::round(100. * inputBlobDims[3] / inputBlobDims[2]) / 100.;
+        double networkAspectRatio = std::round(100. * inputTensorDims[3] / inputTensorDims[2]) / 100.;
         double aspectRatioThreshold = 0.01;
 
          if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-            std::cout << "Face Detection network is reshaped" << std::endl;
-
+             slog::debug << "Face Detection network is reshaped" << slog::endl;
             // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
-            inputBlobDims[3] = static_cast<unsigned long>(inputBlobDims[2] * imageAspectRatio);
+            inputTensorDims[3] = static_cast<unsigned long>(inputTensorDims[2] * imageAspectRatio);
 
-            ieWrapper.reshape({{inputBlobName, inputBlobDims}});
+            ieWrapper.reshape({{inputTensorName, inputTensorDims}});
         }
     }
 
-    ieWrapper.setInputBlob(inputBlobName, image);
+    ieWrapper.setInputTensor(inputTensorName, image);
     ieWrapper.infer();
 
     std::vector<float> rawDetectionResults;
-    ieWrapper.getOutputBlob(outputBlobName, rawDetectionResults);
-
+    ieWrapper.getOutputTensor(outputTensorName, rawDetectionResults);
     FaceInferenceResults tmp;
 
     cv::Size imageSize(image.size());
@@ -114,10 +113,6 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     }
 
     return detectionResult;
-}
-
-void FaceDetector::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
 }
 
 FaceDetector::~FaceDetector() {

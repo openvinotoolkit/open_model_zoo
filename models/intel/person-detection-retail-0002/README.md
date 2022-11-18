@@ -36,7 +36,7 @@ curve. Validation dataset consists of ~50K of images from ~100 different scenes.
 
     The expected channel order is `BGR`.
 
-2. name: `im_info`, shape: `1x6` - An image information
+2. name: `im_info`, shape: `1, 6` - An image information
     [544, 992, 992/`frame_width`, 544/`frame_height`, 992/`frame_width`, 544/`frame_height`]
 
 ## Outputs
@@ -50,5 +50,11 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
 
-   ## Legal Information
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Pedestrian Tracker C++ Demo](../../../demos/pedestrian_tracker_demo/cpp/README.md)
+
+## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -1,0 +1,35 @@
+models:
+  - name: ocrnet-hrnet-w48-paddle
+    launchers:
+      - framework: openvino
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: cityscapes
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_vector
+            reference:
+              bicycle: 0.813189
+              building: 0.936596
+              bus: 0.923402
+              car: 0.961663
+              fence: 0.667066
+              mean: 0.821492
+              motorcycle: 0.716625
+              person: 0.852702
+              pole: 0.717185
+              rider: 0.668266
+              road: 0.985249
+              sidewalk: 0.877029
+              sky: 0.953677
+              terrain: 0.649322
+              traffic light: 0.756834
+              traffic sign: 0.830843
+              train: 0.830843
+              truck: 0.882755
+              vegetation: 0.932083
+              wall: 0.628174

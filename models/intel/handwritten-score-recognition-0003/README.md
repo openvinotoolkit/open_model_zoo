@@ -22,12 +22,12 @@ The network is able to recognize school marks that should have format either `<d
 
 ## Inputs
 
-Image, name: `Placeholder`, shape: `1, 1, 32, 64` in the format `B, C, H, W`, where:
+Image, name: `Placeholder`, shape: `1, 32, 64, 1` in the format `B, H, W, C`, where:
 
 - `B` - batch size
-- `C` - number of channels
 - `H` - image height
 - `W` - image width
+- `C` - number of channels
 
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
@@ -40,6 +40,12 @@ The net outputs a blob with the shape `16, 1, 13` in the format `W, B, L`, where
 - `L` - confidence distribution across the alphabet: `"0123456789._#"`, where # - special blank character for CTC decoding algorithm and the character `'_'` replaces all non-numeric symbols.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Text Detection C++ Demo](../../../demos/text_detection_demo/cpp/README.md)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

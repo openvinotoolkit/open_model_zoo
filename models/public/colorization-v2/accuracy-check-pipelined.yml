@@ -9,7 +9,7 @@ evaluations:
           adapter: classification
 
       launchers:
-        - framework: dlsdk
+        - framework: openvino
 
       datasets:
         - name: imagenet_1000_classes

@@ -4,24 +4,24 @@ Demo application for sound classification algorithm.
 
 ## How It Works
 
-On startup the demo application reads command line parameters and loads a network to Inference engine. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
+On startup the demo application reads command line parameters and loads a model to OpenVINO™ Runtime plugin. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--sample_rate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/sound_classification_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -36,9 +36,9 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 Run the application with the `-h` option to see the usage message:
 
 ```
-usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
-                                    [-d DEVICE] [--labels LABELS]
-                                    [-sr SAMPLE_RATE] [-ol OVERLAP]
+usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-d DEVICE]
+                                    [--labels LABELS] [-sr SAMPLE_RATE]
+                                    [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -46,10 +46,6 @@ Options:
                         Required. Input to process
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL or MYRIAD is acceptable. The demo
@@ -73,10 +69,13 @@ python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_t
 
 ## Demo Output
 
-The demo uses console to display the predictions. It shows classification of each clip with timing of it and total prediction of whole audio.
+The demo uses console to display the predictions. It shows classification of each clip and total prediction of whole audio.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

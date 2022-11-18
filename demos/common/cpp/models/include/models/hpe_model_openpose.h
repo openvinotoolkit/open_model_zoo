@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,27 +13,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
-#include "image_model.h"
+#include <stddef.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <opencv2/core.hpp>
+
+#include "models/image_model.h"
+
+namespace ov {
+class InferRequest;
+class Model;
+}  // namespace ov
+struct HumanPose;
+struct InferenceResult;
+struct InputData;
+struct InternalModelData;
+struct ResultBase;
 
 class HPEOpenPose : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
-    /// @param targetSize - the height used for network reshaping.
+    /// @param targetSize - the height used for model reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
-    HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
+    /// @param layout - model input layout
+    HPEOpenPose(const std::string& modelFileName,
+                double aspectRatio,
+                int targetSize,
+                float confidenceThreshold,
+                const std::string& layout = "");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
-    std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
 
     static const size_t keypointsNumber = 18;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
 
     static const int minJointsNumber = 3;
     static const int stride = 8;
@@ -48,9 +71,8 @@ protected:
     int targetSize;
     float confidenceThreshold;
 
-    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
-                                        const std::vector<cv::Mat>& pafs) const;
+    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps, const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
-    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
+    void changeInputSize(std::shared_ptr<ov::Model>& model);
 };

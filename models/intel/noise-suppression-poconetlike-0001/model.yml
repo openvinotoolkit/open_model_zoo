@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,25 +13,179 @@
 # limitations under the License.
 
 description: >-
-  PoCoNet-like model to suppress noise and keep speech. The model is trained on DNS-challenge
+  PoCoNet-like model to suppress noise and keep speech. The model is trained on DNS-chalange
   datasets https://github.com/microsoft/DNS-Challenge/blob/master/README.md.
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-poconetlike-0001.xml
-    size: 1496368
-    sha256: 6e541ae374b739a7daf5fbcc437adc23c8d6e05eab3fdf88efec63ae233dc25e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
+    size: 1386608
+    checksum: 0fb8f52a61777161228b078fe11baca4fffc4e3253e8416079e476aaf7cf62d9c55b9571554f112903f785914befcf40
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
   - name: FP32/noise-suppression-poconetlike-0001.bin
-    size: 29589616
-    sha256: 2761132d65d43933e5eef6acf763c013a68e0ee7d097f6ec5b0293e2d1c86863
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
+    size: 29589476
+    checksum: ace1743c102be2e6d8f7c82641ceb4dff0045e48afc8c0b9a4bef81693321ae39f787a6b04cc90978cd6caf1ce1de9f1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
   - name: FP16/noise-suppression-poconetlike-0001.xml
-    size: 1496238
-    sha256: ee245abd973772daae2c42e24613892f0c81908050f9497721a535a68108bcdd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
+    size: 1525944
+    checksum: 6169d7f2176d52a194ddc45200dd31c0b58b3718d5f1dcfab32748180eb17d764ad044c30d71c76fda290b73b19a578e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
   - name: FP16/noise-suppression-poconetlike-0001.bin
-    size: 14795124
-    sha256: 6d6f42bb8d4efa35243385a2e7d4b3407cca13524c4946271775c7aefc06a1e5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/4/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
+    size: 14795010
+    checksum: 3599121b3f7eddac7bb81e0186bace4f23631e4ecd99b7985812a9dd24f2c4c08322b5023e76ec6e11309c263ed88594
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
+input_info:
+  - name: input
+    shape: [1, 2048]
+    layout: NC
+  - name: inp_state_000
+    shape: [1, 128]
+    layout: NC
+  - name: inp_state_001
+    shape: [1, 2, 129, 2]
+    layout: NCHW
+  - name: inp_state_002
+    shape: [1, 18, 129, 2]
+    layout: NCHW
+  - name: inp_state_003
+    shape: [1, 34, 129, 2]
+    layout: NCHW
+  - name: inp_state_004
+    shape: [1, 129, 32, 32]
+    layout: NCHW
+  - name: inp_state_005
+    shape: [1, 129, 32, 32]
+    layout: NCHW
+  - name: inp_state_006
+    shape: [1, 32, 64, 2]
+    layout: NCHW
+  - name: inp_state_007
+    shape: [1, 48, 64, 2]
+    layout: NCHW
+  - name: inp_state_008
+    shape: [1, 64, 64, 2]
+    layout: NCHW
+  - name: inp_state_009
+    shape: [1, 64, 64, 22]
+    layout: NCHW
+  - name: inp_state_010
+    shape: [1, 64, 64, 22]
+    layout: NCHW
+  - name: inp_state_011
+    shape: [1, 64, 32, 2]
+    layout: NCHW
+  - name: inp_state_012
+    shape: [1, 96, 32, 2]
+    layout: NCHW
+  - name: inp_state_013
+    shape: [1, 128, 32, 2]
+    layout: NCHW
+  - name: inp_state_014
+    shape: [1, 32, 128, 16]
+    layout: NCHW
+  - name: inp_state_015
+    shape: [1, 32, 128, 16]
+    layout: NCHW
+  - name: inp_state_016
+    shape: [1, 128, 16, 2]
+    layout: NCHW
+  - name: inp_state_017
+    shape: [1, 192, 16, 2]
+    layout: NCHW
+  - name: inp_state_018
+    shape: [1, 256, 16, 2]
+    layout: NCHW
+  - name: inp_state_019
+    shape: [1, 16, 256, 11]
+    layout: NCHW
+  - name: inp_state_020
+    shape: [1, 16, 256, 11]
+    layout: NCHW
+  - name: inp_state_021
+    shape: [1, 256, 8, 2]
+    layout: NCHW
+  - name: inp_state_022
+    shape: [1, 384, 8, 2]
+    layout: NCHW
+  - name: inp_state_023
+    shape: [1, 512, 8, 2]
+    layout: NCHW
+  - name: inp_state_024
+    shape: [1, 8, 256, 8]
+    layout: NCHW
+  - name: inp_state_025
+    shape: [1, 8, 256, 8]
+    layout: NCHW
+  - name: inp_state_026
+    shape: [1, 512, 16, 2]
+    layout: NCHW
+  - name: inp_state_027
+    shape: [1, 256, 16, 2]
+    layout: NCHW
+  - name: inp_state_028
+    shape: [1, 384, 16, 2]
+    layout: NCHW
+  - name: inp_state_029
+    shape: [1, 512, 16, 2]
+    layout: NCHW
+  - name: inp_state_030
+    shape: [1, 16, 128, 11]
+    layout: NCHW
+  - name: inp_state_031
+    shape: [1, 16, 128, 11]
+    layout: NCHW
+  - name: inp_state_032
+    shape: [1, 256, 32, 2]
+    layout: NCHW
+  - name: inp_state_033
+    shape: [1, 128, 32, 2]
+    layout: NCHW
+  - name: inp_state_034
+    shape: [1, 192, 32, 2]
+    layout: NCHW
+  - name: inp_state_035
+    shape: [1, 256, 32, 2]
+    layout: NCHW
+  - name: inp_state_036
+    shape: [1, 32, 64, 16]
+    layout: NCHW
+  - name: inp_state_037
+    shape: [1, 32, 64, 16]
+    layout: NCHW
+  - name: inp_state_038
+    shape: [1, 128, 64, 2]
+    layout: NCHW
+  - name: inp_state_039
+    shape: [1, 64, 64, 2]
+    layout: NCHW
+  - name: inp_state_040
+    shape: [1, 96, 64, 2]
+    layout: NCHW
+  - name: inp_state_041
+    shape: [1, 128, 64, 2]
+    layout: NCHW
+  - name: inp_state_042
+    shape: [1, 64, 32, 22]
+    layout: NCHW
+  - name: inp_state_043
+    shape: [1, 64, 32, 22]
+    layout: NCHW
+  - name: inp_state_044
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_045
+    shape: [1, 32, 129, 2]
+    layout: NCHW
+  - name: inp_state_046
+    shape: [1, 48, 129, 2]
+    layout: NCHW
+  - name: inp_state_047
+    shape: [1, 64, 129, 2]
+    layout: NCHW
+  - name: inp_state_048
+    shape: [1, 2, 129, 4]
+    layout: NCHW
+  - name: inp_state_049
+    shape: [1, 2, 129, 1]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

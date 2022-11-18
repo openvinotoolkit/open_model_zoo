@@ -41,5 +41,13 @@ The net outputs are two blobs:
 1. Name: `Mconv7_stage2_L1`, shape: `1, 38, 32, 57` contains keypoint pairwise relations (part affinity fields).
 2. Name: `Mconv7_stage2_L2`, shape: `1, 19, 32, 57` contains keypoint heatmaps.
 
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Human Pose Estimation C++ Demo](../../../demos/human_pose_estimation_demo/cpp/README.md)
+* [Human Pose Estimation Python\* Demo](../../../demos/human_pose_estimation_demo/python/README.md)
+* [Multi-Channel Human Pose Estimation C++ Demo](../../../demos/multi_channel_human_pose_estimation_demo/cpp/README.md)
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@ limitations under the License.
 
 import pytest
 import numpy as np
-from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.representation import (
+from openvino.tools.accuracy_checker.metrics import MetricsExecutor
+from openvino.tools.accuracy_checker.representation import (
     RegressionPrediction, RegressionAnnotation, FacialLandmarksAnnotation, FacialLandmarksPrediction
 )
-from accuracy_checker.presenters import EvaluationResult
+from openvino.tools.accuracy_checker.presenters import EvaluationResult
 
 
 class TestRegressionMetric:
     def setup_method(self):
-        self.module = 'accuracy_checker.metrics.metric_evaluator'
+        self.module = 'openvino.tools.accuracy_checker.metrics.metric_evaluator'
 
     def test_mae_with_zero_diff_between_annotation_and_prediction(self):
         annotations = [RegressionAnnotation('identifier', 3)]

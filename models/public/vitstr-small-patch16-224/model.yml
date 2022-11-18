@@ -1,0 +1,66 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "vitstr-small-patch16-224" model is "small" version of the ViTSTR models. ViTSTR
+  is a simple single-stage model that uses a pre-trained Vision Transformer (ViT)
+  to perform Scene Text Recognition (ViTSTR). Small version of model has an embedding
+  size of 384 and number of heads of 6. Model is able to recognize alphanumeric case
+  sensitive text and special characters.
+
+  More details provided in the paper <https://arxiv.org/abs/2105.08582> and repository
+  <https://github.com/roatienza/deep-text-recognition-benchmark>.
+task_type: optical_character_recognition
+files:
+  - name: timm-0.4.12-py3-none-any.whl
+    size: 376973
+    checksum: e5030b792501314113ca804b3b00d35d89c40d0a92d53aa0c41e2a83697d11ef5ea8c73ed1c0bec28c4791047c9dd1b3
+    source: https://files.pythonhosted.org/packages/90/fc/606bc5cf46acac3aa9bd179b3954433c026aaf88ea98d6b19f5d14c336da/timm-0.4.12-py3-none-any.whl
+  - name: modules/vitstr.py
+    size: 8363
+    checksum: 90e14135b5a23aad667fbde7581f0142a572b096d3ef6fb4d969f6b6069ce1369eebad916b24e11a1b57768b197d7244
+    source: https://raw.githubusercontent.com/roatienza/deep-text-recognition-benchmark/c937d69388dbaa1c4a776badb2670344b39d0942/modules/vitstr.py
+  - name: vitstr_small_patch16_224.pth
+    size: 86086343
+    checksum: 529c216830a23a2b9d7f6782515deca4a2f99aa42a22440e1997182d092b8db5a64718dda0df47cdc6ca3d51ecec5a97
+    original_source: https://github.com/roatienza/deep-text-recognition-benchmark/releases/download/v0.1.0/vitstr_small_patch16_224.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vitstr-small-patch16-224/vitstr_small_patch16_224.pth
+  - name: vocab.txt
+    size: 282
+    checksum: 5d125193c7222415cea053cabd8dee293eb87656129bf6750a3b1073f4abe25a42e6ff683b379aee0f032d4ededbcd59
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/vitstr-small-patch16-224/vocab.txt
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: timm-0.4.12-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=weights=r"$dl_dir/vitstr_small_patch16_224.pth"
+  - --input-shape=1,1,224,224
+  - --input-names=image
+  - --output-names=logits
+  - --output-file=$conv_dir/vitstr-small-patch16-224.onnx
+input_info:
+  - name: image
+    shape: [1, 1, 224, 224]
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$conv_dir/vitstr-small-patch16-224.onnx
+  - --scale_values=image[255]
+  - --output=logits
+framework: pytorch
+license: https://raw.githubusercontent.com/roatienza/deep-text-recognition-benchmark/master/LICENSE.md

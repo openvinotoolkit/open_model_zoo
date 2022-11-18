@@ -37,24 +37,24 @@ The demo workflow is the following:
     * By default, tracking is used to show text instance with the same color throughout the whole video.
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/text_spotting_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
 
 ```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+omz_downloader --list models.lst
 ```
 
 An example of using the Model Converter:
 
 ```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+omz_converter --list models.lst
 ```
 
 ### Supported Models
@@ -71,17 +71,17 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
-                             -i INPUT [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                             [-d "<device>"] [-l "<absolute_path>"] [--delay "<num>"]
-                             [-pt "<num>"] [-a ALPHABET]
+                             -i INPUT [--loop] [-o OUTPUT]
+                             [-limit OUTPUT_LIMIT] [-d "<device>"]
+                             [--delay "<num>"] [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
                              [--trd_input_prev_hidden TRD_INPUT_PREV_HIDDEN]
                              [--trd_input_encoder_outputs TRD_INPUT_ENCODER_OUTPUTS]
                              [--trd_output_symbols_distr TRD_OUTPUT_SYMBOLS_DISTR]
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
-                             [--keep_aspect_ratio] [--no_track]
-                             [--show_scores] [--show_boxes] [-pc] [-r]
-                             [--no_show] [-u UTILIZATION_MONITORS]
+                             [-trt "<num>"] [--keep_aspect_ratio] [--no_track]
+                             [--show_scores] [--show_boxes] [-r] [--no_show]
+                             [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -108,9 +108,6 @@ Options:
                         The demo will look for a suitable plugin for device specified
                         (by default, it is CPU). Please refer to OpenVINO documentation
                         for the list of devices supported by the model.
-  -l "<absolute_path>", --cpu_extension "<absolute_path>"
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementation.
   --delay "<num>"       Optional. Interval in milliseconds of waiting for a
                         key to be pressed.
   -pt "<num>", --prob_threshold "<num>"
@@ -133,11 +130,12 @@ Options:
   --trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN
                         Optional. Name of current hidden output node from text
                         recognition head decoder part.
+  -trt "<num>", --tr_threshold "<num>"
+                        Optional. Text recognition confidence threshold.
   --keep_aspect_ratio   Optional. Force image resize to keep aspect ratio.
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
@@ -169,10 +167,15 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The application uses OpenCV to display resulting text instances and current inference performance.
+The application uses OpenCV to display resulting text instances.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/model_tools/README.md)

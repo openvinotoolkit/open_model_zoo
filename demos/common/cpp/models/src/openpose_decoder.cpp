@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,27 +14,26 @@
 // limitations under the License.
 */
 
+#include "models/openpose_decoder.h"
+
 #include <algorithm>
+#include <cmath>
+#include <memory>
 #include <utility>
 #include <vector>
 
 #include <utils/common.hpp>
-#include "models/openpose_decoder.h"
 
+#include "models/results.h"
 
-Peak::Peak(const int id, const cv::Point2f& pos, const float score)
-    : id(id),
-      pos(pos),
-      score(score) {}
+Peak::Peak(const int id, const cv::Point2f& pos, const float score) : id(id), pos(pos), score(score) {}
 
 HumanPoseByPeaksIndices::HumanPoseByPeaksIndices(const int keypointsNumber)
     : peaksIndices(std::vector<int>(keypointsNumber, -1)),
       nJoints(0),
       score(0.0f) {}
 
-TwoJointsConnection::TwoJointsConnection(const int firstJointIdx,
-                                         const int secondJointIdx,
-                                         const float score)
+TwoJointsConnection::TwoJointsConnection(const int firstJointIdx, const int secondJointIdx, const float score)
     : firstJointIdx(firstJointIdx),
       secondJointIdx(secondJointIdx),
       score(score) {}
@@ -42,7 +41,8 @@ TwoJointsConnection::TwoJointsConnection(const int firstJointIdx,
 void findPeaks(const std::vector<cv::Mat>& heatMaps,
                const float minPeaksDistance,
                std::vector<std::vector<Peak>>& allPeaks,
-               int heatMapId, float confidenceThreshold) {
+               int heatMapId,
+               float confidenceThreshold) {
     std::vector<cv::Point> peaks;
     const cv::Mat& heatMap = heatMaps[heatMapId];
     const float* heatMapData = heatMap.ptr<float>();
@@ -50,50 +50,36 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
     for (int y = -1; y < heatMap.rows + 1; y++) {
         for (int x = -1; x < heatMap.cols + 1; x++) {
             float val = 0;
-            if (x >= 0
-                    && y >= 0
-                    && x < heatMap.cols
-                    && y < heatMap.rows) {
+            if (x >= 0 && y >= 0 && x < heatMap.cols && y < heatMap.rows) {
                 val = heatMapData[y * heatMapStep + x];
                 val = val >= confidenceThreshold ? val : 0;
             }
 
             float left_val = 0;
-            if (y >= 0
-                    && x < (heatMap.cols - 1)
-                    && y < heatMap.rows) {
+            if (y >= 0 && x < (heatMap.cols - 1) && y < heatMap.rows) {
                 left_val = heatMapData[y * heatMapStep + x + 1];
                 left_val = left_val >= confidenceThreshold ? left_val : 0;
             }
 
             float right_val = 0;
-            if (x > 0
-                    && y >= 0
-                    && y < heatMap.rows) {
+            if (x > 0 && y >= 0 && y < heatMap.rows) {
                 right_val = heatMapData[y * heatMapStep + x - 1];
                 right_val = right_val >= confidenceThreshold ? right_val : 0;
             }
 
             float top_val = 0;
-            if (x >= 0
-                    && x < heatMap.cols
-                    && y < (heatMap.rows - 1)) {
+            if (x >= 0 && x < heatMap.cols && y < (heatMap.rows - 1)) {
                 top_val = heatMapData[(y + 1) * heatMapStep + x];
                 top_val = top_val >= confidenceThreshold ? top_val : 0;
             }
 
             float bottom_val = 0;
-            if (x >= 0
-                    && y > 0
-                    && x < heatMap.cols) {
+            if (x >= 0 && y > 0 && x < heatMap.cols) {
                 bottom_val = heatMapData[(y - 1) * heatMapStep + x];
                 bottom_val = bottom_val >= confidenceThreshold ? bottom_val : 0;
             }
 
-            if ((val > left_val)
-                    && (val > right_val)
-                    && (val > top_val)
-                    && (val > bottom_val)) {
+            if ((val > left_val) && (val > right_val) && (val > top_val) && (val > bottom_val)) {
                 peaks.push_back(cv::Point(x, y));
             }
         }
@@ -124,33 +110,62 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
                                          const float foundMidPointsRatioThreshold,
                                          const int minJointsNumber,
                                          const float minSubsetScore) {
-    static const std::pair<int, int> limbIdsHeatmap[] = {
-        {2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
-        {2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
-    };
-    static const std::pair<int, int> limbIdsPaf[] = {
-        {31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
-        {27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}
-    };
+    static const std::pair<int, int> limbIdsHeatmap[] = {{2, 3},
+                                                         {2, 6},
+                                                         {3, 4},
+                                                         {4, 5},
+                                                         {6, 7},
+                                                         {7, 8},
+                                                         {2, 9},
+                                                         {9, 10},
+                                                         {10, 11},
+                                                         {2, 12},
+                                                         {12, 13},
+                                                         {13, 14},
+                                                         {2, 1},
+                                                         {1, 15},
+                                                         {15, 17},
+                                                         {1, 16},
+                                                         {16, 18},
+                                                         {3, 17},
+                                                         {6, 18}};
+    static const std::pair<int, int> limbIdsPaf[] = {{31, 32},
+                                                     {39, 40},
+                                                     {33, 34},
+                                                     {35, 36},
+                                                     {41, 42},
+                                                     {43, 44},
+                                                     {19, 20},
+                                                     {21, 22},
+                                                     {23, 24},
+                                                     {25, 26},
+                                                     {27, 28},
+                                                     {29, 30},
+                                                     {47, 48},
+                                                     {49, 50},
+                                                     {53, 54},
+                                                     {51, 52},
+                                                     {55, 56},
+                                                     {37, 38},
+                                                     {45, 46}};
 
     std::vector<Peak> candidates;
     for (const auto& peaks : allPeaks) {
-         candidates.insert(candidates.end(), peaks.begin(), peaks.end());
+        candidates.insert(candidates.end(), peaks.begin(), peaks.end());
     }
     std::vector<HumanPoseByPeaksIndices> subset(0, HumanPoseByPeaksIndices(keypointsNumber));
     for (size_t k = 0; k < arraySize(limbIdsPaf); k++) {
         std::vector<TwoJointsConnection> connections;
         const int mapIdxOffset = keypointsNumber + 1;
-        std::pair<cv::Mat, cv::Mat> scoreMid = { pafs[limbIdsPaf[k].first - mapIdxOffset],
-                                                 pafs[limbIdsPaf[k].second - mapIdxOffset] };
+        std::pair<cv::Mat, cv::Mat> scoreMid = {pafs[limbIdsPaf[k].first - mapIdxOffset],
+                                                pafs[limbIdsPaf[k].second - mapIdxOffset]};
         const int idxJointA = limbIdsHeatmap[k].first - 1;
         const int idxJointB = limbIdsHeatmap[k].second - 1;
         const std::vector<Peak>& candA = allPeaks[idxJointA];
         const std::vector<Peak>& candB = allPeaks[idxJointB];
         const size_t nJointsA = candA.size();
         const size_t nJointsB = candB.size();
-        if (nJointsA == 0
-                && nJointsB == 0) {
+        if (nJointsA == 0 && nJointsB == 0) {
             continue;
         } else if (nJointsA == 0) {
             for (size_t i = 0; i < nJointsB; i++) {
@@ -202,7 +217,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
                 }
                 vec /= norm_vec;
                 float score = vec.x * scoreMid.first.at<float>(mid) + vec.y * scoreMid.second.at<float>(mid);
-                int height_n  = pafs[0].rows / 2;
+                int height_n = pafs[0].rows / 2;
                 float suc_ratio = 0.0f;
                 float mid_score = 0.0f;
                 const int mid_num = 10;
@@ -210,13 +225,12 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
                 if (score > scoreThreshold) {
                     float p_sum = 0;
                     int p_count = 0;
-                    cv::Size2f step((candB[j].pos.x - candA[i].pos.x)/(mid_num - 1),
-                                    (candB[j].pos.y - candA[i].pos.y)/(mid_num - 1));
+                    cv::Size2f step((candB[j].pos.x - candA[i].pos.x) / (mid_num - 1),
+                                    (candB[j].pos.y - candA[i].pos.y) / (mid_num - 1));
                     for (int n = 0; n < mid_num; n++) {
                         cv::Point midPoint(cvRound(candA[i].pos.x + n * step.width),
                                            cvRound(candA[i].pos.y + n * step.height));
-                        cv::Point2f pred(scoreMid.first.at<float>(midPoint),
-                                         scoreMid.second.at<float>(midPoint));
+                        cv::Point2f pred(scoreMid.first.at<float>(midPoint), scoreMid.second.at<float>(midPoint));
                         score = vec.x * pred.x + vec.y * pred.y;
                         if (score > midPointsScoreThreshold) {
                             p_sum += score;
@@ -227,18 +241,17 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
                     float ratio = p_count > 0 ? p_sum / p_count : 0.0f;
                     mid_score = ratio + static_cast<float>(std::min(height_n / norm_vec - 1, 0.0));
                 }
-                if (mid_score > 0
-                        && suc_ratio > foundMidPointsRatioThreshold) {
+                if (mid_score > 0 && suc_ratio > foundMidPointsRatioThreshold) {
                     tempJointConnections.push_back(TwoJointsConnection(i, j, mid_score));
                 }
             }
         }
         if (!tempJointConnections.empty()) {
-            std::sort(tempJointConnections.begin(), tempJointConnections.end(),
-                      [](const TwoJointsConnection& a,
-                         const TwoJointsConnection& b) {
-                return (a.score > b.score);
-            });
+            std::sort(tempJointConnections.begin(),
+                      tempJointConnections.end(),
+                      [](const TwoJointsConnection& a, const TwoJointsConnection& b) {
+                          return (a.score > b.score);
+                      });
         }
         size_t num_limbs = std::min(nJointsA, nJointsB);
         size_t cnt = 0;
@@ -251,8 +264,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
             const int& indexA = tempJointConnections[row].firstJointIdx;
             const int& indexB = tempJointConnections[row].secondJointIdx;
             const float& score = tempJointConnections[row].score;
-            if (occurA[indexA] == 0
-                    && occurB[indexB] == 0) {
+            if (occurA[indexA] == 0 && occurB[indexB] == 0) {
                 connections.push_back(TwoJointsConnection(candA[indexA].id, candB[indexB].id, score));
                 cnt++;
                 occurA[indexA] = 1;
@@ -265,8 +277,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
 
         bool extraJointConnections = (k == 17 || k == 18);
         if (k == 0) {
-            subset = std::vector<HumanPoseByPeaksIndices>(
-                        connections.size(), HumanPoseByPeaksIndices(keypointsNumber));
+            subset = std::vector<HumanPoseByPeaksIndices>(connections.size(), HumanPoseByPeaksIndices(keypointsNumber));
             for (size_t i = 0; i < connections.size(); i++) {
                 const int& indexA = connections[i].firstJointIdx;
                 const int& indexB = connections[i].secondJointIdx;
@@ -280,11 +291,9 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
                 const int& indexA = connections[i].firstJointIdx;
                 const int& indexB = connections[i].secondJointIdx;
                 for (size_t j = 0; j < subset.size(); j++) {
-                    if (subset[j].peaksIndices[idxJointA] == indexA
-                            && subset[j].peaksIndices[idxJointB] == -1) {
+                    if (subset[j].peaksIndices[idxJointA] == indexA && subset[j].peaksIndices[idxJointB] == -1) {
                         subset[j].peaksIndices[idxJointB] = indexB;
-                    } else if (subset[j].peaksIndices[idxJointB] == indexB
-                                && subset[j].peaksIndices[idxJointA] == -1) {
+                    } else if (subset[j].peaksIndices[idxJointB] == indexB && subset[j].peaksIndices[idxJointA] == -1) {
                         subset[j].peaksIndices[idxJointA] = indexA;
                     }
                 }
@@ -316,8 +325,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& a
     }
     std::vector<HumanPose> poses;
     for (const auto& subsetI : subset) {
-        if (subsetI.nJoints < minJointsNumber
-                || subsetI.score / subsetI.nJoints < minSubsetScore) {
+        if (subsetI.nJoints < minJointsNumber || subsetI.score / subsetI.nJoints < minSubsetScore) {
             continue;
         }
         int position = -1;

@@ -17,4 +17,3 @@ bus
 train
 motorcycle
 bicycle
-background

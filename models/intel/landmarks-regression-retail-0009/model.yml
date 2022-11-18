@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,32 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml
-    size: 44890
-    sha256: 7b0b5cac7cfe8bd60b1077e5b465778dd861deb8cb59896244740c6ee6edd678
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    size: 51883
+    checksum: dc270c6e8019a7a7cd51f9e279c24f76b58275e46a66211292536b5526fa32658878d535d8eb5a43defbae52cdd85b45
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
   - name: FP32/landmarks-regression-retail-0009.bin
     size: 762464
-    sha256: 743d6045dd1c8df90649d2e19ce40ee41de18b799e261bb11682e1d9ef124b5d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    checksum: ea8afdd4f0eec7273b21bd55c439d3255dd476411175675646e75349241ff81e50bf8f30fbced3f9d683bdc32bfa3db2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
   - name: FP16/landmarks-regression-retail-0009.xml
-    size: 44871
-    sha256: fd488401fdb268b52cb053f326fc463a6973180e84fce58e358ffc511e9db991
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    size: 73873
+    checksum: d39a98cd182ecb72b7b2cc578325a8f310c2b4f0b5041ecb0ae003866db97d7f479abf1e358fce6352680a849073d3bd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
   - name: FP16/landmarks-regression-retail-0009.bin
-    size: 381248
-    sha256: 973b13e64b3576f754a690266b069438b531bc657233d09d7b382ca36e6cf1e4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    size: 381232
+    checksum: 295b2defa639a0ecc21caa506733cb0507c18fb885495a4b88691b1c7d54bc7d78f7aa503e02611080f6368814d9d05c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
   - name: FP16-INT8/landmarks-regression-retail-0009.xml
-    size: 88757
-    sha256: f33c8a7b32bc870f8fc77b862400ae2e976e77fde50fa6dba30916a2334f7ff4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
+    size: 113273
+    checksum: 202f2903300320525e1622e81c3a38c497cbf6d7ad26d87c6798882a6b5343171af851618f224ef4f100ebf34473c048
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
   - name: FP16-INT8/landmarks-regression-retail-0009.bin
-    size: 196426
-    sha256: c890951a87aec5adeedb6949a16e1928ef1843c68cacf6b34aa4b0fe35c897f5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
+    size: 200012
+    checksum: d6b5de49c9445ffd94625df89d7d60bf3f6e9339ef731bc28c2e3eaf18eb716ea3d6dd53e7a1926c6b79a2a173adcaea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
+input_info:
+  - name: '0'
+    shape: [1, 3, 48, 48]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

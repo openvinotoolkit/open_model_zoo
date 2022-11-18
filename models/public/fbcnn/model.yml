@@ -1,0 +1,64 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "fbcnn" model is a flexible blind convolutional neural network to remove JPEG
+  artifacts. Model based on "Towards Flexible Blind JPEG Artifacts Removal" <https://arxiv.org/abs/2109.14573>
+  paper. It was implemented in PyTorch* framework. Model works with color jpeg images.
+  For details about this model and other jpeg artifacts removal models (for grayscale
+  images and double jpeg restoration), check out the "Towards Flexible Blind JPEG
+  Artifacts Removal (FBCNN, ICCV 2021)" <https://github.com/jiaxi-jiang/FBCNN>.
+task_type: image_processing
+files:
+  - name: net.py
+    size: 14063
+    checksum: 993649cebed4f249b35f92a64d797916bba297e6ff58c1f0081402d6c61cf63b661a3388f67c74eafc6ca9e587bd5b5b
+    source: https://raw.githubusercontent.com/jiaxi-jiang/FBCNN/f599bc58e1e2ebe1ab473350ce3c887f491143e1/models/network_fbcnn.py
+  - name: ckpt/fbcnn_color.pth
+    size: 287755111
+    checksum: 11610eb602aa0b3f53568d572fadff03be04854dbc952d49a9b24d4edcba1eb42475b31c1496d669e0b549c431379128
+    original_source: https://github.com/jiaxi-jiang/FBCNN/releases/download/v1.0/fbcnn_color.pth
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/fbcnn/fbcnn_color.pth
+postprocessing:
+  - $type: regex_replace
+    file: net.py
+    pattern: 'x = x\[..., :h, :w\]|x = nn.ReplicationPad2d\(\(0, paddingRight, 0,
+      paddingBottom\)\)\(x\)'
+    replacement: '# \g<0>'
+  # add channels reversing to BGR to model output
+  - $type: regex_replace
+    file: net.py
+    pattern: 'return x,'
+    replacement: 'return x[:, [2, 1, 0], :, :],'
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --import-module=net
+  - --model-name=FBCNN
+  - --weights=$dl_dir/ckpt/fbcnn_color.pth
+  - --input-shape=1,3,512,512
+  - --input-names=image_lq
+  - --output-names=image_result
+  - --output-file=$conv_dir/fbcnn_color.onnx
+input_info:
+  - name: image_lq
+    shape: [1, 3, 512, 512]
+    layout: NCHW
+model_optimizer_args:
+  - --reverse_input_channels
+  - --scale_values=image_lq[255]
+  - --output=image_result
+  - --input_model=$conv_dir/fbcnn_color.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/jiaxi-jiang/FBCNN/main/LICENSE

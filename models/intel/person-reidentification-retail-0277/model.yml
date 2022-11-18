@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,29 +16,29 @@ description: >-
   High accuracy single embedding-based person reidentification model
 task_type: object_attributes
 files:
+  - name: person-reidentification-retail-0265.onnx
+    size: 9632724
+    checksum: 2c79fadc11b59c207e42db877c6c087435116eec2b6adc972e93a5689a67d9991e188d986ceaf73e7fbd5a2a63034b1a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0277/person-reidentification-retail-0265.onnx
   - name: FP32/person-reidentification-retail-0277.xml
-    size: 573033
-    sha256: 22d6e13c6ba856416e23ab033bfde051c6e89696d21be2a7e98670d90a6140b4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
+    size: 531723
+    checksum: 9480c867da12b5f9917b4b9478422b5713c25b7dbb79c4005e22e6a5eae8a88add4daec3ea574504be16a2d16c8ae4fa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
   - name: FP32/person-reidentification-retail-0277.bin
-    size: 8357560
-    sha256: d3f1959a6c6411ff3b24246f9e4b5c1510a827f3f51fb56143bc8c399853ac92
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
+    size: 8357476
+    checksum: dfa569794ba32262b9424fbc522d6f8ed8b4b70fa3f7b1d0928c522d51385598204d1a8f8401da5ddeae6dd0038c4de1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
   - name: FP16/person-reidentification-retail-0277.xml
-    size: 572915
-    sha256: 6663176b9e908c52e3392b881651fff6ccfea8c7ba2558135134b90c975e92c3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
+    size: 693131
+    checksum: 376f6bab9c043ca9801c7b719fbca4560391a8f0e363d1191650019e2db1aa48657261e2a8a83471cc3340971d81569a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
   - name: FP16/person-reidentification-retail-0277.bin
-    size: 4178812
-    sha256: f809b4a16f6105d69eaa8c709894d0103064fe5322c333cde763fcab09d1647e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
-  - name: FP16-INT8/person-reidentification-retail-0277.xml
-    size: 1449896
-    sha256: 59514c514b452050939fce539be9aaa2cfc6f76016098ef1a3fc73cb62554fe0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.xml
-  - name: FP16-INT8/person-reidentification-retail-0277.bin
-    size: 2201582
-    sha256: bd4d2b2d1eec968c2cc2975df417e38b953c542f9ca6326e274e87bf5ad7b2fe
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.bin
+    size: 4178790
+    checksum: 338fa5f50c61aacff4f062348d2e10bd9b12813484f26875c060c4fa340b0b93d0d97a0a06c9e6668dcc8c3fe4ce9775
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
+input_info:
+  - name: data
+    shape: [1, 3, 256, 128]
+    layout: NCHW
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

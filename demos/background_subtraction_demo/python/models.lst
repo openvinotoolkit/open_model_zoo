@@ -1,0 +1,7 @@
+# This file can be used with the --list option of the model downloader.
+background-matting-mobilenetv2
+instance-segmentation-person-????
+modnet-photographic-portrait-matting
+modnet-webcam-portrait-matting
+robust-video-matting-mobilenetv3
+yolact-resnet50-fpn-pytorch

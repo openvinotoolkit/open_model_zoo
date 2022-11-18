@@ -20,7 +20,7 @@ This is a porosity weld recognition model. It runs on a video stream capturing w
 
 ## Inputs
 
-Image, name: `input`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
+Image, name: `image`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -32,6 +32,12 @@ Expected color order is `BGR`.
 ## Outputs
 
 The `features` is a blob with the shape `1, 3` containing logits for three output classes ("no weld", "normal weld" and "porosity").
+
+## Demo usage
+
+The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
+
+* [Action Recognition Python\* Demo](../../../demos/action_recognition_demo/python/README.md)
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

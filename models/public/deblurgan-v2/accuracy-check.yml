@@ -27,13 +27,17 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 28.25
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.97
 
   - name: deblurgan-v2
 
     launchers:
-      - framework: dlsdk
+      - framework: openvino
         adapter:
           type: image_processing
           reverse_channels: True
@@ -53,5 +57,9 @@ models:
           - type: psnr
             scale_border: 0
             presenter: print_vector
+            reference:
+              mean: 28.25
           - type: ssim
             presenter: print_vector
+            reference:
+              mean: 0.97

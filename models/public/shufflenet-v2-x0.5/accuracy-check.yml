@@ -1,0 +1,28 @@
+models:
+  - name: shufflenet-v2-x0.5
+    launchers:
+      - framework: openvino
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: true
+            interpolation: BILINEAR
+          - type: crop
+            size: 224
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.588
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.8113
