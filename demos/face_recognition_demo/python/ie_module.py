@@ -40,8 +40,6 @@ class Module:
         self.outputs[id] = infer_request.results[self.output_tensor]
 
     def enqueue(self, input):
-        self.clear()
-
         if self.max_requests <= self.active_requests:
             log.warning('Processing request rejected - too many requests')
             return False
