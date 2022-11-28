@@ -168,3 +168,6 @@ class OVMSAdapter(ModelAdapter):
 
     def await_any(self):
         pass
+
+    def get_rt_info(self, path):
+        raise NotImplementedError("OVMSAdapter does not support RT info getting")

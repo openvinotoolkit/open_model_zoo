@@ -186,7 +186,7 @@ def main():
         'padding_mode': 'center' if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
         'delta': 0.5 if args.architecture_type == 'higherhrnet' else None, # the 'higherhrnet' and 'ae' specific
     }
-    model = ImageModel.create_model(ARCHITECTURES[args.architecture_type], model_adapter, config)
+    model = ImageModel.create_model(model_adapter, config, ARCHITECTURES[args.architecture_type])
     model.log_layers_info()
 
     hpe_pipeline = AsyncPipeline(model)

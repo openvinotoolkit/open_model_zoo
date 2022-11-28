@@ -172,7 +172,7 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    model = SegmentationModel.create_model(args.architecture_type, model_adapter, {'path_to_labels': args.labels})
+    model = SegmentationModel.create_model(model_adapter, {'path_to_labels': args.labels}, args.architecture_type)
     if args.architecture_type == 'segmentation':
         visualizer = SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':

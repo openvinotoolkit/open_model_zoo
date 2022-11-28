@@ -157,3 +157,9 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         In case of asynchronous execution waits the completion of any
         busy infer request until it becomes available for the data submission.
         '''
+
+    @abc.abstractmethod
+    def get_rt_info(self, path):
+        '''
+        Forwards to openvino.runtime.Model.get_rt_info(path)
+        '''
