@@ -10,11 +10,11 @@ defusedxml==0.7.1
     # via -r tools/accuracy_checker/requirements-core.in
 fast-ctc-decode==0.3.2
     # via -r tools/accuracy_checker/requirements-extra.in
-filelock==3.8.0
+filelock==3.8.1
     # via
     #   huggingface-hub
     #   transformers
-huggingface-hub==0.11.0
+huggingface-hub==0.11.1
     # via transformers
 idna==3.4
     # via requests
@@ -51,7 +51,7 @@ numpy==1.23.1
     #   scipy
     #   tifffile
     #   transformers
-openvino-telemetry==2022.1.1
+openvino-telemetry==2022.1.2
     # via -r tools/accuracy_checker/requirements-core.in
 packaging==21.3
     # via
@@ -127,11 +127,11 @@ tqdm==4.64.1
     #   huggingface-hub
     #   nltk
     #   transformers
-transformers==4.24.0 ; python_version >= "3.7"
+transformers==4.25.1 ; python_version >= "3.7"
     # via -r tools/accuracy_checker/requirements-extra.in
 typing-extensions==4.4.0
     # via huggingface-hub
-urllib3==1.26.12
+urllib3==1.26.13
     # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
