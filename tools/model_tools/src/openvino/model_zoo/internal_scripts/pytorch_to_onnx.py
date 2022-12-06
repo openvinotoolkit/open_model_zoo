@@ -17,6 +17,7 @@ import ast
 import importlib
 import os
 import sys
+import copy
 
 from pathlib import Path
 
@@ -38,6 +39,20 @@ INPUT_DTYPE_TO_TORCH = {
 }
 
 
+class prepend_to_path:
+    def __init__(self, paths):
+        self._preprended_paths = paths
+        self._original_path = None
+
+    def __enter__(self):
+        self._original_path = copy.deepcopy(sys.path)
+        sys.path = self._preprended_paths + sys.path
+
+    def __exit__(self, type, value, traceback):
+        if self._original_path is not None:
+            sys.path = self._original_path
+
+
 def is_sequence(element):
     return isinstance(element, (list, tuple))
 
@@ -46,15 +61,18 @@ def shapes_arg(values):
     """Checks that the argument represents a tensor shape or a sequence of tensor shapes"""
     shapes = ast.literal_eval(values)
     if not is_sequence(shapes):
-        raise argparse.ArgumentTypeError('{!r}: must be a sequence'.format(shapes))
+        raise argparse.ArgumentTypeError(
+            '{!r}: must be a sequence'.format(shapes))
     if not all(is_sequence(shape) for shape in shapes):
         shapes = (shapes, )
     for shape in shapes:
         if not is_sequence(shape):
-            raise argparse.ArgumentTypeError('{!r}: must be a sequence'.format(shape))
+            raise argparse.ArgumentTypeError(
+                '{!r}: must be a sequence'.format(shape))
         for value in shape:
             if not isinstance(value, int) or value < 0:
-                raise argparse.ArgumentTypeError('Argument {!r} must be a positive integer'.format(value))
+                raise argparse.ArgumentTypeError(
+                    'Argument {!r} must be a positive integer'.format(value))
     return shapes
 
 
@@ -72,7 +90,8 @@ def model_parameter(parameter):
 def parse_args():
     """Parse input arguments"""
 
-    parser = argparse.ArgumentParser(description='Conversion of pretrained models from PyTorch to ONNX')
+    parser = argparse.ArgumentParser(
+        description='Conversion of pretrained models from PyTorch to ONNX')
 
     parser.add_argument('--model-name', type=str, required=True,
                         help='Model to convert. May be class name or name of constructor function')
@@ -96,40 +115,40 @@ def parse_args():
                         help='Data type for inputs')
     parser.add_argument('--conversion-param', type=model_parameter, default=[], action='append',
                         help='Additional parameter for export')
-    parser.add_argument('--opset_version', type=int, default=11, help='The ONNX opset version')
+    parser.add_argument('--opset_version', type=int,
+                        default=11, help='The ONNX opset version')
     return parser.parse_args()
 
 
 def load_model(model_name, weights, model_paths, module_name, model_params):
     """Import model and load pretrained weights"""
 
-    if model_paths:
-        sys.path.extend(model_paths)
+    with prepend_to_path(model_paths):
+        try:
+            module = importlib.import_module(module_name)
+            creator = getattr(module, model_name)
+            model = creator(**model_params)
+        except ImportError as err:
+            if model_paths:
+                print('Module {} in {} doesn\'t exist. Check import path and name'.format(
+                    model_name, os.pathsep.join(model_paths)))
+            else:
+                print(
+                    'Module {} doesn\'t exist. Check if it is installed'.format(model_name))
+            sys.exit(err)
+        except AttributeError as err:
+            print('ERROR: Module {} contains no class or function with name {}!'
+                  .format(module_name, model_name))
+            sys.exit(err)
 
-    try:
-        module = importlib.import_module(module_name)
-        creator = getattr(module, model_name)
-        model = creator(**model_params)
-    except ImportError as err:
-        if model_paths:
-            print('Module {} in {} doesn\'t exist. Check import path and name'.format(
-                model_name, os.pathsep.join(model_paths)))
-        else:
-            print('Module {} doesn\'t exist. Check if it is installed'.format(model_name))
-        sys.exit(err)
-    except AttributeError as err:
-        print('ERROR: Module {} contains no class or function with name {}!'
-              .format(module_name, model_name))
-        sys.exit(err)
-
-    try:
-        if weights:
-            model.load_state_dict(torch.load(weights, map_location='cpu'))
-    except RuntimeError as err:
-        print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
-            weights, model_name))
-        sys.exit(err)
-    return model
+        try:
+            if weights:
+                model.load_state_dict(torch.load(weights, map_location='cpu'))
+        except RuntimeError as err:
+            print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
+                weights, model_name))
+            sys.exit(err)
+        return model
 
 
 @torch.no_grad()
