@@ -26,7 +26,7 @@ fast-ctc-decode==0.3.2
     # via openvino-dev
 fastjsonschema==2.15.3
     # via openvino-dev
-filelock==3.8.0
+filelock==3.8.1
     # via
     #   huggingface-hub
     #   transformers
@@ -34,7 +34,7 @@ flatbuffers==1.12
     # via tensorflow
 gast==0.4.0
     # via tensorflow
-google-auth==2.14.1
+google-auth==2.15.0
     # via
     #   google-auth-oauthlib
     #   tensorboard
@@ -44,13 +44,13 @@ google-pasta==0.2.0
     # via tensorflow
 graphviz==0.8.4
     # via mxnet
-grpcio==1.50.0
+grpcio==1.51.1
     # via
     #   tensorboard
     #   tensorflow
 h5py==3.7.0
     # via tensorflow
-huggingface-hub==0.11.0
+huggingface-hub==0.11.1
     # via transformers
 idna==3.4
     # via requests
@@ -58,7 +58,7 @@ imagecodecs==2022.2.22
     # via openvino-dev
 imageio==2.22.4
     # via scikit-image
-importlib-metadata==5.0.0
+importlib-metadata==5.1.0
     # via markdown
 joblib==1.2.0
     # via
@@ -140,10 +140,12 @@ openvino-dev[caffe,mxnet,onnx,tensorflow2]==2022.2.0
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_mxnet.txt
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_onnx.txt
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_tensorflow2.txt
-openvino-telemetry==2022.1.1
+openvino-telemetry==2022.1.2
     # via openvino-dev
 opt-einsum==3.3.0
-    # via tensorflow
+    # via
+    #   paddlepaddle
+    #   tensorflow
 packaging==21.3
     # via
     #   huggingface-hub
@@ -151,7 +153,9 @@ packaging==21.3
     #   scikit-image
     #   tensorflow
     #   transformers
-paddlepaddle==2.2.2
+paddle-bfloat==0.1.7
+    # via paddlepaddle
+paddlepaddle==2.4.0
     # via -r tools/model_tools/requirements-paddle.in
 pandas==1.1.5
     # via openvino-dev
@@ -239,7 +243,6 @@ six==1.16.0
     #   astunparse
     #   google-auth
     #   google-pasta
-    #   grpcio
     #   keras-preprocessing
     #   paddlepaddle
     #   python-dateutil
@@ -250,17 +253,17 @@ tensorboard-data-server==0.6.1
     # via tensorboard
 tensorboard-plugin-wit==1.8.1
     # via tensorboard
-tensorflow==2.9.3
+tensorflow==2.9.1
     # via
     #   -r tools/model_tools/requirements-tensorflow.in
     #   openvino-dev
 tensorflow-estimator==2.9.0
     # via tensorflow
-tensorflow-io-gcs-filesystem==0.27.0
+tensorflow-io-gcs-filesystem==0.28.0
     # via tensorflow
-termcolor==2.1.0
+termcolor==2.1.1
     # via tensorflow
-texttable==1.6.4
+texttable==1.6.7
     # via openvino-dev
 threadpoolctl==3.1.0
     # via scikit-learn
@@ -282,7 +285,7 @@ tqdm==4.64.1
     #   nltk
     #   openvino-dev
     #   transformers
-transformers==4.24.0
+transformers==4.25.1
     # via openvino-dev
 typing-extensions==4.4.0
     # via
@@ -291,7 +294,7 @@ typing-extensions==4.4.0
     #   tensorflow
     #   torch
     #   torchvision
-urllib3==1.26.12
+urllib3==1.26.13
     # via
     #   openvino-dev
     #   requests
@@ -307,7 +310,7 @@ wrapt==1.14.1
     # via tensorflow
 yacs==0.1.8
     # via -r tools/model_tools/requirements-pytorch.in
-zipp==3.10.0
+zipp==3.11.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

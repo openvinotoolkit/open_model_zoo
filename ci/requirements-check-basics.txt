@@ -2,13 +2,13 @@
 
 bandit==1.7.4
     # via -r ci/requirements-check-basics.in
-flake8==5.0.4
+flake8==6.0.0
     # via
     #   -r ci/requirements-check-basics.in
     #   flake8-comprehensions
 flake8-comprehensions==3.10.1
     # via -r ci/requirements-check-basics.in
-gitdb==4.0.9
+gitdb==4.0.10
     # via gitpython
 gitpython==3.1.29
     # via bandit
@@ -20,9 +20,9 @@ pathspec==0.10.2
     # via yamllint
 pbr==5.11.0
     # via stevedore
-pycodestyle==2.9.1
+pycodestyle==2.10.0
     # via flake8
-pyflakes==2.5.0
+pyflakes==3.0.1
     # via flake8
 pyyaml==6.0
     # via

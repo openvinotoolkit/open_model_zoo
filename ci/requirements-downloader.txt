@@ -6,7 +6,7 @@ charset-normalizer==2.1.1
     # via requests
 idna==3.4
     # via requests
-openvino-telemetry==2022.1.1
+openvino-telemetry==2022.1.2
     # via -r tools/model_tools/requirements.in
 pyyaml==6.0
     # via -r tools/model_tools/requirements.in
@@ -14,5 +14,5 @@ requests==2.28.1
     # via
     #   -r tools/model_tools/requirements.in
     #   openvino-telemetry
-urllib3==1.26.12
+urllib3==1.26.13
     # via requests
