@@ -20,35 +20,35 @@ files:
   - name: tokenizer_tgt/merges.txt
     size: 318547
     checksum: 4fe6440c3ddc0d922482ebd652c2e911527a8676eb782434884794139244c641982da5c17adf6a51a752800a2119df82
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
   - name: tokenizer_tgt/vocab.json
     size: 535816
     checksum: f9a9d54f5f388cb1386d501cfde8df57f1f1826bc9e2be513e4fcbbc6610861077b5607b8a3177e3e482b8181b52438d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
   - name: tokenizer_src/merges.txt
     size: 338910
     checksum: 68d27cf15ceaacce5430c0dc2bd231f0ef2290d0cf74b77ab343dda0f46f1e9aefa783bc0c5d0a03b837a9614c99ed18
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/tokenizer_src/merges.txt
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/tokenizer_src/merges.txt
   - name: tokenizer_src/vocab.json
     size: 556158
     checksum: e5189d2064ee859013a826e8ebcf5b17a7b952aca57d69ba78211eff2e5f276e13033cc6c27773aa7377bfac0827090a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/tokenizer_src/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/tokenizer_src/vocab.json
   - name: FP32/machine-translation-nar-de-en-0002.xml
-    size: 1006197
-    checksum: 4665e0b622dc6fc69bd238da8926589aaf70fc029f57e7a17c0280b7848fa5948f0aa50163e803d4c8252015e3d9a10f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
+    size: 844802
+    checksum: 0094e1b2d5555a29369179056b13480914b524e9a374474a73e741543d46d2afd534cc9f7d7281119af32ba05ece4077
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
   - name: FP32/machine-translation-nar-de-en-0002.bin
     size: 284547116
-    checksum: d4700b708655f89ca15fd9a206dc89ff8d57e6d66925b9f7656a5885a864fb59ca8ba0b37661c9340f54c3d02510ba44
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
+    checksum: 7f65ceef9a9a94398d5ee5e3d41b85abf953a4102467926bee7f6db4815ee1f6fb156beb10a98a0ccee312260a56e917
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
   - name: FP16/machine-translation-nar-de-en-0002.xml
-    size: 1177255
-    checksum: 9d685301f73aeed4bc4514d8b8197c6de4ca4b698d93c017cf9218c2ded5c8aa0c3f42837b60d8f87f6f256a6118186f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
+    size: 1020406
+    checksum: 388e9f813c4b844f7a3ad0e9c78b06e7a0aa6355908f03b71bc3e03631def1ab62860e3e37a31acbec386330bec6dacd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
   - name: FP16/machine-translation-nar-de-en-0002.bin
     size: 142274462
-    checksum: 9dd52ed2e5d335461c767913e3aff921e16a4de46b0320ae7798ff1e62450c43d7c310d800f5c5f6d540e4c809a2339c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
+    checksum: 7ef40d312831a91420ec8e6244c0309389f530ceb6ebd4e71d316c09dc08c97d0f05144a2323251b635b84a7fa67823b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
 input_info:
   - name: tokens
     shape: [1, 150]

@@ -17,21 +17,21 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 201989
-    checksum: dfebf62dc849a35de0e66ab6acb284f252bdcb2ec8abb02f7c8e6d0fba96835c54e78b693c0f259a2d3823d5b4cad61e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 139009
+    checksum: c1504a04ae6d1f3d3e32d119a9c392976252f3064d6869a77d9fd8af11cd743ea52ca8a14ff7a1f46a09f96e2f1c5c02
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
-    size: 4229912
-    checksum: c972689d6feb37b6825d1e137907d37d8ea244819623263a0d1001b706b00bbdde6be80a87f90cc31f82c0f003a88443
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
+    size: 4209924
+    checksum: 0cdee73673c46e16bd37e5d49e04860dcc8f4b87e120d95ce55e7d3ddab75c667e5fcada85b92d47ac096c66601220ab
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 287928
-    checksum: b156da558d3f6fadee6fe557dcb2815bc0be4c949cf646e0d132bf5848d7be6e0328a52e4cd215c0d53b047d6a65f221
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 211881
+    checksum: 70a26d9ab9b02720202f4b794c90c8c88c94949ef1045891f3f30e392a9c9a81f33d6fafb6dd44711e278663e47c71bc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
-    size: 2801562
-    checksum: 7d52dc06f502608fbf5ed099a285943bee55bd9b19ebaa9ec87c68340dfe1c81d219961c8b8552efbda1cfcaf65e1d88
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
+    size: 2791568
+    checksum: d73a8f7685c56e8aac51c3199fd7778c8fc8a03711a8af6a4b17fa5538b0c9341f6ea000b1d991575a81a6ee434ec78a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
 input_info:
   - name: input.1
     shape: [1, 3, 224, 224]

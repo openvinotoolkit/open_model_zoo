@@ -18,21 +18,29 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-generation.xml
-    size: 234226
-    checksum: 4f4b3f102feebc25082ef4c9b95c14bb1366094be8167a6357de9887fcf163b3caa815b98ec7214d05a348fa4fed38d0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.xml
+    size: 198474
+    checksum: 89171455a4b853a10762d26f94eecbb238c596813e6480e41c0b17c2be0f3e81a657dce882ac63dd331359988f22a0fb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.xml
   - name: FP32/text-to-speech-en-multi-0001-generation.bin
     size: 51082848
     checksum: 3932ce13021fb9356d042d57eb9c09a4fb771e8a8a8e816c23c0b86ada74b26fe63a32aac198780c97d8c291a02b95fa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.bin
   - name: FP16/text-to-speech-en-multi-0001-generation.xml
-    size: 301502
-    checksum: dcc8821c7640f4b5f70927f129c2696b033a6f07b3ddfa573825b84563474cf7c600a39d717342f31679048e5ba586f3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.xml
+    size: 267588
+    checksum: 4b7ddc7801ad750c44306d485f38228d6204cdbcdb7dcbaf094244e8547185fc420f31fd4cca3c1b68aada74041dcad1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.xml
   - name: FP16/text-to-speech-en-multi-0001-generation.bin
     size: 25541524
     checksum: a8cab15fe6902685566b8908338761c38873459b88d9cfb78679373b0e7923436b6a95b3376175b81d5202ce0f88db4d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
+  - name: FP16-INT8/text-to-speech-en-multi-0001-generation.xml
+    size: 428920
+    checksum: 3cb8e34e496d96ae54f2f10ad8a34659bca69f51a7a3eb7b0938382325d476faaffbe0758cdb7ac90ad36f7507f19a36
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16-INT8/text-to-speech-en-multi-0001-generation.xml
+  - name: FP16-INT8/text-to-speech-en-multi-0001-generation.bin
+    size: 12802797
+    checksum: 7d98ff31389615176d3c89b94ae328ec156716ee3fe66cdf3da3f719a3648bc161cdd99f428a7d0d27e980ac996bcb30
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16-INT8/text-to-speech-en-multi-0001-generation.bin
 input_info:
   - name: mel
     shape: [1, 80, 128]

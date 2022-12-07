@@ -18,29 +18,29 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-1040.xml
-    size: 1526866
-    checksum: fe8332797259fe6e0bfb8ccb27a4fc6b339dc9a62b7713fb929e3c4ea8ce96f8aabf0310405731e3d8f6b48e0f516aa1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.xml
+    size: 1270046
+    checksum: 90b21dd0818a225e29932cbab08bdd5bbfd593a6e002b4f0f254c67740e76f9ba6a19c1b70d3c1d060a416ce2d726ea2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.xml
   - name: FP32/instance-segmentation-security-1040.bin
     size: 52969868
-    checksum: b0b1a083fdc4b4cf4159f53b612f99b308f0c4e43763a6bdf1e4c3c49a41f3e7236ad9145627fd63fe2038a317313935
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.bin
+    checksum: 51b3a223e31383e0851814f2420b44bafc25ec5abfabeba2784c8b55a780473f9d1a63e6bfb7935376d7cf56f5de468a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP32/instance-segmentation-security-1040.bin
   - name: FP16/instance-segmentation-security-1040.xml
-    size: 1711416
-    checksum: 5edb20fa6d9018e575216c92469693a4fb54022f122c80681d19aef6cb4f0e1eed161ca22b340dda6c2b67b9e7b3d3b9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.xml
+    size: 1460047
+    checksum: e71ac488d4ff134cd25b477184c2be0b5fbd836a3b0a5482ba8e7d3bb7ae620c8df37971757b3825a819830c9efc973d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.xml
   - name: FP16/instance-segmentation-security-1040.bin
     size: 26485216
-    checksum: 574876e1775eb1d0103848f4bd3417b68fd14f1a8c10f2660018c9fe19ff8bd6aee353fa4b85411316a7ee3ea9d644e8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.bin
+    checksum: e63974e54d31382a196b0118bfe42c307e89a0beab816c4e86110735e1bae4586f42bb8a36a067cb4533476300417f74
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP16/instance-segmentation-security-1040.bin
   - name: FP16-INT8/instance-segmentation-security-1040.xml
-    size: 2144913
-    checksum: 2c13b5886340a7aa5af3c64da6e49c104a58aa96b4aef713a8876883b368dd700b1de76c41e11c4e3226397b4bb96b86
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.xml
+    size: 1851088
+    checksum: cd3251182190f137f9c1098a268aecda6207b9ea931d4bba105c03057bfc9fac16e9597d8fc98daadba09c47c9c2f228
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.xml
   - name: FP16-INT8/instance-segmentation-security-1040.bin
-    size: 15016260
-    checksum: 26d7086aab3e680a4c8b9c29c4574c2d5bc7d2e8410b57480f8ebf63d4af67b1409442fbd5a3622fbd0f5db154753a60
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.bin
+    size: 14871796
+    checksum: dc0fe4a38cfd62106e04f48cb56ee89681b413bab93a68dbb9e758a5d2362cb931a98e388a29c930cdedde47a6462fb2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-1040/FP16-INT8/instance-segmentation-security-1040.bin
 input_info:
   - name: image
     shape: [1, 3, 608, 608]

@@ -17,29 +17,29 @@ description: >-
 task_type: head_pose_estimation
 files:
   - name: FP32/head-pose-estimation-adas-0001.xml
-    size: 64986
-    checksum: ba3dabba3495ea15c66fed3fff8f9c1ac32fd6e78688ce4df8a8dd4250afd8e191a8de6e0f59d91b64588ef0fff8a982
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    size: 53617
+    checksum: d647e8e1e9f3abd579fe265328d728fc1fdcd81a8ff8c015e0bb1478923db4728801ab4a8f30365691d923bb0cf7fa02
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
   - name: FP32/head-pose-estimation-adas-0001.bin
-    size: 7647604
-    checksum: b25273283cf83f851de276e5d9b836a3abc32485dc8ea5ee736f4e2b1d2dc86d107856da52ce160e1354c90722ecc9a3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    size: 7647616
+    checksum: d207c2ad5bc33695c6a99b187ad69c21c1c525f02eb003a4cd73db23f8ff7c7f5b97b491549b6d1b548bdc3b497a7e38
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
   - name: FP16/head-pose-estimation-adas-0001.xml
-    size: 88191
-    checksum: 7932d36cc2259e051aaa9c6e361502ec2035b72c1ba60e260afbdbbde137574b858e1c56ffdd0a3dc81ea9f74525f67a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    size: 78722
+    checksum: 9bdcfc25536b6d84c08472d5551a9f5b921faea011c716ae16d57d4d5310ffad5b5f539766cee0632d047b22e329bd3d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
   - name: FP16/head-pose-estimation-adas-0001.bin
-    size: 3823810
-    checksum: b9aac8c49fbc95c189b7e8deab18826a6593feda45f9e31a38ac5da7a1f071264c5d5a1e1d642fc75d94c51bf5c1cdaf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    size: 3823816
+    checksum: c2a0a854536e7d176082e74601cdedb3394393438fdd6adc23b9e21a261a94ffec97088014c82d8852773b699daacd58
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
   - name: FP16-INT8/head-pose-estimation-adas-0001.xml
-    size: 121174
-    checksum: 3d88236b5e297ed6f872b502ed01881b283d5b4904f1d646e3a6e6f7dc31ce1ee7c0f9d667652a88628b3883b8a6e0d6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+    size: 107492
+    checksum: f3ecb7c26f785e08d03e9a7d4fd3959adf5a1788e9e242b34aba016e3fc61a3d8deb7e5ee93e21f136a5228e14891880
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
   - name: FP16-INT8/head-pose-estimation-adas-0001.bin
-    size: 2006698
-    checksum: 46ab3bc2fd50c9629f0fca08986754a3032d7c13e5f80d4a71b52135f865e0bc582ce501f67612353e3617b1ede3c7a0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+    size: 2072900
+    checksum: 07dccea07671e5fa5bf726328b0fdda94d9cce4074053e963b2c49065a406e1715f0cfd87b97bc00e4c33a95cc0065be
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
 input_info:
   - name: data
     shape: [1, 3, 60, 60]

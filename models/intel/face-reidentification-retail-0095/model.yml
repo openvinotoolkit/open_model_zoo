@@ -17,29 +17,29 @@ description: >-
 task_type: face_recognition
 files:
   - name: FP32/face-reidentification-retail-0095.xml
-    size: 272000
-    checksum: 0f361be0769d81bfe0822933261300fa939452f3fa06e1e0fd7cbedb0fd5b210174711467ce9c483dcc55f1ff962975f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    size: 237638
+    checksum: 9f95dfd9f00ad6cc788910664be7104882b57dc58ae1517961027e24d8a4cff21dbe49095306606fa7ee7ecf5663d477
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
   - name: FP32/face-reidentification-retail-0095.bin
     size: 4427256
     checksum: 953bb75f16d4e7faa0a19700871e6107726cb83e0e062215a841848335694a1e274c61efacab81b4d240d935fe30efda
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
   - name: FP16/face-reidentification-retail-0095.xml
-    size: 382044
-    checksum: cf64003784f3f3d54bc3a37ab3c81f857505f9a764175056d02a8e2d9e0d8b97e9e7a8b672f73639e951bb9cb056af7f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    size: 350471
+    checksum: 8fb1193bcdab310ea118401a0ffa1dae20a1c793227cf9789e7982c46f511e8ffc67c02b38d9982a9fd76d0b6617b481
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
   - name: FP16/face-reidentification-retail-0095.bin
     size: 2213628
     checksum: 802a00762eb563acb377eeac0e96bc97384a0d2788e0a977414d0f235e1e1ee90e278579ff5579f32c606d2cb046482a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
   - name: FP16-INT8/face-reidentification-retail-0095.xml
-    size: 760363
-    checksum: 12e9d4eb75772513a0c3a379d200a240619e457c5024c2b88db41c178b8015dae3751207d5cb4989c2fb642311a7f40d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
+    size: 684582
+    checksum: 14739924f2e0ce956f36dc2fcb41ef9a0680387a28541eac499dc1fa970bb88c70ff65d82082b24310cdf6c49821e5a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
   - name: FP16-INT8/face-reidentification-retail-0095.bin
-    size: 1243244
-    checksum: cf376fd53a2c454cc4492fdbee661b3f8fdde0ebc3a9165235fafc01f7f4f7a119ff655d783a03f696cdff26abd26d52
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
+    size: 1196284
+    checksum: 40a959c2b1c8f6c59b13d8a5d0d073777419c24a311b14abd03a8a929ee3a95702c130d858d601477b1d10ff54abbca6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
 input_info:
   - name: '0'
     shape: [1, 3, 128, 128]

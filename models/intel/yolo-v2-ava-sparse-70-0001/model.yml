@@ -19,31 +19,31 @@ files:
   - name: parameters.yml
     size: 222
     checksum: a748263155086e1cd99d15486648d9f5ff2a5b342c3018a01f51505381b7d5d3928b40bfbb3c829994e72b020dc03413
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/parameters.yml
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/parameters.yml
   - name: FP32/yolo-v2-ava-sparse-70-0001.xml
-    size: 107088
-    checksum: fda866d8639169aacf08b50fece71b67cbdaba9b6ea1e4ca3053227e20119edbe03b6e61ccbb1b2bd68408e623aa6ed4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.xml
+    size: 85495
+    checksum: 63779239989741ed284321e2396aa2dc8a28dd8f7287b86409140d4a71dab85c378e7854e1c24e5c98a147d06a35cc7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.xml
   - name: FP32/yolo-v2-ava-sparse-70-0001.bin
     size: 202580272
     checksum: db275a2387d3950fdd782b7bce27e413b6b514da1321c87d4e21124bbf596fb92cca81d6371cef6f098a9ae66177f295
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.bin
   - name: FP16/yolo-v2-ava-sparse-70-0001.xml
-    size: 144631
-    checksum: e44a67d4789cb7806f5c06a89b2b891e1db7deb4199d666aaa2f05428e59e49317607c08cb94b46779e69f4bf0bc3966
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.xml
+    size: 125140
+    checksum: f70e22a9b7ea48877ed92fc2d5f6ef792b52b04f83344bbfc96c356b426f1398625ad5662cec65a067ef445ceddb330c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.xml
   - name: FP16/yolo-v2-ava-sparse-70-0001.bin
     size: 101290152
     checksum: 45ed3148f67cc1cc8f069e88eb490244e210f6a2573e806db1b7d606f343eb70b99b3225e39cf46a559ef70310d7162d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.bin
   - name: FP16-INT8/yolo-v2-ava-sparse-70-0001.xml
-    size: 226710
-    checksum: d5d8aad1428871845a4811526416ae75eb5fb6ad8fec56d204913c09e8fd88525bfc7614567ac2e977b45cbf663498d0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.xml
+    size: 187050
+    checksum: 6d21c5522c94e595ebdcfa053e6735c195924b0052bd694e30036e9b70b2f92e50aec4e4fb1c692d67497c43d056c7bd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.xml
   - name: FP16-INT8/yolo-v2-ava-sparse-70-0001.bin
-    size: 50739424
-    checksum: bc6aadb6721558639358b8a108ad29494ca50cdbb96af6c5776c556446c346cab0fec1e156deeb36fea645c9b29d8ef1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.bin
+    size: 50697580
+    checksum: 6570ebccca17a5a211ab7fd159f6bfe2c48d60120d6960e9da012a70d8d5f1e4125f034928299e69ef89ec9b4c09e936
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.bin
 input_info:
   - name: data
     shape: [1, 416, 416, 3]

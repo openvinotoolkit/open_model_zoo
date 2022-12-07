@@ -18,29 +18,21 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0014.xml
-    size: 159484
-    checksum: d467c9689b670ecb97fdb064466756ede1d82318547db6c5d5290aa29b78e3dac40c048cc6609e536df87cfeec2efeb7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.xml
+    size: 131370
+    checksum: fe3a67f85070601b40ce6bc4d8e191a26ad536c4f86ccc3b7d341bd302cf66176dffd1f091e66bb7952a9e779de760a1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0014/FP32/text-recognition-0014.xml
   - name: FP32/text-recognition-0014.bin
-    size: 36555624
-    checksum: a2dbaaa331f5fc765468f1fd23140b4acbc8b4fab4c0ca564f10b6c3163038e8479048a2d02b4ce98dfe262c83523c77
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.bin
+    size: 36555592
+    checksum: 3ced659dcba928eeb8e2332547a93dcafed6857cf27659acf2b2378cb37457c7214ab2ada4cd98f1d42d6817fd02f7c8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0014/FP32/text-recognition-0014.bin
   - name: FP16/text-recognition-0014.xml
-    size: 195367
-    checksum: 4e562c5f2339304b9d4b249f9e5f14c1e2905e4fdcda604be06f8905e49962aa61128d198429aaeb3a5ef415ac9eb740
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.xml
+    size: 167561
+    checksum: 7a0ae4410e8b95b72c118d827ed0b8f2415148298a31b9c644e57f4f426f08f6cec21255328f3512c2aeda46e2006f65
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0014/FP16/text-recognition-0014.xml
   - name: FP16/text-recognition-0014.bin
-    size: 18277910
-    checksum: b90e632833362b6baf018ca9f453e76df76ee77070bb836879d28371ab338e179959ba804968bdd5c9cfdf69ee177f3c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.bin
-  - name: FP16-INT8/text-recognition-0014.xml
-    size: 311249
-    checksum: ced65741e418b47da1f16de4922a4ecc19276112bee397c8ba87e682cff6049a930da9e4bef51e70eedb482de4d22c25
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.xml
-  - name: FP16-INT8/text-recognition-0014.bin
-    size: 15522818
-    checksum: 88051cfcbbb46895ca97bd8a361bdda8c5645cd4fbf507bc071371f4cf02a2827face654af480e55623d8d2fc3c91a87
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.bin
+    size: 18277878
+    checksum: 9edab91ce49361df91ba86f2a27d6b5ac03576a3c3bb5b97f5ec3c06f962748fed5d29eb2c28ea6e69a8b8a4ccbc37e7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0014/FP16/text-recognition-0014.bin
 input_info:
   - name: imgs
     shape: [1, 1, 32, 128]

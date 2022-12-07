@@ -17,29 +17,29 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/common-sign-language-0002.xml
-    size: 216302
-    checksum: 7b73ff93b2490b550dc23ab41c53259a55f203e91ddbbe683764727f197c637255fb88b2a654e186ae54d7954a7eb143
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.xml
+    size: 191214
+    checksum: fc7e4cfee64b991b57483b1401b51b7ba1a4945e35d6a1c19859f5d880d9d19dbd7355b4070811aa947b17128da39fbd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP32/common-sign-language-0002.xml
   - name: FP32/common-sign-language-0002.bin
-    size: 16425088
-    checksum: e806e2f57892df99591f632197357ac6853613836d771a19351731bac2ba56d53ac669f2dda43953d621d4191e811561
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP32/common-sign-language-0002.bin
+    size: 16437392
+    checksum: a64869f774e2d559c63a6d35228660a00c1d1603b4a98fd9ca59feee55e4788ef7d0418f8d13fa792707df076021ccd4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP32/common-sign-language-0002.bin
   - name: FP16/common-sign-language-0002.xml
-    size: 292605
-    checksum: 9914f0f548fb10aef70196883341c7b2558a31abb7a7b045fb3f2a2cc84d190afbea5ce85865bebb9abc4099c6930136
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.xml
+    size: 269757
+    checksum: 45dc3756665796d9839d3f6d27e75869fdcf5a9efeced2bdd63d31470d63ee686481e2f08876b58bde52432bd46a8003
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP16/common-sign-language-0002.xml
   - name: FP16/common-sign-language-0002.bin
-    size: 8212556
-    checksum: e3f8c92071ae43daf8a370512515d768d17b808f6c230dbb8193cb735799817532b8cdb637320ae5f8f92e34114a2a70
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16/common-sign-language-0002.bin
+    size: 8218716
+    checksum: 47f49486cd0451c0eb12de9f1343d63c83bcfa669b813b1e2f7b647ff9c6e59980d67a63a9db0fa164c03bcf50c9d083
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP16/common-sign-language-0002.bin
   - name: FP16-INT8/common-sign-language-0002.xml
-    size: 595031
-    checksum: e60324db2d3dfa211ec9ffaf9744372eeacf473795c7c4e387a5e136678cabb3fe7d14ed9f1e3f37f01ea670ce28387e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.xml
+    size: 537748
+    checksum: 34d5f7ba616770012b2f2985004c7e09cf403eee05158a484f5dd8652bbf4ef2262a14a631e54654f672dbea90d7e669
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP16-INT8/common-sign-language-0002.xml
   - name: FP16-INT8/common-sign-language-0002.bin
-    size: 4293740
-    checksum: 532fc1099ea731ef10cac1cd64f0298b302197b199b63e6495ac2c6e55be04ea119dedfd0ad1b6ebdd5cced2001c4c15
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/common-sign-language-0002/FP16-INT8/common-sign-language-0002.bin
+    size: 4227092
+    checksum: d8e7977ba1ce8f14ac12ab7c0fe0f3904f145aa21110a4235673efa3e825806716713ef247ef06348d56c5ead071f681
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/common-sign-language-0002/FP16-INT8/common-sign-language-0002.bin
 input_info:
   - name: input
     shape: [1, 3, 8, 224, 224]
