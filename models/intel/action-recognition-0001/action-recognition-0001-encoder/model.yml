@@ -18,29 +18,29 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/action-recognition-0001-encoder.xml
-    size: 115932
-    checksum: 5b54319aab7fae742484a0c8bdea8ffac35cbabf168cfa54f3bb36db6ee1a3f84eecca6acf6abcbb1c65804b118c4e4e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
+    size: 101957
+    checksum: 6bb349961287a76587a9cd4b560b10cbd5c1fb6c5a13df62fada82ce306fac69eac3978a0985b753ed4d4cc7992b5480
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
   - name: FP32/action-recognition-0001-encoder.bin
     size: 85104652
     checksum: 34a8a87ef9c06cf2dd430f8d63998999489a934986fecc9c5dba442a2aed101eda59a14d11e63825fa4e5346fdfb4d06
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
   - name: FP16/action-recognition-0001-encoder.xml
-    size: 157155
-    checksum: b08fee7aaf15735596475bc87ab290ea1a374df93fee5411837b47ef5c4e3d1e456641f6b5f219d51a628ceed29886f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
+    size: 143428
+    checksum: 18788c37583b622c7f47e6d286e77f3db5ab6cbe405c1ff0d51d88aa8bfdc293e1f939d09044071e09fc46bcb89b12dc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
   - name: FP16/action-recognition-0001-encoder.bin
     size: 42552326
     checksum: ba4ed6f218b5b6c2ee56009019453acef0f86e4dfefa5e354c10c60beecea5b4ed7ec830608936a63315193c5aa3f133
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
   - name: FP16-INT8/action-recognition-0001-encoder.xml
-    size: 313916
-    checksum: a86f1ce8f7e92885ae73f9ca45a909c89d67b0b4e6267316db635c8b342a8bcd16fcd7699cb0f3b3728912f5a802f3f7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.xml
+    size: 264910
+    checksum: ef3d030bdcd4c2b24d5aa32604428ebd8678d184859df87bf1345255e4357389c371aa9d1cff3f486f0c877a9024343b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.xml
   - name: FP16-INT8/action-recognition-0001-encoder.bin
-    size: 21353070
-    checksum: d5c38ad03f2327f2c81fb071d157c25a1c2a5724a7438beb5133b6230fbf646aff00ccd755d860e755e7b833bfe9d97c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.bin
+    size: 21319022
+    checksum: 13ec38f868260e91f1393e0fe5143ff2b1ed0c16b45790a8ee913f1f067d37c8fbf6a112465b9d55f825558a20be5768
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.bin
 input_info:
   - name: '0'
     shape: [1, 3, 224, 224]

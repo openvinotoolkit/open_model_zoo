@@ -1,0 +1,52 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  online version of MS-TCN++(multi-stage temporal convolutional network)
+task_type: action_recognition
+files:
+  - name: FP32/smartlab-sequence-modelling-0002.xml
+    size: 521472
+    checksum: daf0c2960373294f66845c1342e3181e685275ceedd11794ecaa2aac79c3716a69e088b93a23b9e75b4735311a9c4e1a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0002/FP32/smartlab-sequence-modelling-0002.xml
+  - name: FP32/smartlab-sequence-modelling-0002.bin
+    size: 3935032
+    checksum: 8e5aa54e5d047c13b1b453751511507a5fb852171baf75d609d4192c3bfee0e238e9545d3f77d0b45c2dc4208e4eca27
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0002/FP32/smartlab-sequence-modelling-0002.bin
+  - name: FP16/smartlab-sequence-modelling-0002.xml
+    size: 639834
+    checksum: 445fb62dc99269ed94a67c0db15ec99f5c68850721924fe75af4bb05a2f3cb5b584903f600df104f00a0592b715c5d2c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0002/FP16/smartlab-sequence-modelling-0002.xml
+  - name: FP16/smartlab-sequence-modelling-0002.bin
+    size: 1967736
+    checksum: 5e6d34fde448520db1f48c94367240ee35e26ae14fa970e9db19058ff13ed583d39c49982b764a7efc2a6bf170d7ee31
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0002/FP16/smartlab-sequence-modelling-0002.bin
+input_info:
+  - name: input
+    shape: [1, 1152, 24]
+    layout: NWH
+  - name: fhis_in_0
+    shape: [12, 64, 2048]
+    layout: CHW
+  - name: fhis_in_1
+    shape: [11, 64, 2048]
+    layout: CHW
+  - name: fhis_in_2
+    shape: [11, 64, 2048]
+    layout: CHW
+  - name: fhis_in_3
+    shape: [11, 64, 2048]
+    layout: CHW
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

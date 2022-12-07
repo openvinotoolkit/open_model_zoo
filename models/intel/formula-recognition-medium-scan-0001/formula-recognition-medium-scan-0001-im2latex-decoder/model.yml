@@ -19,23 +19,23 @@ files:
   - name: vocab.json
     size: 3930
     checksum: af08d997a4cfe1e42a58bf581ae6afda7fcb16ed6618609f3d891190bb812983a95ea240d82b913017a4779ccee36963
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 56442
-    checksum: e1ed95edc8fbaa80d92d0e79561a62eeca3e02bd73ca07cb884fd34030f2dcd55d54add92a42df244d558aaf0a865194
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 45330
+    checksum: f08f387eaa61e28f54ec785c6a0b531a1d55bad218562c37a9214a6dd8efc36daa960ace48d5209c287b3c647e9aca5a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
     size: 10252364
     checksum: e2645951b8541fb7281a1593fb4ef85ba97cd6fa7d0f53d56c2907e34910cb1dcd617813695b26ac65253828e04369a7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 63641
-    checksum: 67601df0926d92ff1d55dd2acc6ffa3645636a8f80702a48454591d3d9de03f97c427699c92c979568c8c9613c3ab0e0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 52876
+    checksum: 67693f648bc82ff301b9e1e7fa113163ab7910476929376295a91c364334f78bbb9f6df6543dadca1345271e26795a9a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
     size: 5126242
     checksum: b56e7dc4b8b21c358846f1b9a8d79bc8c67952a08b674ad624370fe568ae216ffbf424ee380f152eba9f350ba34980c6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
 input_info:
   - name: dec_st_c
     shape: [1, 512]

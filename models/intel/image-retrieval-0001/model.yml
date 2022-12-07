@@ -18,29 +18,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/image-retrieval-0001.xml
-    size: 191769
-    checksum: c4576fecf4df7a41b06c3304ae0ce2f99ff6e2c80b2cdf753ec17052d2d0f5b6aa918770c852f6ea4be6036b939bbd7d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP32/image-retrieval-0001.xml
+    size: 154989
+    checksum: c4b001ac8dd4966d1cd88a1123882880675b31c154a8cb23fb2e3affeca2bbad27c5ffaa99591146ab0481742798f370
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.xml
   - name: FP32/image-retrieval-0001.bin
-    size: 10139196
-    checksum: 8b32b8bcd0d54302fd0bddab3ae93322cf70d397b69d06daa5efa28e219988368c7d14df4d0ee5496b5bd97e1fdaed21
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP32/image-retrieval-0001.bin
+    size: 10139192
+    checksum: 1ccfc2b6b16b7ee979a37ed128679249fd4d77ac12b581b3ff5327ef36bedd9c632aae266ef9239083084452f8174dc8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.bin
   - name: FP16/image-retrieval-0001.xml
-    size: 253636
-    checksum: a0de97dc5cddff49bf75314e97c2d2796dc2de03eaa366179ab1515b0f46c664faf9f39e30264d1f6834629f2e214858
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP16/image-retrieval-0001.xml
+    size: 219486
+    checksum: 952bbad2c31814cbee25d26d3c00450296d543b4c92f2d426230d29af4d4d14b4bc18e68c7d225b231765a5ac92acf13
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.xml
   - name: FP16/image-retrieval-0001.bin
-    size: 5069682
-    checksum: 1950afcd71cc5cf0aa07762fc7ef8e0b6099cd1518a8b65d32d2e01bd80083d8dc6d1e8aa8adbe4a632b93d377530c4a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP16/image-retrieval-0001.bin
+    size: 5069680
+    checksum: 7557766403cddb8cae3af356d6eca91db44f2cd1095236aa8a678856a449282ba562784abfc63377b70bd293e88623ff
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.bin
   - name: FP16-INT8/image-retrieval-0001.xml
-    size: 485435
-    checksum: 5ce975a03bd13170b4e56e63c8a58d6c817dbe9a9ed1e3adab56397168238f4f80d779f8f11f722292509112a03a3da7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
+    size: 441343
+    checksum: 1020635dddf15b2e993cdc155ac6d5f75d67b283a01130fc8222e871f09c3323e7da80bd0c4ab2cdaa84b6f57164b14e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
   - name: FP16-INT8/image-retrieval-0001.bin
-    size: 2729401
-    checksum: 64a62cd48f41038983aaf9c0fce79fd0c89af08f6ef904ac89b711ac011344e9d77c77b232f6eee286a8e75d56ec70e1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
+    size: 2660048
+    checksum: e99ba88630c7c71245b032e7f4a5c49655934fdb250addb1cdaf184b239e07d6c0689e0a97b4393ee335ab9872ab7d57
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
 input_info:
   - name: Placeholder
     shape: [1, 224, 224, 3]

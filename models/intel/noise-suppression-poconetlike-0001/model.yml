@@ -18,21 +18,21 @@ description: >-
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-poconetlike-0001.xml
-    size: 1386608
-    checksum: 0fb8f52a61777161228b078fe11baca4fffc4e3253e8416079e476aaf7cf62d9c55b9571554f112903f785914befcf40
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
+    size: 1118674
+    checksum: 7dbdecfb22cfdf3935534f669e1b2aed46cf79206cd9c0d3c0a534e1ad5b7bcada88f90863956646af251d25a7d1400f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
   - name: FP32/noise-suppression-poconetlike-0001.bin
     size: 29589476
-    checksum: ace1743c102be2e6d8f7c82641ceb4dff0045e48afc8c0b9a4bef81693321ae39f787a6b04cc90978cd6caf1ce1de9f1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
+    checksum: 732cf191d8a0b394b35ece4b46930149ba9921afee5d247627d5441c4cbe1a31450e48f656aa2f4f129357b08866a5e4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
   - name: FP16/noise-suppression-poconetlike-0001.xml
-    size: 1525944
-    checksum: 6169d7f2176d52a194ddc45200dd31c0b58b3718d5f1dcfab32748180eb17d764ad044c30d71c76fda290b73b19a578e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
+    size: 1264177
+    checksum: e6f5d2e2e7f104b9d95c2bac05b9109adbb6bfb2d30b31fb56e3621bbf44bb519826ba2bb18a81ef58e1efc85fba6383
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
   - name: FP16/noise-suppression-poconetlike-0001.bin
     size: 14795010
-    checksum: 3599121b3f7eddac7bb81e0186bace4f23631e4ecd99b7985812a9dd24f2c4c08322b5023e76ec6e11309c263ed88594
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
+    checksum: da051918ec934f4449a6fb4721fa70d806ce016149bb2be2de38eede61202874f2ccc53147a3a90d7d54f52540305190
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
 input_info:
   - name: input
     shape: [1, 2048]

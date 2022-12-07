@@ -1,0 +1,45 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  A classifier of taking two-fearture-map vectors and outputs 3-class (noise_action
+  -  put_take -  adjust_rider) probability. Feature-map vectores are from outputs
+  of encoders with different views
+task_type: action_recognition
+files:
+  - name: FP32/smartlab-action-recognition-0001-decoder.xml
+    size: 20470
+    checksum: e87c28568806272d04c487c2a0d7dac013781bccf7ed332b06aee2b9ea649e0fd21c460c71e0a68e6e30816cb67cd7d7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-decoder/FP32/smartlab-action-recognition-0001-decoder.xml
+  - name: FP32/smartlab-action-recognition-0001-decoder.bin
+    size: 2663508
+    checksum: 4cf1b44a441aef53e5bd0c48be49864115b5ce66460fb206e4a58adacb81ff65aa09c41d5fb01f32a3c759f454330cda
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-decoder/FP32/smartlab-action-recognition-0001-decoder.bin
+  - name: FP16/smartlab-action-recognition-0001-decoder.xml
+    size: 22642
+    checksum: 3160a08fd919a9b65de3994d0e798e4329fd367dd5e50c1a4f5434c99de90f2564a26f7df7e8aef79356c09fc4084889
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-decoder/FP16/smartlab-action-recognition-0001-decoder.xml
+  - name: FP16/smartlab-action-recognition-0001-decoder.bin
+    size: 1331790
+    checksum: 6881a8af3bea1b24ff21172bd1f0e8fbea8fdf9cd93e6e9cf9f308f0396d884803679a824ee4875d9ab1e46b4b4e563b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-decoder/FP16/smartlab-action-recognition-0001-decoder.bin
+input_info:
+  - name: input_feature_1
+    shape: [1, 576]
+    layout: NC
+  - name: input_feature_2
+    shape: [1, 576]
+    layout: NC
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
