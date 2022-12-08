@@ -87,8 +87,8 @@ inline ActionDetection::NormalizedBBox ActionDetection::GeneratePriorBox(int pos
                                                                          int step,
                                                                          const cv::Size2f& anchor,
                                                                          const cv::Size& blob_size) const {
-    const float row = static_cast<float>(pos / blob_size.width);
-    const float col = static_cast<float>(pos % blob_size.width);
+    const int row = pos / blob_size.width;
+    const int col = pos % blob_size.width;
 
     const float center_x = (col + 0.5f) * static_cast<float>(step);
     const float center_y = (row + 0.5f) * static_cast<float>(step);
