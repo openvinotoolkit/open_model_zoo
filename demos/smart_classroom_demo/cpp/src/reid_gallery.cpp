@@ -139,10 +139,10 @@ size_t EmbeddingsGallery::size() const {
     return identities.size();
 }
 
-std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const  {
+std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const {
     std::vector<std::string> map;
     map.reserve(identities.size());
-    for (const auto& item : identities)  {
+    for (const auto& item : identities) {
         map.emplace_back(item.label);
     }
     return map;

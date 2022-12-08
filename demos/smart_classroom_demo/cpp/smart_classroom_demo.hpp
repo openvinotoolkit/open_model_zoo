@@ -18,8 +18,8 @@ static const char help_message[] = "Print a usage message.";
 static const char read_limit_message[] = "Optional. Read length limit before stopping or restarting reading the input.";
 static const char person_action_detection_model_message[] = "Required. Path to the Person/Action Detection Retail model (.xml) file.";
 static const char face_detection_model_message[] = "Required. Path to the Face Detection model (.xml) file.";
-static const char facial_landmarks_model_message[] = "Required. Path to the Facial Landmarks Regression Retail model (.xml) file.";
-static const char face_reid_model_message[] = "Required. Path to the Face Reidentification Retail model (.xml) file.";
+static const char facial_landmarks_model_message[] = "Optional. Path to the Facial Landmarks Regression Retail model (.xml) file.";
+static const char face_reid_model_message[] = "Optional. Path to the Face Reidentification Retail model (.xml) file.";
 static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "
                                                              "(the list of available devices is shown below). Default value is CPU. "
                                                              "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -42,7 +42,7 @@ static const char person_threshold_output_message[] = "Optional. Probability thr
 static const char action_threshold_output_message[] = "Optional. Probability threshold for action recognition.";
 static const char threshold_output_message_face_reid[] = "Optional. Cosine distance threshold between two vectors for face reidentification.";
 static const char reid_gallery_path_message[] = "Optional. Path to a faces gallery in .json format.";
-static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in.";
+static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char input_image_height_output_message[] = "Optional. Input image height for face detector.";

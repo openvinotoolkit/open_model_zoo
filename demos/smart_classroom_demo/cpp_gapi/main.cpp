@@ -149,14 +149,15 @@ int main(int argc, char* argv[]) {
         cv::gapi::GNetPackage networks;
 
         /** Configure nets **/
+        cv::Size act_net_in_size;
         cv::Scalar reid_net_in_size;
-        config::configNets(netsFlags, networks, reid_net_in_size);
+        config::configNets(netsFlags, networks, act_net_in_size, reid_net_in_size);
 
         /** Configure and create action detector **/
         std::shared_ptr<ActionDetection> act_det_ptr;
         if (!ad_model_path.empty()) {
-            act_det_ptr = config::createActDetPtr(config::isNetForSixActions(ad_model_path),
-                                                  frame_size,
+            act_det_ptr = config::createActDetPtr(ad_model_path,
+                                                  act_net_in_size,
                                                   const_params.actions_map.size(),
                                                   FLAGS_t_ad,
                                                   FLAGS_t_ar);
@@ -184,6 +185,16 @@ int main(int argc, char* argv[]) {
         if (const_params.actions_type == TEACHER && !face_rec_ptr->LabelExists(const_params.teacher_id)) {
             slog::err << "Teacher id does not exist in the gallery!" << slog::endl;
             return 1;
+        }
+        if (!FLAGS_ad.empty()) {
+            if (const_params.actions_type != STUDENT) {
+                slog::err << "-ad requires -teacher_id and -a_top to be unset" << slog::endl;
+                return 1;
+            }
+            if (FLAGS_fg.empty()) {
+                slog::err << "-ad requires -fg to be set" << slog::endl;
+                return 1;
+            }
         }
 
         /** ---------------- Main graph of demo ---------------- **/

@@ -544,6 +544,16 @@ int main(int argc, char* argv[]) {
         const auto actions_type = FLAGS_teacher_id.empty() ?
             (FLAGS_a_top > 0 ? TOP_K : STUDENT) :
             TEACHER;
+        if (!FLAGS_ad.empty()) {
+            if (actions_type != STUDENT) {
+                slog::err << "-ad requires -teacher_id and -a_top to be unset" << slog::endl;
+                return 1;
+            }
+            if (FLAGS_fg.empty()) {
+                slog::err << "-ad requires -fg to be set" << slog::endl;
+                return 1;
+            }
+        }
         const auto actions_map = actions_type == STUDENT ?
             split(FLAGS_student_ac, ',') : actions_type == TOP_K ?
             split(FLAGS_top_ac, ',') :

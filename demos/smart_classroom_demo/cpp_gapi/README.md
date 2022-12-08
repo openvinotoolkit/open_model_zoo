@@ -72,19 +72,20 @@ Options:
     -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                          Optional. Enable reading the input in a loop.
     -read_limit                    Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                    Optional. Name of output to save.
+    -o "<path>"                    Optional. Name of the output file(s) to save.
     -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
     -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
     -m_lm '<path>'                 Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
     -m_reid '<path>'               Required. Path to the Face Reidentification Retail model (.xml) file.
-    -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU.
-    -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU.
-    -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU.
-    -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU.
+          Or
+    -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
     -r                             Optional. Output Inference results as raw values.
-    -ad                            Optional. Output file name to save per-person action statistics in.
+    -ad                            Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set
     -t_ad                          Optional. Probability threshold for person/action detection.
     -t_ar                          Optional. Probability threshold for action recognition.
     -t_fd                          Optional. Probability threshold for face detections.

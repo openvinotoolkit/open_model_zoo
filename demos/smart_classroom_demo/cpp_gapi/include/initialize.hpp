@@ -74,14 +74,14 @@ bool isNetForSixActions(const std::string& model_path) {
     return model_path.at(model_path.size() - 5) == '6';
 }
 
-std::shared_ptr<ActionDetection> createActDetPtr(const bool net_with_six_actions,
+std::shared_ptr<ActionDetection> createActDetPtr(const std::string& ad_model_path,
                                                  const cv::Size frame_size,
                                                  const size_t actions_map_size,
                                                  const double t_ad,
                                                  const double t_ar) {
     // Load action detector
     ActionDetectorConfig action_config;
-    action_config.net_with_six_actions = net_with_six_actions;
+    action_config.net_with_six_actions = config::isNetForSixActions(ad_model_path);
     action_config.detection_confidence_threshold = static_cast<float>(t_ad);
     action_config.action_confidence_threshold = static_cast<float>(t_ar);
     action_config.num_action_classes = actions_map_size;
@@ -188,7 +188,7 @@ void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string&
     }
 }
 
-void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv::Scalar& reid_net_in_size) {
+void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv::Size& act_net_in_size, cv::Scalar& reid_net_in_size) {
     if (!flags.m_act.empty()) {
         const std::array<std::string, 7> action_detector_5 = {"mbox_loc1/out/conv/flat",
                                                               "mbox_main_conf/out/conv/flat/softmax/flat",
@@ -217,6 +217,10 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
         // clang-format on
 
         networks += cv::gapi::networks(action_net);
+        InferenceEngine::Core core;
+        const auto layerData = core.ReadNetwork(flags.m_act).getInputsInfo().begin()->second;
+        auto layerDims = layerData->getTensorDesc().getDims();
+        act_net_in_size = {int(layerDims[3]), int(layerDims[2])};
         slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act
                    << " device." << slog::endl;
     } else {
