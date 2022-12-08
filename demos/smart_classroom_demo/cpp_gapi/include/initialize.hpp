@@ -20,8 +20,6 @@
 #include "kernel_packages.hpp"
 #include "recognizer.hpp"
 
-#include <inference_engine.hpp>
-
 namespace nets {
 G_API_NET(FaceDetector, <cv::GMat(cv::GMat)>, "face-detector");
 G_API_NET(LandmarksDetector, <cv::GMat(cv::GMat)>, "landmarks-detector");
@@ -217,10 +215,10 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
         // clang-format on
 
         networks += cv::gapi::networks(action_net);
-        InferenceEngine::Core core;
-        const auto layerData = core.ReadNetwork(flags.m_act).getInputsInfo().begin()->second;
-        auto layerDims = layerData->getTensorDesc().getDims();
-        act_net_in_size = {int(layerDims[3]), int(layerDims[2])};
+        ov::Core core;
+        const ov::Output<ov::Node>& input = core.read_model(flags.m_act)->input();
+        const ov::Shape& in_shape = input.get_shape();
+        act_net_in_size = {int(in_shape[2]), int(in_shape[1])};
         slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act
                    << " device." << slog::endl;
     } else {
@@ -271,13 +269,13 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
         } else {
             slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
-        InferenceEngine::Core core;
-        const auto layerData = core.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
-        const auto layerDims = layerData->getTensorDesc().getDims();
-        reid_net_in_size = {static_cast<double>(layerDims[0]),
-                            static_cast<double>(layerDims[1]),
-                            static_cast<double>(layerDims[2]),
-                            static_cast<double>(layerDims[3])};
+        ov::Core core;
+        const ov::Output<ov::Node>& input = core.read_model(flags.m_reid)->input();
+        const ov::Shape& in_shape = input.get_shape();
+        reid_net_in_size = {static_cast<double>(in_shape[0]),
+                            static_cast<double>(in_shape[1]),
+                            static_cast<double>(in_shape[2]),
+                            static_cast<double>(in_shape[3])};
     }
 }
 }  // namespace config
