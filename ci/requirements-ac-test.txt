@@ -1,71 +1,52 @@
 # use update-requirements.py to update this file
 
-atomicwrites==1.4.0
+atomicwrites==1.4.1
     # via -r tools/accuracy_checker/requirements-test.in
-attrs==21.2.0
+attrs==22.1.0
     # via pytest
-certifi==2021.5.30
+certifi==2022.9.24
     # via requests
-charset-normalizer==2.0.4
+charset-normalizer==2.1.1
     # via requests
-click==8.0.1
-    # via
-    #   nltk
-    #   sacremoses
-cycler==0.10.0
-    # via matplotlib
-dataclasses==0.8
-    # via transformers
-decorator==4.4.2
-    # via networkx
+click==8.1.3
+    # via nltk
 defusedxml==0.7.1
     # via -r tools/accuracy_checker/requirements-core.in
-fast-ctc-decode==0.3.0
-    # via -r tools/accuracy_checker/requirements.in
-filelock==3.0.12
+fast-ctc-decode==0.3.2
+    # via -r tools/accuracy_checker/requirements-extra.in
+filelock==3.8.1
     # via
     #   huggingface-hub
     #   transformers
-huggingface-hub==0.0.16
+huggingface-hub==0.11.1
     # via transformers
-idna==3.2
+idna==3.4
     # via requests
-imagecodecs==2020.5.30 ; python_version < "3.7"
-    # via -r tools/accuracy_checker/requirements.in
-imageio==2.9.0
+imagecodecs==2022.2.22 ; python_version >= "3.8"
+    # via -r tools/accuracy_checker/requirements-extra.in
+imageio==2.22.4
     # via scikit-image
-importlib-metadata==4.8.1
-    # via
-    #   click
-    #   huggingface-hub
-    #   pluggy
-    #   pytest
-    #   transformers
-joblib==1.0.1
+iniconfig==1.1.1
+    # via pytest
+joblib==1.2.0
     # via
     #   nltk
-    #   sacremoses
     #   scikit-learn
-kiwisolver==1.3.1
-    # via matplotlib
-lmdb==1.2.1
-    # via -r tools/accuracy_checker/requirements.in
-matplotlib==3.3.4
-    # via scikit-image
-more-itertools==8.9.0
-    # via pytest
-networkx==2.5.1
-    # via scikit-image
-nibabel==3.2.1
-    # via -r tools/accuracy_checker/requirements.in
-nltk==3.6.2
-    # via -r tools/accuracy_checker/requirements.in
-numpy==1.19.5
+lmdb==1.3.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+networkx==2.8 ; python_version >= "3.7"
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   scikit-image
+nibabel==4.0.2
+    # via -r tools/accuracy_checker/requirements-extra.in
+nltk==3.7
+    # via -r tools/accuracy_checker/requirements-extra.in
+numpy==1.23.1
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imagecodecs
     #   imageio
-    #   matplotlib
     #   nibabel
     #   pandas
     #   parasail
@@ -76,111 +57,101 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
-openvino-telemetry==2022.1.0
+openvino-telemetry==2022.1.2
     # via -r tools/accuracy_checker/requirements-core.in
-packaging==21.0
+packaging==21.3
     # via
     #   huggingface-hub
     #   nibabel
     #   pytest
+    #   scikit-image
     #   transformers
-pandas==1.1.5
-    # via -r tools/accuracy_checker/requirements.in
-parasail==1.2.4
-    # via -r tools/accuracy_checker/requirements.in
-pillow==8.3.2
+pandas==1.3.5
+    # via -r tools/accuracy_checker/requirements-extra.in
+parasail==1.3.3 ; platform_system != "Windows"
+    # via -r tools/accuracy_checker/requirements-extra.in
+pillow==9.3.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
-    #   matplotlib
     #   scikit-image
-pluggy==0.13.1
+pluggy==1.0.0
     # via pytest
-py==1.10.0
+py==1.11.0
     # via pytest
-py-cpuinfo==8.0.0
-    # via -r tools/accuracy_checker/requirements.in
-pyclipper==1.3.0
-    # via -r tools/accuracy_checker/requirements.in
-pydicom==2.2.1
-    # via -r tools/accuracy_checker/requirements.in
-pyparsing==2.4.7
-    # via
-    #   matplotlib
-    #   packaging
-pytest==5.4.3
+py-cpuinfo==9.0.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+pyclipper==1.3.0.post4
+    # via -r tools/accuracy_checker/requirements-extra.in
+pydicom==2.3.1
+    # via -r tools/accuracy_checker/requirements-extra.in
+pyparsing==3.0.9
+    # via packaging
+pytest==7.0.1 ; python_version < "3.10"
     # via
     #   -r tools/accuracy_checker/requirements-test.in
     #   pytest-mock
 pytest-mock==2.0.0
     # via -r tools/accuracy_checker/requirements-test.in
 python-dateutil==2.8.2
-    # via
-    #   matplotlib
-    #   pandas
-pytz==2021.1
     # via pandas
-pywavelets==1.1.1
+pytz==2022.6
+    # via pandas
+pywavelets==1.4.1
     # via scikit-image
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
+    #   huggingface-hub
     #   transformers
-rawpy==0.16.0
-    # via -r tools/accuracy_checker/requirements.in
-regex==2021.8.28
+rawpy==0.17.3 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
+regex==2022.10.31
     # via
     #   nltk
-    #   sacremoses
     #   transformers
-requests==2.26.0
+requests==2.28.1
     # via
     #   huggingface-hub
     #   openvino-telemetry
     #   transformers
-sacremoses==0.0.45
-    # via transformers
-scikit-image==0.17.2
-    # via -r tools/accuracy_checker/requirements.in
+scikit-image==0.19.3 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
 scikit-learn==0.24.2
-    # via -r tools/accuracy_checker/requirements.in
-scipy==1.5.4
+    # via -r tools/accuracy_checker/requirements-extra.in
+scipy==1.8.0
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
     #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.96
-    # via -r tools/accuracy_checker/requirements.in
-shapely==1.7.1
-    # via -r tools/accuracy_checker/requirements.in
+sentencepiece==0.1.97
+    # via -r tools/accuracy_checker/requirements-extra.in
+shapely==1.8.5.post1
+    # via -r tools/accuracy_checker/requirements-extra.in
 six==1.16.0
-    # via
-    #   python-dateutil
-    #   sacremoses
-threadpoolctl==2.2.0
+    # via python-dateutil
+threadpoolctl==3.1.0
     # via scikit-learn
-tifffile==2020.9.3
+tifffile==2022.10.10
     # via scikit-image
-tokenizers==0.10.3
+tokenizers==0.13.2 ; python_version >= "3.7"
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
     #   transformers
-tqdm==4.62.2
+tomli==2.0.1
+    # via pytest
+tqdm==4.64.1
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
     #   huggingface-hub
     #   nltk
-    #   sacremoses
     #   transformers
-transformers==4.10.0
-    # via -r tools/accuracy_checker/requirements.in
-typing-extensions==3.10.0.2
-    # via
-    #   huggingface-hub
-    #   importlib-metadata
-urllib3==1.26.6
+transformers==4.25.1 ; python_version >= "3.7"
+    # via -r tools/accuracy_checker/requirements-extra.in
+typing-extensions==4.4.0
+    # via huggingface-hub
+urllib3==1.26.13
     # via requests
-wcwidth==0.2.5
-    # via pytest
-zipp==3.5.0
-    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

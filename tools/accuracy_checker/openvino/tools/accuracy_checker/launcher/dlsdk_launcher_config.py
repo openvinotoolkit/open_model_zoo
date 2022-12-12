@@ -198,6 +198,10 @@ DLSDK_LAUNCHER_PARAMETERS = {
     '_model_type': StringField(
         choices=['xml', 'blob', 'onnx', 'paddle', 'tf'],
         description='hint for model type in automatic model search', optional=True),
+    '_inference_precision_hint': StringField(
+        description='Model execution precision for device',
+        optional=True
+    )
 }
 
 

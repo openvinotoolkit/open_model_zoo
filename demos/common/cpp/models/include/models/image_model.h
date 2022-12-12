@@ -21,6 +21,7 @@
 #include <string>
 
 #include "models/model_base.h"
+#include "utils/image_utils.h"
 
 namespace ov {
 class InferRequest;
@@ -43,4 +44,6 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
+    cv::InterpolationFlags interpolationMode = cv::INTER_LINEAR;
+    RESIZE_MODE resizeMode = RESIZE_FILL;
 };

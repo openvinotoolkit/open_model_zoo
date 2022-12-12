@@ -17,7 +17,6 @@ limitations under the License.
 import json
 import sys
 from datetime import datetime
-
 import cv2
 
 from .argparser import build_arguments_parser

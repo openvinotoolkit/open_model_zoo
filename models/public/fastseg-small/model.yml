@@ -61,7 +61,11 @@ postprocessing:
     pattern: 'from .efficientnet'
     replacement: '# \g<0>'
     file: model/fastseg/model/utils.py
-
+  # replace outdated interface usage
+  - $type: regex_replace
+    pattern: 'from torch._six import container_abcs'
+    replacement: 'import collections.abc as container_abcs'
+    file: model/geffnet/conv2d_layers.py
   # disable unnecessary downloads of pretrained MobileNet weights
   - $type: regex_replace
     pattern: '\(pretrained=True\)'

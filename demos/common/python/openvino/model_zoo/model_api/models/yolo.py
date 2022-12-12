@@ -140,7 +140,7 @@ class YOLO(DetectionModel):
             class_idx = keep_idxs % params.classes
 
             for ind, obj_ind in enumerate(obj_indx):
-                row, col, n = self._get_location(obj_ind, params.sides[0], params.num)
+                row, col, n = self._get_location(obj_ind, params.sides[1], params.num)
 
                 # Process raw value to get absolute coordinates of boxes
                 raw_box = self._get_raw_box(prediction, obj_ind)
@@ -180,8 +180,8 @@ class YOLO(DetectionModel):
     def _get_absolute_det_box(box, row, col, anchors, coord_normalizer, size_normalizer):
         x = (col + box.x) / coord_normalizer[1]
         y = (row + box.y) / coord_normalizer[0]
-        width = np.exp(box.w) * anchors[0] / size_normalizer[0]
-        height = np.exp(box.h) * anchors[1] / size_normalizer[1]
+        width = np.exp(box.w) * anchors[0] / size_normalizer[1]
+        height = np.exp(box.h) * anchors[1] / size_normalizer[0]
 
         return DetectionBox(x, y, width, height)
 
@@ -477,7 +477,7 @@ class YoloV3ONNX(DetectionModel):
         resized_image = self._change_layout(resized_image)
         dict_inputs = {
             self.image_blob_name: resized_image,
-            self.image_info_blob_name: [[image.shape[0], image.shape[1]]]
+            self.image_info_blob_name: np.array([[image.shape[0], image.shape[1]]], dtype=np.float32)
         }
         return dict_inputs, meta
 

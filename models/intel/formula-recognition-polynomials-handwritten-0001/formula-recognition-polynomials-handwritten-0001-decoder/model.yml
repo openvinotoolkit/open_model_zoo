@@ -19,23 +19,23 @@ files:
   - name: vocab.json
     size: 1747
     checksum: 2b2fcc77178a679975411af460e6fcc463779674568eeabfe35b8bc93c54bdd958f64c986efad8ea726c38ae29be74ae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
-    size: 52363
-    checksum: eb6024484bbccf2073e78460a22b8e06e3c91eb65d92f1d2aec32e3b60f0665b525b4400e03a971112268c1e40036d58
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    size: 41977
+    checksum: 4d0161befde6ff928531ca63d0c13d9b0b5c0197af4a8b91fadbb76f5ee084476439eb19141ad7ad621645fa1cfa2933
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 10179548
     checksum: b320bcbaaefbe008b8784751a5c9ddf76bf8edae0b3c3241d4efcbea5b87fa00388019ad6e897058a8eee4c0d1fb2524
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
-    size: 59573
-    checksum: a57701d1c7c660bd82988b9e88a0b1a23e3ca04c9ff107982a601249728ed42dd6538e79b4e3c47f620a6a2e2627d7df
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    size: 49539
+    checksum: 0a0a3624228fddfc02f478d7a2e80624e0d19b600cc0ffa444c0d82d0a4e2c3f0814a13c4fa3201b1b65025fb3e71c25
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 5089822
     checksum: 45191a4a6264c2af12671ecea2a86dc34e83c16a951fa008e4689ee4ab588dd6df24ab78dd9e5c3e267cb362a377274d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
 input_info:
   - name: dec_st_c
     shape: [1, 512]

@@ -1,0 +1,10 @@
+description: >-
+  There are 3 models for smartlab action recogntion including two encoder models and one decoder model.
+  These models are fine-tuned with smartlab dataset to predict actions and can classfy 3 types of action including "noise_action", "put_take" and "adjust_rider".
+task_type: action_recognition
+framework: dldt
+stages_order:
+  - smartlab-action-recognition-0001-encoder-side
+  - smartlab-action-recognition-0001-encoder-top
+  - smartlab-action-recognition-0001-decoder
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

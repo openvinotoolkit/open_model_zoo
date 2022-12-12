@@ -141,7 +141,7 @@ class MaskRCNNModel(ImageModel):
         x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
         x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
 
-        raw_cls_mask = cv2.resize(raw_cls_mask, (w, h)) > 0.5
+        raw_cls_mask = cv2.resize(raw_cls_mask.astype(np.float32), (w, h)) > 0.5
         mask = raw_cls_mask.astype(np.uint8)
         # Put an object mask in an image mask.
         im_mask = np.zeros((im_h, im_w), dtype=np.uint8)

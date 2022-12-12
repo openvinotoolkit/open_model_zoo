@@ -384,7 +384,9 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
 
         auto cur_obj_id = first_obj.object_id;
         auto cur_label = first_obj.label;
-        SCR_CHECK(face_track_id_to_label.count(cur_obj_id) == 0) << " Repeating face tracks";
+        if (face_track_id_to_label.count(cur_obj_id) == 1) {
+            throw std::runtime_error("Repeating face tracks");
+        }
         face_track_id_to_label[cur_obj_id] = cur_label;
     }
     return face_track_id_to_label;
@@ -542,6 +544,16 @@ int main(int argc, char* argv[]) {
         const auto actions_type = FLAGS_teacher_id.empty() ?
             (FLAGS_a_top > 0 ? TOP_K : STUDENT) :
             TEACHER;
+        if (!FLAGS_ad.empty()) {
+            if (actions_type != STUDENT) {
+                slog::err << "-ad requires -teacher_id and -a_top to be unset" << slog::endl;
+                return 1;
+            }
+            if (FLAGS_fg.empty()) {
+                slog::err << "-ad requires -fg to be set" << slog::endl;
+                return 1;
+            }
+        }
         const auto actions_map = actions_type == STUDENT ?
             split(FLAGS_student_ac, ',') : actions_type == TOP_K ?
             split(FLAGS_top_ac, ',') :

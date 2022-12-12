@@ -50,7 +50,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         if (channels != 1 && channels != 3) {
             throw std::runtime_error("Unsupported number of channels");
         }
-        img = resizeImageExt(img, width, height);
+        img = resizeImageExt(img, width, height, resizeMode, interpolationMode);
     }
     request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
     return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);

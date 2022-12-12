@@ -2,61 +2,49 @@
 
 addict==2.4.0
     # via -r ci/requirements-openvino-dev.in
-certifi==2021.10.8
+certifi==2022.9.24
     # via requests
-charset-normalizer==2.0.8
+charset-normalizer==2.1.1
     # via requests
-click==8.0.3
+click==8.1.3
     # via nltk
-colorama==0.4.4
-    # via
-    #   click
-    #   tqdm
-cycler==0.11.0
-    # via matplotlib
-decorator==4.4.2
-    # via networkx
 defusedxml==0.7.1
     # via -r ci/requirements-openvino-dev.in
-editdistance==0.6.0
+fast-ctc-decode==0.3.2
     # via -r ci/requirements-openvino-dev.in
-fast-ctc-decode==0.3.0
-    # via -r ci/requirements-openvino-dev.in
-future==0.18.2
-    # via hyperopt
-hyperopt==0.1.2
-    # via -r ci/requirements-openvino-dev.in
-idna==3.3
+filelock==3.8.1
+    # via
+    #   huggingface-hub
+    #   transformers
+huggingface-hub==0.11.1
+    # via transformers
+idna==3.4
     # via requests
-imageio==2.13.1
+imagecodecs==2022.2.22 ; python_version >= "3.8"
+    # via -r ci/requirements-openvino-dev.in
+imageio==2.22.4
     # via scikit-image
-importlib-metadata==4.8.2
-    # via click
-joblib==1.1.0
+joblib==1.2.0
     # via
     #   nltk
     #   scikit-learn
 jstyleson==0.0.2
     # via -r ci/requirements-openvino-dev.in
-kiwisolver==1.3.1
-    # via matplotlib
-matplotlib==3.3.4
-    # via scikit-image
-networkx==2.5.1
+lmdb==1.3.0
+    # via -r ci/requirements-openvino-dev.in
+networkx==2.8 ; python_version >= "3.7"
     # via
     #   -r ci/requirements-openvino-dev.in
-    #   hyperopt
     #   scikit-image
-nibabel==3.2.1
+nibabel==4.0.2
     # via -r ci/requirements-openvino-dev.in
-nltk==3.6.5
+nltk==3.7
     # via -r ci/requirements-openvino-dev.in
-numpy==1.19.5
+numpy==1.23.1
     # via
     #   -r ci/requirements-openvino-dev.in
-    #   hyperopt
+    #   imagecodecs
     #   imageio
-    #   matplotlib
     #   nibabel
     #   opencv-python
     #   openvino
@@ -68,88 +56,98 @@ numpy==1.19.5
     #   scikit-learn
     #   scipy
     #   tifffile
-opencv-python==4.5.4.60
+    #   transformers
+opencv-python==4.6.0.66
     # via -r ci/requirements-openvino-dev.in
-openvino==2021.4.2
+openvino==2022.2.0
+    # via -r ci/requirements-openvino-dev.in
+openvino-telemetry==2022.1.2
     # via -r ci/requirements-openvino-dev.in
 packaging==21.3
-    # via nibabel
+    # via
+    #   huggingface-hub
+    #   nibabel
+    #   scikit-image
+    #   transformers
 pandas==1.1.5
     # via -r ci/requirements-openvino-dev.in
-parasail==1.2.4
+parasail==1.3.3 ; platform_system != "Windows"
     # via -r ci/requirements-openvino-dev.in
-pillow==8.4.0
+pillow==9.3.0
     # via
     #   -r ci/requirements-openvino-dev.in
     #   imageio
-    #   matplotlib
     #   scikit-image
 progress==1.6
     # via -r ci/requirements-openvino-dev.in
-py-cpuinfo==8.0.0
+py-cpuinfo==9.0.0
     # via -r ci/requirements-openvino-dev.in
-pydicom==2.2.2
+pyclipper==1.3.0.post4
     # via -r ci/requirements-openvino-dev.in
-pymongo==4.0
-    # via hyperopt
-pyparsing==3.0.6
-    # via
-    #   matplotlib
-    #   packaging
+pydicom==2.3.1
+    # via -r ci/requirements-openvino-dev.in
+pyparsing==3.0.9
+    # via packaging
 python-dateutil==2.8.2
-    # via
-    #   matplotlib
-    #   pandas
-pytz==2021.3
     # via pandas
-pywavelets==1.1.1
+pytz==2022.6
+    # via pandas
+pywavelets==1.4.1
     # via scikit-image
 pyyaml==6.0
     # via
     #   -r ci/requirements-openvino-dev.in
-    #   yamlloader
-rawpy==0.16.0
+    #   huggingface-hub
+    #   transformers
+rawpy==0.17.3 ; python_version >= "3.7"
     # via -r ci/requirements-openvino-dev.in
-regex==2021.11.10
-    # via nltk
-requests==2.26.0
-    # via -r ci/requirements-openvino-dev.in
-scikit-image==0.17.2
+regex==2022.10.31
+    # via
+    #   nltk
+    #   transformers
+requests==2.28.1
+    # via
+    #   -r ci/requirements-openvino-dev.in
+    #   huggingface-hub
+    #   openvino-telemetry
+    #   transformers
+scikit-image==0.19.3 ; python_version >= "3.7"
     # via -r ci/requirements-openvino-dev.in
 scikit-learn==0.24.2
     # via -r ci/requirements-openvino-dev.in
 scipy==1.5.4
     # via
     #   -r ci/requirements-openvino-dev.in
-    #   hyperopt
     #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.96
+sentencepiece==0.1.97
     # via -r ci/requirements-openvino-dev.in
-shapely==1.8.0
+shapely==1.8.5.post1
     # via -r ci/requirements-openvino-dev.in
 six==1.16.0
-    # via
-    #   hyperopt
-    #   python-dateutil
-texttable==1.6.4
+    # via python-dateutil
+texttable==1.6.7
     # via -r ci/requirements-openvino-dev.in
-threadpoolctl==3.0.0
+threadpoolctl==3.1.0
     # via scikit-learn
-tifffile==2020.9.3
+tifffile==2022.10.10
     # via scikit-image
-tokenizers==0.10.3
-    # via -r ci/requirements-openvino-dev.in
-tqdm==4.62.3
+tokenizers==0.13.2 ; python_version >= "3.7"
     # via
     #   -r ci/requirements-openvino-dev.in
-    #   hyperopt
+    #   transformers
+tqdm==4.64.1
+    # via
+    #   -r ci/requirements-openvino-dev.in
+    #   huggingface-hub
     #   nltk
-typing-extensions==4.0.1
-    # via importlib-metadata
-urllib3==1.26.7
-    # via requests
-yamlloader==1.1.0
+    #   transformers
+transformers==4.25.1 ; python_version >= "3.7"
     # via -r ci/requirements-openvino-dev.in
-zipp==3.6.0
-    # via importlib-metadata
+typing-extensions==4.4.0
+    # via huggingface-hub
+urllib3==1.26.13
+    # via requests
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

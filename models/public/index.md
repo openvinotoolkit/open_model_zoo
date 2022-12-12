@@ -9,50 +9,50 @@
    :caption: Device Support
 
    omz_models_public_device_support
-
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: 3D Semantic Segmentation Models
-
-   omz_models_model_brain_tumor_segmentation_0001
-   omz_models_model_brain_tumor_segmentation_0002
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Action Recognition Models
-
-   omz_models_model_common_sign_language_0001
-   omz_models_model_i3d_rgb_tf
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Background Matting Models
-
-   omz_models_model_background_matting_mobilenetv2
-   omz_models_model_modnet_photographic_portrait_matting
-   omz_models_model_modnet_webcam_portrait_matting
-   omz_models_model_robust_video_matting_mobilenetv3
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Classification Models
-
+   omz_models_model_aclnet
+   omz_models_model_aclnet_int8
    omz_models_model_alexnet
    omz_models_model_anti_spoof_mn3
+   omz_models_model_background_matting_mobilenetv2
+   omz_models_model_bert_base_ner
+   omz_models_model_brain_tumor_segmentation_0001
+   omz_models_model_brain_tumor_segmentation_0002
    omz_models_model_caffenet
+   omz_models_model_cocosnet
+   omz_models_model_colorization_siggraph
+   omz_models_model_colorization_v2
+   omz_models_model_common_sign_language_0001
    omz_models_model_convnext_tiny
+   omz_models_model_ctdet_coco_dlav0_512
+   omz_models_model_ctpn
+   omz_models_model_deblurgan_v2
+   omz_models_model_deeplabv3
    omz_models_model_densenet_121
    omz_models_model_densenet_121_tf
+   omz_models_model_detr_resnet50
    omz_models_model_dla_34
+   omz_models_model_drn_d_38
+   omz_models_model_efficientdet_d0_tf
+   omz_models_model_efficientdet_d1_tf
    omz_models_model_efficientnet_b0
    omz_models_model_efficientnet_b0_pytorch
    omz_models_model_efficientnet_v2_b0
    omz_models_model_efficientnet_v2_s
+   omz_models_model_erfnet
+   omz_models_model_f3net
+   omz_models_model_face_detection_retail_0044
+   omz_models_model_face_recognition_resnet100_arcface_onnx
+   omz_models_model_faceboxes_pytorch
+   omz_models_model_facenet_20180408_102900
+   omz_models_model_fast_neural_style_mosaic_onnx
+   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_faster_rcnn_resnet50_coco
+   omz_models_model_fastseg_large
+   omz_models_model_fastseg_small
+   omz_models_model_fbcnn
+   omz_models_model_fcrn_dp_nyu_depth_v2_tf
+   omz_models_model_forward_tacotron
+   omz_models_model_gmcnn_places2_tf
    omz_models_model_googlenet_v1
    omz_models_model_googlenet_v1_tf
    omz_models_model_googlenet_v2
@@ -60,11 +60,23 @@
    omz_models_model_googlenet_v3
    omz_models_model_googlenet_v3_pytorch
    omz_models_model_googlenet_v4_tf
+   omz_models_model_gpt_2
    omz_models_model_hbonet_0_25
    omz_models_model_hbonet_1_0
+   omz_models_model_higher_hrnet_w32_human_pose_estimation
+   omz_models_model_hrnet_v2_c1_segmentation
+   omz_models_model_human_pose_estimation_3d_0001
+   omz_models_model_hybrid_cs_model_mri
+   omz_models_model_i3d_rgb_tf
    omz_models_model_inception_resnet_v2_tf
    omz_models_model_levit_128s
+   omz_models_model_license_plate_recognition_barrier_0007
+   omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
+   omz_models_model_mask_rcnn_resnet50_atrous_coco
+   omz_models_model_midasnet
    omz_models_model_mixnet_l
+   omz_models_model_mobilefacedet_v1_mxnet
+   omz_models_model_mobilenet_ssd
    omz_models_model_mobilenet_v1_0_25_128
    omz_models_model_mobilenet_v1_1_0_224
    omz_models_model_mobilenet_v1_1_0_224_tf
@@ -76,9 +88,22 @@
    omz_models_model_mobilenet_v3_large_1_0_224_tf
    omz_models_model_mobilenet_v3_small_1_0_224_paddle
    omz_models_model_mobilenet_v3_small_1_0_224_tf
+   omz_models_model_mobilenet_yolo_v4_syg
+   omz_models_model_modnet_photographic_portrait_matting
+   omz_models_model_modnet_webcam_portrait_matting
+   omz_models_model_mozilla_deepspeech_0_6_1
+   omz_models_model_mozilla_deepspeech_0_8_2
+   omz_models_model_mtcnn
+   omz_models_model_nanodet_m_1_5x_416
+   omz_models_model_nanodet_plus_m_1_5x_416
+   omz_models_model_netvlad_tf
    omz_models_model_nfnet_f0
+   omz_models_model_ocrnet_hrnet_w48_paddle
    omz_models_model_octave_resnet_26_0_25
    omz_models_model_open_closed_eye_0001
+   omz_models_model_pelee_coco
+   omz_models_model_pspnet_pytorch
+   omz_models_model_quartznet_15x5_en
    omz_models_model_regnetx_3_2gf
    omz_models_model_repvgg_a0
    omz_models_model_repvgg_b1
@@ -88,131 +113,39 @@
    omz_models_model_resnet_34_pytorch
    omz_models_model_resnet_50_pytorch
    omz_models_model_resnet_50_tf
+   omz_models_model_retinaface_resnet50_pytorch
+   omz_models_model_retinanet_tf
    omz_models_model_rexnet_v1_x1_0
+   omz_models_model_rfcn_resnet101_coco_tf
+   omz_models_model_robust_video_matting_mobilenetv3
    omz_models_model_se_inception
    omz_models_model_se_resnet_50
    omz_models_model_se_resnext_50
    omz_models_model_shufflenet_v2_x0_5
    omz_models_model_shufflenet_v2_x1_0
+   omz_models_model_single_human_pose_estimation_0001
+   omz_models_model_Sphereface
    omz_models_model_squeezenet1_0
    omz_models_model_squeezenet1_1
-   omz_models_model_swin_tiny_patch4_window7_224
-   omz_models_model_t2t_vit_14
-   omz_models_model_vgg16
-   omz_models_model_vgg19
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Colorization Models
-
-   omz_models_model_colorization_siggraph
-   omz_models_model_colorization_v2
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Deblurring Models
-
-   omz_models_model_deblurgan_v2
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Face Recognition Models
-
-   omz_models_model_face_recognition_resnet100_arcface_onnx
-   omz_models_model_facenet_20180408_102900
-   omz_models_model_Sphereface
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Human Pose Estimation Models
-
-   omz_models_model_higher_hrnet_w32_human_pose_estimation
-   omz_models_model_human_pose_estimation_3d_0001
-   omz_models_model_single_human_pose_estimation_0001
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Image Inpainting Models
-
-   omz_models_model_gmcnn_places2_tf
-   omz_models_model_hybrid_cs_model_mri
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Image Translation Models
-
-   omz_models_model_cocosnet
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Instance Segmentation Models
-
-   omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_mask_rcnn_resnet50_atrous_coco
-   omz_models_model_yolact_resnet50_fpn_pytorch
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: JPEG Artifacts Removal Models
-
-   omz_models_model_fbcnn
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Monocular Depth Estimation Models
-
-   omz_models_model_fcrn_dp_nyu_depth_v2_tf
-   omz_models_model_midasnet
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Named Entity Recognition Models
-
-   omz_models_model_bert_base_ner
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Object Detection Models
-
-   omz_models_model_ctdet_coco_dlav0_512
-   omz_models_model_ctpn
-   omz_models_model_detr_resnet50
-   omz_models_model_efficientdet_d0_tf
-   omz_models_model_efficientdet_d1_tf
-   omz_models_model_face_detection_retail_0044
-   omz_models_model_faceboxes_pytorch
-   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_faster_rcnn_resnet50_coco
-   omz_models_model_mobilefacedet_v1_mxnet
-   omz_models_model_mobilenet_ssd
-   omz_models_model_mobilenet_yolo_v4_syg
-   omz_models_model_mtcnn
-   omz_models_model_nanodet_m_1.5x_416
-   omz_models_model_nanodet_plus_m_1.5x_416
-   omz_models_model_pelee_coco
-   omz_models_model_retinaface_resnet50_pytorch
-   omz_models_model_retinanet_tf
-   omz_models_model_rfcn_resnet101_coco_tf
+   omz_models_model_ssd_mobilenet_v1_coco
+   omz_models_model_ssd_mobilenet_v1_fpn_coco
    omz_models_model_ssd_resnet34_1200_onnx
    omz_models_model_ssd300
    omz_models_model_ssd512
-   omz_models_model_ssd_mobilenet_v1_coco
-   omz_models_model_ssd_mobilenet_v1_fpn_coco
    omz_models_model_ssdlite_mobilenet_v2
+   omz_models_model_swin_tiny_patch4_window7_224
+   omz_models_model_t2t_vit_14
+   omz_models_model_text_recognition_resnet_fc
    omz_models_model_ultra_lightweight_face_detection_rfb_320
    omz_models_model_ultra_lightweight_face_detection_slim_320
    omz_models_model_vehicle_license_plate_detection_barrier_0123
+   omz_models_model_vehicle_reid_0001
+   omz_models_model_vgg16
+   omz_models_model_vgg19
+   omz_models_model_vitstr_small_patch16_224
+   omz_models_model_wav2vec2_base
+   omz_models_model_wavernn
+   omz_models_model_yolact_resnet50_fpn_pytorch
    omz_models_model_yolo_v1_tiny_tf
    omz_models_model_yolo_v2_tf
    omz_models_model_yolo_v2_tiny_tf
@@ -224,95 +157,6 @@
    omz_models_model_yolo_v4_tiny_tf
    omz_models_model_yolof
    omz_models_model_yolox_tiny
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Optical Character Recognition Models
-
-   omz_models_model_license_plate_recognition_barrier_0007
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Place Recognition Models
-
-   omz_models_model_netvlad_tf
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Salient Object Detection Models
-
-   omz_models_model_f3net
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Semantic Segmentation Models
-
-   omz_models_model_deeplabv3
-   omz_models_model_drn_d_38
-   omz_models_model_fastseg_large
-   omz_models_model_fastseg_small
-   omz_models_model_hrnet_v2_c1_segmentation
-   omz_models_model_pspnet_pytorch
-   omz_models_model_ocrnet_hrnet_w48_paddle
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Sound Classification Models
-
-   omz_models_model_aclnet
-   omz_models_model_aclnet_int8
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Speech Recognition Models
-
-   omz_models_model_mozilla_deepspeech_0_6_1
-   omz_models_model_mozilla_deepspeech_0_8_2
-   omz_models_model_quartznet_15x5_en
-   omz_models_model_wav2vec2_base
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Style Transfer Models
-
-   omz_models_model_fast_neural_style_mosaic_onnx
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Text Prediction Models
-
-   omz_models_model_gpt_2
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Text Recognition Models
-
-   omz_models_model_text_recognition_resnet_fc
-   omz_models_model_vitstr_small_patch16_224
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Text to Speech Models
-
-   omz_models_model_forward_tacotron
-   omz_models_model_wavernn
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Vehicle Reidentification Models
-
-   omz_models_model_vehicle_reid_0001
 
 
 .. raw:: html
@@ -398,6 +242,7 @@ detect areas with complex shape.
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 68.41% | 11.469 | 23.819 |
 | DRN-D-38                  |  PyTorch\*     | [drn-d-38](./drn-d-38/README.md) | 71.31% | 1768.3276 | 25.9939 |
+| Erfnet | PyTorch\*      | [erfnet](./erfnet/README.md)| 76.47% | 11.13 | 7.87 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |

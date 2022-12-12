@@ -1,53 +1,40 @@
 # use update-requirements.py to update this file
 
-bandit==1.7.0
+bandit==1.7.4
     # via -r ci/requirements-check-basics.in
-flake8==3.9.2
+flake8==6.0.0
     # via
     #   -r ci/requirements-check-basics.in
     #   flake8-comprehensions
-flake8-comprehensions==3.6.1
+flake8-comprehensions==3.10.1
     # via -r ci/requirements-check-basics.in
-gitdb==4.0.7
+gitdb==4.0.10
     # via gitpython
-gitpython==3.1.18
+gitpython==3.1.29
     # via bandit
-importlib-metadata==4.8.1
-    # via
-    #   flake8
-    #   flake8-comprehensions
-    #   stevedore
-mccabe==0.6.1
+mccabe==0.7.0
     # via flake8
-mistune==2.0.0
+mistune==2.0.4
     # via -r ci/requirements-documentation.in
-pathspec==0.9.0
+pathspec==0.10.2
     # via yamllint
-pbr==5.6.0
+pbr==5.11.0
     # via stevedore
-pycodestyle==2.7.0
+pycodestyle==2.10.0
     # via flake8
-pyflakes==2.3.1
+pyflakes==3.0.1
     # via flake8
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   -r ci/requirements-documentation.in
     #   bandit
     #   yamllint
-six==1.16.0
-    # via bandit
-smmap==4.0.0
+smmap==5.0.0
     # via gitdb
-stevedore==3.4.0
+stevedore==4.1.1
     # via bandit
-typing-extensions==3.10.0.2
-    # via
-    #   gitpython
-    #   importlib-metadata
-yamllint==1.26.3
+yamllint==1.28.0
     # via -r ci/requirements-check-basics.in
-zipp==3.5.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

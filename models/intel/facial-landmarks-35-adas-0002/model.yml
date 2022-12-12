@@ -17,29 +17,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml
-    size: 305099
-    checksum: e7b03ea0bb4fb491a16106081e546302b3f3912a9739c63ea7e432e82479abb5960f61752f150105fecceb6db47bd1fb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+    size: 254373
+    checksum: 7537e7fa73b4d2db5fdb385821e4d16f6411a590cd0e39cdd28c254ddd1b70578b0931860a33fa6ffce7a59699ce80a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
   - name: FP32/facial-landmarks-35-adas-0002.bin
-    size: 18381152
-    checksum: bb4f63ff4a2a6e5873481a75d6335eff52ae059ba46ffe79a17c532f00b7777d7528c46be081f3c9cda13563a0c0edc8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+    size: 18381164
+    checksum: 22a134ab9f84ab362a725696def1f26e4fc8bf47d3333a9717f6678a32779b5d1996f74abfddf98637c0a67bb1dc008d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
   - name: FP16/facial-landmarks-35-adas-0002.xml
-    size: 406087
-    checksum: 536d66f889f50f00723d27903bf9e1365a75a1c180cf0a83b1ffbf44940ccae38232fb3cde037cfd55cbdcafc7c55fc4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+    size: 361519
+    checksum: e7eba4388622aa8974d3560c41e4fcabc76b274972285e60d7501893fe07820327a4be2f31165ea462c1fc8559d0409e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
   - name: FP16/facial-landmarks-35-adas-0002.bin
-    size: 9190584
-    checksum: 0fa627392d3a73a98f20185feef1b32ff483fb016bb585b2b48d460af19973dae1fccc0565bcfa3577e910bbebeb2ca4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+    size: 9190590
+    checksum: 6e9e5bdb5f93d2a43ac46a07436dc8b680a35b7390324d2d10bea18db0bddfc9d12c69335b7e92615553413bd0918661
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
   - name: FP16-INT8/facial-landmarks-35-adas-0002.xml
-    size: 728116
-    checksum: 3b72ab1528effdf7b9d49fd621f872a71d90e63d6203835f2bd4971e9369c401013d138edacd611985c2a4027a2d266e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
+    size: 596581
+    checksum: ffdb09cbc8a879e6572efa5c8769155b6eaf1a11e8e1fb2ee261326d9822a1f463893723a863d064fbb191b382b6ceaa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
   - name: FP16-INT8/facial-landmarks-35-adas-0002.bin
-    size: 4664432
-    checksum: 8f5f516c5436e37f56d3cf252d84b26abc76365a6f83d29eb14ea4b40260049aaea2724cca4fa9aa6b6bccced62887dd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
+    size: 4634118
+    checksum: ad9ef52442b47bbb7e24b61a6f219cfd71455dd99bf6eaa97965ae72da2f55be2565b488f2718256c923576eca8100ba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
 input_info:
   - name: data
     shape: [1, 3, 60, 60]

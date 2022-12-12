@@ -121,8 +121,10 @@ class OpenvinoAdapter(ModelAdapter):
         self.model.reshape(new_shape)
 
     def get_raw_result(self, request):
-        raw_result = {key: request.get_tensor(key).data[:] for key in self.get_output_layers().keys()}
-        return raw_result
+        return {key: request.get_tensor(key).data for key in self.get_output_layers()}
+
+    def copy_raw_result(self, request):
+        return {key: request.get_tensor(key).data.copy() for key in self.get_output_layers()}
 
     def infer_sync(self, dict_data):
         self.infer_request = self.async_queue[self.async_queue.get_idle_request_id()]
@@ -130,7 +132,7 @@ class OpenvinoAdapter(ModelAdapter):
         return self.get_raw_result(self.infer_request)
 
     def infer_async(self, dict_data, callback_data) -> None:
-        self.async_queue.start_async(dict_data, (self.get_raw_result, callback_data))
+        self.async_queue.start_async(dict_data, (self.copy_raw_result, callback_data))
 
     def set_callback(self, callback_fn):
         self.async_queue.set_callback(callback_fn)
@@ -170,6 +172,8 @@ def get_input_shape(input_tensor):
     if not input_tensor.partial_shape.is_dynamic:
         return list(input_tensor.shape)
     ps = str(input_tensor.partial_shape)
+    if ps[0] == '[' and ps[-1] == ']':
+        ps = ps[1:-1]
     preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
     preprocessed = preprocessed.replace('(', '').replace(')', '')
     if '..' in preprocessed:

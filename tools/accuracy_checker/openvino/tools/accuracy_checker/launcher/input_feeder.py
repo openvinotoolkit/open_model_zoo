@@ -43,6 +43,8 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NC': [0, 1],
     'CN': [1, 0],
     'CNH': [1, 0, 2],
+    'NCH': [0, 1, 2],
+    'NSH': [0, 1, 2],
     'N': [0]
 }
 
@@ -54,7 +56,8 @@ DIM_IDS_TO_LAYOUT = {
     (0, 1, 4, 3, 2): 'NDCWH',
     (0, 1): 'NC',
     (1, 0): 'CN',
-    (1, 0, 2): 'CNH'
+    (1, 0, 2): 'CNH',
+    (0, 1, 2): 'NCH'
 }
 
 PRECISION_TO_DTYPE = {
@@ -256,6 +259,10 @@ class InputFeeder:
 
     def fill_non_constant_inputs_with_template(self, data_representation_batch, template):
         def match_by_regex(data, identifiers, input_regex, templates):
+            if isinstance(identifiers, AnnotationDataIdentifier):
+                identifiers = identifiers.data_id
+                if not isinstance(identifiers, list):
+                    data = [data]
             if not isinstance(identifiers, list):
                 identifiers = [identifiers]
             input_data = None

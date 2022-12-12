@@ -43,7 +43,7 @@ public:
     NNBGReplacer() = default;
     virtual ~NNBGReplacer() = default;
     NNBGReplacer(const std::string& model_path);
-    virtual cv::GMat replace(cv::GMat, const cv::Size&, cv::GMat) = 0;
+    virtual cv::GMat replace(cv::GFrame, cv::GMat, const cv::Size&, cv::GMat) = 0;
     const std::string& getName() {
         return m_tag;
     }
@@ -58,7 +58,7 @@ protected:
 class MaskRCNNBGReplacer : public NNBGReplacer {
 public:
     MaskRCNNBGReplacer(const std::string& model_path);
-    cv::GMat replace(cv::GMat, const cv::Size&, cv::GMat) override;
+    cv::GMat replace(cv::GFrame, cv::GMat, const cv::Size&, cv::GMat) override;
 
 private:
     std::string m_input_name;
@@ -70,7 +70,7 @@ private:
 class BGMattingReplacer : public NNBGReplacer {
 public:
     BGMattingReplacer(const std::string& model_path);
-    cv::GMat replace(cv::GMat, const cv::Size&, cv::GMat) override;
+    cv::GMat replace(cv::GFrame, cv::GMat, const cv::Size&, cv::GMat) override;
 
 private:
     std::string m_input_name;

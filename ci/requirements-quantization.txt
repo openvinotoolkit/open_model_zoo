@@ -1,77 +1,71 @@
 # use update-requirements.py to update this file
 
 addict==2.4.0
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-certifi==2021.5.30
+    # via openvino-dev
+certifi==2022.9.24
     # via requests
-charset-normalizer==2.0.4
+charset-normalizer==2.1.1
     # via requests
-click==8.0.1
-    # via
-    #   nltk
-    #   sacremoses
-cycler==0.10.0
-    # via matplotlib
-dataclasses==0.8
-    # via transformers
-decorator==4.4.2
-    # via networkx
+click==8.1.3
+    # via nltk
 defusedxml==0.7.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
     #   -r tools/accuracy_checker/requirements-core.in
-fast-ctc-decode==0.3.0
-    # via -r tools/accuracy_checker/requirements.in
-filelock==3.0.12
+    #   openvino-dev
+fast-ctc-decode==0.3.2
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+fastjsonschema==2.15.3
+    # via openvino-dev
+filelock==3.8.1
     # via
     #   huggingface-hub
     #   transformers
-huggingface-hub==0.0.16
+huggingface-hub==0.11.1
     # via transformers
-idna==3.2
+idna==3.4
     # via requests
-imagecodecs==2020.5.30 ; python_version < "3.7"
-    # via -r tools/accuracy_checker/requirements.in
-imageio==2.9.0
-    # via scikit-image
-importlib-metadata==4.8.1
+imagecodecs==2022.2.22 ; python_version >= "3.8"
     # via
-    #   click
-    #   huggingface-hub
-    #   transformers
-joblib==1.0.1
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+imageio==2.22.4
+    # via scikit-image
+joblib==1.2.0
     # via
     #   nltk
-    #   sacremoses
     #   scikit-learn
 jstyleson==0.0.2
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-kiwisolver==1.3.1
-    # via matplotlib
-lmdb==1.2.1
-    # via -r tools/accuracy_checker/requirements.in
-matplotlib==3.3.4
-    # via scikit-image
-networkx==2.5.1
+    # via openvino-dev
+lmdb==1.3.0
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+networkx==2.8 ; python_version >= "3.7"
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
     #   scikit-image
-nibabel==3.2.1
-    # via -r tools/accuracy_checker/requirements.in
-nltk==3.6.2
-    # via -r tools/accuracy_checker/requirements.in
-numpy==1.19.5
+nibabel==4.0.2
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+nltk==3.7
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+numpy==1.23.1
+    # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imagecodecs
     #   imageio
-    #   matplotlib
     #   nibabel
+    #   opencv-python
+    #   openvino
+    #   openvino-dev
     #   pandas
     #   parasail
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
     #   pywavelets
     #   rawpy
     #   scikit-image
@@ -79,105 +73,128 @@ numpy==1.19.5
     #   scipy
     #   tifffile
     #   transformers
-openvino-telemetry==2022.1.0
-    # via -r tools/accuracy_checker/requirements-core.in
-packaging==21.0
+opencv-python==4.6.0.66
+    # via openvino-dev
+openvino==2022.2.0
+    # via openvino-dev
+openvino-dev[kaldi]==2022.2.0
+    # via -r ${INTEL_OPENVINO_DIR}/tools/requirements_kaldi.txt
+openvino-telemetry==2022.1.2
+    # via
+    #   -r tools/accuracy_checker/requirements-core.in
+    #   openvino-dev
+packaging==21.3
     # via
     #   huggingface-hub
     #   nibabel
+    #   scikit-image
     #   transformers
 pandas==1.1.5
     # via
-    #   -r tools/accuracy_checker/requirements.in
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-parasail==1.2.4
-    # via -r tools/accuracy_checker/requirements.in
-pillow==8.3.2
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+parasail==1.3.3 ; platform_system != "Windows"
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+pillow==9.3.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
-    #   matplotlib
+    #   openvino-dev
     #   scikit-image
-py-cpuinfo==8.0.0
-    # via -r tools/accuracy_checker/requirements.in
-pyclipper==1.3.0
-    # via -r tools/accuracy_checker/requirements.in
-pydicom==2.2.1
-    # via -r tools/accuracy_checker/requirements.in
-pyparsing==2.4.7
+progress==1.6
+    # via openvino-dev
+py-cpuinfo==9.0.0
     # via
-    #   matplotlib
-    #   packaging
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+pyclipper==1.3.0.post4
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+pydicom==2.3.1
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+pyparsing==3.0.9
+    # via packaging
 python-dateutil==2.8.2
-    # via
-    #   matplotlib
-    #   pandas
-pytz==2021.1
     # via pandas
-pywavelets==1.1.1
+pytz==2022.6
+    # via pandas
+pywavelets==1.4.1
     # via scikit-image
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
+    #   huggingface-hub
+    #   openvino-dev
     #   transformers
-rawpy==0.16.0
-    # via -r tools/accuracy_checker/requirements.in
-regex==2021.8.28
+rawpy==0.17.3 ; python_version >= "3.7"
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+regex==2022.10.31
     # via
     #   nltk
-    #   sacremoses
     #   transformers
-requests==2.26.0
+requests==2.28.1
     # via
-    #   -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
     #   huggingface-hub
+    #   openvino-dev
     #   openvino-telemetry
     #   transformers
-sacremoses==0.0.45
-    # via transformers
-scikit-image==0.17.2
-    # via -r tools/accuracy_checker/requirements.in
-scikit-learn==0.24.2
-    # via -r tools/accuracy_checker/requirements.in
-scipy==1.5.4
+scikit-image==0.19.3 ; python_version >= "3.7"
     # via
-    #   -r tools/accuracy_checker/requirements.in
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+scikit-learn==0.24.2
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+scipy==1.8.0
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
     #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.96
-    # via -r tools/accuracy_checker/requirements.in
-shapely==1.7.1
-    # via -r tools/accuracy_checker/requirements.in
+sentencepiece==0.1.97
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+shapely==1.8.5.post1
+    # via
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
 six==1.16.0
-    # via
-    #   python-dateutil
-    #   sacremoses
-texttable==1.6.4
-    # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-threadpoolctl==2.2.0
+    # via python-dateutil
+texttable==1.6.7
+    # via openvino-dev
+threadpoolctl==3.1.0
     # via scikit-learn
-tifffile==2020.9.3
+tifffile==2022.10.10
     # via scikit-image
-tokenizers==0.10.3
+tokenizers==0.13.2 ; python_version >= "3.7"
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
     #   transformers
-tqdm==4.62.2
+tqdm==4.64.1
     # via
-    #   -r tools/accuracy_checker/requirements.in
+    #   -r tools/accuracy_checker/requirements-extra.in
     #   huggingface-hub
     #   nltk
-    #   pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-    #   sacremoses
+    #   openvino-dev
     #   transformers
-transformers==4.10.0
-    # via -r tools/accuracy_checker/requirements.in
-typing-extensions==3.10.0.2
+transformers==4.25.1 ; python_version >= "3.7"
     # via
-    #   huggingface-hub
-    #   importlib-metadata
-urllib3==1.26.6
+    #   -r tools/accuracy_checker/requirements-extra.in
+    #   openvino-dev
+typing-extensions==4.4.0
+    # via huggingface-hub
+urllib3==1.26.13
     # via requests
-zipp==3.5.0
-    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

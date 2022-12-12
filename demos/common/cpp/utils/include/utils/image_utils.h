@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2021-2022 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,4 +24,6 @@ enum RESIZE_MODE {
     RESIZE_KEEP_ASPECT_LETTERBOX
 };
 
-cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode = RESIZE_FILL, bool hqResize = false, cv::Rect* roi = nullptr);
+cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode = RESIZE_FILL,
+                       cv::InterpolationFlags interpolationMode = cv::INTER_LINEAR, cv::Rect* roi = nullptr,
+                       cv::Scalar BorderConstant = cv::Scalar(0, 0, 0));

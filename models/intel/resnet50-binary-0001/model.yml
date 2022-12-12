@@ -17,21 +17,21 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
-    size: 556544
-    checksum: 50a832bb53535d07d95b533656909303a87a457bd68e08da31791c35d26523bbfc6f678bc9a7d6b5fbf21f80caa68d7f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+    size: 292836
+    checksum: 737d2236da9f27c7ed8b52d0c69b69de8c431dffc06e1ee3f8502a504cc904c72207fdc830e2f7e6a6a2c55855f9b8a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
-    size: 22264400
-    checksum: d51cac0630b738ecdbee703b2d2e31dcdfae1b91c596afdd73e31ada2813f113347c52ef61bae1287d30373e455b517d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
+    size: 22173512
+    checksum: 7a72cd775801f0363ae7b7228ad04db015707eb18774da467415cda1156861c817f9de968a0d4e4ee84fe303f5756d28
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
-    size: 804786
-    checksum: 6295e5058156f6404293586cd508ca9e00177cd06ab5bc6619e6bdc1e09f6439fbce3021429fe69ec1120abdf07412ba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
+    size: 452589
+    checksum: 36c9618973647279039f61c2afa5dbdc4398554a3e9ac4e09ba226623afa220f77abd7f44a697b76d5a63fdbfba7eafd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
-    size: 12424496
-    checksum: e83b663e2fa6756e24403a26afff09bfa0fb7766ecec2784913fa48b73e9fdcb4dd3a4f723e33fa4a9969595f5cbfd8e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+    size: 12379050
+    checksum: b0a1714135e31d16ec1b00a4e2ef00e7a3b493a0b9216a8086f170154d1f39146ed1bc6a021f7d54b9a5afc1c3e36a36
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 input_info:
   - name: '0'
     shape: [1, 3, 224, 224]

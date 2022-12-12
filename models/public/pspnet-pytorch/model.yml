@@ -109,6 +109,26 @@ postprocessing:
     pattern: 'import regex as re'
     replacement: 'import re'
     file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: 'from torch\.onnx\.symbolic_registry import register_op'
+    replacement: 'from torch.onnx import register_custom_op_symbolic'
+    file: models/mmcv-1.2.0/mmcv/onnx/symbolic.py
+  - $type: regex_replace
+    pattern: 'register_op\('
+    replacement: "register_custom_op_symbolic('::' + "
+    file: models/mmcv-1.2.0/mmcv/onnx/symbolic.py
+  - $type: regex_replace
+    pattern: "'', opset"
+    replacement: 'opset'
+    file: models/mmcv-1.2.0/mmcv/onnx/symbolic.py
+  - $type: regex_replace
+    pattern: "if layer_type == 'SyncBN':"
+    replacement: "if layer_type == 'SyncBN' and hasattr(layer, '_specify_ddp_gpu_num'):"
+    file: models/mmcv-1.2.0/mmcv/cnn/bricks/norm.py
+  - $type: regex_replace
+    pattern: 'super\(\)\._specify_ddp_gpu_num\(gpu_size\)'
+    replacement: 'pass'
+    file: models/mmcv-1.2.0/mmcv/utils/parrots_wrapper.py
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models

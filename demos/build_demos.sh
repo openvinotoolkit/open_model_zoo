@@ -84,7 +84,12 @@ else
     source "$INTEL_OPENVINO_DIR/setupvars.sh"
 fi
 
-if ! command -v cmake &>/dev/null; then
+# CentOS 7 has two packages: cmake of version 2.8 and cmake3. install_openvino_dependencies.sh installs cmake3
+if command -v cmake3 &>/dev/null; then
+    CMAKE_EXEC=cmake3
+elif command -v cmake &>/dev/null; then
+    CMAKE_EXEC=cmake
+else
     printf "\n\nCMAKE is not installed. It is required to build Open Model Zoo demos. Please install it. \n\n"
     exit 1
 fi
@@ -102,7 +107,7 @@ if [ -e "$build_dir/CMakeCache.txt" ]; then
 fi
 mkdir -p "$build_dir"
 
-(cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
-cmake --build "$build_dir" ${build_targets[@]} -- "$NUM_THREADS"
+(cd "$build_dir" && $CMAKE_EXEC -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
+$CMAKE_EXEC --build "$build_dir" ${build_targets[@]} -- "$NUM_THREADS"
 
 printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"

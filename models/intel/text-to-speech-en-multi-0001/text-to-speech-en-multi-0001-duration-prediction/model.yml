@@ -18,21 +18,29 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 709125
-    checksum: 83be320b1264a37a2dcca20bda4f9ccf59f067ae1a603a3f68c48f48fab0ed98267653f27a5a9d0e0028e88685c1f63a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 587931
+    checksum: 7d29097a82d130bfd3df9ef7cee35eba17d4457e13241194e8f905b0570956fd33e52120ac453234820c4f7c5a33be77
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.bin
     size: 104707920
-    checksum: c154952de5e757761a46495acf405c8e16e7937c9574ece6c00ed49f12dd560d6712d57b84b7eb3e728f01b40cc81621
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
+    checksum: 8ac8a663c2940930d69c6031fc084b4a60898eb505ae7d5671d4e9fdafcf575f596d302c7750755ad67cf886545c8ab1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 879522
-    checksum: 1cb283d44eea6f3cfb0333d2fbda309a75dfb83a28235055a2ffa3e1f0fed1200a762c754802f41a9dc5819303d92478
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 764233
+    checksum: 7c247ffe0f9fe1af597a594f42d5e68157cbc9a9cf96b8a69b6c5d7d23d089c1e344f7d432552b069f6e922d21676ade
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.bin
     size: 52354048
-    checksum: 6a936a4697aba84d9388d59c7a79153662c778a35eb5c43700f6fb0e42b1148ea6846ffbe9b57a7e20e25c8cac38adba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
+    checksum: 4e55f6b419d7e040341b327cad88d3e93755dd91af01e069c20cb80213a2208c9f64fb5b145e0141da472b846a1cd8ed
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
+  - name: FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 1411936
+    checksum: d81aa69acdd039332a0b82e4fb2216b87b6ce95c4de448bf8526e546150cafbd7ee62b4619dc3d7e0d7ce44bfbd0268a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.xml
+  - name: FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.bin
+    size: 26348303
+    checksum: 4a3d555b745e52c633a06c3b5c66485194c750fe2cee91fbbfaf8bad57e6218b6c4bc3f5afa5d51225688d09a6babf0b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.bin
 input_info:
   - name: input_seq
     shape: [1, 512]

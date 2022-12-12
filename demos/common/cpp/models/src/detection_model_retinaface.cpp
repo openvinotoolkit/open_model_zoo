@@ -129,7 +129,7 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
 
-        anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
+        anchors.push_back(std::vector<Anchor>(height * width * anchorNum));
         for (size_t iw = 0; iw < width; ++iw) {
             size_t sw = iw * s;
             for (size_t ih = 0; ih < height; ++ih) {
@@ -146,8 +146,8 @@ void ModelRetinaFace::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 }
 
-std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
-    std::vector<ModelRetinaFace::Anchor> retVal;
+std::vector<Anchor> ratioEnum(const Anchor& anchor, const std::vector<int>& ratios) {
+    std::vector<Anchor> retVal;
     const auto w = anchor.getWidth();
     const auto h = anchor.getHeight();
     const auto xCtr = anchor.getXCenter();
@@ -166,8 +166,8 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
     return retVal;
 }
 
-std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& scales) {
-    std::vector<ModelRetinaFace::Anchor> retVal;
+std::vector<Anchor> scaleEnum(const Anchor& anchor, const std::vector<int>& scales) {
+    std::vector<Anchor> retVal;
     const auto w = anchor.getWidth();
     const auto h = anchor.getHeight();
     const auto xCtr = anchor.getXCenter();
@@ -184,12 +184,12 @@ std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& an
     return retVal;
 }
 
-std::vector<ModelRetinaFace::Anchor> generateAnchors(const int baseSize,
+std::vector<Anchor> generateAnchors(const int baseSize,
                                                      const std::vector<int>& ratios,
                                                      const std::vector<int>& scales) {
-    ModelRetinaFace::Anchor baseAnchor{0.0f, 0.0f, baseSize - 1.0f, baseSize - 1.0f};
+    Anchor baseAnchor{0.0f, 0.0f, baseSize - 1.0f, baseSize - 1.0f};
     auto ratioAnchors = ratioEnum(baseAnchor, ratios);
-    std::vector<ModelRetinaFace::Anchor> retVal;
+    std::vector<Anchor> retVal;
 
     for (const auto& ra : ratioAnchors) {
         auto addon = scaleEnum(ra, scales);
@@ -245,11 +245,11 @@ void filterScores(std::vector<float>& scores,
     }
 }
 
-void filterBoxes(std::vector<ModelRetinaFace::Anchor>& boxes,
+void filterBoxes(std::vector<Anchor>& boxes,
                  const std::vector<size_t>& indices,
                  const ov::Tensor& boxesTensor,
                  int anchorNum,
-                 const std::vector<ModelRetinaFace::Anchor>& anchors) {
+                 const std::vector<Anchor>& anchors) {
     const auto& shape = boxesTensor.get_shape();
     const float* boxesPtr = boxesTensor.data<float>();
     const auto boxPredLen = shape[1] / anchorNum;
@@ -279,7 +279,7 @@ void filterLandmarks(std::vector<cv::Point2f>& landmarks,
                      const std::vector<size_t>& indices,
                      const ov::Tensor& landmarksTensor,
                      int anchorNum,
-                     const std::vector<ModelRetinaFace::Anchor>& anchors,
+                     const std::vector<Anchor>& anchors,
                      const float landmarkStd) {
     const auto& shape = landmarksTensor.get_shape();
     const float* landmarksPtr = landmarksTensor.data<float>();

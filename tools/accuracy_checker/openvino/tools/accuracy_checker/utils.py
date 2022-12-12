@@ -23,6 +23,7 @@ import pickle # nosec - disable B403:import-pickle check
 import struct
 import sys
 import zlib
+import re
 from enum import Enum
 
 from pathlib import Path
@@ -909,6 +910,8 @@ def end_telemetry(tm):
 
 def parse_partial_shape(partial_shape):
     ps = str(partial_shape)
+    if ps[0] == '[' and ps[-1] == ']':
+        ps = ps[1:-1]
     preprocessed = ps.replace('{', '(').replace('}', ')').replace('?', '-1')
     if '[' not in preprocessed:
         preprocessed = preprocessed.replace('(', '').replace(')', '')
@@ -939,7 +942,7 @@ def parse_partial_shape(partial_shape):
 
 
 def postprocess_output_name(
-    output_name, outputs, suffix=('/sink_port_0', ':0'), additional_mapping=None, raise_error=True
+    output_name, outputs, suffix=('/sink_port_', ':'), additional_mapping=None, raise_error=True
 ):
     suffixes = [suffix] if isinstance(suffix, str) else suffix
     outputs = outputs[0] if isinstance(outputs, list) else outputs
@@ -948,10 +951,13 @@ def postprocess_output_name(
     if additional_mapping and output_name in additional_mapping:
         return additional_mapping[output_name]
     for suffix_ in suffixes:
-        if suffix_ in output_name:
-            preprocessed_output_name = output_name.replace(suffix_, '')
+        matches = re.findall(r'{}\d+'.format(suffix_), output_name)
+        if matches:
+            preprocessed_output_name = output_name.replace(matches[0], '')
         else:
-            preprocessed_output_name = '{}{}'.format(output_name, suffix_)
+            suffix_regex = re.compile(output_name + suffix_ + r'\d+')
+            preprocessed_output_name = [layer_name for layer_name in outputs if suffix_regex.match(layer_name)]
+            preprocessed_output_name = preprocessed_output_name[0] if preprocessed_output_name else ''
         if preprocessed_output_name in outputs:
             return preprocessed_output_name
     if raise_error:

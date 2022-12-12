@@ -58,35 +58,35 @@ def parser_paths_list(supported_devices):
     return [Path(p) for p in paths if Path(p).is_file()]
 
 
-def parse_args():
+def build_argparser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
     parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
         help='directory with demo binaries')
     parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
         help='directory with test data')
-    parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
-        help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
-    parser.add_argument('--scope', default='base',
-        help='The scenario for testing demos.', choices=('base', 'performance'))
-    parser.add_argument('--mo', type=Path, metavar='MO.PY',
-        help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
         help='list of devices to test')
-    parser.add_argument('--report-file', type=Path,
-        help='path to report file')
+    parser.add_argument('--downloader-cache-dir', type=Path, metavar='DIR',
+        help='directory to use as the cache for the model downloader')
     parser.add_argument('--log-file', type=Path,
         help='path to log file')
-    parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
-        help='paths to Markdown files with supported devices for each model')
+    parser.add_argument('--mo', type=Path, metavar='MO.PY',
+        help='Model Optimizer entry point script')
+    parser.add_argument('--models-dir', type=Path, metavar='DIR',
+        help='directory with pre-converted models (IRs)')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16', 'FP16-INT8'],
         help='IR precisions for all models. By default, models are tested in FP16, FP16-INT8 precisions')
-    parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
-        help='directory with pre-converted models (IRs)')
-    return parser.parse_args()
+    parser.add_argument('--report-file', type=Path,
+        help='path to report file')
+    parser.add_argument('--scope', default='base', choices=('base', 'performance'),
+        help='The scenario for testing demos.')
+    parser.add_argument('--supported-devices', type=parser_paths_list,
+        help='paths to Markdown files with supported devices for each model')
+    return parser
 
 
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
@@ -197,7 +197,7 @@ def get_models(case, keys):
 
 
 def main():
-    args = parse_args()
+    args = build_argparser().parse_args()
 
     DEMOS = scopes[args.scope]
     suppressed_devices = parse_supported_device_list(args.supported_devices)

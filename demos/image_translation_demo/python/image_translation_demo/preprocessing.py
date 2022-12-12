@@ -34,16 +34,19 @@ def preprocess_semantics(semantic_mask, input_size):
                                interpolation=cv2.INTER_NEAREST)
     # create one-hot label map
     semantic_mask = scatter(semantic_mask, classes=input_size[1])
+
+    if len(semantic_mask.shape) == 3:
+        return np.expand_dims(semantic_mask, axis=0)
     return semantic_mask
 
 
 def preprocess_for_seg_model(image, input_size):
     image = cv2.resize(image, dsize=tuple(input_size[2:]), interpolation=cv2.INTER_LINEAR)
     image = np.transpose(image, (2, 0, 1))
-    return image
+    return np.expand_dims(image, axis=0)
 
 
 def preprocess_image(image, input_size):
     image = cv2.resize(image, dsize=tuple(input_size[2:]), interpolation=cv2.INTER_CUBIC)
     image = np.transpose(image, (2, 0, 1))
-    return image
+    return np.expand_dims(image, axis=0)

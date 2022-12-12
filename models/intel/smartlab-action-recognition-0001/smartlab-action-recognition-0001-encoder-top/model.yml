@@ -1,0 +1,44 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mobilenet-v3 with TSM transfer-learned on mythware top-view dataset. Origianl classifier
+  layer is dropped
+task_type: action_recognition
+files:
+  - name: FP32/smartlab-action-recognition-0001-encoder-top.xml
+    size: 596765
+    checksum: 35cea1b65730c884e96328affc8d586084f41dfa756505f7afd24b067e58fa403ec0936114cbc2426b4351151eb41ce3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-top/FP32/smartlab-action-recognition-0001-encoder-top.xml
+  - name: FP32/smartlab-action-recognition-0001-encoder-top.bin
+    size: 3659904
+    checksum: 5b3e501054d7ec294edadfc2b10169880a7ce468d991e846fdd37d3fed32d36a6730cca012585535b1a442e0cff54503
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-top/FP32/smartlab-action-recognition-0001-encoder-top.bin
+  - name: FP16/smartlab-action-recognition-0001-encoder-top.xml
+    size: 644868
+    checksum: 5202085f4fbe9265f09aecd41359f9664ba12309ce00cbbe395c31853f80e67d6af7b31b4dd5c6e7701a5e2c7b34085e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-top/FP16/smartlab-action-recognition-0001-encoder-top.xml
+  - name: FP16/smartlab-action-recognition-0001-encoder-top.bin
+    size: 1830108
+    checksum: e59f7a089f03be456067951bb6aa08b154a19fd4e17c8b4b9d7748d06b016c3667d94b3e181d40ec9d7bce522c7f12ea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-top/FP16/smartlab-action-recognition-0001-encoder-top.bin
+input_info:
+  - name: input_image
+    shape: [1, 3, 224, 224]
+    layout: NCHW
+  - name: shifted_input
+    shape: [85066]
+    layout: C
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

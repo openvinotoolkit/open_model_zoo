@@ -84,7 +84,7 @@ Options:
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
     -r                             Optional. Output Inference results as raw values.
-    -ad                            Optional. Output file name to save per-person action statistics in.
+    -ad                            Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set
     -t_ad                          Optional. Probability threshold for person/action detection.
     -t_ar                          Optional. Probability threshold for action recognition.
     -t_fd                          Optional. Probability threshold for face detections.

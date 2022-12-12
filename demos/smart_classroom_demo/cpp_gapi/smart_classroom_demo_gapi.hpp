@@ -45,7 +45,7 @@ static const char action_threshold_output_message[] = "Optional. Probability thr
 static const char threshold_output_message_face_reid[] =
     "Optional. Cosine distance threshold between two vectors for face reidentification.";
 static const char reid_gallery_path_message[] = "Optional. Path to a faces gallery in .json format.";
-static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in.";
+static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char input_image_height_output_message[] = "Optional. Input image height for face detector.";
