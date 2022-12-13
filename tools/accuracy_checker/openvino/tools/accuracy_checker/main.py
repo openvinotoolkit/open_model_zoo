@@ -72,9 +72,12 @@ def main():
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
             details.update(evaluator.send_processing_info(tm))
+            metric_types = details.get('metrics', [])
             if args.profile:
                 setup_profiling(args.profiler_logs_dir, evaluator)
             send_telemetry_event(tm, 'model_run', json.dumps(details))
+            for metric in metric_types:
+                send_telemetry_event(tm, 'metric_type', metric)
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
