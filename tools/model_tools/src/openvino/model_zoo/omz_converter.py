@@ -125,10 +125,11 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             expanded_mo_args.append('--layout={}'.format(layout_string))
         if shape_string:
             expanded_mo_args.append('--input_shape={}'.format(shape_string))
+        if data_type == "FP16":
+            expanded_mo_args.append("--compress_to_fp16")
 
         mo_cmd = [*mo_props.cmd_prefix,
             '--framework={}'.format(model_format),
-            '--data_type={}'.format(data_type),
             '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
             '--model_name={}'.format(model.name),
             '--input={}'.format(','.join(input.name for input in model.input_info)),
