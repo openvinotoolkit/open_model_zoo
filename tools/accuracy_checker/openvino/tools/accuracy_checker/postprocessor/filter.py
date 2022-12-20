@@ -299,7 +299,7 @@ class FilterByAspectRatio(BaseFilter):
         filtered = []
         coordinates = zip(entry.x_mins, entry.y_mins, entry.x_maxs, entry.y_maxs)
         for index, (x_min, y_min, x_max, y_max) in enumerate(coordinates):
-            ratio = (y_max - y_min) / np.maximum(x_max - x_min, np.finfo(np.float64).eps)
+            ratio = (y_max - y_min) / np.maximum(x_max - x_min, np.finfo(float).eps)
             if not in_interval(ratio, aspect_ratio):
                 filtered.append(index)
 

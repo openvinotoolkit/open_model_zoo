@@ -48,19 +48,19 @@ class MultiLabelMetric(PerImageEvaluationMetric):
             raise ConfigError('multi label metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
         self.calculate_average = self.get_value_from_config('calculate_average')
-        self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.tp = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.fp = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.tn = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.fn = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.counter = np.zeros_like(list(self.labels.keys()), dtype=float)
         self._create_meta()
 
     def update(self, annotation, prediction):
         def loss(annotation_labels, prediction_labels):
-            tp_result = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-            fp_results = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-            tn_results = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-            fn_results = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+            tp_result = np.zeros_like(list(self.labels.keys()), dtype=float)
+            fp_results = np.zeros_like(list(self.labels.keys()), dtype=float)
+            tn_results = np.zeros_like(list(self.labels.keys()), dtype=float)
+            fn_results = np.zeros_like(list(self.labels.keys()), dtype=float)
 
             for index, label in enumerate(annotation_labels):
                 if label == 1 and label == prediction_labels[index]:
@@ -106,11 +106,11 @@ class MultiLabelMetric(PerImageEvaluationMetric):
             self.meta['names'].append('average')
 
     def reset(self):
-        self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-        self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.tp = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.fp = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.tn = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.fn = np.zeros_like(list(self.labels.keys()), dtype=float)
+        self.counter = np.zeros_like(list(self.labels.keys()), dtype=float)
         self._create_meta()
 
     @classmethod

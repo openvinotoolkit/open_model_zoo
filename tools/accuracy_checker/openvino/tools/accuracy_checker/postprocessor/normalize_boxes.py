@@ -48,9 +48,9 @@ class NormalizeBoxes(Postprocessor):
     def process_image(self, annotation, prediction):
         height, width, _ = self.image_size
         for target in annotation:
-            target.x_mins /= np.maximum(float(width), np.finfo(np.float64).eps)
-            target.x_maxs /= np.maximum(float(width), np.finfo(np.float64).eps)
-            target.y_mins /= np.maximum(float(height), np.finfo(np.float64).eps)
-            target.y_maxs /= np.maximum(float(height), np.finfo(np.float64).eps)
+            target.x_mins /= np.maximum(float(width), np.finfo(float).eps)
+            target.x_maxs /= np.maximum(float(width), np.finfo(float).eps)
+            target.y_mins /= np.maximum(float(height), np.finfo(float).eps)
+            target.y_maxs /= np.maximum(float(height), np.finfo(float).eps)
 
         return annotation, prediction

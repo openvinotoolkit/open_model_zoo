@@ -214,7 +214,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
 
     bbox_min = np.min(bboxes[:, 0, :], axis=0).ravel().astype(int)
     bbox_max = np.max(bboxes[:, 1, :], axis=0).ravel().astype(int)
-    bbox = np.zeros(shape=(2, 3), dtype=np.float)
+    bbox = np.zeros(shape=(2, 3), dtype=float)
     bbox[0] = bbox_min
     bbox[1] = bbox_max
 

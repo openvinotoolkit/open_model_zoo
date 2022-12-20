@@ -136,7 +136,7 @@ class FaceIdentifier(Module):
 
         for image, image_landmarks in zip(face_images, face_landmarks):
             scale = np.array((image.shape[1], image.shape[0]))
-            desired_landmarks = np.array(self.REFERENCE_LANDMARKS, dtype=np.float64) * scale
+            desired_landmarks = np.array(self.REFERENCE_LANDMARKS, dtype=float) * scale
             landmarks = image_landmarks * scale
 
             transform = FaceIdentifier.get_transform(desired_landmarks, landmarks)

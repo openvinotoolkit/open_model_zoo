@@ -292,11 +292,11 @@ class BeamSearch:
 
         self.alive_seq = np.full([self.batch_size * self.beam_size, 1], self.bos, dtype=np.long)
         self.is_finished = np.zeros((self.batch_size, self.beam_size), dtype=np.uint8)
-        self.best_scores = np.full([self.batch_size], -1e10, dtype=np.float)
+        self.best_scores = np.full([self.batch_size], -1e10, dtype=float)
         self._beam_offset = np.arange(0, self.batch_size * self.beam_size, step=self.beam_size, dtype=np.long)
         self.topk_log_probs = np.asarray([0.0] + [float("-inf")] * (self.beam_size - 1))
         self.topk_log_probs = self.topk_log_probs.repeat(self.batch_size).reshape(self.batch_size, self.beam_size)
-        self.topk_scores = np.empty((self.batch_size, self.beam_size), dtype=np.float)
+        self.topk_scores = np.empty((self.batch_size, self.beam_size), dtype=float)
         self.topk_ids = np.empty((self.batch_size, self.beam_size), dtype=np.long)
         self._batch_index = np.empty([self.batch_size, self.beam_size], dtype=np.long)
 
