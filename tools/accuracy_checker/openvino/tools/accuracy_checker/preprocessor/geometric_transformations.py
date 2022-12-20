@@ -84,7 +84,7 @@ class PointAligner(Preprocessor):
         48.0252 / 96, 71.7366 / 112,
         33.5493 / 96, 92.3655 / 112,
         62.7299 / 96, 92.2041 / 112
-    ], dtype=np.float64).reshape(5, 2)
+    ], dtype=float).reshape(5, 2)
 
     @classmethod
     def parameters(cls):
@@ -138,11 +138,11 @@ class PointAligner(Preprocessor):
         if self.normalize:
             inp_shape = img.shape
 
-        keypoints = points.copy().astype(np.float64)
+        keypoints = points.copy().astype(float)
         keypoints[:, 0] *= (float(self.dst_width) / inp_shape[1])
         keypoints[:, 1] *= (float(self.dst_height) / inp_shape[0])
 
-        keypoints_ref = np.zeros((points_number, 2), dtype=np.float64)
+        keypoints_ref = np.zeros((points_number, 2), dtype=float)
         keypoints_ref[:, 0] = self.ref_landmarks[:, 0] * self.dst_width
         keypoints_ref[:, 1] = self.ref_landmarks[:, 1] * self.dst_height
 
@@ -156,8 +156,8 @@ class PointAligner(Preprocessor):
 
     @staticmethod
     def transformation_from_points(points1, points2):
-        points1 = points1.astype(np.float64)
-        points2 = points2.astype(np.float64)
+        points1 = points1.astype(float)
+        points2 = points2.astype(float)
 
         c1 = np.mean(points1, axis=0, keepdims=True)
         c2 = np.mean(points2, axis=0, keepdims=True)
@@ -165,9 +165,9 @@ class PointAligner(Preprocessor):
         points2 -= c2
         s1 = np.std(points1)
         s2 = np.std(points2)
-        points1 /= np.maximum(s1, np.finfo(np.float64).eps)
-        points2 /= np.maximum(s1, np.finfo(np.float64).eps)
-        points_std_ratio = s2 / np.maximum(s1, np.finfo(np.float64).eps)
+        points1 /= np.maximum(s1, np.finfo(float).eps)
+        points2 /= np.maximum(s1, np.finfo(float).eps)
+        points_std_ratio = s2 / np.maximum(s1, np.finfo(float).eps)
 
         u, _, vt = np.linalg.svd(points1.T @ points2)
         r = (u @ vt).T

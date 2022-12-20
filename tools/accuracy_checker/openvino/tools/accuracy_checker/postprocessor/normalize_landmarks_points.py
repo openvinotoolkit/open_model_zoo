@@ -54,10 +54,10 @@ class NormalizeLandmarksPoints(Postprocessor):
                 height = y_max - y_start
 
             target.x_values = (
-                (np.array(target.x_values, dtype=float) - x_start) / np.maximum(width, np.finfo(np.float64).eps)
+                (np.array(target.x_values, dtype=float) - x_start) / np.maximum(width, np.finfo(float).eps)
             )
             target.y_values = (
-                (np.array(target.y_values, dtype=float) - y_start) / np.maximum(height, np.finfo(np.float64).eps)
+                (np.array(target.y_values, dtype=float) - y_start) / np.maximum(height, np.finfo(float).eps)
             )
 
         return annotation, prediction

@@ -137,8 +137,8 @@ class BaseDetectionMetricMixin(Metric):
             tp, fp = np.cumsum(tp)[threshold_indexes], np.cumsum(fp)[threshold_indexes]
 
             labels_stat[label] = {
-                'precision': tp / np.maximum(tp + fp, np.finfo(np.float64).eps),
-                'recall': tp / np.maximum(n, np.finfo(np.float64).eps),
+                'precision': tp / np.maximum(tp + fp, np.finfo(float).eps),
+                'recall': tp / np.maximum(n, np.finfo(float).eps),
                 'thresholds': conf[threshold_indexes],
                 'fppi': fp / len(annotations),
                 'fp': np.sum(fp),
@@ -533,7 +533,7 @@ def match_detections_class_agnostic(prediction, gt, min_iou, overlap_method):
     similarity_matrix = calculate_similarity_matrix(predicted_bboxes, gt_bboxes, overlap_method)
 
     matches = []
-    visited_gt = np.zeros(gt_bboxes_num, dtype=np.bool)
+    visited_gt = np.zeros(gt_bboxes_num, dtype=bool)
     for predicted_id in range(predicted_bboxes_num):
         best_overlap = 0.0
         best_gt_id = -1

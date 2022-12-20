@@ -166,7 +166,7 @@ def match_detections(predicted_data, gt_data, min_iou):
         sorted_predicted_bboxes.sort(key=lambda tup: tup[1].det_conf, reverse=True)
 
         matches = []
-        visited_gt = np.zeros(len(gt_bboxes), dtype=np.bool)
+        visited_gt = np.zeros(len(gt_bboxes), dtype=bool)
         for i in range(len(sorted_predicted_bboxes)):
             predicted_id = sorted_predicted_bboxes[i][0]
             predicted_bbox = sorted_predicted_bboxes[i][1]
@@ -453,8 +453,8 @@ def calculate_metrics(all_tracks):
         total_num_gt_events += len(gt_events)
 
         if len(matches) > 0:
-            matched_gt = np.zeros([len(gt_events)], dtype=np.bool)
-            matched_pred = np.zeros([len(pred_events)], dtype=np.bool)
+            matched_gt = np.zeros([len(gt_events)], dtype=bool)
+            matched_pred = np.zeros([len(pred_events)], dtype=bool)
             for match in matches:
                 matched_gt[match[0]] = True
                 matched_pred[match[1]] = True

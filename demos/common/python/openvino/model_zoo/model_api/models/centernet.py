@@ -132,8 +132,8 @@ class CenterNet(DetectionModel):
         topk_inds = np.argpartition(scores, -K, axis=1)[:, -K:]
         topk_scores = scores[np.arange(scores.shape[0])[:, None], topk_inds]
 
-        topk_ys = (topk_inds / width).astype(np.int32).astype(np.float)
-        topk_xs = (topk_inds % width).astype(np.int32).astype(np.float)
+        topk_ys = (topk_inds / width).astype(np.int32).astype(float)
+        topk_xs = (topk_inds % width).astype(np.int32).astype(float)
 
         topk_scores = topk_scores.reshape((-1))
         topk_ind = np.argpartition(topk_scores, -K)[-K:]

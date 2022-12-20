@@ -68,7 +68,7 @@ def _binary_clf_curve(y_true, y_score):
     threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
 
     # accumulate the true positives with decreasing threshold
-    tps = np.cumsum((y_true * weight), axis=None, dtype=np.float64)[threshold_idxs]
+    tps = np.cumsum((y_true * weight), axis=None, dtype=float)[threshold_idxs]
     fps = 1 + threshold_idxs - tps
     return fps, tps, y_score[threshold_idxs]
 
@@ -563,7 +563,7 @@ def distance_matrix(annotation, prediction):
 
 
 def unique_sample(ids_dict, num):
-    mask = np.zeros(num, dtype=np.bool)
+    mask = np.zeros(num, dtype=bool)
     for indices in ids_dict.values():
         mask[np.random.choice(indices)] = True
 
