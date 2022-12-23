@@ -46,7 +46,8 @@ class prepend_to_path:
 
     def __enter__(self):
         self._original_path = copy.deepcopy(sys.path)
-        sys.path = self._preprended_paths + sys.path
+        if self._preprended_paths is not None:
+            sys.path = self._preprended_paths + sys.path
 
     def __exit__(self, type, value, traceback):
         if self._original_path is not None:
