@@ -56,7 +56,7 @@ class OMZModel:
         self.model_config_path = model_config_path if model_config_path.exists() else None
 
     @classmethod
-    def download(cls, model_name, *, precision='FP32', download_dir='models', cache_dir=None, ie=None):
+    def download(cls, model_name, *, precision='FP16', download_dir=None, cache_dir=None, ie=None):
         '''
         Downloads target model. If the model has already been downloaded,
         retrieves the model from the cache instead of downloading it again.
@@ -71,8 +71,7 @@ class OMZModel:
             precision
                 Target model precisions.
             download_dir
-                Model download directory. By default creates a folder 'models'
-                in current directory and downloads to it.
+                Model download directory. Uses .cache/omz in home directory by default.
             cache_dir
                 Cache directory.
                 The script will place a copy of each downloaded file in the cache, or,
@@ -81,7 +80,11 @@ class OMZModel:
             ie
                 Inference Engine instance
         '''
-        download_dir = Path(download_dir)
+        if download_dir is None:
+            download_dir = Path.home() / '.cache' / 'omz'
+        else:
+            download_dir = Path(download_dir)
+
         cache_dir = cache_dir or download_dir / '.cache'
 
         model = cls._load_model(cls, model_name)

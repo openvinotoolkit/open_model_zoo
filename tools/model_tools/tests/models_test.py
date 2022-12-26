@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import os
 
-import openvino.model_zoo.open_model_zoo as omz
+import openvino.model_zoo.models as omz
 
 from openvino.model_zoo.model_api.models import Classification
 
@@ -10,7 +10,7 @@ from openvino.runtime import Core
 
 class TestOMZModel(unittest.TestCase):
     def test_load_intel(self):
-        face_detection = omz.OMZModel.download('face-detection-0200', precision='FP16-INT8')
+        face_detection = omz.OMZModel.download('face-detection-0200', precision='FP16-INT8', download_dir='models')
         xml_path = face_detection.model_path
 
         self.assertTrue(os.path.exists(xml_path))
