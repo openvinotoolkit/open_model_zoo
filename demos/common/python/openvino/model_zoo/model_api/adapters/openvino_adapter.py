@@ -42,24 +42,34 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     '''
 
-    def __init__(self, core, model_path, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
+    def __init__(self, core, model, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
         self.core = core
-        self.model_path = model_path
+        self.model_path = model
         self.device = device
         self.plugin_config = plugin_config
         self.max_num_requests = max_num_requests
         self.model_parameters = model_parameters
         self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
-        if isinstance(model_path, (str, Path)):
-            if Path(model_path).suffix == ".onnx" and weights_path:
+        try:
+            from openvino.model_zoo.models import OMZModel
+            omz_model = OMZModel.download(model)
+            self.model_path = omz_model.model_path
+        except (SystemExit, ImportError):
+            pass
+
+        if isinstance(self.model_path, (str, Path)):
+            if Path(self.model_path).suffix == ".onnx" and weights_path:
                 log.warning('For model in ONNX format should set only "model_path" parameter.'
                             'The "weights_path" will be omitted')
 
-        self.model_from_buffer = isinstance(model_path, bytes) and isinstance(weights_path, bytes)
-        log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else model_path))
+        self.model_from_buffer = isinstance(self.model_path, bytes) and isinstance(weights_path, bytes)
+        log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else self.model_path))
         weights = weights_path if self.model_from_buffer else ''
-        self.model = core.read_model(model_path, weights)
+        try:
+            self.model = core.read_model(self.model_path, weights)
+        except RuntimeError:
+            raise RuntimeError("Can't download or read from file the model")
 
     def load_model(self):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)

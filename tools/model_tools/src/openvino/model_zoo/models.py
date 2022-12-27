@@ -24,10 +24,6 @@ from  openvino.model_zoo import (
 )
 from openvino.model_zoo.download_engine import validation
 
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter
-from openvino.model_zoo.model_api.models import Model, Classification
-from openvino.model_zoo.model_api.pipelines import get_user_config
-
 
 class OMZModel:
     def __init__(
@@ -42,10 +38,6 @@ class OMZModel:
         self.architecture_type = architecture_type
         self.download_dir = download_dir
 
-        self.model = None
-        self.compiled_model = None
-        self.ie = ie
-        self.device = None
         self._set_config_paths()
 
     def _set_config_paths(self):
@@ -118,42 +110,6 @@ class OMZModel:
                         '--download_dir=' + str(download_dir)])
         return cls(name, model_path, description, task_type, subdirectory, model.architecture_type, ie, download_dir)
 
-    @classmethod
-    def from_pretrained(cls, model_path, *, task_type=None, ie=None):
-        '''
-        Loads model from existing .xml, .onnx files.
-        Parameters
-        ----------
-            model_path
-                Path to .xml or .onnx file.
-            task_type
-                Type of task that the model performs.
-            ie
-                Inference Engine instance
-        '''
-        model_path = Path(model_path).resolve()
-
-        if not model_path.exists():
-            raise ValueError('Path {} to model file does not exist.'.format(model_path))
-
-        if model_path.suffix not in ['.xml', '.onnx']:
-            raise ValueError('Unsupported model format {}. Only .xml or .onnx supported.'.format(model_path.suffix))
-
-        description = 'Pretrained model {}'.format(model_path.name)
-        name = model_path.stem
-
-        try:
-            model = cls._load_model(cls, name)
-        except SystemExit:
-            model = None
-
-        task_type = model.task_type if model else task_type
-        architecture_type = model.architecture_type if model else None
-        download_dir = model_path.parents[3]
-        subdirectory = model.subdirectory if model else model_path.parent.relative_to(download_dir)
-
-        return cls(name, str(model_path), description, task_type, subdirectory, architecture_type, ie, download_dir)
-
     def _load_model(self, model_name):
         parser = argparse.ArgumentParser()
         args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
@@ -161,66 +117,6 @@ class OMZModel:
                     mode=_configuration.ModelLoadingMode.ignore_composite)[0]
 
         return model
-
-    def _load(self, device):
-        self.model = self.ie.read_model(self.model_path)
-        self.compiled_model = self.ie.compile_model(self.model, device)
-        self.device = device
-
-    def __call__(self, inputs, device='CPU', model_creator=None, **kwargs):
-        if model_creator is None:
-            model_creator = self.model_creator
-
-        try:
-            self._create_model_api_instance(model_creator, device, **kwargs)
-        except Exception as exc:
-            if isinstance(exc, TypeError):
-                print(f'{str(exc)} Running in default mode.')
-                return self._default_inference(inputs, device)
-            else:
-                raise exc
-
-        self.model_api.load()
-        results, _ = self.model_api(inputs)
-
-        return results
-
-    def _create_model_api_instance(
-        self, model_creator, device, num_streams='', num_threads=None, max_num_requests=1, configuration=None
-    ):
-        plugin_config = get_user_config(device, num_streams, num_threads)
-        model_adapter = OpenvinoAdapter(create_core(), self.model_path, device=device,
-                            plugin_config=plugin_config, max_num_requests=max_num_requests)
-        self.model_api = model_creator(model_adapter, configuration)
-
-    def model_creator(self, model_adapter, configuration):
-        if self.architecture_type is None and self.task_type != 'classification':
-            raise TypeError('architecture_type is not set or model is usupported by Model API.')
-        else:
-            try:
-                if self.task_type == 'classification':
-                    return Classification(model_adapter, configuration)
-                else:
-                    return Model.create_model(self.architecture_type, model_adapter, configuration)
-            except Exception as exc:
-                raise RuntimeError('Unable to create model class, please check configuration parameters. '
-                                   'Errors occured: '+ str(exc))
-
-    def _default_inference(self, inputs, device='CPU'):
-        if self.ie is None:
-            raise TypeError('ie is not specified or is of the wrong type. '
-                            'Please check ie is of openvino.runtime.Core type.')
-
-        if self.compiled_model is None or device != self.device:
-            self._load(device)
-
-        input_names = [input.get_any_name() for input in self.model.inputs]
-
-        for input_name in inputs:
-            if input_name not in input_names:
-                raise ValueError('Unknown input name {}'.format(input_name))
-
-        return self.compiled_model.infer_new_request(inputs)
 
     def accuracy_checker_config(self):
         accuracy_config = None
@@ -276,16 +172,6 @@ class OMZModel:
                                 'Please check ie is of openvino.runtime.Core type.')
 
         return self.model.inputs
-
-    def outputs(self):
-        if self.model is None:
-            try:
-                self.model = self.ie.read_model(self.model_path)
-            except AttributeError:
-                raise TypeError('ie is not specified or is of the wrong type.'
-                                'Please check ie is of openvino.runtime.Core type.')
-
-        return self.model.outputs
 
     def preferable_input_shape(self, name):
         input_info = self.model_config().get('input_info', [])
