@@ -51,12 +51,13 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_parameters = model_parameters
         self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
-        try:
-            from openvino.model_zoo.models import OMZModel
-            omz_model = OMZModel.download(model)
-            self.model_path = omz_model.model_path
-        except (SystemExit, ImportError):
-            pass
+        if isinstance(model, str):
+            try:
+                from openvino.model_zoo.models import OMZModel
+                omz_model = OMZModel.download(model)
+                self.model_path = omz_model.model_path
+            except (SystemExit, ImportError):
+                pass
 
         if isinstance(self.model_path, (str, Path)):
             if Path(self.model_path).suffix == ".onnx" and weights_path:

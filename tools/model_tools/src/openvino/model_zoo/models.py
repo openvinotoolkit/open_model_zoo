@@ -19,7 +19,7 @@ import yaml
 
 from pathlib import Path
 
-from  openvino.model_zoo import (
+from openvino.model_zoo import (
     _configuration, _common, omz_downloader, omz_converter
 )
 from openvino.model_zoo.download_engine import validation
