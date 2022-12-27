@@ -87,8 +87,10 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, name, model_adapter, configuration=None, preload=False):
-        Model = cls.get_model(name)
+    def create_model(cls, model_adapter, configuration=None, model_type=None, preload=False):
+        if model_type is None:
+            model_type = model_adapter.get_rt_info(['config', 'type_of_model'])
+        Model = cls.get_model(model_type)
         return Model(model_adapter, configuration, preload)
 
     @classmethod

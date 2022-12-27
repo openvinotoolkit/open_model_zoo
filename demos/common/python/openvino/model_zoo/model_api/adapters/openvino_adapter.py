@@ -173,6 +173,9 @@ class OpenvinoAdapter(ModelAdapter):
                 layers_info[layer_name] = Metadata(type=node.get_type_name(), meta=node.get_attributes())
         return layers_info
 
+    def get_rt_info(self, path):
+        return self.model.get_rt_info(path)
+
 
 def get_input_shape(input_tensor):
     def string_to_tuple(string, casting_type=int):

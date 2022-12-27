@@ -184,7 +184,7 @@ def main():
         'input_size': args.input_size, # The CTPN specific
         'num_classes': args.num_classes, # The NanoDet and NanoDetPlus specific
     }
-    model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)
+    model = DetectionModel.create_model(model_adapter, configuration, args.architecture_type)
     model.log_layers_info()
 
     detector_pipeline = AsyncPipeline(model)
