@@ -6,7 +6,7 @@ appdirs==1.4.4
     # via pooch
 audioread==3.0.0
     # via librosa
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 cffi==1.15.1
     # via soundfile
