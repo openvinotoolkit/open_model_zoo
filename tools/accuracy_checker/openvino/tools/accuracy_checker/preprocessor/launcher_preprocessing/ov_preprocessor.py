@@ -18,7 +18,7 @@ from copy import deepcopy
 from collections import namedtuple
 import warnings
 try:
-    from openvino.preprocess import ResizeAlgorithm, ColorFormat # pylint:disable=W9902
+    from openvino.preprocess import ResizeAlgorithm, ColorFormat  # pylint: disable=import-outside-toplevel,package-absolute-imports
 except ImportError:
     ResizeAlgorithm = None
 from ...utils import get_or_parse_value
