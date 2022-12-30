@@ -2,9 +2,9 @@ name: Accuracy cchcker
 
 on:
   push:
-    branches: '*'
+    branches: '**'
   pull_request:
-    branches: '*'
+    branches: '**'
 
 permissions:
   contents: read

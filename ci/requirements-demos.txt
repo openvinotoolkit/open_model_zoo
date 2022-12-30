@@ -12,40 +12,25 @@ cffi==1.15.1
     # via soundfile
 charset-normalizer==2.0.12
     # via requests
-click==8.1.3
-    # via nltk
 cycler==0.11.0
     # via matplotlib
 decorator==5.1.1
     # via librosa
 defusedxml==0.7.1
     # via openvino-dev
-fast-ctc-decode==0.3.2
-    # via openvino-dev
-filelock==3.8.1
-    # via
-    #   huggingface-hub
-    #   transformers
 fonttools==4.38.0
     # via matplotlib
 grpcio==1.47.0
     # via ovmsclient
-huggingface-hub==0.11.1
-    # via transformers
 idna==3.4
     # via requests
-imagecodecs==2022.2.22
-    # via openvino-dev
-imageio==2.22.4
-    # via scikit-image
-importlib-metadata==5.1.0
+importlib-metadata==5.2.0
     # via numba
 inflect==6.0.2
     # via -r demos/requirements.txt
 joblib==1.2.0
     # via
     #   librosa
-    #   nltk
     #   scikit-learn
 jstyleson==0.0.2
     # via openvino-dev
@@ -55,24 +40,16 @@ librosa==0.9.2
     # via -r demos/requirements.txt
 llvmlite==0.39.1
     # via numba
-lmdb==1.3.0
-    # via openvino-dev
 matplotlib==3.5.3
     # via -r demos/requirements.txt
-motmetrics==1.2.5
+motmetrics==1.4.0
     # via -r demos/requirements.txt
 mpmath==1.2.1
     # via sympy
-networkx==2.8
-    # via
-    #   openvino-dev
-    #   scikit-image
-nibabel==4.0.2
-    # via
-    #   -r demos/requirements.txt
-    #   openvino-dev
-nltk==3.7
+networkx==2.8.8
     # via openvino-dev
+nibabel==4.0.2
+    # via -r demos/requirements.txt
 numba==0.56.4
     # via
     #   librosa
@@ -81,8 +58,6 @@ numpy==1.23.1
     # via
     #   -r demos/common/python/requirements.txt
     #   -r demos/requirements.txt
-    #   imagecodecs
-    #   imageio
     #   librosa
     #   matplotlib
     #   motmetrics
@@ -93,124 +68,82 @@ numpy==1.23.1
     #   openvino-dev
     #   ovmsclient
     #   pandas
-    #   parasail
-    #   pywavelets
-    #   rawpy
     #   resampy
-    #   scikit-image
     #   scikit-learn
     #   scipy
     #   tensorboardx
-    #   tifffile
-    #   transformers
-opencv-python==4.6.0.66
+opencv-python==4.7.0.68
     # via
     #   -r demos/common/python/requirements.txt
     #   -r demos/requirements.txt
     #   openvino-dev
-openvino==2022.2.0
+openvino==2022.3.0
     # via openvino-dev
-openvino-dev==2022.2.0
+openvino-dev==2022.3.0
     # via -r ${INTEL_OPENVINO_DIR}/tools/requirements.txt
-openvino-telemetry==2022.1.2
+openvino-telemetry==2022.3.0
     # via openvino-dev
 ovmsclient==2022.2
     # via -r demos/common/python/requirements_ovms.txt
-packaging==21.3
+packaging==22.0
     # via
-    #   huggingface-hub
     #   librosa
     #   matplotlib
     #   nibabel
     #   pooch
-    #   scikit-image
-    #   transformers
-pandas==1.1.5
+pandas==1.3.5
     # via
     #   motmetrics
     #   openvino-dev
-parasail==1.3.3
-    # via openvino-dev
 pillow==9.3.0
     # via
     #   -r demos/requirements.txt
-    #   imageio
     #   matplotlib
     #   openvino-dev
-    #   scikit-image
 pooch==1.6.0
     # via librosa
-progress==1.6
-    # via openvino-dev
 protobuf==3.20.1
     # via
     #   ovmsclient
     #   tensorboardx
-py-cpuinfo==9.0.0
-    # via openvino-dev
-pyclipper==1.3.0.post4
-    # via openvino-dev
 pycparser==2.21
     # via cffi
-pydantic==1.10.2
+pydantic==1.10.4
     # via inflect
-pydicom==2.3.1
-    # via openvino-dev
 pyparsing==2.4.7
     # via
     #   -r demos/requirements.txt
     #   matplotlib
-    #   packaging
 python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
-pytz==2022.6
+pytz==2022.7
     # via pandas
-pywavelets==1.4.1
-    # via scikit-image
 pyyaml==6.0
     # via
     #   -r demos/requirements.txt
-    #   huggingface-hub
     #   openvino-dev
-    #   transformers
-rawpy==0.17.3
-    # via openvino-dev
-regex==2022.10.31
-    # via
-    #   nltk
-    #   transformers
 requests==2.27.1
     # via
-    #   huggingface-hub
     #   openvino-dev
     #   openvino-telemetry
     #   ovmsclient
     #   pooch
-    #   transformers
 resampy==0.4.2
     # via librosa
-scikit-image==0.19.3
-    # via openvino-dev
-scikit-learn==0.24.2
+scikit-learn==1.2.0
     # via
     #   -r demos/requirements.txt
     #   librosa
-    #   openvino-dev
-scipy==1.5.4
+scipy==1.8.1
     # via
     #   -r demos/common/python/requirements.txt
     #   -r demos/requirements.txt
     #   librosa
     #   motmetrics
     #   openvino-dev
-    #   scikit-image
     #   scikit-learn
-sentencepiece==0.1.97
-    # via openvino-dev
-shapely==1.8.5.post1
-    # via openvino-dev
 six==1.16.0
     # via
     #   grpcio
@@ -225,26 +158,14 @@ texttable==1.6.7
     # via openvino-dev
 threadpoolctl==3.1.0
     # via scikit-learn
-tifffile==2022.10.10
-    # via scikit-image
 tokenizers==0.13.2 ; python_version >= "3.7"
-    # via
-    #   -r demos/requirements.txt
-    #   openvino-dev
-    #   transformers
+    # via -r demos/requirements.txt
 tqdm==4.64.1
     # via
     #   -r demos/requirements.txt
-    #   huggingface-hub
-    #   nltk
     #   openvino-dev
-    #   transformers
-transformers==4.25.1
-    # via openvino-dev
 typing-extensions==4.4.0
-    # via
-    #   huggingface-hub
-    #   pydantic
+    # via pydantic
 urllib3==1.26.13
     # via requests
 xmltodict==0.13.0

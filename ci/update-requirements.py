@@ -79,6 +79,7 @@ def main():
         pip_compile(target, *sources, upgrade=args.upgrade)
         fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
+    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
     pc('ci/requirements-ac.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements-extra.in')
     pc('ci/requirements-ac-test.txt',
@@ -97,7 +98,6 @@ def main():
     pc('ci/requirements-quantization.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements-extra.in',
         openvino_dir / 'tools/requirements_kaldi.txt')
-    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
 
 if __name__ == '__main__':
     main()
