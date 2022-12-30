@@ -1,4 +1,4 @@
-name: Accuracy cchcker
+name: Accuracy checker
 
 on:
   push:
@@ -31,4 +31,4 @@ jobs:
     - name: pylint
       run: |
         python -m pip install pylint==2.10.2
-        cd tools/accuracy_checker && python -m pylint --rcfile=.pylintrc `find -wholename '?*/**/*.py' -not -path "./tests/*" -not -path "/build/**"| tr '\n' ' '`
+        cd tools/accuracy_checker && python -m pylint --rcfile=.pylintrc `find -wholename '?*/**/*.py' -not -path "./tests/*" -not -path "./build/**" | tr '\n' ' '`
