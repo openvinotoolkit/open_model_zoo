@@ -22,6 +22,7 @@ import numpy as np
 
 from pathlib import Path
 from unittest.mock import PropertyMock
+from openvino.runtime import Core
 from openvino.tools.accuracy_checker.config import ConfigError
 from openvino.tools.accuracy_checker.launcher import DLSDKLauncher
 from openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
@@ -37,6 +38,10 @@ except ImportError:
 
 def no_available_myriad():
     return True
+
+
+def no_available_gpu():
+    return 'GPU' not in Core().available_devices
 
 
 def has_layers():
@@ -177,6 +182,7 @@ class TestDLSDKLauncherInfer:
 
 @pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
+    @pytest.mark.skipif(no_available_gpu(), reason='no GPU')
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
