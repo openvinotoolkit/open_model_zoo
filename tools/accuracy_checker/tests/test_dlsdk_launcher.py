@@ -22,7 +22,6 @@ import numpy as np
 
 from pathlib import Path
 from unittest.mock import PropertyMock
-from openvino.runtime import Core
 from openvino.tools.accuracy_checker.config import ConfigError
 from openvino.tools.accuracy_checker.launcher import DLSDKLauncher
 from openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
@@ -41,6 +40,7 @@ def no_available_myriad():
 
 
 def no_available_gpu():
+    from openvino.runtime import Core
     return 'GPU' not in Core().available_devices
 
 
