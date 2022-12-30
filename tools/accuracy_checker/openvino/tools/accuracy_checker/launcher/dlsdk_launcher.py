@@ -933,8 +933,7 @@ class DLSDKLauncher(Launcher):
     def get_model_file_type(self):
         if hasattr(self, '_model'):
             return self._model.suffix
-        else:
-            return None
+        return None
 
     def input_shape(self, input_name):
         if input_name in self._partial_shapes:

@@ -189,7 +189,7 @@ class KaldiLatGenDecoder(Adapter):
                 fd.write(str.encode('\0B'))
                 try:
                     float64 = np.float64
-                except:
+                except NameError:
                     float64 = float
 
                 if mat.dtype not in [np.float32, float64]:

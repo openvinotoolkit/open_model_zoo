@@ -28,3 +28,7 @@ jobs:
     - name: python -m pytest tools/accuracy_checker
       run: |
         python -m pytest tools/accuracy_checker
+    - name: pylint
+      run: |
+        python -m pip install pylint==2.10.2
+        cd tools/accuracy_checker && python -m pylint --rcfile=.pylintrc `find -wholename '?*/**/*.py' -not -path "./tests/*" | tr '\n' ' '`
