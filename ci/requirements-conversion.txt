@@ -253,7 +253,7 @@ tensorboard-data-server==0.6.1
     # via tensorboard
 tensorboard-plugin-wit==1.8.1
     # via tensorboard
-tensorflow==2.9.1
+tensorflow==2.9.3
     # via
     #   -r tools/model_tools/requirements-tensorflow.in
     #   openvino-dev
