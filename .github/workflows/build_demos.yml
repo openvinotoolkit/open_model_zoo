@@ -14,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Set up Python 3.8
       uses: actions/setup-python@v3
       with:
@@ -41,5 +43,5 @@ jobs:
     - name: build_demos.sh
       run: |
         source l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/setupvars.sh
-        ls -AF ./opencv-install
+        ls -AF ./opencv-install/opencv
         ./demos/build_demos.sh -DENABLE_PYTHON=y
