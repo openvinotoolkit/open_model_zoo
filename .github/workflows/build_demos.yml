@@ -1,0 +1,45 @@
+name: Accuracy checker Python3.8
+
+on:
+  pull_request:
+    branches: '**'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.8"
+
+    - name: Cache OpenCV
+      id: opencv-cache
+      uses: actions/cache@v2
+      with:
+        path: ./opencv-install
+        key: ${{ runner.os }}-opencv-cache
+
+    - name: Install OpenCV
+      uses: rayandrews/with-opencv-action@v1
+      with:
+        dir: ./opencv-install
+        cached: ${{ steps.opencv-cache.outputs.cache-hit }}
+        opencv-version: '4.6.0'
+
+    - name: Download OpenVINO
+      run: |
+        wget http://10.211.120.125/openvino_ci/private_builds/dldt/releases/2022/3/commit/7cc7f342713f850d1f09d0b8f7db3ceaf05d7f37/swf_drop/packages/releases/l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64.tgz
+        tar xf l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64.tgz
+        sudo l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64/install_dependencies/install_openvino_dependencies.sh
+    - name: build_demos.sh
+      run: |
+        source l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64/setupvars.sh
+        ls -AF ./opencv-install
+        ./demos/build_demos.sh -DENABLE_PYTHON=y
