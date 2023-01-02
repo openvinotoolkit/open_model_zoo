@@ -29,13 +29,13 @@ jobs:
       id: opencv-cache
       uses: actions/cache@v2
       with:
-        path: ${{ env.GITHUB_WORKSPACE }}/opencv-install
+        path: ${{ github.workspace }}/opencv-install
         key: ${{ runner.os }}-opencv-cache
 
     - name: Install OpenCV
       uses: rayandrews/with-opencv-action@v1
       with:
-        dir: ${{ env.GITHUB_WORKSPACE }}/opencv-install
+        dir: ${{ github.workspace }}/opencv-install
         cached: ${{ steps.opencv-cache.outputs.cache-hit }}
         opencv-version: '4.7.0'
 
