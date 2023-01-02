@@ -35,11 +35,11 @@ jobs:
 
     - name: Download OpenVINO
       run: |
-        wget http://10.211.120.125/openvino_ci/private_builds/dldt/releases/2022/3/commit/7cc7f342713f850d1f09d0b8f7db3ceaf05d7f37/swf_drop/packages/releases/l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64.tgz
-        tar xf l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64.tgz
-        sudo l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64/install_dependencies/install_openvino_dependencies.sh
+        wget https://storage.openvinotoolkit.org/repositories/openvino/packages/2022.3/linux/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
+        tar xf l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
+        sudo l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/install_dependencies/install_openvino_dependencies.sh
     - name: build_demos.sh
       run: |
-        source l_openvino_toolkit_ubuntu20_2022.3.0.9066.7cc7f342713_x86_64/setupvars.sh
+        source l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/setupvars.sh
         ls -AF ./opencv-install
         ./demos/build_demos.sh -DENABLE_PYTHON=y
