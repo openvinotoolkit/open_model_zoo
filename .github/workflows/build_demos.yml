@@ -1,4 +1,4 @@
-name: Accuracy checker Python3.8
+name: build_demos.sh
 
 on:
   pull_request:
@@ -31,7 +31,7 @@ jobs:
       with:
         dir: ./opencv-install
         cached: ${{ steps.opencv-cache.outputs.cache-hit }}
-        opencv-version: '4.6.0'
+        opencv-version: '4.7.0'
 
     - name: Download OpenVINO
       run: |
