@@ -36,14 +36,14 @@ except AttributeError:
             return list(map(cv2.GCompileArg, args))
 
 try:
-    from openvino.inference_engine import IECore # pylint:disable=W9902
+    from openvino.inference_engine import IECore  # pylint: disable=import-outside-toplevel,package-absolute-imports
     _ie_core = IECore()
 except ImportError:
     _ie_core = None
 
 
 try:
-    from openvino.inference_engine import known_plugins # pylint:disable=W9902
+    from openvino.inference_engine import known_plugins  # pylint: disable=import-outside-toplevel,package-absolute-imports
 except ImportError:
     known_plugins = []
 

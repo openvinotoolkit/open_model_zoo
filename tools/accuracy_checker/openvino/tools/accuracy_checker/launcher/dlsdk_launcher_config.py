@@ -22,7 +22,7 @@ from ..logging import warning, print_info
 from ..utils import get_path, contains_all, UnsupportedPackage
 
 try:
-    from openvino.inference_engine import known_plugins  # pylint:disable=W9902
+    from openvino.inference_engine import known_plugins  # pylint: disable=import-outside-toplevel,package-absolute-imports
 except ImportError:
     known_plugins = []
 

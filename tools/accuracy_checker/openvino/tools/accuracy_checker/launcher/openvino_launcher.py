@@ -15,6 +15,7 @@ limitations under the License.
 """
 #pylint:disable=no-name-in-module
 #pylint:disable=package-absolute-imports
+#pylint:disable=too-many-lines
 import io
 import multiprocessing
 from pathlib import Path
@@ -203,7 +204,8 @@ class OpenVINOLauncher(Launcher):
             feed_dict.update(lstm_inputs_feed)
             infer_inputs = {self.input_to_tensor_name[layer_name]: data for layer_name, data in feed_dict.items()}
             out_tensors = self.infer_request.infer(infer_inputs)
-            output_result = {out_node.get_node().friendly_name: out_tensor for out_node, out_tensor in out_tensors.items()}
+            output_result = {
+                out_node.get_node().friendly_name: out_tensor for out_node, out_tensor in out_tensors.items()}
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
             if return_raw:
@@ -969,8 +971,7 @@ class OpenVINOLauncher(Launcher):
     def get_model_file_type(self):
         if hasattr(self, '_model'):
             return self._model.suffix
-        else:
-            return None
+        return None
 
     def get_infer_queue(self, log=True):
         if self.config.get('num_requests', 'AUTO') == 'AUTO':

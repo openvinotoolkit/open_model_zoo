@@ -13,12 +13,10 @@ defusedxml==0.7.1
     #   -r tools/accuracy_checker/requirements-core.in
     #   openvino-dev
 fast-ctc-decode==0.3.2
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 fastjsonschema==2.15.3
     # via openvino-dev
-filelock==3.8.1
+filelock==3.9.0
     # via
     #   huggingface-hub
     #   transformers
@@ -27,10 +25,8 @@ huggingface-hub==0.11.1
 idna==3.4
     # via requests
 imagecodecs==2022.2.22 ; python_version >= "3.8"
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-imageio==2.22.4
+    # via -r tools/accuracy_checker/requirements-extra.in
+imageio==2.23.0
     # via scikit-image
 joblib==1.2.0
     # via
@@ -38,24 +34,18 @@ joblib==1.2.0
     #   scikit-learn
 jstyleson==0.0.2
     # via openvino-dev
-lmdb==1.3.0
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-networkx==2.8 ; python_version >= "3.7"
+lmdb==1.4.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+networkx==2.8.8 ; python_version >= "3.7"
     # via
     #   -r tools/accuracy_checker/requirements-extra.in
     #   openvino-dev
     #   scikit-image
 nibabel==4.0.2
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-nltk==3.7
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-numpy==1.23.1
+    # via -r tools/accuracy_checker/requirements-extra.in
+nltk==3.8
+    # via -r tools/accuracy_checker/requirements-extra.in
+numpy==1.23.4
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imagecodecs
@@ -71,57 +61,46 @@ numpy==1.23.1
     #   scikit-image
     #   scikit-learn
     #   scipy
+    #   shapely
     #   tifffile
     #   transformers
-opencv-python==4.6.0.66
+opencv-python==4.7.0.68
     # via openvino-dev
-openvino==2022.2.0
+openvino==2022.3.0
     # via openvino-dev
-openvino-dev[kaldi]==2022.2.0
+openvino-dev[kaldi]==2022.3.0
     # via -r ${INTEL_OPENVINO_DIR}/tools/requirements_kaldi.txt
-openvino-telemetry==2022.1.2
+openvino-telemetry==2022.3.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   openvino-dev
-packaging==21.3
+packaging==22.0
     # via
     #   huggingface-hub
     #   nibabel
     #   scikit-image
     #   transformers
-pandas==1.1.5
+pandas==1.3.5
     # via
     #   -r tools/accuracy_checker/requirements-extra.in
     #   openvino-dev
 parasail==1.3.3 ; platform_system != "Windows"
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 pillow==9.3.0
     # via
     #   -r tools/accuracy_checker/requirements-core.in
     #   imageio
     #   openvino-dev
     #   scikit-image
-progress==1.6
-    # via openvino-dev
 py-cpuinfo==9.0.0
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 pyclipper==1.3.0.post4
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 pydicom==2.3.1
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-pyparsing==3.0.9
-    # via packaging
+    # via -r tools/accuracy_checker/requirements-extra.in
 python-dateutil==2.8.2
     # via pandas
-pytz==2022.6
+pytz==2022.7
     # via pandas
 pywavelets==1.4.1
     # via scikit-image
@@ -132,9 +111,7 @@ pyyaml==6.0
     #   openvino-dev
     #   transformers
 rawpy==0.17.3 ; python_version >= "3.7"
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 regex==2022.10.31
     # via
     #   nltk
@@ -146,27 +123,19 @@ requests==2.28.1
     #   openvino-telemetry
     #   transformers
 scikit-image==0.19.3 ; python_version >= "3.7"
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 scikit-learn==0.24.2
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-scipy==1.8.0
+    # via -r tools/accuracy_checker/requirements-extra.in
+scipy==1.9.3
     # via
     #   -r tools/accuracy_checker/requirements-extra.in
     #   openvino-dev
     #   scikit-image
     #   scikit-learn
 sentencepiece==0.1.97
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
-shapely==1.8.5.post1
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
+shapely==2.0.0
+    # via -r tools/accuracy_checker/requirements-extra.in
 six==1.16.0
     # via python-dateutil
 texttable==1.6.7
@@ -178,7 +147,6 @@ tifffile==2022.10.10
 tokenizers==0.13.2 ; python_version >= "3.7"
     # via
     #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
     #   transformers
 tqdm==4.64.1
     # via
@@ -188,9 +156,7 @@ tqdm==4.64.1
     #   openvino-dev
     #   transformers
 transformers==4.25.1 ; python_version >= "3.7"
-    # via
-    #   -r tools/accuracy_checker/requirements-extra.in
-    #   openvino-dev
+    # via -r tools/accuracy_checker/requirements-extra.in
 typing-extensions==4.4.0
     # via huggingface-hub
 urllib3==1.26.13

@@ -18,7 +18,7 @@ from copy import deepcopy
 from collections import namedtuple
 import warnings
 try:
-    from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant # pylint:disable=W9902
+    from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant  # pylint: disable=import-outside-toplevel,package-absolute-imports
 except ImportError:
     ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant = None, None, None, None
 from ...utils import get_or_parse_value

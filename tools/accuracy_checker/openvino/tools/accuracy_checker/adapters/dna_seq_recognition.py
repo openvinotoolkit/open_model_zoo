@@ -88,15 +88,15 @@ class DNASequenceWithCRFAdapter(Adapter):
 
     def configure(self):
         try:
-            import torch
+            import torch  # pylint: disable=import-outside-toplevel
             self._torch = torch
-        except ImportError as import_error:
-            UnsupportedPackage('torch', import_error.msg).raise_error(self.__provider__)
+        except ImportError as torch_import_error:
+            UnsupportedPackage('torch', torch_import_error.msg).raise_error(self.__provider__)
         try:
-            from crf_beam import beam_search as crf_beam_search
+            from crf_beam import beam_search as crf_beam_search  # pylint: disable=import-outside-toplevel
             self._crf_beam_search = crf_beam_search
-        except ImportError as import_error:
-            UnsupportedPackage('crf_beam', import_error.msg).raise_error(self.__provider__)
+        except ImportError as crf_beam_import_error:
+            UnsupportedPackage('crf_beam', crf_beam_import_error.msg).raise_error(self.__provider__)
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         alphabet = list(self.label_map.values())
@@ -105,7 +105,8 @@ class DNASequenceWithCRFAdapter(Adapter):
         self.state_len = len(alphabet)
         self.n_base = self.state_len - 1
         semiring = namedtuple('semiring', ('zero', 'one', 'mul', 'sum', 'dsum'))
-        self.log_semiring = semiring(zero=-1e38, one=0., mul=self._torch.add, sum=self._torch.logsumexp, dsum=self._torch.softmax)
+        self.log_semiring = semiring(zero=-1e38, one=0., mul=self._torch.add, sum=self._torch.logsumexp,
+            dsum=self._torch.softmax)
         self.idx = self._torch.cat([
             self._torch.arange(self.n_base ** (self.state_len))[:, None],
             self._torch.arange(
@@ -146,7 +147,7 @@ class DNASequenceWithCRFAdapter(Adapter):
         return self.scan(ms, self.idx.to(self._torch.int64), v0, self.log_semiring)
 
     def backward_scores(self, scores):
-        t, n, _ = scores.shape
+        _, n, _ = scores.shape
         vt = scores.new_full((n, self.n_base**(self.state_len)), self.log_semiring.one)
         idx_t = self.idx.flatten().argsort().reshape(*self.idx.shape)
         ms_t = scores[:, :, idx_t]
