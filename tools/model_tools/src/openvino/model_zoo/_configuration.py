@@ -89,6 +89,13 @@ class Model:
             files = []
             file_names = set()
 
+
+            model_api_info = []
+            for info in model.get('model_api_info', []):
+                model_type = validation.validate_string('"model_type"', info['model_type'])
+
+
+
             architecture_type = model.get('architecture_type')
             if architecture_type:
                 architecture_type = validation.validate_string('"architecture_type"', architecture_type)

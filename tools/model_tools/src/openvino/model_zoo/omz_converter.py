@@ -20,6 +20,7 @@ import shutil
 import string
 import sys
 
+from openvino.runtime import Core, serialize
 from pathlib import Path
 
 from openvino.model_zoo import (
@@ -149,6 +150,9 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
                 return False
 
         reporter.print()
+        # rt_model = Core().read_model()
+        print(str(output_dir / model.subdirectory / model_precision / model.name) + '.xml')
+
 
     return True
 
