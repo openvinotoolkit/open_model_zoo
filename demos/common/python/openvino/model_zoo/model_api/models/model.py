@@ -89,7 +89,7 @@ class Model:
     @classmethod
     def create_model(cls, model_adapter, configuration=None, model_type=None, preload=False):
         if model_type is None:
-            model_type = model_adapter.get_rt_info(['config', 'type_of_model'])
+            model_type = model_adapter.get_rt_info(['model_api_info', 'model_type'])
         Model = cls.get_model(model_type)
         return Model(model_adapter, configuration, preload)
 

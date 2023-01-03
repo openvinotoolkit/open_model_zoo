@@ -48,7 +48,7 @@ def build_argparser():
                            'or address of model inference service if using ovms adapter.')
     available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=available_model_wrappers)
+                      type=str, choices=available_model_wrappers)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,

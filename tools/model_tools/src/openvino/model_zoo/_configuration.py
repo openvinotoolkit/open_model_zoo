@@ -55,7 +55,7 @@ class Model:
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
         task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info,
-        architecture_type
+        model_api_info
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -68,7 +68,7 @@ class Model:
         self.precisions = precisions
         self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
-        self.architecture_type = architecture_type
+        self.model_api_info = model_api_info
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
@@ -89,16 +89,7 @@ class Model:
             files = []
             file_names = set()
 
-
-            model_api_info = []
-            for info in model.get('model_api_info', []):
-                model_type = validation.validate_string('"model_type"', info['model_type'])
-
-
-
-            architecture_type = model.get('architecture_type')
-            if architecture_type:
-                architecture_type = validation.validate_string('"architecture_type"', architecture_type)
+            model_api_info = model.get('model_api_info', dict())
 
             for file in model['files']:
                 files.append(ModelFile.deserialize(file))
@@ -187,7 +178,7 @@ class Model:
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
                 task_type, conversion_to_onnx_args, known_frameworks[framework],
-                composite_model_name, input_info, architecture_type)
+                composite_model_name, input_info, model_api_info)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,

@@ -26,6 +26,7 @@ from pathlib import Path
 from openvino.model_zoo import (
     _configuration, _common, _concurrency, _reporting,
 )
+from openvino.model_zoo.download_engine import validation
 
 ModelOptimizerProperties = collections.namedtuple('ModelOptimizerProperties',
     ['cmd_prefix', 'extra_args', 'base_dir'])
@@ -150,10 +151,15 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
                 return False
 
         reporter.print()
-        # rt_model = Core().read_model()
-        print(str(output_dir / model.subdirectory / model_precision / model.name) + '.xml')
 
-
+        xml_path = str(output_dir / model.subdirectory / model_precision / model.name) + '.xml'
+        rt_model = Core().read_model(xml_path)
+        try:
+            val = validation.validate_string('model_type', model.model_api_info['model_type'])
+            rt_model.set_rt_info(val, ['model_api_info', 'model_type'])
+        except KeyError:
+            pass
+        serialize(rt_model, xml_path)
     return True
 
 def num_jobs_arg(value_str):
