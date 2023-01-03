@@ -1,4 +1,4 @@
-name: build_demos.sh
+name: Demos
 
 on:
   pull_request:
