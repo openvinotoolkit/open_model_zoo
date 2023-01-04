@@ -149,7 +149,18 @@ class Model:
         '''
         if config is None: return
         parameters = self.parameters()
+        for name, param in parameters.items():
+            try:
+                str_val = self.model_adapter.get_rt_info(['model_api_info', name])
+                value = param.from_str(str_val)
+                self.__setattr__(name, value)
+            except (NotImplementedError, RuntimeError) as error:  # model_adapter is not openvino adapter or IR doesn't contain requested rt_info
+                if isinstance(error, RuntimeError) and str(error) != 'Cannot get runtime attribute. Path to runtime attribute is incorrect.':
+                    raise
+
         for name, value in config.items():
+            if value is None:
+                continue
             if name in parameters:
                 errors = parameters[name].validate(value)
                 if errors:

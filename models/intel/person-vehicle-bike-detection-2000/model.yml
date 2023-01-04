@@ -15,7 +15,6 @@
 description: >-
   MobileNetV2-SSD with two heads and clustered priors for 256x256 resolution.
 task_type: detection
-architecture_type: ssd
 files:
   - name: FP32/person-vehicle-bike-detection-2000.xml
     size: 185304

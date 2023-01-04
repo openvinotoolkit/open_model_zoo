@@ -21,7 +21,6 @@ description: >-
 
   Originally redistributed as a checkpoint file, was converted to frozen graph.
 task_type: action_recognition
-architecture_type: i3d-rgb
 files:
   - name: i3d-rgb.frozen.pb
     checksum: 8f1c32cc56cc1ca6880b7725430ae8ec369485e60f9bcce9724042ecb6e5bd97d25a04148c38bfde60b0ed00c918bc96

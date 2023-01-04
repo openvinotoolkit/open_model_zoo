@@ -19,7 +19,6 @@ description: >-
   framework and converted to ONNX* format. For additional information refer to repository
   <https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection>.
 task_type: detection
-architecture_type: ssd
 files:
   - name: resnet34-ssd1200.onnx
     size: 80363696

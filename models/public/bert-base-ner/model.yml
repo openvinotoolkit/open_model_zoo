@@ -28,7 +28,6 @@ description: >-
   Tokenization occurs using the BERT tokenizer (see the demo code for implementation
   details) and the enclosed "vocab.txt" dictionary file.
 task_type: named_entity_recognition
-architecture_type: bert-named-entity-recognition
 files:
   - name: transformers-4.5.1-py3-none-any.whl
     size: 2060589

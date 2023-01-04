@@ -26,7 +26,6 @@ description: >-
   More details provided in the paper <https://arxiv.org/abs/1705.09914> and repository
   <https://github.com/fyu/drn>.
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: drn_d_38_cityscapes.pth
     size: 104117210

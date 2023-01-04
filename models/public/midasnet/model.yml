@@ -23,7 +23,6 @@ description: >-
   The model output is an inverse depth map that is defined up to an unknown scale
   factor.
 task_type: monocular_depth_estimation
-architecture_type: monodepth
 files:
   - name: models/midas_net.py
     size: 2662

@@ -21,7 +21,6 @@ description: >-
   More details provided in the paper <https://arxiv.org/abs/2107.08430> and repository
   <https://github.com/Megvii-BaseDetection/YOLOX>.
 task_type: detection
-architecture_type: yolox
 files:
   - name: models/yolox.py
     size: 1374

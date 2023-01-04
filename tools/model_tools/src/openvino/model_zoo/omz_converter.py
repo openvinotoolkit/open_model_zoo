@@ -159,6 +159,31 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             rt_model.set_rt_info(val, ['model_api_info', 'model_type'])
         except KeyError:
             pass
+        try:
+            val = validation.validate_nonnegative_float('confidence_threshold', model.model_api_info['confidence_threshold'])
+            rt_model.set_rt_info(val, ['model_api_info', 'confidence_threshold'])
+        except KeyError:
+            pass
+        try:
+            val = validation.validate_nonnegative_float('iou_threshold', model.model_api_info['iou_threshold'])
+            rt_model.set_rt_info(val, ['model_api_info', 'iou_threshold'])
+        except KeyError:
+            pass
+        try:
+            val = validation.validate_string('resize_type', model.model_api_info['resize_type'])
+            rt_model.set_rt_info(val, ['model_api_info', 'resize_type'])
+        except KeyError:
+            pass
+        try:
+            val = validation.validate_list('anchors', model.model_api_info['anchors'])
+            rt_model.set_rt_info(val, ['model_api_info', 'anchors'])
+        except KeyError:
+            pass
+        try:
+            val = validation.validate_list('masks', model.model_api_info['masks'])
+            rt_model.set_rt_info(val, ['model_api_info', 'masks'])
+        except KeyError:
+            pass
         serialize(rt_model, xml_path)
     return True
 

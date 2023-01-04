@@ -20,7 +20,6 @@ description: >-
   that is defined up to an unknown scale factor. More details can be found in the
   following repository <https://github.com/iro-cp/FCRN-DepthPrediction>.
 task_type: monocular_depth_estimation
-architecture_type: monodepth
 framework: tf
 files:
   - name: NYU_FCRN-checkpoint.zip

@@ -22,7 +22,6 @@ description: >-
   of real-world street images. For model implementation details see original repository
   <https://github.com/ekzhang/fastseg>.
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: mobilev3large-lraspp-f128-9cbabfde.pt
     size: 26476800

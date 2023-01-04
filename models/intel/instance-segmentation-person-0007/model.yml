@@ -16,7 +16,6 @@ description: >-
   Instance segmentation model for one class - person. PointRend based architecture
   with EfficientNet-B1 backbone and lightweight Bbox and Mask heads.
 task_type: instance_segmentation
-architecture_type: maskrcnn
 files:
   - name: FP32/instance-segmentation-person-0007.xml
     size: 3659861

@@ -15,7 +15,6 @@
 description: >-
   ICNet trained on CamVid in TensorFlow with 30% weight sparsity (70.08% mIoU)
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: FP32/icnet-camvid-ava-sparse-30-0001.xml
     size: 384392

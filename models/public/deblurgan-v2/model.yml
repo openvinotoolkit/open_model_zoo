@@ -20,7 +20,6 @@ description: >-
   details about implementation of model, check out the DeblurGAN-v2: Deblurring (Orders-of-Magnitude)
   Faster and Better <https://github.com/VITA-Group/DeblurGANv2> repository.
 task_type: image_processing
-architecture_type: deblurring
 files:
   - name: models/__init__.py
     size: 0

@@ -22,7 +22,6 @@ description: >-
   check out the Semantic Segmentation on MIT ADE20K dataset in PyTorch <https://github.com/CSAILVision/semantic-segmentation-pytorch>
   repository.
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: mit_semseg/lib/__init__.py
     size: 0

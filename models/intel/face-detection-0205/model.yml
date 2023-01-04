@@ -15,7 +15,6 @@
 description: >-
   Face Detection based on MobileNetV2 (FCOS).
 task_type: detection
-architecture_type: ssd
 files:
   - name: FP32/face-detection-0205.xml
     size: 845788

@@ -61,7 +61,7 @@ def build_argparser():
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
+    common_model_args.add_argument('-t', '--prob_threshold', default=None, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
                                    help='Optional. A resize type for model preprocess. By default used model predefined type.')

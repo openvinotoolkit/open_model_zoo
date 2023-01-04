@@ -17,7 +17,6 @@ description: >-
   train set to produce question and context embeddings that are close to each other
   in case of the question answer in the context and far from each other otherwise.
 task_type: question_answering
-architecture_type: bert-embedding
 files:
   - name: vocab.txt
     size: 231508

@@ -15,7 +15,6 @@
 description: >-
   YOLO Tiny v2 (https://arxiv.org/abs/1612.08242) fine-tuned for vehicles detection
 task_type: detection
-architecture_type: yolo
 files:
   - name: parameters.yml
     size: 225

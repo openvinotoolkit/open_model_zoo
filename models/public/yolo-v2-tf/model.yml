@@ -18,7 +18,6 @@ description: >-
   TensorFlow* framework. This model was pre-trained on Common Objects in Context (COCO)
   <https://cocodataset.org/#home> dataset with 80 classes.
 task_type: detection
-architecture_type: yolo
 files:
   - name: yolo-v2.pb
     size: 203970473

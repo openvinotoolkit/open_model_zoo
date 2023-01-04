@@ -25,7 +25,6 @@ description: >-
   The model output is a typical vector containing the tracked object data, as previously
   described.
 task_type: detection
-architecture_type: yolo
 files:
   - name: mobilenet-ssd.prototxt
     size: 29353

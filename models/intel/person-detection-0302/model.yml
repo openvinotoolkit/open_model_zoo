@@ -15,7 +15,6 @@
 description: >-
   Person Detection based on Resnet50 (ATSS) on 1280x720 resolution.
 task_type: detection
-architecture_type: ssd
 files:
   - name: FP32/person-detection-0302.xml
     size: 1138575

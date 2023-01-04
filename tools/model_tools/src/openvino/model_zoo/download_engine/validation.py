@@ -54,6 +54,12 @@ def validate_nonnegative_int(context, value):
             '{}: expected a non-negative integer, got {!r}'.format(context, value))
     return value
 
+def validate_nonnegative_float(context, value):
+    if not isinstance(value, float) or value < 0:
+        raise DeserializationError(
+            '{}: expected a non-negative integer, got {!r}'.format(context, value))
+    return value
+
 def validate_list(context, value):
     if not isinstance(value, list):
         raise DeserializationError(

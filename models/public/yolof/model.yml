@@ -20,7 +20,6 @@ description: >-
   This model was pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
   dataset with 80 classes
 task_type: detection
-architecture_type: yolof
 files:
   # cvpods
   - name: cvpods/__init__.py

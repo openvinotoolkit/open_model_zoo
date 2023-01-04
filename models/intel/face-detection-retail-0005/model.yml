@@ -15,7 +15,6 @@
 description: >-
   Face Detection based on MobileNetV2.
 task_type: detection
-architecture_type: ssd
 files:
   - name: FP32/face-detection-retail-0005.xml
     size: 159595

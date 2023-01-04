@@ -251,7 +251,7 @@ def check_composite_model_dir(model_dir):
                 raise validation.DeserializationError(
                     'Names of composite model parts should start with composite model name')
 
-def load_models(models_root, args, mode=ModelLoadingMode.all):
+def load_models(models_root, mode=ModelLoadingMode.all):
     models = []
     model_names = set()
 
@@ -331,9 +331,9 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
 
     return sorted(models + composite_models, key=lambda model : model.name)
 
-def load_models_or_die(models_root, args, **kwargs):
+def load_models_or_die(models_root, **kwargs):
     try:
-        return load_models(models_root, args, **kwargs)
+        return load_models(models_root, **kwargs)
     except validation.DeserializationError as e:
         indent = '    '
 
@@ -345,7 +345,7 @@ def load_models_or_die(models_root, args, **kwargs):
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_models_from_args(parser, args, models_root, **kwargs):
     if args.print_all:
-        for model in load_models_or_die(models_root, args, **kwargs):
+        for model in load_models_or_die(models_root, **kwargs):
             print(model.name)
         sys.exit()
 
@@ -357,7 +357,7 @@ def load_models_from_args(parser, args, models_root, **kwargs):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_models = load_models_or_die(models_root, args)
+    all_models = load_models_or_die(models_root)
 
     if args.all:
         return all_models

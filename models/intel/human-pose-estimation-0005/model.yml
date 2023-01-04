@@ -15,7 +15,6 @@
 description: >-
   2D human pose estimation based on EfficientHRNet.
 task_type: human_pose_estimation
-architecture_type: hpe-assosiative-embedding
 files:
   - name: FP32/human-pose-estimation-0005.xml
     size: 899859

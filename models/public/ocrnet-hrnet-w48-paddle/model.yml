@@ -23,7 +23,6 @@ description: >-
   see repository <https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.3/configs/ocrnet>,
   paper <https://arxiv.org/abs/1909.11065>.
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: model.pdparams
     size: 425067873

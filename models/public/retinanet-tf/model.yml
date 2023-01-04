@@ -17,7 +17,6 @@ description: >-
   trained on Keras*, then converted to TensorFlow* protobuf format. For details, see
   paper <https://arxiv.org/abs/1708.02002>, repository <https://github.com/fizyr/keras-retinanet>.
 task_type: detection
-architecture_type: ssd
 files:
   - name: retinanet_resnet50_coco_best_v2.1.0.pb
     size: 152890076

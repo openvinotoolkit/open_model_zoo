@@ -16,7 +16,6 @@ description: >-
   Multiclass (BG -  road -  curbs -  marks) segmentation based on ENET -  using depthwise
   convolutions and without ELU operations and without concatenation
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: FP32/road-segmentation-adas-0001.xml
     size: 398306

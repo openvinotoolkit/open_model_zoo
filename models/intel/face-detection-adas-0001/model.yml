@@ -15,7 +15,6 @@
 description: >-
   Face Detection (MobileNet with reduced channels + SSD with weights sharing)
 task_type: detection
-architecture_type: ssd
 files:
   - name: FP32/face-detection-adas-0001.xml
     size: 233651

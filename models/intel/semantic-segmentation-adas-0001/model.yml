@@ -17,7 +17,6 @@ description: >-
   -  traffic sign -  vegetation -  terrain -  sky -  person -  rider -  car -  truck
   -  bus -  train -  motorcycle -  bicycle -  ego-vehicle) segmentation based on ICNet
 task_type: semantic_segmentation
-architecture_type: segmentation
 files:
   - name: FP32/semantic-segmentation-adas-0001.xml
     size: 210932

@@ -25,7 +25,6 @@ description: >-
   More details provided in the paper <https://arxiv.org/abs/2005.12872> and repository
   <https://github.com/facebookresearch/detr>.
 task_type: detection
-architecture_type: detr
 files:
   - name: detr-r50-e632da11.pth
     size: 166618694

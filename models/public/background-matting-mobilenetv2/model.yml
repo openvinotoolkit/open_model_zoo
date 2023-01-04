@@ -21,7 +21,6 @@ description: >-
   For details see the repository <https://github.com/PeterL1n/BackgroundMattingV2>.
   For details regarding export to ONNX see here <https://github.com/DmitriySidnev/BackgroundMattingV2/blob/master/export_onnx.py>.
 task_type: background_matting
-architecture_type: background-matting
 files:
   - name: bgm_mobilenetv2.onnx
     size: 20006715

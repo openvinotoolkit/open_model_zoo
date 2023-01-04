@@ -25,17 +25,20 @@ from openvino.model_zoo import (
 from openvino.model_zoo.download_engine import validation
 
 
+def list_models():
+    return {model.name for model in _configuration.load_models(_common.MODEL_ROOT, _configuration.ModelLoadingMode.ignore_composite)}
+
+
 class OMZModel:
     def __init__(
         self, name=None, model_path=None, description=None, task_type=None,
-        subdirectory=None, architecture_type=None, ie=None, download_dir=None
+        subdirectory=None, download_dir=None
     ):
         self.model_path = model_path
         self.description = description
         self.task_type = task_type
         self.name = name
         self.subdirectory = subdirectory
-        self.architecture_type = architecture_type
         self.download_dir = download_dir
 
         self._set_config_paths()
@@ -48,7 +51,7 @@ class OMZModel:
         self.model_config_path = model_config_path if model_config_path.exists() else None
 
     @classmethod
-    def download(cls, model_name, *, precision='FP16', download_dir=None, cache_dir=None, ie=None):
+    def download(cls, model_name, *, precision='FP16', download_dir=None, cache_dir=None):
         '''
         Downloads target model. If the model has already been downloaded,
         retrieves the model from the cache instead of downloading it again.
@@ -69,8 +72,6 @@ class OMZModel:
                 The script will place a copy of each downloaded file in the cache, or,
                 if it is already there, retrieve it from the cache.
                 By default creates a folder '.cache' in current download directory.
-            ie
-                Inference Engine instance
         '''
         if download_dir is None:
             download_dir = Path.home() / '.cache' / 'omz'
@@ -108,7 +109,7 @@ class OMZModel:
         if not os.path.exists(model_path) or not os.path.exists(bin_path):
             omz_converter.converter(['--name=' + model_name, '--precisions=' + precision,
                         '--download_dir=' + str(download_dir)])
-        return cls(name, model_path, description, task_type, subdirectory, model.architecture_type, ie, download_dir)
+        return cls(name, model_path, description, task_type, subdirectory, download_dir)
 
     def _load_model(self, model_name):
         parser = argparse.ArgumentParser()

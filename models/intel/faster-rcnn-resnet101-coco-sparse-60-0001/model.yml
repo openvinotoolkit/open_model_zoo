@@ -15,7 +15,6 @@
 description: >-
   Faster RCNN with ResNet101 backbone trained on COCO dataset with 0.6 sparsity level.
 task_type: detection
-architecture_type: ssd
 files:
   - name: custom_extension/front/tf/TFTPFasterRCNN.py
     size: 13621

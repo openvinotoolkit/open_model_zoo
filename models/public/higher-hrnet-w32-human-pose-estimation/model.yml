@@ -25,7 +25,6 @@ description: >-
   Representation Learning for Bottom-Up Human Pose Estimation <https://github.com/HRNet/HigherHRNet-Human-Pose-Estimation>
   repository.
 task_type: human_pose_estimation
-architecture_type: hpe-assosiative-embedding
 files:
   - name: models/__init__.py
     size: 412

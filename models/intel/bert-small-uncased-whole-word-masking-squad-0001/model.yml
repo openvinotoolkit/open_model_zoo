@@ -18,7 +18,6 @@ description: >-
   on lower-cased English text using Whole-Word-Masking and fine-tuned on the SQuAD
   v1.1 training set (91.57% F1 -  85.04% EM on the v1.1 dev set).
 task_type: question_answering
-architecture_type: bert-question-answering
 files:
   - name: vocab.txt
     size: 231508

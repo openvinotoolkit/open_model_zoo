@@ -18,7 +18,6 @@ description: >-
   Model pre-trained in Pytorch* on Common Objects in Context (COCO) <https://cocodataset.org/#home>
   dataset. For details, see the repository <https://github.com/dbolya/yolact>.
 task_type: instance_segmentation
-architecture_type: yolact
 files:
   - name: yolact/yolact.py
     size: 31516

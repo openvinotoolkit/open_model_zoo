@@ -19,7 +19,6 @@ description: >-
   (COCO) <https://cocodataset.org/#home> image database. For details about this family
   of models, check out the Google AutoML repository <https://github.com/google/automl/tree/master/efficientdet>.
 task_type: detection
-architecture_type: ssd
 files:
   - name: efficientdet-d0.tar.gz
     size: 28828936

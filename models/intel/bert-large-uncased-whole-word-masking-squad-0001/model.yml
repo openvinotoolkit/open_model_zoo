@@ -16,7 +16,6 @@ description: >-
   BERT-large pretrained on lower-cased English text using Whole-Word-Masking and fine-tuned
   on the SQuAD v1.1 training set (93.21% F1 -  87.2% EM on the v1.1 dev set).
 task_type: question_answering
-architecture_type: bert-question-answering
 files:
   - name: vocab.txt
     size: 231508

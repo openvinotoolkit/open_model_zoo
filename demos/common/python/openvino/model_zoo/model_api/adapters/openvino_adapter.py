@@ -42,7 +42,11 @@ class OpenvinoAdapter(ModelAdapter):
     Works with OpenVINO model
     '''
 
-    def __init__(self, core, model, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0):
+    def __init__(self, core, model, weights_path=None, model_parameters = {}, device='CPU', plugin_config=None, max_num_requests=0,
+            precision='FP16', download_dir=None, cache_dir=None):
+        '''
+        precision, download_dir and cache_dir are ignored if model is a path to a file
+        '''
         self.core = core
         self.model_path = model
         self.device = device
@@ -52,12 +56,10 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
         if isinstance(model, str):
-            try:
-                from openvino.model_zoo.models import OMZModel
-                omz_model = OMZModel.download(model)
+            from openvino.model_zoo.models import OMZModel, list_models
+            if model in list_models():
+                omz_model = OMZModel.download(model, precision=precision, download_dir=download_dir, cache_dir=cache_dir)
                 self.model_path = omz_model.model_path
-            except (SystemExit, ImportError):
-                pass
 
         if isinstance(self.model_path, (str, Path)):
             if Path(self.model_path).suffix == ".onnx" and weights_path:
@@ -67,10 +69,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_from_buffer = isinstance(self.model_path, bytes) and isinstance(weights_path, bytes)
         log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else self.model_path))
         weights = weights_path if self.model_from_buffer else ''
-        try:
-            self.model = core.read_model(self.model_path, weights)
-        except RuntimeError:
-            raise RuntimeError("Can't download or read from file the model")
+        self.model = core.read_model(self.model_path, weights)
 
     def load_model(self):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
