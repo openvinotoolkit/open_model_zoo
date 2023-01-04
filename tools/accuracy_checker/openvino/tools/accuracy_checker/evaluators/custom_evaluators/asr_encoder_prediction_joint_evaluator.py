@@ -358,7 +358,7 @@ class CommonONNXModel(BaseONNXModel):
 class EncoderONNXModel(CommonONNXModel):
     def fit_to_input(self, input_data):
         frames, _, _ = input_data.shape
-        return {self.input_blob.name: input_data, '1': np.array([frames], dtype=np.int64)}
+        return {self.input_blob.name: input_data, '1': np.array([frames], dtype=int)}
 
 
 class PredictionONNXModel(CommonONNXModel):

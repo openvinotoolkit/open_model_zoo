@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from pathlib import Path
-import numpy as np
 
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
@@ -71,7 +70,7 @@ class ImageNetFormatConverter(BaseFormatConverter):
                 if not check_file_existence(self.images_dir / image_name):
                     content_errors.append('{}: does not exist'.format(self.images_dir / image_name))
 
-            label = np.int64(label) if not self.has_background else np.int64(label) + 1
+            label = int(label) if not self.has_background else int(label) + 1
             annotation.append(ClassificationAnnotation(image_name, label))
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)

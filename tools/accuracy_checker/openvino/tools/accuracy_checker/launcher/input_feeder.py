@@ -68,7 +68,7 @@ PRECISION_TO_DTYPE = {
     'I8': np.int8,  # signed char
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
-    'I64': np.int64,  # signed long int
+    'I64': int,  # signed long int
     'STR': str,  # string'
     'BOOL': bool,
     'f32': np.float32,
