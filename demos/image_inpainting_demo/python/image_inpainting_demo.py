@@ -78,8 +78,8 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
             next_y = start_y + length * np.cos(angle)
             next_x = start_x + length * np.sin(angle)
 
-            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
-            next_x = np.clip(next_x, 0, w - 1).astype(np.int)
+            next_y = np.clip(next_y, 0, h - 1).astype(np.int32)
+            next_x = np.clip(next_x, 0, w - 1).astype(np.int32)
             cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
             cv2.circle(mask, (start_y, start_x), brush_width // 2, 1)
 
