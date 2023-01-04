@@ -24,27 +24,31 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install numpy
-
-    - name: Cache OpenCV
-      id: opencv-cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ github.workspace }}/opencv-install
-        key: ${{ runner.os }}-opencv-cache
-
-    - name: Install OpenCV
-      uses: rayandrews/with-opencv-action@v1
-      with:
-        dir: ${{ github.workspace }}/opencv-install
-        cached: ${{ steps.opencv-cache.outputs.cache-hit }}
-        opencv-version: '4.7.0'
-
     - name: Download OpenVINO
       run: |
         wget https://storage.openvinotoolkit.org/repositories/openvino/packages/2022.3/linux/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
         tar xf l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
         sudo l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/install_dependencies/install_openvino_dependencies.sh
+    - name: Cache OpenCV
+      id: opencv-cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/opencv
+        key: ${{ runner.os }}-opencv-cache
+    - if: ${{ steps.opencv-cache.outputs.cache-hit != 'true' }}
+      name: Checlout OpenCV
+      uses: actions/checkout@v3
+      with:
+        repository: opencv/opencv
+        path: opencv
+    - if: ${{ steps.opencv-cache.outputs.cache-hit != 'true' }}
+      name: Compile OpenCV
+      run: |
+        mkdir opencv/build
+        cd opencv/build
+        cmake -DCMAKE_BUILD_TYPE=Release -DWITH_INF_ENGINE=ON -DOpenVINO_DIR=$GITHUB_WORKSPACE/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/runtime/cmake/ ..
+        cmake --build . -j $((`nproc`*2+2))
     - name: build_demos.sh
       run: |
         source l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/setupvars.sh
-        OpenCV_DIR=$GITHUB_WORKSPACE/opencv-install/opencv/build ./demos/build_demos.sh -DENABLE_PYTHON=y
+        OpenCV_DIR=$GITHUB_WORKSPACE/opencv/build ./demos/build_demos.sh -DENABLE_PYTHON=y
