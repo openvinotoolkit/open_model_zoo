@@ -89,7 +89,7 @@ class Model:
     @classmethod
     def create_model(cls, model_adapter, configuration=None, model_type=None, preload=False):
         if model_type is None:
-            model_type = model_adapter.get_rt_info(['model_api_info', 'model_type'])
+            model_type = model_adapter.get_rt_info(['model_info', 'model_type'])
         Model = cls.get_model(model_type)
         return Model(model_adapter, configuration, preload)
 
@@ -151,7 +151,7 @@ class Model:
         parameters = self.parameters()
         for name, param in parameters.items():
             try:
-                str_val = self.model_adapter.get_rt_info(['model_api_info', name])
+                str_val = self.model_adapter.get_rt_info(['model_info', name])
                 value = param.from_str(str_val)
                 self.__setattr__(name, value)
             except (NotImplementedError, RuntimeError) as error:  # model_adapter is not openvino adapter or IR doesn't contain requested rt_info

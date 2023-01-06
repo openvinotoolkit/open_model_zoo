@@ -80,7 +80,7 @@ Description of the model. Must match with the description from the model [docume
 
 [Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
 
-**`model_api_info`** (*optional*)
+**`model_info`** (*optional*)
 
 Dict for ModelAPI model wrappers. Used for [Python Model API](demos/README.md#python-model-api-installation) class creation.
 

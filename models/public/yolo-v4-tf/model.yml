@@ -58,7 +58,7 @@ model_optimizer_args:
 framework: tf
 quantizable: true
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
-model_api_info:
+model_info:
   model_type: YOLOV4
   confidence_threshold: 0.5
   iou_threshold: 0.5
