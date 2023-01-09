@@ -23,7 +23,7 @@ import cv2
 sys.path.append(str(Path(__file__).parent / 'common/python'))
 sys.path.append(str(Path(__file__).parent / 'common/python/openvino/model_zoo'))
 
-from model_api.models import Model
+from model_api.models import DetectionModel
 
 from visualizers import ColorPalette
 
@@ -41,7 +41,7 @@ def draw_detections(frame, detections, palette, labels):
 
 
 def main():
-    model = Model.create_model('yolo-v4-tf', preload=True)
+    model = DetectionModel.create_model('yolo-v4-tf', preload=True)
     image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
     objects = model(image)
     draw_detections(image, objects, ColorPalette(n=100), labels=None)

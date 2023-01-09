@@ -55,21 +55,28 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_parameters = model_parameters
         self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
-        if isinstance(model, str):
-            from openvino.model_zoo.models import OMZModel, list_models
-            if model in list_models():
-                omz_model = OMZModel.download(model, precision=precision, download_dir=download_dir, cache_dir=cache_dir)
-                self.model_path = omz_model.model_path
-
         if isinstance(self.model_path, (str, Path)):
             if Path(self.model_path).suffix == ".onnx" and weights_path:
                 log.warning('For model in ONNX format should set only "model_path" parameter.'
                             'The "weights_path" will be omitted')
 
         self.model_from_buffer = isinstance(self.model_path, bytes) and isinstance(weights_path, bytes)
-        log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else self.model_path))
-        weights = weights_path if self.model_from_buffer else ''
-        self.model = core.read_model(self.model_path, weights)
+        model_from_file = Path(self.model_path).is_file()
+        if model_from_file or self.model_from_buffer:
+            log.info('Reading model {}'.format('from buffer' if self.model_from_buffer else self.model_path))
+            weights = weights_path if self.model_from_buffer else ''
+            self.model = core.read_model(self.model_path, weights)
+            return
+        if isinstance(model, str):
+            from openvino.model_zoo.models import OMZModel, list_models
+            if model in list_models():
+                omz_model = OMZModel.download(model, precision=precision, download_dir=download_dir, cache_dir=cache_dir)
+                self.model_path = omz_model.model_path
+                log.info(f'Reading model {self.model_path}')
+                self.model = core.read_model(self.model_path)
+                return
+        raise RuntimeError('Model must be bytes, a file or existing OMZ model name')
+
 
     def load_model(self):
         self.compiled_model = self.core.compile_model(self.model, self.device, self.plugin_config)
