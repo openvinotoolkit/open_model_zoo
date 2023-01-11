@@ -118,14 +118,12 @@ class Segmentor:
         frame_side = frame_side[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
         frame_top = frame_top[np.newaxis, :, :, :].transpose((0, 3, 1, 2)).astype(np.float32)
 
-        self.infer_encoder_side_request.start_async(inputs={ \
+        self.infer_encoder_side_request.start_async(inputs={
             self.encoder_side_input_keys['input_image']: frame_side,
             self.encoder_side_input_keys['shifted_input']: self.shifted_tesor_side})
 
-        self.infer_encoder_top_request.start_async(inputs= \
-                                                       {self.encoder_top_input_keys['input_image']: frame_top,
-                                                        self.encoder_top_input_keys[
-                                                            'shifted_input']: self.shifted_tesor_top})
+        self.infer_encoder_top_request.start_async(inputs={self.encoder_top_input_keys['input_image']: frame_top,
+                                                           self.encoder_top_input_keys['shifted_input']: self.shifted_tesor_top})
 
         while True:
             if self.infer_encoder_side_request.wait_for(0) and self.infer_encoder_top_request.wait_for(0):

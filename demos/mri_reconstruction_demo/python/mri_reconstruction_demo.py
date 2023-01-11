@@ -14,7 +14,7 @@ logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, 
 logger = logging.getLogger('mri_reconstruction_demo')
 
 def kspace_to_image(kspace):
-    assert(len(kspace.shape) == 3 and kspace.shape[-1] == 2)
+    assert len(kspace.shape) == 3 and kspace.shape[-1] == 2
     fft = cv.idft(kspace, flags=cv.DFT_SCALE)
     img = cv.magnitude(fft[:, :, 0], fft[:, :, 1])
     return cv.normalize(img, dst=None, alpha=255, beta=0, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)

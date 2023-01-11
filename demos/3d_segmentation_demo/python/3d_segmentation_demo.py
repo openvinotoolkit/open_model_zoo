@@ -173,7 +173,7 @@ def normalize(image, mask, full_intensities_range):
 
 
 def resample_np(data, output_shape, order):
-    assert(len(data.shape) == len(output_shape))
+    assert len(data.shape) == len(output_shape)
     factor = [float(o) / i for i, o in zip(data.shape, output_shape)]
     return interpolation.zoom(data, zoom=factor, order=order)
 
