@@ -20,19 +20,14 @@ import math
 
 
 class Detection:
-    def __init__(self, xmin, ymin, xmax, ymax, score, id):
+    def __init__(self, xmin, ymin, xmax, ymax, score, id, str_label=None):
         self.xmin = xmin
         self.ymin = ymin
         self.xmax = xmax
         self.ymax = ymax
         self.score = score
         self.id = id
-
-    def bottom_left_point(self):
-        return self.xmin, self.ymin
-
-    def top_right_point(self):
-        return self.xmax, self.ymax
+        self.str_label = str_label
 
     def get_coords(self):
         return self.xmin, self.ymin, self.xmax, self.ymax

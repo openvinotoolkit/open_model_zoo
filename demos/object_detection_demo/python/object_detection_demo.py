@@ -127,16 +127,15 @@ def build_argparser():
     return parser
 
 
-def draw_detections(frame, detections, palette, labels, output_transform):
+def draw_detections(frame, detections, palette, output_transform):
     frame = output_transform.resize(frame)
     for detection in detections:
         class_id = int(detection.id)
         color = palette[class_id]
-        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
         xmin, ymin, xmax, ymax = detection.get_coords()
         xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
+        cv2.putText(frame, '{} {:.1%}'.format(detection.str_label, detection.score),
                     (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
         if isinstance(detection, DetectionWithLandmarks):
             for landmark in detection.landmarks:
@@ -145,15 +144,13 @@ def draw_detections(frame, detections, palette, labels, output_transform):
     return frame
 
 
-def print_raw_results(detections, labels, frame_id):
+def print_raw_results(detections, frame_id):
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         xmin, ymin, xmax, ymax = detection.get_coords()
-        class_id = int(detection.id)
-        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
         log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+                  .format(detection.str_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -210,11 +207,11 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(objects, model.labels, next_frame_id_to_show)
+                print_raw_results(objects, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
-            frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+            frame = draw_detections(frame, objects, palette, output_transform)
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
 
@@ -270,11 +267,11 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(objects, model.labels, next_frame_id_to_show)
+            print_raw_results(objects, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
-        frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+        frame = draw_detections(frame, objects, palette, output_transform)
         render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 

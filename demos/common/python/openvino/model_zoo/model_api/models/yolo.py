@@ -121,6 +121,12 @@ class YOLO(DetectionModel):
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)
         detections = self._resize_detections(detections, meta)
+        if self.labels is None:
+            for detection in detections:
+                detection.str_label = f'#{detection.id}'
+        else:
+            for detection in detections:
+                detection.str_label = self.labels[detection.id]
         return detections
 
     def _parse_yolo_region(self, predictions, input_size, params):

@@ -184,6 +184,11 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             rt_model.set_rt_info(val, ['model_info', 'masks'])
         except KeyError:
             pass
+        try:
+            val = validation.validate_list('labels', model.model_info['labels'])
+            rt_model.set_rt_info(val, ['model_info', 'labels'])
+        except KeyError:
+            pass
         serialize(rt_model, xml_path)
     return True
 

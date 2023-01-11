@@ -87,7 +87,7 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, model_adapter, configuration=None, model_type=None, preload=False):
+    def create_model(cls, model_adapter, configuration=None, model_type=None, preload=True):
         if model_type is None:
             model_type = model_adapter.get_rt_info(['model_info', 'model_type'])
         Model = cls.get_model(model_type)
@@ -264,11 +264,10 @@ class Model:
 
         Returns:
             - postprocessed data in the format defined by wrapper
-            - the input metadata obtained from `preprocess` method
         '''
         dict_data, input_meta = self.preprocess(inputs)
         raw_result = self.infer_sync(dict_data)
-        return self.postprocess(raw_result, input_meta), input_meta
+        return self.postprocess(raw_result, input_meta)
 
     def load(self, force=False):
         if not self.model_loaded or force:

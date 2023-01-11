@@ -28,23 +28,22 @@ from model_api.models import DetectionModel
 from visualizers import ColorPalette
 
 
-def draw_detections(frame, detections, palette, labels):
+def draw_detections(frame, detections, palette):
     for detection in detections:
         class_id = int(detection.id)
         color = palette[class_id]
-        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
         xmin, ymin, xmax, ymax = detection.get_coords()
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
+        cv2.putText(frame, '{} {:.1%}'.format(detection.str_label, detection.score),
                     (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
     return frame
 
 
 def main():
-    model = DetectionModel.create_model('yolo-v4-tf', preload=True)
+    model = DetectionModel.create_model('yolo-v4-tf')
     image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
     objects = model(image)
-    draw_detections(image, objects, ColorPalette(n=100), labels=None)
+    draw_detections(image, objects, ColorPalette(n=100))
     cv2.imshow('Detection Results', image)
     cv2.waitKey(0)
 
