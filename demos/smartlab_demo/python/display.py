@@ -90,7 +90,7 @@ class Display:
         cv2.putText(img, text, (x, y + text_h + font_scale - 1), font, font_scale, text_color, font_thickness)
         return text_size
 
-    def display_result(self, frame_top, frame_side, side_seg_results, top_seg_results, \
+    def display_result(self, frame_top, frame_side, side_seg_results, top_seg_results,
                        top_det_results, side_det_results, scoring, state, keyframe, frame_counter, fps):
 
         if state == 'Initial':
@@ -166,16 +166,6 @@ class Display:
         m_weights_right = scoring['measuring_score_weights_right']
         m_weights_tweezers = scoring['measuring_score_weights_tweezers']
         e_tidy = scoring['end_score_tidy']
-
-        # display keyframe
-        i_rider_k = keyframe['initial_score_rider']
-        i_balance_k = keyframe['initial_score_balance']
-        m_rider_tweezers_k = keyframe['measuring_score_rider_tweezers']
-        m_balance_k = keyframe['measuring_score_balance']
-        m_object_left_k = keyframe['measuring_score_object_left']
-        m_weights_right_k = keyframe['measuring_score_weights_right']
-        m_weights_tweezers_k = keyframe['measuring_score_weights_tweezers']
-        e_tidy_k = keyframe['end_score_tidy']
 
         w, h = self.draw_text_without_background(self.score_board, f"SCORE - {display_status}",
                                                  pos=(self.w1, 60), text_color_bg=initial_text_color_bg)
