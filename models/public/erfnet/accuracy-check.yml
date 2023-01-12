@@ -45,4 +45,3 @@ models:
             use_argmax: false
             presenter:  print_scalar
             reference: 0.7647
-            
