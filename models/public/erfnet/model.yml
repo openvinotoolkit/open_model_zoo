@@ -20,7 +20,7 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: erfnet.onnx
-    size: 8253755 
+    size: 8253755
     checksum: f6597d416f02b8218b557c4f673a0837fc215213055f9957267667003578e76507515d7c2be5d6983549f81cb96a0a66
     source: https://github.com/Zhangxianwen2021/ERFNet/raw/main/erfnet.onnx
 input_info:

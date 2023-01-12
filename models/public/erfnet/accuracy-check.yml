@@ -10,7 +10,7 @@ models:
         preprocessing:
           - type: resize
             dst_width: 976
-            dst_height: 208 
+            dst_height: 208
         postprocessing:
           - type: resize_segmentation_mask
             dst_width: 1640
@@ -45,3 +45,4 @@ models:
             use_argmax: false
             presenter:  print_scalar
             reference: 0.7647
+            
