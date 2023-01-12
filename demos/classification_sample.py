@@ -54,7 +54,7 @@ def draw_labels(frame, classifications):
 
 
 def main():
-    classifier = Classification.create_model('se-resnext-50')
+    classifier = Classification.create_model('resnet-18-pytorch')
     image = cv2.imread('/home/wov/Pictures/ILSVRC2012_val_00000001.JPEG')
     classifications = classifier(image)
     image = draw_labels(image, classifications)

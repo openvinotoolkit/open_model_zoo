@@ -53,7 +53,7 @@ quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
 model_info:
   model_type: Classification
-  labesl:
+  labels:
     - tench
     - goldfish
     - great_white_shark
