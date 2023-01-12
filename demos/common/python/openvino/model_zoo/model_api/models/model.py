@@ -15,6 +15,11 @@
 """
 
 import logging as log
+import re
+
+from openvino.model_zoo.model_api.adapters.model_adapter import ModelAdapter
+from openvino.model_zoo.model_api.adapters.ovms_adapter import OVMSAdapter
+from openvino.model_zoo.model_api.adapters.openvino_adapter import OpenvinoAdapter, create_core, get_user_config
 
 
 class WrapperError(RuntimeError):
@@ -87,7 +92,35 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, model_adapter, configuration=None, model_type=None, preload=True):
+    def create_model(cls, model, configuration={}, model_type=None, preload=True, core=None, weights_path=None, model_parameters={}, device='AUTO',
+            nstreams='1', nthreads=None, max_num_requests=0, precision='FP16', download_dir=None, cache_dir=None):
+        '''
+        Args:
+            model: instance of ModelAdapter subclass, OVMS URL, path to model or name from Open Model Zoo
+            configuration: model wrapper config, for example confidence_threshold, labels
+            model_type: name of model wrapper to create
+            preload: whether to call load_model(). May be set to false to reshape model before loading
+            core: openvino.runtim.Core instance, passed to OpenvinoAdapter
+            weights_path: passed to OpenvinoAdapter
+            model_parameters: passed to OpenvinoAdapter
+            device: passed to OpenvinoAdapter
+            nstreams: passed to OpenvinoAdapter
+            nthreads: passed to OpenvinoAdapter
+            max_num_requests: passed to OpenvinoAdapter
+            precision: passed to OpenvinoAdapter
+            download_dir: passed to OpenvinoAdapter
+            cache_dir: passed to OpenvinoAdapter
+        '''
+        if isinstance(model, ModelAdapter):
+            model_adapter = model
+        elif isinstance(model, str) and re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/\w+(\:\d+)*").fullmatch(model):
+            model_adapter = OVMSAdapter(model)
+        else:
+            if core is None:
+                core = create_core()
+                plugin_config = get_user_config(device, nstreams, nthreads)
+            model_adapter = OpenvinoAdapter(core=core, model=model, weights_path=weights_path, model_parameters=model_parameters, device=device,
+                plugin_config=plugin_config, max_num_requests=max_num_requests, precision='FP16', download_dir=None, cache_dir=None)
         if model_type is None:
             model_type = model_adapter.get_rt_info(['model_info', 'model_type'])
         Model = cls.get_model(model_type)
@@ -147,7 +180,6 @@ class Model:
          Raises:
             WrapperError: if the configuration is incorrect
         '''
-        if config is None: return
         parameters = self.parameters()
         for name, param in parameters.items():
             try:

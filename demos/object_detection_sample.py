@@ -20,10 +20,10 @@ from pathlib import Path
 
 import cv2
 
+sys.path.append(str(Path(__file__).parents[1] / 'tools/model_tools/src'))
 sys.path.append(str(Path(__file__).parent / 'common/python'))
-sys.path.append(str(Path(__file__).parent / 'common/python/openvino/model_zoo'))
 
-from model_api.models import DetectionModel
+from openvino.model_zoo.model_api.models import DetectionModel
 
 from visualizers import ColorPalette
 

@@ -92,3 +92,26 @@ model_optimizer_args:
   - --input_model=$conv_dir/fastseg-small.onnx
 framework: pytorch
 license: https://raw.githubusercontent.com/ekzhang/fastseg/master/LICENSE.txt
+model_info:
+  model_type: segmentation
+  labels:
+    - road
+    - sidewalk
+    - building
+    - wall
+    - fence
+    - pole
+    - traffic light
+    - traffic sign
+    - vegetation
+    - terrain
+    - sky
+    - person
+    - rider
+    - car
+    - truck
+    - bus
+    - train
+    - motorcycle
+    - bicycle
+    - background
