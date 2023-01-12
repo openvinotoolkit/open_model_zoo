@@ -74,7 +74,7 @@ class AudioSpectrogram(Preprocessor):
         frames = image.data
         if self.skip_channels:
             frames = frames.squeeze()
-        pspec = np.absolute(np.fft.rfft(frames, self.fftbase))  # pylint:disable=W9904
+        pspec = np.absolute(np.fft.rfft(frames, self.fftbase))  # pylint:disable=bad-function-call
         if self.magnutide_squared:
             pspec = np.square(pspec)
         image.data = pspec

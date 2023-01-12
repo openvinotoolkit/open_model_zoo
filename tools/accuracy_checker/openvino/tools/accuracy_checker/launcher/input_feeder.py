@@ -68,7 +68,7 @@ PRECISION_TO_DTYPE = {
     'I8': np.int8,  # signed char
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
-    'I64': np.int64,  # signed long int
+    'I64': int,  # signed long int
     'STR': str,  # string'
     'BOOL': bool,
     'f32': np.float32,
@@ -85,6 +85,23 @@ PRECISION_TO_DTYPE = {
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'PROCESSED_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT',
                              'SCALE_FACTOR']
+
+
+def match_by_regex(data, identifiers, input_regex, templates):
+    if isinstance(identifiers, AnnotationDataIdentifier):
+        identifiers = identifiers.data_id
+        if not isinstance(identifiers, list):
+            data = [data]
+    if not isinstance(identifiers, list):
+        identifiers = [identifiers]
+    input_data = None
+    shape_template = None
+    for identifier, data_value, template in zip(identifiers, data, templates):
+        if input_regex.match(identifier):
+            input_data = data_value
+            shape_template = template
+            break
+    return input_data, shape_template
 
 
 class InputFeeder:
@@ -188,7 +205,7 @@ class InputFeeder:
         return image_infos
 
     def fill_non_constant_inputs(self, data_representation_batch):
-        def match_by_regex(data, identifiers, input_regex):
+        def match_regex(data, identifiers, input_regex):
             if not isinstance(identifiers, list):
                 identifiers = [identifiers]
             input_data = None
@@ -245,7 +262,7 @@ class InputFeeder:
                         assert idx < len(identifiers), 'number input layers and data is not matched'
                         input_batch.append(data[idx])
                         continue
-                    input_data = match_by_regex(data, identifiers, input_regex)
+                    input_data = match_regex(data, identifiers, input_regex)
 
                 if input_data is None:
                     raise ConfigError('Suitable data for filling layer {} not found'.format(input_layer))
@@ -258,21 +275,6 @@ class InputFeeder:
         )[0]
 
     def fill_non_constant_inputs_with_template(self, data_representation_batch, template):
-        def match_by_regex(data, identifiers, input_regex, templates):
-            if isinstance(identifiers, AnnotationDataIdentifier):
-                identifiers = identifiers.data_id
-                if not isinstance(identifiers, list):
-                    data = [data]
-            if not isinstance(identifiers, list):
-                identifiers = [identifiers]
-            input_data = None
-            shape_template = None
-            for identifier, data_value, template in zip(identifiers, data, templates):
-                if input_regex.match(identifier):
-                    input_data = data_value
-                    shape_template = template
-                    break
-            return input_data, shape_template
         filled_inputs = {}
         filled_template = {}
         check_regex = True

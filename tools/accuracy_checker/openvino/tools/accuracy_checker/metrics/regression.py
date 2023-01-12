@@ -409,7 +409,7 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         result = point_regression_differ(
             annotation.x_values, annotation.y_values, prediction.x_values, prediction.y_values
         )
-        result /= np.maximum(annotation.normalization_coefficient, np.finfo(np.float64).eps)
+        result /= np.maximum(annotation.normalization_coefficient, np.finfo(float).eps)
         self.magnitude.append(result)
         if self.profiler:
             self.profiler.update(

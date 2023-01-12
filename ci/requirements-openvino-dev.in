@@ -6,65 +6,49 @@ defusedxml (>=0.7.1) ; extra == 'mxnet'
 defusedxml (>=0.7.1) ; extra == 'onnx'
 defusedxml (>=0.7.1) ; extra == 'tensorflow'
 defusedxml (>=0.7.1) ; extra == 'tensorflow2'
-fast-ctc-decode (>=0.2.5)
 fastjsonschema (~=2.15.1) ; extra == 'caffe'
 fastjsonschema (~=2.15.1) ; extra == 'kaldi'
 fastjsonschema (~=2.15.1) ; extra == 'mxnet'
 fastjsonschema (~=2.15.1) ; extra == 'onnx'
 fastjsonschema (~=2.15.1) ; extra == 'tensorflow'
 fastjsonschema (~=2.15.1) ; extra == 'tensorflow2'
-imagecodecs (~=2020.5.30) ; python_version < "3.7"
-imagecodecs (~=2021.11.20) ; python_version == "3.7"
-imagecodecs (~=2022.2.22) ; python_version >= "3.8"
-jstyleson (~=0.0.2)
-lmdb (>=1.2.1)
+jstyleson (>=0.0.2)
+mxnet (<=1.9.1,>=1.7.0.post2) ; (sys_platform != "win32") and extra == 'mxnet'
 mxnet (~=1.2.0) ; (sys_platform == "win32") and extra == 'mxnet'
-mxnet (~=1.7.0.post2) ; (sys_platform != "win32") and extra == 'mxnet'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'caffe'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'kaldi'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'mxnet'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'onnx'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'tensorflow'
-networkx (<2.8.1) ; (python_version > "3.6") and extra == 'tensorflow2'
-networkx (<2.8.1) ; python_version > "3.6"
-networkx (<2.8.1) ; python_version >= "3.7"
+networkx (<=2.8.8)
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'caffe'
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'kaldi'
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'mxnet'
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'onnx'
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'tensorflow'
+networkx (<=2.8.8) ; (python_version > "3.6") and extra == 'tensorflow2'
+networkx (<=2.8.8) ; python_version > "3.6"
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'caffe'
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'kaldi'
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'mxnet'
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'onnx'
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'tensorflow'
 networkx (~=2.5) ; (python_version <= "3.6") and extra == 'tensorflow2'
-networkx (~=2.5) ; python_version < "3.7"
 networkx (~=2.5) ; python_version <= "3.6"
-nibabel (>=3.2.1)
-nltk (>=3.5)
-numpy (<=1.23.1,>=1.16.6)
-numpy (<=1.23.1,>=1.16.6) ; extra == 'caffe'
-numpy (<=1.23.1,>=1.16.6) ; extra == 'kaldi'
-numpy (<=1.23.1,>=1.16.6) ; extra == 'mxnet'
-numpy (<=1.23.1,>=1.16.6) ; extra == 'onnx'
-numpy (<=1.23.1,>=1.16.6) ; extra == 'tensorflow'
-numpy (<=1.23.1,>=1.16.6) ; extra == 'tensorflow2'
-onnx (<1.12,>=1.8.1) ; extra == 'onnx'
-onnx (<1.12,>=1.8.1) ; extra == 'pytorch'
-opencv-python
+numpy (<=1.23.4,>=1.16.6)
+numpy (<=1.23.4,>=1.16.6) ; extra == 'caffe'
+numpy (<=1.23.4,>=1.16.6) ; extra == 'kaldi'
+numpy (<=1.23.4,>=1.16.6) ; extra == 'mxnet'
+numpy (<=1.23.4,>=1.16.6) ; extra == 'onnx'
+numpy (<=1.23.4,>=1.16.6) ; extra == 'tensorflow'
+numpy (<=1.23.4,>=1.16.6) ; extra == 'tensorflow2'
+numpy (>=1.16.6)
+onnx (<=1.12,>=1.8.1) ; extra == 'onnx'
+onnx (<=1.12,>=1.8.1) ; extra == 'pytorch'
 opencv-python (>=4.5)
-openvino (==2022.2.0)
+openvino (==2022.3.0)
 openvino-telemetry (>=2022.1.0)
-paddlepaddle (~=2.2.0) ; extra == 'paddle'
-pandas (~=1.1.5)
-parasail (>=1.2.4) ; platform_system != "Windows"
-parasail (~=1.2.4) ; platform_system == "Windows"
+paddlepaddle (>=2.2.0) ; extra == 'paddle'
+pandas (~=1.3.5)
 pillow (>=8.1.2)
-progress (>=1.5)
 protobuf (<4.0.0,>=3.18.1) ; extra == 'caffe'
 protobuf (<4.0.0,>=3.18.1) ; extra == 'onnx'
-py-cpuinfo (>=7.0.0)
-pyclipper (>=1.2.1)
-pydicom (>=2.1.2)
 pyyaml (>=5.4.1)
-rawpy (>=0.16.0) ; python_version < "3.7"
-rawpy (~=0.17.1) ; python_version >= "3.7"
 requests (>=2.25.1)
 requests (>=2.25.1) ; extra == 'caffe'
 requests (>=2.25.1) ; extra == 'kaldi'
@@ -72,23 +56,15 @@ requests (>=2.25.1) ; extra == 'mxnet'
 requests (>=2.25.1) ; extra == 'onnx'
 requests (>=2.25.1) ; extra == 'tensorflow'
 requests (>=2.25.1) ; extra == 'tensorflow2'
-scikit-image (>=0.19.2) ; python_version >= "3.7"
-scikit-image (~=0.17.2) ; python_version < "3.7"
-scikit-learn (~=0.24.1)
-scipy (<=1.8.0,>=1.5.4)
-scipy (~=1.5.4)
-scipy (~=1.5.4) ; extra == 'pytorch'
-sentencepiece (>=0.1.95)
-shapely (>=1.7.1)
-tensorflow (<=2.9.1,>=1.15.5) ; extra == 'tensorflow'
-tensorflow (<=2.9.1,>=2.5) ; extra == 'tensorflow2'
-texttable (~=1.6.3)
-tokenizers (>=0.10.1) ; python_version >= "3.7"
-tokenizers (~=0.10.1) ; python_version < "3.7"
-torch (==1.8.1) ; extra == 'pytorch'
-torchvision (==0.9.1) ; extra == 'pytorch'
+scipy (<1.9.0,>=1.5.4) ; extra == 'pytorch'
+scipy (>=1.8) ; python_version >= "3.8"
+scipy (~=1.7) ; python_version == "3.7"
+tensorflow (<=2.10.0,>=1.15.5) ; extra == 'tensorflow'
+tensorflow (<=2.10.0,>=2.5) ; extra == 'tensorflow2'
+tensorflow (<=2.9.3,>=2.5) ; extra == 'tensorflow2'
+texttable (>=1.6.3)
+torch (<=1.13.0,>=1.8.1) ; extra == 'pytorch'
+torchvision (<=0.14.0,>=0.9.1) ; extra == 'pytorch'
 tqdm (>=4.54.1)
-transformers (<4.17,>=4.5) ; python_version < "3.7"
-transformers (>=4.5) ; python_version >= "3.7"
 urllib3 (>=1.26.4) ; extra == 'mxnet'
 yacs (>=0.1.8) ; extra == 'pytorch'

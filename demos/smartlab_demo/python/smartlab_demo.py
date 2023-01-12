@@ -74,8 +74,9 @@ def video_loop(args, cap_top, cap_side, detector, segmentor, evaluator, display)
     # multithread setup
     executor = concurrent.futures.ThreadPoolExecutor()
     future_detector = None
-    future_segmentor = None
     buffer_display = None
+    scoring = None
+    keyframe = None
 
     while cap_top.isOpened() and cap_side.isOpened():
         ret_top, frame_top = cap_top.read()

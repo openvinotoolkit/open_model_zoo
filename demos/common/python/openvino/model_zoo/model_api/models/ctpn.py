@@ -326,7 +326,7 @@ class TextProposalGraphBuilder:
             boxes_table[int(box[0])].append(index)
         self.boxes_table = boxes_table
 
-        graph = np.zeros((text_proposals.shape[0], text_proposals.shape[0]), np.bool)
+        graph = np.zeros((text_proposals.shape[0], text_proposals.shape[0]), bool)
 
         for index, box in enumerate(text_proposals):
             successions = self.get_successions(index)
@@ -379,7 +379,7 @@ class TextProposalConnector:
         text_lines[:, :4].clip(min=0, max=(image_size[1] - 1, image_size[0] - 1, image_size[1] - 1, image_size[0] - 1),
                                out=text_lines[:, :4])
 
-        text_recs = np.zeros((len(text_lines), 9), np.float)
+        text_recs = np.zeros((len(text_lines), 9), float)
         for index, line in enumerate(text_lines):
             xmin, ymin, xmax, ymax = line[0], line[1], line[2], line[3]
             text_recs[index, 0], text_recs[index, 1], text_recs[index, 2], text_recs[index, 3] = xmin, ymin, xmax, ymin

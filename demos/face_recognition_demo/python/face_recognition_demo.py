@@ -228,7 +228,7 @@ def main():
             if frame_num == 0:
                 raise ValueError("Can't read an image from the input")
             break
-        if input_crop:
+        if input_crop is not None:
             frame = center_crop(frame, input_crop)
         if frame_num == 0:
             output_transform = OutputTransform(frame.shape[:2], args.output_resolution)

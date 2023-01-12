@@ -1,12 +1,12 @@
 # use update-requirements.py to update this file
 
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.1
     # via requests
 idna==3.4
     # via requests
-openvino-telemetry==2022.1.2
+openvino-telemetry==2022.3.0
     # via -r tools/model_tools/requirements.in
 pyyaml==6.0
     # via -r tools/model_tools/requirements.in

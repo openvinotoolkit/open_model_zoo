@@ -28,7 +28,7 @@ def pad_tensor(x, pad, side='both'):
     # i.e., it won't generalise to other shapes/dims
     b, t, c = x.shape
     total = t + 2 * pad if side == 'both' else t + pad
-    padded = np.zeros((b, total, c), dtype=np.float)
+    padded = np.zeros((b, total, c), dtype=float)
     if side in ('before', 'both'):
         padded[:, pad:pad + t, :] = x
     elif side == 'after':
@@ -94,7 +94,7 @@ def fold_with_overlap(x, target, overlap):
         padding = target + 2 * overlap - remaining
         x = pad_tensor(x, padding, side='after')
 
-    folded = np.zeros((num_folds, target + 2 * overlap, features), dtype=np.float)
+    folded = np.zeros((num_folds, target + 2 * overlap, features), dtype=float)
 
 
     # Get the values for the folded tensor
@@ -113,13 +113,13 @@ def xfade_and_unfold(y, overlap):
     Args:
         y (ndarry)    : Batched sequences of audio samples
                         shape=(num_folds, target + 2 * overlap)
-                        dtype=np.float64
+                        dtype=float
         overlap (int) : Timesteps for both xfade and rnn warmup
 
     Return:
         (ndarry) : audio samples in a 1d array
                    shape=(total_len)
-                   dtype=np.float64
+                   dtype=float
 
     Details:
         y = [[seq1],

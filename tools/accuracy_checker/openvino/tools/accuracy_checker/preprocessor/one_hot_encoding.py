@@ -62,7 +62,7 @@ class OneHotEncoding(Preprocessor):
             shapes = list(data.shape)
             ndim = len(shapes)
             shapes[axis] = classes
-            base_arr = np.full(shapes, base, np.int)
+            base_arr = np.full(shapes, base, np.int32)
             expanded_index = []
             for i in range(ndim):
                 arr = (data if axis == i

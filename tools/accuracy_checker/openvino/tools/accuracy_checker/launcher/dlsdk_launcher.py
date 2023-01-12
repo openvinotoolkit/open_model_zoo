@@ -20,7 +20,7 @@ import re
 import warnings
 from collections import OrderedDict
 import numpy as np
-import openvino.inference_engine as ie
+import openvino.inference_engine as ie  # pylint: disable=package-absolute-imports
 
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
@@ -45,11 +45,11 @@ from ..logging import print_info
 from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 
 try:
-    from openvino.inference_engine import Blob, TensorDesc  # pylint:disable=W9902
+    from openvino.inference_engine import Blob, TensorDesc  # pylint: disable=import-outside-toplevel,package-absolute-imports
 except ImportError:
     try:
         # old structures names compatibilities
-        from openvino.inference_engine import IEBlob, IETensorDesc # pylint:disable=W9902
+        from openvino.inference_engine import IEBlob, IETensorDesc  # pylint: disable=import-outside-toplevel,package-absolute-imports
 
         Blob = IEBlob
         TensorDesc = IETensorDesc
@@ -933,8 +933,7 @@ class DLSDKLauncher(Launcher):
     def get_model_file_type(self):
         if hasattr(self, '_model'):
             return self._model.suffix
-        else:
-            return None
+        return None
 
     def input_shape(self, input_name):
         if input_name in self._partial_shapes:

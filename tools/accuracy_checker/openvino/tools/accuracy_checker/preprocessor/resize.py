@@ -282,7 +282,7 @@ class _TFResizer(_Resizer):
     def supported_interpolations(cls):
         try:
             import tensorflow as tf # pylint: disable=C0415
-        except ImportError as import_error:
+        except ImportError:
             return {}
         if tf.__version__ < '2.0.0':
             tf.enable_eager_execution()

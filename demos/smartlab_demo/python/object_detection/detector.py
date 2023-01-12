@@ -105,7 +105,7 @@ class Detector:
         self.all_classes += list(self.top_loc_exp.mw_classes)
         self.all_classes += list(self.side_glb_exp.mw_classes)
         self.all_classes += list(self.side_loc_exp.mw_classes)
-        self.all_classes = sorted(list(set(self.all_classes)))
+        self.all_classes = sorted(set(self.all_classes))
 
         #  max-number constraints:
         self.max_nums = {

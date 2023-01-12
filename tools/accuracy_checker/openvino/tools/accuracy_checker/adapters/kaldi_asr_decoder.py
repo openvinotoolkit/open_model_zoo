@@ -187,7 +187,12 @@ class KaldiLatGenDecoder(Adapter):
             with out_file.open('wb') as fd:
                 fd.write(str.encode(utterance_key + " "))
                 fd.write(str.encode('\0B'))
-                if mat.dtype not in [np.float32, np.float64]:
+                try:
+                    float64 = np.float64
+                except NameError:
+                    float64 = float
+
+                if mat.dtype not in [np.float32, float64]:
                     raise RuntimeError("Unsupported numpy dtype: {}".format(mat.dtype))
                 mat_type = 'FM' if mat.dtype == np.float32 else 'DM'
                 fd.write(str.encode(mat_type + " "))

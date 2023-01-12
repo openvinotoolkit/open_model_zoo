@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-There are 3 models for smartlab action recogntion including two encoder models and one decoder model. 
+There are 3 models for smartlab action recogntion including two encoder models and one decoder model.
 
 These models are fine-tuned with smartlab dataset to predict actions and can classfy 3 types of action including "noise_action", "put_take" and "adjust_rider".
 
@@ -20,7 +20,7 @@ Output `put_take` action
 
 ## Encoder models specification
 
-The smartlab-action-recognition-0001-encoder-* have Mobilenet-V2 like backbone with convolutional encoder part of the action recognition. 
+The smartlab-action-recognition-0001-encoder-* have Mobilenet-V2 like backbone with convolutional encoder part of the action recognition.
 
 There are two models called: `smartlab-action-recognition-0001-encoder-side` and `smartlab-action-recognition-0001-encoder-top`, which have the same strcuture but different weights.
 

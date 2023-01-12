@@ -567,7 +567,7 @@ class Evaluator(object):
                     # if rider move, check tweezers and rider distance
                     # if tweezers and rider are apart more than use_tweezers_threshold pixels (based on euclidean distance), consider not using tweezers
                     if np.linalg.norm(
-                        rider_min_coordinate - tweezers_min_coordinate) <= self.use_tweezers_threshold and self.rider_tweezers_lock_mark == False:
+                        rider_min_coordinate - tweezers_min_coordinate) <= self.use_tweezers_threshold and not self.rider_tweezers_lock_mark:
                         self.scoring['measuring_score_rider_tweezers'] = 1
                         self.keyframe['measuring_score_rider_tweezers'] = self.frame_counter
 
@@ -655,7 +655,7 @@ class Evaluator(object):
                 else:  # if object put happens on the right, then give zero score mark
                     self.object_direction = 'right'
                     self.object_is_in_tray_now = True
-                    if self.is_object_put == False or self.is_change_object_direction:
+                    if not self.is_object_put or self.is_change_object_direction:
                         self.is_object_put = True
                         self.is_change_object_direction = False
                         object_left_score = 0
@@ -688,7 +688,7 @@ class Evaluator(object):
                     self.object_is_in_tray_now = True
                     # give mark when object is put first time,
                     # change mark only if student change direction afterward
-                    if self.is_object_put == False or self.is_change_object_direction:
+                    if not self.is_object_put or self.is_change_object_direction:
                         self.is_change_object_direction = False
                         object_left_score = 1
                         object_left_keyframe = self.frame_counter
@@ -698,7 +698,7 @@ class Evaluator(object):
                 else:
                     self.object_direction = 'right'
                     self.object_is_in_tray_now = True
-                    if self.is_object_put == False or self.is_change_object_direction:
+                    if not self.is_object_put or self.is_change_object_direction:
                         self.is_object_put = True
                         self.is_change_object_direction = False
                         object_left_score = 0
@@ -831,7 +831,7 @@ class Evaluator(object):
                         self.keyframe["end_score_tidy"] = self.frame_counter
                     else:
                         self.evaluate_rider()
-                        if self.rider_zero == True:
+                        if self.rider_zero:
                             self.scoring["end_score_tidy"] = 1
                             self.keyframe["end_score_tidy"] = self.frame_counter
                         else:
@@ -853,7 +853,7 @@ class Evaluator(object):
                         self.keyframe["end_score_tidy"] = self.frame_counter
                     else:
                         self.evaluate_rider()
-                        if self.rider_zero == True:
+                        if self.rider_zero:
                             self.scoring["end_score_tidy"] = 1
                             self.keyframe["end_score_tidy"] = self.frame_counter
                         else:
@@ -889,7 +889,7 @@ class Evaluator(object):
             self.keyframe['initial_score_balance'] = self.frame_counter
         elif self.state == "Measuring":
             self.balance_persist_duration = 0
-            if self.measuring_state_balance_lock_mark == False:
+            if not self.measuring_state_balance_lock_mark:
                 self.scoring['measuring_score_balance'] = 0
                 self.keyframe['measuring_score_balance'] = self.frame_counter
 
@@ -932,11 +932,11 @@ class Evaluator(object):
                 right_roundscrew2_coor = roundscrew2_coor[0]
 
             # find center coordinate of roundscrew2 and pointerhead
-            left_roundscrew2_center_coor = [(left_roundscrew2_coor[0] + left_roundscrew2_coor[2]) / 2, \
+            left_roundscrew2_center_coor = [(left_roundscrew2_coor[0] + left_roundscrew2_coor[2]) / 2,
                                             (left_roundscrew2_coor[1] + left_roundscrew2_coor[3]) / 2]
-            right_roundscrew2_center_coor = [(right_roundscrew2_coor[0] + right_roundscrew2_coor[2]) / 2, \
+            right_roundscrew2_center_coor = [(right_roundscrew2_coor[0] + right_roundscrew2_coor[2]) / 2,
                                              (right_roundscrew2_coor[1] + right_roundscrew2_coor[3]) / 2]
-            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2, \
+            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2,
                                        (pointerhead_coor[0][1] + pointerhead_coor[0][3]) / 2]
 
             # rotate to make two roundscrew1 in a horizontal line
@@ -955,7 +955,7 @@ class Evaluator(object):
                 self.lose_balance_mark()
 
         elif len(scale_coor) == 1 and len(pointerhead_coor) == 1:
-            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2, \
+            pointerhead_center_coor = [(pointerhead_coor[0][0] + pointerhead_coor[0][2]) / 2,
                                        (pointerhead_coor[0][1] + pointerhead_coor[0][3]) / 2]
             lower_limit = (scale_coor[0][0] + scale_coor[0][2]) / 2 - self.balance_threshold
             upper_limit = (scale_coor[0][0] + scale_coor[0][2]) / 2 + self.balance_threshold

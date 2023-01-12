@@ -12,16 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from torch import load
+import torch
 from modules.vitstr import vitstr_small_patch16_224
+
+
+class Model(torch.nn.Module):
+    def __init__(self, model):
+        super(Model, self).__init__()
+        self.model = model
+
+    def forward(self, x):
+        return self.model(x)
+
 
 
 def create_model(weights):
     model = vitstr_small_patch16_224(num_classes=96)
 
-    checkpoint = load(weights, map_location='cpu')
+    checkpoint = torch.load(weights, map_location='cpu')
     ckpt = {k.replace('module.vitstr.', ''): v for k, v in checkpoint.items()}
 
     model.load_state_dict(ckpt)
 
-    return model
+    return Model(model)
