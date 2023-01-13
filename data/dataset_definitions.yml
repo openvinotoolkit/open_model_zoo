@@ -1473,15 +1473,15 @@ datasets:
       reference_suffix: out
 
   - name: online_mstcn_plus_encoder_dataset
-      data_source: annotation
-      reader: numpy_reader
-      annotation_conversion:
-        converter: feature_regression
-        reference_dir: image
-        input_dir: image
-        input_suffix: in
-        reference_suffix: out
-        use_bin_data: True
+    data_source: annotation
+    reader: numpy_reader
+    annotation_conversion:
+      converter: feature_regression
+      reference_dir: image
+      input_dir: image
+      input_suffix: in
+      reference_suffix: out
+      use_bin_data: True
 
   - name: smartlab_detection_10cl_top
     data_source: object_detection/streams_1/top/images
