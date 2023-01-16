@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2023 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on path_trie.cpp from https://github.com/parlance/ctcdecode,
