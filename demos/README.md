@@ -295,7 +295,7 @@ python -mpip install --user -r <omz_dir>/demos/requirements.txt
 
 ### <a name="python_model_api"></a>Python\* model API package
 
-Python* ModelAPI is factored out as a sepparate package. Refer to the [Python Model API documentation](https://github.com/openvinotoolkit/open_model_zoo/blob/master/demos/common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package)) to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
+Python* ModelAPI is factored out as a sepparate package. Refer to the [Python Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package) to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
 
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
