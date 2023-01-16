@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020-2021 Intel Corporation
+* Copyright (c) 2020-2023 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in its major part on ctc_beam_search_decoder.h from https://github.com/parlance/ctcdecode,
