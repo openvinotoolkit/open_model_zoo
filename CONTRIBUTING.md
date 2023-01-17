@@ -266,7 +266,7 @@ Learn the detailed structure and headers naming convention from any model docume
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
 
-Copyright &copy; 2018-2019 Intel Corporation
+Copyright &copy; 2018-2023 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 ```
