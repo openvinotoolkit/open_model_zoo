@@ -21,7 +21,7 @@ jobs:
       - name: Pip install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install openvino openvino-dev[caffe,mxnet,onnx,tensorflow2] -r tools/model_tools/requirements.in -r tools/model_tools/requirements-pytorch.in -r tools/model_tools/requirements-tensorflow.in
+          python -m pip install openvino openvino-dev[caffe,mxnet,onnx,tensorflow2] -r tools/model_tools/requirements.in -r tools/model_tools/requirements-paddle.in -r tools/model_tools/requirements-pytorch.in -r tools/model_tools/requirements-tensorflow.in
       - name: Test representative-models.lst
         run: |
           python tools/model_tools/downloader.py --list tools/model_tools/tests/representative-models.lst -o . -j 4
