@@ -173,7 +173,7 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    model = SegmentationModel.create_model(model_adapter, {'path_to_labels': args.labels}, args.architecture_type)
+    model = SegmentationModel.create_model(model_adapter, args.architecture_type, {'path_to_labels': args.labels})
     if isinstance(model, SalientObjectDetectionModel):
         visualizer = SaliencyMapVisualizer()
     else:

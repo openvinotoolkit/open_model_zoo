@@ -49,8 +49,8 @@ def main():
         'path_to_labels': None,
         'confidence_threshold': 0.5
     }
-    detector = DetectionModel.create_model('yolo-v4-tf', ov=create_core(), 'CPU', flags_nstreams='1', flags_nthreads=None,
-        configuration, model_type=None, preload=True, max_num_requests=1, precision='FP16', download_dir=None, cache_dir=None)
+    detector = DetectionModel.create_model('yolo-v4-tf', ov=create_core(), device='CPU', flags_nstreams='1', flags_nthreads=None,
+        configuration=configuration, model_type=None, preload=True, max_num_requests=1, precision='FP16', download_dir=None, cache_dir=None)
     image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
     objects = detector(image)
     draw_detections(image, objects, ColorPalette(n=100), labels=None)

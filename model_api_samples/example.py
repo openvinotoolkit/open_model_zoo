@@ -55,7 +55,7 @@ def main():
         'path_to_labels': None,
         'confidence_threshold': 0.5
     }
-    detector = DetectionModel.create_model(model_adapter, configuration, preload=True)
+    detector = DetectionModel.create_model(model_adapter, configuration=configuration, preload=True)
     image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
     objects = detector(image)[0]
     draw_detections(image, objects, ColorPalette(n=100), labels=None)

@@ -92,7 +92,7 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, model, configuration={}, model_type=None, preload=True, core=None, weights_path=None, model_parameters={}, device='AUTO',
+    def create_model(cls, model, model_type=None, configuration={}, preload=True, core=None, weights_path=None, model_parameters={}, device='AUTO',
             nstreams='1', nthreads=None, max_num_requests=0, precision='FP16', download_dir=None, cache_dir=None):
         '''
         Args:
@@ -120,7 +120,7 @@ class Model:
                 core = create_core()
                 plugin_config = get_user_config(device, nstreams, nthreads)
             model_adapter = OpenvinoAdapter(core=core, model=model, weights_path=weights_path, model_parameters=model_parameters, device=device,
-                plugin_config=plugin_config, max_num_requests=max_num_requests, precision='FP16', download_dir=None, cache_dir=None)
+                plugin_config=plugin_config, max_num_requests=max_num_requests, precision=precision, download_dir=download_dir, cache_dir=download_dir)
         if model_type is None:
             model_type = model_adapter.get_rt_info(['model_info', 'model_type'])
         Model = cls.get_model(model_type)
