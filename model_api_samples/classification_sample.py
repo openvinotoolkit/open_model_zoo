@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).resolve().parent / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'demos/common/python'))
 
 from openvino.model_zoo.model_api.models import Classification
 
@@ -54,8 +54,12 @@ def draw_labels(frame, classifications):
 
 
 def main():
+    if len(sys.argv) != 2:
+        raise RuntimeError(f'Usage: {sys.argv[0]} <path_to_image>')
     classifier = Classification.create_model('resnet-18-pytorch')
-    image = cv2.imread('/home/wov/Pictures/ILSVRC2012_val_00000001.JPEG')
+    image = cv2.imread(sys.argv[1])
+    if image is None:
+        raise RuntimeError('Failed to read the image')
     classifications = classifier(image)
     image = draw_labels(image, classifications)
     cv2.imshow('Detection Results', image)

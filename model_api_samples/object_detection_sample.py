@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).resolve().parent / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'demos/common/python'))
 
 from openvino.model_zoo.model_api.models import DetectionModel
 
@@ -40,8 +40,12 @@ def draw_detections(frame, detections, palette):
 
 
 def main():
+    if len(sys.argv) != 2:
+        raise RuntimeError(f'Usage: {sys.argv[0]} <path_to_image>')
     model = DetectionModel.create_model('yolo-v4-tf')
-    image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
+    image = cv2.imread(sys.argv[1])
+    if image is None:
+        raise RuntimeError('Failed to read the image')
     objects = model(image)
     draw_detections(image, objects, ColorPalette(n=100))
     cv2.imshow('Detection Results', image)

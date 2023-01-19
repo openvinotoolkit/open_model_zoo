@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).resolve().parent / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'demos/common/python'))
 
 from openvino.model_zoo.model_api.models import SegmentationModel
 
@@ -62,8 +62,12 @@ def render_segmentation(frame, masks, visualiser):
 
 
 def main():
+    if len(sys.argv) != 2:
+        raise RuntimeError(f'Usage: {sys.argv[0]} <path_to_image>')
     segmentor = SegmentationModel.create_model('fastseg-small')
-    image = cv2.imread('/home/wov/Pictures/dog-0000.jpg')
+    image = cv2.imread(sys.argv[1])
+    if image is None:
+        raise RuntimeError('Failed to read the image')
     mask = segmentor(image)
     masked = render_segmentation(image, mask, SegmentationVisualizer())
     cv2.imshow('Detection Results', masked)
