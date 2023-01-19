@@ -469,7 +469,7 @@ class AnnotationProvider:
 
     @property
     def identifiers(self):
-        return list(map(lambda ann: ann.identifier, self._data_buffer.values()))
+        return [ann.identifier for ann in self._data_buffer.values()]
 
     def __len__(self):
         return len(self._data_buffer)

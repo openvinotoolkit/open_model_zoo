@@ -153,6 +153,7 @@ class DNASequenceWithCRFAdapter(Adapter):
         ms_t = scores[:, :, idx_t]
         idx_t = self._torch.div(idx_t, self.n_base + 1, rounding_mode='floor')
         return self.scan(ms_t.flip(0), idx_t.to(self._torch.int64), vt, self.log_semiring).flip(0)
+
     def select_output_blob(self, outputs):
         self.output_verified = True
         if self.output_blob:

@@ -862,7 +862,7 @@ class Evaluator(object):
 
             elif len(battery_coors) == 0:
                 self.evaluate_rider()
-                if self.rider_zero == True:
+                if self.rider_zero:
                     self.scoring["end_score_tidy"] = 1
                     self.keyframe["end_score_tidy"] = self.frame_counter
         else:

@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 import pytest
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call # noqa: F401
 from openvino.tools.accuracy_checker.metrics import MetricsExecutor
 from openvino.tools.accuracy_checker.presenters import ScalarPrintPresenter, VectorPrintPresenter, EvaluationResult
 from openvino.tools.accuracy_checker.representation import ClassificationAnnotation, ClassificationPrediction

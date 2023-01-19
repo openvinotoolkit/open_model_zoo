@@ -295,7 +295,7 @@ class DLSDKLauncher(Launcher):
             layers[layer_name].affinity = device
 
     def _is_vpu(self):
-        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        device_list = (device.split('.')[0] for device in self._devices_list())
         return contains_any(device_list, VPU_PLUGINS)
 
     @property
@@ -413,7 +413,7 @@ class DLSDKLauncher(Launcher):
             if config:
                 self.ie_core.set_config(config, 'GPU')
         if self._is_vpu():
-            device_list = map(lambda device: device.split('.')[0], self._devices_list())
+            device_list = (device.split('.')[0] for device in self._devices_list())
             devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:

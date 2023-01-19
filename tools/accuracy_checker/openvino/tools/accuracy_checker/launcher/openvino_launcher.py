@@ -273,7 +273,7 @@ class OpenVINOLauncher(Launcher):
             node.rt_info["affinity"] = device
 
     def _is_vpu(self):
-        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        device_list = (device.split('.')[0] for device in self._devices_list())
         return contains_any(device_list, VPU_PLUGINS)
 
     @property
@@ -377,7 +377,7 @@ class OpenVINOLauncher(Launcher):
             if config:
                 ov_set_config(self.ie_core, config, device='GPU')
         if self._is_vpu():
-            device_list = map(lambda device: device.split('.')[0], self._devices_list())
+            device_list = (device.split('.')[0] for device in self._devices_list())
             devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:
@@ -484,7 +484,7 @@ class OpenVINOLauncher(Launcher):
         if 'INFERENCE_PRECISION_HINT' not in supported_props:
             warning(f'inference precision hint is not supported for device {self._device}, option will be ingnored')
             return
-        if not precision_hint.upper() in PRECISION_STR_TO_TYPE and not precision_hint in format_map:
+        if precision_hint.upper() not in PRECISION_STR_TO_TYPE and precision_hint not in format_map:
             raise ConfigError(f'Unknown precision {precision_hint} for inference precision hint')
         precision_type = PRECISION_STR_TO_TYPE.get(precision_hint.upper(), precision_hint)
         self.ie_core.set_property(self._device, {'INFERENCE_PRECISION_HINT': precision_type})
