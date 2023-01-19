@@ -209,7 +209,7 @@ class OpenvinoAdapter(ModelAdapter):
         return self.get_raw_result(self.infer_request)
 
     def infer_async(self, dict_data, callback_data) -> None:
-        self.async_queue.start_async(dict_data, (self.copy_raw_result, callback_data))
+        self.async_queue.start_async(dict_data, callback_data)
 
     def set_callback(self, callback_fn):
         self.async_queue.set_callback(callback_fn)

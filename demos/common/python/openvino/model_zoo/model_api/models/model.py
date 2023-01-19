@@ -327,6 +327,9 @@ class Model:
                 "with preload=True option or call load() method before infer_async()")
         self.model_adapter.infer_async(dict_data, callback_data)
 
+    def set_callback(self, callback_fn):
+        self.model_adapter.set_callback(callback_fn)
+
     def is_ready(self):
         return self.model_adapter.is_ready()
 

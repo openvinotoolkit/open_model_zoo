@@ -34,8 +34,8 @@ class AsyncPipeline:
 
     def callback(self, request, callback_args):
         try:
-            get_result_fn, (id, meta, preprocessing_meta, start_time) = callback_args
-            self.completed_results[id] = (get_result_fn(request), meta, preprocessing_meta, start_time)
+            id, meta, preprocessing_meta, start_time = callback_args
+            self.completed_results[id] = (self.model.model_adapter.copy_raw_result(request), meta, preprocessing_meta, start_time)
         except Exception as e:
             self.callback_exceptions.append(e)
 
@@ -69,7 +69,11 @@ class AsyncPipeline:
         return self.model.is_ready()
 
     def await_all(self):
+        if self.callback_exceptions:
+            raise self.callback_exceptions[0]
         self.model.await_all()
 
     def await_any(self):
+        if self.callback_exceptions:
+            raise self.callback_exceptions[0]
         self.model.await_any()
