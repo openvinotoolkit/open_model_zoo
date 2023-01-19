@@ -20,8 +20,8 @@ from pathlib import Path
 
 import cv2
 
-sys.path.append(str(Path(__file__).parent / 'common/python'))
-sys.path.append(str(Path(__file__).parent / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parent / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parent / 'common/python/openvino/model_zoo'))
 
 from model_api.models import DetectionModel
 from model_api.pipelines import get_user_config

@@ -21,8 +21,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-sys.path.append(str(Path(__file__).parents[1] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).parent / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
+sys.path.append(str(Path(__file__).resolve().parent / 'common/python'))
 
 from openvino.model_zoo.model_api.models import SegmentationModel
 
