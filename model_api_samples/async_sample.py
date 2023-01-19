@@ -46,6 +46,7 @@ def main():
         dict_inputs, meta = model.preprocess(image)
         model.infer_async(dict_inputs, callback_data=i)
     model.await_all()
+    assert(all(results))
 
 
 
