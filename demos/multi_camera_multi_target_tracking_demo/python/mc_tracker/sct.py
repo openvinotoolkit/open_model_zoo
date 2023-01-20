@@ -511,8 +511,8 @@ class SingleCameraTracker:
                 reid_dist_curr, reid_dist_avg, reid_dist_clust = None, None, None
                 if self.tracks[idx].f_avg.is_valid() and features[j] is not None \
                         and self.tracks[idx].get_last_feature() is not None:
-                    reid_dist_avg = 0.5 * cosine(self.tracks[idx].f_avg.get(), features[j])
-                    reid_dist_curr = 0.5 * cosine(self.tracks[idx].get_last_feature(), features[j])
+                    reid_dist_avg = 0.5 * cosine(self.tracks[idx].f_avg.get().squeeze(), features[j].squeeze())
+                    reid_dist_curr = 0.5 * cosine(self.tracks[idx].get_last_feature().squeeze(), features[j].squeeze())
 
                     if self.process_curr_features_number > 0:
                         num_features = len(self.tracks[idx])
