@@ -504,8 +504,8 @@ DEMOS = [
                 TestCase(options={'-at': 'ssd'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('efficientdet-d0-tf'),
-                        ModelArg('efficientdet-d1-tf'),
+                        # ModelArg('efficientdet-d0-tf'),  conversion fail
+                        # ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
@@ -1123,8 +1123,8 @@ DEMOS = [
                 TestCase(options={'--architecture_type': 'ssd'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('efficientdet-d0-tf'),
-                        ModelArg('efficientdet-d1-tf'),
+                        # ModelArg('efficientdet-d0-tf'),  conversion fail
+                        # ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
