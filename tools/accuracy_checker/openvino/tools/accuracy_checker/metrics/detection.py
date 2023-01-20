@@ -790,8 +790,8 @@ def get_valid_labels(labels, background):
 
 def calc_iou(gt_box, dt_box):
     # Convert detected face rectangle to integer point form
-    gt_box = list(map(lambda x: int(round(x, 0)), gt_box))
-    dt_box = list(map(lambda x: int(round(x, 0)), dt_box))
+    gt_box = [int(round(x, 0)) for x in gt_box]
+    dt_box = [int(round(x, 0)) for x in dt_box]
 
     # Calculate overlapping width and height of two boxes
     inter_width = min(gt_box[2], dt_box[2]) - max(gt_box[0], dt_box[0])

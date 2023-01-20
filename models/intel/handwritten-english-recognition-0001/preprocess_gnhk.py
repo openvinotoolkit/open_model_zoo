@@ -53,7 +53,7 @@ def main():
         # open corresponding JSON annotation file
         with open(img_id + ".json") as f:
             data = json.load(f)
-            line_indices = set(map(lambda obj: obj["line_idx"], data))
+            line_indices = {obj["line_idx"] for obj in data}
             img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
             img = binarize(img)
             for idx in sorted(line_indices):
@@ -63,7 +63,7 @@ def main():
                 if not objects:
                     continue
                 objects = sorted(objects, key=lambda x: x['polygon']['x0'])
-                label = " ".join(map(lambda obj: obj["text"], objects))
+                label = " ".join((obj["text"] for obj in objects))
                 print(img_id, idx, label)
 
                 # create mask for the words
@@ -82,12 +82,12 @@ def main():
                 cv2.bitwise_not(bg, bg, mask = mask)
                 overlay = bg + masked
                 # crop bounding rectangle of the text region
-                polys = list(map(lambda obj: [
+                polys = [[
                     [obj["polygon"]["x0"], obj["polygon"]["y0"]],
                     [obj["polygon"]["x1"], obj["polygon"]["y1"]],
                     [obj["polygon"]["x2"], obj["polygon"]["y2"]],
                     [obj["polygon"]["x3"], obj["polygon"]["y3"]]
-                ], objects))
+                ] for obj in objects]
                 flat = [item for sublist in polys for item in sublist]
                 pts = np.array(flat)
                 rect = cv2.boundingRect(pts)

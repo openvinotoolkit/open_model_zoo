@@ -79,7 +79,7 @@ def samples_to_melspectrum(samples, sampling_rate, window_size, stride, n_mels, 
     window_size, stride = round(window_size), round(stride)
 
     # window_size must be a power of 2 to match tf:
-    if not(window_size > 0  and  (window_size - 1) & window_size == 0):
+    if not (window_size > 0 and (window_size - 1) & window_size == 0):
         raise ValueError("window_size(ms)*sampling_rate(kHz) must be a power of two")
 
     spec = np.abs(librosa.core.spectrum.stft(

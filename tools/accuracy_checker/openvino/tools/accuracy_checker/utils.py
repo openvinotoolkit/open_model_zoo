@@ -374,7 +374,7 @@ def format_key(key):
 
 
 def to_lower_register(str_list):
-    return list(map(lambda item: item.lower() if item else None, str_list))
+    return [item.lower() if item else None for item in str_list]
 
 
 def polygon_from_points(points):

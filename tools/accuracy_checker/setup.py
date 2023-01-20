@@ -84,7 +84,7 @@ def prepare_requirements():
         warnings.warn(
             '"install_core" command is deprecated and will be removed in 2023.1 release, please use "install" instead',
             DeprecationWarning
-            )
+        )
     requirements = read("requirements-extra.in").split('\n')
     return requirements_core, requirements
 

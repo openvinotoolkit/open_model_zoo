@@ -216,7 +216,7 @@ class Launcher(ClassProvider):
                         validation_scheme=cls.validation_scheme())
                 )
                 return errors
-        uri = uri_prefix or'launcher.{}'.format(cls.__provider__)
+        uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return LauncherConfigValidator(
             uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(
