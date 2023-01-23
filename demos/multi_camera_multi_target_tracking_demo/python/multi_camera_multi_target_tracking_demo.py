@@ -197,6 +197,7 @@ def run(params, config, capture, detector, reid):
 
     if len(config.embeddings.save_path):
         save_embeddings(tracker.scts, **vars(config.embeddings))
+    detector.infer_queue.wait_all()
 
 
 def main():
