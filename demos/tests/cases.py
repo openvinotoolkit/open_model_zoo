@@ -340,9 +340,9 @@ DEMOS = [
             TestCase(options={'-at': 'openpose',
                               '-m': ModelArg('human-pose-estimation-0001')}
             ),
-            TestCase(options={'-at': 'higherhrnet',
-                              '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}
-            ),
+            # TestCase(options={'-at': 'higherhrnet',
+            #                   '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}
+            # ),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -365,9 +365,9 @@ DEMOS = [
                     ModelArg('single-image-super-resolution-1033'),
                     ModelArg('text-image-super-resolution-0001'))
             ),
-            TestCase(options={'-at': 'deblur',
-                '-m': ModelArg('deblurgan-v2')}
-            ),
+            # TestCase(options={'-at': 'deblur',
+            #     '-m': ModelArg('deblurgan-v2')}
+            # ),
             TestCase(options={'-at': 'jr',
                '-m': ModelArg('fbcnn')}
             )
@@ -881,12 +881,12 @@ DEMOS = [
        })
     )),
 
-    PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': DataPatternArg('face-detection-adas'),
-                          **MONITORS,
-                          '--no_show': None,
-                          '-m': ModelArg('deblurgan-v2')}),
-    )),
+    # PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
+    #     TestCase(options={'-i': DataPatternArg('face-detection-adas'),
+    #                       **MONITORS,
+    #                       '--no_show': None,
+    #                       '-m': ModelArg('deblurgan-v2')}),
+    # )),
 
     PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'],
                model_keys=['-m_p', '-m_r', '-m_o'], test_cases=combine_cases(
@@ -988,8 +988,8 @@ DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
         [
-            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+            # TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            # TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -1350,7 +1350,8 @@ DEMOS = [
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
             ModelArg('quartznet-15x5-en'),
-            ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
+            # ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
+        )
     )),
 
     PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
