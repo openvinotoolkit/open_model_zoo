@@ -17,6 +17,7 @@
 
 import sys
 from pathlib import Path
+import threading
 
 import cv2
 
@@ -34,18 +35,20 @@ def main():
     if image is None:
         raise RuntimeError('Failed to read the image')
 
+    event = threading.Event()
     INFERENCE_NUMBER = 10
     results = [False for _ in range(INFERENCE_NUMBER)]  # container for results
-    def callback(request, userdata):
+    def callback(result, userdata):
         print(f"Done! Number: {userdata}")
         results[userdata] = True
+        if all(results):
+            event.set()
 
     model.set_callback(callback)
     ## Run parallel inference
     for i in range(INFERENCE_NUMBER):
-        dict_inputs, meta = model.preprocess(image)
-        model.infer_async(dict_inputs, callback_data=i)
-    model.await_all()
+        model.process_async(image, callback_data=i)
+    event.wait()
     assert(all(results))
 
 
