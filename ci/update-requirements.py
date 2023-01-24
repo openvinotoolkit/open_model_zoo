@@ -80,12 +80,6 @@ def main():
         fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
     pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
-    pc('ci/requirements-ac.txt',
-        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements-extra.in',
-        'ci/requirements-openvino-dev.txt')
-    pc('ci/requirements-ac-test.txt',
-        'tools/accuracy_checker/requirements-extra.in', 'tools/accuracy_checker/requirements-test.in',
-        'tools/accuracy_checker/requirements-core.in', 'ci/requirements-openvino-dev.txt')
     pc('ci/requirements-check-basics.txt',
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
