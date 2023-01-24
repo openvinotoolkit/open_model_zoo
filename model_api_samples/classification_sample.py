@@ -20,8 +20,8 @@ from pathlib import Path
 
 import cv2
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'demos/common/python'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools/model_tools/src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'demos/common/python'))
 
 from openvino.model_zoo.model_api.models import Classification
 
