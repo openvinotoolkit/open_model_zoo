@@ -29,8 +29,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.models import MaskRCNNModel, YolactModel, OutputTransform
-from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
-from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, get_user_config, OpenvinoAdapter, OVMSAdapter
+from model_api.pipelines import AsyncPipeline
 from model_api.performance_metrics import PerformanceMetrics
 
 

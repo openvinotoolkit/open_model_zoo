@@ -46,7 +46,7 @@ class AsyncPipeline:
 
         infer_start_time = perf_counter()
         callback_data = id, meta, preprocessing_meta, infer_start_time
-        self.model.infer_async(inputs, callback_data)
+        self.model.infer_async_raw(inputs, callback_data)
 
     def get_raw_result(self, id):
         if id in self.completed_results:

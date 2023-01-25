@@ -44,7 +44,7 @@ def main():
     ## Run parallel inference
     for i in range(INFERENCE_NUMBER):
         dict_inputs, meta = model.preprocess(image)
-        model.infer_async(dict_inputs, callback_data=i)
+        model.infer_async_raw(dict_inputs, callback_data=i)
     model.await_all()
     assert(all(results))
 

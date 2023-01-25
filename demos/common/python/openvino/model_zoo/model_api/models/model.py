@@ -321,7 +321,7 @@ class Model:
                 "with preload=True option or call load() method before infer_sync()")
         return self.model_adapter.infer_sync(dict_data)
 
-    def infer_async(self, dict_data, callback_data):
+    def infer_async_raw(self, dict_data, callback_data):
         if not self.model_loaded:
             self.raise_error("The model is not loaded to the device. Please, create the wrapper "
                 "with preload=True option or call load() method before infer_async()")
