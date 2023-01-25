@@ -102,7 +102,7 @@ pillow==9.3.0
     #   openvino-dev
 pooch==1.6.0
     # via librosa
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   ovmsclient
     #   tensorboardx
