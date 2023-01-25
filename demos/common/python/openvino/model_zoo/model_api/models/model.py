@@ -343,7 +343,7 @@ class Model:
         meta, get_result_fn, postprocess_fn, callback_fn, user_data = callback_data
         raw_result = get_result_fn(request)
         result = postprocess_fn(raw_result, meta)
-        callback_fn(result, meta, user_data)
+        callback_fn(result, user_data)
 
     def set_callback(self, callback_fn):
         self.callback_fn = callback_fn

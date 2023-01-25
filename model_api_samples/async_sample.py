@@ -36,8 +36,8 @@ def main():
 
     INFERENCE_NUMBER = 10
     results = [False for _ in range(INFERENCE_NUMBER)]  # container for results
-    def callback(result, meta, userdata):
-        print(f"Number: {userdata}, Meta: {meta}, Result: {result}")
+    def callback(result, userdata):
+        print(f"Number: {userdata}, Result: {result}")
         results[userdata] = True
 
     model.set_callback(callback)
