@@ -204,9 +204,9 @@ class OpenvinoAdapter(ModelAdapter):
         return {key: request.get_tensor(key).data.copy() for key in self.get_output_layers()}
 
     def infer_sync(self, dict_data):
-        ireq = self.compiled_model.create_infer_request()
-        ireq.infer(dict_data)
-        return self.get_raw_result(ireq)
+        self.infer_request = self.async_queue[self.async_queue.get_idle_request_id()]
+        self.infer_request.infer(dict_data)
+        return self.get_raw_result(self.infer_request)
 
     def infer_async(self, dict_data, callback_data) -> None:
         self.async_queue.start_async(dict_data, callback_data)

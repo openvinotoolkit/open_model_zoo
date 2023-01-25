@@ -16,7 +16,6 @@
 
 import logging as log
 import re
-import threading
 
 from openvino.model_zoo.model_api.adapters.model_adapter import ModelAdapter
 from openvino.model_zoo.model_api.adapters.ovms_adapter import OVMSAdapter
@@ -81,8 +80,6 @@ class Model:
         if preload:
             self.load()
 
-        self.callback_fn = lambda *args: None
-
     @classmethod
     def get_model(cls, name):
         subclasses = [subclass for subclass in cls.get_subclasses() if subclass.__model__]
@@ -95,7 +92,7 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, model, model_type=None, configuration={}, preload=True, core=None, weights_path=None, model_parameters={}, device='CPU',
+    def create_model(cls, model, model_type=None, configuration={}, preload=True, core=None, weights_path=None, model_parameters={}, device='AUTO',
             nstreams='1', nthreads=None, max_num_requests=0, precision='FP16', download_dir=None, cache_dir=None):
         '''
         Args:
@@ -331,7 +328,7 @@ class Model:
         self.model_adapter.infer_async(dict_data, callback_data)
 
     def set_callback(self, callback_fn):
-        self.callback_fn = callback_fn
+        self.model_adapter.set_callback(callback_fn)
 
     def is_ready(self):
         return self.model_adapter.is_ready()
@@ -351,9 +348,3 @@ class Model:
         for name, metadata in self.outputs.items():
             self.logger.info('\tOutput layer: {}, shape: {}, precision: {}, layout: {}'.format(
                 name, metadata.shape, metadata.precision, metadata.layout))
-
-    def process_async(self, inputs, callback_data):
-        def thread_fn():
-            res = self.__call__(inputs)
-            self.callback_fn(res, callback_data)
-        threading.Thread(target=thread_fn).start()
