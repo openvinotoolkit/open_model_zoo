@@ -327,8 +327,27 @@ class Model:
                 "with preload=True option or call load() method before infer_async()")
         self.model_adapter.infer_async(dict_data, callback_data)
 
+    def infer_async(self, input_data, user_data):
+        if not self.model_loaded:
+            self.raise_error("The model is not loaded to the device. Please, create the wrapper "
+                "with preload=True option or call load() method before infer_async()")
+        dict_data, meta = self.preprocess(input_data)
+        self.model_adapter.infer_async(dict_data, (meta,
+                                                   self.model_adapter.get_raw_result,
+                                                   self.postprocess,
+                                                   self.callback_fn,
+                                                   user_data))
+
+    @staticmethod
+    def process_callback(request, callback_data):
+        meta, get_result_fn, postprocess_fn, callback_fn, user_data = callback_data
+        raw_result = get_result_fn(request)
+        result = postprocess_fn(raw_result, meta)
+        callback_fn(result, meta, user_data)
+
     def set_callback(self, callback_fn):
-        self.model_adapter.set_callback(callback_fn)
+        self.callback_fn = callback_fn
+        self.model_adapter.set_callback(Model.process_callback)
 
     def is_ready(self):
         return self.model_adapter.is_ready()
