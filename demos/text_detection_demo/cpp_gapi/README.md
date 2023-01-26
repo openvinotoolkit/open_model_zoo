@@ -1,4 +1,4 @@
-# Text Detection C++ Demo
+# G-API Text Detection C++ Demo
 
 ![example](../text_detection_demo.jpg)
 
@@ -8,9 +8,9 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-detection-0004`, which is a lightweight detection network for finding text.
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
-* `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm "logits"` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
-* `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "decoder_output"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0015/README.md) for details.
-* `text-recognition-0016`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyz"` (supported symbols set), `-tr_o_blb_nm "decoder_output"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0016/README.md) for details.
+* `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
+* `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0015/README.md) for details.
+* `text-recognition-0016`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyz"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0016/README.md) for details.
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and `-dt simple` (to specify decoder type).
 * `handwritten-score-recognition-0003`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`. You should add options `-m_tr_ss "0123456789._"` (supported symbols set) and `-dt ctc` (to specify decoder type).
 * `vitstr-small-patch16-224`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss <path to vocab file>/.vocab.txt` (supported symbols set), `-dt simple` (to specify decoder type), `-start_index 1` (to process output from provided index) and `-pad " "` (to use specific pad symbol).
@@ -21,12 +21,12 @@ On startup, the application reads command line parameters and loads a model to O
 
 If text recognition model is provided, the demo prints recognized text as well.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Embedding Preprocessing Computation](@ref openvino_docs_MO_DG_Additional_Optimization_Use_Cases).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvino.ai/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model.html#general-conversion-parameters).
 
 ## Preparing to Run
 
 For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
-The list of models supported by the demo is in `<omz_dir>/demos/text_detection_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/text_detection_demo/cpp_gapi/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -66,7 +66,7 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-text_detection_demo [OPTION]
+text_detection_demo_gapi [OPTION]
 Options:
 
     -h                             Print a usage message.
@@ -102,6 +102,7 @@ Options:
     -b                             Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
     -start_index                   Optional. Start index for Simple decoder. Default value is 0.
     -pad                           Optional. Pad symbol. Default value is '#'.
+    -gapi_regular_mode             Optional. If it is set, G-API graph is compiled in the regular execution mode; otherwise, graph is compiled in the streaming mode for processing video stream data.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -109,7 +110,7 @@ Running the application with the empty list of options yields the usage message 
 For example, use the following command line command to run the application:
 
 ```sh
-./text_detection_demo \
+./text_detection_demo_gapi \
   -i <path_to_image>/sample.jpg \
   -m_td <path_to_model>/text-detection-0004.xml \
   -m_tr <path_to_model>/text-recognition-0014.xml \
@@ -121,7 +122,7 @@ For example, use the following command line command to run the application:
 For `text-recognition-resnet-fc`, `text-recgonition-0015` and `text-recognition-0016` you should use `simple` decoder for `-dt` option. For the rest models use `ctc` decoder (default decoder). In case of `text-recognition-0015` and `text-recognition-0016` models, specify path to `text-recognition-0015-encoder` (`text-recognition-0016-encoder`) models for `-m_tr` key and decoder part (`text-recognition-0015-decoder` and `text-recognition-0016-decoder`, correspondingly) will be found automatically as shown on example below:
 
 ```sh
-./text_detection_demo \
+./text_detection_demo_gapi \
   -i <path_to_image>/sample.jpg \
   -m_td <path_to_model>/text-detection-0003.xml \
   -m_tr <path_to_model>/text-recognition-0015/text-recognition-0015-encoder/<precision>/text-recognition-0015-encoder.xml \
@@ -147,17 +148,11 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 
 * **FPS**: average rate of video frame processing (frames per second).
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for the following pipeline stages:
-  * **Text detection inference** — infering input data (images) and getting a result for text detection model.
-  * **Text detection postprocessing** — preparation inference result for output for text detection model.
-  * **Text recognition inference** — infering input data (images) and getting a result for text recognition model.
-  * **Text recognition postprocessing** — preparation inference result for output for text recognition model.
-  * **Text crop** — crop bounding boxes with text from input image.
 
 You can use these metrics to measure application-level performance.
 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
