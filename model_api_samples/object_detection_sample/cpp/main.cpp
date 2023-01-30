@@ -182,74 +182,14 @@ int main(int argc, char* argv[]) {
                       << std::endl;
             return EXIT_FAILURE;
         }
-        // TODO: read config from IR
-        // TODO: read type from IR
-        std::unique_ptr<ModelBase> model;
-        std::string FLAGS_m = argv[1];  // I use ssd300
-        std::string FLAGS_at = "ssd";
-        float FLAGS_t = 0.5f;
-        std::vector<std::string> labels;
-        ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
-        std::string FLAGS_layout;
-        bool FLAGS_auto_resize = false;
-        float FLAGS_iou_t = 0.5;
-        std::vector<float> anchors;
-        std::vector<int64_t> masks;
-        if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, static_cast<float>(FLAGS_t), labels, FLAGS_layout));
-        } else if (FLAGS_at == "faceboxes") {
-            model.reset(new ModelFaceBoxes(FLAGS_m,
-                                           static_cast<float>(FLAGS_t),
-                                           FLAGS_auto_resize,
-                                           static_cast<float>(FLAGS_iou_t),
-                                           FLAGS_layout));
-        } else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m,
-                                            static_cast<float>(FLAGS_t),
-                                            FLAGS_auto_resize,
-                                            static_cast<float>(FLAGS_iou_t),
-                                            FLAGS_layout));
-        } else if (FLAGS_at == "retinaface-pytorch") {
-            model.reset(new ModelRetinaFacePT(FLAGS_m,
-                                              static_cast<float>(FLAGS_t),
-                                              FLAGS_auto_resize,
-                                              static_cast<float>(FLAGS_iou_t),
-                                              FLAGS_layout));
-        } else if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, static_cast<float>(FLAGS_t), FLAGS_auto_resize, labels, FLAGS_layout));
-        } else if (FLAGS_at == "yolo") {
-            bool FLAGS_yolo_af = true;  // Use advanced postprocessing/filtering algorithm for YOLO
-            model.reset(new ModelYolo(FLAGS_m,
-                                      static_cast<float>(FLAGS_t),
-                                      FLAGS_auto_resize,
-                                      FLAGS_yolo_af,
-                                      static_cast<float>(FLAGS_iou_t),
-                                      labels,
-                                      anchors,
-                                      masks,
-                                      FLAGS_layout));
-        } else if (FLAGS_at == "yolov3-onnx") {
-            model.reset(new ModelYoloV3ONNX(FLAGS_m,
-                                            static_cast<float>(FLAGS_t),
-                                            labels,
-                                            FLAGS_layout));
-        } else if (FLAGS_at == "yolox") {
-            model.reset(new ModelYoloX(FLAGS_m,
-                                       static_cast<float>(FLAGS_t),
-                                       static_cast<float>(FLAGS_iou_t),
-                                       labels,
-                                       FLAGS_layout));
-        } else {
-            slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
-            return -1;
-        }
+        std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
+        std::unique_ptr<DetectionModel> model = std::unique_ptr<DetectionModel>{static_cast<DetectionModel*>(ModelBase::create_model(argv[1], core).release())};
+        ColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
 
         cv::Mat image = cv::imread(argv[2]);
         if (!image.data) {
             throw std::runtime_error{"Failed to read the image"};
         }
-
-        ov::Core core;
 
         std::string device = "CPU";
         uint32_t nireq = 0, nthreads = 0;
@@ -257,7 +197,7 @@ int main(int argc, char* argv[]) {
 
         AsyncPipeline pipeline(std::move(model),
                                ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads),
-                               core);
+                               *core);
 
         std::unique_ptr<ResultBase> result;
 
