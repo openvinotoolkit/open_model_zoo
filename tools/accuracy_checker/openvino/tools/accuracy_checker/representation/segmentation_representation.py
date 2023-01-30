@@ -387,7 +387,7 @@ class BackgroundMattingAnnotation(SegmentationAnnotation):
     def _load_mask(self):
         mask = super()._load_mask()
         if np.ndim(mask) == 3 and mask.shape[-1] == 4 and not self.load_alpha:
-            mask = mask[:, :, -1]
+            mask = mask[:, :, :-1]
         return mask
 
     @property
