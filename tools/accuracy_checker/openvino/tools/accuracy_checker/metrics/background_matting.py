@@ -94,6 +94,8 @@ class MeanOfAbsoluteDifference(BaseBackgroundMattingMetrics):
     def update(self, annotation, prediction):
         pred = self.get_prediction(prediction)
         gt = self.get_annotation(annotation)
+        if pred.shape[-1] == 1 and pred.shape[-1] != gt.shape[-1]:
+            gt = cv2.cvtColor(gt, cv2.COLOR_RGB2GRAY)
         value = np.mean(abs(pred - gt)) * 1e3
         self.results.append(value)
         return value
@@ -105,6 +107,8 @@ class SpatialGradient(BaseBackgroundMattingMetrics):
     def update(self, annotation, prediction):
         pred = self.get_prediction(prediction)
         gt = self.get_annotation(annotation)
+        if pred.shape[-1] == 1 and pred.shape[-1] != gt.shape[-1]:
+            gt = cv2.cvtColor(gt, cv2.COLOR_RGB2GRAY)
         gt_grad = self.gauss_gradient(gt)
         pred_grad = self.gauss_gradient(pred)
         value = np.sum((gt_grad - pred_grad) ** 2) / 1000
@@ -152,6 +156,8 @@ class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
     def update(self, annotation, prediction):
         pred = self.get_prediction(prediction)
         gt = self.get_annotation(annotation)
+        if pred.shape[-1] == 1 and pred.shape[-1] != gt.shape[-1]:
+            gt = cv2.cvtColor(gt, cv2.COLOR_RGB2GRAY)
         if self.use_mask:
             mask = self.prepare_pha(annotation.value) > 0
             pred = pred[mask]
