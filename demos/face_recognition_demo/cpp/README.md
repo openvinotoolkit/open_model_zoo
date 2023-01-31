@@ -26,34 +26,34 @@ the application deploys 4 models on the specified devices using OpenVINO
 library and runs them in asynchronous manner.
 There are 3 user modes for this demo application:
 1. Only face detetion. In this mode, an input frame is processed by the face detection model to predict face bounding boxes.
-  To do face detection, use only `-m_fd` flag. Example:
+  To do face detection, use only `-mfd` flag. Example:
   ```
   ./face_recognition_demo \
      -i <path_to_video>/input_video.mp4 \
-     -m_fd <path_to_model>/face-detection-retail-0004.xml
+     -mfd <path_to_model>/face-detection-retail-0004.xml
   ```
 2. Face Recognition mode. In this case after face detection, face keypoints
    are predicted by the Landmarks model and as final step face recognition model uses keypoints to align faces
    and match found faces with faces from face gallery, which should be defined by user.
-   So, in this mode user should provide 3 flags `-m_fd`, `-m_lm`, `-m_reid`. Example:
+   So, in this mode user should provide 3 flags `-mfd`, `-mlm`, `-mreid`. Example:
    ```
    ./face_recognition_demo
      -i <path_to_video>/input_video.mp4
-     -m_fd <path_to_model>/face-detection-retail-0004.xml
-     -m_lm <path_to_model>/landmarks-regression-retail-0009.xml
-     -m_reid <path_to_model>/face-reidentification-retail-0095.xml
+     -mfd <path_to_model>/face-detection-retail-0004.xml
+     -mlm <path_to_model>/landmarks-regression-retail-0009.xml
+     -mreid <path_to_model>/face-reidentification-retail-0095.xml
      -fg "/home/face_gallery"
    ```
 3. With Anti-Spoof model. In this case 4 models are working and for all recognized faces demo applies anti-spoof model,
    which estimate probability whether spoof or real faces on video.
-   So, in this mode user should provide 3 flags `-m_fd`, `-m_lm`, `-m_reid`. Example:
+   So, in this mode user should provide 3 flags `-mfd`, `-mlm`, `-mreid`. Example:
    ```
    ./face_recognition_demo
      -i <path_to_video>/input_video.mp4
-     -m_fd <path_to_model>/face-detection-retail-0004.xml
-     -m_lm <path_to_model>/landmarks-regression-retail-0009.xml
-     -m_reid <path_to_model>/face-reidentification-retail-0095.xml
-     -m_as <path_to_model>/anti-spoof-mn3.xml
+     -mfd <path_to_model>/face-detection-retail-0004.xml
+     -mlm <path_to_model>/landmarks-regression-retail-0009.xml
+     -mreid <path_to_model>/face-reidentification-retail-0095.xml
+     -mas <path_to_model>/anti-spoof-mn3.xml
      -fg "/home/face_gallery"
    ```
 
@@ -121,28 +121,31 @@ Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
 Running the application with the `-h` option:
 
 ```
-        [ -h]                                                Show the help message and exit
+        [ -h]                                                show the help message and exit
         [--help]                                             print help on all arguments
-        [ -i <INPUT>]                                        An input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
-         -m_fd <MODEL FILE>                                  Path to the Face Detection model (.xml) file.
-        [-m_lm <MODEL FILE>]                                 Path to the Facial Landmarks Regression Retail model (.xml) file
-        [-m_reid <MODEL FILE>]                               Path to the Face Recognition model (.xml) file.
-        [-m_as <MODEL FILE>]                                 Path to the Antispoofing Classification model (.xml) file.
-        [ -t_fd <NUMBER>]                                    Probability threshold for face detections. Default is 0.5
-        [ --input_shape <STRING>]                            Specify the input shape for detection network in (width x height) format. Example: 1280x720. Input of network shape used by default.
-        [ -t_reid <NUMBER>]                                  Cosine distance threshold between two vectors for face reidentification. Default is 0.7
-        [ -exp <NUMBER>]                                     Expand ratio for bbox before face recognition. Default is 1.0
+        [ -i <INPUT>]                                        an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
+         -mfd <MODEL FILE>                                  path to the Face Detection model (.xml) file.
+        [-mlm <MODEL FILE>]                                 path to the Facial Landmarks Regression Retail model (.xml) file
+        [-mreid <MODEL FILE>]                               path to the Face Recognition model (.xml) file.
+        [-mas <MODEL FILE>]                                 path to the Antispoofing Classification model (.xml) file.
+        [ -t_fd <NUMBER>]                                    probability threshold for face detections. Default is 0.5
+        [ --input_shape <STRING>]                            specify the input shape for detection network in (width x height) format. Input of model will be reshaped according specified shape.Example: 1280x720. Shape of network input used by default.
+        [ -t_reid <NUMBER>]                                  cosine distance threshold between two vectors for face reidentification. Default is 0.7
+        [ -exp <NUMBER>]                                     expand ratio for bbox before face recognition. Default is 1.0
         [--greedy_reid_matching] ([--nogreedy_reid_matching])(don't) use faster greedy matching algorithm in face reid.
-        [-fg <GALLERY PATH>]                                 Path to a faces gallery directory.
+        [-fg <GALLERY PATH>]                                 path to a faces gallery directory.
         [--allow_grow] ([--noallow_grow])                    (dont't) allow to grow faces gallery and to dump on disk.
         [--crop_gallery] ([--nocrop_gallery])                (dont't) crop images during faces gallery creation.
-        [ -d <DEVICE>]                                       Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
-        [--lim <NUMBER>]                                     Number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
-        [ -o <OUTPUT>]                                       Name of the output file(s) to save.
-        [--loop]                                             Enable reading the input in a loop
-        [--nthreads <integer>]                               Number of threads for TFLite model.
+        [ -dfd <DEVICE>]                                    specify a device Face Detection model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [ -dlm <DEVICE>]                                    specify a device for Landmarks Regression model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [ -dreid <DEVICE>]                                  specify a target device for Face Reidentification model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [ -das <DEVICE>]                                    specify a device for Anti-spoofing model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [--lim <NUMBER>]                                     number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
+        [ -o <OUTPUT>]                                       name of the output file(s) to save.
+        [--loop]                                             enable reading the input in a loop
+        [--nthreads <integer>]                               number of threads for TFLite model.
         [--show] ([--noshow])                                (don't) show output
-        [ -u <DEVICE>]                                       Resource utilization graphs. Default is cdm. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
+        [ -u <DEVICE>]                                       resource utilization graphs. Default is cdm. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
         Key bindings:
                 Q, q, Esc - Quit
                 P, p, 0, spacebar - Pause

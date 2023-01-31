@@ -103,13 +103,13 @@ constexpr char das_msg[] =
     "Default is CPU";
 DEFINE_string(das, "CPU", das_msg);
 
-constexpr char lim_msg[] = "Number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
+constexpr char lim_msg[] = "number of frames to store in output. If 0 is set, all frames are stored. Default is 1000";
 DEFINE_uint32(lim, 1000, lim_msg);
 
 constexpr char show_msg[] = "(don't) show output";
 DEFINE_bool(show, true, show_msg);
 
-constexpr char u_msg[] = "Resource utilization graphs. Default is cdm. "
+constexpr char u_msg[] = "resource utilization graphs. Default is cdm. "
     "c - average CPU load, d - load distribution over cores, m - memory usage, h - hide";
 DEFINE_string(u, "cdm", u_msg);
 
