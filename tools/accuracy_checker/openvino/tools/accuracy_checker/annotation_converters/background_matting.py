@@ -146,6 +146,7 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                 'with_background': BoolField(optional=True, default=False, description='load backgrounds'),
                 'with_alpha': BoolField(optional=True, default=False,
                                         description='load images with mask including alpha channel'),
+                "per_clip_location": BoolField(optional=True, default=False, description="inverse data struction")
             }
         )
         return configuration_parameters
@@ -157,23 +158,35 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
         self.background_postfix = self.get_value_from_config('background_postfix')
         self.with_background = self.get_value_from_config('with_background')
         self.with_alpha = self.get_value_from_config('with_alpha')
+        self.per_clip_location = self.get_value_from_config("per_clip_location")
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
-        image_name = '{prefix}{clip}/{base}{postfix}'.format(
-            prefix=self.images_prefix, clip='{clip}', base='{base}', postfix=self.images_postfix
-        )
-        mask_name = '{prefix}{clip}/{base}{postfix}'.format(
-            prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
-        )
+        if not self.per_clip_location:
+            image_name = '{prefix}{clip}/{base}{postfix}'.format(
+                prefix=self.images_prefix, clip='{clip}', base='{base}', postfix=self.images_postfix
+            )
+            mask_name = '{prefix}{clip}/{base}{postfix}'.format(
+                prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
+            )
+        else:
+            image_name = "{clip}/{prefix}/{base}{postfix}".format(
+                prefix=self.images_prefix, clip='{clip}', base='{base}', postfix=self.images_postfix
+            )
+            mask_name = '{clip}/{prefix}/{base}{postfix}'.format(
+                prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
+            )
+
         image_pattern = self.get_image_pattern('**/*')
         images_list = list(self.images_dir.glob(image_pattern))
-        clips_list = self.get_clips_names(images_list)
+        clips_list = self.get_clips_names(images_list, self.per_clip_location)
         num_iterations = len(images_list)
         content_errors = None if not check_content else []
         idx = 0
         for clip_name in sorted(clips_list):
-            clip_dir = self.images_dir / self.images_prefix / clip_name
+            clip_dir = (self.images_dir / self.images_prefix / clip_name
+                        if not self.per_clip_location else self.images_dir / clip_name / self.images_prefix
+                        )
             image_pattern = self.get_image_pattern('*', with_prefix=False)
             clip_images = list(clip_dir.glob(image_pattern))
 
@@ -192,9 +205,20 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                 mask = mask_name.format(base=base_name, clip=clip_name)
 
                 if self.with_background:
-                    bgr_name = '{prefix}{clip}/{base}{postfix}'.format(
-                        prefix=self.background_prefix, clip=clip_name, base=base_name, postfix=self.background_postfix
-                    )
+                    if not self.per_clip_location:
+                        bgr_name = '{prefix}{clip}/{base}{postfix}'.format(
+                            prefix=self.background_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.background_postfix
+                        )
+                    else:
+                        bgr_name = '{clip}/{prefix}/{base}{postfix}'.format(
+                            prefix=self.background_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.background_postfix
+                        )
                     bgr_file = self.backgrounds_dir / bgr_name
                     if not bgr_file.exists():
                         continue
@@ -213,16 +237,18 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
         )
 
     @staticmethod
-    def get_clips_names(images_list):
+    def get_clips_names(images_list, per_clip_location):
         result = []
         for image in images_list:
-            clip_path = image.parent
+            clip_path = image.parent if not per_clip_location else image.parents[1]
             result.append(clip_path.name)
         return list(set(result))
 
     def get_image_pattern(self, image_pattern='*', with_prefix=True, with_postfix=True):
         if with_prefix and self.images_prefix:
             image_pattern = self.images_prefix + image_pattern
+            if self.per_clip_location:
+                image_pattern = "*/" + image_pattern
         if with_postfix and self.images_postfix:
             image_pattern = image_pattern + self.images_postfix
         return image_pattern
