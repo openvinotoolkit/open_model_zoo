@@ -173,9 +173,10 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
             image_name = "{clip}/{prefix}/{base}{postfix}".format(
                 prefix=self.images_prefix, clip='{clip}', base='{base}', postfix=self.images_postfix
             )
-            mask_name = '{clip}/{prefix}/{base}{postfix}'.format(prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
+            mask_name = '{clip}/{prefix}/{base}{postfix}'.format(
+                prefix=self.mask_prefix, clip='{clip}', base='{base}', postfix=self.mask_postfix
             )
-  
+
         image_pattern = self.get_image_pattern('**/*')
         images_list = list(self.images_dir.glob(image_pattern))
         clips_list = self.get_clips_names(images_list, self.per_clip_location)
@@ -183,7 +184,9 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
         content_errors = None if not check_content else []
         idx = 0
         for clip_name in sorted(clips_list):
-            clip_dir = self.images_dir / self.images_prefix / clip_name if not self.per_clip_location else self.images_dir  / clip_name / self.images_prefix
+            clip_dir = (self.images_dir / self.images_prefix / clip_name
+                        if not self.per_clip_location else self.images_dir / clip_name / self.images_prefix
+                        )
             image_pattern = self.get_image_pattern('*', with_prefix=False)
             clip_images = list(clip_dir.glob(image_pattern))
 
@@ -204,11 +207,17 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                 if self.with_background:
                     if not self.per_clip_location:
                         bgr_name = '{prefix}{clip}/{base}{postfix}'.format(
-                            prefix=self.background_prefix, clip=clip_name, base=base_name, postfix=self.background_postfix
+                            prefix=self.background_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.background_postfix
                         )
                     else:
                         bgr_name = '{clip}/{prefix}/{base}{postfix}'.format(
-                            prefix=self.background_prefix, clip=clip_name, base=base_name, postfix=self.background_postfix
+                            prefix=self.background_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.background_postfix
                         )
                     bgr_file = self.backgrounds_dir / bgr_name
                     if not bgr_file.exists():
