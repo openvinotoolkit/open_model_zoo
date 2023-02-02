@@ -41,8 +41,8 @@ def _ssim(annotation_image, prediction_image):
     var_x = np.var(prediction)
     var_y = np.var(ground_truth)
     sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))
-    c1 = (0.01 * 2**8-1)**2
-    c2 = (0.03 * 2**8-1)**2
+    c1 = (0.01 * (2**8-1))**2
+    c2 = (0.03 * (2**8-1))**2
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 
