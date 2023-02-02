@@ -327,7 +327,9 @@ class SSDONNXAdapter(Adapter):
                 'scores_out': StringField(
                     description='name (or regex for it) of output layer with scores', optional=True
                 ),
-                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
+                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes'),
+                'diff_coord_order': BoolField(optional=True, default=False,
+                    description='Ordering convention of coordinates differs from standard')
             }
         )
         return parameters
@@ -336,6 +338,7 @@ class SSDONNXAdapter(Adapter):
         self.labels_out = self.get_value_from_config('labels_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.bboxes_out = self.get_value_from_config('bboxes_out')
+        self.diff_coord_order = self.get_value_from_config('diff_coord_order')
         self.outputs_verified = False
 
     def process(self, raw, identifiers, frame_meta):
@@ -352,7 +355,10 @@ class SSDONNXAdapter(Adapter):
         )):
             if self.scores_out:
                 scores = raw_outputs[self.scores_out][idx]
-                x_mins, y_mins, x_maxs, y_maxs = bboxes.T
+                if self.diff_coord_order:
+                    y_mins, x_mins, y_maxs, x_maxs = bboxes.T
+                else:
+                    x_mins, y_mins, x_maxs, y_maxs = bboxes.T
             else:
                 x_mins, y_mins, x_maxs, y_maxs, scores = bboxes.T
             if labels.ndim > 1:
