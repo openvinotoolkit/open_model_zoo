@@ -31,6 +31,12 @@ class Detection:
 
     def get_coords(self):
         return self.xmin, self.ymin, self.xmax, self.ymax
+    
+    def __str__(self):
+        return f'({self.xmin}, {self.ymin}, {self.xmax}, {self.ymax}, {self.score}, {self.id}, {self.str_label})'
+    
+    def __repr__(self):
+        return f'({self.xmin}, {self.ymin}, {self.xmax}, {self.ymax}, {self.score}, {self.id}, {self.str_label})'
 
 
 def clip_detections(detections, size):

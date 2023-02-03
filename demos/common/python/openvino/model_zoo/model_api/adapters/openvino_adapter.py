@@ -1,31 +1,34 @@
-"""
+'''
  Copyright (c) 2021-2022 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
+ Licensed under the Apache License, Version 2.0 (the 'License');
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
+ distributed under the License is distributed on an 'AS IS' BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
-"""
+'''
 
 import logging as log
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, Tuple
 
 try:
-    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version, Dimension
+    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version, \
+                                Dimension, Type
+    from openvino.preprocess import PrePostProcessor, ResizeAlgorithm, ColorFormat
+    import openvino.runtime as ov
     openvino_absent = False
 except ImportError:
     openvino_absent = True
 
 from .model_adapter import ModelAdapter, Metadata
-from .utils import Layout
+from .utils import Layout, resize_image_letterbox, crop_resize
 
 
 def create_core():
@@ -53,7 +56,7 @@ def parse_devices(device_string):
 
 
 def parse_value_per_device(devices: Set[str], values_string: str)-> Dict[str, int]:
-    """Format: <device1>:<value1>,<device2>:<value2> or just <value>"""
+    '''Format: <device1>:<value1>,<device2>:<value2> or just <value>'''
     values_string_upper = values_string.upper()
     result = {}
     device_value_strings = values_string_upper.split(',')
@@ -116,7 +119,7 @@ class OpenvinoAdapter(ModelAdapter):
         self.model_parameters['input_layouts'] = Layout.parse_layouts(self.model_parameters.get('input_layouts', None))
 
         if isinstance(self.model_path, (str, Path)):
-            if Path(self.model_path).suffix == ".onnx" and weights_path:
+            if Path(self.model_path).suffix == '.onnx' and weights_path:
                 log.warning('For model in ONNX format should set only "model_path" parameter.'
                             'The "weights_path" will be omitted')
 
@@ -145,7 +148,7 @@ class OpenvinoAdapter(ModelAdapter):
             # +1 to use it as a buffer of the pipeline
             self.async_queue = AsyncInferQueue(self.compiled_model, len(self.async_queue) + 1)
 
-        log.info('The model {} is loaded to {}'.format("from buffer" if self.model_from_buffer else self.model_path, self.device))
+        log.info('The model {} is loaded to {}'.format('from buffer' if self.model_from_buffer else self.model_path, self.device))
         self.log_runtime_settings()
 
     def log_runtime_settings(self):
@@ -242,7 +245,65 @@ class OpenvinoAdapter(ModelAdapter):
 
     def get_rt_info(self, path):
         return self.model.get_rt_info(path)
-
+    
+    def embed_preprocessing(self, layout='NCHW', resize_mode:str=None, interpolation_mode='LINEAR',
+                            target_shape:Tuple[int]=None, dtype=type(int), brg2rgb=False, mean=None, 
+                            scale=None, input_idx=0):
+        ppp = PrePostProcessor(self.model)
+        
+        INTERPOLATION_MODE_MAP = {
+            'LINEAR': 'linear',
+            'CUBIC': 'cubic',
+            'NEAREST': 'nearest',
+        }
+        
+        RESIZE_MODE_MAP = {
+            'crop': crop_resize,
+            'resize_image_letterbox': resize_image_letterbox,
+            'fit_to_window_letterbox': resize_image_letterbox,
+        }
+        
+        # Handle resize
+        # Change to dynamic shape to handle various image size
+        # TODO: check the number of input channels and rank of input shape      
+        if resize_mode and target_shape:
+            if resize_mode in RESIZE_MODE_MAP:
+                input_shape = [1,-1,-1,3]
+                    
+                print("Embed resize")
+                ppp.input(input_idx).tensor().set_shape(input_shape)
+                #ppp.input(input_idx).preprocess().resize(RESIZE_MODE_MAP[resize_mode], target_shape[0], target_shape[1])
+                ppp.input(input_idx).preprocess() \
+                    .custom(RESIZE_MODE_MAP[resize_mode](target_shape, INTERPOLATION_MODE_MAP[interpolation_mode]))
+                
+            else: 
+                raise ValueError(f'Upsupported resize type in model preprocessing: {resize_mode}')
+        
+        # Change the input type to the 8-bit image
+        if dtype == type(int):
+            ppp.input(input_idx).tensor().set_element_type(Type.u8)
+        
+        ppp.input(input_idx).tensor() \
+            .set_layout(ov.Layout('NHWC')) \
+            .set_color_format(ColorFormat.BGR)
+            
+        # Handle layout
+        ppp.input(input_idx).model().set_layout(ov.Layout(layout))
+            
+        # Handle color format
+        if brg2rgb:
+            ppp.input(input_idx).preprocess().convert_color(ColorFormat.RGB)
+            
+        ppp.input(input_idx).preprocess().convert_element_type(Type.f32)
+            
+        if mean:
+            ppp.input(input_idx).preprocess().mean(mean)
+        if scale:
+            ppp.input(input_idx).preprocess().scale(scale)
+            
+        self.model = ppp.build()
+        ov.serialize(self.model, "tmp.xml")
+        self.load_model()
 
 def get_input_shape(input_tensor):
     def string_to_tuple(string, casting_type=int):
