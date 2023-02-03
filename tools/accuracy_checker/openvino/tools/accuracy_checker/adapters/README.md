@@ -112,6 +112,10 @@ AccuracyChecker supports following set of adapters:
   * `labels_out` - name of output layer with labels or regular expression for it searching.
   * `scores_out`- name of output layer with scores or regular expression for it searching. Optional, can be not provided, if your model has concatenation of scores with box coordinates.
   * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
+* `ssd_tf` - converting output of SSD-based model from TensorFlow framework to `DetectionPrediction` representation.
+  * `labels_out` - name of output layer with labels or regular expression for it searching.
+  * `scores_out`- name of output layer with scores or regular expression for it searching.
+  * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
 * `tf_object_detection` - converting output of detection models from TensorFlow object detection API to `DetectionPrediction`.
   * `classes_out` - name of output layer with predicted classes.
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].

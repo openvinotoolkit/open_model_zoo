@@ -327,9 +327,7 @@ class SSDONNXAdapter(Adapter):
                 'scores_out': StringField(
                     description='name (or regex for it) of output layer with scores', optional=True
                 ),
-                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes'),
-                'diff_coord_order': BoolField(optional=True, default=False,
-                    description='Ordering convention of coordinates differs from standard')
+                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
             }
         )
         return parameters
@@ -338,7 +336,6 @@ class SSDONNXAdapter(Adapter):
         self.labels_out = self.get_value_from_config('labels_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.bboxes_out = self.get_value_from_config('bboxes_out')
-        self.diff_coord_order = self.get_value_from_config('diff_coord_order')
         self.outputs_verified = False
 
     def process(self, raw, identifiers, frame_meta):
@@ -355,10 +352,7 @@ class SSDONNXAdapter(Adapter):
         )):
             if self.scores_out:
                 scores = raw_outputs[self.scores_out][idx]
-                if self.diff_coord_order:
-                    y_mins, x_mins, y_maxs, x_maxs = bboxes.T
-                else:
-                    x_mins, y_mins, x_maxs, y_maxs = bboxes.T
+                x_mins, y_mins, x_maxs, y_maxs = bboxes.T
             else:
                 x_mins, y_mins, x_maxs, y_maxs, scores = bboxes.T
             if labels.ndim > 1:
@@ -396,6 +390,39 @@ class SSDONNXAdapter(Adapter):
         self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
 
         self.outputs_verified = True
+
+
+class SSDAdapterTensorFlow(SSDONNXAdapter):
+    __provider__ = 'ssd_tf'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
+            'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
+            'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes'),
+        })
+        return parameters
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        if not self.outputs_verified:
+            self._get_output_names(raw_outputs)
+        boxes_out, labels_out = raw_outputs[self.bboxes_out], raw_outputs[self.labels_out]
+
+        for idx, (identifier, bboxes, labels) in enumerate(zip(
+                identifiers, boxes_out, labels_out
+        )):
+            scores = raw_outputs[self.scores_out][idx]
+            y_mins, x_mins, y_maxs, x_maxs = bboxes.T
+
+            results.append(
+                DetectionPrediction(
+                    identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
 
 
 class SSDMultiLabelAdapter(Adapter):
