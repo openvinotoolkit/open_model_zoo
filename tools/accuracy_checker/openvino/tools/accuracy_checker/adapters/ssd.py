@@ -392,6 +392,39 @@ class SSDONNXAdapter(Adapter):
         self.outputs_verified = True
 
 
+class SSDAdapterTensorFlow(SSDONNXAdapter):
+    __provider__ = 'ssd_tf'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
+            'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
+            'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes'),
+        })
+        return parameters
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        if not self.outputs_verified:
+            self._get_output_names(raw_outputs)
+        boxes_out, labels_out = raw_outputs[self.bboxes_out], raw_outputs[self.labels_out]
+
+        for idx, (identifier, bboxes, labels) in enumerate(zip(
+                identifiers, boxes_out, labels_out
+        )):
+            scores = raw_outputs[self.scores_out][idx]
+            y_mins, x_mins, y_maxs, x_maxs = bboxes.T
+
+            results.append(
+                DetectionPrediction(
+                    identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
+
+
 class SSDMultiLabelAdapter(Adapter):
     __provider__ = 'ssd_multilabel'
 

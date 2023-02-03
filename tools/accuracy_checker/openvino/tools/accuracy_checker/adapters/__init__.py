@@ -70,7 +70,10 @@ from .detection_person_vehicle import (
     PersonVehicleDetectionRefinementAdapter
 )
 from .detection_head import HeadDetectionAdapter
-from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter, SSDMultiLabelAdapter
+from .ssd import (
+    SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDMultiLabelAdapter,
+    SSDAdapterMxNet, SSDONNXAdapter, SSDAdapterTensorFlow
+)
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import (
@@ -174,6 +177,7 @@ __all__ = [
 
     'SSDAdapter',
     'SSDAdapterMxNet',
+    'SSDAdapterTensorFlow',
     'SSDONNXAdapter',
     'PyTorchSSDDecoder',
     'FacePersonAdapter',
