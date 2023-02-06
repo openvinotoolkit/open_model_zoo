@@ -451,7 +451,8 @@ class YoloV3ONNX(DetectionModel):
         
         if self.embed_preprocessing:
             layout = 'NHWC' if self.nchw_layout else 'NCHW'
-            model_adapter.embed_preprocessing(image_layout=layout, resize_mode='CUBIC', target_shape=(self.w, self.h))
+            model_adapter.embed_preprocessing(image_layout=layout, resize_mode='standard', interpolation_mode='CUBIC', 
+                                              target_shape=(self.w, self.h))
         
 
     def _get_outputs(self):

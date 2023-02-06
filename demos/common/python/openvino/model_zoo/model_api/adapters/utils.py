@@ -116,6 +116,7 @@ def resize_image_letterbox_graph(input: Output, size, interpolation="linear"):
     resized_image = opset.pad(image, pads_begin, pads_end, "constant")
     return resized_image
 
+
 def crop_resize_graph(input: Output, size):
     h_axis = 1
     w_axis = 2
@@ -172,6 +173,7 @@ def crop_resize_graph(input: Output, size):
                               mode="linear", shape_calculation_mode="sizes")
     return resized_image
 
+
 def resize_image_graph(input: Output, size, keep_aspect_ratio=False, interpolation="linear"):
     h_axis = 1
     w_axis = 2
@@ -192,28 +194,20 @@ def resize_image_graph(input: Output, size, keep_aspect_ratio=False, interpolati
         resized_image = opset.interpolate(input, list(size), scales=scale,
                               axes=[h_axis, w_axis], 
                               mode="linear", shape_calculation_mode="sizes")
-        print("Keep aspect ratio")
-    
     return resized_image
-
-# def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
-#     if not keep_aspect_ratio:
-#         resized_frame = cv2.resize(image, size, interpolation=interpolation)
-#     else:
-#         h, w = image.shape[:2]
-#         scale = min(size[1] / h, size[0] / w)
-#         resized_frame = cv2.resize(image, None, fx=scale, fy=scale, interpolation=interpolation)
-#     return resized_frame
 
 
 def resize_image(size, interpolation="linear"):
     return custom_preprocess_function(partial(resize_image_graph, size=size, interpolation=interpolation))
 
+
 def resize_image_with_aspect(size, interpolation="linear"):
    return custom_preprocess_function(partial(resize_image_graph, size=size, keep_aspect_ratio=True, interpolation=interpolation))
 
+
 def crop_resize(size, interpolation="linear"):
     return custom_preprocess_function(partial(crop_resize_graph, size=size))
+
 
 def resize_image_letterbox(size, interpolation="linear"):
     return custom_preprocess_function(partial(resize_image_letterbox_graph, size=size, interpolation=interpolation))
