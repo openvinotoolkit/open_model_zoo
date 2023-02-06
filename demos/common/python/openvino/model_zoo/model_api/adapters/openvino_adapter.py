@@ -28,7 +28,7 @@ except ImportError:
     openvino_absent = True
 
 from .model_adapter import ModelAdapter, Metadata
-from .utils import Layout, resize_image_letterbox, crop_resize
+from .utils import Layout, resize_image_letterbox, crop_resize, resize_image, resize_image_with_aspect
 
 
 def create_core():
@@ -259,7 +259,8 @@ class OpenvinoAdapter(ModelAdapter):
         
         RESIZE_MODE_MAP = {
             'crop': crop_resize,
-            'resize_image_letterbox': resize_image_letterbox,
+            'standard': resize_image,
+            'fit_to_window': resize_image_with_aspect,
             'fit_to_window_letterbox': resize_image_letterbox,
         }
         
@@ -272,7 +273,6 @@ class OpenvinoAdapter(ModelAdapter):
                     
                 print("Embed resize")
                 ppp.input(input_idx).tensor().set_shape(input_shape)
-                #ppp.input(input_idx).preprocess().resize(RESIZE_MODE_MAP[resize_mode], target_shape[0], target_shape[1])
                 ppp.input(input_idx).preprocess() \
                     .custom(RESIZE_MODE_MAP[resize_mode](target_shape, INTERPOLATION_MODE_MAP[interpolation_mode]))
                 

@@ -22,6 +22,7 @@ from openvino.runtime import layout_helpers
 from openvino.runtime import opset10 as opset
 from openvino.runtime.utils.decorators import custom_preprocess_function
 from openvino.runtime import Output
+import openvino.runtime as ov
 
 class Layout:
     def __init__(self, layout = '') -> None:
@@ -119,41 +120,97 @@ def crop_resize_graph(input: Output, size):
     h_axis = 1
     w_axis = 2
     desired_aspect_ratio = size[1] / size[0] # width / height
-    image_shape = opset.shape_of(input, name="shape")
     
+    image_shape = opset.shape_of(input, name="shape")
     iw = opset.convert(opset.gather(image_shape, opset.constant(w_axis), axis=0), destination_type="i32")
     ih = opset.convert(opset.gather(image_shape, opset.constant(h_axis), axis=0), destination_type="i32")
     
-    #if desired_aspect_ratio == 1:
-    offset = opset.unsqueeze(opset.divide(opset.subtract(ih, iw), opset.constant(2, dtype=np.int32)), 0)
-    stop = opset.add(offset, iw)
-    cropped_frame = opset.slice(input, start=offset, stop=stop, step=[1], axes=[h_axis])
+    if desired_aspect_ratio == 1:
+        # then_body
+        image_t = opset.parameter([-1,-1,-1,3], np.uint8, "image")
+        iw_t = opset.parameter([], np.int32, "iw")
+        ih_t = opset.parameter([], np.int32, "ih")
+        then_offset = opset.unsqueeze(opset.divide(opset.subtract(ih_t, iw_t), opset.constant(2, dtype=np.int32)), 0)
+        then_stop = opset.add(then_offset, iw_t)
+        then_cropped_frame = opset.slice(image_t, start=then_offset, stop=then_stop, step=[1], axes=[h_axis])
+        then_body_res_1 = opset.result(then_cropped_frame)
+        then_body = ov.Model([then_body_res_1], [image_t, iw_t, ih_t], "then_body_function")
+
+        # else_body
+        image_e = opset.parameter([-1,-1,-1,3], np.uint8, "image")
+        iw_e = opset.parameter([], np.int32, "iw")
+        ih_e = opset.parameter([], np.int32, "ih")
+        else_offset = opset.unsqueeze(opset.divide(opset.subtract(iw_e, ih_e), opset.constant(2, dtype=np.int32)), 0)
+        else_stop = opset.add(else_offset, ih_e)
+        else_cropped_frame = opset.slice(image_e, start=else_offset, stop=else_stop, step=[1], axes=[w_axis])
+        else_body_res_1 = opset.result(else_cropped_frame)
+        else_body = ov.Model([else_body_res_1], [image_e, iw_e, ih_e], "else_body_function")
+
+        # if
+        condition = opset.greater(ih, iw)
+        if_node = opset.if_op(condition.output(0))
+        if_node.set_then_body(then_body)
+        if_node.set_else_body(else_body)
+        if_node.set_input(input, image_t, image_e)
+        if_node.set_input(iw.output(0), iw_t, iw_e)
+        if_node.set_input(ih.output(0), ih_t, ih_e)
+        cropped_frame = if_node.set_output(then_body_res_1, else_body_res_1)
+        
+    elif desired_aspect_ratio < 1:
+        new_width = opset.floor(opset.multiply(opset.convert(ih, destination_type="f32"), desired_aspect_ratio))
+        offset = opset.unsqueeze(opset.divide(opset.subtract(iw, new_width), opset.constant(2, dtype=np.int32)), 0)
+        stop = opset.add(offset, new_width)
+        cropped_frame = opset.slice(input, start=offset, stop=stop, step=[1], axes=[w_axis])
+    elif desired_aspect_ratio > 1:
+        new_hight = opset.floor(opset.multiply(opset.convert(iw, destination_type="f32"), desired_aspect_ratio))
+        offset = opset.unsqueeze(opset.divide(opset.subtract(ih, new_hight), opset.constant(2, dtype=np.int32)), 0)
+        stop = opset.add(offset, new_hight)
+        cropped_frame = opset.slice(input, start=offset, stop=stop, step=[1], axes=[h_axis])
     
     resized_image = opset.interpolate(cropped_frame, list(size), scales=np.array([1.0, 1.0], dtype=np.float32),
                               axes=[h_axis, w_axis], 
                               mode="linear", shape_calculation_mode="sizes")
     return resized_image
 
+def resize_image_graph(input: Output, size, keep_aspect_ratio=False, interpolation="linear"):
+    h_axis = 1
+    w_axis = 2
+    w, h = size
+    
+    if not keep_aspect_ratio:
+        resized_image = opset.interpolate(input, list(size), scales=np.array([1.0, 1.0], dtype=np.float32),
+                              axes=[h_axis, w_axis], 
+                              mode="linear", shape_calculation_mode="sizes")
+        print("Not keep aspect ratio")
+    else:
+        image_shape = opset.shape_of(input, name="shape")
+        iw = opset.convert(opset.gather(image_shape, opset.constant(w_axis), axis=0), destination_type="f32")
+        ih = opset.convert(opset.gather(image_shape, opset.constant(h_axis), axis=0), destination_type="f32")
+        w_ratio = opset.divide(np.float32(w), iw)
+        h_ratio = opset.divide(np.float32(h), ih)
+        scale = opset.minimum(w_ratio, h_ratio)
+        resized_image = opset.interpolate(input, list(size), scales=scale,
+                              axes=[h_axis, w_axis], 
+                              mode="linear", shape_calculation_mode="sizes")
+        print("Keep aspect ratio")
+    
+    return resized_image
 
-# def crop_resize(image, size):
-#     desired_aspect_ratio = size[1] / size[0] # width / height
-#     if desired_aspect_ratio == 1:
-#         if (image.shape[0] > image.shape[1]):
-#             offset = (image.shape[0] - image.shape[1]) // 2
-#             cropped_frame = image[offset:image.shape[1] + offset]
-#         else:
-#             offset = (image.shape[1] - image.shape[0]) // 2
-#             cropped_frame = image[:, offset:image.shape[0] + offset]
-#     elif desired_aspect_ratio < 1:
-#         new_width = math.floor(image.shape[0] * desired_aspect_ratio)
-#         offset = (image.shape[1] - new_width) // 2
-#         cropped_frame = image[:, offset:new_width + offset]
-#     elif desired_aspect_ratio > 1:
-#         new_height = math.floor(image.shape[1] / desired_aspect_ratio)
-#         offset = (image.shape[0] - new_height) // 2
-#         cropped_frame = image[offset:new_height + offset]
+# def resize_image(image, size, keep_aspect_ratio=False, interpolation=cv2.INTER_LINEAR):
+#     if not keep_aspect_ratio:
+#         resized_frame = cv2.resize(image, size, interpolation=interpolation)
+#     else:
+#         h, w = image.shape[:2]
+#         scale = min(size[1] / h, size[0] / w)
+#         resized_frame = cv2.resize(image, None, fx=scale, fy=scale, interpolation=interpolation)
+#     return resized_frame
 
-#     return cv2.resize(cropped_frame, size)
+
+def resize_image(size, interpolation="linear"):
+    return custom_preprocess_function(partial(resize_image_graph, size=size, interpolation=interpolation))
+
+def resize_image_with_aspect(size, interpolation="linear"):
+   return custom_preprocess_function(partial(resize_image_graph, size=size, keep_aspect_ratio=True, interpolation=interpolation))
 
 def crop_resize(size, interpolation="linear"):
     return custom_preprocess_function(partial(crop_resize_graph, size=size))
@@ -161,16 +218,3 @@ def crop_resize(size, interpolation="linear"):
 def resize_image_letterbox(size, interpolation="linear"):
     return custom_preprocess_function(partial(resize_image_letterbox_graph, size=size, interpolation=interpolation))
     
-    
-# def resize_image_letterbox(image, size, interpolation=cv2.INTER_LINEAR):
-#     ih, iw = image.shape[0:2]
-#     w, h = size
-#     scale = min(w / iw, h / ih)
-#     nw = int(iw * scale)
-#     nh = int(ih * scale)
-#     image = cv2.resize(image, (nw, nh), interpolation=interpolation)
-#     dx = (w - nw) // 2
-#     dy = (h - nh) // 2
-#     resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
-#                            mode='constant', constant_values=0)
-#     return resized_image
