@@ -270,8 +270,6 @@ class OpenvinoAdapter(ModelAdapter):
         if resize_mode and target_shape:
             if resize_mode in RESIZE_MODE_MAP:
                 input_shape = [1,-1,-1,3]
-                    
-                print("Embed resize")
                 ppp.input(input_idx).tensor().set_shape(input_shape)
                 ppp.input(input_idx).preprocess() \
                     .custom(RESIZE_MODE_MAP[resize_mode](target_shape, INTERPOLATION_MODE_MAP[interpolation_mode]))
