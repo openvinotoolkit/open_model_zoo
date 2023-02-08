@@ -7,14 +7,14 @@
 #include "utils/ocv_common.hpp"
 #include <vector>
 
-AsyncInferQueue::AsyncInferQueue(ov::CompiledModel& compiled_model, size_t size) {
+AsyncInferQueue::AsyncInferQueue(ov::CompiledModel& compiledModel, size_t size) {
     requests.resize(size);
-    for (size_t request_id = 0; request_id < size; ++request_id) {
-        requests[request_id] = compiled_model.create_infer_request();
-        idsOfFreeRequests.push(request_id);
+    for (size_t requestId = 0; requestId < size; ++requestId) {
+        requests[requestId] = compiledModel.create_infer_request();
+        idsOfFreeRequests.push(requestId);
     }
 
-    for (const auto& output: compiled_model.outputs()) {
+    for (const auto& output: compiledModel.outputs()) {
         outputNames.push_back(output.get_any_name());
     }
 
@@ -23,7 +23,7 @@ AsyncInferQueue::AsyncInferQueue(ov::CompiledModel& compiled_model, size_t size)
 
 void AsyncInferQueue::setCallback() {
     for (size_t requestId = 0; requestId < requests.size(); ++requestId) {
-        requests[requestId].set_callback([this, requestId /* ... */](std::exception_ptr exception_ptr) {
+        requests[requestId].set_callback([this, requestId /* ... */](std::exception_ptr exceptionPtr) {
             {
                 // acquire the mutex to access m_idle_handles
                 std::lock_guard<std::mutex> lock(mutex);
@@ -38,8 +38,8 @@ void AsyncInferQueue::setCallback() {
             // Notify locks in getIdleRequestId()
             cv.notify_one();
             try {
-                if (exception_ptr) {
-                    std::rethrow_exception(exception_ptr);
+                if (exceptionPtr) {
+                    std::rethrow_exception(exceptionPtr);
                 }
             } catch (const std::exception& e) {
                 throw ov::Exception(e.what());
@@ -71,20 +71,20 @@ void AsyncInferQueue::waitAll() {
     }
 }
 
-void AsyncInferQueue::submitData(std::unordered_map<std::string,  cv::Mat> inputs, size_t input_id) {
+void AsyncInferQueue::submitData(std::unordered_map<std::string,  cv::Mat> inputs, size_t inputId) {
     size_t id = getIdleRequestId();
 
     {
         std::lock_guard<std::mutex> lock(mutex);
         idsOfFreeRequests.pop();
     }
-    requests[id].set_callback([this, id, input_id /* ... */](std::exception_ptr exception_ptr) {
+    requests[id].set_callback([this, id, inputId /* ... */](std::exception_ptr exceptionPtr) {
         {
             // acquire the mutex to access m_idle_handles
             std::lock_guard<std::mutex> lock(mutex);
             for (const auto& outName : outputNames) {
                 auto tensor = requests[id].get_tensor(outName);
-                results[input_id][outName] = tensor;
+                results[inputId][outName] = tensor;
             }
             // Add idle handle to queue
             idsOfFreeRequests.push(id);
@@ -92,8 +92,8 @@ void AsyncInferQueue::submitData(std::unordered_map<std::string,  cv::Mat> input
         // Notify locks in getIdleRequestId()
         cv.notify_one();
         try {
-            if (exception_ptr) {
-                std::rethrow_exception(exception_ptr);
+            if (exceptionPtr) {
+                std::rethrow_exception(exceptionPtr);
             }
         } catch (const std::exception& e) {
             throw ov::Exception(e.what());

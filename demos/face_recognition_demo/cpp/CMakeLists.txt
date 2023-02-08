@@ -10,5 +10,3 @@ add_demo(NAME face_recognition_demo
     HEADERS ${HEADERS}
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
     DEPENDENCIES monitors utils)
-
-target_compile_features(face_recognition_demo PRIVATE cxx_std_17)

@@ -32,25 +32,27 @@ public:
     static constexpr char unknownLabel[] = "Unknown";
     static constexpr int unknownId = -1;
     static constexpr float unknownDistance = 1.0;
-    EmbeddingsGallery(const std::string& ids_list, double threshold,
-                      bool crop_gallery, const DetectorConfig& detector_config,
-                      AsyncModel& landmarks_det,
-                      AsyncModel& image_reid,
-                      bool use_greedy_matcher=false);
+    EmbeddingsGallery(const std::string& fgPath,
+                      double threshold,
+                      bool crop,
+                      const DetectorConfig& detectorConfig,
+                      AsyncModel& landmarksDet,
+                      AsyncModel& imageReid,
+                      bool useGreedyMatcher = false);
     size_t size() const;
     std::vector<std::pair<int, float>> getIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const;
     std::string getLabelByID(int id) const;
     bool labelExists(const std::string& label) const;
-    std::string tryToSave(cv::Mat new_face);
-    void addFace(cv::Mat new_face, cv::Mat embedding, std::string label);
+    std::string tryToSave(cv::Mat newFace);
+    void addFace(cv::Mat newFace, cv::Mat embedding, std::string label);
 
 private:
-    RegistrationStatus registerIdentity(const std::string& identity_label,
+    RegistrationStatus registerIdentity(const std::string& identityLabel,
                                         const cv::Mat& image,
-                                        const bool crop_gallery,
+                                        const bool crop,
                                         FaceDetector& detector,
-                                        AsyncModel& landmarks_det,
-                                        AsyncModel& image_reid,
+                                        AsyncModel& landmarksDet,
+                                        AsyncModel& imageReid,
                                         cv::Mat& embedding);
     std::vector<int> idxToId;
     double reidThreshold;

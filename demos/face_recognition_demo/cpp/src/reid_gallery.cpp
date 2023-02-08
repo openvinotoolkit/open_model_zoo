@@ -4,14 +4,19 @@
 
 #include "reid_gallery.hpp"
 
-#include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#    include "w_dirent.hpp"
+#else
+#    include <dirent.h>  // for closedir, dirent, opendir, readdir, DIR
+#endif
+
 #include "utils/kuhn_munkres.hpp"
 
-namespace fs = std::filesystem;
+// namespace fs = std::filesystem;
 namespace {
     float computeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
         float xy = static_cast<float>(descr1.dot(descr2));
@@ -25,38 +30,44 @@ namespace {
 
 }  // namespace
 
-EmbeddingsGallery::EmbeddingsGallery(const std::string& face_gallery_path,
+EmbeddingsGallery::EmbeddingsGallery(const std::string& fgPath,
                                      double threshold,
-                                     bool crop_gallery,
-                                     const DetectorConfig& detector_config,
-                                     AsyncModel& landmarks_det,
-                                     AsyncModel& image_reid,
+                                     bool crop,
+                                     const DetectorConfig& detectorConfig,
+                                     AsyncModel& landmarksDet,
+                                     AsyncModel& imageReid,
                                      bool useGreedyMatcher) :
-    reidThreshold(threshold), useGreedyMatcher(useGreedyMatcher), faceGalleryPath(face_gallery_path) {
+    reidThreshold(threshold), useGreedyMatcher(useGreedyMatcher), faceGalleryPath(fgPath) {
     if (faceGalleryPath.empty()) {
         return;
     }
 
-    FaceDetector detector(detector_config);
+    FaceDetector detector(detectorConfig);
 
     int id = 0;
-    for (const auto & entry : fs::directory_iterator(faceGalleryPath)) {
-        if (entry.is_regular_file() &&
-            std::find(file_extensions.begin(), file_extensions.end(), entry.path().extension()) != file_extensions.end()) {
-            std::string label = entry.path().stem();
+    DIR* dir = opendir(fgPath.c_str());
+    if (!dir) {
+        throw std::runtime_error("Can't find the directory " + fgPath);
+    }
+    while (struct dirent* ent = readdir(dir)) {
+        if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, "..")) {
+            std::string name = ent->d_name;
+            cv::Mat image = cv::imread(fgPath + '/' + name);
+            if (image.empty()) {
+                throw std::runtime_error("Image is empty");
+            }
             std::vector<cv::Mat> embeddings;
-            cv::Mat image = cv::imread(entry.path());
-            assert(!image.empty());
             cv::Mat emb;
-            RegistrationStatus status = registerIdentity(label, image, crop_gallery,  detector, landmarks_det, image_reid, emb);
+            RegistrationStatus status = registerIdentity(name, image, crop,  detector, landmarksDet, imageReid, emb);
             if (status == RegistrationStatus::SUCCESS) {
                 embeddings.push_back(emb);
                 idxToId.push_back(id);
-                identities.emplace_back(embeddings, label, id);
+                identities.emplace_back(embeddings, name, id);
                 ++id;
             }
         }
     }
+    closedir(dir);
     slog::info << identities.size() << " persons to recognize were added from the gallery" << slog::endl;
 }
 
@@ -111,24 +122,24 @@ bool EmbeddingsGallery::labelExists(const std::string& label) const {
                                            [label](const GalleryObject& o) {return o.label == label;});
 }
 
-std::string EmbeddingsGallery::tryToSave(cv::Mat new_face){
+std::string EmbeddingsGallery::tryToSave(cv::Mat newFace){
     std::string winname = "Unknown face";
-    size_t height = int(400 * new_face.rows / new_face.cols);
+    size_t height = int(400 * newFace.rows / newFace.cols);
     cv::Mat resized;
-    cv::resize(new_face, resized, cv::Size(400, height), 0.0, 0.0, cv::INTER_AREA);
+    cv::resize(newFace, resized, cv::Size(400, height), 0.0, 0.0, cv::INTER_AREA);
     size_t font = cv::FONT_HERSHEY_PLAIN;
     size_t fontScale = 1;
     cv::Scalar fontColor(255, 255, 255);
     size_t lineType = 1;
-    cv::copyMakeBorder(resized, new_face, 5, 5, 5, 5, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
-    cv::putText(new_face, "Please, enter person's name and", cv::Point2d(30, 80), font, fontScale, fontColor, lineType);
-    cv::putText(new_face, "press \"Enter\" to accept and continue.", cv::Point2d(30, 110), font, fontScale, fontColor, lineType);
-    cv::putText(new_face, "Press \"Escape\" to discard.", cv::Point2d(30, 140), font, fontScale, fontColor, lineType);
-    cv::putText(new_face, "Name: ", cv::Point2d(30, 170), font, fontScale, fontColor, lineType);
+    cv::copyMakeBorder(resized, newFace, 5, 5, 5, 5, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
+    cv::putText(newFace, "Please, enter person's name and", cv::Point2d(30, 80), font, fontScale, fontColor, lineType);
+    cv::putText(newFace, "press \"Enter\" to accept and continue.", cv::Point2d(30, 110), font, fontScale, fontColor, lineType);
+    cv::putText(newFace, "Press \"Escape\" to discard.", cv::Point2d(30, 140), font, fontScale, fontColor, lineType);
+    cv::putText(newFace, "Name: ", cv::Point2d(30, 170), font, fontScale, fontColor, lineType);
     std::string name;
     bool save = false;
     while (true) {
-        cv::Mat cc = new_face.clone();
+        cv::Mat cc = newFace.clone();
         cv::putText(cc, name, cv::Point2d(30, 200), font, fontScale, fontColor, lineType);
         cv::imshow(winname, cc);
         int key = (cv::waitKey(0) & 0xFF);
@@ -164,42 +175,42 @@ std::string EmbeddingsGallery::tryToSave(cv::Mat new_face){
             continue;
         }
     }
-
+    cv::destroyWindow(winname);
     return (save ? name : "");
 }
 
-void EmbeddingsGallery::addFace(const cv::Mat new_face, const cv::Mat embedding, std::string label) {
+void EmbeddingsGallery::addFace(const cv::Mat newFace, const cv::Mat embedding, std::string label) {
     identities.emplace_back(std::vector<cv::Mat>{embedding}, label, idxToId.size());
     idxToId.push_back(idxToId.size());
     label += ".jpg";
-    fs::path filename = fs::path(faceGalleryPath) / label;
-
-    cv::imwrite(filename, new_face);
+    cv::imwrite(faceGalleryPath + "/" + label, newFace);
 }
 
-RegistrationStatus EmbeddingsGallery::registerIdentity(const std::string& identity_label,
+RegistrationStatus EmbeddingsGallery::registerIdentity(const std::string& identityLabel,
     const cv::Mat& image,
-    bool crop_gallery,
+    bool crop,
     FaceDetector& detector,
-    AsyncModel& landmarks_det,
-    AsyncModel& image_reid,
+    AsyncModel& landmarksDet,
+    AsyncModel& imageReid,
     cv::Mat& embedding) {
     cv::Mat target = image;
-    if (crop_gallery) {
+    if (crop) {
         detector.submitData(image);
         std::vector<FaceBox> faces = detector.getResults();
         if (faces.size() == 0) {
             return RegistrationStatus::FAILURE_NOT_DETECTED;
         }
-        CV_Assert(faces.size() == 1);
+        if (faces.size() != 1) {
+            throw std::runtime_error("More than 1 face on the image provided for face gallery");
+        }
         cv::Mat faceRoi = image(faces[0].face);
         target = faceRoi;
     }
 
     cv::Mat landmarks;
     std::vector<cv::Mat> images = { target };
-    std::vector<cv::Mat> landmarksVec = landmarks_det.infer(images);
+    std::vector<cv::Mat> landmarksVec = landmarksDet.infer(images);
     alignFaces(images, landmarksVec);
-    embedding = image_reid.infer(images)[0];
+    embedding = imageReid.infer(images)[0];
     return RegistrationStatus::SUCCESS;
 }
