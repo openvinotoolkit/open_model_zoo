@@ -376,19 +376,46 @@ class SalientRegionPrediction(SegmentationPrediction):
 
 
 class BackgroundMattingAnnotation(SegmentationAnnotation):
-    def __init__(self, identifier, path_to_mask, mask_to_gray=False, load_alpha=False, video_id=None):
+    def __init__(self, identifier, path_to_mask, mask_to_gray=False, load_alpha=False, path_to_fgr=None, video_id=None):
         super().__init__(
             identifier, path_to_mask,
             GTMaskLoader.OPENCV_UNCHANGED if not mask_to_gray else GTMaskLoader.OPENCV_GRAY
         )
         self.load_alpha = load_alpha
         self.video_id = video_id
+        self._foreground_path = path_to_fgr
+        self._fgr = None
+
+    @property
+    def fgr(self):
+        return self._fgr if self._fgr is not None else self._load_foreground()
+
+    @fgr.setter
+    def fgr(self, value):
+        self._fgr = value
 
     def _load_mask(self):
         mask = super()._load_mask()
         if np.ndim(mask) == 3 and mask.shape[-1] == 4 and not self.load_alpha:
             mask = mask[:, :, -1]
         return mask
+
+    def _load_foreground(self):
+        if self._fgr is None and self._foreground_path:
+            loader_config = self.LOADERS.get(GTMaskLoader.OPENCV_UNCHANGED)
+            data_source = self.metadata.get('additional_data_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            if isinstance(loader_config, str):
+                loader = BaseReader.provide(loader_config, data_source)
+            else:
+                loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
+            fgr = loader.read(self._foreground_path)
+            return fgr.astype(np.uint8)
+        elif self._fgr is None:
+            return self.mask
+
+        return self._fgr
 
     @property
     def value(self):

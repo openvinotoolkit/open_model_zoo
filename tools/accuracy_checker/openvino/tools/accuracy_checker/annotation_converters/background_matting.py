@@ -144,6 +144,10 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                 'background_prefix': StringField(optional=True, default='', description='prefix for gt backgrounds'),
                 'background_postfix': StringField(optional=True, default='.png', description='prefix for backgrounds'),
                 'with_background': BoolField(optional=True, default=False, description='load backgrounds'),
+                'foregrounds_dir': PathField(optional=True, description='path to input foregrounds directory', is_directory=True),
+                'foreground_prefix': StringField(optional=True, default='', description='prefix for gt foregrounds'),
+                'foreground_postfix': StringField(optional=True, default='.png', description='prefix for foregrounds'),
+                'with_foreground': BoolField(optional=True, default=False, description='load foregrounds'),
                 'with_alpha': BoolField(optional=True, default=False,
                                         description='load images with mask including alpha channel'),
                 "per_clip_location": BoolField(optional=True, default=False, description="inverse data struction")
@@ -157,6 +161,10 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
         self.background_prefix = self.get_value_from_config('background_prefix')
         self.background_postfix = self.get_value_from_config('background_postfix')
         self.with_background = self.get_value_from_config('with_background')
+        self.foregrounds_dir = self.get_value_from_config('foregrounds_dir')
+        self.foreground_prefix = self.get_value_from_config('foreground_prefix')
+        self.foreground_postfix = self.get_value_from_config('foreground_postfix')
+        self.with_foreground = self.get_value_from_config('with_foreground')
         self.with_alpha = self.get_value_from_config('with_alpha')
         self.per_clip_location = self.get_value_from_config("per_clip_location")
 
@@ -224,9 +232,29 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                         continue
                     identifier = [identifier, bgr_name]
 
+                fgr_name = None
+                if self.with_foreground:
+                    if not self.per_clip_location:
+                        fgr_name = '{prefix}{clip}/{base}{postfix}'.format(
+                            prefix=self.foreground_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.foreground_postfix
+                        )
+                    else:
+                        fgr_name = '{clip}/{prefix}/{base}{postfix}'.format(
+                            prefix=self.foreground_prefix,
+                            clip=clip_name,
+                            base=base_name,
+                            postfix=self.foreground_postfix
+                        )
+                    fgr_file = self.foregrounds_dir / fgr_name
+                    if not fgr_file.exists():
+                        continue
+
                 annotations.append(
                     BackgroundMattingAnnotation(identifier, mask, self.mask_to_gray,
-                                                self.with_alpha, video_id=clip_name)
+                                                self.with_alpha, path_to_fgr=fgr_name, video_id=clip_name)
                 )
                 if progress_callback is not None and idx % progress_interval == 0:
                     progress_callback(idx / num_iterations * 100)

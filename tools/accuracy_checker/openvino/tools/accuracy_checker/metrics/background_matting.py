@@ -53,7 +53,8 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
         return ['alpha', 'image']
 
     @staticmethod
-    def prepare_pha(image):
+    def prepare_pha(annotation):
+        image = annotation.value
         if image.shape[-1] == 4:
             image = image[:, :, -1]
         elif image.shape[-1] == 3:
@@ -61,13 +62,14 @@ class BaseBackgroundMattingMetrics(PerImageEvaluationMetric):
         return image.astype(np.float32) / 255
 
     @staticmethod
-    def prepare_fgr(image):
+    def prepare_fgr(annotation):
+        image = annotation.fgr
         if image.shape[-1] == 4:
             image = image[:, :, :-1]
         return image.astype(np.float32) / 255
 
     def get_annotation(self, annotation):
-        return self.process_func(annotation.value)
+        return self.process_func(annotation)
 
     def get_prediction(self, prediction):
         return prediction.value[self.prediction_source]
@@ -159,7 +161,7 @@ class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
         if pred.shape[-1] == 1 and pred.shape[-1] != gt.shape[-1]:
             gt = cv2.cvtColor(gt, cv2.COLOR_RGB2GRAY)
         if self.use_mask:
-            mask = self.prepare_pha(annotation.value) > 0
+            mask = self.prepare_pha(annotation) > 0.01
             pred = pred[mask]
             gt = gt[mask]
         value = np.mean((pred - gt) ** 2) * 1e3
