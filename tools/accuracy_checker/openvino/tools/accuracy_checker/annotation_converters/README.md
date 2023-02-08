@@ -293,7 +293,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
   * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
   * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
-* `background_matting` - converts a general format of datasets, where frames extracted from video for background matting task to `BackgroundMattingAnnotation`. Belonging image to video should be reflected into its name `<video_name>.mp4.<image_name>.jpg`. The converter expects following dataset structure:
+* `video_background_matting` - converts a general format of datasets, where frames extracted from video for background matting task to `BackgroundMattingAnnotation`. Belonging image to video should be reflected into its name `<video_name>.mp4.<image_name>.jpg`. The converter expects following dataset structure:
   1. images and GT masks are located in separated directories (e.g. `<dataset_root>/images` for images and `<dataset_root>/masks` for masks respectively).
   2. images and GT masks has common part in names and can have difference in prefix and postfix (e.g. image name is image0001.jpeg, mask for it is gt0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png)
   * `images_dir` - path to directory with images.
@@ -304,19 +304,23 @@ The main difference between this converter and `super_resolution` in data organi
   * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
   * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
 * `background_matting_sequential` - converts a general format of datasets for background matting task to `BackgroundMattingAnnotation`. Images and GT data are grouoed by clips. The converter expects following dataset structure:
-  1. images, GT masks and backgrounds are located in separated directories (e.g. `<dataset_root>/images` for images, `<dataset_root>/masks` for masks and `<dataset_root>/backgrounds` for backgrounds respectively).
-  2. images, GT masks and backgrounds has common part in names and can have difference in prefix and postfix (e.g. image name is clip_0/image0001.jpeg, mask for it is clip_0/gt0001.png, background is clip_0/bg0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png, background_prefix - bg, background_postfix - .png)
+  1. images, GT masks, backgrounds and foregrounds if needed are located in separated directories (e.g. `<dataset_root>/images` for images, `<dataset_root>/masks` for masks, `<dataset_root>/backgrounds` for backgrounds and `<dataset_root>/foregrounds` for foregrounds respectively).
+  2. images, GT masks, backgrounds and foregrounds has common part in names and can have difference in prefix and postfix (e.g. image name is clip_0/image0001.jpeg, mask for it is clip_0/gt0001.png, background is clip_0/bg0001.png, foreground is clip_0/fgr0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png, background_prefix - bg, background_postfix - .png, foreground_prefix - fgr, foreground_postfix - .png)
   * `images_dir` - path to directory with images.
   * `masks_dir` - path to directory with GT masks.
   * `image_prefix` - prefix part for image file names. (Optional, default is empty).
   * `image_postfix` - postfix part for image file names (optional, default is `.png`).
-  * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
-  * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
+  * `mask_prefix` - prefix part for mask file names (Optional, default is empty).
+  * `mask_postfix` - postfix part for mask file names (Optional, default is `.png`).
   * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
   * `backgrounds_dir` - path to gt backgrounds directory.
   * `background_prefix` - prefix for gt backgrounds.
   * `background_postfix` - postfix for gt backgrounds.
   * `with_background` - load backgrounds.
+  * `foregrounds_dir` - path to gt foregrounds directory (Optional, default is `None`).
+  * `foreground_prefix` - prefix for gt foregrounds.
+  * `foreground_postfix` - postfix for gt foregrounds.
+  * `with_foreground` - load foregrounds.
   * `with_alpha` - load images with mask including alpha channel.
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
