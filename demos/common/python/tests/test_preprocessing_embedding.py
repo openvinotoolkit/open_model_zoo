@@ -9,17 +9,20 @@ import sys
 import numpy as np
 import pytest
 import cv2
+import time
 
 # Temporary WA
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'tools/model_tools/src'))
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'demos/common/python'))
 
-from openvino.model_zoo.model_api.models import Model, Classification
+from openvino.model_zoo.model_api.models import Model
 from openvino.model_zoo.model_api.models import Detection
+from openvino.model_zoo.model_api.models import classification_models
+from openvino.model_zoo.model_api.models import detection_models
+from openvino.model_zoo.model_api.models import segmentation_models
 
 
-IMAFE_FILE = tempfile.NamedTemporaryFile(suffix=".onnx").name
-
+IMAFE_FILE = tempfile.NamedTemporaryFile(suffix=".jpg").name
 
 def download_image(save_path):
     URL="https://raw.githubusercontent.com/tensorflow/models/master/research/object_detection/test_images/image1.jpg"
@@ -32,7 +35,7 @@ def compare_output_objects(ref, obj):
     if type(ref) != type(obj):
         raise RuntimeError(f"Type of reference and object are different."
                            f"Reference: {ref}, object: {obj}")
-    if isinstance(ref, tuple):
+    if isinstance(ref, tuple): # treat as classification results
         if len(ref) != len(obj):
             raise RuntimeError(f"Length of reference and object are different."
                                f"Reference: {ref}, object: {obj}")
@@ -45,6 +48,9 @@ def compare_output_objects(ref, obj):
         result = result and math.isclose(ref.score, obj.score, rel_tol=1e-03)
         result = result and ref.id == obj.id
         return result
+    if isinstance(ref, np.ndarray): # treat as segmentation masks     
+        diff_ratio = np.count_nonzero(ref-obj) / ref.size
+        return diff_ratio < 0.03 # number of different pixels should be less than 3%
     return False
 
         
@@ -67,10 +73,9 @@ def compare_model_outputs(references, objects):
                 f"Reference: {references_to_compare}, object: {objects_to_compare}"
             break
     return result
-        
 
 @pytest.mark.parametrize(("model_name"), 
-            ["resnet-18-pytorch", "yolo-v4-tf"])
+            classification_models + detection_models + segmentation_models)
 def test_image_models(model_name):
     download_image(IMAFE_FILE)
     

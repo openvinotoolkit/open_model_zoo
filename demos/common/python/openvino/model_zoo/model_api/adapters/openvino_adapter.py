@@ -300,7 +300,7 @@ class OpenvinoAdapter(ModelAdapter):
             ppp.input(input_idx).preprocess().scale(scale)
             
         self.model = ppp.build()
-        ov.serialize(self.model, "tmp.xml")
+        #ov.serialize(self.model, "tmp.xml")
         self.load_model()
 
 def get_input_shape(input_tensor):

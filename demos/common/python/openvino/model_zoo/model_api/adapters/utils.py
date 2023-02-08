@@ -168,7 +168,9 @@ def crop_resize_graph(input: Output, size):
         stop = opset.add(offset, new_hight)
         cropped_frame = opset.slice(input, start=offset, stop=stop, step=[1], axes=[h_axis])
     
-    resized_image = opset.interpolate(cropped_frame, list(size), scales=np.array([1.0, 1.0], dtype=np.float32),
+    target_size = list(size)
+    target_size.reverse()
+    resized_image = opset.interpolate(cropped_frame, target_size, scales=np.array([1.0, 1.0], dtype=np.float32),
                               axes=[h_axis, w_axis], 
                               mode="linear", shape_calculation_mode="sizes")
     return resized_image
@@ -179,11 +181,13 @@ def resize_image_graph(input: Output, size, keep_aspect_ratio=False, interpolati
     w_axis = 2
     w, h = size
     
+    target_size = list(size)
+    target_size.reverse()
+    
     if not keep_aspect_ratio:
-        resized_image = opset.interpolate(input, list(size), scales=np.array([1.0, 1.0], dtype=np.float32),
+        resized_image = opset.interpolate(input, target_size, scales=np.array([1.0, 1.0], dtype=np.float32),
                               axes=[h_axis, w_axis], 
                               mode="linear", shape_calculation_mode="sizes")
-        print("Not keep aspect ratio")
     else:
         image_shape = opset.shape_of(input, name="shape")
         iw = opset.convert(opset.gather(image_shape, opset.constant(w_axis), axis=0), destination_type="f32")
@@ -191,7 +195,7 @@ def resize_image_graph(input: Output, size, keep_aspect_ratio=False, interpolati
         w_ratio = opset.divide(np.float32(w), iw)
         h_ratio = opset.divide(np.float32(h), ih)
         scale = opset.minimum(w_ratio, h_ratio)
-        resized_image = opset.interpolate(input, list(size), scales=scale,
+        resized_image = opset.interpolate(input, target_size, scales=scale,
                               axes=[h_axis, w_axis], 
                               mode="linear", shape_calculation_mode="sizes")
     return resized_image
