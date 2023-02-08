@@ -412,7 +412,7 @@ class BackgroundMattingAnnotation(SegmentationAnnotation):
                 loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
             fgr = loader.read(self._foreground_path)
             return fgr.astype(np.uint8)
-        elif self._fgr is None:
+        if self._fgr is None:
             return self.mask
 
         return self._fgr

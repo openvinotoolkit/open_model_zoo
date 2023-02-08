@@ -23,7 +23,7 @@ from ..representation import (
     BackgroundMattingPrediction
 )
 
-from ..config import BoolField, StringField
+from ..config import BoolField, NumberField, StringField
 from .metric import PerImageEvaluationMetric
 from ..utils import UnsupportedPackage
 
@@ -161,7 +161,7 @@ class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
         if pred.shape[-1] == 1 and pred.shape[-1] != gt.shape[-1]:
             gt = cv2.cvtColor(gt, cv2.COLOR_RGB2GRAY)
         if self.use_mask:
-            mask = self.prepare_pha(annotation) > 0.01
+            mask = self.prepare_pha(annotation) > self.pha_tolerance
             pred = pred[mask]
             gt = gt[mask]
         value = np.mean((pred - gt) ** 2) * 1e3
@@ -174,6 +174,10 @@ class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
         parameters.update({
             'use_mask': BoolField(
                 optional=True, default=False, description="Apply alpha mask to foreground."
+            ),
+            'pha_tolerance': NumberField(
+                optional=True, default=0.01, description="Tolerance to get binary mask from pha.",
+                min_value=0.0, max_value=1.0
             )
         })
         return parameters
@@ -181,3 +185,4 @@ class MeanSquaredErrorWithMask(BaseBackgroundMattingMetrics):
     def configure(self):
         super().configure()
         self.use_mask = self.get_value_from_config('use_mask')
+        self.pha_tolerance = self.get_value_from_config('pha_tolerance')

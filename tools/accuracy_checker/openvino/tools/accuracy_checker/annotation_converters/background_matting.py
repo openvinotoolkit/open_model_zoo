@@ -144,7 +144,8 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
                 'background_prefix': StringField(optional=True, default='', description='prefix for gt backgrounds'),
                 'background_postfix': StringField(optional=True, default='.png', description='prefix for backgrounds'),
                 'with_background': BoolField(optional=True, default=False, description='load backgrounds'),
-                'foregrounds_dir': PathField(optional=True, description='path to input foregrounds directory', is_directory=True),
+                'foregrounds_dir': PathField(optional=True,
+                                             description='path to input foregrounds directory', is_directory=True),
                 'foreground_prefix': StringField(optional=True, default='', description='prefix for gt foregrounds'),
                 'foreground_postfix': StringField(optional=True, default='.png', description='prefix for foregrounds'),
                 'with_foreground': BoolField(optional=True, default=False, description='load foregrounds'),
@@ -168,6 +169,7 @@ class BackgroundMattingSequential(BackgroundMattingConverter):
         self.with_alpha = self.get_value_from_config('with_alpha')
         self.per_clip_location = self.get_value_from_config("per_clip_location")
 
+    # pylint: disable=too-many-branches
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
         if not self.per_clip_location:
