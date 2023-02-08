@@ -608,7 +608,7 @@ class RetinaNetTF2(Adapter):
             nmsed_boxes.append(nms_boxes)
             nmsed_scores.append(nms_scores)
             nmsed_classes.append(nmsed_classes_i)
-        if np.size(nmsed_scores):
+        if nmsed_scores:
             nmsed_boxes = np.concatenate(nmsed_boxes, axis=0)
             nmsed_scores = np.concatenate(nmsed_scores, axis=0)
             nmsed_classes = np.concatenate(nmsed_classes, axis=0)
