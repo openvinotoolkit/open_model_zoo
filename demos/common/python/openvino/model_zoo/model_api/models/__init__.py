@@ -42,11 +42,15 @@ from .utils import Detection, DetectionWithLandmarks
 classification_models = [
     "resnet-18-pytorch",
     "se-resnext-50",
+    "mobilenet-v3-large-1.0-224-tf",
+    "efficientnet-b0-pytorch",
 ]
 
 detection_models = [
-    #"face-detection-retail-0044", # resize_type is wrong in model.yml
+    #"face-detection-retail-0044", # resize_type is wrong or missed in model.yml
     "yolo-v4-tf",
+    "ssd_mobilenet_v1_fpn_coco",
+    "ssdlite_mobilenet_v2",
 ]
 
 segmentation_models = [
