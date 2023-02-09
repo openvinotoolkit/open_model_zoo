@@ -44,6 +44,7 @@ model_info:
   iou_threshold: 0.6
   resize_type: fit_to_window_letterbox
   labels:
+    - background
     - person
     - bicycle
     - car

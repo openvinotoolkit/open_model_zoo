@@ -26,7 +26,7 @@ class Detection:
         self.xmax = xmax
         self.ymax = ymax
         self.score = score
-        self.id = id
+        self.id = int(id)
         self.str_label = str_label
 
     def get_coords(self):

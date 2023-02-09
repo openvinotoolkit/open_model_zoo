@@ -43,6 +43,7 @@ class SSD(DetectionModel):
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)
         detections = self._resize_detections(detections, meta)
+        detections = self._add_label_names(detections)
         return detections
 
     def _get_output_parser(self, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):

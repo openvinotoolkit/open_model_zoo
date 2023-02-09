@@ -94,6 +94,24 @@ class DetectionModel(ImageModel):
         else:
             self.raise_error('Unknown resize type {}'.format(self.resize_type))
         return clip_detections(detections, original_shape)
+    
+    def _add_label_names(self, detections):
+        '''Adds labels names to detections if they are available
+        
+        Args:
+            detections (List[Detection]): list of detections with coordinates in normalized form
+
+        Returns:
+            - list of detections with label strings
+        '''
+        if self.labels is None:
+            for detection in detections:
+                    detection.str_label = f'#{detection.id}'
+        else:
+            for detection in detections:
+                print(f"detection.id: {detection.id}")
+                detection.str_label = self.labels[detection.id]   
+        return detections
 
 
 def resize_detections(detections, original_image_size):
