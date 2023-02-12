@@ -121,6 +121,7 @@ class YOLO(DetectionModel):
     def postprocess(self, outputs, meta):
         detections = self._parse_outputs(outputs, meta)
         detections = self._resize_detections(detections, meta)
+        detections = self._add_label_names(detections)
         return detections
 
     def _parse_yolo_region(self, predictions, input_size, params):
@@ -442,6 +443,12 @@ class YoloV3ONNX(DetectionModel):
         self._check_io_number(2, 3)
         self.classes = 80
         self.bboxes_blob_name, self.scores_blob_name, self.indices_blob_name = self._get_outputs()
+        
+        if self.embed_preprocessing:
+            layout = 'NHWC' if self.nchw_layout else 'NCHW'
+            model_adapter.embed_preprocessing(image_layout=layout, resize_mode='standard', interpolation_mode='CUBIC', 
+                                              target_shape=(self.w, self.h))
+        
 
     def _get_outputs(self):
         bboxes_blob_name = None
@@ -471,14 +478,25 @@ class YoloV3ONNX(DetectionModel):
 
     def preprocess(self, inputs):
         image = inputs
+        dict_inputs = {}
         meta = {'original_shape': image.shape}
-        resized_image = self.resize(image, (self.w, self.h), interpolation=INTERPOLATION_TYPES['CUBIC'])
-        meta.update({'resized_shape': resized_image.shape})
-        resized_image = self._change_layout(resized_image)
-        dict_inputs = {
-            self.image_blob_name: resized_image,
-            self.image_info_blob_name: np.array([[image.shape[0], image.shape[1]]], dtype=np.float32)
-        }
+        
+        if self.embed_preprocessing:
+            meta.update({'resized_shape': (self.w, self.h)})
+            
+            dict_inputs = {
+                self.image_blob_name: np.expand_dims(image, axis=0),
+                self.image_info_blob_name: np.array([[image.shape[0], image.shape[1]]], dtype=np.float32)
+            }
+        else:
+            resized_image = self.resize(image, (self.w, self.h), interpolation=INTERPOLATION_TYPES['CUBIC'])
+            meta.update({'resized_shape': resized_image.shape})
+            resized_image = self._change_layout(resized_image)
+            dict_inputs = {
+                self.image_blob_name: resized_image,
+                self.image_info_blob_name: np.array([[image.shape[0], image.shape[1]]], dtype=np.float32)
+            }
+            
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):

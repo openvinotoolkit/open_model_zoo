@@ -14,6 +14,8 @@
  limitations under the License.
 """
 
+from typing import Tuple
+
 try:
     import ovmsclient
     ovmsclient_absent = False
@@ -114,6 +116,8 @@ class OVMSAdapter(ModelAdapter):
             model_version_str = "latest" if self.model_version == 0 else str(self.model_version)
             raise RuntimeError("Requested model: {}, version: {}, has not been found or is not "
                 "in available state".format(self.model_name, model_version_str))
+            
+        self.preprocessing_embedded = False
 
         self.metadata = self.client.get_model_metadata(model_name=self.model_name,
                                                        model_version=self.model_version)
@@ -167,4 +171,12 @@ class OVMSAdapter(ModelAdapter):
         pass
 
     def await_any(self):
+        pass
+
+    def get_rt_info(self, path):
+        raise NotImplementedError("OVMSAdapter does not support RT info getting")
+    
+    def embed_preprocessing(self, layout='NCHW', resize_mode:str=None, interpolation_mode='LINEAR',
+                            target_shape:Tuple[int]=None, dtype=type(int), brg2rgb=False, mean=None, 
+                            scale=None, input_idx=0):
         pass

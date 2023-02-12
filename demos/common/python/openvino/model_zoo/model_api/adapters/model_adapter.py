@@ -16,7 +16,7 @@
 
 import abc
 from dataclasses import dataclass, field
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 
 @dataclass
@@ -156,4 +156,17 @@ class ModelAdapter(metaclass=abc.ABCMeta):
         '''
         In case of asynchronous execution waits the completion of any
         busy infer request until it becomes available for the data submission.
+        '''
+
+    @abc.abstractmethod
+    def get_rt_info(self, path):
+        '''
+        Forwards to openvino.runtime.Model.get_rt_info(path)
+        '''
+        
+    @abc.abstractmethod
+    def embed_preprocessing(self, layout=None, resize_mode:str=None, interpolation_mode='LINEAR',
+                            target_shape:Tuple[int]=None, dtype=type(int), brg2rgb=False, input_idx=0):
+        '''
+        Embeds preprocessing into the model using OpenVINO preprocessing API
         '''

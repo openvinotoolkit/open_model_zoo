@@ -23,13 +23,14 @@ from time import perf_counter
 
 import cv2
 
+sys.path.append(str(Path(__file__).resolve().parents[3] / 'tools/model_tools/src'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from model_api.models import Classification, OutputTransform
 from model_api.performance_metrics import put_highlighted_text, PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from model_api.pipelines import AsyncPipeline
+from model_api.adapters import create_core, get_user_config, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture

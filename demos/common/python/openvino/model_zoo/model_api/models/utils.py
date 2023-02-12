@@ -20,22 +20,26 @@ import math
 
 
 class Detection:
-    def __init__(self, xmin, ymin, xmax, ymax, score, id):
+    def __init__(self, xmin, ymin, xmax, ymax, score, id, str_label=None):
         self.xmin = xmin
         self.ymin = ymin
         self.xmax = xmax
         self.ymax = ymax
         self.score = score
-        self.id = id
-
-    def bottom_left_point(self):
-        return self.xmin, self.ymin
-
-    def top_right_point(self):
-        return self.xmax, self.ymax
+        self.id = int(id)
+        self.str_label = str_label
 
     def get_coords(self):
         return self.xmin, self.ymin, self.xmax, self.ymax
+    
+    def __to_str(self):
+        return f'({self.xmin}, {self.ymin}, {self.xmax}, {self.ymax}, {self.score}, {self.id}, {self.str_label})'
+    
+    def __str__(self):
+        return self.__to_str()
+    
+    def __repr__(self):
+        return self.__to_str()
 
 
 def clip_detections(detections, size):

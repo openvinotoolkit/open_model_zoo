@@ -31,8 +31,8 @@ from html_reader import get_paragraphs
 
 from model_api.models import BertQuestionAnswering
 from model_api.models.tokens_bert import text_to_tokens, load_vocab_file, ContextWindow
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from model_api.pipelines import AsyncPipeline
+from model_api.adapters import create_core, get_user_config, OpenvinoAdapter, OVMSAdapter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

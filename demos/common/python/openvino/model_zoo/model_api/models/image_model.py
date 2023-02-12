@@ -14,6 +14,8 @@
  limitations under the License.
 """
 
+import numpy as np
+
 from .model import Model
 from .types import BooleanValue, ListValue, StringValue
 from .utils import RESIZE_TYPES, pad_image, InputTransform
@@ -66,6 +68,12 @@ class ImageModel(Model):
             self.n, self.h, self.w, self.c = self.inputs[self.image_blob_name].shape
         self.resize = RESIZE_TYPES[self.resize_type]
         self.input_transform = InputTransform(self.reverse_input_channels, self.mean_values, self.scale_values)
+        
+        if self.embed_preprocessing:
+            layout = self.inputs[self.image_blob_name].layout
+            model_adapter.embed_preprocessing(layout=layout, resize_mode=self.resize_type, interpolation_mode='LINEAR',
+                                              target_shape=(self.w, self.h), brg2rgb=self.reverse_input_channels,
+                                              mean=self.mean_values, scale=self.scale_values)
 
     @classmethod
     def parameters(cls):
@@ -84,6 +92,7 @@ class ImageModel(Model):
                 default_value='standard', choices=tuple(RESIZE_TYPES.keys()),
                 description="Type of input image resizing"
             ),
+            'embed_preprocessing': BooleanValue(default_value=False, description='Whether embed preprocessing into the model'),
         })
         return parameters
 
@@ -135,15 +144,25 @@ class ImageModel(Model):
             - the input metadata, which might be used in `postprocess` method
         '''
         image = inputs
+        dict_inputs = {}
         meta = {'original_shape': image.shape}
-        resized_image = self.resize(image, (self.w, self.h))
-        meta.update({'resized_shape': resized_image.shape})
-        if self.resize_type == 'fit_to_window':
-            resized_image = pad_image(resized_image, (self.w, self.h))
-            meta.update({'padded_shape': resized_image.shape})
-        resized_image = self.input_transform(resized_image)
-        resized_image = self._change_layout(resized_image)
-        dict_inputs = {self.image_blob_name: resized_image}
+        
+        if self.embed_preprocessing:
+            meta.update({'resized_shape': (self.w, self.h, self.c)})
+            
+            dict_inputs = {
+                self.image_blob_name: np.expand_dims(image, axis=0)
+            }
+        else:
+            resized_image = self.resize(image, (self.w, self.h))
+            meta.update({'resized_shape': resized_image.shape})
+            if self.resize_type == 'fit_to_window':
+                resized_image = pad_image(resized_image, (self.w, self.h))
+                meta.update({'padded_shape': resized_image.shape})
+            resized_image = self.input_transform(resized_image)
+            resized_image = self._change_layout(resized_image)
+            dict_inputs = {self.image_blob_name: resized_image}
+            
         return dict_inputs, meta
 
     def _change_layout(self, image):

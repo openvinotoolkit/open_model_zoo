@@ -15,6 +15,11 @@
 """
 
 import logging as log
+import re
+
+from openvino.model_zoo.model_api.adapters.model_adapter import ModelAdapter
+from openvino.model_zoo.model_api.adapters.ovms_adapter import OVMSAdapter
+from openvino.model_zoo.model_api.adapters.openvino_adapter import OpenvinoAdapter, create_core, get_user_config
 
 
 class WrapperError(RuntimeError):
@@ -87,8 +92,38 @@ class Model:
             name, ', '.join([subclass.__model__ for subclass in subclasses])))
 
     @classmethod
-    def create_model(cls, name, model_adapter, configuration=None, preload=False):
-        Model = cls.get_model(name)
+    def create_model(cls, model, model_type=None, configuration={}, preload=True, core=None, weights_path=None, model_parameters={}, device='AUTO',
+            nstreams='1', nthreads=None, max_num_requests=0, precision='FP16', download_dir=None, cache_dir=None):
+        '''
+        Args:
+            model: instance of ModelAdapter subclass, OVMS URL, path to model or name from Open Model Zoo
+            configuration: model wrapper config, for example confidence_threshold, labels
+            model_type: name of model wrapper to create
+            preload: whether to call load_model(). May be set to false to reshape model before loading
+            core: openvino.runtim.Core instance, passed to OpenvinoAdapter
+            weights_path: passed to OpenvinoAdapter
+            model_parameters: passed to OpenvinoAdapter
+            device: passed to OpenvinoAdapter
+            nstreams: passed to OpenvinoAdapter
+            nthreads: passed to OpenvinoAdapter
+            max_num_requests: passed to OpenvinoAdapter
+            precision: passed to OpenvinoAdapter
+            download_dir: passed to OpenvinoAdapter
+            cache_dir: passed to OpenvinoAdapter
+        '''
+        if isinstance(model, ModelAdapter):
+            model_adapter = model
+        elif isinstance(model, str) and re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/\w+(\:\d+)*").fullmatch(model):
+            model_adapter = OVMSAdapter(model)
+        else:
+            if core is None:
+                core = create_core()
+                plugin_config = get_user_config(device, nstreams, nthreads)
+            model_adapter = OpenvinoAdapter(core=core, model=model, weights_path=weights_path, model_parameters=model_parameters, device=device,
+                plugin_config=plugin_config, max_num_requests=max_num_requests, precision=precision, download_dir=download_dir, cache_dir=download_dir)
+        if model_type is None:
+            model_type = model_adapter.get_rt_info(['model_info', 'model_type'])
+        Model = cls.get_model(model_type)
         return Model(model_adapter, configuration, preload)
 
     @classmethod
@@ -145,9 +180,19 @@ class Model:
          Raises:
             WrapperError: if the configuration is incorrect
         '''
-        if config is None: return
         parameters = self.parameters()
+        for name, param in parameters.items():
+            try:
+                str_val = self.model_adapter.get_rt_info(['model_info', name])
+                value = param.from_str(str_val)
+                self.__setattr__(name, value)
+            except (NotImplementedError, RuntimeError) as error:  # model_adapter is not openvino adapter or IR doesn't contain requested rt_info
+                if isinstance(error, RuntimeError) and str(error) != 'Cannot get runtime attribute. Path to runtime attribute is incorrect.':
+                    raise
+
         for name, value in config.items():
+            if value is None:
+                continue
             if name in parameters:
                 errors = parameters[name].validate(value)
                 if errors:
@@ -251,11 +296,10 @@ class Model:
 
         Returns:
             - postprocessed data in the format defined by wrapper
-            - the input metadata obtained from `preprocess` method
         '''
         dict_data, input_meta = self.preprocess(inputs)
         raw_result = self.infer_sync(dict_data)
-        return self.postprocess(raw_result, input_meta), input_meta
+        return self.postprocess(raw_result, input_meta)
 
     def load(self, force=False):
         if not self.model_loaded or force:
@@ -277,11 +321,33 @@ class Model:
                 "with preload=True option or call load() method before infer_sync()")
         return self.model_adapter.infer_sync(dict_data)
 
-    def infer_async(self, dict_data, callback_data):
+    def infer_async_raw(self, dict_data, callback_data):
         if not self.model_loaded:
             self.raise_error("The model is not loaded to the device. Please, create the wrapper "
                 "with preload=True option or call load() method before infer_async()")
         self.model_adapter.infer_async(dict_data, callback_data)
+
+    def infer_async(self, input_data, user_data):
+        if not self.model_loaded:
+            self.raise_error("The model is not loaded to the device. Please, create the wrapper "
+                "with preload=True option or call load() method before infer_async()")
+        dict_data, meta = self.preprocess(input_data)
+        self.model_adapter.infer_async(dict_data, (meta,
+                                                   self.model_adapter.get_raw_result,
+                                                   self.postprocess,
+                                                   self.callback_fn,
+                                                   user_data))
+
+    @staticmethod
+    def process_callback(request, callback_data):
+        meta, get_result_fn, postprocess_fn, callback_fn, user_data = callback_data
+        raw_result = get_result_fn(request)
+        result = postprocess_fn(raw_result, meta)
+        callback_fn(result, user_data)
+
+    def set_callback(self, callback_fn):
+        self.callback_fn = callback_fn
+        self.model_adapter.set_callback(Model.process_callback)
 
     def is_ready(self):
         return self.model_adapter.is_ready()

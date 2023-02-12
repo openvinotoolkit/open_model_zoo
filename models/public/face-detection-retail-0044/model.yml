@@ -38,3 +38,12 @@ model_optimizer_args:
 framework: caffe
 quantizable: true
 license: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/develop/LICENSE
+model_info:
+  model_type: ssd
+  resize_type: asdf
+  labels:
+    - one
+    - two
+    - trhee
+  threshold: 0.5
+  mean_values: [1.0, 1.0, 1.0]

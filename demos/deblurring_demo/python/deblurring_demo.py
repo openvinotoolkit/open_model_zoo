@@ -27,8 +27,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvin
 
 from model_api.models import Deblurring
 from model_api.performance_metrics import PerformanceMetrics
-from model_api.pipelines import get_user_config, AsyncPipeline
-from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
+from model_api.pipelines import AsyncPipeline
+from model_api.adapters import create_core, get_user_config, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture

@@ -54,7 +54,8 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info
+        task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info,
+        model_info
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -67,6 +68,7 @@ class Model:
         self.precisions = precisions
         self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
+        self.model_info = model_info
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = converter_to_onnx
         self.composite_model_name = composite_model_name
@@ -86,6 +88,8 @@ class Model:
 
             files = []
             file_names = set()
+
+            model_info = model.get('model_info', dict())
 
             for file in model['files']:
                 files.append(ModelFile.deserialize(file))
@@ -174,7 +178,7 @@ class Model:
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
                 task_type, conversion_to_onnx_args, known_frameworks[framework],
-                composite_model_name, input_info)
+                composite_model_name, input_info, model_info)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
@@ -247,7 +251,7 @@ def check_composite_model_dir(model_dir):
                 raise validation.DeserializationError(
                     'Names of composite model parts should start with composite model name')
 
-def load_models(models_root, args, mode=ModelLoadingMode.all):
+def load_models(models_root, mode=ModelLoadingMode.all):
     models = []
     model_names = set()
 
@@ -327,9 +331,9 @@ def load_models(models_root, args, mode=ModelLoadingMode.all):
 
     return sorted(models + composite_models, key=lambda model : model.name)
 
-def load_models_or_die(models_root, args):
+def load_models_or_die(models_root, **kwargs):
     try:
-        return load_models(models_root, args)
+        return load_models(models_root, **kwargs)
     except validation.DeserializationError as e:
         indent = '    '
 
@@ -339,9 +343,9 @@ def load_models_or_die(models_root, args):
         sys.exit(1)
 
 # requires the --print_all, --all, --name and --list arguments to be in `args`
-def load_models_from_args(parser, args, models_root):
+def load_models_from_args(parser, args, models_root, **kwargs):
     if args.print_all:
-        for model in load_models_or_die(models_root, args):
+        for model in load_models_or_die(models_root, **kwargs):
             print(model.name)
         sys.exit()
 
@@ -353,7 +357,7 @@ def load_models_from_args(parser, args, models_root):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_models = load_models_or_die(models_root, args)
+    all_models = load_models_or_die(models_root)
 
     if args.all:
         return all_models
