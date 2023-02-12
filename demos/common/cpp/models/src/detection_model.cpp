@@ -29,8 +29,8 @@ DetectionModel::DetectionModel(const std::string& modelFileName,
                                const std::vector<std::string>& labels,
                                const std::string& layout)
     : ImageModel(modelFileName, useAutoResize, layout),
-      confidenceThreshold(confidenceThreshold),
-      labels(labels) {}
+      labels(labels),
+      confidenceThreshold(confidenceThreshold) {}
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;

@@ -41,9 +41,9 @@ public:
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
+    std::vector<std::string> labels;
 protected:
     float confidenceThreshold;
-    std::vector<std::string> labels;
 
     std::string getLabelName(int labelID) {
         return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID);

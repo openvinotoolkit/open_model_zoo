@@ -59,3 +59,28 @@ model_optimizer_args:
 framework: caffe
 quantizable: true
 license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE
+model_info:
+  model_type: ssd
+  confidence_threshold: 0.5
+  labels:
+    - background
+    - aeroplane
+    - bicycle
+    - bird
+    - boat
+    - bottle
+    - bus
+    - car
+    - cat
+    - chair
+    - cow
+    - diningtable
+    - dog
+    - horse
+    - motorbike
+    - person
+    - pottedplant
+    - sheep
+    - sofa
+    - train
+    - tvmonitor
