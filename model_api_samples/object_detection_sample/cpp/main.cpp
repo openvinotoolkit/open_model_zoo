@@ -75,12 +75,12 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error{"Failed to read the image"};
         }
 
-        auto model = DetectionModel::create_model(argv[1]);
+        auto model = DetectionModel::create_model(argv[1]); // works with SSD300. Download it using Python Model API
         auto result = model->infer(ImageInputData(image));
 
         DefaultColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
         cv::Mat outFrame = renderDetectionData(image, result->asRef<DetectionResult>(), palette);
-        
+
         cv::imwrite("result.png", outFrame);
     } catch (const std::exception& error) {
         std::cerr << error.what() << std::endl;
