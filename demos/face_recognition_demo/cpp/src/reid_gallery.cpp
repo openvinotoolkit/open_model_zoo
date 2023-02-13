@@ -16,7 +16,6 @@
 
 #include "utils/kuhn_munkres.hpp"
 
-// namespace fs = std::filesystem;
 namespace {
     float computeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
         float xy = static_cast<float>(descr1.dot(descr2));
@@ -29,6 +28,10 @@ namespace {
     std::vector<std::string> file_extensions = {".jpg", ".png"};
 
 }  // namespace
+
+const char EmbeddingsGallery::unknownLabel[] = "Unknown";
+const int EmbeddingsGallery::unknownId = -1;
+const float EmbeddingsGallery::unknownDistance = 1.0;
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& fgPath,
                                      double threshold,

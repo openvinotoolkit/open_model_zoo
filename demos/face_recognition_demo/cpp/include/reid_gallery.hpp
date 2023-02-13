@@ -29,9 +29,9 @@ struct GalleryObject {
 
 class EmbeddingsGallery {
 public:
-    static constexpr char unknownLabel[] = "Unknown";
-    static constexpr int unknownId = -1;
-    static constexpr float unknownDistance = 1.0;
+    static const char unknownLabel[];
+    static const int unknownId;
+    static const float unknownDistance;
     EmbeddingsGallery(const std::string& fgPath,
                       double threshold,
                       bool crop,
