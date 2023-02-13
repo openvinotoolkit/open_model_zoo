@@ -57,12 +57,6 @@ cv::Mat renderDetectionData(cv::Mat& outputImg, DetectionResult& result, const D
         cv::rectangle(outputImg, obj, color, 2);
     }
 
-    try {
-        for (auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
-            cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
-        }
-    } catch (const std::bad_cast&) {}
-
     return outputImg;
 }
 
@@ -76,12 +70,12 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
 
-        std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1]);
-
         cv::Mat image = cv::imread(argv[2]);
         if (!image.data) {
             throw std::runtime_error{"Failed to read the image"};
         }
+
+        std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1]);
 
         auto result = model->infer(ImageInputData(image));
 
