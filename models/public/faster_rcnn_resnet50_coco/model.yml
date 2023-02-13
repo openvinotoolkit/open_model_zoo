@@ -16,6 +16,7 @@ description: >-
   Faster R-CNN ResNet-50 model. Used for object detection. For details, see the paper
   <https://arxiv.org/abs/1506.01497>.
 task_type: detection
+architecture_type: ssd
 files:
   - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
     size: 381355771

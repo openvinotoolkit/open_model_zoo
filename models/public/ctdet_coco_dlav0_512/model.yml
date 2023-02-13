@@ -19,6 +19,7 @@ description: >-
   object size. For details see paper <https://arxiv.org/abs/1904.07850>, repository
   <https://github.com/xingyizhou/CenterNet/>.
 task_type: detection
+architecture_type: centernet
 files:
   - name: ctdet_coco_dlav0_1x.pth
     size: 221889662

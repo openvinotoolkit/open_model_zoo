@@ -18,6 +18,7 @@ description: >-
   and the "mobilenet-ssd" is that there the "mobilenet-ssd" can only detect face,
   the "ssd_mobilenet_v1_coco" model can detect objects.
 task_type: detection
+architecture_type: ssd
 files:
   - name: ssd_mobilenet_v1_coco.tar.gz
     size: 76541073

@@ -15,6 +15,7 @@
 description: >-
   YOLO Tiny v2 trained on VOC dataset by AVA team with 0.6 sparsity level.
 task_type: detection
+architecture_type: yolo
 files:
   - name: parameters.yml
     size: 197

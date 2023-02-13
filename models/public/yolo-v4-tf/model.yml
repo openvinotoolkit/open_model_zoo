@@ -20,6 +20,7 @@ description: >-
   on Common Objects in Context (COCO) <https://cocodataset.org/#home> dataset with
   80 classes.
 task_type: detection
+architecture_type: yolov4
 files:
   - name: yolov4.weights
     size: 257717640

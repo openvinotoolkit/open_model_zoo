@@ -16,6 +16,7 @@ description: >-
   This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector for
   the "Barrier" use case.
 task_type: detection
+architecture_type: ssd
 files:
   - name: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
     size: 4387714

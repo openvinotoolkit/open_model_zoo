@@ -18,6 +18,7 @@ description: >-
   using the Caffe* framework and trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
   dataset. For details about this model, check out the repository <https://github.com/Robert-JunWang/Pelee>.
 task_type: detection
+architecture_type: ssd
 files:
   - name: pelee_coco.tar.gz
     size: 22501897

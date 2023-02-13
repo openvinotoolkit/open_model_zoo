@@ -21,6 +21,7 @@ description: >-
   For details see the repository <https://github.com/PeterL1n/RobustVideoMatting>.
   For details regarding export to ONNX see the instruction <https://github.com/DmitriySidnev/RobustVideoMatting#export-to-onnx>.
 task_type: background_matting
+architecture_type: robust-video-matting
 files:
   - name: robust_video_matting_mobilenetv3.onnx
     size: 14981904

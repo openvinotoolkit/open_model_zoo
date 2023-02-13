@@ -16,6 +16,7 @@ description: >-
   FaceBoxes: A CPU Real-time Face Detector with High Accuracy. For details see the
   repository <https://github.com/zisianw/FaceBoxes.PyTorch>, paper <https://arxiv.org/abs/1708.05234>
 task_type: detection
+architecture_type: faceboxes
 files:
   - name: faceboxes.py
     size: 4999
