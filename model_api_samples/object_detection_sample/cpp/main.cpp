@@ -40,14 +40,6 @@
 #include <openvino/openvino.hpp>
 
 #include <models/detection_model.h>
-#include <models/detection_model_centernet.h>
-#include <models/detection_model_faceboxes.h>
-#include <models/detection_model_retinaface.h>
-#include <models/detection_model_retinaface_pt.h>
-#include <models/detection_model_ssd.h>
-#include <models/detection_model_yolo.h>
-#include <models/detection_model_yolov3_onnx.h>
-#include <models/detection_model_yolox.h>
 #include <models/input_data.h>
 #include <models/model_base.h>
 #include <models/results.h>
@@ -62,80 +54,10 @@
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
-
-class ColorPalette {
-private:
-    std::vector<cv::Scalar> palette;
-
-    static double getRandom(double a = 0.0, double b = 1.0) {
-        static std::default_random_engine e;
-        std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max()));
-        return dis(e);
-    }
-
-    static double distance(const cv::Scalar& c1, const cv::Scalar& c2) {
-        auto dh = std::fmin(std::fabs(c1[0] - c2[0]), 1 - fabs(c1[0] - c2[0])) * 2;
-        auto ds = std::fabs(c1[1] - c2[1]);
-        auto dv = std::fabs(c1[2] - c2[2]);
-
-        return dh * dh + ds * ds + dv * dv;
-    }
-
-    static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet,
-                                     const std::vector<cv::Scalar>& colorCandidates) {
-        std::vector<double> distances;
-        distances.reserve(colorCandidates.size());
-        for (auto& c1 : colorCandidates) {
-            auto min =
-                *std::min_element(colorSet.begin(), colorSet.end(), [&c1](const cv::Scalar& a, const cv::Scalar& b) {
-                    return distance(c1, a) < distance(c1, b);
-                });
-            distances.push_back(distance(c1, min));
-        }
-        auto max = std::max_element(distances.begin(), distances.end());
-        return colorCandidates[std::distance(distances.begin(), max)];
-    }
-
-    static cv::Scalar hsv2rgb(const cv::Scalar& hsvColor) {
-        cv::Mat rgb;
-        cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
-        cv::cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
-        return cv::Scalar(rgb.data[0], rgb.data[1], rgb.data[2]);
-    }
-
-public:
-    explicit ColorPalette(size_t n) {
-        palette.reserve(n);
-        std::vector<cv::Scalar> hsvColors(1, {1., 1., 1.});
-        std::vector<cv::Scalar> colorCandidates;
-        size_t numCandidates = 100;
-
-        hsvColors.reserve(n);
-        colorCandidates.resize(numCandidates);
-        for (size_t i = 1; i < n; ++i) {
-            std::generate(colorCandidates.begin(), colorCandidates.end(), []() {
-                return cv::Scalar{getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0)};
-            });
-            hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
-        }
-
-        for (auto& hsv : hsvColors) {
-            // Convert to OpenCV HSV format
-            hsv[0] *= 179;
-            hsv[1] *= 255;
-            hsv[2] *= 255;
-
-            palette.push_back(hsv2rgb(hsv));
-        }
-    }
-
-    const cv::Scalar& operator[](size_t index) const {
-        return palette[index % palette.size()];
-    }
-};
+#include <utils/color_palette.hpp>
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette) {
+cv::Mat renderDetectionData(DetectionResult& result, const DefaultColorPalette& palette) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -183,8 +105,8 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
         std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
-        std::unique_ptr<DetectionModel> model = std::unique_ptr<DetectionModel>{static_cast<DetectionModel*>(ModelBase::create_model(argv[1], core).release())};
-        ColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
+        std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1], core);
+        DefaultColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
 
         cv::Mat image = cv::imread(argv[2]);
         if (!image.data) {
@@ -206,8 +128,7 @@ int main(int argc, char* argv[]) {
             result = pipeline.getResult();
         }
         cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
-        cv::imshow("Detection Results", outFrame);
-        cv::waitKey(0);
+        cv::imwrite("result.png", outFrame);
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
         return 1;
