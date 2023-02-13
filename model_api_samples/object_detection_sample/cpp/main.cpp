@@ -64,13 +64,7 @@
 #include <utils/slog.hpp>
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(DetectionResult& result) {
-    if (!result.metaData) {
-        throw std::invalid_argument("Renderer: metadata is null");
-    }
-
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
-
+cv::Mat renderDetectionData(const cv::Mat& outputImg, DetectionResult& result) {
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
@@ -118,22 +112,9 @@ int main(int argc, char* argv[]) {
         if (!image.data) {
             throw std::runtime_error{"Failed to read the image"};
         }
+        std::unique_ptr<ResultBase> result = model->operator()(ImageInputData(image));
 
-        std::string device = "CPU";
-        uint32_t nireq = 0, nthreads = 0;
-        std::string nstreams;
-
-        AsyncPipeline pipeline(std::move(model),
-                               ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads),
-                               *core);
-
-        std::unique_ptr<ResultBase> result;
-
-        pipeline.submitData(ImageInputData(image), std::make_shared<ImageMetaData>(image, std::chrono::steady_clock::now()));
-        while (!result) {
-            result = pipeline.getResult();
-        }
-        cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+        cv::Mat outFrame = renderDetectionData(image, result->asRef<DetectionResult>());
         cv::imshow("Detection Results", outFrame);
         cv::waitKey(0);
     } catch (const std::exception& error) {

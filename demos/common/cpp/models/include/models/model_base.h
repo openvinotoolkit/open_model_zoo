@@ -26,10 +26,10 @@
 #include <utils/config_factory.h>
 #include <utils/ocv_common.hpp>
 
-struct InferenceResult;
+#include "models/results.h"
+
 struct InputData;
 struct InternalModelData;
-struct ResultBase;
 
 class ModelBase {
 public:
@@ -39,12 +39,11 @@ public:
 
     virtual ~ModelBase() {}
 
-    static std::unique_ptr<ModelBase> create_model(const std::string& modelFileName, std::shared_ptr<ov::Core> core = nullptr, std::string model_type = "", float confidence_threshold = -std::numeric_limits<float>::infinity(), std::vector<std::string> labels = {});
-
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
     virtual ov::CompiledModel compileModel(const ModelConfig& config, ov::Core& core);
     virtual void onLoadCompleted(const std::vector<ov::InferRequest>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
+    virtual std::unique_ptr<ResultBase> operator()(const InputData& inputData);
 
     const std::vector<std::string>& getOutputsNames() const {
         return outputsNames;

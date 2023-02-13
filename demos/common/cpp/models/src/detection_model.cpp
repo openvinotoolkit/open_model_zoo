@@ -31,7 +31,7 @@
 
 #include "models/image_model.h"
 
-std::unique_ptr<DetectionModel> DetectionModel::create_model(const std::string& modelFileName, std::shared_ptr<ov::Core> core, std::string model_type, float confidence_threshold, std::vector<std::string> labels) {
+std::unique_ptr<DetectionModel> DetectionModel::create_model(const std::string& modelFileName, std::shared_ptr<ov::Core> core, std::string model_type, float confidence_threshold, std::vector<std::string> labels, const std::string& device, uint32_t nireq, const std::string& nstreams, uint32_t nthreads) {
     if (!core) {
         core.reset(new ov::Core{});
     }
@@ -50,31 +50,32 @@ std::unique_ptr<DetectionModel> DetectionModel::create_model(const std::string& 
     float FLAGS_iou_t = 0.5;
     std::vector<float> anchors;
     std::vector<int64_t> masks;
+    std::unique_ptr<DetectionModel> detection_model;
     if (model_type == "centernet") {
-        return std::unique_ptr<DetectionModel>(new ModelCenterNet(modelFileName, static_cast<float>(confidence_threshold), labels, FLAGS_layout));
+        detection_model.reset(new ModelCenterNet(modelFileName, static_cast<float>(confidence_threshold), labels, FLAGS_layout));
     } else if (model_type == "faceboxes") {
-        return std::unique_ptr<DetectionModel>(new ModelFaceBoxes(modelFileName,
+        detection_model.reset(new ModelFaceBoxes(modelFileName,
                                         static_cast<float>(confidence_threshold),
                                         FLAGS_auto_resize,
                                         static_cast<float>(FLAGS_iou_t),
                                         FLAGS_layout));
     } else if (model_type == "retinaface") {
-        return std::unique_ptr<DetectionModel>(new ModelRetinaFace(modelFileName,
+        detection_model.reset(new ModelRetinaFace(modelFileName,
                                         static_cast<float>(confidence_threshold),
                                         FLAGS_auto_resize,
                                         static_cast<float>(FLAGS_iou_t),
                                         FLAGS_layout));
     } else if (model_type == "retinaface-pytorch") {
-        return std::unique_ptr<DetectionModel>(new ModelRetinaFacePT(modelFileName,
+        detection_model.reset(new ModelRetinaFacePT(modelFileName,
                                             static_cast<float>(confidence_threshold),
                                             FLAGS_auto_resize,
                                             static_cast<float>(FLAGS_iou_t),
                                             FLAGS_layout));
     } else if (model_type == "ssd") {
-        return std::unique_ptr<DetectionModel>(new ModelSSD(modelFileName, static_cast<float>(confidence_threshold), FLAGS_auto_resize, labels, FLAGS_layout));
+        detection_model.reset(new ModelSSD(modelFileName, static_cast<float>(confidence_threshold), FLAGS_auto_resize, labels, FLAGS_layout));
     } else if (model_type == "yolo") {
         bool FLAGS_yolo_af = true;  // Use advanced postprocessing/filtering algorithm for YOLO
-        return std::unique_ptr<DetectionModel>(new ModelYolo(modelFileName,
+        detection_model.reset(new ModelYolo(modelFileName,
                                     static_cast<float>(confidence_threshold),
                                     FLAGS_auto_resize,
                                     FLAGS_yolo_af,
@@ -84,12 +85,12 @@ std::unique_ptr<DetectionModel> DetectionModel::create_model(const std::string& 
                                     masks,
                                     FLAGS_layout));
     } else if (model_type == "yolov3-onnx") {
-        return std::unique_ptr<DetectionModel>(new ModelYoloV3ONNX(modelFileName,
+        detection_model.reset(new ModelYoloV3ONNX(modelFileName,
                                         static_cast<float>(confidence_threshold),
                                         labels,
                                         FLAGS_layout));
     } else if (model_type == "yolox") {
-        return std::unique_ptr<DetectionModel>(new ModelYoloX(modelFileName,
+        detection_model.reset(new ModelYoloX(modelFileName,
                                     static_cast<float>(confidence_threshold),
                                     static_cast<float>(FLAGS_iou_t),
                                     labels,
@@ -97,6 +98,9 @@ std::unique_ptr<DetectionModel> DetectionModel::create_model(const std::string& 
     } else {
         throw std::runtime_error{"No model type or invalid model type (-at) provided: " + model_type};
     }
+
+    detection_model->compileModel(ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads), *core);
+    return detection_model;
 }
 
 DetectionModel::DetectionModel(const std::string& modelFileName,

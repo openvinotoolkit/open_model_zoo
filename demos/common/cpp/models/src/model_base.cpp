@@ -66,3 +66,15 @@ ov::Layout ModelBase::getInputLayout(const ov::Output<ov::Node>& input) {
 
     return layout;
 }
+
+std::unique_ptr<ResultBase> ModelBase::operator()(const InputData& inputData) {
+    ov::InferRequest ireq = compiledModel.create_infer_request();
+    InferenceResult result;
+    result.internalModelData = this->preprocess(inputData, ireq);
+    ireq.infer();
+    for (const auto& outName : this->getOutputsNames()) {
+        auto tensor = ireq.get_tensor(outName);
+        result.outputsData.emplace(outName, tensor);
+    }
+    return this->postprocess(result);
+}
