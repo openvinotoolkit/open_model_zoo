@@ -76,3 +76,25 @@ ov::Layout ModelBase::getInputLayout(const ov::Output<ov::Node>& input) {
 
     return layout;
 }
+
+std::unique_ptr<ResultBase> ModelBase::operator()(const InputData& inputData)
+{
+    InferenceResult result;
+    result.modelName = getModelName();
+    result.frameId = inputData.frameId;
+    result.metaData = inputData.metaData;
+
+    if (isCompiled)
+    {
+        std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
+        this->compiledModel = this->compileModel(this->config, core);
+        this->inferRequest = this->compiledModel.create_infer_request();
+    }
+    
+    auto internalModelData = model->preprocess(inputData, inferRequest);
+    inferRequest.infer();
+    result.internalModelData = std::move(internalModelData);
+    auto retVal = model->postprocess(result);
+    *retVal = static_cast<ResultBase&>(result);
+    return retVal;
+}

@@ -104,8 +104,8 @@ int main(int argc, char* argv[]) {
                       << std::endl;
             return EXIT_FAILURE;
         }
-        std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
-        std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1], core);
+        //std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
+        std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1]);
         DefaultColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
 
         cv::Mat image = cv::imread(argv[2]);
@@ -113,20 +113,23 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error{"Failed to read the image"};
         }
 
-        std::string device = "CPU";
-        uint32_t nireq = 0, nthreads = 0;
-        std::string nstreams;
+        // std::string device = "CPU";
+        // uint32_t nireq = 0, nthreads = 0;
+        // std::string nstreams;
 
-        AsyncPipeline pipeline(std::move(model),
-                               ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads),
-                               *core);
+        // AsyncPipeline pipeline(std::move(model),
+        //                        ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads),
+        //                        *core);
 
         std::unique_ptr<ResultBase> result;
 
-        pipeline.submitData(ImageInputData(image), std::make_shared<ImageMetaData>(image, std::chrono::steady_clock::now()));
-        while (!result) {
-            result = pipeline.getResult();
-        }
+        // pipeline.submitData(ImageInputData(image), std::make_shared<ImageMetaData>(image, std::chrono::steady_clock::now()));
+        // while (!result) {
+        //     result = pipeline.getResult();
+        // }
+
+        result = model(ImageInputData(image));
+
         cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
         cv::imwrite("result.png", outFrame);
     } catch (const std::exception& error) {
