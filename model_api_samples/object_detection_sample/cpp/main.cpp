@@ -16,24 +16,13 @@
 
 #include <stddef.h>
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
 #include <cstdint>
 #include <exception>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <memory>
-#include <random>
 #include <stdexcept>
 #include <string>
-#include <typeinfo>
-#include <utility>
-#include <vector>
 
-#include <gflags/gflags.h>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -41,38 +30,20 @@
 
 #include <models/detection_model.h>
 #include <models/input_data.h>
-#include <models/model_base.h>
 #include <models/results.h>
-#include <monitors/presenter.h>
-#include <pipelines/async_pipeline.h>
-#include <pipelines/metadata.h>
-#include <utils/args_helper.hpp>
-#include <utils/common.hpp>
-#include <utils/config_factory.h>
-#include <utils/default_flags.hpp>
-#include <utils/images_capture.h>
-#include <utils/ocv_common.hpp>
-#include <utils/performance_metrics.hpp>
-#include <utils/slog.hpp>
 #include <utils/color_palette.hpp>
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(DetectionResult& result, const DefaultColorPalette& palette) {
-    if (!result.metaData) {
-        throw std::invalid_argument("Renderer: metadata is null");
-    }
-
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
-
+cv::Mat renderDetectionData(cv::Mat& outputImg, DetectionResult& result, const DefaultColorPalette& palette) {
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
     // Visualizing result data over source image
     for (auto& obj : result.objects) {
-        slog::debug << " " << std::left << std::setw(9) << obj.label << " | " << std::setw(10) << obj.confidence
+        std::cout << " " << std::left << std::setw(9) << obj.label << " | " << std::setw(10) << obj.confidence
                     << " | " << std::setw(4) << int(obj.x) << " | " << std::setw(4) << int(obj.y) << " | "
                     << std::setw(4) << int(obj.x + obj.width) << " | " << std::setw(4) << int(obj.y + obj.height)
-                    << slog::endl;
+                    << std::endl;
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
         const auto& color = palette[obj.labelID];
@@ -97,46 +68,31 @@ cv::Mat renderDetectionData(DetectionResult& result, const DefaultColorPalette& 
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << ov::get_openvino_version() << slog::endl;
+        std::cout << ov::get_openvino_version() << std::endl;
 
         if (argc != 3) {
-            std::cout << "Usage : " << argv[0] << " <path_to_model> <path_to_image>"
+            std::cerr << "Usage : " << argv[0] << " <path_to_model> <path_to_image>"
                       << std::endl;
             return EXIT_FAILURE;
         }
-        //std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
+
         std::unique_ptr<DetectionModel> model = DetectionModel::create_model(argv[1]);
-        DefaultColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
 
         cv::Mat image = cv::imread(argv[2]);
         if (!image.data) {
             throw std::runtime_error{"Failed to read the image"};
         }
 
-        // std::string device = "CPU";
-        // uint32_t nireq = 0, nthreads = 0;
-        // std::string nstreams;
+        auto result = model->infer(ImageInputData(image));
 
-        // AsyncPipeline pipeline(std::move(model),
-        //                        ConfigFactory::getUserConfig(device, nireq, nstreams, nthreads),
-        //                        *core);
-
-        std::unique_ptr<ResultBase> result;
-
-        // pipeline.submitData(ImageInputData(image), std::make_shared<ImageMetaData>(image, std::chrono::steady_clock::now()));
-        // while (!result) {
-        //     result = pipeline.getResult();
-        // }
-
-        result = model(ImageInputData(image));
-
-        cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
+        DefaultColorPalette palette(model->labels.size() > 0 ? model->labels.size() : 100);
+        cv::Mat outFrame = renderDetectionData(image, result->asRef<DetectionResult>(), palette);
         cv::imwrite("result.png", outFrame);
     } catch (const std::exception& error) {
-        slog::err << error.what() << slog::endl;
+        std::cerr << error.what() << std::endl;
         return 1;
     } catch (...) {
-        slog::err << "Unknown/internal exception happened." << slog::endl;
+        std::cerr << "Unknown/internal exception happened." << std::endl;
         return 1;
     }
 

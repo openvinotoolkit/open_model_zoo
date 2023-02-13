@@ -14,16 +14,8 @@
 // limitations under the License.
 */
 
-#include "models/detection_model.h"
-#include "models/detection_model_centernet.h"
-#include "models/detection_model_faceboxes.h"
-#include "models/detection_model_retinaface.h"
-#include "models/detection_model_retinaface_pt.h"
-#include "models/detection_model_ssd.h"
-#include "models/detection_model_yolo.h"
-#include "models/detection_model_yolov3_onnx.h"
-#include "models/detection_model_yolox.h"
 #include "models/model_base.h"
+#include <models/results.h>
 #include "utils/args_helper.hpp"
 
 #include <utility>
@@ -77,24 +69,30 @@ ov::Layout ModelBase::getInputLayout(const ov::Output<ov::Node>& input) {
     return layout;
 }
 
-std::unique_ptr<ResultBase> ModelBase::operator()(const InputData& inputData)
+std::unique_ptr<ResultBase> ModelBase::infer(const InputData& inputData)
 {
     InferenceResult result;
-    result.modelName = getModelName();
-    result.frameId = inputData.frameId;
-    result.metaData = inputData.metaData;
 
-    if (isCompiled)
+    if (!this->isCompiled)
     {
-        std::shared_ptr<ov::Core> core = std::make_shared<ov::Core>();
-        this->compiledModel = this->compileModel(this->config, core);
+        auto core = ov::Core();
+        auto model = prepareModel(core);
+        this->compiledModel = compiledModel = core.compile_model(model, "AUTO");
         this->inferRequest = this->compiledModel.create_infer_request();
+        this->isCompiled = true;
     }
     
-    auto internalModelData = model->preprocess(inputData, inferRequest);
+    auto internalModelData = this->preprocess(inputData, inferRequest);
+    
     inferRequest.infer();
+    
     result.internalModelData = std::move(internalModelData);
-    auto retVal = model->postprocess(result);
+    for (const auto& outName : this->getOutputsNames()) {
+        auto tensor = this->inferRequest.get_tensor(outName);
+        result.outputsData.emplace(outName, tensor);
+    }
+
+    auto retVal = this->postprocess(result);
     *retVal = static_cast<ResultBase&>(result);
     return retVal;
 }
