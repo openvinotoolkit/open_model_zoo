@@ -113,7 +113,7 @@ class Model:
         '''
         if isinstance(model, ModelAdapter):
             model_adapter = model
-        elif isinstance(model, str) and re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/\w+(\:\d+)*").fullmatch(model):
+        elif isinstance(model, str) and re.compile(r"(\w+\.*\-*)*\w+:\d+\/models\/[a-zA-Z0-9_-]+(\:\d+)*").fullmatch(model):
             model_adapter = OVMSAdapter(model)
         else:
             if core is None:
