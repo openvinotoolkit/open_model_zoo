@@ -516,7 +516,7 @@ class OpenVINOLauncher(Launcher):
                 for name in out.names:
                     self.out_tensor_name_to_node[name] = out.get_node().friendly_name
             return
-        if self._weights is None and self._model.suffix != '.onnx':
+        if self._weights is None and self._model.suffix != '.onnx' and self._model.suffix != '.pb':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
