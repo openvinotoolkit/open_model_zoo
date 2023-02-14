@@ -186,8 +186,8 @@ class Model:
                 str_val = self.model_adapter.get_rt_info(['model_info', name])
                 value = param.from_str(str_val)
                 self.__setattr__(name, value)
-            except (NotImplementedError, RuntimeError) as error:  # model_adapter is not openvino adapter or IR doesn't contain requested rt_info
-                if isinstance(error, RuntimeError) and str(error) != 'Cannot get runtime attribute. Path to runtime attribute is incorrect.':
+            except RuntimeError as error:  # model_adapter is not openvino adapter or IR doesn't contain requested rt_info
+                if str(error) != 'Cannot get runtime attribute. Path to runtime attribute is incorrect.' and str(error) != 'OVMSAdapter does not support RT info getting':
                     raise
 
         for name, value in config.items():

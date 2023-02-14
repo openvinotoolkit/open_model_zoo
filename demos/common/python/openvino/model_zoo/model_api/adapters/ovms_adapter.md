@@ -10,7 +10,7 @@ The `OVMSAdapter` implements `ModelAdapter` interface. The `OVMSAdapter` makes i
 
 ### Deploy OpenVINO Model Server
 
-Model Server is distributed as a docker image and it's available in DockerHub, so you can use it with `docker run` command. See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
+Model Server is distributed as a docker image and it's available in DockerHub, so you can use it with `docker run` command. See [model server documentation](https://github.com/openvinotoolkit/model_server/blob/main/docs/starting_server.md) to learn how to deploy OpenVINO optimized models with OpenVINO Model Server.
 
 ### Install ovmsclient
 
@@ -35,7 +35,7 @@ It's possible to configure inference related options for the model in OpenVINO M
 - `--nireq` - number of InferRequests
 - `--plugin_config` - configuration of the device plugin
 
-See [model server configuration parameters](https://github.com/openvinotoolkit/model_server/blob/main/docs/docker_container.md#configuration-parameters) for more details.
+See [model server configuration parameters](https://github.com/openvinotoolkit/model_server/blob/main/docs/starting_server.md#serving-a-single-model) for more details.
 
 ### Example OVMS startup command
 ```

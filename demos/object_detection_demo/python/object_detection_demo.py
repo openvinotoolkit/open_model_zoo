@@ -23,9 +23,9 @@ from time import perf_counter
 
 import cv2
 
-sys.path.append(str(Path(__file__).resolve().parents[3] / 'tools/model_tools/src'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'tools/model_tools/src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
 from openvino.model_zoo.model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
 from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
