@@ -17,7 +17,6 @@
 
 import sys
 from pathlib import Path
-from copy import deepcopy
 
 import cv2
 from PIL import Image
