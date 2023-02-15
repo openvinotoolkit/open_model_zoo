@@ -143,19 +143,17 @@ int LandmarksEstimator::sign(float number) {
     return 0;
 }
 
-cv::Mat LandmarksEstimator::affineTransform(
-    cv::Point2f center, cv::Point2f scale, float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv)
-{
+cv::Mat LandmarksEstimator::affineTransform(cv::Point2f center, cv::Point2f scale, float rot, size_t dst_w, size_t dst_h, cv::Point2f shift, bool inv) {
     cv::Point2f scale_tmp = scale;
     const float pi = acos(-1.0f);
     float rot_rad = pi * rot / 180;
     cv::Point2f src_dir = rotatePoint(cv::Point2f(0.f, scale_tmp.y * -0.5f), rot_rad);
-    cv::Point2f* src = new cv::Point2f[3];
+    cv::Point2f src[3];
     src[0] = cv::Point2f(center.x + scale_tmp.x * shift.x, center.y + scale_tmp.y * shift.y);
     src[1] = cv::Point2f(center.x + src_dir.x + scale_tmp.x * shift.x, center.y + src_dir.y + scale_tmp.y * shift.y);
     src[2] = get3rdPoint(src[0], src[1]);
     cv::Point2f dst_dir = cv::Point2f(0.f, dst_w * -0.5f);
-    cv::Point2f* dst = new cv::Point2f[3];
+    cv::Point2f dst[3];
     dst[0] = cv::Point2f(dst_w * 0.5f, dst_h * 0.5f);
     dst[1] = dst[0] + dst_dir;
     dst[2] = get3rdPoint(dst[0], dst[1]);
