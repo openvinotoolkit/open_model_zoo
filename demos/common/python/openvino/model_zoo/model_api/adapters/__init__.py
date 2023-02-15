@@ -15,13 +15,12 @@
 """
 
 
-from .openvino_adapter import create_core, get_user_config, OpenvinoAdapter
+from .openvino_adapter import create_core, OpenvinoAdapter
 from .ovms_adapter import OVMSAdapter
 from .utils import Layout
 
 __all__ = [
     'create_core',
-    'get_user_config',
     'Layout',
     'OpenvinoAdapter',
     'OVMSAdapter',

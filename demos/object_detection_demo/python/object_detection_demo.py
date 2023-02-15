@@ -23,14 +23,13 @@ from time import perf_counter
 
 import cv2
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'tools/model_tools/src'))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from openvino.model_zoo.model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
-from openvino.model_zoo.model_api.pipelines import AsyncPipeline
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter, get_user_config
+from model_api.models import DetectionModel, DetectionWithLandmarks, RESIZE_TYPES, OutputTransform
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -49,7 +48,7 @@ def build_argparser():
                            'or address of model inference service if using ovms adapter.')
     available_model_wrappers = [name.lower() for name in DetectionModel.available_wrappers()]
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, choices=available_model_wrappers)
+                      type=str, required=True, choices=available_model_wrappers)
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
@@ -62,7 +61,7 @@ def build_argparser():
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    common_model_args.add_argument('-t', '--prob_threshold', default=None, type=float,
+    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),
                                    help='Optional. A resize type for model preprocess. By default used model predefined type.')
@@ -128,15 +127,16 @@ def build_argparser():
     return parser
 
 
-def draw_detections(frame, detections, palette, output_transform):
+def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
     for detection in detections:
         class_id = int(detection.id)
         color = palette[class_id]
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
         xmin, ymin, xmax, ymax = detection.get_coords()
         xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(frame, '{} {:.1%}'.format(detection.str_label, detection.score),
+        cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                     (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
         if isinstance(detection, DetectionWithLandmarks):
             for landmark in detection.landmarks:
@@ -145,13 +145,15 @@ def draw_detections(frame, detections, palette, output_transform):
     return frame
 
 
-def print_raw_results(detections, frame_id):
+def print_raw_results(detections, labels, frame_id):
     log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         xmin, ymin, xmax, ymax = detection.get_coords()
+        class_id = int(detection.id)
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
         log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                  .format(detection.str_label, detection.score, xmin, ymin, xmax, ymax))
+                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -182,7 +184,7 @@ def main():
         'input_size': args.input_size, # The CTPN specific
         'num_classes': args.num_classes, # The NanoDet and NanoDetPlus specific
     }
-    model = DetectionModel.create_model(model_adapter, args.architecture_type, configuration)
+    model = DetectionModel.create_model(args.architecture_type, model_adapter, configuration)
     model.log_layers_info()
 
     detector_pipeline = AsyncPipeline(model)
@@ -208,11 +210,11 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(objects, next_frame_id_to_show)
+                print_raw_results(objects, model.labels, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             rendering_start_time = perf_counter()
-            frame = draw_detections(frame, objects, palette, output_transform)
+            frame = draw_detections(frame, objects, palette, model.labels, output_transform)
             render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
 
@@ -268,11 +270,11 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(objects, next_frame_id_to_show)
+            print_raw_results(objects, model.labels, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         rendering_start_time = perf_counter()
-        frame = draw_detections(frame, objects, palette, output_transform)
+        frame = draw_detections(frame, objects, palette, model.labels, output_transform)
         render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 

@@ -24,14 +24,13 @@ from time import perf_counter
 import cv2
 import numpy as np
 
-sys.path.append(str(Path(__file__).resolve().parents[3] / 'tools/model_tools/src'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
 
-from openvino.model_zoo.model_api.models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
-from openvino.model_zoo.model_api.performance_metrics import PerformanceMetrics
-from openvino.model_zoo.model_api.pipelines import AsyncPipeline
-from openvino.model_zoo.model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter, get_user_config
+from model_api.models import OutputTransform, SegmentationModel
+from model_api.performance_metrics import PerformanceMetrics
+from model_api.pipelines import get_user_config, AsyncPipeline
+from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 
 import monitors
 from images_capture import open_images_capture
@@ -95,7 +94,7 @@ def build_argparser():
                       help='Required. Path to an .xml file with a trained model '
                            'or address of model inference service if using OVMS adapter.')
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
-                      type=str, choices=('segmentation', 'salient_object_detection'))
+                      type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-i', '--input', required=True,
@@ -173,11 +172,11 @@ def main():
     elif args.adapter == 'ovms':
         model_adapter = OVMSAdapter(args.model)
 
-    model = SegmentationModel.create_model(model_adapter, args.architecture_type, {'path_to_labels': args.labels})
-    if isinstance(model, SalientObjectDetectionModel):
-        visualizer = SaliencyMapVisualizer()
-    else:
+    model = SegmentationModel.create_model(args.architecture_type, model_adapter, {'path_to_labels': args.labels})
+    if args.architecture_type == 'segmentation':
         visualizer = SegmentationVisualizer(args.colors)
+    if args.architecture_type == 'salient_object_detection':
+        visualizer = SaliencyMapVisualizer()
     model.log_layers_info()
 
     pipeline = AsyncPipeline(model)

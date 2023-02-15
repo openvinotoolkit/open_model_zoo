@@ -39,13 +39,11 @@ public:
                    const std::vector<std::string>& labels,
                    const std::string& layout = "");
 
-    static std::unique_ptr<DetectionModel> create_model(const std::string& modelFileName, std::shared_ptr<ov::Core> core = nullptr, std::string model_type = "", float confidence_threshold = -std::numeric_limits<float>::infinity(), std::vector<std::string> labels = {});
-
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
-    std::vector<std::string> labels;
 protected:
     float confidenceThreshold;
+    std::vector<std::string> labels;
 
     std::string getLabelName(int labelID) {
         return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID);

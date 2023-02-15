@@ -35,10 +35,7 @@ class ModelBase {
 public:
     ModelBase(const std::string& modelFileName, const std::string& layout = "")
         : modelFileName(modelFileName),
-          inputsLayouts(parseLayoutString(layout)) 
-        {
-            this->isCompiled = false;
-        }
+          inputsLayouts(parseLayoutString(layout)) {}
 
     virtual ~ModelBase() {}
 
@@ -46,7 +43,6 @@ public:
     virtual ov::CompiledModel compileModel(const ModelConfig& config, ov::Core& core);
     virtual void onLoadCompleted(const std::vector<ov::InferRequest>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
-    virtual std::unique_ptr<ResultBase> infer(const InputData& inputData);
 
     const std::vector<std::string>& getOutputsNames() const {
         return outputsNames;
@@ -74,8 +70,6 @@ protected:
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
     ov::CompiledModel compiledModel;
-    ov::InferRequest inferRequest;
-    bool isCompiled;
     std::string modelFileName;
     ModelConfig config = {};
     std::map<std::string, ov::Layout> inputsLayouts;

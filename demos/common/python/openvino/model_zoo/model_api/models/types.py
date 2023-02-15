@@ -54,9 +54,6 @@ class NumericalValue(BaseValue):
         self.max = max
         self.value_type = value_type
 
-    def from_str(self, value):
-        return float(value)
-
     def validate(self, value):
         errors = super().validate(value)
         if not value:
@@ -88,9 +85,6 @@ class StringValue(BaseValue):
             if not isinstance(choice, str):
                 raise ValueError("Incorrect option in choice list - {}.". format(choice))
 
-    def from_str(self, value):
-        return value
-
     def validate(self, value):
         errors = super().validate(value)
         if not value:
@@ -114,9 +108,6 @@ class BooleanValue(BaseValue):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    def from_str(self, value):
-        return 'YES' == value
-
     def validate(self, value):
         errors = super().validate(value)
         if not value:
@@ -130,16 +121,6 @@ class ListValue(BaseValue):
     def __init__(self, value_type=None, **kwargs) -> None:
         super().__init__(**kwargs)
         self.value_type = value_type
-
-    def from_str(self, value):
-        try:
-            floats = [float(i) for i in value.split()]
-            ints = [int(i) for i in value.split()]
-            if ints == floats:
-                return ints
-            return floats
-        except ValueError:
-            return value.split()
 
     def validate(self, value):
         errors = super().validate(value)
@@ -163,10 +144,6 @@ class ListValue(BaseValue):
 class DictValue(BaseValue):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-
-    def from_str(self, value):
-        # TODO
-        raise NotImplementedError
 
     def validate(self, value):
         errors = super().validate(value)

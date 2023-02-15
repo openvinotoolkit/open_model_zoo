@@ -1,3 +1,0 @@
-opencv-python
--r demos/common/python/requirements.txt
--r demos/common/python/requirements_ovms.txt
