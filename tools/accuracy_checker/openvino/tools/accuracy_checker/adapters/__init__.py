@@ -37,7 +37,8 @@ from .text_recognition import (
 )
 
 from .image_processing import (
-    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV, TrimapAdapter
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV,
+    TrimapAdapter, DenoiseRTAdapter
 )
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
@@ -200,6 +201,7 @@ __all__ = [
     'MultiSuperResolutionAdapter',
     'SuperResolutionYUV',
     'TrimapAdapter',
+    'DenoiseRTAdapter',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',

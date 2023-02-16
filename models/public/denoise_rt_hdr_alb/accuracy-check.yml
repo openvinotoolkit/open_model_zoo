@@ -1,0 +1,32 @@
+models:
+  - name: denoise-render-hdr-alb
+
+    launchers:
+      - framework: openvino
+        adapter:
+          type: denoise_rt
+        inputs:
+            -   name: "color"
+                type: INPUT
+                value: ".*_color.exr"
+            -   name: "albedo"
+                type: INPUT
+                value: ".*_albedo.exr"
+
+    datasets:
+      - name: tungsten_dataset
+        annotation_conversion:
+          converter: tungsten
+        preprocessing:
+          - type: autoexposure
+            key: 0.18
+            k: 16
+          - type: pu_transfer_function
+        postprocessing:
+          - type: pu_inverse_transfer_function
+          - type: autoexposure
+            key: 0.18
+            k: 16
+        metrics:
+          - type: ssim
+            presenter: print_vector

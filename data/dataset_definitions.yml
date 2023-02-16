@@ -1525,3 +1525,17 @@ datasets:
       image_postfix: '.jpg'
     annotation: human_matting.pickle
     dataset_meta: human_matting.json
+
+  - name: tungsten_dataset_rt_hdr_alb
+    data_source: tungsten\
+    annotation_conversion:
+        converter: tungsten
+        dataset_root_dir: tungsten\
+        input_subfolder: [ 'spp_4_data' ]
+        target_subfolder: spp_4096_data
+        annotation_loader: opencv_unchanged
+        features: ['color', 'albedo']
+        extension: exr
+    reader:
+        type: opencv_imread
+        reading_flag: unchanged

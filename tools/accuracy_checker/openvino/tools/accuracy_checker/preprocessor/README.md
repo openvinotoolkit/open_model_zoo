@@ -248,7 +248,10 @@ Accuracy Checker supports following set of preprocessors:
   * `quality_factor` - quality of compression, from 0 to 100 (the higher is the better).
 * `transpose` - transpose data using specified axes order.
   * `axes` - list of dimensions in transposing order.
-
+* `autoexposure` - multiplying an image by exposure(value calculated automatically).
+  * `key` - Destination width.
+  * `k` - Downsampling amount.
+* `pu_transfer_function` - apply perceptually uniform encoding.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.
