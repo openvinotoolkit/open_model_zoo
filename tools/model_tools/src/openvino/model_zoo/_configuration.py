@@ -89,7 +89,7 @@ class Model:
             files = []
             file_names = set()
 
-            model_info = model.get('model_info', dict())
+            model_info = model.get('model_info', {})
 
             for file in model['files']:
                 files.append(ModelFile.deserialize(file))
