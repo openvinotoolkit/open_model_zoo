@@ -2922,7 +2922,7 @@ SWIG_Python_TypeError(const char *type, PyObject *obj)
 /* Convert a pointer value, signal an exception on a type mismatch */
 SWIGRUNTIME void *
 SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int SWIGUNUSEDPARM(argnum), int flags) {
-  void *result;
+  void *result = nullptr;
   if (SWIG_Python_ConvertPtr(obj, &result, ty, flags) == -1) {
     PyErr_Clear();
 #if SWIG_POINTER_EXCEPTION
