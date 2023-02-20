@@ -16,7 +16,7 @@ limitations under the License.
 
 import argparse
 import sys
-import subprocess
+import subprocess  # nosec - disable B404:import-subprocess check
 
 from pathlib import Path
 

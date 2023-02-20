@@ -19,10 +19,11 @@ import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
-os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
-
-import cv2
 import numpy as np
+
+#pylint: disable=wrong-import-position
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
+import cv2
 
 from openvino.runtime import Core, get_version
 from utils.color import autoexposure, get_transfer_function, round_up, srgb_inverse, srgb_forward
@@ -68,7 +69,7 @@ def pad_image(image, shape):
 
 
 def load_image(filename):
-    image = cv2.imread(str(filename), cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH | cv2.IMREAD_UNCHANGED)
+    image = cv2.imread(str(filename), cv2.IMREAD_UNCHANGED)
     if image is None:
         raise RuntimeError('Could not read image')
 

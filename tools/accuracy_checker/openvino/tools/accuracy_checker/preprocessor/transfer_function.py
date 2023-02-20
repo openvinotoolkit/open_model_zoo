@@ -15,7 +15,6 @@ limitations under the License.
 """
 import numpy as np
 
-from ..config import NumberField
 from .preprocessor import Preprocessor
 
 

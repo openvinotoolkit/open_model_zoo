@@ -16,11 +16,11 @@ limitations under the License.
 import numpy as np
 
 from .postprocessor import Postprocessor
-from ..config import NumberField
 from ..representation import ImageProcessingPrediction, ImageProcessingAnnotation
 from ..preprocessor import PuTransferFunction
 
 
+#pylint: disable=W0223
 class PuInverseTransferFunction(Postprocessor):
     """
         Fit of PU2 curve normalized at 100 cd/m^2
@@ -35,7 +35,7 @@ class PuInverseTransferFunction(Postprocessor):
         self.hdr_y_max = 65504.  # maximum HDR value
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
-        for prediction_, annotation_ in zip(prediction, annotation):
+        for prediction_, _ in zip(prediction, annotation):
             params = image_metadata.get('params', None)
             pu_norm_scale = 1. / PuTransferFunction.pu_forward(self.hdr_y_max, params)
             prediction_.value = self.pu_inverse(prediction_.value / pu_norm_scale, params)
