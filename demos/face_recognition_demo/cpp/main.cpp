@@ -119,10 +119,10 @@ void parse(int argc, char *argv[]) {
         std::cout <<   "\t[ -h]                                                " << h_msg
                   << "\n\t[--help]                                             print help on all arguments"
                   << "\n\t[ -i <INPUT>]                                        " << i_msg
-                  << "\n\t -mfd <MODEL FILE>                                  " << mfd_msg
-                  << "\n\t[-mlm <MODEL FILE>]                                 " << mlm_msg
-                  << "\n\t[-mreid <MODEL FILE>]                               " << mreid_msg
-                  << "\n\t[-mas <MODEL FILE>]                                 " << mas_msg
+                  << "\n\t --mfd <MODEL FILE>                                  " << mfd_msg
+                  << "\n\t[--mlm <MODEL FILE>]                                 " << mlm_msg
+                  << "\n\t[--mreid <MODEL FILE>]                               " << mreid_msg
+                  << "\n\t[--mas <MODEL FILE>]                                 " << mas_msg
                   << "\n\t[ -t_fd <NUMBER>]                                    " << tfd_msg
                   << "\n\t[ --input_shape <STRING>]                            " << input_shape_msg
                   << "\n\t[ -t_reid <NUMBER>]                                  " << treid_msg
@@ -131,10 +131,10 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[-fg <GALLERY PATH>]                                 " << fg_msg
                   << "\n\t[--allow_grow] ([--noallow_grow])                    " << ag_msg
                   << "\n\t[--crop_gallery] ([--nocrop_gallery])                " << cg_msg
-                  << "\n\t[ -dfd <DEVICE>]                                    " << dfd_msg
-                  << "\n\t[ -dlm <DEVICE>]                                    " << dlm_msg
-                  << "\n\t[ -dreid <DEVICE>]                                  " << dreid_msg
-                  << "\n\t[ -das <DEVICE>]                                    " << das_msg
+                  << "\n\t[--dfd <DEVICE>]                                     " << dfd_msg
+                  << "\n\t[--dlm <DEVICE>]                                     " << dlm_msg
+                  << "\n\t[--dreid <DEVICE>]                                   " << dreid_msg
+                  << "\n\t[--das <DEVICE>]                                     " << das_msg
                   << "\n\t[--lim <NUMBER>]                                     " << lim_msg
                   << "\n\t[ -o <OUTPUT>]                                       " << o_msg
                   << "\n\t[--loop]                                             " << loop_msg
@@ -174,7 +174,7 @@ cv::Size getInputSize(const std::string& input_shape) {
 std::string getLabelForFace(const Result& result) {
     std::string faceLabel = result.label;
     if (!result.real) {
-        faceLabel = "Fake";
+        faceLabel = "Spoof";
     }
     return faceLabel;
 }
