@@ -120,12 +120,12 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--mlm <MODEL FILE>]                                 " << mlm_msg
                   << "\n\t[--mreid <MODEL FILE>]                               " << mreid_msg
                   << "\n\t[--mas <MODEL FILE>]                                 " << mas_msg
-                  << "\n\t[ -t_fd <NUMBER>]                                    " << tfd_msg
-                  << "\n\t[ --input_shape <STRING>]                            " << input_shape_msg
-                  << "\n\t[ -t_reid <NUMBER>]                                  " << treid_msg
-                  << "\n\t[ -exp <NUMBER>]                                     " << exp_msg
+                  << "\n\t[--t_fd <NUMBER>]                                    " << tfd_msg
+                  << "\n\t[--input_shape <STRING>]                             " << input_shape_msg
+                  << "\n\t[--t_reid <NUMBER>]                                  " << treid_msg
+                  << "\n\t[--exp <NUMBER>]                                     " << exp_msg
                   << "\n\t[--greedy_reid_matching] ([--nogreedy_reid_matching])" << match_algo_msg
-                  << "\n\t[-fg <GALLERY PATH>]                                 " << fg_msg
+                  << "\n\t[--fg <GALLERY PATH>]                                " << fg_msg
                   << "\n\t[--allow_grow] ([--noallow_grow])                    " << ag_msg
                   << "\n\t[--crop_gallery] ([--nocrop_gallery])                " << cg_msg
                   << "\n\t[--dfd <DEVICE>]                                     " << dfd_msg

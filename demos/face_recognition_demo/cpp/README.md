@@ -128,12 +128,12 @@ Running the application with the `-h` option:
         [--mlm <MODEL FILE>]                                 path to the Facial Landmarks Regression Retail model (.xml) file
         [--mreid <MODEL FILE>]                               path to the Face Recognition model (.xml) file.
         [--mas <MODEL FILE>]                                 path to the Antispoofing Classification model (.xml) file.
-        [ -t_fd <NUMBER>]                                    probability threshold for face detections. Default is 0.5
-        [ --input_shape <STRING>]                            specify the input shape for detection network in (width x height) format. Input of model will be reshaped according specified shape.Example: 1280x720. Shape of network input used by default.
-        [ -t_reid <NUMBER>]                                  cosine distance threshold between two vectors for face reidentification. Default is 0.7
-        [ -exp <NUMBER>]                                     expand ratio for bbox before face recognition. Default is 1.0
+        [--t_fd <NUMBER>]                                    probability threshold for face detections. Default is 0.5
+        [--input_shape <STRING>]                             specify the input shape for detection network in (width x height) format. Input of model will be reshaped according specified shape.Example: 1280x720. Shape of network input used by default.
+        [--t_reid <NUMBER>]                                  cosine distance threshold between two vectors for face reidentification. Default is 0.7
+        [--exp <NUMBER>]                                     expand ratio for bbox before face recognition. Default is 1.0
         [--greedy_reid_matching] ([--nogreedy_reid_matching])(don't) use faster greedy matching algorithm in face reid.
-        [-fg <GALLERY PATH>]                                 path to a faces gallery directory.
+        [--fg <GALLERY PATH>]                                path to a faces gallery directory.
         [--allow_grow] ([--noallow_grow])                    (dont't) allow to grow faces gallery and to dump on disk.
         [--crop_gallery] ([--nocrop_gallery])                (dont't) crop images during faces gallery creation.
         [--dfd <DEVICE>]                                     specify a device Face Detection model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
