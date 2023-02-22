@@ -39,9 +39,6 @@ DEFINE_string(mreid, "", mreid_msg);
 constexpr char mas_msg[] = "path to the Antispoofing Classification model (.xml) file.";
 DEFINE_string(mas, "", mas_msg);
 
-constexpr char num_threads_message[] = "number of threads for TFLite model.";
-DEFINE_uint32(nthreads, 1, num_threads_message);
-
 constexpr char tfd_msg[] = "probability threshold for face detections. Default is 0.5";
 DEFINE_double(t_fd, 0.5, tfd_msg);
 
@@ -138,7 +135,6 @@ void parse(int argc, char *argv[]) {
                   << "\n\t[--lim <NUMBER>]                                     " << lim_msg
                   << "\n\t[ -o <OUTPUT>]                                       " << o_msg
                   << "\n\t[--loop]                                             " << loop_msg
-                  << "\n\t[--nthreads <integer>]                               " << num_threads_message
                   << "\n\t[--show] ([--noshow])                                " << show_msg
                   << "\n\t[ -u <DEVICE>]                                       " << u_msg
                   << "\n\tKey bindings:"
@@ -152,6 +148,8 @@ void parse(int argc, char *argv[]) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_mfd.empty()) {
         throw std::invalid_argument{"-m_fd <MODEL FILE> can't be empty"};
+    } if (!FLAGS_fg.empty() && FLAGS_mlm.empty() && FLAGS_mreid.empty()) {
+        throw std::logic_error("Face Gallery path should be provided only with landmarks and reidentification models");
     } if (!FLAGS_input_shape.empty() && FLAGS_input_shape.find("x") == std::string::npos) {
         throw std::logic_error("Correct format of --input_shape parameter is \"width\"x\"height\".");
     }

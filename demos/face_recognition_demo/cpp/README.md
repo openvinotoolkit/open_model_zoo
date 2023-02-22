@@ -124,10 +124,10 @@ Running the application with the `-h` option:
         [ -h]                                                show the help message and exit
         [--help]                                             print help on all arguments
         [ -i <INPUT>]                                        an input to process. The input must be a single image, a folder of images, video file or camera id. Default is 0
-         -mfd <MODEL FILE>                                  path to the Face Detection model (.xml) file.
-        [-mlm <MODEL FILE>]                                 path to the Facial Landmarks Regression Retail model (.xml) file
-        [-mreid <MODEL FILE>]                               path to the Face Recognition model (.xml) file.
-        [-mas <MODEL FILE>]                                 path to the Antispoofing Classification model (.xml) file.
+         --mfd <MODEL FILE>                                  path to the Face Detection model (.xml) file.
+        [--mlm <MODEL FILE>]                                 path to the Facial Landmarks Regression Retail model (.xml) file
+        [--mreid <MODEL FILE>]                               path to the Face Recognition model (.xml) file.
+        [--mas <MODEL FILE>]                                 path to the Antispoofing Classification model (.xml) file.
         [ -t_fd <NUMBER>]                                    probability threshold for face detections. Default is 0.5
         [ --input_shape <STRING>]                            specify the input shape for detection network in (width x height) format. Input of model will be reshaped according specified shape.Example: 1280x720. Shape of network input used by default.
         [ -t_reid <NUMBER>]                                  cosine distance threshold between two vectors for face reidentification. Default is 0.7
@@ -136,14 +136,13 @@ Running the application with the `-h` option:
         [-fg <GALLERY PATH>]                                 path to a faces gallery directory.
         [--allow_grow] ([--noallow_grow])                    (dont't) allow to grow faces gallery and to dump on disk.
         [--crop_gallery] ([--nocrop_gallery])                (dont't) crop images during faces gallery creation.
-        [ -dfd <DEVICE>]                                    specify a device Face Detection model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
-        [ -dlm <DEVICE>]                                    specify a device for Landmarks Regression model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
-        [ -dreid <DEVICE>]                                  specify a target device for Face Reidentification model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
-        [ -das <DEVICE>]                                    specify a device for Anti-spoofing model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [--dfd <DEVICE>]                                     specify a device Face Detection model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [--dlm <DEVICE>]                                     specify a device for Landmarks Regression model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [--dreid <DEVICE>]                                   specify a target device for Face Reidentification model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
+        [--das <DEVICE>]                                     specify a device for Anti-spoofing model to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU
         [--lim <NUMBER>]                                     number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
         [ -o <OUTPUT>]                                       name of the output file(s) to save.
         [--loop]                                             enable reading the input in a loop
-        [--nthreads <integer>]                               number of threads for TFLite model.
         [--show] ([--noshow])                                (don't) show output
         [ -u <DEVICE>]                                       resource utilization graphs. Default is cdm. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
         Key bindings:

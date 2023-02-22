@@ -77,6 +77,7 @@ omz_converter --name <model_name>
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
 
+* [Face Recognition C++ Demo](../../../demos/face_recognition_demo/cpp/README.md)
 * [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
 * [Smart Classroom C++ Demo](../../../demos/smart_classroom_demo/cpp/README.md)
 * [Smart Classroom C++ G-API Demo](../../../demos/smart_classroom_demo/cpp_gapi/README.md)
