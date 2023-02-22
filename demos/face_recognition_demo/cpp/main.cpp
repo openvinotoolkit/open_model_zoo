@@ -148,7 +148,7 @@ void parse(int argc, char *argv[]) {
         throw std::invalid_argument{"-i <INPUT> can't be empty"};
     } if (FLAGS_mfd.empty()) {
         throw std::invalid_argument{"-m_fd <MODEL FILE> can't be empty"};
-    } if (!FLAGS_fg.empty() && FLAGS_mlm.empty() && FLAGS_mreid.empty()) {
+    } if (!FLAGS_fg.empty() && (FLAGS_mlm.empty() || FLAGS_mreid.empty())) {
         throw std::logic_error("Face Gallery path should be provided only with landmarks and reidentification models");
     } if (!FLAGS_input_shape.empty() && FLAGS_input_shape.find("x") == std::string::npos) {
         throw std::logic_error("Correct format of --input_shape parameter is \"width\"x\"height\".");
