@@ -54,7 +54,7 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
       targetSize(targetSize),
       confidenceThreshold(confidenceThreshold),
       delta(delta) {
-        resizeMode = resizeMode;
+        this->resizeMode = resizeMode;
         interpolationMode = cv::INTER_CUBIC;
       }
 
