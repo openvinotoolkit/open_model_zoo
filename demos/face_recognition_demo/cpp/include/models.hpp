@@ -66,7 +66,7 @@ private:
 };
 
 void alignFaces(std::vector<cv::Mat>& face_images,
-                std::vector<cv::Mat>& landmarks_vec);
+                const std::vector<cv::Mat>& landmarks_vec);
 
 struct FaceBox {
     cv::Rect face;

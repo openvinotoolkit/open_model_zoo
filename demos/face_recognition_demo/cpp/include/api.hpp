@@ -17,13 +17,14 @@
 // Classes for using in main
 struct Result {
     cv::Rect face;
+    std::vector<cv::Point> landmarks;
     size_t id;
     float distance;
     std::string label;
     bool real;
-    Result(cv::Rect face, size_t id,
+    Result(cv::Rect face, std::vector<cv::Point> landmarks, size_t id,
            float distance, const std::string& label, bool real = true) :
-        face(face), id(id), distance(distance), label(label), real(real) {}
+        face(face), landmarks(landmarks), id(id), distance(distance), label(label), real(real) {}
 };
 
 class FaceRecognizer {
@@ -35,7 +36,8 @@ public:
 
 class FaceRecognizerDefault : public FaceRecognizer {
 public:
-    static constexpr int maxNumRequests = 16;
+    static const int MAX_NUM_REQUESTS;
+    static const int LANDMARKS_NUM;
     FaceRecognizerDefault(
         const BaseConfig& landmarksDetectorConfig,
         const BaseConfig& reidConfig,
@@ -63,19 +65,20 @@ public:
         auto faceRoi = [&](const FaceBox& face) {
             return frame(face.face);
         };
+
         int numFaces = faces.size();
-        if (numFaces < maxNumRequests) {
+        if (numFaces < MAX_NUM_REQUESTS) {
             std::transform(faces.begin(), faces.end(), std::back_inserter(faceRois), faceRoi);
             landmarks = landmarksDetector.infer(faceRois);
             alignFaces(faceRois, landmarks);
             embeddings = faceReid.infer(faceRois);
         } else {
             auto embedding = [&](cv::Mat& emb) { return emb; };
-            for (int n = numFaces; n > 0; n -= maxNumRequests) {
+            for (int n = numFaces; n > 0; n -= MAX_NUM_REQUESTS) {
                 landmarks.clear();
                 faceRois.clear();
                 size_t start_idx = size_t(numFaces) - n;
-                size_t end_idx = start_idx + std::min(numFaces, maxNumRequests);
+                size_t end_idx = start_idx + std::min(numFaces, MAX_NUM_REQUESTS);
                 std::transform(faces.begin() + start_idx, faces.begin() + end_idx, std::back_inserter(faceRois), faceRoi);
 
                 landmarks = landmarksDetector.infer(faceRois);
@@ -94,7 +97,14 @@ public:
                 if (personName != "")
                     faceGallery.addFace(origImg(faces[faceIndex].face), embeddings[faceIndex], personName);
             }
-            results.emplace_back(faces[faceIndex].face, matches[faceIndex].first,
+            std::vector<cv::Point> lms;
+            for (int i = 0; i < LANDMARKS_NUM; ++i) {
+                std::cout << landmarks[0] << std::endl;
+                int x = static_cast<int>(faces[faceIndex].face.x + landmarks[faceIndex].at<float>(2* i, 0) * faces[faceIndex].face.width);
+                int y = static_cast<int>(faces[faceIndex].face.y + landmarks[faceIndex].at<float>(2* i + 1, 0) * faces[faceIndex].face.height);
+                lms.emplace_back(x, y);
+            }
+            results.emplace_back(faces[faceIndex].face, lms, matches[faceIndex].first,
                                  matches[faceIndex].second, faceGallery.getLabelByID(matches[faceIndex].first));
         }
         return results;
@@ -108,7 +118,7 @@ protected:
 
 class AntiSpoofer {
 public:
-    static constexpr int maxNumRequests = 16;
+    static const int MAX_NUM_REQUESTS;
     AntiSpoofer(const BaseConfig& antiSpoofConfig, const float spoofThreshold=40.0) :
         antiSpoof(antiSpoofConfig), spoofThreshold(spoofThreshold)
      {}
@@ -126,15 +136,15 @@ public:
             return frame(face.face);
         };
         int numFaces = faces.size();
-        if (numFaces < maxNumRequests) {
+        if (numFaces < MAX_NUM_REQUESTS) {
             std::transform(faces.begin(), faces.end(), std::back_inserter(faceRois), faceRoi);
             spoofs = antiSpoof.infer(faceRois);
         } else {
             auto func = [&](cv::Mat& spoof) { return spoof; };
-            for (int n = numFaces; n > 0; n -= maxNumRequests) {
+            for (int n = numFaces; n > 0; n -= MAX_NUM_REQUESTS) {
                 faceRois.clear();
                 size_t startIdx = size_t(numFaces) - n;
-                size_t endIdx = startIdx + std::min(numFaces, maxNumRequests);
+                size_t endIdx = startIdx + std::min(numFaces, MAX_NUM_REQUESTS);
                 std::transform(faces.begin() + startIdx, faces.begin() + endIdx, std::back_inserter(faceRois), faceRoi);
                 std::vector<cv::Mat> tmpSpoofs = antiSpoof.infer(faceRois);
                 std::transform(tmpSpoofs.begin(), tmpSpoofs.end(), std::back_inserter(spoofs), func);
@@ -153,3 +163,7 @@ private:
         return probability > spoofThreshold;
     }
 };
+
+const int FaceRecognizerDefault::LANDMARKS_NUM = 5;
+const int FaceRecognizerDefault::MAX_NUM_REQUESTS = 16;
+const int AntiSpoofer::MAX_NUM_REQUESTS = 16;

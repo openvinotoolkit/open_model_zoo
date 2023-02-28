@@ -213,6 +213,10 @@ cv::Mat drawDetections(const std::vector<Result>& results, cv::Mat frame) {
         drawPhotoFrameCorner(cv::Point(rect.x + rect.width - 1, rect.y), -dx, dy);
         drawPhotoFrameCorner(cv::Point(rect.x, rect.y + rect.height - 1), dx, -dy);
         drawPhotoFrameCorner(cv::Point(rect.x + rect.width - 1, rect.y + rect.height - 1), -dx, -dy);
+
+        for (const auto lm : result.landmarks) {
+            cv::circle(frame, lm, 2, {110, 193, 225}, -1);
+        }
     }
     return frame;
 }
@@ -250,12 +254,12 @@ int main(int argc, char* argv[]) {
         if (!lmModelPath.empty() && !frModelPath.empty()) {
             BaseConfig landmarksConfig(lmModelPath);
             landmarksConfig.deviceName = FLAGS_dlm;
-            landmarksConfig.numRequests = FaceRecognizerDefault::maxNumRequests;
+            landmarksConfig.numRequests = FaceRecognizerDefault::MAX_NUM_REQUESTS;
             landmarksConfig.core = core;
 
             BaseConfig reidConfig(frModelPath);
             reidConfig.deviceName = FLAGS_dreid;
-            reidConfig.numRequests = FaceRecognizerDefault::maxNumRequests;
+            reidConfig.numRequests = FaceRecognizerDefault::MAX_NUM_REQUESTS;
             reidConfig.core = core;
 
             bool allowGrow = FLAGS_allow_grow && FLAGS_show;
@@ -273,7 +277,7 @@ int main(int argc, char* argv[]) {
         if (!asModelPath.empty()) {
             BaseConfig antiSpoofConfig(asModelPath);
             antiSpoofConfig.deviceName = FLAGS_das;
-            antiSpoofConfig.numRequests = FaceRecognizerDefault::maxNumRequests;
+            antiSpoofConfig.numRequests = FaceRecognizerDefault::MAX_NUM_REQUESTS;
             antiSpoofConfig.core = core;
             antiSpoofer.reset(new AntiSpoofer(antiSpoofConfig));
         } else {
@@ -310,7 +314,7 @@ int main(int argc, char* argv[]) {
                 results = faceRecognizer->recognize(prevFrame.clone(), faces);
             } else {
                 for (const auto& f : faces) {
-                    results.emplace_back(f.face, EmbeddingsGallery::unknownId,
+                    results.emplace_back(f.face, std::vector<cv::Point>{}, EmbeddingsGallery::unknownId,
                         EmbeddingsGallery::unknownDistance, EmbeddingsGallery::unknownLabel);
                 }
             }

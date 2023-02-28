@@ -48,7 +48,7 @@ cv::Mat getTransform(cv::Mat* src, cv::Mat* dst) {
     return m;
 }
 
-void alignFaces(std::vector<cv::Mat>& faceImages, std::vector<cv::Mat>& landmarksVec) {
+void alignFaces(std::vector<cv::Mat>& faceImages, const std::vector<cv::Mat>& landmarksVec) {
     if (landmarksVec.size() == 0) {
         return;
     }
@@ -56,16 +56,17 @@ void alignFaces(std::vector<cv::Mat>& faceImages, std::vector<cv::Mat>& landmark
     cv::Mat refLandmarks = cv::Mat(5, 2, CV_32F);
 
     for (size_t j = 0; j < faceImages.size(); j++) {
+        auto lms = landmarksVec.at(j).clone();
         for (int i = 0; i < refLandmarks.rows; i++) {
             refLandmarks.at<float>(i, 0) =
                     REF_LANDMARKS_NORMED[2 * i] * faceImages.at(j).cols;
             refLandmarks.at<float>(i, 1) =
                     REF_LANDMARKS_NORMED[2 * i + 1] * faceImages.at(j).rows;
-            landmarksVec.at(j) = landmarksVec.at(j).reshape(1, 5);
-            landmarksVec.at(j).at<float>(i, 0) *= faceImages.at(j).cols;
-            landmarksVec.at(j).at<float>(i, 1) *= faceImages.at(j).rows;
+            lms = lms.reshape(1, 5);
+            lms.at<float>(i, 0) *= faceImages.at(j).cols;
+            lms.at<float>(i, 1) *= faceImages.at(j).rows;
         }
-        cv::Mat m = getTransform(&refLandmarks, &landmarksVec.at(j));
+        cv::Mat m = getTransform(&refLandmarks, &lms);
         cv::warpAffine(faceImages.at(j), faceImages.at(j), m,
                        faceImages.at(j).size(), cv::WARP_INVERSE_MAP);
     }
