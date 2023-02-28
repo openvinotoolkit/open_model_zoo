@@ -305,35 +305,38 @@ DEMOS = [
     )),
 
     CppDemo(name='face_recognition_demo',
-            model_keys=['-mfd', '-mlm', '-mreid', '-mas'],
-            device_keys=['-dfd', '-dlm', '-dreid', '-das'],
+            model_keys=['--mfd', '--mlm', '--mreid', '--mas'],
+            device_keys=['--dfd', '--dlm', '--dreid', '--das'],
             test_cases=combine_cases(
         TestCase(options={'--noshow': None,
             **MONITORS,
             '-i': DataPatternArg('face-detection-adas'),
-            '-fg': DataDirectoryArg('face-recognition-gallery'),
-            '-mfd': ModelArg('face-detection-adas-0001'),
+            '--mfd': ModelArg('face-detection-adas-0001'),
             }),
         [
             *combine_cases(
                 [
                     TestCase(options={}),
                     TestCase(options={
-                        '-mlm': ModelArg('landmarks-regression-retail-0009'),
-                        '-mreid': ModelArg('Sphereface'),
+                        '--fg': DataDirectoryArg('face-recognition-gallery'),
+                        '--mlm': ModelArg('landmarks-regression-retail-0009'),
+                        '--mreid': ModelArg('Sphereface'),
                     }),
                     TestCase(options={
-                        '-mlm': ModelArg('landmarks-regression-retail-0009'),
-                        '-mreid': ModelArg('face-recognition-resnet100-arcface-onnx'),
+                        '--fg': DataDirectoryArg('face-recognition-gallery'),
+                        '--mlm': ModelArg('landmarks-regression-retail-0009'),
+                        '--mreid': ModelArg('face-recognition-resnet100-arcface-onnx'),
                     }),
                     TestCase(options={
-                        '-mlm': ModelArg('landmarks-regression-retail-0009'),
-                        '-mreid': ModelArg('face-recognition-resnet100-arcface-onnx'),
+                        '--fg': DataDirectoryArg('face-recognition-gallery'),
+                        '--mlm': ModelArg('landmarks-regression-retail-0009'),
+                        '--mreid': ModelArg('face-recognition-resnet100-arcface-onnx'),
                     }),
                     TestCase(options={
-                        '-mlm': ModelArg('landmarks-regression-retail-0009'),
-                        '-mreid': ModelArg('facenet-20180408-102900'),
-                        '-mas': ModelArg('anti-spoof-mn3'),
+                        '--fg': DataDirectoryArg('face-recognition-gallery'),
+                        '--mlm': ModelArg('landmarks-regression-retail-0009'),
+                        '--mreid': ModelArg('facenet-20180408-102900'),
+                        '--mas': ModelArg('anti-spoof-mn3'),
                     }),
                 ],
             ),
