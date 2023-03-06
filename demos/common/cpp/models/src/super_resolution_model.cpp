@@ -205,3 +205,105 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
 
     return std::unique_ptr<ResultBase>(result);
 }
+
+std::unique_ptr<ResultBase> SuperResolutionChannelJoint::postprocess(InferenceResult& infResult) {
+    ImageResult* result = new ImageResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    const auto outputData = infResult.getFirstOutputTensor().data<float>();
+
+    const ov::Shape& outShape = infResult.getFirstOutputTensor().get_shape();
+
+    const size_t outHeight = static_cast<int>(outShape[2]);
+    const size_t outWidth = static_cast<int>(outShape[3]);
+
+    std::vector<cv::Mat> channels;
+    for (int i = 0; i < 3; ++i) {
+        channels.emplace_back(outHeight, outWidth, CV_32FC1, &(outputData[0]) + i * outHeight * outWidth);
+    }
+    cv::Mat resultImg(outHeight, outWidth, CV_32FC3);
+    cv::merge(channels, resultImg);
+
+    resultImg.convertTo(resultImg, CV_8UC3);
+    result->resultImage = resultImg;
+
+    return std::unique_ptr<ResultBase>(result);
+}
+
+std::shared_ptr<InternalModelData> SuperResolutionChannelJoint::preprocess(const InputData& inputData,
+                                                                           ov::InferRequest& request) {
+    auto imgData = inputData.asRef<ImageInputData>();
+    auto& img = imgData.inputImage;
+
+    const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
+    const ov::Layout layout("NCHW");
+
+    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight) {
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+    }
+
+    const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
+    const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
+
+    //img = resizeImageExt(img, width, height);
+    //request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
+
+    std::vector<cv::Mat> channels;
+    cv::split(img, channels);
+
+    ov::Tensor tensor(ov::element::u8, {3, 1, height, width});
+    matToTensor(channels[0], tensor, 0);
+    matToTensor(channels[1], tensor, 1);
+    matToTensor(channels[2], tensor, 2);
+
+    request.set_tensor(inputsNames[0], tensor);
+
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
+}
+
+void SuperResolutionChannelJoint::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
+    // --------------------------- Configure input & output ---------------------------------------------
+    // --------------------------- Prepare input --------------------------------------------------
+    const ov::OutputVector& inputs = model->inputs();
+    if (inputs.size() != 1) {
+        throw std::logic_error("Super resolution channel joint model wrapper supports topologies with 1 inputs only");
+    }
+    std::string lrInputTensorName = inputs.begin()->get_any_name();
+    inputsNames.push_back(lrInputTensorName);
+    ov::Shape lrShape = inputs.begin()->get_shape();
+    if (lrShape.size() != 4) {
+        throw std::logic_error("Number of dimensions for an input must be 4");
+    }
+    // in case of 2 inputs they have the same layouts
+    ov::Layout inputLayout = getInputLayout(model->inputs().front());
+
+    auto channelsId = ov::layout::channels_idx(inputLayout);
+
+    if (lrShape[channelsId] != 1) {
+        throw std::logic_error("Input layer is expected to have 1 channel");
+    }
+
+    ov::preprocess::PrePostProcessor ppp(model);
+    const auto& input = inputs.front();
+    ppp.input(input.get_any_name()).tensor().set_element_type(ov::element::u8).set_layout("NCHW");
+    ppp.input(input.get_any_name()).model().set_layout(inputLayout);
+
+    // --------------------------- Prepare output -----------------------------------------------------
+    const ov::OutputVector& outputs = model->outputs();
+    if (outputs.size() != 1) {
+        throw std::logic_error("Super resolution model wrapper supports topologies with only 1 output");
+    }
+
+    outputsNames.push_back(outputs.begin()->get_any_name());
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    model = ppp.build();
+
+    const ov::Shape& outShape = model->output().get_shape();
+
+    const ov::Layout outputLayout("NCHW");
+    const auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    const auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
+
+    changeInputSize(model, static_cast<int>(outWidth / inWidth));
+
+    ov::set_batch(model, 3);
+}

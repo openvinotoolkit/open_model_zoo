@@ -34,9 +34,6 @@ std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::Core& core) {
     // -------------------------- Reading all outputs names and customizing I/O tensors (in inherited classes)
     prepareInputsOutputs(model);
 
-    /** Set batch size to 1 **/
-    ov::set_batch(model, 1);
-
     return model;
 }
 
