@@ -244,16 +244,13 @@ std::shared_ptr<InternalModelData> SuperResolutionChannelJoint::preprocess(const
     const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
     const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
 
-    //img = resizeImageExt(img, width, height);
-    //request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
-
     std::vector<cv::Mat> channels;
     cv::split(img, channels);
 
     ov::Tensor tensor(ov::element::u8, {3, 1, height, width});
-    matToTensor(channels[0], tensor, 0);
-    matToTensor(channels[1], tensor, 1);
-    matToTensor(channels[2], tensor, 2);
+    for (int i = 0; i < 3; ++i) {
+        matToTensor(channels[i], tensor, i);
+    }
 
     request.set_tensor(inputsNames[0], tensor);
 
