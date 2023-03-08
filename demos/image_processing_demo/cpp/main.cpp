@@ -58,7 +58,7 @@ DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, "
-                                 "'sr_channel_joint' for Super Resolution task that accepts and returns 1 channel image, 'deblur' for "
+                                 "'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, 'deblur' for "
                                  "Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."

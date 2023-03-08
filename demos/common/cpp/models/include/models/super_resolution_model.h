@@ -55,4 +55,5 @@ public:
     std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
+    void setBatch(std::shared_ptr<ov::Model>& model) override;
 };

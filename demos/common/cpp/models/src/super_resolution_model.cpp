@@ -304,3 +304,7 @@ void SuperResolutionChannelJoint::prepareInputsOutputs(std::shared_ptr<ov::Model
 
     ov::set_batch(model, 3);
 }
+
+void SuperResolutionChannelJoint::setBatch(std::shared_ptr<ov::Model>& model) {
+    ov::set_batch(model, 3);
+}

@@ -33,6 +33,7 @@ std::shared_ptr<ov::Model> ModelBase::prepareModel(ov::Core& core) {
     logBasicModelInfo(model);
     // -------------------------- Reading all outputs names and customizing I/O tensors (in inherited classes)
     prepareInputsOutputs(model);
+    setBatch(model);
 
     return model;
 }
@@ -61,4 +62,8 @@ ov::Layout ModelBase::getInputLayout(const ov::Output<ov::Node>& input) {
     }
 
     return layout;
+}
+
+void ModelBase::setBatch(std::shared_ptr<ov::Model>& model) {
+    ov::set_batch(model, 1);
 }

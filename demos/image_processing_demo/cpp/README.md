@@ -87,7 +87,7 @@ image_processing_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
+    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
