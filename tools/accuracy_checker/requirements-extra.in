@@ -15,7 +15,8 @@ imagecodecs~=2021.11.20;python_version=="3.7"
 imagecodecs~=2022.2.22;python_version>="3.8"
 
 # reid
-scikit-learn>=1.2.0
+scikit-learn>=0.24.1;python_version<"3.11"
+scikit-learn>=1.2.0;python_version>="3.11"
 
 # cpu extension usage
 py-cpuinfo>=7.0.0
