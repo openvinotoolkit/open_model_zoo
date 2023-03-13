@@ -489,7 +489,7 @@ class OpenVINOLauncher(Launcher):
         precision_type = PRECISION_STR_TO_TYPE.get(precision_hint.upper(), precision_hint)
         self.ie_core.set_property(self._device, {'INFERENCE_PRECISION_HINT': precision_type})
         current_precision = self.ie_core.get_property(self._device, 'INFERENCE_PRECISION_HINT')
-        print_info(f'Inference precision: {current_precision.get_type_name()}')
+        print_info(f'Inference precision: {current_precision}')
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)
