@@ -39,7 +39,7 @@ def positive_int_arg(value_str):
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
 
-def main():
+def download(argv):
     parser = DownloaderArgumentParser()
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='download only models whose names match at least one of the specified patterns')
@@ -63,7 +63,7 @@ def main():
     parser.add_argument('-j', '--jobs', type=positive_int_arg, metavar='N', default=1,
         help='how many downloads to perform concurrently')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     reporter = Downloader.make_reporter(args.progress_format)
 
@@ -103,6 +103,10 @@ def main():
                 reporter.print(failed_model_name)
                 telemetry.send_event('md', 'downloader_failed_models', failed_model_name)
             sys.exit(1)
+
+
+def main():
+    download(sys.argv[1:])
 
 
 if __name__ == '__main__':

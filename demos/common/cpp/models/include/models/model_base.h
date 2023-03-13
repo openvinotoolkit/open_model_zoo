@@ -63,6 +63,7 @@ public:
 
 protected:
     virtual void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) = 0;
+    virtual void setBatch(std::shared_ptr<ov::Model>& model);
 
     std::shared_ptr<ov::Model> prepareModel(ov::Core& core);
 
