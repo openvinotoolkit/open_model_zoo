@@ -4,7 +4,8 @@ tqdm>=4.54.1
 # image reading and preprocessing
 # networkx version upperbound in scikit-image is conflicted
 networkx~=2.5;python_version<"3.7"
-networkx;python_version>="3.7"
+# nncf's upperbound: https://github.com/openvinotoolkit/nncf/blob/1de67217adf60a29afa310edf4a5f4d36314446a/setup.py#L104
+networkx<=2.8.2;python_version>="3.7"
 # note: python 3.6 wheels is not available since 0.18
 scikit-image~=0.17.2;python_version<"3.7"
 scikit-image>=0.19.2;python_version>="3.7"
