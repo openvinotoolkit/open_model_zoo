@@ -189,7 +189,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
         for j, s in enumerate(data_seq):
             image_handle = read_nii_header(test_data_path, data_name + s)
             affine = image_handle.affine
-            image = image_handle.get_data().astype(np.float32)
+            image = image_handle.get_fdata(dtype=np.float32)
 
             mask = image > 0.
             bboxes[j] = bbox3(mask)
@@ -200,7 +200,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
     else:
         data_handle = read_nii_header(test_data_path, data_name)
         affine = data_handle.affine
-        data = data_handle.get_data().astype(np.float32)
+        data = data_handle.get_fdata(dtype=np.float32)
         assert len(data.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(data.shape))
         assert data.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(data.shape)
         # Reading order is specified for data from http://medicaldecathlon.com/

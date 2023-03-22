@@ -79,7 +79,7 @@ class QuartzNet:
         preemphased = np.concatenate([audio[:1], audio[1:] - preemph * audio[:-1].astype(np.float32)])
 
         win_length = round(sampling_rate * 0.02)
-        spec = np.abs(librosa.core.spectrum.stft(preemphased, n_fft=512, hop_length=round(sampling_rate * 0.01),
+        spec = np.abs(librosa.stft(preemphased, n_fft=512, hop_length=round(sampling_rate * 0.01),
             win_length=win_length, center=True, window=scipy.signal.windows.hann(win_length), pad_mode='reflect'))
         mel_basis = librosa.filters.mel(sampling_rate, 512, n_mels=64, fmin=0.0, fmax=8000.0, norm='slaney', htk=False)
         log_melspectrum = np.log(np.dot(mel_basis, np.power(spec, 2)) + 2 ** -24)
