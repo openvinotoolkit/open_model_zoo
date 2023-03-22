@@ -32,10 +32,7 @@ _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 symbols = [_pad] + list(_special) + list(_punctuation) + list(_letters)
 
 
-# Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}
-_id_to_symbol = {i: s for i, s in enumerate(symbols)}
-
 
 
 _abbreviations = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in [
