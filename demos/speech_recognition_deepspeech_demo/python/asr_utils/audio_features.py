@@ -89,7 +89,7 @@ def samples_to_melspectrum(samples, sampling_rate, window_size, stride, n_mels, 
     ))
     # match tf: norm=None
     mel_basis = librosa.filters.mel(
-        sampling_rate, window_size,
+        sr=sampling_rate, n_fft=window_size,
         n_mels=n_mels, fmin=fmin, fmax=fmax,
         norm=None, htk=True,
     )
