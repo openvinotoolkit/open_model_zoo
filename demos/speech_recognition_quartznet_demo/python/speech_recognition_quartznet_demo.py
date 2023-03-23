@@ -81,7 +81,7 @@ class QuartzNet:
         win_length = round(sampling_rate * 0.02)
         spec = np.abs(librosa.stft(preemphased, n_fft=512, hop_length=round(sampling_rate * 0.01),
             win_length=win_length, center=True, window=scipy.signal.windows.hann(win_length), pad_mode='reflect'))
-        mel_basis = librosa.filters.mel(sampling_rate, 512, n_mels=64, fmin=0.0, fmax=8000.0, norm='slaney', htk=False)
+        mel_basis = librosa.filters.mel(sr=sampling_rate, n_fft=512, n_mels=64, fmin=0.0, fmax=8000.0, norm='slaney', htk=False)
         log_melspectrum = np.log(np.dot(mel_basis, np.power(spec, 2)) + 2 ** -24)
 
         normalized = (log_melspectrum - log_melspectrum.mean(1)[:, None]) / (log_melspectrum.std(1)[:, None] + 1e-5)
