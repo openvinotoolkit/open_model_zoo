@@ -1307,7 +1307,7 @@ DEMOS = [
     )),
 
     PythonDemo(name='smartlab_demo', device_keys=['-d'],
-        model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
+        model_keys=['-m_ta', '-m_tm', '-m_sa', '-m_sm', '-m_en', '-m_de'],
         test_cases=combine_cases(
         [
             TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
