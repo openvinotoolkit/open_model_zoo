@@ -1311,13 +1311,15 @@ DEMOS = [
         test_cases=combine_cases(
         [
             TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
-                '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
+                '-sv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
                 '-m_ta': ModelArg('smartlab-object-detection-0001'),
                 '-m_tm': ModelArg('smartlab-object-detection-0002'),
-                '-m_fa': ModelArg('smartlab-object-detection-0003'),
-                '-m_fm': ModelArg('smartlab-object-detection-0004'),
-                '-m_en': ModelArg('i3d-rgb-tf'),
-                '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
+                '-m_sa': ModelArg('smartlab-object-detection-0003'),
+                '-m_sm': ModelArg('smartlab-object-detection-0004'),
+                '--mode': 'mstcn',  # TODO: test multiview
+                '-m_en': ModelArg('smartlab-sequence-modelling-0001'),
+                '-m_de': ModelArg('smartlab-sequence-modelling-0002'),
+            }),
         ],
     )),
 
