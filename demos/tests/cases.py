@@ -1310,8 +1310,8 @@ DEMOS = [
         model_keys=['-m_ta', '-m_tm', '-m_sa', '-m_sm', '-m_en', '-m_de'],
         test_cases=combine_cases(
         [
-            TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
-                '-sv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
+            TestCase(options={'-tv': TestDataArg('stream_8_top.mp4'),
+                '-sv': TestDataArg('stream_8_front.mp4'),
                 '-m_ta': ModelArg('smartlab-object-detection-0001'),
                 '-m_tm': ModelArg('smartlab-object-detection-0002'),
                 '-m_sa': ModelArg('smartlab-object-detection-0003'),
