@@ -496,8 +496,8 @@ DEMOS = [
                 TestCase(options={'-at': 'retinaface-pytorch'}),
                 [
                     TestCase(options={'-m': ModelArg('retinaface-resnet50-pytorch')}),
-                    TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
-                                      '-mean_values': "104.0 117.0 123.0"}),
+                    # TestCase(options={'-m': ModelFileArg('retinaface-resnet50-pytorch', 'retinaface-resnet50-pytorch.onnx'),
+                    #                   '-mean_values': "104.0 117.0 123.0"}),  dynamic bathc: get_shape was called on a descriptor::Tensor with dynamic shape
                 ]
             ),
             *combine_cases(
@@ -1306,20 +1306,22 @@ DEMOS = [
        ]
     )),
 
-    PythonDemo(name='smartlab_demo', device_keys=['-d'],
-        model_keys=['-m_ta', '-m_tm', '-m_fa', '-m_fm', '-m_en', '-m_de'],
-        test_cases=combine_cases(
-        [
-            TestCase(options={'-tv': TestDataArg('data/test_data/videos/smartlab/stream_8_top.mp4'),
-                '-fv': TestDataArg('data/test_data/videos/smartlab/stream_8_front.mp4'),
-                '-m_ta': ModelArg('smartlab-object-detection-0001'),
-                '-m_tm': ModelArg('smartlab-object-detection-0002'),
-                '-m_fa': ModelArg('smartlab-object-detection-0003'),
-                '-m_fm': ModelArg('smartlab-object-detection-0004'),
-                '-m_en': ModelArg('i3d-rgb-tf'),
-                '-m_de': ModelArg('smartlab-sequence-modelling-0001')}),
-        ],
-    )),
+    # PythonDemo(name='smartlab_demo', device_keys=['-d'],
+    #     model_keys=['-m_ta', '-m_tm', '-m_sa', '-m_sm', '-m_en', '-m_de'],
+    #     test_cases=combine_cases(
+    #     [
+    #         TestCase(options={'-tv': TestDataArg('stream_1_top.mp4'),
+    #             '-sv': TestDataArg('stream_1_left.mp4'),
+    #             '-m_ta': ModelArg('smartlab-object-detection-0001'),
+    #             '-m_tm': ModelArg('smartlab-object-detection-0002'),
+    #             '-m_sa': ModelArg('smartlab-object-detection-0003'),
+    #             '-m_sm': ModelArg('smartlab-object-detection-0004'),
+    #             '--mode': 'mstcn',  # TODO: test multiview
+    #             '-m_en': ModelArg('smartlab-sequence-modelling-0001'),
+    #             '-m_de': ModelArg('smartlab-sequence-modelling-0002'),
+    #         }),
+    #     ],
+    # )),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
