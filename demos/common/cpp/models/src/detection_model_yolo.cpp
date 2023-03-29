@@ -130,7 +130,8 @@ void ModelYolo::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) {
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
+    inputTransform.setPrecision(ppp, input.get_any_name());
+    ppp.input().tensor().set_layout({"NHWC"});
 
     if (useAutoResize) {
         ppp.input().tensor().set_spatial_dynamic_shape();
