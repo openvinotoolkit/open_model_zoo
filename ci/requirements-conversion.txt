@@ -6,8 +6,6 @@ absl-py==1.4.0
     #   tensorflow
 addict==2.4.0
     # via openvino-dev
-astor==0.8.1
-    # via paddlepaddle
 astunparse==1.6.3
     # via tensorflow
 cachetools==5.3.0
@@ -16,17 +14,15 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
-decorator==5.1.1
-    # via paddlepaddle
 defusedxml==0.7.1
     # via openvino-dev
 fastjsonschema==2.15.3
     # via openvino-dev
-flatbuffers==1.12
+flatbuffers==23.3.3
     # via tensorflow
 gast==0.4.0
     # via tensorflow
-google-auth==2.16.2
+google-auth==2.17.0
     # via
     #   google-auth-oauthlib
     #   tensorboard
@@ -36,7 +32,7 @@ google-pasta==0.2.0
     # via tensorflow
 graphviz==0.8.4
     # via mxnet
-grpcio==1.51.3
+grpcio==1.53.0
     # via
     #   tensorboard
     #   tensorflow
@@ -46,18 +42,20 @@ idna==3.4
     # via requests
 importlib-metadata==6.1.0
     # via markdown
+jax==0.4.8
+    # via tensorflow
 jstyleson==0.0.2
     # via openvino-dev
-keras==2.9.0
+keras==2.12.0
     # via tensorflow
-keras-preprocessing==1.1.2
+libclang==16.0.0
     # via tensorflow
-libclang==15.0.6.1
-    # via tensorflow
-markdown==3.4.1
+markdown==3.4.3
     # via tensorboard
 markupsafe==2.1.2
     # via werkzeug
+ml-dtypes==0.0.4
+    # via jax
 mxnet==1.9.1
     # via openvino-dev
 networkx==2.8.8
@@ -65,14 +63,14 @@ networkx==2.8.8
 numpy==1.23.4
     # via
     #   h5py
-    #   keras-preprocessing
+    #   jax
+    #   ml-dtypes
     #   mxnet
     #   onnx
     #   opencv-python
     #   openvino
     #   openvino-dev
     #   opt-einsum
-    #   paddlepaddle
     #   pandas
     #   scipy
     #   tensorboard
@@ -90,44 +88,34 @@ nvidia-cudnn-cu11==8.5.0.96
     # via torch
 oauthlib==3.2.2
     # via requests-oauthlib
-onnx==1.12.0
-    # via
-    #   -r tools/model_tools/requirements-pytorch.in
-    #   openvino-dev
+onnx==1.13.1
+    # via -r tools/model_tools/requirements-pytorch.in
 opencv-python==4.7.0.72
     # via openvino-dev
 openvino==2022.3.0
     # via openvino-dev
-openvino-dev[caffe,mxnet,onnx,tensorflow2]==2022.3.0
+openvino-dev[caffe,mxnet]==2022.3.0
     # via
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_caffe.txt
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_mxnet.txt
-    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_onnx.txt
-    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_tensorflow2.txt
 openvino-telemetry==2022.3.0
     # via openvino-dev
 opt-einsum==3.3.0
     # via
-    #   paddlepaddle
+    #   jax
     #   tensorflow
 packaging==23.0
     # via tensorflow
-paddle-bfloat==0.1.7
-    # via paddlepaddle
-paddlepaddle==2.4.2
-    # via -r tools/model_tools/requirements-paddle.in
 pandas==1.3.5
     # via openvino-dev
 pillow==9.4.0
     # via
     #   openvino-dev
-    #   paddlepaddle
     #   torchvision
-protobuf==3.19.6
+protobuf==3.20.3
     # via
     #   onnx
     #   openvino-dev
-    #   paddlepaddle
     #   tensorboard
     #   tensorflow
 pyasn1==0.4.8
@@ -138,7 +126,7 @@ pyasn1-modules==0.2.8
     # via google-auth
 python-dateutil==2.8.2
     # via pandas
-pytz==2022.7.1
+pytz==2023.3
     # via pandas
 pyyaml==6.0
     # via
@@ -149,7 +137,6 @@ requests==2.28.2
     #   mxnet
     #   openvino-dev
     #   openvino-telemetry
-    #   paddlepaddle
     #   requests-oauthlib
     #   tensorboard
     #   torchvision
@@ -160,29 +147,26 @@ rsa==4.9
 scipy==1.10.1
     # via
     #   -r tools/model_tools/requirements-pytorch.in
+    #   jax
     #   openvino-dev
 six==1.16.0
     # via
     #   astunparse
     #   google-auth
     #   google-pasta
-    #   keras-preprocessing
-    #   paddlepaddle
     #   python-dateutil
     #   tensorflow
-tensorboard==2.9.1
+tensorboard==2.12.0
     # via tensorflow
-tensorboard-data-server==0.6.1
+tensorboard-data-server==0.7.0
     # via tensorboard
 tensorboard-plugin-wit==1.8.1
     # via tensorboard
-tensorflow==2.9.3
-    # via
-    #   -r tools/model_tools/requirements-tensorflow.in
-    #   openvino-dev
-tensorflow-estimator==2.9.0
+tensorflow==2.12.0
+    # via -r tools/model_tools/requirements-tensorflow.in
+tensorflow-estimator==2.12.0
     # via tensorflow
-tensorflow-io-gcs-filesystem==0.31.0
+tensorflow-io-gcs-filesystem==0.32.0
     # via tensorflow
 termcolor==2.2.0
     # via tensorflow
@@ -214,7 +198,7 @@ wheel==0.40.0
     #   nvidia-cublas-cu11
     #   nvidia-cuda-runtime-cu11
     #   tensorboard
-wrapt==1.15.0
+wrapt==1.14.1
     # via tensorflow
 yacs==0.1.8
     # via -r tools/model_tools/requirements-pytorch.in
