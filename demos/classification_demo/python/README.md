@@ -100,7 +100,7 @@ omz_converter --list models.lst
 
 ### Required Files
 
-If you want to see classification results, you must use "-labels" flags to specify .txt file containing lists of classes and labels.
+If you want to see classification results, you must use "--labels" flags to specify .txt file containing lists of classes and labels.
 
 Please note that you should use `<omz_dir>/data/dataset_classes/imagenet_2015.txt` labels file with the following models:
 
@@ -118,12 +118,12 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT
                               [-d DEVICE] [--labels LABELS]
-                              [-topk {1,2,3,4,5,6,7,8,9,10}]
+                              [--topk {1,2,3,4,5,6,7,8,9,10}]
                               [-nireq NUM_INFER_REQUESTS]
                               [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
-                              [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                              [--no_show]
-                              [--output_resolution OUTPUT_RESOLUTION]
+                              [--loop] [-o OUTPUT] [--limit OUTPUT_LIMIT]
+                              [--noshow]
+                              [--res OUTPUT_RESOLUTION]
                               [-u UTILIZATION_MONITORS]
                               [--reverse_input_channels]
                               [--mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES]
@@ -131,72 +131,59 @@ usage: classification_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT
                               [-r]
 
 Options:
-  -h, --help            Show this help message and exit.
+  -h, --help            show the help message and exit
+                        Key bindings:
+                          Q, q, Esc - Quit
+                          P, p, 0, SpaceBar - Pause for stream input. Any key - switch frame for separated images
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model or
-                        address of model inference service if using OVMS adapter.
-  --adapter {openvino,ovms}
-                        Optional. Specify the model adapter. Default is
-                        openvino.
+                        path to an .xml file with a trained model or address of model inference service if using OVMS adapter
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a
-                        single image, a folder of images, video file or camera
-                        id.
+                        an input to process. The input must be a single image, a folder of images or camera id
+  --adapter {openvino,ovms}
+                        specify the model adapter. Default is openvino
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will look
-                        for a suitable plugin for device specified. Default
-                        value is CPU.
+                        specify the target device to infer on: CPU, GPU, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for device specified. Default is CPU
 
 Common model options:
-  --labels LABELS       Optional. Labels mapping file.
-  -topk {1,2,3,4,5,6,7,8,9,10}
-                        Optional. Number of top results. Default value is 5.
-                        Must be from 1 to 10.
+  --labels LABELS
+                        labels mapping file
+  --layout LAYOUT
+                        model inputs layouts. Example: NCHW or input0:NCHW,input1:NC in case of more than one input
+  --topk {1,2,3,4,5,6,7,8,9,10}
+                        number of top results(from 1 to 10). Default value is 5
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
-                        Optional. Number of infer requests
+                        number of infer requests
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
-                        Optional. Number of streams to use for inference on
-                        the CPU or/and GPU in throughput mode (for HETERO and
-                        MULTI device cases use format
-                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
-                        <nstreams>).
+                        number of streams to use for inference on the CPU or/and GPU in throughput mode
+                        (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
-                        Optional. Number of threads to use for inference on
-                        CPU (including HETERO cases).
+                        number of threads to use for inference on CPU (including HETERO cases)
 
 Input/output options:
-  --loop                Optional. Enable reading the input in a loop.
+  -lim OUTPUT_LIMIT, --limit OUTPUT_LIMIT
+                        number of frames to store in output. If 0 is set, all frames are stored. Default is 1000
+  --loop                enable reading the input in a loop
+  --noshow              don't show output
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
-  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0 is
-                        set, all frames are stored.
-  --no_show             Optional. Don't show output.
-  --output_resolution OUTPUT_RESOLUTION
-                        Optional. Specify the maximum output window resolution
-                        in (width x height) format. Example: 1280x720. Input
-                        frame size used by default.
+                        name of the output file(s) to save
+  --res OUTPUT_RESOLUTION
+                        set image grid resolution in format WxH
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
-                        Optional. List of monitors to show initially.
+                        resource utilization graphs. c - average CPU load, d - load distribution over cores, m - memory usage, h - hide
 
 Input transform options:
   --reverse_input_channels
-                        Optional. Switch the input channels order from BGR to
-                        RGB.
+                        switch the input channels order from BGR to RGB
   --mean_values MEAN_VALUES MEAN_VALUES MEAN_VALUES
-                        Optional. Normalize input by subtracting the mean
-                        values per channel. Example: 255.0 255.0 255.0
+                        normalize input by subtracting the mean values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES SCALE_VALUES SCALE_VALUES
-                        Optional. Divide input by scale values per channel.
-                        Division is applied after mean values subtraction.
-                        Example: 255.0 255.0 255.0
+                        divide input by scale values per channel(division is applied after mean values subtraction). Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message
-                        Optional. Output inference results raw values showing.
+                        output inference results raw values showing
 ```
 
 Running the application with the empty list of options yields an error message.
