@@ -18,9 +18,9 @@ decorator==5.1.1
     # via librosa
 defusedxml==0.7.1
     # via openvino-dev
-fonttools==4.39.2
+fonttools==4.39.3
     # via matplotlib
-grpcio==1.51.3
+grpcio==1.53.0
     # via ovmsclient
 idna==3.4
     # via requests
@@ -110,7 +110,7 @@ protobuf==3.20.3
     #   tensorboardx
 pycparser==2.21
     # via cffi
-pydantic==1.10.6
+pydantic==1.10.7
     # via inflect
 pyparsing==2.4.7
     # via
@@ -120,7 +120,7 @@ python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
-pytz==2022.7.1
+pytz==2023.3
     # via pandas
 pyyaml==6.0
     # via
