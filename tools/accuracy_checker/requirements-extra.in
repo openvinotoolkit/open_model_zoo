@@ -45,7 +45,7 @@ nltk>=3.5
 # DNA sequence matching
 parasail>=1.2.4;platform_system!="Windows"
 parasail~=1.2.4;platform_system=="Windows"
-fast-ctc-decode>=0.2.5
+fast-ctc-decode>=0.2.5;python_version<"3.11"
 
 # raw image formats processing
 rawpy>=0.16.0;python_version<"3.7"
