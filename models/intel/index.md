@@ -139,12 +139,6 @@
    omz_models_model_yolo_v2_tiny_vehicle_detection_0001
 
 
-.. raw:: html
-
-   <script>
-      window.TABLE_SORT = true;
-   </script>
-
 @endsphinxdirective
 -->
 
@@ -165,6 +159,8 @@ detect the same types of objects (for example, `face-detection-adas-0001` and
 `face-detection-retail-0004`) provide a choice for higher accuracy/wider
 applicability at the cost of slower performance, so you can expect a "bigger"
 network to detect objects of the same type better.
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -226,6 +222,8 @@ Object recognition models are used for classification, regression, and character
 recognition. Use these networks after a respective detector (for example,
 Age/Gender recognition after Face Detection).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [age-gender-recognition-retail-0013](./age-gender-recognition-retail-0013/README.md)         | 0.094 | 2.138 |
@@ -260,6 +258,8 @@ vectors that are "close" by L2 metric (Euclidean distance).
 There are multiple models that provide various trade-offs between performance
 and accuracy (expect a bigger model to perform better).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [face-reidentification-retail-0095](./face-reidentification-retail-0095/README.md)     | 0.588 | 1.107 |
@@ -277,6 +277,8 @@ class. These networks are much bigger than respective object detection networks,
 but they provide a better (pixel-level) localization of objects and they can
 detect areas with complex shape (for example, free space on the road).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/README.md)         | 4.770  | 0.184 |
@@ -291,6 +293,8 @@ detect areas with complex shape (for example, free space on the road).
 Instance segmentation is an extension of object detection and semantic
 segmentation problems. Instead of predicting a bounding box around each object
 instance instance segmentation model outputs pixel-wise masks for all instances.
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -312,6 +316,8 @@ estimation network for every detection. These methods are very accurate. The
 second finds all keypoints in a given frame, then groups them by person
 instances, thus faster than previous, because network runs once.
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [human-pose-estimation-0001](./human-pose-estimation-0001/README.md) | 15.435  | 4.099  |
@@ -324,6 +330,8 @@ instances, thus faster than previous, because network runs once.
 Deep Learning models find their application in various image processing tasks to
 increase the quality of the output.
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [single-image-super-resolution-1032](./single-image-super-resolution-1032/README.md) | 11.654 | 0.030 |
@@ -334,6 +342,8 @@ increase the quality of the output.
 
 Deep Learning models for text detection in various applications.
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-detection-0003](./text-detection-0003/README.md)                       | 51.256 | 6.747 |
@@ -343,6 +353,8 @@ Deep Learning models for text detection in various applications.
 ## Text Recognition
 
 Deep Learning models for text recognition in various applications.
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -369,6 +381,8 @@ Deep Learning models for text recognition in various applications.
 
 Deep Learning models for text spotting (simultaneous detection and recognition).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-spotting-0005](./text-spotting-0005/README.md) |         |        |
@@ -383,6 +397,8 @@ Action Recognition models predict action that is being performed on a short vide
 or spatio-temporal) features (embeddings) from individual clip fragments and then aggregate them in a temporal model
 to predict a vector with classification scores. Models that compute embeddings are called *encoder*, while models
 that predict an actual labels are called *decoder*.
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -400,6 +416,8 @@ that predict an actual labels are called *decoder*.
 
 Deep Learning models for image retrieval (ranking 'gallery' images according to their similarity to some 'probe' image).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [image-retrieval-0001](./image-retrieval-0001/README.md) | 0.613 | 2.535 |
@@ -408,12 +426,16 @@ Deep Learning models for image retrieval (ranking 'gallery' images according to 
 
 Deep Learning compressed models
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [resnet50-binary-0001](./resnet50-binary-0001/README.md)                     | 1.002 | 7.446 |
 | [resnet18-xnor-binary-onnx-0001](./resnet18-xnor-binary-onnx-0001/README.md) | -     | -     |
 
 ## Question Answering
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -427,6 +449,8 @@ Deep Learning compressed models
 
 ## Machine Translation
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [machine-translation-nar-en-ru-0002](./machine-translation-nar-en-ru-0002/README.md) | 23.17 | 69.29 |
@@ -438,6 +462,8 @@ Deep Learning compressed models
 
 Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-to-speech-en-0001](./text-to-speech-en-0001/README.md) |       |        |
@@ -446,6 +472,8 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-0001-generation                          | 48.38 | 12.77  |
 
 Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
@@ -458,6 +486,8 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 
 Deep Learning models for noise suppression.
 
+<div class="sort-table"></div>
+
 | Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------|--------------------- |----------- |
 | [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
@@ -467,6 +497,8 @@ Deep Learning models for noise suppression.
 
 Deep Learning models for time series forecasting.
 
+<div class="sort-table"></div>
+
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
@@ -474,6 +506,8 @@ Deep Learning models for time series forecasting.
 ## Action Sequence Modeling
 
 Deep Learning models for online sequence modeling.
+
+<div class="sort-table"></div>
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
