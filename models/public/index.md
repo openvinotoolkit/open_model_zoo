@@ -159,12 +159,6 @@
    omz_models_model_yolox_tiny
 
 
-.. raw:: html
-
-   <script>
-      window.TABLE_SORT = true;
-   </script>
-
 @endsphinxdirective
 -->
 
@@ -176,6 +170,8 @@ The table [Public Pre-Trained Models Device Support](./device_support.md) summar
 You can download models and convert them into OpenVINO™ IR format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/model_tools/README.md) and other automation tools.
 
 ## Classification Models
+
+<div class="sort-table"></div>
 
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
@@ -238,6 +234,8 @@ detect areas with complex shape.
 
 ### Semantic Segmentation Models
 
+<div class="sort-table"></div>
+
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 68.41% | 11.469 | 23.819 |
@@ -255,6 +253,8 @@ Instance segmentation is an extension of object detection and semantic
 segmentation problems. Instead of predicting a bounding box around each object
 instance instance segmentation model outputs pixel-wise masks for all instances.
 
+<div class="sort-table"></div>
+
 | Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------ | -------------- | -------------- | -------- | ------ | ------- |
 | Mask R-CNN Inception ResNet V2 | TensorFlow\*   | [mask_rcnn_inception_resnet_v2_atrous_coco](./mask_rcnn_inception_resnet_v2_atrous_coco/README.md) | 39.86%/35.36% | 675.314 | 92.368 |
@@ -262,6 +262,8 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | YOLACT ResNet 50 FPN | PyTorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/README.md) | 28.0%/30.69% | 118.575 |  36.829  |
 
 ### 3D Semantic Segmentation Models
+
+<div class="sort-table"></div>
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
@@ -273,6 +275,8 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 Several detection models can be used to detect a set of the most popular
 objects - for example, faces, people, vehicles. Most of the networks are
 SSD-based and provide reasonable accuracy/performance trade-offs.
+
+<div class="sort-table"></div>
 
 | Model Name                           | Implementation           | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | ------------------------ | -------------- | -------- | ------ | ------- |
@@ -315,6 +319,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 ## Face Recognition Models
 
+<div class="sort-table"></div>
+
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
 | FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/README.md) | 99.14% | 2.846 | 23.469 |
@@ -332,6 +338,8 @@ estimation network for every detection. These methods are very accurate. The
 second finds all keypoints in a given frame, then groups them by person
 instances, thus faster than previous, because network runs once.
 
+<div class="sort-table"></div>
+
 | Model Name                       | Implementation | OMZ Model Name                | Accuracy | GFlops | mParams |
 |--------------------------------- | ---------------| ----------------------------- | -------- | ------ | ------- |
 | human-pose-estimation-3d-0001    | PyTorch\*      | [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/README.md) | 100.44437mm | 18.998 |  5.074  |
@@ -343,6 +351,8 @@ instances, thus faster than previous, because network runs once.
 The task of monocular depth estimation is to predict a depth (or inverse depth) map based on a single input image.
 Since this task contains - in the general setting - some ambiguity, the resulting depth maps are often only defined up to an unknown scaling factor.
 
+<div class="sort-table"></div>
+
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/README.md)| 0.07071 | 207.25144  |    104.081     |
@@ -351,6 +361,8 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 ## Image Inpainting Models
 
 Image inpainting task is to estimate suitable pixel information to fill holes in images.
+
+<div class="sort-table"></div>
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
@@ -361,6 +373,8 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 
 Style transfer task is to transfer the style of one image to another.
 
+<div class="sort-table"></div>
+
 | Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------ | ---------------| -------------- | -------- | ------ | ------- |
 | fast-neural-style-mosaic-onnx  | ONNX\*         | [fast-neural-style-mosaic-onnx](./fast-neural-style-mosaic-onnx/README.md) | 12.04dB | 15.518 | 1.679 |
@@ -369,6 +383,8 @@ Style transfer task is to transfer the style of one image to another.
 
 The task of action recognition is to predict action that is being performed on a short video clip
 (tensor formed by stacking sampled frames from input video).
+
+<div class="sort-table"></div>
 
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
@@ -379,6 +395,8 @@ The task of action recognition is to predict action that is being performed on a
 
 Colorization task is to predict colors of scene from grayscale image.
 
+<div class="sort-table"></div>
+
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/README.md) | 26.99dB | 83.6045 |  32.2360 |
@@ -388,6 +406,8 @@ Colorization task is to predict colors of scene from grayscale image.
 
 The task of sound classification is to predict what sounds are in an audio fragment.
 
+<div class="sort-table"></div>
+
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- | ------- |
 | ACLNet                    | PyTorch\* | [aclnet](./aclnet/README.md) | 86%/92% | 1.4     | 2.7     |
@@ -396,6 +416,8 @@ The task of sound classification is to predict what sounds are in an audio fragm
 ## Speech Recognition Models
 
 The task of speech recognition is to recognize and translate spoken language into text.
+
+<div class="sort-table"></div>
 
 | Model Name        | Implementation | OMZ Model Name                                                   | Accuracy | GFlops | mParams |
 | ----------------- | -------------- | ---------------------------------------------------------------- | -------- | ------ | ------- |
@@ -408,11 +430,15 @@ The task of speech recognition is to recognize and translate spoken language int
 
 The task of image translation is to generate the output based on exemplar.
 
+<div class="sort-table"></div>
+
 | Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/README.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
 ## Optical Character Recognition Models
+
+<div class="sort-table"></div>
 
 | Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
@@ -422,6 +448,8 @@ The task of image translation is to generate the output based on exemplar.
 
 The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
 
+<div class="sort-table"></div>
+
 | Model Name | Implementation | OMZ Model Name                           | Accuracy | GFlops | mParams |
 | ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
 | NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/README.md) | 82.0321% | 36.6374| 149.0021|
@@ -430,6 +458,8 @@ The task of place recognition is to quickly and accurately recognize the locatio
 
 The task of image deblurring.
 
+<div class="sort-table"></div>
+
 | Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/README.md) | 28.25Db  | 80.8919 | 2.1083   |
@@ -437,6 +467,8 @@ The task of image deblurring.
 ## JPEG Artifacts Removal Models
 
 The task of restoration images from jpeg format.
+
+<div class="sort-table"></div>
 
 | Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops     | mParams  |
 | -------------- | -------------- | ---------------------------------------------- | -------- | ---------- | -------- |
@@ -447,6 +479,8 @@ The task of restoration images from jpeg format.
  Salient object detection is a task-based on a visual attention mechanism,
  in which algorithms aim to explore objects or regions more attentive than the surrounding areas on the scene or images.
 
+<div class="sort-table"></div>
+
 | Model Name     | Implementation | OMZ Model Name            | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
 | F3Net          | PyTorch\*      | [f3net](./f3net/README.md) | 84.21%   | 31.2883 | 25.2791  |
@@ -454,6 +488,8 @@ The task of restoration images from jpeg format.
 ## Text Prediction Models
 
 Text prediction is a task to predict the next word, given all of the previous words within some text.
+
+<div class="sort-table"></div>
 
 | Model Name     | Implementation | OMZ Model Name             | Accuracy | GFlops   | mParams  |
 | -------------- | -------------- | -------------------------- | -------- | -------- | -------- |
@@ -466,12 +502,16 @@ Researchers compete on creating algorithms which are able to recognize text of d
 See details about datasets in [here](./text-recognition-resnet-fc/README.md)
 The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 images) in case-insensitive mode.
 
+<div class="sort-table"></div>
+
 | Model Name                      | Implementation | OMZ Model Name                                                       | Accuracy | GFlops  | mParams  |
 | ------------------------------- | -------------- | -------------------------------------------------------------------- | -------- | ------- | -------- |
 | Resnet-FC                       | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94%   | 40.3704 | 177.9668 |
 | ViTSTR Small patch=16, size=224 | PyTorch\*      | [vitstr-small-patch16-224](./vitstr-small-patch16-224/README.md)     | 90.34%   | 9.1544  | 21.5061  |
 
 ## Text to Speech Models
+
+<div class="sort-table"></div>
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
@@ -482,11 +522,15 @@ The reported metric is collected over the alphanumeric subset of ICDAR13 (1015 i
 
 Named entity recognition (NER) is the task of tagging entities in text with their corresponding type.
 
+<div class="sort-table"></div>
+
 | Model Name     | Implementation | OMZ Model Name                                   | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
 | bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
 
 ## Vehicle Reidentification Models
+
+<div class="sort-table"></div>
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
@@ -497,6 +541,8 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 Background matting is a method of separating a foreground from a background in an image or video,
 wherein some pixels may belong to foreground as well as background, such pixels are called partial
 or mixed pixels. This distinguishes background matting from segmentation approaches where the result is a binary mask.
+
+<div class="sort-table"></div>
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
