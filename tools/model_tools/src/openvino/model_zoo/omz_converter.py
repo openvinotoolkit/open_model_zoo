@@ -155,42 +155,44 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
 
             reporter.print()
             rt_model = Core().read_model(os.path.join(mo_output_dir, model.name + '.xml'))
-        try:
-            val = validation.validate_string('model_type', model.model_info['model_type'])
-            rt_model.set_rt_info(val, ['model_info', 'model_type'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_nonnegative_float('confidence_threshold', model.model_info['confidence_threshold'])
-            rt_model.set_rt_info(val, ['model_info', 'confidence_threshold'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_nonnegative_float('iou_threshold', model.model_info['iou_threshold'])
-            rt_model.set_rt_info(val, ['model_info', 'iou_threshold'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_string('resize_type', model.model_info['resize_type'])
-            rt_model.set_rt_info(val, ['model_info', 'resize_type'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_list('anchors', model.model_info['anchors'])
-            rt_model.set_rt_info(val, ['model_info', 'anchors'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_list('masks', model.model_info['masks'])
-            rt_model.set_rt_info(val, ['model_info', 'masks'])
-        except KeyError:
-            pass
-        try:
-            val = validation.validate_list('labels', model.model_info['labels'])
-            rt_model.set_rt_info(val, ['model_info', 'labels'])
-        except KeyError:
-            pass
-        serialize(rt_model, str(output_dir / model.subdirectory / model_precision / model.name) + '.xml')
+            try:
+                val = validation.validate_string('model_type', model.model_info['model_type'])
+                rt_model.set_rt_info(val, ['model_info', 'model_type'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_nonnegative_float('confidence_threshold', model.model_info['confidence_threshold'])
+                rt_model.set_rt_info(val, ['model_info', 'confidence_threshold'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_nonnegative_float('iou_threshold', model.model_info['iou_threshold'])
+                rt_model.set_rt_info(val, ['model_info', 'iou_threshold'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_string('resize_type', model.model_info['resize_type'])
+                rt_model.set_rt_info(val, ['model_info', 'resize_type'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_list('anchors', model.model_info['anchors'])
+                rt_model.set_rt_info(val, ['model_info', 'anchors'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_list('masks', model.model_info['masks'])
+                rt_model.set_rt_info(val, ['model_info', 'masks'])
+            except KeyError:
+                pass
+            try:
+                val = validation.validate_list('labels', model.model_info['labels'])
+                rt_model.set_rt_info(val, ['model_info', 'labels'])
+            except KeyError:
+                pass
+            serialize(rt_model, str(output_dir / model.subdirectory / model_precision / model.name) + '.xml')
+            # rt_model must be destroyed before mo_output_dir because rt_model holds .bin which mo_output_dir will try to delete
+            del rt_model
     return True
 
 def num_jobs_arg(value_str):
