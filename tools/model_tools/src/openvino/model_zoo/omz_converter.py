@@ -19,6 +19,7 @@ import os
 import shutil
 import string
 import sys
+import tempfile
 
 from openvino.runtime import Core, serialize
 from pathlib import Path
@@ -130,31 +131,30 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         if data_type == "FP16":
             expanded_mo_args.append("--compress_to_fp16")
 
-        mo_cmd = [*mo_props.cmd_prefix,
-            '--framework={}'.format(model_format),
-            '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
-            '--model_name={}'.format(model.name),
-            '--input={}'.format(','.join(input.name for input in model.input_info)),
-            *expanded_mo_args, *mo_props.extra_args]
+        with tempfile.TemporaryDirectory() as mo_output_dir:
+            mo_cmd = [*mo_props.cmd_prefix,
+                '--framework={}'.format(model_format),
+                f'--output_dir={mo_output_dir}',
+                '--model_name={}'.format(model.name),
+                '--input={}'.format(','.join(input.name for input in model.input_info)),
+                *expanded_mo_args, *mo_props.extra_args]
 
-        reporter.print_section_heading('{}Converting {} to IR ({})',
-            '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
+            reporter.print_section_heading('{}Converting {} to IR ({})',
+                '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-        reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
+            reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
 
-        if not args.dry_run:
-            reporter.print(flush=True)
+            if not args.dry_run:
+                reporter.print(flush=True)
 
-            if not reporter.job_context.subprocess(mo_cmd):
-                telemetry.send_event('md', 'converter_failed_models', model.name)
-                telemetry.send_event('md', 'converter_error',
-                    json.dumps({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
-                return False
+                if not reporter.job_context.subprocess(mo_cmd):
+                    telemetry.send_event('md', 'converter_failed_models', model.name)
+                    telemetry.send_event('md', 'converter_error',
+                        json.dumps({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
+                    return False
 
-        reporter.print()
-
-        xml_path = str(output_dir / model.subdirectory / model_precision / model.name) + '.xml'
-        rt_model = Core().read_model(xml_path)
+            reporter.print()
+            rt_model = Core().read_model(os.path.join(mo_output_dir, model.name + '.xml'))
         try:
             val = validation.validate_string('model_type', model.model_info['model_type'])
             rt_model.set_rt_info(val, ['model_info', 'model_type'])
@@ -190,7 +190,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             rt_model.set_rt_info(val, ['model_info', 'labels'])
         except KeyError:
             pass
-        serialize(rt_model, xml_path)
+        serialize(rt_model, str(output_dir / model.subdirectory / model_precision / model.name) + '.xml')
     return True
 
 def num_jobs_arg(value_str):
