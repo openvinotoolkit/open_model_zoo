@@ -75,7 +75,7 @@ public:
 
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
-        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        compiledModel = core_.compile_model(model, deviceName);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
     }
 
@@ -186,7 +186,7 @@ public:
         reidLen = (int)outputShape[1];
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
-        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        compiledModel = core_.compile_model(model, deviceName);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-ID");
     }
 

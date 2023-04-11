@@ -96,7 +96,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle And License Plate Detection");
     }
 
@@ -220,7 +220,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "Vehicle Attributes Recognition");
     }
 
@@ -353,7 +353,7 @@ public:
         slog::info << "Preprocessor configuration: " << slog::endl;
         slog::info << ppp << slog::endl;
 
-        m_compiled_model = core.compile_model(model, deviceName, pluginConfig);
+        m_compiled_model = core.compile_model(model, deviceName);
         logCompiledModelInfo(m_compiled_model, xmlPath, deviceName, "License Plate Recognition");
     }
 
