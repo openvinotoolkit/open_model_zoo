@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/unet-camvid-onnx-0001.xml
-    size: 65135
-    checksum: 1a1bd9785f6619f00e6ccd4ea2fad58f86b742b096d0293715ce25a2c023334e15d7789d5e4c2d8393c2ad230ab4771d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
+    size: 63776
+    checksum: d71879d00459919c1c8a79103340954136b7b97f7715057c82ae043e5f246bb25c31300f9a880ca3be7e213467d05a99
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
   - name: FP32/unet-camvid-onnx-0001.bin
-    size: 124129860
-    checksum: b598ba1a5e5191c824362a2e4fa12454dccf81ad9b4cbefcb9c63f8ff053d2cd5f0fb66bca156afd69060a5ba67762a6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
+    size: 124129852
+    checksum: 5341b1408ac30feebe9b051aa386889d23d17880e500e1d956159983f053121964b7087c14a4c1ccf2238c1270309141
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
   - name: FP16/unet-camvid-onnx-0001.xml
-    size: 91871
-    checksum: c1f848511007da5481c0331271642de65db65a383e655022e2f8b53a91c92ca5c171ef2bf11f77f427e4ea6f508dee8b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
+    size: 90576
+    checksum: 11fa0b79f013d18e0b172a6a7aac44252cc8d293e26ef361fe771549ec56ff86669548a4857385580d2ff6987617dc9a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
   - name: FP16/unet-camvid-onnx-0001.bin
-    size: 62064934
-    checksum: 6288a955d2758130a610f317e88c1a3f51d730f5d51c459fbef133587219839b9093af3c25b0c8c95fab678b852098f6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
+    size: 62064926
+    checksum: f12329f471ac74d47685a8c974af86fedbabf7038562de4ba2e60cbd1557846edd8a692ca76a45f6060ebd9476cad6ba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
   - name: FP16-INT8/unet-camvid-onnx-0001.xml
-    size: 152992
-    checksum: dd67b734c801ed3e31d972cc755218deb513a6a9472abe829ce71e9750ba921d05301f937a553910462e3c5b6f914d3c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
+    size: 153888
+    checksum: 07dea837e44e72ff3cd11c135e0a85a0925c8e4b5c18f76a368bf97c1410e0a8901926b87b7fcca149783bda4520e925
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
   - name: FP16-INT8/unet-camvid-onnx-0001.bin
     size: 31066874
-    checksum: 94e20a808f08ea1c301de0fa4e9262a50d12ef83a83f4f4c1974290594f1b58bad834d9d7bb3d87fb63a9bb12168de6a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
+    checksum: c6f5e9633d36bd0d9246cb8c2db8788813bab0260901b2bf41a0d2b584aa2f9ccec3271a4753c6c8b9d67fa54b91f85a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
 input_info:
   - name: input.1
     shape: [1, 3, 368, 480]

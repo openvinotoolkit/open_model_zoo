@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 139009
-    checksum: c1504a04ae6d1f3d3e32d119a9c392976252f3064d6869a77d9fd8af11cd743ea52ca8a14ff7a1f46a09f96e2f1c5c02
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 139174
+    checksum: 9e654434f1dfac659cf7a6ae1e527949c184a46b73fdf297b9a968d5acda527b3bd27dc839bee271d44815429fd09183
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 4209924
-    checksum: 0cdee73673c46e16bd37e5d49e04860dcc8f4b87e120d95ce55e7d3ddab75c667e5fcada85b92d47ac096c66601220ab
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
+    checksum: 662ae2e74c495ec0e61f6f4736a54d19954569a1841632ae198f428f6542e85c33a34d0f0fc407854f2fb7176dab9d9f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 211881
-    checksum: 70a26d9ab9b02720202f4b794c90c8c88c94949ef1045891f3f30e392a9c9a81f33d6fafb6dd44711e278663e47c71bc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 212110
+    checksum: 717e6df1053d1babac17a9c55b823f2c2234bdfb8af6c369e3d30eb09bef9b8db9d5f948fe00f58fab8fd016245a6fb5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 2791568
-    checksum: d73a8f7685c56e8aac51c3199fd7778c8fc8a03711a8af6a4b17fa5538b0c9341f6ea000b1d991575a81a6ee434ec78a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
+    checksum: 78359cb3a5ad1ce60bbab308cf59e32dcf1ce2fbdfd0ed4af73078d8109a7ffc6516342328ce3172931b5d13369fd50a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
 input_info:
   - name: input.1
     shape: [1, 3, 224, 224]

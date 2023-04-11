@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,29 +18,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml
-    size: 43567
-    checksum: 322ae6ad41dde92229c922252646341b540a1d758999168bdfefda2afb0a248f7734446205154f1e2b827e2180aed184
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    size: 43654
+    checksum: f551a3f78308205aee2b921b1127d6a085414bcdd2dbc525c19acf70e88aa84033dc3f97ec16cd363d4cba12a461983c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
   - name: FP32/landmarks-regression-retail-0009.bin
     size: 762464
     checksum: ea8afdd4f0eec7273b21bd55c439d3255dd476411175675646e75349241ff81e50bf8f30fbced3f9d683bdc32bfa3db2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
   - name: FP16/landmarks-regression-retail-0009.xml
-    size: 66306
-    checksum: aa2371007382b56f9c0a5263982af73f9082da495bea9b5c4285aa00e823e24b72dd69c3f07b5204db9088a4fabe1344
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    size: 66508
+    checksum: 393eda465df2a886f7edd932e2f1cd6930ae91f85708f91b4cd60e411acfb86e9de9e083907901208e9e8af639846572
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
   - name: FP16/landmarks-regression-retail-0009.bin
     size: 381232
-    checksum: 295b2defa639a0ecc21caa506733cb0507c18fb885495a4b88691b1c7d54bc7d78f7aa503e02611080f6368814d9d05c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    checksum: 0e6e830387f56783de313e0f7022b7808fd2e9e0b28b411a65608e2c1df0bcf939c65fb699fc51868df30232d6308515
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
   - name: FP16-INT8/landmarks-regression-retail-0009.xml
-    size: 100309
-    checksum: 41671095aa5bda543718c3a37d2b65b85b69c97081d3f40ef1369c671b7161401eee8ed1914681c6eb66c7a0ca3cdc03
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
+    size: 99320
+    checksum: 3767804ed4d244e63048f8e44e6ba0fb82a71377568009fd30118aec088d815c11f3bbfd6c210916881b9815d79f5cc5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
   - name: FP16-INT8/landmarks-regression-retail-0009.bin
-    size: 196972
-    checksum: 4fb75d7d85837bb3d312f49e86441e2c5138e27dedc47c0971687a4a87a5d33e08638e97411e6f05df393ac690bfb9b7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
+    size: 196964
+    checksum: 9ef7b38ced5de407631aaea3f6ec44b49560668b90f54b6663bd178d09c258e91dfd22056ffe2f5a6d67fee962d6e92c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
 input_info:
   - name: '0'
     shape: [1, 3, 48, 48]

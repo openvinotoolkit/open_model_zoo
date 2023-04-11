@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@ files:
   - name: person-reidentification-retail-0265.onnx
     size: 9632724
     checksum: 2c79fadc11b59c207e42db877c6c087435116eec2b6adc972e93a5689a67d9991e188d986ceaf73e7fbd5a2a63034b1a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-reidentification-retail-0277/person-reidentification-retail-0265.onnx
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-reidentification-retail-0277/person-reidentification-retail-0265.onnx
   - name: FP32/person-reidentification-retail-0277.xml
-    size: 451861
-    checksum: c40f472f9d1f823802aa08e17f42b244d715080f0fb2b13b51ef8b9e4bea41f3409d95a17e97a75841f955b6740232ca
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
+    size: 451948
+    checksum: 8b9bd45ee44c67f08b88c82c33cff1bb0f9e7e687c52741461577badbdb7cde146e49fffedb1f813230cd47420af3470
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
   - name: FP32/person-reidentification-retail-0277.bin
     size: 8357492
     checksum: adf16b7292f3c3858bd642eed8e471072499872592e242ca2be75fd50100179f72a875b05c1907f56d3d970d751dcba0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
   - name: FP16/person-reidentification-retail-0277.xml
-    size: 616040
-    checksum: 7194e34295901e36908f49ccc886d014f57ad4c53deaad5fce9b54e09c37392dee20bae66e90080f2f15b84ef2383741
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
+    size: 616140
+    checksum: 554b403108fea776cb54c971c4c8acfaaeaae3884b5945eefbcbad8b9ed3c84f0382cb72c666c02c07129826a668d79e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
   - name: FP16/person-reidentification-retail-0277.bin
     size: 4178806
-    checksum: a7fa9870b93e1fbbb52ce4c799da867ebdb491f7694cd1159a21f59455ade2b7a152e0792f2870b11bab337e39e66dd5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
+    checksum: 0466aa71c44a14aa902a609c6500f4bc087cabbfa09c1e5bfb309f0a7e89fcdd9971e0359663e31803e3611bfa4d2353
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
 input_info:
   - name: data
     shape: [1, 3, 256, 128]

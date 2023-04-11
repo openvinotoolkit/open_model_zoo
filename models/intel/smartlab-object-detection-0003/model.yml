@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,29 +18,21 @@ description: >-
 task_type: detection
 files:
   - name: FP32/smartlab-object-detection-0003.xml
-    size: 328760
-    checksum: 9fa044f5056f8c9f3a10772fe646bb94df8728bc35a9db8064861cdaf17300b94d69c0e62482e0597368a7e899ff41e1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml
+    size: 325181
+    checksum: ccb0c94628e0e0ab420f07b03f5240897588a4772870faa6c133fe2405272d0e1bcd79ddddf00bffa9ff4ebe30611339
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml
   - name: FP32/smartlab-object-detection-0003.bin
     size: 3563540
     checksum: 9c71c1238b277cb013cda660155a80bbd73222823cebb6f532901dc62f1e4225984b2061011879afa73e7e2d01598092
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.bin
   - name: FP16/smartlab-object-detection-0003.xml
-    size: 457673
-    checksum: 54a91def6faf8f4701dc2f410d0034a60745c2c1e5652342a6d0b0c5c553e5e9ebea640d043da555a570b86172740d68
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.xml
+    size: 454039
+    checksum: 4e60a8e229fe641684678d191e03df60ea79aaf0aa205dca26aa70dff0e3ea6649b30698d68487a10bfc28d2da4d8c35
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.xml
   - name: FP16/smartlab-object-detection-0003.bin
     size: 1781914
     checksum: 872329a18ffbed49c31f775d615d850f5dcdeb8016ea6dcfeac23af03d107e7f2c385027c94347f9cc94b5da167815dc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.bin
-  - name: FP16-INT8/smartlab-object-detection-0003.xml
-    size: 849658
-    checksum: edc78074a91ff9cc4df6ad10d1789c4c1d90508984be4f762215ebe5d698a0d38973f3af546139ca9e2b530d7abe671e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP16-INT8/smartlab-object-detection-0003.xml
-  - name: FP16-INT8/smartlab-object-detection-0003.bin
-    size: 941310
-    checksum: 01ab3a76961be7e6a10bd786555d7bddd2a64600c3ec81e18d2b746ce2670d6381cdc3476ab6d368a0d09f55ff83e9ef
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-object-detection-0003/FP16-INT8/smartlab-object-detection-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-object-detection-0003/FP16/smartlab-object-detection-0003.bin
 input_info:
   - name: images
     shape: [1, 3, 416, 416]

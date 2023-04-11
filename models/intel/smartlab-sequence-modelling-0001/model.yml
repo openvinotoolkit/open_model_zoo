@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/smartlab-sequence-modelling-0001.xml
-    size: 175914
-    checksum: c42960adee1d13dc6b67cd16b232283110398c06e37ee8e994e279cb8037c33a1aed5fb96c8ff0949a48a029d0531b15
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.xml
+    size: 175879
+    checksum: 61ff12a6dfb4984adf97a48b1845bc11dab044a4684908194e1b1a442f3f68df006139787bfb00d8ae3ddc1cf263e08f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.xml
   - name: FP32/smartlab-sequence-modelling-0001.bin
     size: 3683832
     checksum: 8d0daa848bbbfeeda0b72195e68c767a840ff18afa38fec9b99c5fc6d741e3ed0fadfeae66c1f8e320c947e4751c3536
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-sequence-modelling-0001/FP32/smartlab-sequence-modelling-0001.bin
   - name: FP16/smartlab-sequence-modelling-0001.xml
-    size: 256904
-    checksum: 9544fa8d21b86418930c0cf4d35077be604cbf4df0508b6fb7714f20636b6a3f450389aeb9ed007be5d95a681914bab9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0001/FP16/smartlab-sequence-modelling-0001.xml
+    size: 253347
+    checksum: 0c19a80b327e52e9ef8a3c622d4991f33a22aa5eaab1957fcfef0654d71db3c4ee61941f60e3742558411cca7a224af4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-sequence-modelling-0001/FP16/smartlab-sequence-modelling-0001.xml
   - name: FP16/smartlab-sequence-modelling-0001.bin
-    size: 1841924
-    checksum: 10fc4d41d29c50c0c9d41fab63f8def5cc14a60d60bfbabccef0960cb746563a969bd9ae12ab10fb792bbd25fd2a600e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/smartlab-sequence-modelling-0001/FP16/smartlab-sequence-modelling-0001.bin
+    size: 1851716
+    checksum: eef70f2fd39b1ae73ba099b3df22804ee5aa6b47b69e1ff30753c41fa47e7c2bb5526f85d72c02061170de472d016629
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/smartlab-sequence-modelling-0001/FP16/smartlab-sequence-modelling-0001.bin
 input_info:
   - name: input
     shape: [1, 3, 224, 224]

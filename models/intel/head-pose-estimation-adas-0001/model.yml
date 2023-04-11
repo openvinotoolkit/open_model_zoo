@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: head_pose_estimation
 files:
   - name: FP32/head-pose-estimation-adas-0001.xml
-    size: 53617
-    checksum: d647e8e1e9f3abd579fe265328d728fc1fdcd81a8ff8c015e0bb1478923db4728801ab4a8f30365691d923bb0cf7fa02
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    size: 53705
+    checksum: 7b155bf7821ff6e7f46e32fc6fc2cc11c7f8692957e3762d84e2aaba2718a5e07dfd1eb885a3f2953ac2b170d83975a7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
   - name: FP32/head-pose-estimation-adas-0001.bin
     size: 7647616
-    checksum: d207c2ad5bc33695c6a99b187ad69c21c1c525f02eb003a4cd73db23f8ff7c7f5b97b491549b6d1b548bdc3b497a7e38
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    checksum: 29c6f24561fd81516c2d12c3648fb8a5018b1a09846ef57a664667f39c3796b1007c71d8c8801eb0babaf38ac8c2556e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
   - name: FP16/head-pose-estimation-adas-0001.xml
-    size: 78722
-    checksum: 9bdcfc25536b6d84c08472d5551a9f5b921faea011c716ae16d57d4d5310ffad5b5f539766cee0632d047b22e329bd3d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    size: 78824
+    checksum: b92f6721a43f87fc5b7edda1d062cd05c97452c8990aa9517da5c959d9cdf4a75a05d3897d6b2bf5bab3dc530ac57947
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
   - name: FP16/head-pose-estimation-adas-0001.bin
     size: 3823816
-    checksum: c2a0a854536e7d176082e74601cdedb3394393438fdd6adc23b9e21a261a94ffec97088014c82d8852773b699daacd58
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    checksum: ff57525f97d3d837baf03344802a195b504148f8fc818844c15a89a9f742e770d411113685ec3f648417299bf443dde2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
   - name: FP16-INT8/head-pose-estimation-adas-0001.xml
-    size: 107492
-    checksum: f3ecb7c26f785e08d03e9a7d4fd3959adf5a1788e9e242b34aba016e3fc61a3d8deb7e5ee93e21f136a5228e14891880
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+    size: 108809
+    checksum: 8b160178eaae9218ffa5e239b46ce21a554e4741ab1d1a92a0d4a23c3195fe3458cbdde3861792a7ac54bd49f7cef914
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
   - name: FP16-INT8/head-pose-estimation-adas-0001.bin
     size: 2072900
-    checksum: 07dccea07671e5fa5bf726328b0fdda94d9cce4074053e963b2c49065a406e1715f0cfd87b97bc00e4c33a95cc0065be
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+    checksum: 34e6a5f80aef9ad834b362e559f547957215bf48b6b97e76dab07dc1eb03d0c867be7a79f5499a4da3c78fd30884a7b7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
 input_info:
   - name: data
     shape: [1, 3, 60, 60]

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@ files:
   - name: vocab.json
     size: 1747
     checksum: 2b2fcc77178a679975411af460e6fcc463779674568eeabfe35b8bc93c54bdd958f64c986efad8ea726c38ae29be74ae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/vocab.json
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
-    size: 41977
-    checksum: 4d0161befde6ff928531ca63d0c13d9b0b5c0197af4a8b91fadbb76f5ee084476439eb19141ad7ad621645fa1cfa2933
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    size: 41986
+    checksum: 2bfa4638a54a5b96578c3cff2cc90fc67f1818d998e051c2c41728a3095640234c088b8e123b3622b2a7e0b7dd274971
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 10179548
     checksum: b320bcbaaefbe008b8784751a5c9ddf76bf8edae0b3c3241d4efcbea5b87fa00388019ad6e897058a8eee4c0d1fb2524
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
-    size: 49539
-    checksum: 0a0a3624228fddfc02f478d7a2e80624e0d19b600cc0ffa444c0d82d0a4e2c3f0814a13c4fa3201b1b65025fb3e71c25
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    size: 49510
+    checksum: d630e4eb3b63d08408bac94b032973dd99f174e7cfc08df4e31adae6146c80ed239d8a76f4aa74c8bb1611fe7b3e5b20
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 5089822
-    checksum: 45191a4a6264c2af12671ecea2a86dc34e83c16a951fa008e4689ee4ab588dd6df24ab78dd9e5c3e267cb362a377274d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    checksum: 35ecd08c9d158faa740f6d29b07557c44cddbd64d4bde12a2efdf330d1fd0b2efa4c3a57ce09209f253905ac0a8ae47a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
 input_info:
   - name: dec_st_c
     shape: [1, 512]

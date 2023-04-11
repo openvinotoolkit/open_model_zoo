@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,29 +18,21 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 587931
-    checksum: 7d29097a82d130bfd3df9ef7cee35eba17d4457e13241194e8f905b0570956fd33e52120ac453234820c4f7c5a33be77
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 587809
+    checksum: 4393f0bec7d7fbe5b9b225f9e2528d56a39ab3595ddeb37c000d8dc69d1c84d29029a1cc171df3b4ef810626edb2e79c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP32/text-to-speech-en-multi-0001-duration-prediction.bin
     size: 104707920
     checksum: 8ac8a663c2940930d69c6031fc084b4a60898eb505ae7d5671d4e9fdafcf575f596d302c7750755ad67cf886545c8ab1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 764233
-    checksum: 7c247ffe0f9fe1af597a594f42d5e68157cbc9a9cf96b8a69b6c5d7d23d089c1e344f7d432552b069f6e922d21676ade
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 764042
+    checksum: 5517d1877b7a42336581e38bbab3d8a0b92d2bd6da925311de9606f8ce47165b32af84d3dbf980662743cf4a8e33f040
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
   - name: FP16/text-to-speech-en-multi-0001-duration-prediction.bin
     size: 52354048
-    checksum: 4e55f6b419d7e040341b327cad88d3e93755dd91af01e069c20cb80213a2208c9f64fb5b145e0141da472b846a1cd8ed
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
-  - name: FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.xml
-    size: 1411936
-    checksum: d81aa69acdd039332a0b82e4fb2216b87b6ce95c4de448bf8526e546150cafbd7ee62b4619dc3d7e0d7ce44bfbd0268a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.xml
-  - name: FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.bin
-    size: 26348303
-    checksum: 4a3d555b745e52c633a06c3b5c66485194c750fe2cee91fbbfaf8bad57e6218b6c4bc3f5afa5d51225688d09a6babf0b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16-INT8/text-to-speech-en-multi-0001-duration-prediction.bin
+    checksum: ccab9c3e5adf2ffe7faef0f2cd503f54c04464129c11732adf9d57d9549a517590ba68699fc4f8ae7b022f8164f68d27
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
 input_info:
   - name: input_seq
     shape: [1, 512]

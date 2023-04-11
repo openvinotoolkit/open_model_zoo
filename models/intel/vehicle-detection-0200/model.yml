@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/vehicle-detection-0200.xml
-    size: 185277
-    checksum: 8b7a80d890175cbefc0eca90e2a9ec6d4d611b7b65c1dee5f85dd5f35bfe7144165984744a0958679cdb0bd57029eaa7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP32/vehicle-detection-0200.xml
+    size: 185195
+    checksum: acc8b78af711c51aed491261b73b133e1f389621830b233981b472a2cd876149403e02166851dc90f3a4a8eedf88f11e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP32/vehicle-detection-0200.xml
   - name: FP32/vehicle-detection-0200.bin
     size: 7269196
-    checksum: b69eefb12dc4345a271bd888ab43092305eda6c57a8a446b692f4b15c4a46d88116410a2b26b43a788c1905beac8b295
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP32/vehicle-detection-0200.bin
+    checksum: f03356341ee3142f7f2b9b7b73f2167e10a981d9081b3da5c116332ebefee0f36558eab02d26a422197505d969be489b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP32/vehicle-detection-0200.bin
   - name: FP16/vehicle-detection-0200.xml
-    size: 254748
-    checksum: eb08adbfd25ded01c5cf048d8e4ddafc0e8e5f5ebb6f85976f7497f882d2f28a05b8ea44104041c7d10fdc04c7cff88d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP16/vehicle-detection-0200.xml
+    size: 254617
+    checksum: 7eaeb61a11d459211f4e431773d3b49cb835a32e91f742a4704a92d9bc7f29bc83a6c72f7dcb60593f210f24bb298be7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP16/vehicle-detection-0200.xml
   - name: FP16/vehicle-detection-0200.bin
     size: 3634654
-    checksum: 23e1ad44eccae0aea7541d04ca7174160ce0972c07d278695fd89a254a5e5d0f4a657a1044a4c6ace3dc49220851eb72
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP16/vehicle-detection-0200.bin
+    checksum: d299fedffcbe56d1fb430705c71bd7c805658c350320604faf4cae8f0391ea37cb47ad68af4dcd3a0ee255ed9262bec5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP16/vehicle-detection-0200.bin
   - name: FP16-INT8/vehicle-detection-0200.xml
-    size: 490238
-    checksum: 942fd91d6935326e4ffd767907e36bc174695e23cfac168d48081efd470f4cab55ce7df74f20ce34e20c2f07226fe7ff
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.xml
+    size: 448977
+    checksum: adcf3545b10fd82cc16da0450ff81a6edbb4fff5f9ce99804b9645d2dcc1fd004597dbc17f3669036b9f8346a92053fe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.xml
   - name: FP16-INT8/vehicle-detection-0200.bin
-    size: 1942006
-    checksum: bf193140a39a59f33b5697ca440db1c9b88d76000b5cce49d8f2557b74f398b83a7aaf8680155e6cf009b3add4fda3da
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.bin
+    size: 1942118
+    checksum: 17a5ae03084f595e01a9b06232d9fc6ee976f97155ba5cb064312288eb30ec2b6d364ea2d2b49d47b10172c53f8bce2f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.bin
 input_info:
   - name: image
     shape: [1, 3, 256, 256]

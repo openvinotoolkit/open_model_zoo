@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,21 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0004.xml
-    size: 217690
-    checksum: 61eecacc30b78897d16b6422d4ab2a83c93a3376b0783ab54916ad03d33d401d469ed8d697c06177c1251c4fed24af3f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.xml
+    size: 217607
+    checksum: fb65d4a233781ee5da04548351f9c22d8b7a5d93ccbe6d1125a467a5fb0d0f3a8ca07d1bfad5e54068a56e6b219faafe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.xml
   - name: FP32/asl-recognition-0004.bin
     size: 16632996
     checksum: e96030ea87966c4b57efeb4bcd07dd524c28db7eb2bc35314f55188308655a57c82c3127f00b6345e4da03e8137304de
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.bin
   - name: FP16/asl-recognition-0004.xml
-    size: 307674
-    checksum: 3332a999da88a21eb98d8d41cbb15d8e7775cdbf624f3548e4a56b2862f6d91359ed642efdaab86349b660dc72d25f00
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.xml
+    size: 307489
+    checksum: 44f98a2d1a8402b059b495327a113890a34c5763cb2ee11a23f8934c6da540480fd4d2ffb303921f4384d6c408f78f54
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.xml
   - name: FP16/asl-recognition-0004.bin
     size: 8316518
-    checksum: 26421d6135cf6df2f0124eacc4af9871a0fb8b56eeb65154c945b7baa932c5aaa651464872d0f135241f70a4a7d7ffe0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.bin
-  - name: FP16-INT8/asl-recognition-0004.xml
-    size: 625538
-    checksum: 50b360ddbbb33776eefeae8d7ed5618a007abbc6bf69cf044916005bb2f6178a3cc6a71b5528b7ac65970a583fe39eb8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
-  - name: FP16-INT8/asl-recognition-0004.bin
-    size: 4258313
-    checksum: 131c2a948b09bbdf908bb8a9cdfca87eb07c0af25bd6d61905c97c14268065181b15c94aff66b2cfaef3665b370d29da
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
+    checksum: f459762b6df7d41177ba1633285d672a3a78262a75d75cfd0780ccd6f78f1d8f5c0a03a09fb711512e9bf923031b35c2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.bin
 input_info:
   - name: input
     shape: [1, 3, 16, 224, 224]

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: detection
 files:
   - name: FP32/pedestrian-detection-adas-0002.xml
-    size: 239113
-    checksum: 95b85ea6fdba672dca3474f755aa66d628e38ee04d803e3b67f2afef98ac8ec209c7861bde3cb49c955c19f3c66fa154
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
+    size: 239200
+    checksum: 2722984b58d465295b87b1c22b12f257bd4f1644227ccbb09e7aa641e298ea5bfbee22b6fa859d06b7bae120d1efb9ec
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
   - name: FP32/pedestrian-detection-adas-0002.bin
     size: 4660248
-    checksum: 1b071e8899e85b6f2ba43add7260d5642bb3296e7af634ce4cae6d67a4b30136f9774b053fdb7472203b79d2565af40f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
+    checksum: 9320298afd3a49e4789108b69a0593a9e42f89097afa1d26490ce8065ab09a8d13a4cfeae359b545f50ee4c1eb1f62f0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
   - name: FP16/pedestrian-detection-adas-0002.xml
-    size: 308823
-    checksum: 5f9f380e436c1e0c99a7b182ecf896da722effa0fbc4bf35800fe534fcb83526ee14baf13e94c1b25b7569bacbadf0e6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
+    size: 308923
+    checksum: f5fed243fa69ae9151a632e5b495854f71863e249217a0bc5899e486017358098e7220f0540973a894476dbadf905d55
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
   - name: FP16/pedestrian-detection-adas-0002.bin
     size: 2330176
-    checksum: 8390cf4fc346e9b7a6544ce25eb73438ded93cc8a5781389a7eff1796976f7d4b289ac7fc786d53012d5cc1e575e184b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
+    checksum: c4635a4bfc7e2d10fdb6e6e192bba63d0aba9d78360aa05539f00e07307c5fd0e5a2e0b0dbac17f8157a187816bd6742
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
   - name: FP16-INT8/pedestrian-detection-adas-0002.xml
-    size: 487215
-    checksum: 7c94201cdc5f301a78fbf3e77aa74bc1484feeefed8fe57e75967b1ad0ca07a30a1e19498492e01b97967e707c5fecab
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.xml
+    size: 455222
+    checksum: 83a58d9c24b13d479e7ac3ca38e5675bf1f044f46ae460c7a727f3b4209cfe36b52c9df79eaf52c22ed12fc002a1d7ac
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.xml
   - name: FP16-INT8/pedestrian-detection-adas-0002.bin
-    size: 1223451
-    checksum: e1c7c3589c472198e6e787ea3fbbd61f9c8baa690f2579b32386edb2b56c21545c5298ff36bad107b1364ccf07338267
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
+    size: 1223675
+    checksum: 5583feeaf6fbd5f7424465f4ca51aac421c30689c6f6479e66832719eb32ef6e589884c67aaab9e454bd33d2fc811b42
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
 input_info:
   - name: data
     shape: [1, 3, 384, 672]
