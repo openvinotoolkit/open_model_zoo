@@ -28,7 +28,7 @@ public:
 
     Detector() = default;
     Detector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize, const ov::AnyMap& pluginConfig) :
+            const bool autoResize) :
         m_autoResize(autoResize), m_detectionTresholds{detectionTresholds} {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
@@ -165,7 +165,7 @@ class VehicleAttributesClassifier {
 public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(ov::Core& core, const std::string& deviceName,
-        const std::string& xmlPath, const bool autoResize, const ov::AnyMap& pluginConfig) :
+        const std::string& xmlPath, const bool autoResize) :
         m_autoResize(autoResize) {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);
@@ -277,8 +277,7 @@ private:
 class Lpr {
 public:
     Lpr() = default;
-    Lpr(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
-        const ov::AnyMap& pluginConfig) :
+    Lpr(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize) :
         m_autoResize(autoResize) {
         slog::info << "Reading model: " << xmlPath << slog::endl;
         std::shared_ptr<ov::Model> model = core.read_model(xmlPath);

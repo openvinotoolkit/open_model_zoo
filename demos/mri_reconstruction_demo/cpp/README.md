@@ -24,7 +24,7 @@ Options:
     -i "<path>"                       Required. Path to input .npy file with MRI scan data.
     -p "<path>"                       Required. Path to sampling mask in .npy format.
     -m "<path>"                       Required. Path to an .xml file with a trained model.
-    -d "<device>"                     Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable (CPU by default).
+    -d "<device>"                     Optional. Specify the target device to infer on; CPU or GPU is acceptable (CPU by default).
     --no_show                         Optional. Disable results visualization.
 ```
 

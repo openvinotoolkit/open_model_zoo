@@ -108,7 +108,7 @@ def build_argparser():
     parser.add_argument('-i', '--input', help="Required. Path to an audio file in WAV PCM 16 kHz mono format", required=True)
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
-                             "CPU, GPU, HDDL, MYRIAD or HETERO. "
+                             "CPU, GPU or HETERO. "
                              "The demo will look for a suitable OpenVINO Runtime plugin for this device. Default value is CPU.")
     return parser
 

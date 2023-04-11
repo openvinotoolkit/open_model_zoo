@@ -45,7 +45,7 @@ def build_argparser():
     args.add_argument('-m', "--model", type=str, required=True,
                       help="Required. Path to an .xml file with a trained model.")
     args.add_argument("-d", "--device", type=str, default="CPU",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is"
+                      help="Optional. Specify the target device to infer on; CPU or GPU is"
                            " acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU")
     args.add_argument('--labels', type=str, default=None,

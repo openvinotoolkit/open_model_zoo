@@ -15,7 +15,7 @@ encoding the resulting (previous) frames or running further inference, like some
 the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid
 oversubscribing the shared compute resources.
-As another example, if the inference is performed on the HDDL, and the CPU is essentially idle,
+As another example, if the inference is performed on the iGPU, and the CPU is essentially idle,
 then it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
 then there is little gain from doing the (resulting video) encoding on the same GPU in parallel,
 because the device is already busy.
@@ -188,8 +188,8 @@ Options:
                         Optional. Specify the model adapter. Default is
                         openvino.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo
+                        Optional. Specify the target device to infer on; CPU or
+                        GPU is acceptable. The demo
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
 

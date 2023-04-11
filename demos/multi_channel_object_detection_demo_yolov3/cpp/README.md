@@ -65,20 +65,7 @@ To run the demo on CPU, with one single camera, use the following command:
 ./multi_channel_object_detection_demo_yolov3 -m <path_to_model>/model.xml -d CPU -i 0
 ```
 
-To run the demo on HDDL, using two recorded video files, use the following command:
-
-```sh
-./multi_channel_object_detection_demo_yolov3 -m <path_to_mdel>/model.xml -d HDDL -i <path_to_file>/file1,<path_to_file>/file2
-```
-
 Video files will be processed simultaneously.
-
-To achieve 100% utilization of one Myriad X, the rule of thumb is to run 4 infer requests on each Myriad X. Option `-nireq 32` can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
-
-```sh
-./multi_channel_object_detection_demo_yolov3 -m <path_to_model>/model.xml -d HDDL
--i <path_to_file>/file1,<path_to_file>/file2,<path_to_file>/file3,<path_to_file>/file4 -nireq 32
-```
 
 ### Input Video Sources
 

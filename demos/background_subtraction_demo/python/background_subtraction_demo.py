@@ -56,9 +56,9 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
-                           'acceptable. The demo will look for a suitable plugin for device specified. '
-                           'Default value is CPU.')
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU")
     args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
                       help='Optional. Probability threshold for detections filtering.')
     args.add_argument('--resize_type', default=None, choices=RESIZE_TYPES.keys(),

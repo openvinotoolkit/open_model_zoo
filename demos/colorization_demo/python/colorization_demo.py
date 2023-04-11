@@ -41,8 +41,9 @@ def build_arg():
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=Path)
     in_args.add_argument("-d", "--device",
-                         help="Optional. Specify target device for infer: CPU, GPU, HDDL or MYRIAD. "
-                              "Default: CPU",
+                         help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                              "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                              "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU",
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input", required=True,
                          help='Required. An input to process. The input must be a single image, '

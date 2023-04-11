@@ -29,8 +29,8 @@ def build_argparser():
     parser.add_argument('-m', '--model', dest='model', required=True,
                         help='Path to .xml file of OpenVINO IR.')
     parser.add_argument('-d', '--device', dest='device', default='CPU',
-                        help='Optional. Specify the target device to infer on; CPU, '
-                             'GPU, HDDL or MYRIAD is acceptable. Default value is CPU.')
+                        help='Optional. Specify the target device to infer on; CPU or '
+                             'GPU is acceptable. Default value is CPU.')
     parser.add_argument('--no_show', action='store_true',
                         help='Disable results visualization')
     return parser

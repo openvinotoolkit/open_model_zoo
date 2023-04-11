@@ -12,8 +12,8 @@
 static const char help_message[] = "Print a usage message.";
 static const char input_message[] = "Required. Path to input .npy file with MRI scan data.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on; CPU, "
-                                            "GPU, HDDL or MYRIAD is acceptable (CPU by default).";
+static const char target_device_message[] = "Optional. Specify the target device to infer on; CPU or "
+                                            "GPU is acceptable (CPU by default).";
 static const char pattern_message[] = "Required. Path to sampling mask in .npy format.";
 static const char no_show_message[] = "Optional. Disable results visualization.";
 

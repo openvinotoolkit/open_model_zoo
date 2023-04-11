@@ -208,9 +208,9 @@ def build_argparser():
                       help="Optional. Probability threshold to treat model prediction as meaningful",
                       default=0.95, type=float)
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
-                           "acceptable. The demo will look for a suitable plugin for device specified. Default value "
-                           "is CPU",
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU",
                       default="CPU", type=str)
     args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
                       help='Optional. Resolution of the demo application window. Default: 1280 720')

@@ -10,7 +10,7 @@ Specifically, this demo keeps the number of Infer Requests that you have set usi
 This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
-For example, if the inference is performed on the HDDL, and the CPU is essentially idle, than it makes sense to do things on the CPU
+For example, if the inference is performed on the iGPU, and the CPU is essentially idle, than it makes sense to do things on the CPU
 in parallel. But if the inference is performed, say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
 

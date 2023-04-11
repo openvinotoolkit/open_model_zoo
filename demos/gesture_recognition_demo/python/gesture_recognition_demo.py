@@ -84,9 +84,9 @@ def build_argparser():
                       help='Optional. Threshold for the predicted score of an action.',
                       default=0.8, type=float)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL '
-                           'or MYRIAD. The demo will look for a suitable plugin for device '
-                           'specified (by default, it is CPU).',
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU",
                       default='CPU', type=str)
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')

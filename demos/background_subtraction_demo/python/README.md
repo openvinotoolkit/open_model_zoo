@@ -98,86 +98,52 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: background_subtraction_demo.py [-h] -m MODEL
-                                      [--adapter {openvino,ovms}] -i INPUT
-                                      [-d DEVICE] [-t PROB_THRESHOLD]
-                                      [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}]
-                                      [--labels LABELS]
-                                      [--target_bgr TARGET_BGR]
-                                      [--background BACKGROUND]
-                                      [--blur_bgr BLUR_BGR]
-                                      [-nireq NUM_INFER_REQUESTS]
-                                      [-nstreams NUM_STREAMS]
-                                      [-nthreads NUM_THREADS] [--loop]
-                                      [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                                      [--no_show] [--show_with_original_frame]
-                                      [--output_resolution OUTPUT_RESOLUTION]
-                                      [-u UTILIZATION_MONITORS] [-r]
+usage: background_subtraction_demo.py [-h] -m MODEL [--adapter {openvino,ovms}] -i INPUT [-d DEVICE] [-t PROB_THRESHOLD] [--resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}] [--labels LABELS] [--target_bgr TARGET_BGR]
+                                      [--background BACKGROUND] [--blur_bgr BLUR_BGR] [--layout LAYOUT] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
+                                      [--show_with_original_frame] [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model or
-                        address of model inference service if using OVMS
-                        adapter.
+                        Required. Path to an .xml file with a trained model or address of model inference service if using OVMS adapter.
   --adapter {openvino,ovms}
-                        Optional. Specify the model adapter. Default is
-                        openvino.
+                        Optional. Specify the model adapter. Default is openvino.
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a
-                        single image, a folder of images, video file or camera
-                        id.
+                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will look
-                        for a suitable plugin for device specified. Default
-                        value is CPU.
+                        Optional. Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>'
+                        format to specify MULTI plugin. Default is CPU
   -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
-                        Optional. Probability threshold for detections
-                        filtering.
+                        Optional. Probability threshold for detections filtering.
   --resize_type {crop,standard,fit_to_window,fit_to_window_letterbox}
-                        Optional. A resize type for model preprocess. By
-                        default used model predefined type.
+                        Optional. A resize type for model preprocess. By default used model predefined type.
   --labels LABELS       Optional. Labels mapping file.
   --target_bgr TARGET_BGR
-                        Optional. Background onto which to composite the
-                        output (by default to green field).
+                        Optional. Background onto which to composite the output (by default to green field).
   --background BACKGROUND
-                        Optional. Background image for background-matting
-                        model. This is a background image that equal to a real
-                        background behind a person on an input frame and must
-                        have the same shape as an input image.
-  --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with
-                        value 0 is not applied).
+                        Optional. Background image for background-matting model. This is a background image that equal to a real background behind a person on an input frame and must have the same shape as an input image.
+  --blur_bgr BLUR_BGR   Optional. Background blur strength (by default with value 0 is not applied).
+  --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests.
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
-                        Optional. Number of streams to use for inference on
-                        the CPU or/and GPU in throughput mode (for HETERO and
-                        MULTI device cases use format
-                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
-                        <nstreams>).
+                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
-                        Optional. Number of threads to use for inference on
-                        CPU (including HETERO cases).
+                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
 
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0 is
-                        set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
   --show_with_original_frame
-                        Optional. Merge the result frame with the original
-                        one.
+                        Optional. Merge the result frame with the original one.
   --output_resolution OUTPUT_RESOLUTION
-                        Optional. Specify the maximum output window resolution
-                        in (width x height) format. Example: 1280x720. Input
-                        frame size used by default.
+                        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 

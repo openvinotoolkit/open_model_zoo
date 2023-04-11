@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 A tiny model to upscale scanned images with text. The model used the `ConvTranspose2d` layer instead
-of the `PixelShuffle` layer. As a result, the model can be launched on GPU and MYRIAD devices and
+of the `PixelShuffle` layer. As a result, the model can be launched on GPU device and
 support the `reshape` function.
 
 ## Example

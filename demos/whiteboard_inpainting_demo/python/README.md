@@ -82,8 +82,8 @@ optional arguments:
                         Optional. Threshold for person instance segmentation model.
   --no_show             Optional. Don't show output.
   -d DEVICE, --device DEVICE
-                        Optional. Specify a target device to infer on. CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will
+                        Optional. Specify a target device to infer on. CPU or
+                        GPU is acceptable. The demo will
                         look for a suitable plugin for the device specified.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.

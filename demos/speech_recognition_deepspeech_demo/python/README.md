@@ -74,7 +74,7 @@ optional arguments:
                         Required. Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
-                        example: CPU, GPU, HDDL, MYRIAD or HETERO. The
+                        example: CPU or GPU or HETERO. The
                         demo will look for a suitable OpenVINO Runtime plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME

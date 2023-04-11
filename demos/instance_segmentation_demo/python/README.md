@@ -92,7 +92,7 @@ Options:
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for device
+                        Optional. Specify the target device to infer on; CPU or GPU is acceptable. The demo will look for a suitable plugin for device
                         specified. Default value is CPU.
 
 Common model options:
