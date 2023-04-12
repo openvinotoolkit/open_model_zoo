@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: face_recognition
 files:
   - name: FP32/face-reidentification-retail-0095.xml
-    size: 237638
-    checksum: 9f95dfd9f00ad6cc788910664be7104882b57dc58ae1517961027e24d8a4cff21dbe49095306606fa7ee7ecf5663d477
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    size: 237585
+    checksum: d5adadadf98f45459bf740b0d5cb425b029ef81133280d3b4f9d0ba0d565b8e21b834c3d030448b8926d849340a8ca7a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
   - name: FP32/face-reidentification-retail-0095.bin
     size: 4427256
     checksum: 953bb75f16d4e7faa0a19700871e6107726cb83e0e062215a841848335694a1e274c61efacab81b4d240d935fe30efda
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
   - name: FP16/face-reidentification-retail-0095.xml
-    size: 350471
-    checksum: 8fb1193bcdab310ea118401a0ffa1dae20a1c793227cf9789e7982c46f511e8ffc67c02b38d9982a9fd76d0b6617b481
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    size: 350427
+    checksum: 689fb39e94bbd0d22cfeeb9292d0b91ac753424a7ee2c0555070e4038a00bfcaad473b47303012b9a393027dbad0dbce
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
   - name: FP16/face-reidentification-retail-0095.bin
     size: 2213628
-    checksum: 802a00762eb563acb377eeac0e96bc97384a0d2788e0a977414d0f235e1e1ee90e278579ff5579f32c606d2cb046482a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    checksum: 6d51703e854509dafdab9dfc6b932136d301d95be6d52c9c23b5a4f5de1ffec80e8d38b87e0e9556ad36f0dded1588ed
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
   - name: FP16-INT8/face-reidentification-retail-0095.xml
-    size: 684582
-    checksum: 14739924f2e0ce956f36dc2fcb41ef9a0680387a28541eac499dc1fa970bb88c70ff65d82082b24310cdf6c49821e5a9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
+    size: 650833
+    checksum: 5ccd7b936e0926b18c0fe9f851644c08901bdc6bc1885c619c55ce7753d6a3e43d30063a71710e8be809e369329f63e8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
   - name: FP16-INT8/face-reidentification-retail-0095.bin
-    size: 1196284
-    checksum: 40a959c2b1c8f6c59b13d8a5d0d073777419c24a311b14abd03a8a929ee3a95702c130d858d601477b1d10ff54abbca6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
+    size: 1196364
+    checksum: 5b4dcdbb2916d26aeff45d97b6ed732ab67ae44912acf273016082bc84a9d6ba2e23d21c6934deb5f5f02e2a1c41a242
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
 input_info:
   - name: '0'
     shape: [1, 3, 128, 128]

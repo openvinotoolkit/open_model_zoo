@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,29 +18,29 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/road-segmentation-adas-0001.xml
-    size: 398306
-    checksum: 30f6be266d7a49a0e9d5d9b1412134b2ee9dbc3586a8fc980c5f0aeaa879b6b722ccc00945d25c83c454e02673bbb3c4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+    size: 398315
+    checksum: 76248abe41e6cc1e4286c21d1d2447a73d29dc86d7343056d37dccefccee65793ab7b3a9bfeda4f17c89c2978112e1ee
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
   - name: FP32/road-segmentation-adas-0001.bin
     size: 737184
-    checksum: 3d8eb2bb70175216e3812e884479aab0e4fce0a3d2df0f5bc5ead86022e002f4b21998f413e052e0e83cb4ef6a8cf3db
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+    checksum: 00391dd817115d2b076cade11062a4ff8c70659eb629d30b4babae3b6888f7c180e7ef306e8e5f14fde33f0bb23e1207
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
   - name: FP16/road-segmentation-adas-0001.xml
-    size: 554644
-    checksum: 451d7804d2f041aed8c200fe4ec1a6b50516e75f1fdc27474dcefb6e8298f8d746b927e69e1db13bf11afb9b4fb1904f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+    size: 554615
+    checksum: 5e50ee68aea37a06435bf6159b586c5059e2673281c020588fa78bd9f160bad8cfb5aad50c9161b8e20925440d15cfa5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
   - name: FP16/road-segmentation-adas-0001.bin
     size: 368616
-    checksum: ceb049b365760f1bb9139a60578362e78c912900284cdd6ac89892fa7cd5b1b491838834d12d37188470e9f900278fe4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+    checksum: 8ca68eb984166af6f99fde64e5e204a21c970061eb149196438c359b70e87abe0d75bc239801e9449027b3c406e19a75
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
   - name: FP16-INT8/road-segmentation-adas-0001.xml
-    size: 1137031
-    checksum: b4e0d66a6a4cb6e36917a6ebdcfdd9d8bdbf3ec18e5557b57d2b0a24584d5bac18a32a8696ae8a03f17a55aaff5095ee
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.xml
+    size: 1056103
+    checksum: b652d74f5902b7530421990627a262c42f397336e281f3d778ab7e1b4e1e85754a9d3045b0a2fbea8466a60c633fe98f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.xml
   - name: FP16-INT8/road-segmentation-adas-0001.bin
-    size: 214968
-    checksum: 23634050b12745be080fdad12170542ea2bb7dbf6afefdcefc433b56b1fd65d7f949de02f5bde8b2116113b72bf754e2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
+    size: 215040
+    checksum: 8d3a12b216491bd00369b11b47c9ead9bec7325879dfbc27e0becc3c1a5f589573f97643535003a06b7281f2accae5f7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
 input_info:
   - name: data
     shape: [1, 3, 512, 896]

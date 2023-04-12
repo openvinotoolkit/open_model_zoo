@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,29 +17,29 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
-    size: 39201
-    checksum: 9bb25aec42eefd8d7268da2205e612413704fdc75692a91d3dc1d61fc57c7360d8d34b7254b6d4ed2c88910c5710f60b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    size: 39209
+    checksum: 670369f2550d26d86fe78e87a8d1221b979d3ae595a85d10b264b170858fff51c3e22103897896ff61c090cd0923a648
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
     checksum: b763e002e1084a792e99c755c457a2d64848967cfaa2bb851ef09e3d5d756a335b77cf08a1b770d60ccfbb87329b3f62
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
-    size: 55676
-    checksum: 4ad8c4ed368c7f3bb42d5bc61487bb86d8f81ba9d546948330e38c7817bdaac00c73a4aa95c403ce40a9891ca1d36b99
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    size: 55639
+    checksum: e09fefe36af94c2523750cd6791a0f068ba97ea9e58e3fe69371403cc1523f6674d443036e189364c51e7eb3d23b84e5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
-    checksum: 707923353b0e5bec597a3f6b0372d4c400f2c0dddad6994e041967c883d28d8dbae99f69bb7b2a835edbc0f3c5d43fc1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    checksum: 1bd220b2433aa295ca891aafa7749105d8c40b4165a65c3d65ba6fe434ac44e2d6225f9a44bdffcb8a253a30f48580a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
   - name: FP16-INT8/emotions-recognition-retail-0003.xml
-    size: 110755
-    checksum: 56bc64c6e1444b5b9cdd05aff6cbfa2c1fbf8ed14de470a740ce8a22d54440d51d1e8c571f008136bb915f375c58bfe8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
+    size: 110985
+    checksum: 95faeda93e0221dbdf513714a9ad8e7d49b6c4a334826775edbd4ce1f6c1d26ba8a224b5fce846f50cbc019f54e4601d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
   - name: FP16-INT8/emotions-recognition-retail-0003.bin
     size: 2495090
-    checksum: 4738a9b290d0edffa391f0cfd367d7a7e74174473a80f5c7f39183f215f95e899e62840d9caff2e0b4ddd8524bf77476
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
+    checksum: ae54da861c7bcc64f8136511fc2f1e79d45cd0fdc273dd80ad0dfdeb76d5e7a6560b2ac9af95cd9eb1821883e42580c7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
 input_info:
   - name: data
     shape: [1, 3, 64, 64]

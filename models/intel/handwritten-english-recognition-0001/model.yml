@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-english-recognition-0001.xml
-    size: 86896
-    checksum: 8f2ff52a6e0714e92d5fa0328c67e6e20ce84f93a159a613dba8cefced1f6ca9f48844f737115e24ff96c0ac3774ed2b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.xml
+    size: 86902
+    checksum: a747e6b672411f29f411a2a6503824bce3f1bc7423e0b40e26abdd9671ddb6a71a41a228df8661b007d62777007e3535
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.xml
   - name: FP32/handwritten-english-recognition-0001.bin
     size: 22224984
     checksum: b46e579567a726d60eca506cd484ec55f0605b7a974a7937908c1ca8ab3e8d02b96e31d8101980ce3d6f51990f1237ad
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/handwritten-english-recognition-0001/FP32/handwritten-english-recognition-0001.bin
   - name: FP16/handwritten-english-recognition-0001.xml
-    size: 104484
-    checksum: 4e3bcf08b328a48cdb93c6248611d73be841bc447387c984f0e43dd970e9381c56657da44abea7fa83241f00ff866f0c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.xml
+    size: 104525
+    checksum: 5143f1f8827b17262f8460ecc37768a4f0a96a5dd6e688ffe9b24d954712197b75ba3dd370cad02033d5f056f9fcdca3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.xml
   - name: FP16/handwritten-english-recognition-0001.bin
     size: 11112574
-    checksum: 7004de5b07425a35f7b747213e149a6f6651dd904e930c1cf710c39ec5380bd03b1eed1603f6d7d0a21eaa9ee0f119e5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.bin
+    checksum: 131e8ff9c93aa5b729ad85954698f9d665b00d5a1c2ab4d6c98161af23e0f5ac414cf2820d87bac46f86e9da40669234
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.bin
   - name: FP16-INT8/handwritten-english-recognition-0001.xml
     size: 124052
     checksum: ec33c8b484de5e1f10bd7b6de0762e2c3e45cf01272333848364bf6d9bb861e01a0c3c21f67930b1a1487effe8c10ba7

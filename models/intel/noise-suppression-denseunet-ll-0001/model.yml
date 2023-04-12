@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,21 +19,21 @@ description: >-
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-denseunet-ll-0001.xml
-    size: 585562
-    checksum: f5ae1d44ebebb67b32186d549880aa81212c59e7ffe5c39711980fa341bf9915a059335b7dd42bd0c82c9abcc8f664d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.xml
+    size: 578172
+    checksum: a8c42fc6df99b271ad7b64ced589ab40e91c3be72943dc62efe800dc3193a249e2d29e59cc2ac0afc6d4b8953ab50296
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.xml
   - name: FP32/noise-suppression-denseunet-ll-0001.bin
     size: 17250892
     checksum: 9e2038d788acecd0076d31cc0ecfcc75129bff666ab77c8b427eb71a19c4771a24eb35415ff43e4812643028e650be69
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-denseunet-ll-0001/FP32/noise-suppression-denseunet-ll-0001.bin
   - name: FP16/noise-suppression-denseunet-ll-0001.xml
-    size: 697339
-    checksum: 01bed143c5f80c8a8a3d8d4584c140cd11cc8c86b92c869f029cf219d1168f9eb442acf9683c1a47c7f485d249005bd0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.xml
+    size: 689820
+    checksum: 2e19ada601278fdfa85bd2adfa5e48a57523e6e38f2ac9c0704d7c7bef84b535b7e2e8b10e8316d1f9c842d1644f6a79
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.xml
   - name: FP16/noise-suppression-denseunet-ll-0001.bin
     size: 8625568
-    checksum: 356a8628ce4fa90b062628dabb02d6066769cde0825b97eb83e8bd2dcd2ee6b4df28c204d8895cc2033e13a2e7e9de7c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
+    checksum: 6758e2bda57379425a0b5d0943a77ab25ffe547acf43075bd3fe948d52b124cd04ca4baf1e4a26909747066b39d060a5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-denseunet-ll-0001/FP16/noise-suppression-denseunet-ll-0001.bin
 input_info:
   - name: input
     shape: [1, 128]

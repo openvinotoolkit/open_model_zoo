@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-0001-regression.xml
-    size: 486093
-    checksum: fe209c9bbad436227c622948de982aad9e4f588af0eb157ced255b254c22471125f97bd7e51380887de279e977ffe626
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.xml
+    size: 485898
+    checksum: 99b64dcafb1d24376c85583838226b944eebb905764ed2a5c684b6fa1723cb1b11c92bd6f0d1e653786665589002370e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.xml
   - name: FP32/text-to-speech-en-0001-regression.bin
     size: 19851380
     checksum: 2f4773b7928b888a95e297ade88b55fa3c93cbd312d3e6f0393b9c85c6c19bf7128a869b8e094530c2b0baffb2eedafc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP32/text-to-speech-en-0001-regression.bin
   - name: FP16/text-to-speech-en-0001-regression.xml
-    size: 631593
-    checksum: e8215ce3c02521c4377bf55b12cbe368b7a50b413cf6eb1addb52fc1160b52913932b71196c9a24a9e265bb8e1e877cd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.xml
+    size: 631246
+    checksum: 4f327c06927e70a0543be7fae2a600df9d14fc647e134814e13be77a31a381dffdf7ed847cf107784c4c3a19f2768d16
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.xml
   - name: FP16/text-to-speech-en-0001-regression.bin
     size: 9925762
-    checksum: 69b046948383f0adee38f5ee102a52c6e50f4943067d1e1ed0ff47a7ab383a0dc60e2da62618b9a01900905a164e4511
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.bin
+    checksum: c8d2328cd460bc110168de5d808ebd5347d58f8fd11484cd8a7f0b4c745aecd9aa60cb1e52fe3f4c9db85d4babf35fb8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.bin
   - name: FP16-INT8/text-to-speech-en-0001-regression.xml
     size: 1248196
     checksum: f95bf91ba62f58f289e36079b55fbe1450880e76f3977edbe567e2f9c26d932e46f96da2a0e7b33268695c16def0614c

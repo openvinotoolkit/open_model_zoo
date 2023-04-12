@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ description: >-
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-poconetlike-0001.xml
-    size: 1118674
-    checksum: 7dbdecfb22cfdf3935534f669e1b2aed46cf79206cd9c0d3c0a534e1ad5b7bcada88f90863956646af251d25a7d1400f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
+    size: 1111250
+    checksum: 871b7388da293caa205827771e10695f9143e94c24ea04ec809d716eecea2e78307d080132a8f19385ee0ce4e7a56300
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
   - name: FP32/noise-suppression-poconetlike-0001.bin
     size: 29589476
     checksum: 732cf191d8a0b394b35ece4b46930149ba9921afee5d247627d5441c4cbe1a31450e48f656aa2f4f129357b08866a5e4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
   - name: FP16/noise-suppression-poconetlike-0001.xml
-    size: 1264177
-    checksum: e6f5d2e2e7f104b9d95c2bac05b9109adbb6bfb2d30b31fb56e3621bbf44bb519826ba2bb18a81ef58e1efc85fba6383
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
+    size: 1256664
+    checksum: a414a33fba85a35450901881ded8b969f1c300091b7ca02705649a3bba6eadca988f93fc91a046dfcd119fdba9a4fbbd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
   - name: FP16/noise-suppression-poconetlike-0001.bin
     size: 14795010
-    checksum: da051918ec934f4449a6fb4721fa70d806ce016149bb2be2de38eede61202874f2ccc53147a3a90d7d54f52540305190
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
+    checksum: 0b5534242bf489257a58377024d8755134e531dbfabc80fcb0b7ad75ef60381e6d65e6a67c5c4616691cd27d1bd4a247
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
 input_info:
   - name: input
     shape: [1, 2048]

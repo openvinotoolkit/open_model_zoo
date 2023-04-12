@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-raisinghand-recognition-0001.xml
-    size: 698981
-    checksum: f5721d20c441d368677be9349231d0d7ce233a0c503e186f6c997854c742e9e843abf6bf564aed0c317bb9d7ff832d60
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+    size: 698990
+    checksum: 23042aaeef234f807f803264f547d76b0e5d12e623155e08836ea03c963f6ac5d1a90bd88f4dd3b43ee9db9214a1c37a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
   - name: FP32/person-detection-raisinghand-recognition-0001.bin
     size: 7799844
     checksum: 5626ecdd5843bae6af53f7319a947efdc064d787c73c42afa1dc5f229cbd3869250993358d677bdf47973c943876847a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
   - name: FP16/person-detection-raisinghand-recognition-0001.xml
-    size: 1038679
-    checksum: 3e67d5af0b3ddcadae5709d750cc6c37f882710a9c3a362ac2b1e8b616b49f14dfec064c40b2364ed63d4963f7826607
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+    size: 1038650
+    checksum: 34c7918a8b42a327db719db776a72412ee94b8b4bce6a011048b04c32d943c3ea788aa88ed9eec90101ed5693760ad34
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
   - name: FP16/person-detection-raisinghand-recognition-0001.bin
     size: 3899974
-    checksum: 04e3cdc2ad58033545e035e0f349ccd2d2ca6d829b87703e758f4ddb489f066f0f8a6b1b4a76098b30c062d310369626
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+    checksum: e0a5974711dc5041fe46760985ee6f5c239e09239b613aa11fe2d83f1f29927eea1e7e3088a8138607ef213566284ea2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
   - name: FP16-INT8/person-detection-raisinghand-recognition-0001.xml
     size: 1913919
     checksum: 14e16271941e32a792725e71c5b7e430d396eb7ba110cbb527e879021dd4ba248e92b9d3e4aeb461cabaec020cf93b98

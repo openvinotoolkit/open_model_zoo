@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
-    size: 78406
-    checksum: b939a2767a5a8b3d3dcdc9d8009d707f9bec62251a29f784503a99f8d724b7256032c278e908eb5ca38e6bb30e0696bc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    size: 78485
+    checksum: 4f355965e070341e1f1df5b954213e0ecca5d43faf8a0c9770efdf04c7442c88fb0aaeb825fc8091b30f0a674c808446
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
     size: 119436
     checksum: ec5a759c2d43eebf679040638ad765bc6ce5c16253421ddeb8acafd1ab6c8cb406f9f85b274771d9f670efc3d824e926
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
-    size: 91307
-    checksum: 2c588d2094128e3ca6163c7b9126361378576cb68aee088c93f644b9686df8331fa5f2a91567e233a091b9e36c7d23a5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    size: 91475
+    checksum: 7b9f3995adf3a713295de26ff2a77b4375dc27975d44abf45e88d2bd2fede1cdcbdd04ee108e5845ed776cb0fd72d37d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
     size: 59762
     checksum: 4cee28140fe9e171c023690dec8376eff8937d7cae39998ebcad317b96268fa8c9e8ec226af088ea45a7664a920a7d92
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
   - name: FP16-INT8/single-image-super-resolution-1032.xml
     size: 155273
     checksum: 524fd7c4132eba99a5bd38666988ad1e71c61d8b427f6520a87cd32a03f1e3976417e5f0e3f3d3bbdc6e53e6b568f271

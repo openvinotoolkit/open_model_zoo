@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-0001-generation.xml
-    size: 198358
-    checksum: 875b9f36369b668b1b5c569c73bf4641c509ef08370adc3edb06d8100d865d8a5379fed74ff1b6903cdfddba5840aaeb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.xml
+    size: 189912
+    checksum: a495cd5ef69f8859fa957bb1d6cc719bcc99ae352428678a4950138f2c08e9efdf40bc94218769d6c1177acd443b7077
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.xml
   - name: FP32/text-to-speech-en-0001-generation.bin
-    size: 51082836
-    checksum: 4ab9315bd3281dd878d7627f8887f803a81c623a83b72ebb8dc96b4fc1ec4750ad276023b3cde0447b0d2571bae5c52c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.bin
+    size: 51082832
+    checksum: 23f1fb6e9068a835c0bbd22742d85f43cf7aba1b52d8545588bef42b0445c4e1b3a7b7986affe12a05afb5ca52085d04
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.bin
   - name: FP16/text-to-speech-en-0001-generation.xml
-    size: 267494
-    checksum: d7078ebde5b61b33ebb0f8c002f9469a53b03a127074e12e446f6454adb210a4f844ba3ebfe0a950809da641f006ba99
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.xml
+    size: 258984
+    checksum: d6790de4b5da740a87ae64a2a585fa13f87bfef6110279c4e51a37bd4bdba96a47b63445b0cbb14bd5489adf1c9730e0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.xml
   - name: FP16/text-to-speech-en-0001-generation.bin
-    size: 25541512
-    checksum: 7bb3b17cbfde2c10a95d625fa378a8753690bd48349e49a025904461b01bbe35d149c2a3724f9b9b2169d074580e4970
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
+    size: 25541508
+    checksum: 043bf50eea637f478dd7ee19b3db51585f8c8dc218e480ed36b1caee5dbb721551b22b3a2037fe847c781434ea7b62bc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
   - name: FP16-INT8/text-to-speech-en-0001-generation.xml
     size: 428787
     checksum: e21897e63ebd3f7fa583e2bc49872bdf305499a355915b759858d0d2d2503df0c17338a715dd31c4ecf91a2a176995a6

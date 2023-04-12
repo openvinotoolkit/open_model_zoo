@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/driver-action-recognition-adas-0002-decoder.xml
-    size: 216461
-    checksum: d3d0b239266c997de83d34800b262cf772ebd51727a6734c8d4e955c3d9c7b9b7e161a44af14def4cc038d9da5baef19
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 216384
+    checksum: 9a64e6b33a2a9d0bdc5755feca31095ed2683dc0df830e46f96a2d421a14607e69589d3197fc31b144fc2c5ef2b4d2e3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
   - name: FP32/driver-action-recognition-adas-0002-decoder.bin
     size: 29436128
-    checksum: a56bee281d765181d0892466af72cceb61babfb5f044603a417c920a6bca1ae1505a55b39f66349bf9ce30dfa2423b99
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+    checksum: 510f239486d80bca3b6c5810423a88d6e41c5d8008461bbdb4cada2857b27e75884a28f499f8e9f5c49c4d538c4305d2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
   - name: FP16/driver-action-recognition-adas-0002-decoder.xml
-    size: 234887
-    checksum: 533d019303094c9fe4c16a272637f7d7bc68392dbc1e74db674e2ef35db3060735531217f5e28d4f980ecb69f89484fb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 234762
+    checksum: 6a6bb75e5a9b853034d1af63e9ec22c28601a568e6ca1534355dcf0d121658b88a58727901f0595fd26d0c8774446ad3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
   - name: FP16/driver-action-recognition-adas-0002-decoder.bin
     size: 14718156
-    checksum: 5b7f5a4f755774d9715578b7654f3823846b223d9da11e42c92bf400ab034a2fe12c7724d5a9cbe198b8e0d57dfbcd23
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+    checksum: 8c38df5ad90e0d3254e9d65ecb7e29e592b46303efc803de62956abf8dbf9e3ebad3373daa39a34c47d5c974837799e0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
   - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
     size: 321637
     checksum: e80ee48d2a403dbe37c8e37278af4cc039072db79504537dce76f9fafaf5576bc5d80bb2f0178c9c0cfe38bc26ce8e03

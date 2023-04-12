@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: token_recognition
 files:
   - name: FP32/text-recognition-0015-decoder.xml
-    size: 40438
-    checksum: fbf45971fd4f79b8eeb0f42726a08c41a5112ef7c607dd55fe3b9ea05b88674cea47ed5fd6d299ba367d1cc4013fab92
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.xml
+    size: 40447
+    checksum: 2a2d30b0a8e0ef91bcba2fcdc65757a50142fa7fcf8be603579e2bd7d78b4a36d98fb586234fbfe82c31d5660d691d97
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.xml
   - name: FP32/text-recognition-0015-decoder.bin
     size: 42516952
     checksum: b02950a52d38504621d50015805970b010aeef560d238e7886d77314ac5179e5f105eecd21cd31bd894b0a0912be68bb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP32/text-recognition-0015-decoder.bin
   - name: FP16/text-recognition-0015-decoder.xml
-    size: 47373
-    checksum: 24130038ba53c737062082737b72b53abd49f2a7c9095f9687a7b4d7d5824f6314c9b1b7cf5fb2906c06172f8c6fe535
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.xml
+    size: 47344
+    checksum: 5dfafc5455b98a6a309d31d5d63eea0c687f743955a52c6f03ce728e32896ef816806eac61779fcdb922a41dcf53d07d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.xml
   - name: FP16/text-recognition-0015-decoder.bin
     size: 21258580
-    checksum: 73808e1f5536781d58b654b60eb21993e5f3828930a2164a05ac0f7dcf11f2e6a3ab1b9487c5b323ac685443b5092959
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.bin
+    checksum: 56e4c8c59842234cb39f60fd993c9cede707dd9045403962394cbe34d650a776b9cda6ef9221702717b604c34e4f0587
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0015/text-recognition-0015-decoder/FP16/text-recognition-0015-decoder.bin
 input_info:
   - name: hidden
     shape: [1, 1, 1024]

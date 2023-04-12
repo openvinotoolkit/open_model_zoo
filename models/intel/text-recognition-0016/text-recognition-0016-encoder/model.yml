@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-recognition-0016-encoder.xml
-    size: 399414
-    checksum: 6331f4dbd49da7424485cf4bd0ecf0351502ab333243bfdc0d46891ae887b8c0cc93f1b93e22f3217cdea9f3acf99beb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.xml
+    size: 399485
+    checksum: d33ac3383c12be5c12e1cfded0de4734ccbe67ae5a0dacbec7ee405f3473a206327f7f208cb53a400764d121a05af56c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.xml
   - name: FP32/text-recognition-0016-encoder.bin
     size: 352511984
     checksum: 8d542fa6f599194c48571893592249b12465a05d38f0043345d0927c01e97ecb2e913f94b24e9850dfb333924c49782d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP32/text-recognition-0016-encoder.bin
   - name: FP16/text-recognition-0016-encoder.xml
-    size: 521836
-    checksum: 7833a9aaec442e0db495491599690ad61192ef46385fd36509424e2c0170ff67e2073981d2800c0b61c463c04246ff3e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.xml
+    size: 521912
+    checksum: 97a393dd89928ed3c807fc1b0ca09c38196b435e2c2e60d14923eb9777a1f4d2c73ad3f5e6c743b0cb30aa776c4d9164
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.xml
   - name: FP16/text-recognition-0016-encoder.bin
     size: 176256120
-    checksum: b38f980d3aae3c29cb2aa38ec418215af9c6b4c64b44cff29c49e0760502f90237116d29addf9ea8b3f2b8d6050a99ec
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
+    checksum: 8145c42308e09b75a4db04583faa41b2cdaae07f52a38bf2fb2de8f8c599bee719eae64180918827425e2048abbebb41
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
   - name: FP16-INT8/text-recognition-0016-encoder.xml
     size: 994647
     checksum: 12cf3fe852080af1ddca2193fa08ae29e19cbe1e96caf13c93e5b1653f2ad427fef2d56f73a178377c6889f04670ce3b

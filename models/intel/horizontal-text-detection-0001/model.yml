@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ description: >-
 task_type: detection
 files:
   - name: FP32/horizontal-text-detection-0001.xml
-    size: 696071
-    checksum: 7d8eca64a643526b5d78e1f0cdfd2f19c269f1b3fe41bc0d08f7ee5bd829daa864261d79e9fd878b3854ac52cedaa69e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
+    size: 695929
+    checksum: b64efc8c8364d1377c3f69c05ea04b924e35d52034b850dc427f8d32f49ff76b401d68dd86a2dbedb2c82ddd271816ba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
   - name: FP32/horizontal-text-detection-0001.bin
     size: 7753440
-    checksum: d7edd72357a478cc715f359607f9f059b5edf6c408c366c217b9eea475d5e1310e1614e988c2e46b3935544d44f07b57
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
+    checksum: 90579432af590231331bc993ecb34ae5e1a505a53b5b22aa7cf81220b905bcde1c14fdbdbb893869c86666f25581219f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
   - name: FP16/horizontal-text-detection-0001.xml
-    size: 834955
-    checksum: 3febdde920e96c8f90a25ea28cc34408db9e1eaa979ef9410c2baacc9cfd03cc8d668d5230b10c75acd6f25e13bcce00
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
+    size: 834824
+    checksum: 40bf45db2bd325d36e4b3bea6423042bf95959b3b6b846daab514bb80c1436344be8aabfc14a0402273135847d6bd7d7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
   - name: FP16/horizontal-text-detection-0001.bin
     size: 3876900
-    checksum: ae5f36ce93f050e9412719dfee45d1fb531f4f0406a6b86e1f89127bb7b9db3a7680e7401f400dd1973287552d20f95e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
+    checksum: bee59fcdb7946b5efc702cb71271b4e4abd0f2c48a4f33a9d679f9743b44bfa52dc550eed70f42c856b59436bbd30d1c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
   - name: FP16-INT8/horizontal-text-detection-0001.xml
     size: 1245442
     checksum: b140a0c189ee9e068dd95d59bda7bb12d4d4e56e48a693d072bc6428135b5bf4cc67531b736a7fdeb3284b7ef0a6a785
