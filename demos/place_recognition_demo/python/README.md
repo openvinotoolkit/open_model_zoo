@@ -82,8 +82,8 @@ Options:
                         Optional. Number of frames to store in output. If 0
                         is set, all frames are stored.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on: CPU,
-                        GPU, HDDL or MYRIAD. The demo will look for a
+                        Optional. Specify the target device to infer on: CPU or
+                        GPU. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   --no_show             Optional. Do not visualize inference results.

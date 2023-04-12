@@ -56,41 +56,29 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: gesture_recognition_demo.py [-h] -m_a ACTION_MODEL -m_d DETECTION_MODEL
-                                   -i INPUT [-o OUTPUT] [-limit OUTPUT_LIMIT]
-                                   -c CLASS_MAP [-s SAMPLES_DIR]
-                                   [-t ACTION_THRESHOLD] [-d DEVICE]
-                                   [--no_show] [-u UTILIZATION_MONITORS]
+usage: gesture_recognition_demo.py [-h] -m_a ACTION_MODEL -m_d DETECTION_MODEL -i INPUT [-o OUTPUT] [-limit OUTPUT_LIMIT] -c CLASS_MAP [-s SAMPLES_DIR] [-t ACTION_THRESHOLD] [-d DEVICE] [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
   -m_a ACTION_MODEL, --action_model ACTION_MODEL
-                        Required. Path to an .xml file with a trained gesture
-                        recognition model.
+                        Required. Path to an .xml file with a trained gesture recognition model.
   -m_d DETECTION_MODEL, --detection_model DETECTION_MODEL
-                        Required. Path to an .xml file with a trained person
-                        detector model.
+                        Required. Path to an .xml file with a trained person detector model.
   -i INPUT, --input INPUT
-                        Required. Path to a video file or a device node of a
-                        webcam.
+                        Required. Path to a video file or a device node of a web-camera.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output.
-                        If 0 is set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   -c CLASS_MAP, --class_map CLASS_MAP
                         Required. Path to a file with gesture classes.
   -s SAMPLES_DIR, --samples_dir SAMPLES_DIR
-                        Optional. Path to a directory with video samples of
-                        gestures.
+                        Optional. Path to a directory with video samples of gestures.
   -t ACTION_THRESHOLD, --action_threshold ACTION_THRESHOLD
-                        Optional. Threshold for the predicted score of an
-                        action.
+                        Optional. Threshold for the predicted score of an action.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on: CPU,
-                        GPU, HDDL or MYRIAD. The demo will look for a
-                        suitable plugin for device specified (by default, it
-                        is CPU).
+                        Optional. Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>'
+                        format to specify MULTI plugin. Default is CPU
   --no_show             Optional. Do not visualize inference results.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.

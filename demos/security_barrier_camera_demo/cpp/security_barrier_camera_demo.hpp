@@ -40,11 +40,6 @@ static const char ninputs_message[] = "Optional. Specify the number of channels 
 static const char fps[] = "Optional. Set the playback speed not faster than the specified FPS. 0 removes the upper bound.";
 static const char worker_threads[] = "Optional. Set the number of threads including the main thread a Worker class will use.";
 static const char display_resolution_message[] = "Optional. Specify the maximum output window resolution.";
-static const char use_tag_scheduler_message[] = "Required for HDDL plugin only. "
-                                                "If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. "
-                                                "Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. "
-                                                "You must specify the number of VPUs for each network in the hddl_service.config file. "
-                                                "Refer to the corresponding README file for more information.";
 static const char infer_num_threads_message[] = "Optional. Number of threads to use for inference on the CPU "
                                                 "(including HETERO and MULTI cases).";
 static const char infer_num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode "
@@ -71,7 +66,6 @@ DEFINE_uint32(ni, 0, ninputs_message);
 DEFINE_uint32(fps, 0, fps);
 DEFINE_uint32(n_wt, 1, worker_threads);
 DEFINE_string(display_resolution, "1920x1080", display_resolution_message);
-DEFINE_bool(tag, false, use_tag_scheduler_message);
 DEFINE_uint32(nthreads, 0, infer_num_threads_message);
 DEFINE_string(nstreams, "", infer_num_streams_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -104,7 +98,6 @@ void showUsage() {
     std::cout << "    -fps                       " << fps << std::endl;
     std::cout << "    -n_wt                      " << worker_threads << std::endl;
     std::cout << "    -display_resolution        " << display_resolution_message << std::endl;
-    std::cout << "    -tag                       " << use_tag_scheduler_message << std::endl;
     std::cout << "    -nstreams \"<integer>\"      " << infer_num_streams_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"      " << infer_num_threads_message << std::endl;
     std::cout << "    -u                         " << utilization_monitors_message << std::endl;

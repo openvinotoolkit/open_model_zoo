@@ -71,48 +71,36 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
-                                  [-limit OUTPUT_LIMIT] -at
-                                  {en-de,en-mean,i3d-rgb} -m_en M_ENCODER
-                                  [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
-                                  [-d DEVICE] [-lb LABELS]
-                                  [--no_show] [-s LABEL_SMOOTHING]
-                                  [-u UTILIZATION_MONITORS]
-                                  [-r RAW_OUTPUT_MESSAGE]
+usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] -at {en-de,en-mean,i3d-rgb} -m_en M_ENCODER [-m_de M_DECODER | --seq DECODER_SEQ_SIZE] [-d DEVICE] [-lb LABELS] [--no_show] [-s LABEL_SMOOTHING]
+                                  [-u UTILIZATION_MONITORS] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a
-                        single image, a folder of images, video file or camera
-                        id.
+                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0 is
-                        set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   -at {en-de,en-mean,i3d-rgb}, --architecture_type {en-de,en-mean,i3d-rgb}
-                        Required. Specify model architecture type.
+                        Required. Specify architecture type.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
                         Optional. Path to decoder model. Only for -at en-de.
   --seq DECODER_SEQ_SIZE
-                        Optional. Length of sequence that decoder takes as
-                        input.
+                        Optional. Length of sequence that decoder takes as input.
   -d DEVICE, --device DEVICE
-                        Optional. Specify a target device to infer on. CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for the device specified.
-                        Default value is CPU.
+                        Optional. Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>'
+                        format to specify MULTI plugin. Default is CPU
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names.
   --no_show             Optional. Don't show output.
   -s LABEL_SMOOTHING, --smooth LABEL_SMOOTHING
-                        Optional. Number of frames used for output label
-                        smoothing.
+                        Optional. Number of frames used for output label smoothing.
   -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
   -r, --raw_output_message
                         Optional. Output inference results raw values showing.
 ```

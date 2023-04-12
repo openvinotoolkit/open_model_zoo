@@ -71,8 +71,8 @@ Options:
                         Required. Path to a folder where output files will be
                         saved
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. Default
+                        Optional. Specify the target device to infer on; CPU or
+                        GPU is acceptable. Default
                         value is CPU
 ```
 

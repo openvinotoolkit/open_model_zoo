@@ -43,7 +43,7 @@ optional arguments:
   -i INPUT, --input INPUT
                         Required. Path to an audio file in WAV PCM 16 kHz mono format.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on, for example: CPU, GPU, HDDL, MYRIAD or
+                        Optional. Specify the target device to infer on, for example: CPU, GPU or
                         HETERO. The demo will look for a suitable OpenVINO Runtime plugin for this device. Default value is CPU.
   --vocab VOCAB         Optional. Path to an .json file with encoding vocabulary.
   --dynamic_shape       Optional. Using dynamic shapes for inputs and outputs of model.

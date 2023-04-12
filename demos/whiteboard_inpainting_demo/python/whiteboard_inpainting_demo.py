@@ -86,7 +86,7 @@ def main():
                         help='Optional. Threshold for person instance segmentation model.')
     parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
-                        help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
+                        help='Optional. Specify a target device to infer on. CPU or GPU is '
                              'acceptable. The demo will look for a suitable plugin for the device specified.')
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
                         help='Optional. List of monitors to show initially.')

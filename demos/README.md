@@ -158,8 +158,6 @@ To run the demo applications, you can use videos from https://storage.openvinoto
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** OpenVINO™ Runtime HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
-
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/model_tools/README.md).
 
 ## Build the Demo Applications

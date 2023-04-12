@@ -139,100 +139,59 @@ omz_converter --list models.lst
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
-                                   M_DECODER -i INPUT [-no_show]
-                                   [-o OUTPUT_FILE] -v VOCAB_PATH
-                                   [--max_formula_len MAX_FORMULA_LEN]
-                                   [-t CONF_THRESH] [-d DEVICE]
-                                   [--resolution RESOLUTION RESOLUTION]
-                                   [--preprocessing_type {crop,resize}]
-                                   [--imgs_layer IMGS_LAYER]
-                                   [--row_enc_out_layer ROW_ENC_OUT_LAYER]
-                                   [--hidden_layer HIDDEN_LAYER]
-                                   [--context_layer CONTEXT_LAYER]
-                                   [--init_0_layer INIT_0_LAYER]
-                                   [--dec_st_c_layer DEC_ST_C_LAYER]
-                                   [--dec_st_h_layer DEC_ST_H_LAYER]
-                                   [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
-                                   [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
-                                   [--output_layer OUTPUT_LAYER]
-                                   [--output_prev_layer OUTPUT_PREV_LAYER]
-                                   [--logit_layer LOGIT_LAYER]
-                                   [--tgt_layer TGT_LAYER]
+usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i INPUT [-no_show] [-o OUTPUT_FILE] -v VOCAB_PATH [--max_formula_len MAX_FORMULA_LEN] [-t CONF_THRESH] [-d DEVICE] [--resolution RESOLUTION RESOLUTION]
+                                   [--preprocessing_type {crop,resize}] [--imgs_layer IMGS_LAYER] [--row_enc_out_layer ROW_ENC_OUT_LAYER] [--hidden_layer HIDDEN_LAYER] [--context_layer CONTEXT_LAYER] [--init_0_layer INIT_0_LAYER]
+                                   [--dec_st_c_layer DEC_ST_C_LAYER] [--dec_st_h_layer DEC_ST_H_LAYER] [--dec_st_c_t_layer DEC_ST_C_T_LAYER] [--dec_st_h_t_layer DEC_ST_H_T_LAYER] [--output_layer OUTPUT_LAYER]
+                                   [--output_prev_layer OUTPUT_PREV_LAYER] [--logit_layer LOGIT_LAYER] [--tgt_layer TGT_LAYER]
 
 Options:
   -h, --help            Show this help message and exit.
-  -m_encoder M_ENCODER  Required. Path to an .xml file with a trained encoder
-                        part of the model
-  -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
-                        part of the model
+  -m_encoder M_ENCODER  Required. Path to an .xml file with a trained encoder part of the model
+  -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder part of the model
   -i INPUT, --input INPUT
-                        Required. Path to a folder with images, path to an
-                        image files, integer identificator of the camera or
-                        path to the video. See README.md for details.
-  -no_show, --no_show   Optional. Suppress pop-up window with rendered
-                        formula.
+                        Required. Path to a folder with images, path to an image files, integer identifier of the camera or path to the video. See README.md for details.
+  -no_show, --no_show   Optional. Suppress pop-up window with rendered formula.
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
-                        Optional. Path to file where to store output. If not
-                        mentioned, result will be stored in the console.
+                        Optional. Path to file where to store output. If not mentioned, result will be stored in the console.
   -v VOCAB_PATH, --vocab_path VOCAB_PATH
-                        Required. Path to vocab file to construct meaningful
-                        phrase
+                        Required. Path to vocab file to construct meaningful phrase
   --max_formula_len MAX_FORMULA_LEN
-                        Optional. Defines maximum length of the formula
-                        (number of tokens to decode)
+                        Optional. Defines maximum length of the formula (number of tokens to decode)
   -t CONF_THRESH, --conf_thresh CONF_THRESH
-                        Optional. Probability threshold to treat model
-                        prediction as meaningful
+                        Optional. Probability threshold to treat model prediction as meaningful
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for device specified.
-                        Default value is CPU
+                        Optional. Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>'
+                        format to specify MULTI plugin. Default is CPU
   --resolution RESOLUTION RESOLUTION
-                        Optional. Resolution of the demo application window.
-                        Default: 1280 720
+                        Optional. Resolution of the demo application window. Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
   --imgs_layer IMGS_LAYER
-                        Optional. Encoder input name for images. See README
-                        for details.
+                        Optional. Encoder input name for images. See README for details.
   --row_enc_out_layer ROW_ENC_OUT_LAYER
-                        Optional. Encoder output key for row_enc_out. See
-                        README for details.
+                        Optional. Encoder output key for row_enc_out. See README for details.
   --hidden_layer HIDDEN_LAYER
-                        Optional. Encoder output key for hidden. See README
-                        for details.
+                        Optional. Encoder output key for hidden. See README for details.
   --context_layer CONTEXT_LAYER
-                        Optional. Encoder output key for context. See README
-                        for details.
+                        Optional. Encoder output key for context. See README for details.
   --init_0_layer INIT_0_LAYER
-                        Optional. Encoder output key for init_0. See README
-                        for details.
+                        Optional. Encoder output key for init_0. See README for details.
   --dec_st_c_layer DEC_ST_C_LAYER
-                        Optional. Decoder input key for dec_st_c. See README
-                        for details.
+                        Optional. Decoder input key for dec_st_c. See README for details.
   --dec_st_h_layer DEC_ST_H_LAYER
-                        Optional. Decoder input key for dec_st_h. See README
-                        for details.
+                        Optional. Decoder input key for dec_st_h. See README for details.
   --dec_st_c_t_layer DEC_ST_C_T_LAYER
-                        Optional. Decoder output key for dec_st_c_t. See
-                        README for details.
+                        Optional. Decoder output key for dec_st_c_t. See README for details.
   --dec_st_h_t_layer DEC_ST_H_T_LAYER
-                        Optional. Decoder output key for dec_st_h_t. See
-                        README for details.
+                        Optional. Decoder output key for dec_st_h_t. See README for details.
   --output_layer OUTPUT_LAYER
-                        Optional. Decoder output key for output. See README
-                        for details.
+                        Optional. Decoder output key for output. See README for details.
   --output_prev_layer OUTPUT_PREV_LAYER
-                        Optional. Decoder input key for output_prev. See
-                        README for details.
+                        Optional. Decoder input key for output_prev. See README for details.
   --logit_layer LOGIT_LAYER
-                        Optional. Decoder output key for logit. See README for
-                        details.
+                        Optional. Decoder output key for logit. See README for details.
   --tgt_layer TGT_LAYER
-                        Optional. Decoder input key for tgt. See README for
-                        details.
+                        Optional. Decoder input key for tgt. See README for details.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

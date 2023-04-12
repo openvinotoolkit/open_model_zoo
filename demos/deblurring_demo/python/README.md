@@ -52,50 +52,36 @@ omz_converter --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: deblurring_demo.py [-h] -m MODEL -i INPUT [--adapter {openvino,ovms}] [-d DEVICE]
-                          [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
-                          [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
-                          [-limit OUTPUT_LIMIT] [--no_show]
+usage: deblurring_demo.py [-h] -m MODEL -i INPUT [--adapter {openvino,ovms}] [-d DEVICE] [--layout LAYOUT] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                           [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model or
-                        address of model inference service if using OVMS adapter.
+                        Required. Path to an .xml file with a trained model or address of model inference service if using OVMS adapter.
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a
-                        single image, a folder of images or anything that
-                        cv2.VideoCapture can process.
+                        Required. An input to process. The input must be a single image, a folder of images or anything that cv2.VideoCapture can process.
   --adapter {openvino,ovms}
-                        Optional. Specify the model adapter. Default is
-                        openvino.
+                        Optional. Specify the model adapter. Default is openvino.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for device specified.
-                        Default value is CPU.
+                        Optional. Specify a device to infer on (the list of available devices is shown below). Use '-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use '-d MULTI:<comma-separated_devices_list>'
+                        format to specify MULTI plugin. Default is CPU
+  --layout LAYOUT       Optional. Model inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
-                        Optional. Number of streams to use for inference on
-                        the CPU or/and GPU in throughput mode (for HETERO and
-                        MULTI device cases use format
-                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
-                        <nstreams>).
+                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
-                        Optional. Number of threads to use for inference on
-                        CPU (including HETERO cases).
+                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
 
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0 is
-                        set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.

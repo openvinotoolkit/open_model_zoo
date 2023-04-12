@@ -50,9 +50,9 @@ def build_argparser():
     args.add_argument('--adapter', help='Optional. Specify the model adapter. Default is openvino.',
                       default='openvino', type=str, choices=('openvino', 'ovms'))
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
-                           'acceptable. The demo will look for a suitable plugin for device specified. '
-                           'Default value is CPU.')
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU")
     args.add_argument('--layout', type=str, default=None,
                       help='Optional. Model inputs layouts. '
                            'Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.')

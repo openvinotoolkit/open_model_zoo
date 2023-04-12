@@ -28,7 +28,7 @@ public:
 
     PersonDetector() = default;
     PersonDetector(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize, const ov::AnyMap& pluginConfig) :
+            const bool autoResize) :
         autoResize{autoResize}, detectionTresholds{detectionTresholds}, core_{core} {
         slog::info << "Reading Person Detection model " << xmlPath << slog::endl;
         auto model = core.read_model(xmlPath);
@@ -75,7 +75,7 @@ public:
 
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
-        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        compiledModel = core_.compile_model(model, deviceName);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Detection");
     }
 
@@ -139,8 +139,7 @@ private:
 class ReId {
 public:
     ReId() = default;
-    ReId(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize,
-        const ov::AnyMap& pluginConfig) :
+    ReId(ov::Core& core, const std::string& deviceName, const std::string& xmlPath, const bool autoResize) :
         autoResize {autoResize},
         core_{core} {
         slog::info << "Reading Person Re-ID model " << xmlPath << slog::endl;
@@ -187,7 +186,7 @@ public:
         reidLen = (int)outputShape[1];
         ppp.output().tensor().set_element_type(ov::element::f32);
         model = ppp.build();
-        compiledModel = core_.compile_model(model, deviceName, pluginConfig);
+        compiledModel = core_.compile_model(model, deviceName);
         logCompiledModelInfo(compiledModel, xmlPath, deviceName, "Person Re-ID");
     }
 

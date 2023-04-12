@@ -51,9 +51,9 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
-                           'acceptable. The demo will look for a suitable plugin for device specified. '
-                           'Default value is CPU.')
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU")
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)

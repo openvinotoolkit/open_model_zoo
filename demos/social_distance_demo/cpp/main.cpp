@@ -16,7 +16,6 @@
 
 #include "openvino/openvino.hpp"
 #include "openvino/runtime/intel_gpu/properties.hpp"
-#include "openvino/runtime/intel_myriad/hddl_properties.hpp"
 
 #include "monitors/presenter.h"
 #include "utils/args_helper.hpp"
@@ -713,24 +712,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        /** Graph tagging via config options**/
-        auto makeTagConfig = [&](const std::string& deviceName, const std::string& suffix) {
-            ov::AnyMap config;
-            if (FLAGS_tag && deviceName == "HDDL") {
-                config["HDDL"] = ov::intel_myriad::hddl::graph_tag("tag" + suffix);
-            }
-            return config;
-        };
-
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         PersonDetector detector(core, FLAGS_d_det, FLAGS_m_det,
-            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d_det, "Detect"));
+            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize);
         slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
         ReId reid;
         std::size_t nreidireq{0};
         if (!FLAGS_m_reid.empty()) {
-            reid = ReId(core, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize, makeTagConfig(FLAGS_d_reid, "ReId"));
+            reid = ReId(core, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize);
             nreidireq = nireq * 3;
             slog::info << "\tNumber of network inference requests: " << nreidireq << slog::endl;
         }

@@ -6,10 +6,8 @@ OpenVINO™ launcher is one of the supported wrappers for easily launching model
 
 For enabling OpenVINO™ launcher you need to add `framework: openvino` in launchers section of your configuration file and provide following parameters:
 
-* `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `GNA`, `MYRIAD`, `HDDL`,
+* `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `GNA`,
     Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.
-
-    If you have several devices in your machine, you are able to provide specific device id in such way: `<DEVICE>.<DEVICE_ID>` (e.g. `MYRIAD.1.2-ma2480`)
 
     It is possible to specify one or more devices via `-td, --target devices` command line argument. Target device will be selected from command line (in case when several devices provided, evaluations will be run one by one with all specified devices).
 * `model` - path to model for your topology or compiled executable network. You also can provide path to directory with model for automatic model search inside directory and help to find it specifying `--model_type`. Supported model types: `xml`, `onnx`, `paddle`, `tf`, `blob`.

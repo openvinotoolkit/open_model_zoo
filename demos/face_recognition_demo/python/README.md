@@ -89,88 +89,54 @@ Running the application with the `-h` option or without
 any arguments yields the following message:
 
 ```
-usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
-                                [-limit OUTPUT_LIMIT]
-                                [--output_resolution OUTPUT_RESOLUTION]
-                                [--no_show] [--crop_size CROP_SIZE CROP_SIZE]
-                                [--match_algo {HUNGARIAN,MIN_DIST}]
-                                [-u UTILIZATION_MONITORS] [-fg FG]
-                                [--run_detector] [--allow_grow] -m_fd M_FD
-                                -m_lm M_LM -m_reid M_REID
-                                [--fd_input_size FD_INPUT_SIZE FD_INPUT_SIZE]
-                                [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}] [-v]
-                                [-t_fd [0..1]] [-t_id [0..1]]
-                                [-exp_r_fd NUMBER]
+usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--output_resolution OUTPUT_RESOLUTION] [--no_show] [--crop_size CROP_SIZE CROP_SIZE] [--match_algo {HUNGARIAN,MIN_DIST}] [-u UTILIZATION_MONITORS]
+                                [-fg FG] [--run_detector] [--allow_grow] -m_fd M_FD -m_lm M_LM -m_reid M_REID [--fd_input_size FD_INPUT_SIZE FD_INPUT_SIZE] [-d_fd {CPU,GPU,HETERO}] [-d_lm {CPU,GPU,HETERO}] [-d_reid {CPU,GPU,HETERO}] [-v]
+                                [-t_fd [0..1]] [-t_id [0..1]] [-exp_r_fd NUMBER]
 
-Optional arguments:
-  -h, --help            Show this help message and exit.
+optional arguments:
+  -h, --help            show this help message and exit
 
 General:
   -i INPUT, --input INPUT
-                        Required. An input to process. The input must be a
-                        single image, a folder of images, video file or camera id.
+                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output.
-                        If 0 is set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --output_resolution OUTPUT_RESOLUTION
-                        Optional. Specify the maximum output window resolution
-                        in (width x height) format. Example: 1280x720.
-                        Input frame size used by default.
+                        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
   --no_show             Optional. Don't show output.
-  --crop_size CROP_SIZE
+  --crop_size CROP_SIZE CROP_SIZE
                         Optional. Crop the input stream to this resolution.
   --match_algo {HUNGARIAN,MIN_DIST}
-                        Optional. Algorithm for face matching.
-                        Default: HUNGARIAN.
+                        Optional. Algorithm for face matching. Default: HUNGARIAN.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
 Faces database:
-  -fg                   Optional. Path to the face images directory.
-  --run_detector        Optional. Use Face Detection model to find faces
-                        on the face images, otherwise use full images.
-  --allow_grow          Optional. Flag to allow growing the face database,
-                        in addition allow dumping new faces on disk. In that
-                        case the user will be asked if he wants to add a
-                        specific image to the images gallery (and it leads to
-                        automatic dumping images to the same folder on disk).
-                        If it is, then the user should specify the name for
-                        the image in the open window and press `Enter`.
-                        If it's not, then press `Escape`. The user may add
-                        new images for the same person by setting the same
-                        name in the open window.
+  -fg FG                Optional. Path to the face images directory.
+  --run_detector        Optional. Use Face Detection model to find faces on the face images, otherwise use full images.
+  --allow_grow          Optional. Allow to grow faces gallery and to dump on disk. Available only if --no_show option is off.
 
 Models:
-  -m_fd PATH            Required. Path to an .xml file with Face Detection model.
-  -m_lm PATH            Required. Path to an .xml file with Facial Landmarks Detection
-                        model.
-  -m_reid PATH          Required. Path to an .xml file with Face Reidentification
-                        model.
-  --fd_input_size FD_INPUT_SIZE
-                        Optional. Specify the input size of detection model for
-                        reshaping. Example: 500 700.
+  -m_fd M_FD            Required. Path to an .xml file with Face Detection model.
+  -m_lm M_LM            Required. Path to an .xml file with Facial Landmarks Detection model.
+  -m_reid M_REID        Required. Path to an .xml file with Face Reidentification model.
+  --fd_input_size FD_INPUT_SIZE FD_INPUT_SIZE
+                        Optional. Specify the input size of detection model for reshaping. Example: 500 700.
 
 Inference options:
-  -d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}
-                        Optional. Target device for Face Detection model.
-                        Default value is CPU.
-  -d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}
-                        Optional. Target device for Facial Landmarks Detection
-                        model. Default value is CPU.
-  -d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}
-                        Optional. Target device for Face Reidentification
-                        model. Default value is CPU.
+  -d_fd {CPU,GPU,HETERO}
+                        Optional. Target device for Face Detection model. Default value is CPU.
+  -d_lm {CPU,GPU,HETERO}
+                        Optional. Target device for Facial Landmarks Detection model. Default value is CPU.
+  -d_reid {CPU,GPU,HETERO}
+                        Optional. Target device for Face Reidentification model. Default value is CPU.
   -v, --verbose         Optional. Be more verbose.
   -t_fd [0..1]          Optional. Probability threshold for face detections.
-  -t_id [0..1]          Optional. Cosine distance threshold between two vectors
-                        for face identification.
-  -exp_r_fd NUMBER      Optional. Scaling ratio for bboxes passed to face
-                        recognition.
+  -t_id [0..1]          Optional. Cosine distance threshold between two vectors for face identification.
+  -exp_r_fd NUMBER      Optional. Scaling ratio for bboxes passed to face recognition.
 ```
 
 Example of a valid command line to run the application:

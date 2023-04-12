@@ -87,8 +87,8 @@ Options:
                         Optional. Specify the model adapter. Default is
                         openvino.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo
+                        Optional. Specify the target device to infer on; CPU or
+                        GPU is acceptable. The demo
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
 

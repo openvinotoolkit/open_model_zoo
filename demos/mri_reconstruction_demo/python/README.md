@@ -30,8 +30,8 @@ optional arguments:
   -m MODEL, --model MODEL
                         Path to .xml file of OpenVINO IR.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. Default value is
+                        Optional. Specify the target device to infer on; CPU or
+                        GPU is acceptable. Default value is
                         CPU.
   --no_show             Disable results visualization
 ```

@@ -58,9 +58,9 @@ def build_argparser():
                               help='Optional. Length of sequence that decoder takes as input.',
                               default=16, type=int)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
-                           'acceptable. The demo will look for a suitable plugin for the device specified. '
-                           'Default value is CPU.',
+                      help="Optional. Specify a device to infer on (the list of available devices is shown below). Use "
+                           "'-d HETERO:<comma-separated_devices_list>' format to specify HETERO plugin. Use "
+                           "'-d MULTI:<comma-separated_devices_list>' format to specify MULTI plugin. Default is CPU",
                       default='CPU', type=str)
     args.add_argument('-lb', '--labels', help='Optional. Path to file with label names.', type=str)
     args.add_argument('--no_show', action='store_true', help="Optional. Don't show output.")
@@ -87,10 +87,6 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     core = Core()
 
-    if 'MYRIAD' in args.device:
-        myriad_config = {'MYRIAD_ENABLE_HW_ACCELERATION': 'YES'}
-        core.set_property('MYRIAD', myriad_config)
-
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
         encoder_target_device = args.device
@@ -98,7 +94,7 @@ def main():
         encoder_target_device = decoder_target_device
 
     models = [IEModel(args.m_encoder, core, encoder_target_device, model_type='Action Recognition Encoder',
-                      num_requests=(3 if args.device == 'MYRIAD' else 1))]
+                      num_requests=1)]
 
     if args.architecture_type == 'en-de':
         if args.m_decoder is None:
