@@ -129,7 +129,9 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         if shape_string:
             expanded_mo_args.append('--input_shape={}'.format(shape_string))
         if data_type == "FP16":
-            expanded_mo_args.append("--compress_to_fp16")
+            expanded_mo_args.append("--compress_to_fp16=True")
+        else:
+            expanded_mo_args.append("--compress_to_fp16=False")
 
         with tempfile.TemporaryDirectory() as mo_output_dir:
             mo_cmd = [*mo_props.cmd_prefix,
