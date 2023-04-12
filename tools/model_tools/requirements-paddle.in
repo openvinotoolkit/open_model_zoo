@@ -1,1 +1,2 @@
-paddlepaddle>=2.2.0;python_version<"3.11"  # ticket 95904
+# ticket 95904 - disabled due to incompatible required protobuf version
+#paddlepaddle>=2.2.0
