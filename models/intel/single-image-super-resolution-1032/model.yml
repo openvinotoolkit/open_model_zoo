@@ -32,6 +32,14 @@ files:
     size: 59762
     checksum: 4cee28140fe9e171c023690dec8376eff8937d7cae39998ebcad317b96268fa8c9e8ec226af088ea45a7664a920a7d92
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+  - name: FP16-INT8/single-image-super-resolution-1032.xml
+    size: 155273
+    checksum: 524fd7c4132eba99a5bd38666988ad1e71c61d8b427f6520a87cd32a03f1e3976417e5f0e3f3d3bbdc6e53e6b568f271
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.xml
+  - name: FP16-INT8/single-image-super-resolution-1032.bin
+    size: 31122
+    checksum: ebe56c5dd4a7145f2c7857406b015fa621af316c782d16b03bb18e130a682fbacb4f5a453b4d75a8b2fe5d0dcb438ff2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
 input_info:
   - name: '0'
     shape: [1, 3, 270, 480]

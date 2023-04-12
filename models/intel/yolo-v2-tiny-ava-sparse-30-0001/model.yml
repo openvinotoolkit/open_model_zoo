@@ -36,6 +36,14 @@ files:
     size: 31717480
     checksum: 188767473ba834238419f60287c9d43abc5e560a611c1073c4f928d4e53ffa8555dabefcb3b2852bade24beea19503fa
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
+  - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 79843
+    checksum: 65a7c348df9ed5fdf99f2c788b9ea015b8692c6ef66c0b074825ba1463ebeb05a7560ccd2cb95eaa14e2a8a0b8077443
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
+  - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
+    size: 15874740
+    checksum: 3c1a8cc0c30fc4b0569b6c354d81cb20e07a66570dc2930a2ff82185018df7fa98e643959fc08da7afd043fc52cfec93
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
 input_info:
   - name: data
     shape: [1, 416, 416, 3]

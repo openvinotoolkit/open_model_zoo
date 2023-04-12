@@ -33,6 +33,14 @@ files:
     size: 11112574
     checksum: 131e8ff9c93aa5b729ad85954698f9d665b00d5a1c2ab4d6c98161af23e0f5ac414cf2820d87bac46f86e9da40669234
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/handwritten-english-recognition-0001/FP16/handwritten-english-recognition-0001.bin
+  - name: FP16-INT8/handwritten-english-recognition-0001.xml
+    size: 124052
+    checksum: ec33c8b484de5e1f10bd7b6de0762e2c3e45cf01272333848364bf6d9bb861e01a0c3c21f67930b1a1487effe8c10ba7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP16-INT8/handwritten-english-recognition-0001.xml
+  - name: FP16-INT8/handwritten-english-recognition-0001.bin
+    size: 10973050
+    checksum: 4c399b71d90e0814a958a4f5bcddab9786d6ea526a45c3c34686865bc25384c37c50732d4995f766326a5071fe0bd3b5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/handwritten-english-recognition-0001/FP16-INT8/handwritten-english-recognition-0001.bin
 input_info:
   - name: actual_input
     shape: [1, 1, 96, 2000]

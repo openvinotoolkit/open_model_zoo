@@ -33,6 +33,14 @@ files:
     size: 25541508
     checksum: 043bf50eea637f478dd7ee19b3db51585f8c8dc218e480ed36b1caee5dbb721551b22b3a2037fe847c781434ea7b62bc
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
+  - name: FP16-INT8/text-to-speech-en-0001-generation.xml
+    size: 428787
+    checksum: e21897e63ebd3f7fa583e2bc49872bdf305499a355915b759858d0d2d2503df0c17338a715dd31c4ecf91a2a176995a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16-INT8/text-to-speech-en-0001-generation.xml
+  - name: FP16-INT8/text-to-speech-en-0001-generation.bin
+    size: 12802769
+    checksum: c5c37fb0438627ec5ba5a0f163977b9d6b0d8dce5f51ae0b87944f1b8b8b420b8e415f5b695ac85e551018b0d11ceaaa
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16-INT8/text-to-speech-en-0001-generation.bin
 input_info:
   - name: mel
     shape: [1, 80, 128]

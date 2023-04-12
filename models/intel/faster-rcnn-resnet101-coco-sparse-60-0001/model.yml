@@ -44,6 +44,14 @@ files:
     size: 105585120
     checksum: 2ca0c3d9f900316b76409af3ac2caf2f6955917287ef79cfe5939302aa8c0576193cbf9e88e1d97f305444f9af0c2d23
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+  - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
+    size: 815938
+    checksum: 8647c2ab9e6164d554c5617ea527255138ce05cdf921cb052ea61a126adefcffb2b70e29bdcc9206bdac4388c8a27e69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
+  - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+    size: 53064310
+    checksum: efbeb9cefb4a299f39df1457bd593322eb8a56d2a0f8af1960bc8959267ae002ae95e67cb440805768e4f3125e5ef68e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
 input_info:
   - name: image
     shape: [1, 800, 1280, 3]

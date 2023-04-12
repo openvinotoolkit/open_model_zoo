@@ -32,6 +32,14 @@ files:
     size: 3634654
     checksum: 5d5ac1ffe989c670608e575a649ba93144fcd559903e4c6e7c39edad73fef84621e8abaabda125459e5433d7c2dff0ba
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-0201/FP16/vehicle-detection-0201.bin
+  - name: FP16-INT8/vehicle-detection-0201.xml
+    size: 490459
+    checksum: 4457ece8fa436015c3d8fede71312e4b7b4017b10eaece8d656d6febb3cc4ae83c0498aaf75646cdbf2aeb7fc8e7b859
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0201/FP16-INT8/vehicle-detection-0201.xml
+  - name: FP16-INT8/vehicle-detection-0201.bin
+    size: 1942006
+    checksum: defac9876c54ad60e0f8b88a9f42a1daa37c5838cb7d41daaffaabafed95fafc1590b701b218844e5e65014e419bdd1d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-0201/FP16-INT8/vehicle-detection-0201.bin
 input_info:
   - name: image
     shape: [1, 3, 384, 384]

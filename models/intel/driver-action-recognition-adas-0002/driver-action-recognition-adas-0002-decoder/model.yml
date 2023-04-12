@@ -32,6 +32,14 @@ files:
     size: 14718156
     checksum: 8c38df5ad90e0d3254e9d65ecb7e29e592b46303efc803de62956abf8dbf9e3ebad3373daa39a34c47d5c974837799e0
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+    size: 321637
+    checksum: e80ee48d2a403dbe37c8e37278af4cc039072db79504537dce76f9fafaf5576bc5d80bb2f0178c9c0cfe38bc26ce8e03
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
+    size: 7398823
+    checksum: aa537bf22258a4b91661bf52a98a759eb6a3e6c7939484b53732dfa809730c85884078c306a0ba83cebc09b1ca803c81
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
 input_info:
   - name: '0'
     shape: [1, 16, 512]

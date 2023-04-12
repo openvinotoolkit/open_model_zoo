@@ -33,6 +33,14 @@ files:
     size: 9925762
     checksum: c8d2328cd460bc110168de5d808ebd5347d58f8fd11484cd8a7f0b4c745aecd9aa60cb1e52fe3f4c9db85d4babf35fb8
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16/text-to-speech-en-0001-regression.bin
+  - name: FP16-INT8/text-to-speech-en-0001-regression.xml
+    size: 1248196
+    checksum: f95bf91ba62f58f289e36079b55fbe1450880e76f3977edbe567e2f9c26d932e46f96da2a0e7b33268695c16def0614c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16-INT8/text-to-speech-en-0001-regression.xml
+  - name: FP16-INT8/text-to-speech-en-0001-regression.bin
+    size: 5052210
+    checksum: 79dd3b0c25040ad62af605b8949c0e639e919cd2b1e454425329c65f19e407f7b863451322dae64c7b6470b7f858c4b9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-regression/FP16-INT8/text-to-speech-en-0001-regression.bin
 input_info:
   - name: data
     shape: [1, 512, 256]

@@ -32,6 +32,14 @@ files:
     size: 8316518
     checksum: f459762b6df7d41177ba1633285d672a3a78262a75d75cfd0780ccd6f78f1d8f5c0a03a09fb711512e9bf923031b35c2
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.bin
+  - name: FP16-INT8/asl-recognition-0004.xml
+    size: 625538
+    checksum: 50b360ddbbb33776eefeae8d7ed5618a007abbc6bf69cf044916005bb2f6178a3cc6a71b5528b7ac65970a583fe39eb8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
+  - name: FP16-INT8/asl-recognition-0004.bin
+    size: 4258313
+    checksum: 131c2a948b09bbdf908bb8a9cdfca87eb07c0af25bd6d61905c97c14268065181b15c94aff66b2cfaef3665b370d29da
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
 input_info:
   - name: input
     shape: [1, 3, 16, 224, 224]

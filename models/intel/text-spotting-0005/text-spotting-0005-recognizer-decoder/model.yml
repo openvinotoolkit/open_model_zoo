@@ -33,6 +33,14 @@ files:
     size: 1354012
     checksum: 011af452e46e1de11a0f4cfea00f22ce316337e72724a0c5cd2dc8724e8e71dfd6264fd4f54a5000beefa59ded8a9487
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
+  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.xml
+    size: 68109
+    checksum: 50f4521ef116132ad67946b8ce274e94d7b749602aaf5eb028749db790edf2a6ee294d1aabe256dea2183a65696ecab7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.xml
+  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.bin
+    size: 1085164
+    checksum: 01760e9b24e1ba09b872c8cb56013f5ab2257b75fee8797813d8c65e8d2baad71c58b845110a6b96b517264806198f47
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.bin
 input_info:
   - name: prev_symbol
     shape: [1]

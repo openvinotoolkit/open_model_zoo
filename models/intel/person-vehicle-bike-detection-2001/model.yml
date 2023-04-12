@@ -32,6 +32,14 @@ files:
     size: 3642626
     checksum: f956376ed8b29edfd61670fa8f1db7a8aa31eae98b6f83426dbabb05ee3e07bed6de625085df96ac0c51864815a447de
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-vehicle-bike-detection-2001/FP16/person-vehicle-bike-detection-2001.bin
+  - name: FP16-INT8/person-vehicle-bike-detection-2001.xml
+    size: 459257
+    checksum: 1830467fb0a09d21ec63e8fc7e373ba44d246a8c280fc03fa98623f4483f182634f1730ff9e40bb6e69896570cd3453f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.xml
+  - name: FP16-INT8/person-vehicle-bike-detection-2001.bin
+    size: 1978582
+    checksum: 16580b8476d471798bcc3ff32baaaafb120397d43ea6f86d61a60d7b9e4a4b3dc2f83d845fb6d6128279ab0b9d184228
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-vehicle-bike-detection-2001/FP16-INT8/person-vehicle-bike-detection-2001.bin
 input_info:
   - name: image
     shape: [1, 3, 384, 384]

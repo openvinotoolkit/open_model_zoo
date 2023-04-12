@@ -32,6 +32,14 @@ files:
     size: 176256120
     checksum: 8145c42308e09b75a4db04583faa41b2cdaae07f52a38bf2fb2de8f8c599bee719eae64180918827425e2048abbebb41
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16/text-recognition-0016-encoder.bin
+  - name: FP16-INT8/text-recognition-0016-encoder.xml
+    size: 994647
+    checksum: 12cf3fe852080af1ddca2193fa08ae29e19cbe1e96caf13c93e5b1653f2ad427fef2d56f73a178377c6889f04670ce3b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16-INT8/text-recognition-0016-encoder.xml
+  - name: FP16-INT8/text-recognition-0016-encoder.bin
+    size: 88768148
+    checksum: 0d3e26cc6cb1882257a49ab8677d032ee9539c95c7d85c7ad3036a1849eaee58811514f911cdd46c2e9a34b60fe99582
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/text-recognition-0016/text-recognition-0016-encoder/FP16-INT8/text-recognition-0016-encoder.bin
 input_info:
   - name: imgs
     shape: [1, 1, 64, 256]

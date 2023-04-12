@@ -36,6 +36,14 @@ files:
     size: 1286772
     checksum: 0406e296c9822f4a5e8ee300ad40e5c0a0eeeaf9206f829556cb836cb8f10a4f8a4dd94d1bb16a60562bf1568fd12618
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
+  - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
+    size: 572878
+    checksum: 6727770c8fa3ffb61876941d3e61b3e21576545a4fac84aa93c6b07f519d962cbdeeddd2f32f28d667a922426b628de1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
+  - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
+    size: 701053
+    checksum: 0d245d4e0ced1cda7d38d86d69737906f7fbe7de2b7591eaa0719c228d0edd2cf8f55c767752ff3b4ffeef0a56c31da7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
 input_info:
   - name: Placeholder
     shape: [1, 300, 300, 3]

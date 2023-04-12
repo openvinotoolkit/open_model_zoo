@@ -32,6 +32,14 @@ files:
     size: 64252178
     checksum: 06b7d22ead99396391abd765e43d44758ad7c6d576cc2502527975343fe33cfc5b5cd20c8e49f7a28fc54969b078834d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/person-detection-0302/FP16/person-detection-0302.bin
+  - name: FP16-INT8/person-detection-0302.xml
+    size: 1718252
+    checksum: b58846ce32afb08e0f99f9d77de5b4b0d8151fff11e6037a32c90a72b5ed9a012727f3e88aade844e436b645eba416e5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-0302/FP16-INT8/person-detection-0302.xml
+  - name: FP16-INT8/person-detection-0302.bin
+    size: 32284200
+    checksum: b681a60d8968918f73546cf24e67fc40954721addd6c99f538884478239f069d7719255d99ca8d65b14d98a08b2a53ea
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/person-detection-0302/FP16-INT8/person-detection-0302.bin
 input_info:
   - name: image
     shape: [1, 3, 720, 1280]

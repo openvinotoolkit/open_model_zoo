@@ -33,6 +33,14 @@ files:
     size: 2157328
     checksum: 175a2d7f9163ff616504f26718237f125235334b8c1eb7935ebe95796472605a72bfaee66ff9c23629c255e9c4c620b1
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+  - name: FP16-INT8/vehicle-detection-adas-0002.xml
+    size: 452888
+    checksum: 7e7fc926351aa56f4008791b415c2bb7dc7329acc4af1c18c33187102959b2a93b852afc0fa0e4f98b204a86e42c6f96
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
+  - name: FP16-INT8/vehicle-detection-adas-0002.bin
+    size: 1132755
+    checksum: 037834dfc3b4ce4fa99d06819fba7fefd324399204eec1d9905ad4fa11b99b70e63910065873a506b90bc3ffa2ebc2fe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
 input_info:
   - name: data
     shape: [1, 3, 384, 672]

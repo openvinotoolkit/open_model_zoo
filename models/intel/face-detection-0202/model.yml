@@ -32,6 +32,14 @@ files:
     size: 3634654
     checksum: 41845332b1deda478b168b77304781891c513f4178ea4f68eff872fcca168514dd9f451fe91120f19d4ab457ec6098b4
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/face-detection-0202/FP16/face-detection-0202.bin
+  - name: FP16-INT8/face-detection-0202.xml
+    size: 490631
+    checksum: 7d1ff9409a3ad47b844360c1ca19640d226ce4dffc89a9c777b17b547a70e2c6a6de0176242468c60b31d881dd52c0eb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-detection-0202/FP16-INT8/face-detection-0202.xml
+  - name: FP16-INT8/face-detection-0202.bin
+    size: 1942006
+    checksum: 5222ba34ad2aae223fd4e3d43cad066390888ab9a5e38341e73e6a4f7586cdb3f627588365af236e2c65ce7719bc0fd7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-detection-0202/FP16-INT8/face-detection-0202.bin
 input_info:
   - name: image
     shape: [1, 3, 384, 384]

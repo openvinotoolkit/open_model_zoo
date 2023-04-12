@@ -33,6 +33,14 @@ files:
     size: 195117028
     checksum: bee6c2d8526b9c09077af93ec6951e638be7a1bf189ac1dd42664862c8394a1171a989d00896cf97ced43a3843ae8495
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/instance-segmentation-security-0091/FP16/instance-segmentation-security-0091.bin
+  - name: FP16-INT8/instance-segmentation-security-0091.xml
+    size: 1958908
+    checksum: ba295661e888c9f2397e11d27028c845d71541e8b5a2f2961118e0cc7a3b24fa3f671a593cf569e21e9eb5f6a69124ff
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.xml
+  - name: FP16-INT8/instance-segmentation-security-0091.bin
+    size: 119100058
+    checksum: 71d7295e590f4dbb9c1e5f1994c1ff53970fe87126ef294745b706e5596ed29f6a39b584265d1ba426a6f1259974f9df
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/instance-segmentation-security-0091/FP16-INT8/instance-segmentation-security-0091.bin
 input_info:
   - name: image
     shape: [1, 3, 800, 1344]
