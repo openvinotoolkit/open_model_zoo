@@ -50,7 +50,7 @@ def pip_compile(target, *sources, upgrade=False):
 
 def update_openvino_dev_reqs():
     package_downloading_stdout = subprocess.run(
-        [sys.executable, '-m', 'pip', 'download', 'openvino-dev', '--no-deps'],
+        [sys.executable, '-m', 'pip', 'download', 'openvino-dev'],
         check=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
 
     wheel_name = re.search(r'openvino\S*\.whl', package_downloading_stdout).group(0)
