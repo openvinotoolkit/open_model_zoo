@@ -172,11 +172,11 @@ termcolor==2.2.0
     # via tensorflow
 texttable==1.6.7
     # via openvino-dev
-torch==1.13.0
+torch==1.13.1
     # via
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
-torchvision==0.14.0
+torchvision==0.14.1
     # via -r tools/model_tools/requirements-pytorch.in
 tqdm==4.65.0
     # via openvino-dev
