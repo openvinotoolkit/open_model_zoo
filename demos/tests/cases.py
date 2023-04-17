@@ -625,7 +625,7 @@ DEMOS = [
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'),
-                    ModelArg('ocrnet-hrnet-w48-paddle'),
+                    # ModelArg('ocrnet-hrnet-w48-paddle'),  # ticket 95904 
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'),
                     # ModelArg('erfnet'),  # TODO add after CI is up
