@@ -787,3 +787,101 @@ class YoloxAdapter(YolorAdapter):
         self.grids = np.concatenate(grids, 1)
         self.expanded_strides = np.concatenate(expanded_strides, 1)
         self.img_size = img_size
+
+
+def xywh2xyxy(x):
+    y =  np.copy(x)
+    y[..., 0] = x[..., 0] - x[..., 2] / 2  # top left x
+    y[..., 1] = x[..., 1] - x[..., 3] / 2  # top left y
+    y[..., 2] = x[..., 0] + x[..., 2] / 2  # bottom right x
+    y[..., 3] = x[..., 1] + x[..., 3] / 2  # bottom right y
+    return y
+
+
+class YoloV8DetectionAdapter(Adapter):
+    """
+    class adapter for yolov8, yolov8 support multiple tasks, this class for object detection.
+    Adapter is base class for all adapters. Each new adapter should be registered in ../adapter/__init__.py
+    """
+    # provider is required field for all entities in accuracy checker, it defines how object called on config level
+    __provider__ = "yolov8_detection"
+
+    @classmethod
+    def parameters(cls):
+        """
+        parameters declares additional configuration parameters for adapter.
+        It is classmethod for extraction parameters without object creation
+        """
+        # get parent parameters if any
+        params = super().parameters()
+        # update configuration for specific adapter
+        params.update(
+           {
+            "conf_threshold": NumberField(value_type=float, optional=True, min_value=0, default=0.25,
+                                     description="Minimal score value for valid detections."),
+            "multi_label": BoolField(optional=True, default=True, description="Use multiple labels per box")
+           }
+        )
+        return params
+
+    def configure(self):
+        """
+        configure method used for parsing and initialization configuration parameters.
+        It called in __init__
+        """
+        self.conf_threshold = self.get_value_from_config("conf_threshold")
+        self.multi_label = self.get_value_from_config("multi_label")
+
+    def process(self, raw, identifiers, frame_meta):
+        """
+        the main processing method for adapters.
+        Parameters:
+          raw: dict or list of dicts with raw model outputs from launcher
+          identifiers: unique identifier which input data this prediction belongs (usually file name)
+          frame_meta: list of metadata for input data per input frame in batch,
+          may contains useful info for postprocessing e.g. order of preprocessing ops and input size.
+        Return:
+          list of Prediction object for batch.
+        """
+        result = []
+        # resolve difference between data stored in dict and list, repack data in complicated cases
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        # extract data for specific output. output_blob field contains name of output from model
+        prediction = raw_outputs[self.output_blob]
+        # obtain info about number of classes
+        nc = prediction.shape[1] - 4  # number of classes
+        mi = 4 + nc # masks start
+        # to speedup calculation when number of classes 1 and multi label selected, turn off it
+        self.multi_label &= nc > 1
+        # main cycle for match
+        for identifier, output, meta in zip(identifiers, prediction, frame_meta):
+            # out format (batch, 4 + nc, num_boxes), transpose to work per box representation
+            output = np.transpose(output, (1, 0))
+            # filter by confidence to reduce calculations
+            output = output[np.max(output[:, 4:mi], axis=1) > self.conf_threshold]
+            # add empty prediction if no detected objects
+            if not output.shape[0]:
+                result.append(DetectionPrediction(identifier, [], [], [], [], [], [], meta))
+                continue
+            # split boxes and per class probabilities
+            box = output[:, :4]
+            cls = output[:, 4:mi]
+            # convert box representation to expected format
+            box = xywh2xyxy(box)
+            # get labels and scores depending on selected strategy
+            if self.multi_label:
+                i, j = np.nonzero(cls > self.conf_threshold)
+                box = box[i]
+                conf = cls[i, j]
+                labels = j
+            else:  # best class only
+                conf = np.max(cls, axis=1)
+                labels = np.argmax(cls, axis=1)
+            min_conf = conf.reshape(-1) > self.conf_threshold
+            box = box[min_conf]
+            conf = conf[min_conf]
+            labels = labels[min_conf]
+            # create detection representation for batch element
+            # DetectionPrediction(identifier, label, score, x_mins, y_mins, x_maxs, y_maxs, meta)
+            result.append(DetectionPrediction(identifier, labels, conf, *box.T, meta))
+        return result
