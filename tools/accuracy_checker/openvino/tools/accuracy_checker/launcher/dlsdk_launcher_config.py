@@ -196,7 +196,7 @@ DLSDK_LAUNCHER_PARAMETERS = {
                     'static - convert undefined shapes to static before execution'
     ),
     '_model_type': StringField(
-        choices=['xml', 'blob', 'onnx', 'paddle', 'tf'],
+        choices=['xml', 'blob', 'onnx', 'paddle', 'tf', 'tflite'],
         description='hint for model type in automatic model search', optional=True),
     '_inference_precision_hint': StringField(
         description='Model execution precision for device',
@@ -265,7 +265,8 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         'blob': 'blob',
         'onnx': 'onnx',
         'paddle': 'pdmodel',
-        'tf': 'pb'
+        'tf': 'pb',
+        'tflite': 'tflite',
     }
 
     def get_model_by_suffix(model_name, model_dir, suffix):
