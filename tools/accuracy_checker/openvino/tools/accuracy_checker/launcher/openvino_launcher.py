@@ -125,7 +125,7 @@ class OpenVINOLauncher(Launcher):
                 config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only)
 
     def try_to_set_default_layout(self):
-        if self.get_value_from_config('_model_type') == 'tf':
+        if self.get_value_from_config('_model_type') in ['tf', 'tflite']:
             self.default_layout = 'NHWC'
         input_nodes = self.network.inputs if self.network else self.exec_network.inputs
         for input_node in input_nodes:
@@ -516,7 +516,7 @@ class OpenVINOLauncher(Launcher):
                 for name in out.names:
                     self.out_tensor_name_to_node[name] = out.get_node().friendly_name
             return
-        if self._weights is None and self._model.suffix != '.onnx' and self._model.suffix != '.pb':
+        if self._weights is None and self._model.suffix not in ['.onnx', '.pb', '.tflite']:
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
