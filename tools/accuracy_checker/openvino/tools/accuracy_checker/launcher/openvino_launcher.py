@@ -484,8 +484,8 @@ class OpenVINOLauncher(Launcher):
         if 'INFERENCE_PRECISION_HINT' not in supported_props:
             warning(f'inference precision hint is not supported for device {self._device}, option will be ingnored')
             return
-        if precision_hint.upper() not in PRECISION_STR_TO_TYPE and precision_hint not in format_map:
-            raise ConfigError(f'Unknown precision {precision_hint} for inference precision hint')
+        if precision_hint.upper() not in PRECISION_STR_TO_TYPE:
+            warning(f'Unknown precision {precision_hint} for inference precision hint')
         precision_type = PRECISION_STR_TO_TYPE.get(precision_hint.upper(), precision_hint)
         self.ie_core.set_property(self._device, {'INFERENCE_PRECISION_HINT': precision_type})
         current_precision = self.ie_core.get_property(self._device, 'INFERENCE_PRECISION_HINT')
