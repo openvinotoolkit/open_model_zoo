@@ -40,3 +40,5 @@ urllib3==1.26.15
     # via requests
 zipp==3.15.0
     # via importlib-metadata
+paddlepaddle==2.4.2
+    # via -r ci/requirements-openvino-dev.in
