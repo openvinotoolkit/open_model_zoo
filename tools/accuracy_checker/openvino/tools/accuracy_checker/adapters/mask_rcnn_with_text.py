@@ -150,6 +150,8 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         labels = det_labels
 
         cls_masks = [[] for _ in range(num_classes)]
+        if not np.size(bboxes):
+            return cls_masks
 
         for bbox, label, mask in zip(bboxes, labels, masks):
             x0, y0, x1, y1 = bbox
