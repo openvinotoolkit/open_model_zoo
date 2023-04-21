@@ -13,7 +13,8 @@ scikit-image>=0.19.2;python_version>="3.7"
 # there is issue with resolving versions for python3.6 and python3.7, pin to specific version of lib
 imagecodecs~=2020.5.30;python_version<"3.7"
 imagecodecs~=2021.11.20;python_version=="3.7"
-imagecodecs~=2022.2.22;python_version>="3.8"
+imagecodecs~=2022.2.22;python_version=="3.8" or python_version=="3.9"
+imagecodecs~=2023.3.16;python_version>="3.11"
 
 # reid
 scikit-learn>=0.24.1;python_version<"3.11"
@@ -55,4 +56,4 @@ rawpy~=0.17.1;python_version>="3.7"
 lmdb>=1.2.1
 
 # pandas datasets support
-pandas>=1.1.5,<=1.3.5
+pandas>=1.1.5,<2.1
