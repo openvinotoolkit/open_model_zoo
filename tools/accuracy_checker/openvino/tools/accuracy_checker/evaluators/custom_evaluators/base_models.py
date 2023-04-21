@@ -165,17 +165,17 @@ class BaseDLSDKModel:
         if model.is_dir():
             is_blob = network_info.get('_model_is_blob')
             if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                model_list = list(model.rglob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list:
-                    model_list = list(model.glob('*.blob'))
+                    model_list = list(model.rglob('*.blob'))
             else:
-                model_list = list(model.glob('*{}*.xml'.format(self.default_model_suffix)))
-                blob_list = list(model.glob('*{}*.blob'.format(self.default_model_suffix)))
-                onnx_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
+                model_list = list(model.rglob('*{}*.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.rglob('*{}*.blob'.format(self.default_model_suffix)))
+                onnx_list = list(model.rglob('*{}*.onnx'.format(self.default_model_suffix)))
                 if not model_list and not blob_list and not onnx_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    onnx_list = list(model.glob('*.onnx'))
+                    model_list = list(model.rglob('*.xml'))
+                    blob_list = list(model.rglob('*.blob'))
+                    onnx_list = list(model.rglob('*.onnx'))
                 if not model_list:
                     model_list = blob_list if blob_list else onnx_list
             if not model_list:
@@ -393,9 +393,9 @@ class BaseONNXModel:
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}*.onnx'.format(self.default_model_suffix)))
+            model_list = list(model.rglob('*{}*.onnx'.format(self.default_model_suffix)))
             if not model_list:
-                model_list = list(model.glob('*.onnx'))
+                model_list = list(model.rglob('*.onnx'))
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
             if len(model_list) > 1:
@@ -472,9 +472,9 @@ class BaseCaffeModel:
         model = Path(network_info.get('model', ''))
         weights = network_info.get('weights')
         if model.is_dir():
-            models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
+            models_list = list(Path(model).rglob('{}.prototxt'.format(self.default_model_name)))
             if not models_list:
-                models_list = list(Path(model).glob('*.prototxt'))
+                models_list = list(Path(model).rglob('*.prototxt'))
             if not models_list:
                 raise ConfigError('Suitable model description is not detected')
             if len(models_list) != 1:
@@ -484,7 +484,7 @@ class BaseCaffeModel:
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
             if not weights.exists():
-                weights_list = list(weights_dir.glob('*.caffemodel'))
+                weights_list = list(weights_dir.rglob('*.caffemodel'))
                 if not weights_list:
                     raise ConfigError('Suitable weights is not detected')
                 if len(weights_list) != 1:
