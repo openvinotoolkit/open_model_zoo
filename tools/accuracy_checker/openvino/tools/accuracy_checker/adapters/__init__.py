@@ -77,7 +77,17 @@ from .ssd import (
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import (
-    TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter, YolorAdapter, YoloxAdapter
+    TinyYOLOv1Adapter,
+    YoloV2Adapter,
+    YoloV3Adapter,
+    YoloV3ONNX,
+    YoloV3TF2,
+    YoloV5Adapter,
+    YolorAdapter,
+    YoloxAdapter,
+    YolofAdapter,
+    # for adapter registration, it should be imported and added to __all__ list
+    YoloV8DetectionAdapter
 )
 from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
@@ -174,6 +184,8 @@ __all__ = [
     'YoloV5Adapter',
     'YolorAdapter',
     'YoloxAdapter',
+    'YolofAdapter',
+    'YoloV8DetectionAdapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',

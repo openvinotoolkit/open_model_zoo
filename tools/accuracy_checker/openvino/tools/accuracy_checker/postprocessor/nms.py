@@ -63,7 +63,7 @@ class NMS(Postprocessor):
             'include_boundaries': BoolField(
                 optional=True, default=True, description="Shows if boundaries are included."
             ),
-            'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K."),
+            'keep_top_k': NumberField(min_value=0, value_type=int, optional=True, description="Keep top K."),
             'use_min_area': BoolField(
                 optional=True, default=False,
                 description="Use minimum area of two bounding boxes as base area to calculate overlap"
