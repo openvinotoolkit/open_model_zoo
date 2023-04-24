@@ -20,7 +20,7 @@ from pkginfo import Wheel
 # Package dependencies can vary depending on the Python version.
 # We thus have to run pip-compile with the lowest Python version that
 # the project supports.
-EXPECTED_PYTHON_VERSION = (3, 6)
+EXPECTED_PYTHON_VERSION = (3, 8)
 
 repo_root = Path(__file__).resolve().parent.parent
 script_name = Path(__file__).name
@@ -79,26 +79,20 @@ def main():
         pip_compile(target, *sources, upgrade=args.upgrade)
         fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
-    pc('ci/requirements-ac.txt',
-        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in')
-    pc('ci/requirements-ac-test.txt',
-        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in',
-        'tools/accuracy_checker/requirements-core.in')
+    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
     pc('ci/requirements-check-basics.txt',
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
         *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['paddle', 'pytorch', 'tensorflow']),
-        *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
-            for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
+        *(openvino_dir / f'tools/requirements_{suffix}.txt'
+            for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']))
     pc('ci/requirements-demos.txt',
-        'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
+        'demos/requirements.txt', openvino_dir / 'tools/requirements.txt')
     pc('ci/requirements-downloader.txt',
         'tools/model_tools/requirements.in')
     pc('ci/requirements-quantization.txt',
-        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
-        openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
-        openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
-    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
+        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements-extra.in',
+        openvino_dir / 'tools/requirements_kaldi.txt')
 
 if __name__ == '__main__':
     main()
