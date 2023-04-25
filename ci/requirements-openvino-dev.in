@@ -53,8 +53,8 @@ tensorflow (<2.13.0,>=1.15.5) ; extra == 'tensorflow'
 tensorflow (<2.13.0,>=2.5) ; extra == 'tensorflow2'
 tensorflow (<=2.9.3,>=2.5) ; extra == 'tensorflow2'
 texttable (>=1.6.3)
-torch (<2.1,>=1.8.1) ; extra == 'pytorch'
-torchvision (<=0.14.0,>=0.9.1) ; extra == 'pytorch'
+torch (<=1.13.0,>=1.8.1) ; extra == 'pytorch'
+torchvision (<=0.14.0,>=0.9.1;python_version < "3.11") ; extra == 'pytorch'
 tqdm (>=4.54.1)
 urllib3 (>=1.26.4) ; extra == 'mxnet'
 yacs (>=0.1.8) ; extra == 'pytorch'
