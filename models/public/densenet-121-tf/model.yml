@@ -32,7 +32,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --mean_values=input_1[123.68,116.78,103.94]
   - --scale_values=input_1[58.395,57.12,57.375]
-  - --output=StatefulPartitionedCall/densenet121/predictions/Softmax
   - --saved_model_dir=$conv_dir/densenet-121.savedmodel
 framework: tf
 quantizable: true
