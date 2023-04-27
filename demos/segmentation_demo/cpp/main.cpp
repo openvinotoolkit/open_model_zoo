@@ -383,11 +383,13 @@ int main(int argc, char* argv[]) {
         for (; framesProcessed <= frameNum; framesProcessed++) {
             result = pipeline.getResult();
             if (result != nullptr) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform, only_masks);
                 //--- Showing results and device information
                 if (FLAGS_r) {
                     printRawResults(result->asRef<ImageResult>(), labels);
                 }
+                renderMetrics.update(renderingStart);
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                                outFrame,
