@@ -1058,15 +1058,27 @@ datasets:
     annotation_conversion:
       converter: inpainting
       images_dir: VOCdevkit/VOC2012/JPEGImages/
-    annotation: inpainting_voc12.pickle
-
+      masks_dir: free_form_masks/masks_2k
+    annotation: inpainting_voc12_masks2k.pickle
     preprocessing:
-      - type: auto_resize
-      - type: rect_mask
-    postprocessing:
-      - type: resize
-        apply_to: prediction
+      - type: crop
+        dst_width: 680
+        dst_height: 512
+      - type: custom_mask
+        mask_dir: free_form_masks/masks_2k
 
+    postprocessing:
+      - type: crop_image
+        dst_width: 680
+        dst_height: 512
+        apply_to: annotation
+
+    metrics:
+      - type: psnr
+        scale_border: 0
+        presenter: print_vector
+      - type: ssim
+        presenter: print_vector
 
   - name: mrlEyes_2018_01
     annotation_conversion:
