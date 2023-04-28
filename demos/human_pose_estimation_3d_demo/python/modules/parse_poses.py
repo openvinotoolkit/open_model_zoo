@@ -11,9 +11,22 @@
  limitations under the License.
 """
 
+import logging as log
 import numpy as np
+import os
+import sys
 
 from modules.pose import Pose, propagate_ids
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+if hasattr(os, "add_dll_directory"):
+    for path in os.environ.get("PATH", "").split(";"):
+        if "" == path:
+            continue
+        try:
+            os.add_dll_directory(path)
+        except OSError as e:
+            log.warning(f"Can't add_dll_directory '{path}': {e}")
 try:
     from pose_extractor import extract_poses
 except ImportError as err:
