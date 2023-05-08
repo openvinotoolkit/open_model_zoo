@@ -88,7 +88,7 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     ov::preprocess::PrePostProcessor ppp(model);
     for (const auto& input : inputs) {
-        ppp.input(input.get_any_name()).tensor().set_element_type(ov::element::u8).set_layout("NHWC");
+        ppp.input(input.get_any_name()).tensor().set_element_type(ov::element::f32).set_layout("NHWC");
 
         ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
@@ -146,7 +146,11 @@ void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, in
 std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData,
                                                                     ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
+    //auto& img = imgData.inputImage;
+    cv::Mat rgbCopy;
+
+    cv::cvtColor(imgData.inputImage, rgbCopy, cv::COLOR_BGR2RGB);
+    auto img = inputTransform(rgbCopy);
 
     const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
     const ov::Layout layout("NHWC");
@@ -161,7 +165,13 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
     const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
     img = resizeImageExt(img, width, height);
-    request.set_tensor(inputsNames[0], wrapMat2Tensor(img));
+    auto ov_tensor = wrapMat2Tensor(img);
+    std::cout << ov_tensor.get_element_type() << std::endl;
+    for (int i = 0; i < 20; i++)
+    {
+        std::cout << (float)ov_tensor.data<float>()[i] << std::endl;
+    }
+    request.set_tensor(inputsNames[0], ov_tensor);
 
     if (inputsNames.size() == 2) {
         const ov::Tensor bicInputTensor = request.get_tensor(inputsNames[1]);
@@ -169,7 +179,13 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
         const int w = static_cast<int>(bicInputTensor.get_shape()[ov::layout::width_idx(layout)]);
         cv::Mat resized;
         cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
-        request.set_tensor(inputsNames[1], wrapMat2Tensor(resized));
+        auto ov_tensor_2 = wrapMat2Tensor(resized);
+        std::cout << ov_tensor_2.get_element_type() << std::endl;
+        for (int i = 0; i < 20; i++)
+        {
+            std::cout << (int)ov_tensor_2.data<uint8_t>()[i] << std::endl;
+        }
+        request.set_tensor(inputsNames[1], ov_tensor_2);
     }
 
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);

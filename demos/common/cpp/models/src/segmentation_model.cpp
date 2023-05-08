@@ -69,7 +69,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
+    ppp.input().tensor().set_element_type(ov::element::f32).set_layout({"NHWC"});
 
     if (useAutoResize) {
         ppp.input().tensor().set_spatial_dynamic_shape();
@@ -100,10 +100,12 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
             outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
             break;
         case 4:
-            outputLayout = "NCHW";
+            outputLayout = "NHWC";
             outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
             outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
             outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
+
+            std::cout << "outChannels: " << outChannels << ", outHeight: " << outHeight << ", outWidth: " << outWidth << std::endl;
             break;
         default:
             throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D outputs are supported.");
@@ -127,7 +129,8 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
             reinterpret_cast<int32_t*>(predictions.data)[i] = int32_t(data[i]);
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
-    } else if (outTensor.get_element_type() == ov::element::f32) {
+    }
+    /*else if (outTensor.get_element_type() == ov::element::f32) {
         const float* data = outTensor.data<float>();
         for (int rowId = 0; rowId < outHeight; ++rowId) {
             for (int colId = 0; colId < outWidth; ++colId) {
@@ -138,6 +141,27 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
                     if (prob > maxProb) {
                         classId = chId;
                         maxProb = prob;
+                    }
+                }  // nChannels
+
+                result->resultImage.at<uint8_t>(rowId, colId) = classId;
+            }  // width
+        }  // height
+    }*/
+    else if (outTensor.get_element_type() == ov::element::f32)
+    {
+        const float* data = outTensor.data<float>();
+        for (int rowId = 0; rowId < outHeight; ++rowId) {
+            for (int colId = 0; colId < outWidth; ++colId) {
+                int classId = 0;
+                float maxProb = -999.0f;
+                for (int chId = 0; chId < outChannels; ++chId) {
+                    float prob = data[rowId * outWidth * outChannels  + colId * outChannels + chId]; //   N * M * k -> n * M * K + m * K + k
+                    if (prob > maxProb) {
+                        classId = chId;
+                        maxProb = prob;
+                        //std::cout << "prob: " << prob << ", classID: " << classId << std::endl;
+                        //std::cout << "rowId: " << rowId << ", colId: " << colId << ",chId: " << chId  << std::endl;
                     }
                 }  // nChannels
 

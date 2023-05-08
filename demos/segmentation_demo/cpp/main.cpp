@@ -287,8 +287,10 @@ int main(int argc, char* argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
 
         ov::Core core;
+        std::unique_ptr<SegmentationModel> model(new SegmentationModel(FLAGS_m, FLAGS_auto_resize, FLAGS_layout));
+        model->setInputsPreprocessing(false, "127 127 127", "255 255 255");
         AsyncPipeline pipeline(
-            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize, FLAGS_layout)),
+            std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);

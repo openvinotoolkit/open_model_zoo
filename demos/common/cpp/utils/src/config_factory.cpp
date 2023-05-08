@@ -65,6 +65,15 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
                                                    ov::intel_gpu::hint::ThrottleLevel(1));
             }
         }
+        else if (device.find("VPU") != std::string::npos) {
+            config.compiledModelConfig.emplace(std::string("VPUX_COMPILER_TYPE"),
+                std::string("MLIR"));
+            std::cout << "VPUX_COMPILER_TYPE" << std::endl;
+            
+            config.compiledModelConfig.emplace(std::string("LOG_LEVEL"),
+                                               std::string("LOG_DEBUG"));
+             
+        }
     }
     return config;
 }

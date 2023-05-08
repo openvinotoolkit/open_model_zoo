@@ -184,8 +184,9 @@ int main(int argc, char* argv[]) {
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
-
+        
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
+        model->setInputsPreprocessing(true, "0 0 0", "255 255 255");
         AsyncPipeline pipeline(std::move(model),
                                ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
                                core);

@@ -110,7 +110,8 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     }
 
     ov::preprocess::PrePostProcessor ppp(model);
-    ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
+    ppp.input().tensor().set_element_type(ov::element::f32).set_layout({ "NHWC" });
+    //ppp.input().tensor().set_element_type(ov::element::u8).set_layout({"NHWC"});
 
     if (useAutoResize) {
         ppp.input().tensor().set_spatial_dynamic_shape();
