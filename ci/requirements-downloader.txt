@@ -1,6 +1,6 @@
 # use update-requirements.py to update this file
 
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
@@ -10,9 +10,9 @@ openvino-telemetry==2022.3.0
     # via -r tools/model_tools/requirements.in
 pyyaml==6.0
     # via -r tools/model_tools/requirements.in
-requests==2.28.2
+requests==2.30.0
     # via
     #   -r tools/model_tools/requirements.in
     #   openvino-telemetry
-urllib3==1.26.15
+urllib3==2.0.2
     # via requests
