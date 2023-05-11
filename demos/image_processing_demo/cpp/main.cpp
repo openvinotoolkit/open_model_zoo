@@ -80,6 +80,11 @@ static const char output_resolution_message[] =
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 static const char jc_message[] = "Optional. Flag of using compression for jpeg images. "
                                  "Default value if false. Only for jr architecture type.";
+static const char reverse_input_channels_message[] = "Optional. Switch the input channels order from BGR to RGB.";
+static const char mean_values_message[] =
+    "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+                                           "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -93,6 +98,9 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
 DEFINE_bool(jc, false, jc_message);
+DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
  * \brief This function shows a help message
@@ -118,6 +126,9 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -jc                       " << jc_message << std::endl;
+    std::cout << "    -reverse_input_channels   " << reverse_input_channels_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
@@ -184,9 +195,9 @@ int main(int argc, char* argv[]) {
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
-        
+
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at, FLAGS_jc);
-        model->setInputsPreprocessing(true, "0 0 0", "255 255 255");
+        model->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
         AsyncPipeline pipeline(std::move(model),
                                ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
                                core);
