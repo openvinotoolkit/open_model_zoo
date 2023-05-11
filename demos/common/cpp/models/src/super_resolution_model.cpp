@@ -88,7 +88,8 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     ov::preprocess::PrePostProcessor ppp(model);
     for (const auto& input : inputs) {
-        inputTransform.setPrecision(ppp, input().get_any_name());
+        inputTransform.setPrecision(ppp, input.get_any_name());
+        ppp.input(input.get_any_name()).tensor().set_layout("NHWC");
         ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
 
