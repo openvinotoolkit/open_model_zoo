@@ -70,6 +70,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     ov::preprocess::PrePostProcessor ppp(model);
     inputTransform.setPrecision(ppp, model->input().get_any_name());
+    ppp.input().tensor().set_layout("NHWC");
 
     if (useAutoResize) {
         ppp.input().tensor().set_spatial_dynamic_shape();
