@@ -88,8 +88,8 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
 
     ov::preprocess::PrePostProcessor ppp(model);
     for (const auto& input : inputs) {
-        ppp.input(input.get_any_name()).tensor().set_element_type(ov::element::u8).set_layout("NHWC");
-
+        inputTransform.setPrecision(ppp, input.get_any_name());
+        ppp.input(input.get_any_name()).tensor().set_layout("NHWC");
         ppp.input(input.get_any_name()).model().set_layout(inputLayout);
     }
 
@@ -146,7 +146,7 @@ void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, in
 std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData,
                                                                     ov::InferRequest& request) {
     auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
+    auto img = inputTransform(imgData.inputImage);
 
     const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
     const ov::Layout layout("NHWC");
