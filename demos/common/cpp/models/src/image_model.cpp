@@ -47,7 +47,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         if (static_cast<size_t>(img.channels()) != channels) {
             throw std::runtime_error(std::string("The number of channels for model input: ") +
                                      std::to_string(channels) + " and image: " +
-                                     std::to_string(static_cast<size_t>(img.channels())) + " - must match");
+                                     std::to_string(img.channels()) + " - must match");
         }
         if (channels != 1 && channels != 3) {
             throw std::runtime_error("Unsupported number of channels");
