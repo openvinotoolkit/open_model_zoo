@@ -81,7 +81,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     }
 
     ppp.input().model().set_layout(inputLayout);
-    model = ppp.build();
+
     // --------------------------- Prepare output  -----------------------------------------------------
     if (model->outputs().size() != 1) {
         throw std::logic_error("Segmentation model wrapper supports topologies with only 1 output");
@@ -91,25 +91,13 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     outputsNames.push_back(output.get_any_name());
 
     const ov::Shape& outputShape = output.get_shape();
-    ov::Layout outputLayout("");
-    switch (outputShape.size()) {
-        case 3:
-            outputLayout = "CHW";
-            outChannels = 1;
-            outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
-            outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
-            break;
-        case 4:
-            outputLayout = "NHWC";
-            outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
-            outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
-            outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
-
-            std::cout << "outChannels: " << outChannels << ", outHeight: " << outHeight << ", outWidth: " << outWidth << std::endl;
-            break;
-        default:
-            throw std::logic_error("Unexpected output tensor shape. Only 4D and 3D outputs are supported.");
-    }
+    ov::Layout outputLayout = getLayoutFromShape(outputShape);
+    outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
+    outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
+    outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
+    ppp.output(output.get_any_name()).model().set_layout(outputLayout);
+    ppp.output(output.get_any_name()).tensor().set_layout("NCHW");
+    model = ppp.build();
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
@@ -130,7 +118,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
     }
-    /*else if (outTensor.get_element_type() == ov::element::f32) {
+    else if (outTensor.get_element_type() == ov::element::f32) {
         const float* data = outTensor.data<float>();
         for (int rowId = 0; rowId < outHeight; ++rowId) {
             for (int colId = 0; colId < outWidth; ++colId) {
@@ -147,29 +135,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
                 result->resultImage.at<uint8_t>(rowId, colId) = classId;
             }  // width
         }  // height
-    }*/
-    else if (outTensor.get_element_type() == ov::element::f32)
-    {
-        const float* data = outTensor.data<float>();
-        for (int rowId = 0; rowId < outHeight; ++rowId) {
-            for (int colId = 0; colId < outWidth; ++colId) {
-                int classId = 0;
-                float maxProb = -999.0f;
-                for (int chId = 0; chId < outChannels; ++chId) {
-                    float prob = data[rowId * outWidth * outChannels  + colId * outChannels + chId]; //   N * M * k -> n * M * K + m * K + k
-                    if (prob > maxProb) {
-                        classId = chId;
-                        maxProb = prob;
-                        //std::cout << "prob: " << prob << ", classID: " << classId << std::endl;
-                        //std::cout << "rowId: " << rowId << ", colId: " << colId << ",chId: " << chId  << std::endl;
-                    }
-                }  // nChannels
-
-                result->resultImage.at<uint8_t>(rowId, colId) = classId;
-            }  // width
-        }  // height
     }
-
     cv::resize(result->resultImage,
                result->resultImage,
                cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
