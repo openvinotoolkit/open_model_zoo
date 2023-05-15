@@ -117,8 +117,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
             reinterpret_cast<int32_t*>(predictions.data)[i] = int32_t(data[i]);
         }
         predictions.convertTo(result->resultImage, CV_8UC1);
-    }
-    else if (outTensor.get_element_type() == ov::element::f32) {
+    } else if (outTensor.get_element_type() == ov::element::f32) {
         const float* data = outTensor.data<float>();
         for (int rowId = 0; rowId < outHeight; ++rowId) {
             for (int colId = 0; colId < outWidth; ++colId) {
@@ -136,6 +135,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
             }  // width
         }  // height
     }
+
     cv::resize(result->resultImage,
                result->resultImage,
                cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
