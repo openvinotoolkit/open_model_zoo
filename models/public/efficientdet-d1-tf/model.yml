@@ -20,18 +20,17 @@ description: >-
   of models, check out the Google AutoML repository <https://github.com/google/automl/tree/master/efficientdet>.
 task_type: detection
 files:
-  - name: efficientdet-d0_frozen.pb
-    size: 48828228
-    checksum: 0178799e293b54bb7a478b1671accfe5fb14d947cc196434db829dae216f55fff5de972a0291a71b7d3b3186aed8dfe9
-    source: efficientdet-d0_frozen.pb
-    original_source: efficientdet-d0_frozen.pb
+  - name: efficientdet-d1_frozen.pb
+    size: 28613804
+    checksum: f89a4fe6072e5dddc71c0532261e1cd89a69472d92a85445437e8b57129708adbad35cf09a8e7603a25b05ee0ebdf4cb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2023.0/efficientdet-d1-tf/efficientdet-d1_frozen.pb
 input_info:
   - name: image_arrays
     shape: [1, 640, 640, 3]
     layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_model=$dl_dir/efficientdet-d0_frozen.pb
+  - --input_model=$dl_dir/efficientdet-d1_frozen.pb
   - --transformations_config=$mo_ext_dir/front/tf/automl_efficientdet.json
 framework: tf
 license: https://raw.githubusercontent.com/google/automl/master/LICENSE

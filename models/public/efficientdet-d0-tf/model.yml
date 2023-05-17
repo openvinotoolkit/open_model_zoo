@@ -21,10 +21,9 @@ description: >-
 task_type: detection
 files:
   - name: efficientdet-d0_frozen.pb
-    size: 28828936
-    checksum: 4107802535b036f846d856e55d0035f871bf900f28b25874874bcb72631f666d9f3a0ff8239c73e28a5fe9a0f816ac9f
-    source: efficientdet-d0_frozen.pb
-    original_source: efficientdet-d0_frozen.pb
+    size: 16829617
+    checksum: 0bbb0a801eca6414dbbe983a2f15458999ceb5ba70480e0c1202e2563a39bc8b90b1fada46011079e2216d7540597856
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2023.0/efficientdet-do-tf/efficientdet-d0_frozen.pb
 input_info:
   - name: image_arrays
     shape: [1, 512, 512, 3]
