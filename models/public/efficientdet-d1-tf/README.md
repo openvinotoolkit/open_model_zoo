@@ -7,6 +7,32 @@ models  designed to perform object detection. This model was pre-trained in Tens
 All the EfficientDet models have been pre-trained on the [Common Objects in Context (COCO)](https://cocodataset.org/#home) image database.
 For details about this family of models, check out the Google AutoML [repository](https://github.com/google/automl/tree/master/efficientdet).
 
+## Steps to Reproduce Conversion to Frozen Graph
+
+1. Clone the original repository
+```sh
+git clone https://github.com/google/automl.git
+cd automl
+```
+2. Checkout the commit that the conversion was tested on:
+```sh
+git checkout 341af7d4da7805c3a874877484e133f33c420ec5
+```
+3. Navigate to efficientdet source code directory
+```sh
+cd efficientdet
+```
+4. Install dependencies
+```sh
+pip install -r requirements.txt
+```
+5. Download model checkpoint archive using this [link](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco2/efficientdet-d1.tar.gz) and unzip it.
+6. Run following command:
+   ```sh
+   python model_inspect.py --runmode=saved_model --model_name=efficientdet-d1 --ckpt_path=CHECKPOINT_DIR --saved_model_dir=OUTPUT_DIR
+   ```
+   where `CHECKPOINT_DIR` - directory where model checkpoint stored, `OUTPUT_DIR` - directory where converted model should be stored.
+
 ## Specification
 
 | Metric            | Value           |
