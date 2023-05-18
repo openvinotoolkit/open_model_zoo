@@ -79,9 +79,11 @@ class PrintProgressReporter(ProgressReporter):
         self.current += batch_size
         now = time.time()
         batch_time = now - self.prev_time
-        if (batch_id + 1) % self.print_interval == 0 or batch_time >= self.print_period:
-            self.prev_time = now
-            print_info('{} / {} processed in {:.3f}s'.format((batch_id + 1) * batch_size, self.dataset_size, batch_time))
+        if (batch_id + 1) % self.print_interval != 0 and batch_time < self.print_period:
+            return
+        
+        self.prev_time = now
+        print_info('{} / {} processed in {:.3f}s'.format((batch_id + 1) * batch_size, self.dataset_size, batch_time))
 
 
 class TQDMReporter(ProgressReporter):
