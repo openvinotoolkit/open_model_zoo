@@ -81,7 +81,7 @@ class PrintProgressReporter(ProgressReporter):
         batch_time = now - self.prev_time
         if (batch_id + 1) % self.print_interval != 0 and batch_time < self.print_period:
             return
-        
+ 
         self.prev_time = now
         print_info('{} / {} processed in {:.3f}s'.format((batch_id + 1) * batch_size, self.dataset_size, batch_time))
 
