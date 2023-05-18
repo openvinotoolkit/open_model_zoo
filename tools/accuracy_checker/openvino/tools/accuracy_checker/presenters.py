@@ -200,7 +200,7 @@ class VectorPrintPresenter(BasePresenter):
 
 def write_scalar_result(
         res_value, name, abs_threshold=None, rel_threshold=None, diff_with_ref=None, value_name=None,
-        postfix='%', scale=100, result_format='{:.2f}'
+        postfix='%', scale=100, result_format='{:.4f}'
 ):
     display_name = "{}@{}".format(name, value_name) if value_name else name
     display_result = result_format.format(res_value * scale)
@@ -241,7 +241,7 @@ def get_result_format_parameters(meta, use_default_formatting):
     if not use_default_formatting:
         postfix = meta.get('postfix', '%')
         scale = meta.get('scale', 100)
-        result_format = meta.get('data_format', '{:.2f}')
+        result_format = meta.get('data_format', '{:.6f}')
 
     return postfix, scale, result_format
 
