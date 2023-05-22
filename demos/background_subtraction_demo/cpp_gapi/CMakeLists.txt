@@ -4,6 +4,7 @@
 
 if (NOT TARGET utils_gapi)
     message(WARNING "background_subtraction_demo_gapi skipped. No suitable OpenCV version detected.")
+    return()
 endif()
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
