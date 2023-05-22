@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+if (NOT TARGET utils_gapi)
+    message(WARNING "interactive_face_detection_demo_gapi skipped. No suitable OpenCV version detected.")
+endif()
+
 file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h*)
 
