@@ -202,7 +202,7 @@ OpenVINO&trade; Runtime supports models in the Intermediate Representation (IR) 
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using OpenVINO™. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
+A demo shows the main idea of how to infer a model using OpenVINO™. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvino.ai/2023.0/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 

@@ -1,4 +1,4 @@
-# [OpenVINO™ Toolkit](https://docs.openvino.ai/latest/index.html) - Open Model Zoo repository
+# [OpenVINO™ Toolkit](https://docs.openvino.ai/2023.0/index.html) - Open Model Zoo repository
 [![Stable release](https://img.shields.io/badge/version-2022.2.0-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.2.0)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
@@ -19,8 +19,8 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
 ## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
-* [Pre-Trained Models](https://docs.openvino.ai/latest/model_zoo.html)
-* [Demos and Samples](https://docs.openvino.ai/latest/omz_demos.html)
+* [Pre-Trained Models](https://docs.openvino.ai/2023.0/model_zoo.html)
+* [Demos and Samples](https://docs.openvino.ai/2023.0/omz_demos.html)
 
 ## Other Usage Examples
 * [Open Visual Cloud](https://www.intel.com/content/www/us/en/developer/articles/technical/open-visual-cloud.html)

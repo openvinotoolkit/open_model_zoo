@@ -15,7 +15,7 @@ For enabling OpenVINO™ launcher you need to add `framework: openvino` in launc
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 **Note:**
-   You can generate executable blob using [compile_tool](https://docs.openvino.ai/latest/_inference_engine_tools_compile_tool_README.html).
+   You can generate executable blob using [compile_tool](https://docs.openvino.ai/2023.0/_inference_engine_tools_compile_tool_README.html).
    Before evaluation executable blob, please make sure that selected device support it.
 
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch
@@ -28,7 +28,7 @@ Device config contains device specific options which should be set to Inference 
 1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are plugin configuration for each device. Plugin configuration represented as dictionary where keys are plugin specific configuration keys and values are their values respectively.
 
-Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvino.ai/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
+Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvino.ai/2023.0/_docs_IE_DG_supported_plugins_Supported_Devices.html)
 
 **Note:** Since OpenVINO 2020.4 on platforms with native bfloat16 support models will be executed on this precision by default. For disabling this behaviour, you need to use device_config with following configuration:
 ```yml
@@ -90,7 +90,7 @@ For enabling OpenVINO™ API 1.0 launcher you need to add `framework: dlsdk` in 
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 **Note:**
-   You can generate executable blob using [compile_tool](https://docs.openvino.ai/latest/_inference_engine_tools_compile_tool_README.html).
+   You can generate executable blob using [compile_tool](https://docs.openvino.ai/2023.0/_inference_engine_tools_compile_tool_README.html).
    Before evaluation executable blob, please make sure that selected device support it.
 
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch.
@@ -103,7 +103,7 @@ Device config contains device specific options which should be set to Inference 
 1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are plugin configuration for each device. Plugin configuration represented as dictionary where keys are plugin specific configuration keys and values are their values respectively.
 
-Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvino.ai/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
+Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvino.ai/2023.0/_docs_IE_DG_supported_plugins_Supported_Devices.html)
 
 **Note:** Since OpenVINO 2020.4 on platforms with native bfloat16 support models will be executed on this precision by default. For disabling this behaviour, you need to use device_config with following configuration:
 ```yml
