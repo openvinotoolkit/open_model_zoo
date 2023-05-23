@@ -21,7 +21,7 @@ then there is little gain from doing the (resulting video) encoding on the same 
 because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the
-[Optimization Guide](https://docs.openvino.ai/latest/_docs_optimization_guide_dldt_optimization_guide.html).
+[Optimization Guide](https://docs.openvino.ai/2023.0/_docs_optimization_guide_dldt_optimization_guide.html).
 
 Other demo objectives are:
 
@@ -332,6 +332,6 @@ You can use these metrics to measure application-level performance.
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/2023.0/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
 * [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server)
