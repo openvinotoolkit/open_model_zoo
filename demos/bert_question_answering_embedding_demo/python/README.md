@@ -145,7 +145,7 @@ Notice that since order of inputs for the model does matter, the demo script che
 from the command line match the actual network inputs.
 The embedding model is reshaped by the demo to infer embedding vectors for long contexts and short question.
 Make sure that the original model converted by Model Optimizer with reshape option.
-Please see general [reshape intro and limitations](https://docs.openvino.ai/latest/_docs_IE_DG_ShapeInference.html)
+Please see general [reshape intro and limitations](https://docs.openvino.ai/2023.0/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
 
@@ -164,6 +164,6 @@ Thus, for the long paragraph texts, the network is called multiple times as for 
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
-* [Model Optimizer](https://docs.openvino.ai/latest/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Optimizer](https://docs.openvino.ai/2023.0/openvino_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/model_tools/README.md)
-* [Benchmark C++ Sample](https://docs.openvino.ai/latest/_inference_engine_samples_benchmark_app_README.html)
+* [Benchmark C++ Sample](https://docs.openvino.ai/2023.0/_inference_engine_samples_benchmark_app_README.html)
