@@ -45,9 +45,10 @@ pip install openvino-dev
 ```
 > **NOTE**: openvino-dev version should be the same as OMZ Tools. For example, if you are using OMZ Tools for 2021.4.2 then install openvino-dev==2021.4.2.
 
-2. Install the tools with the following command:
+3. Install the `omz-tools` with the following command:
 
 ```sh
+# Navigate to the open_model_zoo/tools/model_tools directory
 pip install --upgrade pip
 pip install .
 ```
