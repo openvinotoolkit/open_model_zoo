@@ -30,7 +30,6 @@ input_info:
     layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --output=StatefulPartitionedCall/MobilenetV3small/Predictions/Softmax
   - --saved_model_dir=$conv_dir/mobilenet_v3_small_224_1.0_float.savedmodel
 framework: tf
 quantizable: true
