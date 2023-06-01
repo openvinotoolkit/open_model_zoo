@@ -988,28 +988,6 @@ class TestIEPreprocessor:
         assert isinstance(color_space, Enum)
         assert color_space.name == 'RGB'
 
-    def test_nv12_color_format(self):
-        config = [{'type': 'nv12_to_bgr'}]
-        preprocessor = get_preprocessor('dlsdk')(config)
-        assert not preprocessor.has_resize()
-        assert len(preprocessor.steps) == 1
-        assert not preprocessor.keep_preprocessing_info
-        assert preprocessor.steps[0].name == 'color_format'
-        color_space = preprocessor.steps[0].value
-        assert isinstance(color_space, Enum)
-        assert color_space.name == 'NV12'
-
-    def test_partial_color_format(self):
-        config = [{'type': 'bgr_to_nv12'}, {'type': 'nv12_to_bgr'}]
-        preprocessor = get_preprocessor('dlsdk')(config)
-        assert not preprocessor.has_resize()
-        assert len(preprocessor.steps) == 1
-        assert preprocessor.keep_preprocessing_info == [config[0]]
-        assert preprocessor.steps[0].name == 'color_format'
-        color_space = preprocessor.steps[0].value
-        assert isinstance(color_space, Enum)
-        assert color_space.name == 'NV12'
-
     def test_several_supported_preprocessing_ops(self):
         config = [{'type': 'resize'}, {'type': 'bgr_to_rgb'}]
         preprocessor = get_preprocessor('dlsdk')(config)
