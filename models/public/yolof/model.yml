@@ -185,5 +185,5 @@ model_optimizer_args:
   - --mean_values=image[103.53,116.28,123.675]
   - --output=boxes
   - --input_model=$conv_dir/yolof.onnx
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/megvii-model/YOLOF/main/LICENSE

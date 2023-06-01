@@ -62,5 +62,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/vitstr-small-patch16-224.onnx
   - --scale_values=image[255]
   - --output=logits
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/roatienza/deep-text-recognition-benchmark/master/LICENSE.md

@@ -111,6 +111,6 @@ model_optimizer_args:
   - --scale_values=data[57.375,57.12,58.395]
   - --output=prob
   - --input_model=$conv_dir/regnetx-3.2gf.onnx
-framework: pytorch
+framework: pytorch  # test
 quantizable: true
 license: https://raw.githubusercontent.com/facebookresearch/pycls/master/LICENSE

@@ -89,5 +89,5 @@ model_optimizer_args:
   - --mean_values=[123.675,116.28,103.53]
   - --scale_values=[58.395,57.12,57.375]
   - --input_model=$conv_dir/fastseg-large.onnx
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/ekzhang/fastseg/master/LICENSE.txt

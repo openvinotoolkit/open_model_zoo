@@ -70,6 +70,6 @@ model_optimizer_args:
   - --scale_values=input.1[56.77,55.97,57.50]
   - --reverse_input_channels
   - --output="saliency_map"
-framework: pytorch
+framework: pytorch  # test
 quantizable: true
 license: https://github.com/weijun88/F3Net/blob/master/LICENSE

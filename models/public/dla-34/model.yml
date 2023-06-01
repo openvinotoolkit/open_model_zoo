@@ -52,6 +52,6 @@ model_optimizer_args:
   - --scale_values=data[58.395,57.12,57.375]
   - --output=prob
   - --input_model=$conv_dir/dla-34.onnx
-framework: pytorch
+framework: pytorch  # test
 quantizable: true
 license: https://raw.githubusercontent.com/ucbdrive/dla/master/LICENSE

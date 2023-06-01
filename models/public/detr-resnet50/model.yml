@@ -93,5 +93,5 @@ model_optimizer_args:
   - --scale_values=input[58.395,57.12,57.375]
   - --output=boxes,scores
   - --input_model=$conv_dir/detr-resnet50.onnx
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/facebookresearch/detr/master/LICENSE

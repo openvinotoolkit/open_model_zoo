@@ -109,5 +109,5 @@ input_info:
 model_optimizer_args:
   - --output=output
   - --input_model=$conv_dir/quartznet.onnx
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/NVIDIA/NeMo/main/LICENSE

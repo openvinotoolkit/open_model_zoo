@@ -247,5 +247,5 @@ model_optimizer_args:
   - --scale_values=data[57.375, 57.12, 58.395]
   - --mean_values=data[103.53, 116.28, 123.675]
   - --output=output
-framework: pytorch
+framework: pytorch  # test
 license: https://raw.githubusercontent.com/RangiLyu/nanodet/main/LICENSE

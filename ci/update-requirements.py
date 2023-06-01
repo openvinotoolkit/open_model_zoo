@@ -5,7 +5,8 @@ This script updates all of the requirements-*.txt files in this directory
 with the most recent package versions.
 
 It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo,
-so install these dependencies before running it.
+so install these dependencies before running it:
+py -m venv venv && source venv/bin/activate && py -m pip install -U pip && py -m pip install -U pkginfo pip-tools
 """
 
 import argparse
@@ -83,9 +84,9 @@ def main():
     pc('ci/requirements-check-basics.txt',
        'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
-        *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['paddle', 'pytorch', 'tensorflow']),
+        *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['pytorch', 'tensorflow']),  # paddle
         *(openvino_dir / f'tools/requirements_{suffix}.txt'
-            for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']))
+            for suffix in ['caffe', 'mxnet', 'onnx']))  # tensorflow2
     pc('ci/requirements-demos.txt',
         'demos/requirements.txt', openvino_dir / 'tools/requirements.txt')
     pc('ci/requirements-downloader.txt',

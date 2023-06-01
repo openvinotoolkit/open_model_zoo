@@ -113,6 +113,6 @@ input_info:
 model_optimizer_args:
   - --input_model=$conv_dir/wav2vec2-base.onnx
   - --output=logits
-framework: pytorch
+framework: pytorch  # test
 quantizable: true
 license: https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE
