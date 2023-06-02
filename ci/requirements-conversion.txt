@@ -99,11 +99,12 @@ opencv-python==4.7.0.72
     # via openvino-dev
 openvino==2023.0.0
     # via openvino-dev
-openvino-dev[caffe,mxnet,onnx]==2023.0.0
+openvino-dev[caffe,mxnet,onnx,tensorflow2]==2023.0.0
     # via
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_caffe.txt
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_mxnet.txt
     #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_onnx.txt
+    #   -r ${INTEL_OPENVINO_DIR}/tools/requirements_tensorflow2.txt
 openvino-telemetry==2022.3.0
     # via openvino-dev
 opt-einsum==3.3.0
@@ -162,7 +163,9 @@ tensorboard==2.12.3
 tensorboard-data-server==0.7.0
     # via tensorboard
 tensorflow==2.12.0
-    # via -r tools/model_tools/requirements-tensorflow.in
+    # via
+    #   -r tools/model_tools/requirements-tensorflow.in
+    #   openvino-dev
 tensorflow-estimator==2.12.0
     # via tensorflow
 tensorflow-io-gcs-filesystem==0.32.0

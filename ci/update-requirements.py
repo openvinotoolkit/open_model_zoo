@@ -86,7 +86,7 @@ def main():
     pc('ci/requirements-conversion.txt',
         *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['pytorch', 'tensorflow']),  # paddle
         *(openvino_dir / f'tools/requirements_{suffix}.txt'
-            for suffix in ['caffe', 'mxnet', 'onnx']))  # tensorflow2
+            for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']))
     pc('ci/requirements-downloader.txt',
         'tools/model_tools/requirements.in')
     pc('ci/requirements-quantization.txt',
