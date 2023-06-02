@@ -76,22 +76,13 @@ def main():
 
     update_openvino_dev_reqs()
 
-    def pc(target, *sources):
-        pip_compile(target, *sources, upgrade=args.upgrade)
-        fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
-
-    pc('ci/requirements-openvino-dev.txt', 'ci/requirements-openvino-dev.in')
-    pc('ci/requirements-check-basics.txt',
-       'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
-    pc('ci/requirements-conversion.txt',
+    pip_compile('ci/requirements-conversion.txt',
+        'tools/model_tools/requirements.in', 'ci/requirements-openvino-dev.in',
         *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['pytorch', 'tensorflow']),  # paddle
         *(openvino_dir / f'tools/requirements_{suffix}.txt'
-            for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']))
-    pc('ci/requirements-downloader.txt',
-        'tools/model_tools/requirements.in')
-    pc('ci/requirements-quantization.txt',
-        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements-extra.in',
-        openvino_dir / 'tools/requirements_kaldi.txt')
+            for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']),
+        upgrade=args.upgrade)
+    fixup_req_file('ci/requirements-conversion.txt', [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
 if __name__ == '__main__':
     main()
