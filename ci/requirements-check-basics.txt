@@ -41,7 +41,7 @@ smmap==5.0.0
     # via gitdb
 stevedore==5.1.0
     # via bandit
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via rich
 yamllint==1.32.0
     # via -r ci/requirements-check-basics.in

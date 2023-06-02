@@ -26,7 +26,7 @@ flatbuffers==23.5.26
     # via tensorflow
 gast==0.4.0
     # via tensorflow
-google-auth==2.19.0
+google-auth==2.19.1
     # via
     #   google-auth-oauthlib
     #   tensorboard
@@ -179,7 +179,7 @@ torchvision==0.15.2+cpu
     # via -r tools/model_tools/requirements-pytorch.in
 tqdm==4.65.0
     # via openvino-dev
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via
     #   onnx
     #   tensorflow

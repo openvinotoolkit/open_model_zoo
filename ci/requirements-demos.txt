@@ -169,7 +169,7 @@ tqdm==4.65.0
     # via
     #   -r demos/requirements.txt
     #   openvino-dev
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via
     #   librosa
     #   pydantic

@@ -22,7 +22,7 @@ filelock==3.12.0
     #   transformers
 fsspec==2023.5.0
     # via huggingface-hub
-huggingface-hub==0.15.0
+huggingface-hub==0.15.1
     # via transformers
 idna==3.4
     # via requests
@@ -126,11 +126,11 @@ requests==2.31.0
     #   openvino-dev
     #   openvino-telemetry
     #   transformers
-scikit-image==0.20.0 ; python_version >= "3.7"
+scikit-image==0.21.0 ; python_version >= "3.7"
     # via -r tools/accuracy_checker/requirements-extra.in
 scikit-learn==1.2.2 ; python_version < "3.11"
     # via -r tools/accuracy_checker/requirements-extra.in
-scipy==1.9.1
+scipy==1.10.1
     # via
     #   -r tools/accuracy_checker/requirements-extra.in
     #   openvino-dev
@@ -161,7 +161,7 @@ tqdm==4.65.0
     #   transformers
 transformers==4.29.2 ; python_version >= "3.7"
     # via -r tools/accuracy_checker/requirements-extra.in
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via huggingface-hub
 tzdata==2023.3
     # via pandas
