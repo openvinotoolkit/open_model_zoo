@@ -109,10 +109,11 @@ setup(
     install_requires=read_text('requirements.in'),
     version=get_version('src/openvino/model_zoo/_version.py'),
     extras_require={
-        'pytorch': read_text('requirements-pytorch.in'),
+        'pytorch': read_text('requirements-pytorch.in').replace('--extra-index-url https://download.pytorch.org/whl/cpu\n', ''),
         'tensorflow2': read_text('requirements-tensorflow.in'),
         'paddle': read_text('requirements-paddle.in')
     },
+    dependency_links=['https://download.pytorch.org/whl/cpu'],
     cmdclass={
         'build_py': CustomBuild,
         'sdist': DisabledSdist,

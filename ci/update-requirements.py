@@ -6,7 +6,7 @@ with the most recent package versions.
 
 It uses pip-compile (https://github.com/jazzband/pip-tools) and pkginfo,
 so install these dependencies before running it:
-py -m venv venv && source venv/bin/activate && py -m pip install -U pip && py -m pip install -U pkginfo pip-tools
+py -m venv venv && source venv/bin/activate && py -m pip install -U pip && py -m pip install -U pkginfo pip-tools && INTEL_OPENVINO_DIR=/home/wov/Downloads/l_openvino_toolkit_ubuntu20_2023.0.0.10926.b4452d56304_x86_64/ py ci/update-requirements.py --upgrade && deactivate && rm -rf venv/
 """
 
 import argparse
