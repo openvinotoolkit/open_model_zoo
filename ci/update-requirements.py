@@ -76,13 +76,13 @@ def main():
 
     update_openvino_dev_reqs()
 
-    pip_compile('ci/requirements-conversion.txt',
-        'tools/model_tools/requirements.in', 'ci/requirements-openvino-dev.in',
+    pip_compile(repo_root / 'requirements-conversion.txt',
+        'tools/model_tools/requirements.in', 'requirements-openvino-dev.in',
         *(f'tools/model_tools/requirements-{suffix}.in' for suffix in ['pytorch', 'tensorflow']),  # paddle
         *(openvino_dir / f'tools/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tensorflow2']),
         upgrade=args.upgrade)
-    fixup_req_file('ci/requirements-conversion.txt', [(openvino_dir, 'INTEL_OPENVINO_DIR')])
+    fixup_req_file(repo_root / 'requirements-conversion.txt', [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
 if __name__ == '__main__':
     main()
