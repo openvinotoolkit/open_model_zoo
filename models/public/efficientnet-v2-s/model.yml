@@ -56,5 +56,5 @@ model_optimizer_args:
   - --scale_values=input[127.5,127.5,127.5]
   - --reverse_input_channels
   - --output=logits
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

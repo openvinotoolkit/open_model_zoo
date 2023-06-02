@@ -150,5 +150,5 @@ model_optimizer_args:
   - --scale_values=input.1[58.395,57.12,57.375]
   - --input_model=$conv_dir/pspnet_r50-d8.onnx
   - --reverse_input_channels
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/master/LICENSE

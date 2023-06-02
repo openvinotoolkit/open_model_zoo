@@ -84,5 +84,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=output
   - --input_model=$conv_dir/yolox-tiny.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/Megvii-BaseDetection/YOLOX/main/LICENSE

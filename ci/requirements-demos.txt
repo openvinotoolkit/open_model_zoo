@@ -62,7 +62,7 @@ nibabel==5.1.0
     # via -r demos/requirements.txt
 numba==0.57.0
     # via librosa
-numpy==1.23.1
+numpy==1.24.3
     # via
     #   -r demos/common/python/requirements.txt
     #   -r demos/requirements.txt

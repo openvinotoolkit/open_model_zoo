@@ -71,5 +71,5 @@ model_optimizer_args:
   - --mean_values=[73.975742869,83.660769353,73.175805779]
   - --scale_values=[46.653282963,47.574230671,47.041147921]
   - --input_model=$conv_dir/drn-d-38.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/fyu/drn/master/LICENSE

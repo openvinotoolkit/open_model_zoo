@@ -75,5 +75,5 @@ model_optimizer_args:
   - --scale_values=image[58.395,57.12,57.375]
   - --reverse_input_channels
   - --output=probs
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/yitu-opensource/T2T-ViT/main/LICENSE

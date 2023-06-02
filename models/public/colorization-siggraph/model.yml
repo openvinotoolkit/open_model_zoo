@@ -66,5 +66,5 @@ input_info:
 model_optimizer_args:
   - --output=color_ab
   - --input_model=$conv_dir/colorization-siggraph.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/LICENSE

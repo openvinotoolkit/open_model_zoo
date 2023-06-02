@@ -25,7 +25,7 @@ files:
     checksum: 836c1fe7b0e1ba55db92e7e1deb15641afac1f3ac7975d8a7bfa7bd08e407d4a7664b2eb7149553f1e241cd424adb5fc
     size: 7863957
     source: https://raw.githubusercontent.com/d-li14/HBONet/master/pretrained/hbonet_0_25.pth
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-name=hbonet
   - --model-param=width_mult=0.25

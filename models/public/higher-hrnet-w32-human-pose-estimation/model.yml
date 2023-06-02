@@ -79,5 +79,5 @@ model_optimizer_args:
   - --scale_values=image[58.395,57.12,57.375]
   - --output=embeddings,heatmaps
   - --input_model=$conv_dir/higher-hrnet-w32-human-pose-estimation.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE

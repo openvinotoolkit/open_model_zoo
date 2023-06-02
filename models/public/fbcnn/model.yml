@@ -60,5 +60,5 @@ model_optimizer_args:
   - --scale_values=image_lq[255]
   - --output=image_result
   - --input_model=$conv_dir/fbcnn_color.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/jiaxi-jiang/FBCNN/main/LICENSE

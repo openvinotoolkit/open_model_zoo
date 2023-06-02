@@ -25,7 +25,7 @@ postprocessing:
   - $type: unpack_archive
     format: gztar
     file: single-human-pose-estimation-0001.tar.gz
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-path=$dl_dir/single-human-pose-estimation-0001/
   - --model-name=SinglePersonPoseEstimationWithMobileNet

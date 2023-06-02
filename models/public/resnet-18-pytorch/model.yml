@@ -30,7 +30,7 @@ files:
     size: 46827520
     original_source: https://download.pytorch.org/models/resnet18-5c106cde.pth
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-18-pytorch/resnet18-5c106cde.pth
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-name=resnet18
   - --weights=$dl_dir/resnet18-5c106cde.pth

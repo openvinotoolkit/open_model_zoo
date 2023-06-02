@@ -44,7 +44,7 @@ files:
     size: 3620
     checksum: f3fdd36cab53e2f3ff1819391246ab9738426758ee5f6af01d5e8c22a8f662a49164e738be6574a4cae03fac76d47259
     source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/splat.py
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=resnest50

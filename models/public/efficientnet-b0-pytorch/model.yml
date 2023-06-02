@@ -73,7 +73,7 @@ model_optimizer_args:
   - --scale_values=data[58.395,57.12,57.375]
   - --output=prob
   - --input_model=$conv_dir/efficientnet-b0.onnx
-framework: pytorch  # test
+framework: pytorch
 quantizable: true
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE
 model_info:

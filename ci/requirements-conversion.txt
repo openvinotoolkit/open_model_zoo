@@ -1,5 +1,7 @@
 # use update-requirements.py to update this file
 
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 absl-py==1.4.0
     # via
     #   tensorboard
@@ -14,16 +16,12 @@ certifi==2023.5.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
-cmake==3.26.3
-    # via triton
 defusedxml==0.7.1
     # via openvino-dev
 fastjsonschema==2.16.3
     # via openvino-dev
 filelock==3.12.0
-    # via
-    #   torch
-    #   triton
+    # via torch
 flatbuffers==23.5.26
     # via tensorflow
 gast==0.4.0
@@ -60,8 +58,6 @@ keras==2.12.0
     # via tensorflow
 libclang==16.0.0
     # via tensorflow
-lit==16.0.5
-    # via triton
 markdown==3.4.3
     # via tensorboard
 markupsafe==2.1.2
@@ -93,31 +89,6 @@ numpy==1.23.5
     #   tensorboard
     #   tensorflow
     #   torchvision
-nvidia-cublas-cu11==11.10.3.66
-    # via
-    #   nvidia-cudnn-cu11
-    #   nvidia-cusolver-cu11
-    #   torch
-nvidia-cuda-cupti-cu11==11.7.101
-    # via torch
-nvidia-cuda-nvrtc-cu11==11.7.99
-    # via torch
-nvidia-cuda-runtime-cu11==11.7.99
-    # via torch
-nvidia-cudnn-cu11==8.5.0.96
-    # via torch
-nvidia-cufft-cu11==10.9.0.58
-    # via torch
-nvidia-curand-cu11==10.2.10.91
-    # via torch
-nvidia-cusolver-cu11==11.4.0.1
-    # via torch
-nvidia-cusparse-cu11==11.7.4.91
-    # via torch
-nvidia-nccl-cu11==2.14.3
-    # via torch
-nvidia-nvtx-cu11==11.7.91
-    # via torch
 oauthlib==3.2.2
     # via requests-oauthlib
 onnx==1.13.1
@@ -200,17 +171,14 @@ termcolor==2.3.0
     # via tensorflow
 texttable==1.6.7
     # via openvino-dev
-torch==2.0.1
+torch==2.0.1+cpu
     # via
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
-    #   triton
-torchvision==0.15.2
+torchvision==0.15.2+cpu
     # via -r tools/model_tools/requirements-pytorch.in
 tqdm==4.65.0
     # via openvino-dev
-triton==2.0.0
-    # via torch
 typing-extensions==4.6.2
     # via
     #   onnx
@@ -226,12 +194,6 @@ werkzeug==2.3.4
 wheel==0.40.0
     # via
     #   astunparse
-    #   nvidia-cublas-cu11
-    #   nvidia-cuda-cupti-cu11
-    #   nvidia-cuda-runtime-cu11
-    #   nvidia-curand-cu11
-    #   nvidia-cusparse-cu11
-    #   nvidia-nvtx-cu11
     #   tensorboard
 wrapt==1.14.1
     # via tensorflow

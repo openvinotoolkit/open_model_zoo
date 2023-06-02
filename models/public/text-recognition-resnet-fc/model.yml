@@ -298,5 +298,5 @@ model_optimizer_args:
   - --scale_values=input[127.5]
   - --output=output
   - --input_model=$conv_dir/resnet_fc.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/LICENSE

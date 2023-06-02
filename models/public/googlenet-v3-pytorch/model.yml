@@ -30,7 +30,7 @@ files:
     size: 108857766
     original_source: https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/googlenet-v3-pytorch/inception_v3_google-1a9a5a14.pth
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-name=inception_v3
   - --weights=$dl_dir/inception_v3_google-1a9a5a14.pth

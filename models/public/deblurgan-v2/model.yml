@@ -79,5 +79,5 @@ model_optimizer_args:
   - --scale_values=blur_image[127.5]
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/LICENSE

@@ -48,6 +48,6 @@ model_optimizer_args:
   - --input_model=$conv_dir/faceboxes-pytorch.onnx
   - --mean_values=input.1[104.0,117.0,123.0]
   - --output=boxes,scores
-framework: pytorch  # test
+framework: pytorch
 quantizable: true
 license: https://github.com/zisianw/FaceBoxes.PyTorch/blob/master/LICENSE

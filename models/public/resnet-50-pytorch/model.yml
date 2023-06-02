@@ -30,7 +30,7 @@ files:
     size: 102502400
     original_source: https://download.pytorch.org/models/resnet50-19c8e357.pth
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/resnet-50-pytorch/resnet50-19c8e357.pth
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-name=resnet50
   - --weights=$dl_dir/resnet50-19c8e357.pth

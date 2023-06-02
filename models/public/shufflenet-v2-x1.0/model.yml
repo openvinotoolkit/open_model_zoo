@@ -30,7 +30,7 @@ files:
     size: 9218294
     original_source: https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/shufflenet-v2-x1.0/shufflenetv2_x1-5666bf0f80.pth
-framework: pytorch  # test
+framework: pytorch
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=shufflenet_v2_x1_0

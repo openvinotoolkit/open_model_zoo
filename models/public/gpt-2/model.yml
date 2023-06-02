@@ -123,5 +123,5 @@ input_info:
 model_optimizer_args:
   - --input_model=$conv_dir/gpt-2.onnx
   - --output=output
-framework: pytorch  # test
+framework: pytorch
 license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE
