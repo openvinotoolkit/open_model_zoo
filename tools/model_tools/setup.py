@@ -113,7 +113,6 @@ setup(
         'tensorflow2': read_text('requirements-tensorflow.in'),
         'paddle': read_text('requirements-paddle.in')
     },
-    dependency_links=['https://download.pytorch.org/whl/cpu'],
     cmdclass={
         'build_py': CustomBuild,
         'sdist': DisabledSdist,
