@@ -275,6 +275,14 @@ postprocessing:
     file: vedastr/utils/config.py
     pattern: 'addict'
     replacement: 'vedastr.addict'
+  - $type: regex_replace
+    file: vedastr/models/bodies/feature_extractors/encoders/backbones/resnet.py
+    pattern:  "from torchvision.models.resnet import model_urls, BasicBlock, Bottleneck, conv1x1"
+    replacement: 'from torchvision.models.resnet import BasicBlock, Bottleneck, conv1x1'
+  - $type: regex_replace
+    file: vedastr/models/bodies/feature_extractors/encoders/backbones/resnet.py
+    pattern:  ".*'weights_url': model_urls.*,"
+    replacement: "'weights_url': '',"
   - $type: unpack_archive
     format: zip
     file: vedastr/addict-2.4.0-py3-none-any.whl
