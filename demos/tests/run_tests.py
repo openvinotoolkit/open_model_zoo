@@ -133,6 +133,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
                 sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
                 '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
                 '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
+                '--jobs', '4',
             ],
             stderr=subprocess.STDOUT, universal_newlines=True)
     except subprocess.CalledProcessError as e:
