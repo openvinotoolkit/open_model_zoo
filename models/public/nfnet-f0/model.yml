@@ -32,39 +32,20 @@ description: >-
   paper <https://arxiv.org/abs/2102.06171>.
 task_type: classification
 files:
-  - name: timm-0.4.5-py3-none-any.whl
-    size: 287415
-    checksum: 0956e380ed9d2a00697bbb8bba8c2c741dd426671a92de220e2e46c673ec86643071f2264b411a929578609ff1d94ad1
-    source: https://files.pythonhosted.org/packages/9e/89/d94f59780b5dd973154bf506d8ce598f6bfe7cc44dd445d644d6d3be8c39/timm-0.4.5-py3-none-any.whl
-  - name: dm_nfnet_f0-604f9c3a.pth
-    size: 285993610
-    checksum: dd903d64b8b6404e9b33b5fb664ac803916d51e1d4a03ff5c9f286084dd2240d29472e2dacff5768f731780ce2102da5
-    original_source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-dnf-weights/dm_nfnet_f0-604f9c3a.pth
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/nfnet-f0/dm_nfnet_f0-604f9c3a.pth
-postprocessing:
-  - $type: unpack_archive
-    format: zip
-    file: timm-0.4.5-py3-none-any.whl
-conversion_to_onnx_args:
-  - --model-path=$dl_dir
-  - --model-path=$config_dir
-  - --model-name=create_normfreenet
-  - --import-module=model
-  - --weights=$dl_dir/dm_nfnet_f0-604f9c3a.pth
-  - --input-shape=1,3,256,256
-  - --input-names=image
-  - --output-names=probs
-  - --output-file=$conv_dir/nfnet-f0.onnx
+  - name: nfnet-f0.onnx
+    size: 286265582
+    checksum: d96a2f7be563a1b6d840dae5e10627e2ac714aa57c83ae205816322b5b7a9e3902d8d03ef6949a6b52ec202d3c163710
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2023.0/nfnet-f0/nfnet-f0.onnx
 input_info:
   - name: image
     shape: [1, 3, 256, 256]
     layout: NCHW
 model_optimizer_args:
-  - --input_model=$conv_dir/nfnet-f0.onnx
+  - --input_model=$dl_dir/nfnet-f0.onnx
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395, 57.12, 57.375]
   - --reverse_input_channels
   - --output=probs
-framework: pytorch
+framework: onnx
 quantizable: true
 license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE
