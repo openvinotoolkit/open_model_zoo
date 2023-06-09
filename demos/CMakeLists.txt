@@ -81,7 +81,7 @@ function(add_demos_to_build)
                         list(FIND BUILD_SAMPLE_NAME ${dir} index)
                     endif()
                     # Skip GAPI demos if OpenCV was built without GAPI
-                    if(index EQUAL -1 OR (sub_dir STREQUAL "cpp_gapi" AND GAPI_DEMO_DISABLED))
+                    if(index EQUAL -1 OR (sub_dir MATCHES ".*cpp_gapi.*" AND GAPI_DEMO_DISABLED))
                         message(STATUS "${dir} SKIPPED")
                     else()
                         # Include subdirectory to the project.
