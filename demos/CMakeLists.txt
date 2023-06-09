@@ -80,7 +80,8 @@ function(add_demos_to_build)
                     if(BUILD_SAMPLE_NAME)
                         list(FIND BUILD_SAMPLE_NAME ${dir} index)
                     endif()
-                    if(index EQUAL -1)
+                    # Skip GAPI demos if OpenCV was built without GAPI
+                    if(index EQUAL -1 OR (sub_dir STREQUAL "cpp_gapi" AND GAPI_DEMO_DISABLED))
                         message(STATUS "${dir} SKIPPED")
                     else()
                         # Include subdirectory to the project.
@@ -142,15 +143,15 @@ find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
-# TODO: remove wrapping if after OpenCV3 is dropped
-if(OpenCV_VERSION VERSION_GREATER_EQUAL 4.5.3)
-    find_package(OpenCV QUIET COMPONENTS gapi)
-    if(NOT OpenCV_FOUND)
-        message(WARNING "No suitable OpenCV version detected, GAPI demos skipped")
-    else()
-        add_subdirectory(common/cpp_gapi)
-    endif()
+
+find_package(OpenCV QUIET COMPONENTS gapi)
+if(NOT OpenCV_FOUND)
+    message(WARNING "No suitable OpenCV version detected, GAPI demos skipped")
+    set(GAPI_DEMO_DISABLED ON)
+else()
+    add_subdirectory(common/cpp_gapi)
 endif()
+
 add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories
