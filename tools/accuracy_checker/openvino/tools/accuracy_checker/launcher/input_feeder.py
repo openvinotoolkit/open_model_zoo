@@ -128,7 +128,8 @@ class InputFeeder:
         self.shape_checker = shape_checker
         self.input_transform_func = prepare_input_data or fit_to_input
         self.network_inputs = network_inputs or []
-        self.network_input_mapping = network_input_mapping or {input_name: input_name for input_name in self.network_inputs}
+        self.network_input_mapping = network_input_mapping or {
+            input_name: input_name for input_name in self.network_inputs}
         self.default_layout = default_layout
         self.dummy = dummy
         self.ordered_inputs = False
@@ -372,10 +373,10 @@ class InputFeeder:
 
         for input_ in inputs_entry:
             name = input_['name']
-            normized_name = self.network_input_mapping.get(name)
-            if normized_name is None:
+            normalized_name = self.network_input_mapping.get(name)
+            if normalized_name is None:
                 raise ConfigError('network does not contain input "{}"'.format(name))
-            input_["name"] = normized_name
+            input_["name"] = normalized_name
             if input_['type'] in INPUT_TYPES_WITHOUT_VALUE:
                 self._configure_inputs_without_value(
                     input_, image_info_inputs, orig_image_info_inputs, processed_image_info_inputs, scale_factor_inputs,
@@ -385,23 +386,23 @@ class InputFeeder:
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
-                precision = self.get_layer_precision(input_, normized_name, precision_info, precisions) or np.float32
+                precision = self.get_layer_precision(input_, normalized_name, precision_info, precisions) or np.float32
                 if isinstance(value, list):
                     value = np.array(value, dtype=precision)
                 if isinstance(value, (int, float)) and 'shape' in input_:
                     value = np.full(input_['shape'], value, dtype=precision)
-                constant_inputs[normized_name] = self.input_transform_func(value, normized_name, None, precision)
+                constant_inputs[normalized_name] = self.input_transform_func(value, normalized_name, None, precision)
             else:
-                config_non_constant_inputs.append(normized_name)
+                config_non_constant_inputs.append(normalized_name)
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
-                    non_constant_inputs_mapping[normized_name] = value
-                layout = layouts_info.get(normized_name, input_.get('layout', default_layout))
-                if normized_name in layouts_info:
+                    non_constant_inputs_mapping[normalized_name] = value
+                layout = layouts_info.get(normalized_name, input_.get('layout', default_layout))
+                if normalized_name in layouts_info:
                     input_['layout'] = layout
                 if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
-                    layouts[normized_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
-                self.get_layer_precision(input_, normized_name, precision_info, precisions)
+                    layouts[normalized_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                self.get_layer_precision(input_, normalized_name, precision_info, precisions)
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
@@ -601,7 +602,7 @@ class InputFeeder:
                 else:
                     del self.layouts_mapping[layer_name]
             elif layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
-                self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]        
+                self.layouts_mapping[layer_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
 
     def release(self):
         del self.network_inputs
