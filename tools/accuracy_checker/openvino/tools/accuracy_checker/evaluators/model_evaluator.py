@@ -92,10 +92,11 @@ class ModelEvaluator(BaseEvaluator):
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
+        input_mapping = getattr(launcher, "nodel_input_mapping", None) if not postpone_model_loading else {}
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher_inputs, launcher.input_shape, launcher.fit_to_input,
             launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision,
-            input_layouts
+            input_layouts, network_input_mapping=input_mapping
         )
         if not postpone_model_loading:
             if input_precision or input_layouts:

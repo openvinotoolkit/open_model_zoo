@@ -489,9 +489,10 @@ class ModelEvaluator:
     def load_network(self, network_list=None):
         network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
+        input_mapping = getattr(self.launcher, "nodel_input_mapping", None)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
-            self.launcher.fit_to_input, self.launcher.default_layout
+            self.launcher.fit_to_input, self.launcher.default_layout, network_input_mapping=input_mapping
         )
         self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
@@ -502,9 +503,10 @@ class ModelEvaluator:
         model_paths = next(iter(models_list))
         xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
+        input_mapping = getattr(self.launcher, "nodel_input_mapping", None)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
-            self.launcher.fit_to_input, self.launcher.default_layout
+            self.launcher.fit_to_input, self.launcher.default_layout, network_input_mapping=input_mapping
         )
         self.input_feeder.update_layout_configuration(self.launcher.layout_mapping)
         if self.adapter:
