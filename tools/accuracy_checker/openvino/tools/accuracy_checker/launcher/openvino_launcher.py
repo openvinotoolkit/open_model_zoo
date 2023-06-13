@@ -670,6 +670,17 @@ class OpenVINOLauncher(Launcher):
         return inputs_mapping
 
     @property
+    def nodel_input_mapping(self):
+        input_mapping = {}
+        for idx, input_node in enumerate(self.network.inputs):
+            node_name = input_node.get_node().friendly_name
+            input_mapping[idx] = input_node.get_node().friendly_name
+            input_mapping[node_name] = node_name
+            for tensor_name in list(input_node.get_names()):
+                input_mapping[tensor_name] = node_name
+        return input_mapping
+
+    @property
     def dyn_batch_only(self):
         if not self.dyn_input_layers:
             return True
