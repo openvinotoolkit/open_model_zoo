@@ -16,7 +16,7 @@ limitations under the License.
 
 from ..presenters import write_csv_result
 
-
+# pylint: disable=W0223,R0904
 class BaseEvaluator:
     # create class instance using config
     @classmethod
@@ -57,6 +57,9 @@ class BaseEvaluator:
     @staticmethod
     def send_processing_info(sender):
         return {}
+
+    def set_launcher_property(self, property_dict):
+        pass
 
     # helper for writing intermediate metric results to csv file
     def write_results_to_csv(self, csv_file, ignore_results_formatting, metric_interval):

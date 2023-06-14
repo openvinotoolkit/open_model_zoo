@@ -164,6 +164,10 @@ class ModuleEvaluator(BaseEvaluator):
             return report
         return header, report
 
+    def set_launcher_property(self, property_dict):
+        self._internal_module.set_launcher_property(property_dict)
+
+
 def load_module(model_cls, python_path=None):
     module_parts = model_cls.split(".")
     model_cls = module_parts[-1]
