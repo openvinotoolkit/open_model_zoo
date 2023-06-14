@@ -237,6 +237,9 @@ class BaseCustomEvaluator(BaseEvaluator):
             for model in self._part_by_name.values():
                 model.release()
 
+    def set_launcher_property(self, property_dict):
+        self.launcher.ie_core.set_property(property_dict)
+
     def register_postprocessor(self, postprocessing_config):
         pass
 

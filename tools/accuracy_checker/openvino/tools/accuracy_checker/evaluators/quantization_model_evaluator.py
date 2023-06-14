@@ -35,12 +35,16 @@ def create_model_evaluator(config):
     init_logging()
     cascade = 'evaluations' in config
     if not cascade:
-        return ModelEvaluator.from_configs(config)
+        evaluator = ModelEvaluator.from_configs(config)
+        evaluator.set_launcher_property({"ENABLE_MMAP": "NO"})
+        return evaluator
 
     if config['evaluations'][0]['module_config']['launchers'][0]['framework'] != 'openvino':
         config['evaluations'][0]['module_config']['launchers'][0]['framework'] = 'openvino'
 
-    return ModuleEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
+    evaluator = ModuleEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
+    evaluator.set_launcher_property({"ENABLE_MMAP": "NO"})
+    return evaluator
 
 
 class ModelEvaluator:
@@ -536,6 +540,9 @@ class ModelEvaluator:
             self.postprocessor.register_postprocessor(postprocessing_config)
         else:
             raise ValueError('Unsupported post-processor configuration type {}'.format(type(postprocessing_config)))
+
+    def set_launcher_property(self, property_dict):
+        self.launcher.ie_core.set_property(property_dict)
 
     def reset(self):
         if self.metric_executor:
