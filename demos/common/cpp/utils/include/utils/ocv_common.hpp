@@ -111,21 +111,78 @@ static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
     cv::resize(mat, cv::Mat{size, CV_8UC3, tensor.data()}, size);
 }
 
-static inline ov::Layout getLayoutFromShape(const ov::Shape& shape) {
+struct IntervalCondition {
+    using DimType = size_t;
+    using IndexType = size_t;
+    using ConditionChecker = std::function<bool(IndexType, const ov::Shape&)>;
+
+    template<class Cond>
+    constexpr IntervalCondition(IndexType i1, IndexType i2, Cond c) :
+        impl([=](IndexType i0, const ov::Shape& shape) {
+            return c(shape[i0], shape[i1]) && c(shape[i0], shape[i2]);})
+    {}
+    bool operator() (IndexType i0, const ov::Shape& shape) const { return impl(i0, shape); }
+private:
+    ConditionChecker impl;
+};
+
+template <template<class> class Cond, class ...Args>
+IntervalCondition makeCond(Args&&...args) {
+    return IntervalCondition(std::forward<Args>(args)..., Cond<IntervalCondition::DimType>{});
+}
+using LayoutCondition = std::tuple<size_t/*dim index*/, IntervalCondition, std::string>;
+
+static inline std::tuple<bool, ov::Layout> makeGuesLayoutFrom4DShape(const ov::Shape& shape) {
+    // at the moment we make assumption about NCHW & NHCW only
+    // if hypothetical C value is less than hypothetical H and W - then
+    // out assumption is correct and we pick a corresponding layout
+    static const std::array<LayoutCondition, 2> hypothesisMatrix {{
+        {1, makeCond<std::less_equal>(2, 3), "NCHW"},
+        {3, makeCond<std::less_equal>(1, 2), "NHWC"}
+    }};
+    for (const auto &h : hypothesisMatrix) {
+
+        auto channel_index = std::get<0>(h);
+        const auto &cond = std::get<1>(h);
+        if (cond(channel_index, shape)) {
+            return std::make_tuple(true, ov::Layout{std::get<2>(h)});
+        }
+    }
+    return {false, ov::Layout{}};
+}
+
+static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_layout = false) {
     if (shape.size() == 2) {
         return "NC";
     }
-    else if (shape.size() == 3) {
+    if (shape.size() == 3) {
         return (shape[0] >= 1 && shape[0] <= 4) ? "CHW" :
                                                   "HWC";
     }
-    else if (shape.size() == 4) {
-        return (shape[1] >= 1 && shape[1] <= 4) ? "NCHW" :
-                                                  "NHWC";
+    if (shape.size() == 4) {
+        if (shape[1] >= 1 && shape[1] <= 4) {
+            return "NCHW";
+        }
+        if (shape[3] >= 1 && shape[3] <= 4) {
+            return "NHWC";
+        }
+        if (shape[1] == shape[2]) {
+            return "NHWC";
+        }
+        if (shape[2] == shape[3]) {
+            return "NCHW";
+        }
+        if (gues_layout) {
+            bool guesResult = false;
+            ov::Layout guessedLayout;
+            std::tie(guesResult, guessedLayout) = makeGuesLayoutFrom4DShape(shape);
+            if (guesResult) {
+                return guessedLayout;
+            }
+        }
     }
-    else {
-        throw std::runtime_error("Usupported " + std::to_string(shape.size()) + "D shape");
-    }
+    throw std::runtime_error(std::string("Usupported " + std::to_string(shape.size()) + "D shape: ") +
+                             shape.to_string());
 }
 
 /**
