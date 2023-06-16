@@ -62,7 +62,6 @@ except ImportError as error:
     ng = UnsupportedPackage('ngraph', error)
 
 
-# pylint:disable=R0904
 class DLSDKLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.

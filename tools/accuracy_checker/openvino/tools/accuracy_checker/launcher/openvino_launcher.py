@@ -57,7 +57,6 @@ PRECISION_STR_TO_TYPE = {
 }
 
 
-# pylint:disable=R0904
 class OpenVINOLauncher(Launcher):
     __provider__ = 'openvino'
 
