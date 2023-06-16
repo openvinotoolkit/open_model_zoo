@@ -273,11 +273,11 @@ tokenizers==0.13.2
     # via
     #   openvino-dev
     #   transformers
-torch==1.13.0
+torch==1.13.1
     # via
     #   -r tools/model_tools/requirements-pytorch.in
     #   torchvision
-torchvision==0.14.0
+torchvision==0.14.1
     # via -r tools/model_tools/requirements-pytorch.in
 tqdm==4.64.1
     # via
