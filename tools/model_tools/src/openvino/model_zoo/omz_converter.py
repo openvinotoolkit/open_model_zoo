@@ -19,7 +19,6 @@ import os
 import shutil
 import string
 import sys
-import tempfile
 
 from openvino.runtime import Core, serialize
 from pathlib import Path
