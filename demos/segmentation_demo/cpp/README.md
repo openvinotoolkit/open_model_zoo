@@ -52,6 +52,7 @@ omz_converter --list models.lst
 > **NOTE**: The results can significantly differ depending on the model used for background segmentation and outdoors camera images segmentation.
 
 ![example](../segmentation_image.jpg)
+![example](../segmentation_image_1.jpg)
 
 ## Running
 
