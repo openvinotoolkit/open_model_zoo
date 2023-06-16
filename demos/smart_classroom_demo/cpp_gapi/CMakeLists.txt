@@ -2,6 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+if (NOT TARGET utils_gapi)
+    message(WARNING "smart_classroom_demo_gapi skipped. No suitable OpenCV version detected.")
+    return()
+endif()
+
 file (GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file (GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 

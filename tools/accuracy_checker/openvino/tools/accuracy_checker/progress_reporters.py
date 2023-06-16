@@ -63,9 +63,10 @@ class ProgressReporter(ClassProvider):
 class PrintProgressReporter(ProgressReporter):
     __provider__ = 'print'
 
-    def __init__(self, dataset_size=None, print_interval=1000):
+    def __init__(self, dataset_size=None, print_interval=1000, print_period=1800):
         super().__init__(dataset_size)
         self.print_interval = print_interval
+        self.print_period = print_period
 
     def reset(self, dataset_size, objects='dataset'):
         self.dataset_size = dataset_size
@@ -76,13 +77,12 @@ class PrintProgressReporter(ProgressReporter):
 
     def update(self, batch_id, batch_size):
         self.current += batch_size
-        if (batch_id + 1) % self.print_interval != 0:
-            return
-
         now = time.time()
         batch_time = now - self.prev_time
-        self.prev_time = now
+        if (batch_id + 1) % self.print_interval != 0 and batch_time < self.print_period:
+            return
 
+        self.prev_time = now
         print_info('{} / {} processed in {:.3f}s'.format((batch_id + 1) * batch_size, self.dataset_size, batch_time))
 
 

@@ -107,7 +107,7 @@ def match_by_regex(data, identifiers, input_regex, templates):
 class InputFeeder:
     def __init__(
             self, inputs_config, network_inputs, shape_checker, prepare_input_data=None, default_layout='NCHW',
-            dummy=False, input_precisions_list=None, input_layouts=None
+            dummy=False, input_precisions_list=None, input_layouts=None, network_input_mapping=None
     ):
         def fit_to_input(data, input_layer_name, layout, precision, template=None):
             layout_used = False
@@ -128,6 +128,8 @@ class InputFeeder:
         self.shape_checker = shape_checker
         self.input_transform_func = prepare_input_data or fit_to_input
         self.network_inputs = network_inputs or []
+        self.network_input_mapping = network_input_mapping or {
+            input_name: input_name for input_name in self.network_inputs}
         self.default_layout = default_layout
         self.dummy = dummy
         self.ordered_inputs = False
@@ -371,8 +373,10 @@ class InputFeeder:
 
         for input_ in inputs_entry:
             name = input_['name']
-            if name not in self.network_inputs:
+            normalized_name = self.network_input_mapping.get(name)
+            if normalized_name is None:
                 raise ConfigError('network does not contain input "{}"'.format(name))
+            input_["name"] = normalized_name
             if input_['type'] in INPUT_TYPES_WITHOUT_VALUE:
                 self._configure_inputs_without_value(
                     input_, image_info_inputs, orig_image_info_inputs, processed_image_info_inputs, scale_factor_inputs,
@@ -382,23 +386,23 @@ class InputFeeder:
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
-                precision = self.get_layer_precision(input_, name, precision_info, precisions) or np.float32
+                precision = self.get_layer_precision(input_, normalized_name, precision_info, precisions) or np.float32
                 if isinstance(value, list):
                     value = np.array(value, dtype=precision)
                 if isinstance(value, (int, float)) and 'shape' in input_:
                     value = np.full(input_['shape'], value, dtype=precision)
-                constant_inputs[name] = self.input_transform_func(value, name, None, precision)
+                constant_inputs[normalized_name] = self.input_transform_func(value, normalized_name, None, precision)
             else:
-                config_non_constant_inputs.append(name)
+                config_non_constant_inputs.append(normalized_name)
                 if value is not None:
                     value = re.compile(value) if not isinstance(value, int) else value
-                    non_constant_inputs_mapping[name] = value
-                layout = layouts_info.get(name, input_.get('layout', default_layout))
-                if name in layouts_info:
+                    non_constant_inputs_mapping[normalized_name] = value
+                layout = layouts_info.get(normalized_name, input_.get('layout', default_layout))
+                if normalized_name in layouts_info:
                     input_['layout'] = layout
                 if layout in LAYER_LAYOUT_TO_IMAGE_LAYOUT:
-                    layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
-                self.get_layer_precision(input_, name, precision_info, precisions)
+                    layouts[normalized_name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
+                self.get_layer_precision(input_, normalized_name, precision_info, precisions)
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
@@ -553,9 +557,10 @@ class InputFeeder:
                     'invalid value for input precision {}. Please specify <input_name>:<precision>'.format(input_c)
                 )
             layer_name, precision_ = precision_for_layer
-            if layer_name not in self.network_inputs:
+            input_name = self.network_input_mapping.get(layer_name)
+            if input_name is None:
                 raise ConfigError("precision specified for unknown layer: {}".format(layer_name))
-            precision_dict[layer_name] = precision_
+            precision_dict[input_name] = precision_
         return precision_dict
 
     @staticmethod

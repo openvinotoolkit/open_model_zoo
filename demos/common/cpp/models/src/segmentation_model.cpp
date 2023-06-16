@@ -67,6 +67,9 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     if (inputShape.size() != 4 || inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
         throw std::logic_error("3-channel 4-dimensional model's input is expected");
     }
+    if (model->outputs().size() != 1) {
+        throw std::logic_error("Segmentation model wrapper supports topologies with only 1 output");
+    }
 
     ov::preprocess::PrePostProcessor ppp(model);
     inputTransform.setPrecision(ppp, model->input().get_any_name());
@@ -91,13 +94,15 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     const auto& output = model->output();
     outputsNames.push_back(output.get_any_name());
 
-    const ov::Shape& outputShape = output.get_shape();
-    ov::Layout outputLayout = getLayoutFromShape(outputShape);
+    const ov::Shape& outputShape = output.get_partial_shape().get_max_shape();
+
+    ov::Layout outputLayout = getLayoutFromShape(outputShape, true);
     outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
     outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
     outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
-    ppp.output(output.get_any_name()).model().set_layout(outputLayout);
-    ppp.output(output.get_any_name()).tensor().set_layout("NCHW");
+
+    ppp.output().model().set_layout(outputLayout);
+    ppp.output().tensor().set_element_type(ov::element::f32).set_layout("NCHW");
     model = ppp.build();
 }
 
