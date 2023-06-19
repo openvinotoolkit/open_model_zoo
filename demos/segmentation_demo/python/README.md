@@ -68,7 +68,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
-                            [-at {segmentation,salient_object_detection}
+                            [-at {segmentation,salient_object_detection}]
                             [--adapter {openvino,ovms}] [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
