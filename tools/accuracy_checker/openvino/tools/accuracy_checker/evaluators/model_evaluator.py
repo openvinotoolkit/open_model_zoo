@@ -37,7 +37,7 @@ from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
 
 
-# pylint: disable=W0223,R0904
+# pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
             self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode, config

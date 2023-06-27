@@ -16,7 +16,7 @@ limitations under the License.
 
 from ..presenters import write_csv_result
 
-# pylint: disable=W0223,R0904
+# pylint: disable=W0223
 class BaseEvaluator:
     # create class instance using config
     @classmethod

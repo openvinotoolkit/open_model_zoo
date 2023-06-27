@@ -24,7 +24,6 @@ from ..presenters import generate_csv_report
 from ..metrics import MetricsExecutor
 
 
-# pylint:disable=R0904
 class ModuleEvaluator(BaseEvaluator):
     def __init__(self, internal_module, config):
         super().__init__()
