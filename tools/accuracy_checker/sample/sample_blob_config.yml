@@ -9,8 +9,6 @@ models:
         # Note: not all devices support blob execution, it is the reason why for sample we will use myriad.
         device: MYRIAD
         # exported executable network blob
-        # you can export executable network blob from OpenVINO IR using compile_tool, see https://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html
-        # path to model is prefixed with directory, specified in "-m/--models" option
         model: SampleNet.blob
         # launcher returns raw result, so it should be converted
         # to an appropriate representation with adapter
