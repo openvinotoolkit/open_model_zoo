@@ -16,16 +16,18 @@ limitations under the License.
 
 from pathlib import Path
 
-from ..config import PathField, BoolField
+from ..config import PathField, BoolField, StringField
 from ..representation import ClassificationAnnotation
 from ..utils import read_txt, get_path, check_file_existence, read_json
 
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
+from ._nlp_common import get_tokenizer
 
 
 class ImageNetFormatConverter(BaseFormatConverter):
     __provider__ = 'imagenet'
     annotation_types = (ClassificationAnnotation, )
+    max_seq_length = 128
 
     @classmethod
     def parameters(cls):
@@ -47,6 +49,15 @@ class ImageNetFormatConverter(BaseFormatConverter):
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
+            ),
+            'prepare_input_ids_from_labels': BoolField(
+                optional=True, default=False,
+                description="Convert label strings into image captions list. It's required for CLIP models"
+            ),
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'model_id': StringField(
+                optional=True,
+                description='The model id of a predefined tokenizer hosted inside a model repo on huggingface.co'
             )
         })
         return configuration_parameters
@@ -57,6 +68,10 @@ class ImageNetFormatConverter(BaseFormatConverter):
         self.has_background = self.get_value_from_config('has_background')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.prepare_input_ids_from_labels = self.get_value_from_config('prepare_input_ids_from_labels')
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.model_id = self.get_value_from_config('model_id')
+        self.tokenizer, self.external_tok = get_tokenizer(self.config, self.lower_case)
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = []
@@ -78,7 +93,23 @@ class ImageNetFormatConverter(BaseFormatConverter):
         return ConverterReturn(annotation, self.get_meta(), content_errors)
 
     @staticmethod
-    def _create_meta(labels_file, dataset_meta, has_background=False):
+    def _create_captions(label_map, tokenizer):
+        tokenized_captions = []
+        input_masks = []
+        for label in label_map.values():
+            first_label = label.split(',')[0]
+            caption = f"This is a picture of {first_label}."
+            tokens = tokenizer.tokenize(caption, add_special_tokens=True)
+            input_ids = tokenizer.convert_tokens_to_ids(tokens)
+            if len(tokens) > ImageNetFormatConverter.max_seq_length:
+                tokens = tokens[:ImageNetFormatConverter.max_seq_length]
+            input_mask = [1] * len(input_ids)
+            tokenized_captions.append(input_ids)
+            input_masks.append(input_mask)
+        return tokenized_captions, input_masks
+
+    @staticmethod
+    def _create_meta(labels_file, dataset_meta, tokenizer, has_background=False, prepare_input_ids_from_labels=False, ):
         meta = {}
         label_map = {}
         if dataset_meta:
@@ -106,8 +137,12 @@ class ImageNetFormatConverter(BaseFormatConverter):
             label_map[0] = 'background'
             meta['background_label'] = 0
 
+        if prepare_input_ids_from_labels:
+            (captions, masks) = ImageNetFormatConverter._create_captions(label_map, tokenizer)
+            meta['input_ids'] = captions
+            meta['input_masks'] = masks
         return meta
 
     def get_meta(self):
-        meta = self._create_meta(self.labels_file, self.dataset_meta, self.has_background) or None
+        meta = self._create_meta(self.labels_file, self.dataset_meta, self.tokenizer, self.has_background, self.prepare_input_ids_from_labels ) or None
         return meta
