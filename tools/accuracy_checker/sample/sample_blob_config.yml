@@ -6,9 +6,9 @@ models:
       # launcher framework (e.g. caffe, openvino)
       - framework: openvino
         # device for infer (e.g. for openvino cpu, gpu, hetero:cpu,gpu ...)
-        # Note: not all devices support blob execution, it is the reason why for sample we will use myriad.
-        device: MYRIAD
+        device: CPU
         # exported executable network blob
+        # path to model is prefixed with directory, specified in "-m/--models" option
         model: SampleNet.blob
         # launcher returns raw result, so it should be converted
         # to an appropriate representation with adapter
