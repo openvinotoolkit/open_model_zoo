@@ -266,3 +266,21 @@ class TrimapAdapter(ImageProcessingAdapter):
             result.append(ImageProcessingPrediction(identifier, out_img))
 
         return result
+
+
+class DenoiseRTAdapter(ImageProcessingAdapter):
+    __provider__ = 'denoise_rt'
+    prediction_types = (ImageProcessingPrediction, )
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.output_verified:
+            self.select_output_blob(raw_outputs)
+
+        for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
+            out_img = out_img.transpose((1, 2, 0))
+            out_img = np.maximum(out_img, 0.)
+            result.append(ImageProcessingPrediction(identifier, out_img))
+
+        return result

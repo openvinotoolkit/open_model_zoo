@@ -854,6 +854,13 @@ The main difference between this converter and `super_resolution` in data organi
   * `from_landmarks` - allow to calculate hand bounding box coordinates from landmarks data instead of data provided in `bbox_file` (optional, default `False`).
   * `padding` - additional padding, in pixels, around hand bounding box, calculated in `from_landmarks` mode (optional, default `10`).
   * `num_keypoints` - number of keypoints in annotation expected by model (optional, default `21`).
+* `tungsten` - converts Tungsten dataset for denoising images rendered with ray tracing task to `ImageProcessingAnnotation`.
+  * `dataset_root_dir` - path to dataset root.
+  * `features` - list of features. Optional, default color.
+  * `input_subfolder` - sub-directory for input features(Optional, default spp_4_data)
+  * `target_subfolder` - sub-directory for targets(Optional, default spp_4096_data)
+  * `extension` - images extension (Optional, default - png).
+  * `annotation_loader` -  which library will be used for ground truth image reading. Supported: `opencv`, `opencv_unchanged` (Optional. Default value is opencv_unchanged).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

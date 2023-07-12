@@ -127,6 +127,7 @@ from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .speaker_identification import SpeakerReIdentificationDatasetConverter
 from .mvtec import MVTecDatasetConverter
 from .gan_annotation_converter import GANAnnotationConverter
+from .tungsten import TungstenAnnotationConverter
 from .kitti_converter import KITTIConverter
 from .smartlab_action_recognition import SmartLabActionRecognition
 from .malware_classification import MalwareClassificationDatasetConverter
@@ -258,6 +259,7 @@ __all__ = [
     'SpeakerReIdentificationDatasetConverter',
     'MVTecDatasetConverter',
     'GANAnnotationConverter',
+    'TungstenAnnotationConverter',
     'KITTIConverter',
     'SmartLabActionRecognition',
     'MalwareClassificationDatasetConverter',

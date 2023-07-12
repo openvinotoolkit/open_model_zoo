@@ -139,3 +139,7 @@ Accuracy Checker supports following set of postprocessors:
   * `pooling type` - pooling type for embeddings - `mean` for mean pooling, `max` for max pooling (Optional, default `mean`).
   * `remove_padding` - remove end of string padding from word embeddings (Optional, default `True`).
 * `hand_landmarks` - converts hand landmark coordinates to source image coordinate space. Supported representations: `HandLandmarksPrediction`.
+* `autoexposure` - dividing an image by exposure(value calculated automatically). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `key` - Destination width.
+  * `k` - Downsampling amount.
+* `pu_inverse_transfer_function` - apply inverse perceptually uniform encoding.

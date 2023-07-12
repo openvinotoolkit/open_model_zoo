@@ -77,6 +77,8 @@ from .one_hot_encoding import OneHotEncoding
 from .raw_image_preprocessing import PackBayerImage
 from .trimap import TrimapPreprocessor, AlphaChannel
 from .compression import JPEGCompression
+from .autoexposure import AutoExposure
+from .transfer_function import PuTransferFunction
 
 __all__ = [
     'PreprocessingExecutor',
@@ -164,5 +166,8 @@ __all__ = [
 
     'TrimapPreprocessor',
     'AlphaChannel',
-    'JPEGCompression'
+    'JPEGCompression',
+
+    'AutoExposure',
+    'PuTransferFunction'
 ]

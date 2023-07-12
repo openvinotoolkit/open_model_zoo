@@ -1,0 +1,44 @@
+# Copyright (C) 2023 KNS Group LLC (YADRO)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Denoising for images rendered with ray tracing
+task_type: image_processing
+files:
+  - name: denoise_rt_hdr_alb.tza
+    size: 3670280
+    checksum: 37ea4fe857cb633d2b4c68c56b99053083dcbea01a849bbbd1f0b70ec1216e16f6d99a9eedcbd8fbd4057de686ca292a
+    source: https://media.githubusercontent.com/media/OpenImageDenoise/oidn-weights/a34b7641349c5a79e46a617d61709c35df5d6c28/rt_hdr_alb.tza
+  - name: tza.py
+    size: 5875
+    checksum: 00c09df9fa07e483402464c4c596639d03f6d0325133e41183cb6caea5705b25f1f449b29ec1bbe071a3440c863e95cc
+    source: https://raw.githubusercontent.com/OpenImageDenoise/oidn/d959bac5b7130b31c41095811ddfbe58c4cf03f4/training/tza.py
+  - name: model.py
+    size: 3380
+    checksum: 7a1922a8327b5f54a4fe403a0f99785a5909e09ba66e005f338ed9f394ab2dc25854df66c2a8e96c089561e672be8622
+    source: https://raw.githubusercontent.com/isalyahova/OIDN_onnx_model/d9a49ce5706aa72e83e93954ef49ed3893d406d0/model.py
+  - name: convert_model.py
+    size: 2787
+    checksum: ea03100e75455cd96cc04b181e31c505c627aef8e3b78958e3c76916245bcc74e6beb3eadf5d36b25c5aea84f7646ebc
+    source: https://raw.githubusercontent.com/isalyahova/OIDN_onnx_model/d9a49ce5706aa72e83e93954ef49ed3893d406d0/convert_model.py
+input_info:
+  - name: 'color'
+    layout: NCHW
+  - name: 'albedo'
+    layout: NCHW
+model_optimizer_args:
+  - --input_model=$dl_dir/denoise_rt_hdr_alb.onnx
+  - --input=color[?,3,?,?],albedo[?,3,?,?]
+framework: onnx
+license: https://github.com/OpenImageDenoise/oidn/blob/master/LICENSE.txt
