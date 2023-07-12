@@ -44,11 +44,12 @@ class LanguageModeling(BaseRepresentation):
 
 
 class LanguageModelingAnnotation(LanguageModeling):
-    def __init__(self, identifier, unique_id, input_ids, tokens, labels=None):
+    def __init__(self, identifier, unique_id, input_ids, tokens, labels=None, input_mask=None):
         super().__init__(identifier)
         self.unique_id = unique_id
         self.tokens = tokens
         self.input_ids = input_ids
+        self.input_mask = input_mask
         self.labels = labels if labels is not None else []
 
 

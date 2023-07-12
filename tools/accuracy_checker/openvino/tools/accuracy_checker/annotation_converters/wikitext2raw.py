@@ -73,13 +73,15 @@ class Wikitext2RawConverter(BaseFormatConverter):
         for idx in range(0, len(encoding.ids) - self.max_seq_length + 1, self.max_seq_length):
             ids = encoding.ids[idx: idx + self.max_seq_length]
             tokens = encoding.tokens[idx:idx + self.max_seq_length]
-            identifier = ['input_ids_{}'.format(idx), 'labels_{}'.format(idx)]
+            attention_mask = encoding.attention_mask[idx:idx + self.max_seq_length]
+            identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'labels_{}'.format(idx)]
             annotation = LanguageModelingAnnotation(
                 identifier,
                 np.array(unique_id),
                 np.array([ids]),
                 tokens,
                 labels=np.array(ids),
+                input_mask=np.array([attention_mask])
             )
             annotations.append(annotation)
             unique_id += 1
