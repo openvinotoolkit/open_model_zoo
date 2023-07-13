@@ -52,6 +52,7 @@
 #include <utils_gapi/stream_source.hpp>
 
 #include "classification_benchmark_demo_gapi.hpp"
+#include "../cpp/grid_mat.hpp"
 #include <models/classification_model.h>
 
 
@@ -91,28 +92,110 @@ G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
 }
 
 struct IndexScore {
-    size_t label_index;
-    float score;
+    using IndicesStorage = std::list<size_t>;
+    using ConfidenceMap = std::map<float, typename IndicesStorage::reverse_iterator>;
+
+    using LabelsMap = std::vector<std::pair<float, std::string>>;
+
+    IndexScore() = default;
+    IndexScore(IndexScore &&) = default;
+    IndexScore(const IndexScore &) = default;
+    IndexScore(ConfidenceMap &&c, IndicesStorage &&i) :
+        max_confidence_with_indices_ref(std::move(c)),
+        max_element_indices(std::move(i)) {}
+    IndexScore& operator=(IndexScore &&) = default;
+    IndexScore& operator=(const IndexScore &) = default;
+
+    void getScoredLabels(const std::vector<std::string> &in_labes,
+                         LabelsMap &out_scored_labels_to_append) const {
+        try {
+            // fill starting from max confidence
+            for (auto conf_index_it = max_confidence_with_indices_ref.rbegin();
+                 conf_index_it != max_confidence_with_indices_ref.rend();
+                 ++conf_index_it) {
+                std::string str_label = in_labes.at(*conf_index_it->second);
+                out_scored_labels_to_append.emplace_back(conf_index_it->first, std::move(str_label));
+            }
+        } catch (const std::out_of_range& ex) {
+            throw std::out_of_range(std::string("Provided labels file doesn't contain detected class index\nException: ") + ex.what());
+        }
+    }
+
+    static IndexScore create_from_array(const float *out_blob_data_ptr, size_t out_blob_element_count,
+                                        size_t top_k_amount) {
+        if (!out_blob_data_ptr) {
+            return IndexScore();
+        }
+        // find top K
+        ConfidenceMap max_confidence_with_indices;
+        IndicesStorage max_element_indices;
+        size_t i = 0;
+        // fill & sort topK with first K elements of N array: O(K*Log(K))
+        while(i < std::min(top_k_amount, out_blob_element_count)) {
+            max_element_indices.push_back(i);
+            max_confidence_with_indices.emplace(out_blob_data_ptr[i], max_element_indices.rbegin());
+            i++;
+        }
+
+        // search K elements through remnant N-K array elements
+        // greater than the minimum element in the pivot topK
+        // O((N-K)*Log(K))
+        for (i = top_k_amount; i < out_blob_element_count && !max_confidence_with_indices.empty(); i++) {
+            if (out_blob_data_ptr[i] >= max_confidence_with_indices.begin()->first) {
+                auto list_min_elem_it = max_confidence_with_indices.begin()->second;
+                *list_min_elem_it = i;
+                max_confidence_with_indices.erase(max_confidence_with_indices.begin());
+                max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
+            }
+        }
+
+        return IndexScore(std::move(max_confidence_with_indices), std::move(max_element_indices));
+/*        out_blob = 1 x 1000 = 1000
+            {0.0 0.1 0.2  }
+TopK = first K
+confidence  {0.2 0.1 0.0}
+index       {2    1    0}
+*/
+    }
+
+private:
+    ConfidenceMap max_confidence_with_indices_ref;
+    IndicesStorage max_element_indices;
 };
 
 using GIndexScore = cv::GOpaque<IndexScore>;
 namespace custom {
-G_API_OP(PostProcessing, <GIndexScore(cv::GMat, cv::GMat)>, "classification_benchmark.custom.post_processing") {
-    static cv::GOpaqueDesc outMeta(const cv::GMatDesc &in, const cv::GMatDesc &) {
+G_API_OP(TopK, <GIndexScore(cv::GMat, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
+    static cv::GOpaqueDesc outMeta(const cv::GMatDesc &in, const cv::GMatDesc &, uint32_t) {
         return cv::empty_gopaque_desc();
     }
 };
 
-GAPI_OCV_KERNEL(OCVPostProcessing, PostProcessing) {
-    static void run(const cv::Mat &in, const cv::Mat &out_blob, IndexScore &out) {
+GAPI_OCV_KERNEL(OCVTopK, TopK) {
+    static void run(const cv::Mat &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
         // TODO extract labelId & classes
+
+        cv::MatSize out_blob_size = out_blob.size;
+        if (out_blob_size.dims() != 2) {
+            throw std::runtime_error(std::string("Incorrect inference result blob dimensions has been detected: ") +
+                                     std::to_string(out_blob_size.dims()) + ", expected: 2 for classification networks");
+        }
+
+        if (out_blob.type() != CV_32F) {
+            throw std::runtime_error(std::string("Incorrect inference result blob elements type has been detected: ") +
+                                     std::to_string(out_blob.type()) + ", expected: CV_32F for classification networks");
+        }
+        const float *out_blob_data_ptr = out_blob.ptr<float>();
+        const size_t out_blob_data_elem_count = out_blob.total();
+
+        out = IndexScore::create_from_array(out_blob_data_ptr, out_blob_data_elem_count, top_k_amount);
     }
 };
 } // namespace custom
 
 int main(int argc, char* argv[]) {
     try {
-        PerformanceMetrics metrics;
+        PerformanceMetrics metrics, renderMetrics;
 
         /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
@@ -134,7 +217,7 @@ int main(int argc, char* argv[]) {
         cv::GComputation comp([&] {
             cv::GMat in;
             auto blob = cv::gapi::infer<nets::Classification>(in);
-            cv::GOpaque<IndexScore> index_score = custom::PostProcessing::on(in, blob);
+            cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
 
             auto graph_inputs = cv::GIn(in);
             return cv::GComputation(std::move(graph_inputs), cv::GOut(blob, index_score));
@@ -152,7 +235,7 @@ int main(int argc, char* argv[]) {
              .pluginConfig(config.getLegacyConfig());
         // clang-format on
 
-        auto kernels = cv::gapi::kernels<custom::OCVPostProcessing>();
+        auto kernels = cv::gapi::kernels<custom::OCVTopK>();
         auto pipeline = comp.compileStreaming(cv::compile_args(kernels, cv::gapi::networks(net)));
 
         /** Output container for result **/
@@ -186,30 +269,56 @@ int main(int argc, char* argv[]) {
         }
 
         GridMat gridMat(presenter, cv::Size(width, height));
+        bool keepRunning = true;
         size_t framesNum = 0;
+        long long correctPredictionsCount = 0;
+        unsigned int framesNumOnCalculationStart = 0;
 ////////////////////////////////////////
         bool isStart = true;
-        const auto startTime = std::chrono::steady_clock::now();
+        double accuracy = 0;
+        bool isTestMode = true;
+        std::chrono::steady_clock::duration elapsedSeconds = std::chrono::steady_clock::duration(0);
+        auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
+        IndexScore::LabelsMap top_k_scored_labels;
+        top_k_scored_labels.reserve(FLAGS_nt);
         while (pipeline.pull(cv::gout(output, infer_result))) {
             framesNum++;
 
-            predictionResult = PredictionResult::Unknown; ????
-            std::string label = ????
+            PredictionResult predictionResult = PredictionResult::Unknown;
+            std::string label("UNKNOWN");
+            try {
+                top_k_scored_labels.clear();
+                infer_result.getScoredLabels(labels, top_k_scored_labels);
 
-            gridMat.updateMat(outputImg, label, predictionResult);
+                if (top_k_scored_labels.empty()) {
+                    throw std::out_of_range("No any classes detected");
+                }
+
+                label = top_k_scored_labels.begin()->second;
+            } catch (const std::out_of_range &ex) {
+                std::cerr << ex.what()
+                          << "\nPlease, make sure the model or the label file are correct";
+            }
+
+            auto renderingStart = std::chrono::steady_clock::now();
+            gridMat.updateMat(output, label, predictionResult);
+            // TODO
+            correctPredictionsCount = framesNum; // add ground thruth file
             accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
+            // TODO
+            std::chrono::steady_clock::time_point timeStamp; // set value
             gridMat.textUpdate(metrics,
-                                classificationResult.metaData->asRef<ImageMetaData>().timeStamp,
-                                accuracy,
-                                FLAGS_nt,
-                                isTestMode,
-                                !FLAGS_gt.empty(),
-                                presenter);
+                               timeStamp,
+                               accuracy,
+                               FLAGS_nt,
+                               isTestMode,
+                               !FLAGS_gt.empty(),
+                               presenter);
             renderMetrics.update(renderingStart);
             elapsedSeconds = std::chrono::steady_clock::now() - startTime;
             if (!FLAGS_no_show) {
-                cv::imshow("classification_demo", gridMat.outImg);
+                cv::imshow("classification_demo_gapi", gridMat.outImg);
                 //--- Processing keyboard events
                 int key = cv::waitKey(1);
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc
@@ -228,6 +337,21 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+
+        if (!FLAGS_gt.empty()) {
+            slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
+        }
+
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        /* TODO
+         logLatencyPerStage(readerMetrics.getTotal().latency,
+                           pipeline.getPreprocessMetrics().getTotal().latency,
+                           pipeline.getInferenceMetircs().getTotal().latency,
+                           pipeline.getPostprocessMetrics().getTotal().latency,
+                           renderMetrics.getTotal().latency);
+        */
+        slog::info << presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
         return 1;
