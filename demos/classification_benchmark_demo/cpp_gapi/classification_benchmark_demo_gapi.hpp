@@ -62,7 +62,7 @@ DEFINE_string(gt, "", gt_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_uint32(nireq, 0, num_inf_req_message);
+DEFINE_uint32(nireq, 1, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);

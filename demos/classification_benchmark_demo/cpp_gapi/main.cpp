@@ -93,25 +93,18 @@ G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
 
 struct IndexScore {
     using IndicesStorage = std::list<size_t>;
-    using ConfidenceMap = std::map<float, typename IndicesStorage::reverse_iterator>;
+    using ConfidenceMap = std::multimap<float, typename IndicesStorage::iterator>;
 
     using LabelsMap = std::vector<std::pair<float, std::string>>;
 
     IndexScore() = default;
-    IndexScore(IndexScore &&) = default;
-    IndexScore(const IndexScore &) = default;
-    IndexScore(ConfidenceMap &&c, IndicesStorage &&i) :
-        max_confidence_with_indices_ref(std::move(c)),
-        max_element_indices(std::move(i)) {}
-    IndexScore& operator=(IndexScore &&) = default;
-    IndexScore& operator=(const IndexScore &) = default;
 
     void getScoredLabels(const std::vector<std::string> &in_labes,
                          LabelsMap &out_scored_labels_to_append) const {
         try {
             // fill starting from max confidence
-            for (auto conf_index_it = max_confidence_with_indices_ref.rbegin();
-                 conf_index_it != max_confidence_with_indices_ref.rend();
+            for (auto conf_index_it = max_confidence_with_indices.rbegin();
+                 conf_index_it != max_confidence_with_indices.rend();
                  ++conf_index_it) {
                 std::string str_label = in_labes.at(*conf_index_it->second);
                 out_scored_labels_to_append.emplace_back(conf_index_it->first, std::move(str_label));
@@ -123,33 +116,35 @@ struct IndexScore {
 
     static IndexScore create_from_array(const float *out_blob_data_ptr, size_t out_blob_element_count,
                                         size_t top_k_amount) {
+        IndexScore ret;
         if (!out_blob_data_ptr) {
             return IndexScore();
         }
         // find top K
-        ConfidenceMap max_confidence_with_indices;
-        IndicesStorage max_element_indices;
+        ret.max_confidence_with_indices;
+        ret.max_element_indices;
         size_t i = 0;
         // fill & sort topK with first K elements of N array: O(K*Log(K))
         while(i < std::min(top_k_amount, out_blob_element_count)) {
-            max_element_indices.push_back(i);
-            max_confidence_with_indices.emplace(out_blob_data_ptr[i], max_element_indices.rbegin());
+            ret.max_element_indices.push_back(i);
+            ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], std::prev(ret.max_element_indices.end()));
             i++;
         }
 
         // search K elements through remnant N-K array elements
         // greater than the minimum element in the pivot topK
         // O((N-K)*Log(K))
-        for (i = top_k_amount; i < out_blob_element_count && !max_confidence_with_indices.empty(); i++) {
-            if (out_blob_data_ptr[i] >= max_confidence_with_indices.begin()->first) {
-                auto list_min_elem_it = max_confidence_with_indices.begin()->second;
+        for (i = top_k_amount; i < out_blob_element_count && !ret.max_confidence_with_indices.empty(); i++) {
+            const auto &low_confidence_it = ret.max_confidence_with_indices.begin();
+            if (out_blob_data_ptr[i] >= low_confidence_it->first) {
+                auto list_min_elem_it = low_confidence_it->second;
                 *list_min_elem_it = i;
-                max_confidence_with_indices.erase(max_confidence_with_indices.begin());
-                max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
+                ret.max_confidence_with_indices.erase(low_confidence_it);
+                ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
             }
         }
 
-        return IndexScore(std::move(max_confidence_with_indices), std::move(max_element_indices));
+        return ret;
 /*        out_blob = 1 x 1000 = 1000
             {0.0 0.1 0.2  }
 TopK = first K
@@ -159,20 +154,20 @@ index       {2    1    0}
     }
 
 private:
-    ConfidenceMap max_confidence_with_indices_ref;
+    ConfidenceMap max_confidence_with_indices;
     IndicesStorage max_element_indices;
 };
 
 using GIndexScore = cv::GOpaque<IndexScore>;
 namespace custom {
-G_API_OP(TopK, <GIndexScore(cv::GMat, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
-    static cv::GOpaqueDesc outMeta(const cv::GMatDesc &in, const cv::GMatDesc &, uint32_t) {
+G_API_OP(TopK, <GIndexScore(cv::GFrame, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
+    static cv::GOpaqueDesc outMeta(const cv::GFrameDesc &in, const cv::GMatDesc &, uint32_t) {
         return cv::empty_gopaque_desc();
     }
 };
 
 GAPI_OCV_KERNEL(OCVTopK, TopK) {
-    static void run(const cv::Mat &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
+    static void run(const cv::MediaFrame &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
         // TODO extract labelId & classes
 
         cv::MatSize out_blob_size = out_blob.size;
@@ -215,12 +210,13 @@ int main(int argc, char* argv[]) {
                                                                std::numeric_limits<size_t>::max(),
                                                                stringToSize(FLAGS_res));
         cv::GComputation comp([&] {
-            cv::GMat in;
+            cv::GFrame in;
             auto blob = cv::gapi::infer<nets::Classification>(in);
             cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
 
+            cv::GMat bgr = cv::gapi::streaming::BGR(in);
             auto graph_inputs = cv::GIn(in);
-            return cv::GComputation(std::move(graph_inputs), cv::GOut(blob, index_score));
+            return cv::GComputation(std::move(graph_inputs), cv::GOut(bgr, index_score));
         });
 
         /** Configure network **/
