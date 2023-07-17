@@ -22,7 +22,7 @@ from ..representation import (
     QuestionAnsweringBiDAFAnnotation
 )
 from ..annotation_converters._nlp_common import WordPieceTokenizer
-from ..config import NumberField
+from ..config import NumberField,BoolField
 
 
 PrelimPrediction = namedtuple(
@@ -48,6 +48,12 @@ class ExtractSQUADPrediction(Postprocessor):
             ),
             'n_best_size': NumberField(
                 optional=True, value_type=int, default=20, description="The total number of n-best predictions."
+            ),
+            'v2_with_no_answers': BoolField(
+                optional=True, default=False, description="The SQuADv2 dataset with questions impossible to answer."
+            ),
+            'no_answer_score_threshold': NumberField(
+                optional=True, value_type=float, default=0.0, description="No answer for prediction scores below threshold for SQuADv2."
             )
         })
         return parameters
@@ -55,6 +61,8 @@ class ExtractSQUADPrediction(Postprocessor):
     def configure(self):
         self.max_answer = self.get_value_from_config('max_answer')
         self.n_best_size = self.get_value_from_config('n_best_size')
+        self.v2_with_no_answers = self.get_value_from_config('v2_with_no_answers')
+        self.no_answer_score_threshold = self.get_value_from_config('no_answer_score_threshold')
 
     def process_image(self, annotation, prediction):
         def _get_best_indexes(logits, n_best_size):
@@ -101,11 +109,17 @@ class ExtractSQUADPrediction(Postprocessor):
                         )
 
             prelim_predictions = sorted(prelim_predictions, key=lambda x: (x.start_logit + x.end_logit), reverse=True)
+
             nbest = []
             seen_predictions = set()
             for pred in prelim_predictions:
                 if len(nbest) >= self.n_best_size:
                     break
+
+                # For SQuADv2 give no answer for predicsion with score below no_answer_score_threshold
+                if self.v2_with_no_answers:
+                    if (pred.start_logit + pred.end_logit) < self.no_answer_score_threshold:
+                        break
 
                 if pred.start_index > 0:
                     orig_doc_start = annotation_.token_to_orig_map[pred.start_index]
@@ -254,3 +268,4 @@ class ExtractSQUADPredictionBiDAF(Postprocessor):
             prediction_.tokens = tokens
 
         return annotation, prediction
+
