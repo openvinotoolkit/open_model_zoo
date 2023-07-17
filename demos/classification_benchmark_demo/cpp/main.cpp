@@ -201,6 +201,13 @@ int main(int argc, char* argv[]) {
                 if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
                 }
+                // README
+                // std::map type for classIndicesMap guarantees to sort out images by name.
+                // The same logic is applied in openImagesCapture() for DirReader source type,
+                // which produces data for sorted pictures.
+                // To be coherent in detection of ground truth for pictures we have to
+                // use the same sorting approach for a source and ground truth data
+                // If you're going to copy paste this code, remember that pictures need to be sorted
                 classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
             }
 

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <limits>
 #include <memory>
@@ -127,19 +128,20 @@ struct IndexScore {
     using IndicesStorage = std::list<size_t>;
     using ConfidenceMap = std::multimap<float, typename IndicesStorage::iterator>;
 
-    using LabelsMap = std::vector<std::pair<float, std::string>>;
+    using ClassDescription = std::tuple<float, size_t, std::string>;
+    using LabelsStorage = std::vector<ClassDescription>;
 
     IndexScore() = default;
 
     void getScoredLabels(const std::vector<std::string> &in_labes,
-                         LabelsMap &out_scored_labels_to_append) const {
+                         LabelsStorage &out_scored_labels_to_append) const {
         try {
             // fill starting from max confidence
             for (auto conf_index_it = max_confidence_with_indices.rbegin();
                  conf_index_it != max_confidence_with_indices.rend();
                  ++conf_index_it) {
                 std::string str_label = in_labes.at(*conf_index_it->second);
-                out_scored_labels_to_append.emplace_back(conf_index_it->first, std::move(str_label));
+                out_scored_labels_to_append.emplace_back(conf_index_it->first, *conf_index_it->second,  std::move(str_label));
             }
         } catch (const std::out_of_range& ex) {
             throw std::out_of_range(std::string("Provided labels file doesn't contain detected class index\nException: ") + ex.what());
@@ -181,11 +183,46 @@ private:
     IndicesStorage max_element_indices;
 };
 
+using GRect = cv::GOpaque<cv::Rect>;
+using GSize = cv::GOpaque<cv::Size>;
 using GIndexScore = cv::GOpaque<IndexScore>;
+
 namespace custom {
+G_API_OP(LocateROI, <GRect(GSize)>, "sample.custom.locate-roi") {
+    static cv::GOpaqueDesc outMeta(const cv::GOpaqueDesc &) {
+        return cv::empty_gopaque_desc();
+    }
+};
+
 G_API_OP(TopK, <GIndexScore(cv::GFrame, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
     static cv::GOpaqueDesc outMeta(const cv::GFrameDesc &in, const cv::GMatDesc &, uint32_t) {
         return cv::empty_gopaque_desc();
+    }
+};
+
+GAPI_OCV_KERNEL(OCVLocateROI, LocateROI) {
+    // This is the place where we can run extra analytics
+    // on the input image frame and select the ROI (region
+    // of interest) where we want to detect our objects (or
+    // run any other inference).
+    //
+    // Currently it doesn't do anything intelligent,
+    // but only crops the input image to square (this is
+    // the most convenient aspect ratio for detectors to use)
+
+    static void run(const cv::Size& in_size,
+                    cv::Rect &out_rect) {
+
+        // Identify the central point & square size (- some padding)
+        const auto center = cv::Point{in_size.width/2, in_size.height/2};
+        auto sqside = std::min(in_size.width, in_size.height);
+
+        // Now build the central square ROI
+        out_rect = cv::Rect{ center.x - sqside/2
+                             , center.y - sqside/2
+                             , sqside
+                             , sqside
+                            };
     }
 };
 
@@ -213,13 +250,83 @@ GAPI_OCV_KERNEL(OCVTopK, TopK) {
 
 int main(int argc, char* argv[]) {
     try {
-        PerformanceMetrics metrics, renderMetrics;
+        PerformanceMetrics metrics, readerMetrics, renderMetrics;
 
         /** Get OpenVINO runtime version **/
         slog::info << ov::get_openvino_version() << slog::endl;
+
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
+        }
+
+        //------------------------------- Preparing Input ------------------------------------------------------
+        std::vector<std::string> imageNames;
+        parseInputFilesArguments(imageNames);
+        if (imageNames.empty())
+            throw std::runtime_error("No images provided");
+        std::sort(imageNames.begin(), imageNames.end());
+        for (size_t i = 0; i < imageNames.size(); i++) {
+            const std::string& name = imageNames[i];
+            auto readingStart = std::chrono::steady_clock::now();
+            const cv::Mat& tmpImage = cv::imread(name);
+            if (tmpImage.data == nullptr) {
+                slog::err << "Could not read image " << name << slog::endl;
+                imageNames.erase(imageNames.begin() + i);
+                i--;
+            } else {
+                readerMetrics.update(readingStart);
+                size_t lastSlashIdx = name.find_last_of("/\\");
+                if (lastSlashIdx != std::string::npos) {
+                    imageNames[i] = name.substr(lastSlashIdx + 1);
+                } else {
+                    imageNames[i] = name;
+                }
+            }
+        }
+
+        // ----------------------------------------Read image classes-----------------------------------------
+        std::vector<unsigned> classIndices;
+        if (!FLAGS_gt.empty()) {
+            std::map<std::string, unsigned> classIndicesMap;
+            std::ifstream inputGtFile(FLAGS_gt);
+            if (!inputGtFile.is_open()) {
+                throw std::runtime_error("Can't open the ground truth file.");
+            }
+
+            std::string line;
+            while (std::getline(inputGtFile, line)) {
+                size_t separatorIdx = line.find(' ');
+                if (separatorIdx == std::string::npos) {
+                    throw std::runtime_error("The ground truth file has incorrect format.");
+                }
+                std::string imagePath = line.substr(0, separatorIdx);
+                size_t imagePathEndIdx = imagePath.rfind('/');
+                unsigned classIndex = static_cast<unsigned>(std::stoul(line.substr(separatorIdx + 1)));
+                if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
+                    throw std::runtime_error("The ground truth file has incorrect format.");
+                }
+                // README
+                // std::map type for classIndicesMap guarantees to sort out images by name.
+                // The same logic is applied in openImagesCapture() for DirReader source type,
+                // which produces data for sorted pictures.
+                // To be coherent in detection of ground truth for pictures we have to
+                // use the same sorting approach for a source and ground truth data
+                // If you're going to copy paste this code, remember that pictures need to be sorted
+                classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
+            }
+
+            for (size_t i = 0; i < imageNames.size(); i++) {
+                auto imageSearchResult = classIndicesMap.find(imageNames[i]);
+                if (imageSearchResult != classIndicesMap.end()) {
+                    classIndices.push_back(imageSearchResult->second);
+                } else {
+                    throw std::runtime_error("No class specified for image " + imageNames[i]);
+                }
+            }
+        } else {
+            classIndices.resize(imageNames.size());
+            std::fill(classIndices.begin(), classIndices.end(), 0);
         }
 
         //------------------------------ Running routines ----------------------------------------------
@@ -244,9 +351,12 @@ int main(int argc, char* argv[]) {
 
         cv::GComputation comp([&] {
             cv::GFrame in;
-
             cv::GOpaque<int64_t> outTs = cv::gapi::streaming::timestamp(in);
-            auto blob = cv::gapi::infer<nets::Classification>(in);
+
+            auto size = cv::gapi::streaming::size(in);
+            cv::GOpaque<cv::Rect> in_roi = custom::LocateROI::on(size);
+
+            auto blob = cv::gapi::infer<nets::Classification>(in_roi, in);
             cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
 
             cv::GMat bgr = cv::gapi::streaming::BGR(in);
@@ -266,7 +376,7 @@ int main(int argc, char* argv[]) {
              .pluginConfig(config.getLegacyConfig());
         // clang-format on
 
-        auto kernels = cv::gapi::kernels<custom::OCVTopK>();
+        auto kernels = cv::gapi::kernels<custom::OCVLocateROI, custom::OCVTopK>();
         auto pipeline = comp.compileStreaming(cv::compile_args(kernels, cv::gapi::networks(net)));
 
         /** Output container for result **/
@@ -319,7 +429,7 @@ int main(int argc, char* argv[]) {
         std::chrono::steady_clock::duration elapsedSeconds = std::chrono::steady_clock::duration(0);
         auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
-        IndexScore::LabelsMap top_k_scored_labels;
+        IndexScore::LabelsStorage top_k_scored_labels;
         top_k_scored_labels.reserve(FLAGS_nt);
         int64_t timestamp = 0;
         while (pipeline.pull(cv::gout(output, infer_result, timestamp)) && keepRunning) {
@@ -327,7 +437,7 @@ int main(int argc, char* argv[]) {
             std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
             framesNum++;
 
-            PredictionResult predictionResult = PredictionResult::Unknown;
+            PredictionResult predictionResult = PredictionResult::Incorrect;
             std::string label("UNKNOWN");
             try {
                 top_k_scored_labels.clear();
@@ -337,7 +447,17 @@ int main(int argc, char* argv[]) {
                     throw std::out_of_range("No any classes detected");
                 }
 
-                label = top_k_scored_labels.begin()->second;
+                size_t predicted_class_id = std::get<1>(*top_k_scored_labels.begin());
+                label = std::get<2>(*top_k_scored_labels.begin());
+
+                if (!FLAGS_gt.empty()) {
+                    if (predicted_class_id == classIndices.at(framesNum % classIndices.size())) {
+                        predictionResult = PredictionResult::Correct;
+                        correctPredictionsCount++;
+                    }
+                } else {
+                    predictionResult = PredictionResult::Unknown;
+                }
             } catch (const std::out_of_range &ex) {
                 std::cerr << ex.what()
                           << "\nPlease, make sure the model or the label file are correct";
@@ -345,8 +465,6 @@ int main(int argc, char* argv[]) {
 
             auto renderingStart = std::chrono::steady_clock::now();
             gridMat.updateMat(output, label, predictionResult);
-            // TODO
-            correctPredictionsCount = framesNum; // add ground thruth file
             accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
 
             gridMat.textUpdate(metrics,
@@ -385,13 +503,12 @@ int main(int argc, char* argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        /* TODO
-         logLatencyPerStage(readerMetrics.getTotal().latency,
-                           pipeline.getPreprocessMetrics().getTotal().latency,
-                           pipeline.getInferenceMetircs().getTotal().latency,
-                           pipeline.getPostprocessMetrics().getTotal().latency,
+        // TODO Not all metrics are functional
+        logLatencyPerStage(readerMetrics.getTotal().latency,
+                           -0.0,
+                           -0.0,
+                           -0.0,
                            renderMetrics.getTotal().latency);
-        */
         slog::info << presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
