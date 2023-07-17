@@ -17,9 +17,10 @@ limitations under the License.
 import numpy as np
 
 from ..representation import LanguageModelingAnnotation
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, StringField
 from ..utils import UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
+from transformers import BloomTokenizerFast
 
 try:
     from tokenizers import Tokenizer, pre_tokenizers, decoders
@@ -42,6 +43,7 @@ class Wikitext2RawConverter(BaseFormatConverter):
             'testing_file': PathField(description="Path to testing file."),
             'merges_file': PathField(description="Path to merges file."),
             'vocab_file': PathField(description='Path to vocabulary file.'),
+            'pretrained_model_name': StringField(description='Pretreined model name. Used to load tokenizer'),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
                 optional=True, default=128, value_type=int
@@ -57,15 +59,19 @@ class Wikitext2RawConverter(BaseFormatConverter):
         self.vocab_file = self.get_value_from_config('vocab_file')
         self.merges_file = self.get_value_from_config('merges_file')
         self.max_seq_length = int(self.get_value_from_config('max_seq_length'))
-        self.tokenizer = Tokenizer(BPE.from_file(str(self.vocab_file), str(self.merges_file)))
+        self.pretrained_model_name = self.get_value_from_config('pretrained_model_name')
+        if self.pretrained_model_name:
+            self.tokenizer =  BloomTokenizerFast.from_pretrained(self.pretrained_model_name)
+        else:
+            self.tokenizer = Tokenizer(BPE.from_file(str(self.vocab_file), str(self.merges_file)))
+            self.tokenizer.decoder = decoders.ByteLevel()
         self.tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
-        self.tokenizer.decoder = decoders.ByteLevel()
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         with open(str(self.testing_file), encoding="utf-8") as f:
             text = f.read()
 
-        tokens = self.tokenizer.encode_batch([text])
+        tokens = self.tokenizer([text]) if self.pretrained_model_name else self.tokenizer.encode_batch([text])
 
         encoding = tokens[0]
         annotations = []
