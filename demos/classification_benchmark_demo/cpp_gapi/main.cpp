@@ -121,8 +121,6 @@ struct IndexScore {
             return IndexScore();
         }
         // find top K
-        ret.max_confidence_with_indices;
-        ret.max_element_indices;
         size_t i = 0;
         // fill & sort topK with first K elements of N array: O(K*Log(K))
         while(i < std::min(top_k_amount, out_blob_element_count)) {
@@ -143,14 +141,7 @@ struct IndexScore {
                 ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
             }
         }
-
         return ret;
-/*        out_blob = 1 x 1000 = 1000
-            {0.0 0.1 0.2  }
-TopK = first K
-confidence  {0.2 0.1 0.0}
-index       {2    1    0}
-*/
     }
 
 private:
@@ -211,12 +202,14 @@ int main(int argc, char* argv[]) {
                                                                stringToSize(FLAGS_res));
         cv::GComputation comp([&] {
             cv::GFrame in;
+
+            cv::GOpaque<int64_t> outTs = cv::gapi::streaming::timestamp(in);
             auto blob = cv::gapi::infer<nets::Classification>(in);
             cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
 
             cv::GMat bgr = cv::gapi::streaming::BGR(in);
             auto graph_inputs = cv::GIn(in);
-            return cv::GComputation(std::move(graph_inputs), cv::GOut(bgr, index_score));
+            return cv::GComputation(std::move(graph_inputs), cv::GOut(bgr, index_score, outTs));
         });
 
         /** Configure network **/
@@ -269,7 +262,6 @@ int main(int argc, char* argv[]) {
         size_t framesNum = 0;
         long long correctPredictionsCount = 0;
         unsigned int framesNumOnCalculationStart = 0;
-////////////////////////////////////////
         bool isStart = true;
         double accuracy = 0;
         bool isTestMode = true;
@@ -278,7 +270,10 @@ int main(int argc, char* argv[]) {
         pipeline.start();
         IndexScore::LabelsMap top_k_scored_labels;
         top_k_scored_labels.reserve(FLAGS_nt);
-        while (pipeline.pull(cv::gout(output, infer_result))) {
+        int64_t timestamp = 0;
+        while (pipeline.pull(cv::gout(output, infer_result, timestamp)) && keepRunning) {
+            std::chrono::milliseconds dur(timestamp);
+            std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
             framesNum++;
 
             PredictionResult predictionResult = PredictionResult::Unknown;
@@ -302,10 +297,9 @@ int main(int argc, char* argv[]) {
             // TODO
             correctPredictionsCount = framesNum; // add ground thruth file
             accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
-            // TODO
-            std::chrono::steady_clock::time_point timeStamp; // set value
+
             gridMat.textUpdate(metrics,
-                               timeStamp,
+                               frame_timestamp,  //from original image created timestamp
                                accuracy,
                                FLAGS_nt,
                                isTestMode,

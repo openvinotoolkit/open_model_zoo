@@ -61,6 +61,8 @@ cv::MediaFrame::View MediaBGRAdapter::access(cv::MediaFrame::Access) {
 bool MediaCommonCapSrc::pull(cv::gapi::wip::Data& data) {
     if (CommonCapSrc::pull(data)) {
         data = cv::MediaFrame::Create<MediaBGRAdapter>(cv::util::get<cv::Mat>(data));
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        data.meta[cv::gapi::streaming::meta_tag::timestamp] = int64_t{std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()};
         return true;
     }
     return false;
