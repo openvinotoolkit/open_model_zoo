@@ -331,6 +331,12 @@ int main(int argc, char* argv[]) {
 
         //------------------------------ Running routines ----------------------------------------------
         std::vector<std::string> labels = ClassificationModel::loadLabels(FLAGS_labels);
+        for (const auto& classIndex : classIndices) {
+            if (classIndex >= labels.size()) {
+                throw std::runtime_error("Class index " + std::to_string(classIndex) +
+                                         " is outside the range supported by the model.");
+            }
+        }
 
         /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i,
@@ -427,15 +433,37 @@ int main(int argc, char* argv[]) {
         double accuracy = 0;
         bool isTestMode = true;
         std::chrono::steady_clock::duration elapsedSeconds = std::chrono::steady_clock::duration(0);
+        std::chrono::seconds testDuration = std::chrono::seconds(3);
+        std::chrono::seconds fpsCalculationDuration = std::chrono::seconds(1);
         auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
         IndexScore::LabelsStorage top_k_scored_labels;
         top_k_scored_labels.reserve(FLAGS_nt);
         int64_t timestamp = 0;
-        while (pipeline.pull(cv::gout(output, infer_result, timestamp)) && keepRunning) {
+        while (keepRunning && elapsedSeconds < std::chrono::seconds(FLAGS_time) && pipeline.pull(cv::gout(output, infer_result, timestamp))) {
             std::chrono::milliseconds dur(timestamp);
             std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
             framesNum++;
+
+            // scale GridMat to show images bunch in 1 sec update interval
+            // Logic bases on measurement frames count and time interval
+            if (elapsedSeconds >= testDuration - fpsCalculationDuration && framesNumOnCalculationStart == 0) {
+                framesNumOnCalculationStart = framesNum;
+            }
+            if (isTestMode && elapsedSeconds >= testDuration) {
+                isTestMode = false;
+                typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
+                gridMat = GridMat(presenter,
+                                  cv::Size(width, height),
+                                  cv::Size(16, 9),
+                                  (framesNum - framesNumOnCalculationStart) /
+                                      std::chrono::duration_cast<Sec>(fpsCalculationDuration).count());
+                metrics = PerformanceMetrics();
+                startTime = std::chrono::steady_clock::now();
+                framesNum = 0;
+                correctPredictionsCount = 0;
+                accuracy = 0;
+            }
 
             PredictionResult predictionResult = PredictionResult::Incorrect;
             std::string label("UNKNOWN");
