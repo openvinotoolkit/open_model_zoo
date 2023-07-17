@@ -1,4 +1,4 @@
-# Classification Benchmark C++ Demo
+# G-API Classification Benchmark  C++ Demo
 
 ![](../classification_benchmark.gif)
 
@@ -18,7 +18,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/classification_benchmark_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/classification_benchmark_demo/gapi_cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -147,6 +147,9 @@ Options:
     -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
     -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
     -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
+    -use_onevpl                Optional. Use onevpl video decoding.
+    -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>,<prop name>:<value> Several important configuration parameters: 'mfxImplDescription.mfxDecoderDescription.decoder.CodecID' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc and 'mfxImplDescription.AccelerationMode' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
+    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size. 0 leaves frames pool size default for your system. This parameter doesn't have a god default value. It must be adjusted for specific execution (video, model, system ...).
 ```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
@@ -156,7 +159,7 @@ For higher FPS, it is recommended to use -nireq which slightly exceeds -nstreams
 For example, use the following command-line command to run the application:
 
 ```sh
-./classification_benchmark_demo -m <path_to_classification_model> \
+./classification_benchmark_demo_gapi -m <path_to_classification_model> \
                       -i <path_to_folder_with_images> \
                       -labels <path_to_file_with_list_of_labels> \
                       -gt <path_to_ground_truth_data_file> \
