@@ -97,6 +97,7 @@ The Open Model Zoo includes the following demos:
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
 - [Classification Python\* Demo](./classification_demo/python/README.md) - Shows an example of using neural networks for image classification.
 - [Classification Benchmark C++ Demo](./classification_benchmark_demo/cpp/README.md) - Visualizes OpenVINO performance on inference of neural networks for image classification.
+- [Classification Benchmark C++ G-API Demo](./classification_benchmark_demo/cpp_gapi/README.md) - Classification Benchmark C++ G-API version.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
