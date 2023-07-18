@@ -14,10 +14,6 @@ For enabling OpenVINO™ launcher you need to add `framework: openvino` in launc
 * `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
-**Note:**
-   You can generate executable blob using [compile_tool](https://docs.openvino.ai/2023.0/_inference_engine_tools_compile_tool_README.html).
-   Before evaluation executable blob, please make sure that selected device support it.
-
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch
 
 * `allow_reshape_input` - parameter, which allows to reshape input layer to data shape (default value is False).
@@ -88,10 +84,6 @@ For enabling OpenVINO™ API 1.0 launcher you need to add `framework: dlsdk` in 
 * `model` - path to model for your topology or compiled executable network. You also can provide path to directory with model for automatic model search inside directory and help to find it specifying `--model_type`. Supported model types: `xml`, `onnx`, `blob`.
 * `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
-
-**Note:**
-   You can generate executable blob using [compile_tool](https://docs.openvino.ai/2023.0/_inference_engine_tools_compile_tool_README.html).
-   Before evaluation executable blob, please make sure that selected device support it.
 
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch.
 
