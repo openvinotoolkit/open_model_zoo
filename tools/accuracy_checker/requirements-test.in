@@ -2,7 +2,6 @@ pytest>=5.0,<=7.0.1; python_version < '3.10'
 pytest==7.2.0; python_version >= '3.10'
 pytest-mock~=2.0
 scipy~=1.10.1
-transformers~=4.30.2
 
 # pytest depends on atomicwrites, but only on Windows.
 # This means that if we use pip-compile on Linux, the resulting requirements.txt
