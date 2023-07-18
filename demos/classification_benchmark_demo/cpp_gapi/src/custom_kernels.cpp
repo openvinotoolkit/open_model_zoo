@@ -25,14 +25,25 @@
 
 void IndexScore::getScoredLabels(const std::vector<std::string> &in_labes,
                                  LabelsStorage &out_scored_labels_to_append) const {
+    uint64_t labels_offset_correction = 0;
+    if (in_labes.size() + 1  == classification_indices_scale) {
+        // Equal to inserting 'other' label as first.
+        labels_offset_correction = -1;
+    } else if (classification_indices_scale != in_labes.size()) {
+        throw std::logic_error("Model's number of classes and parsed labels must match (" +
+                               std::to_string(classification_indices_scale) + " and " +
+                               std::to_string(in_labes.size()) + ')');
+    }
+
     // fill starting from max confidence
     for (auto conf_index_it = max_confidence_with_indices.rbegin();
          conf_index_it != max_confidence_with_indices.rend();
          ++conf_index_it) {
         try {
+            size_t recalculated_label_id = *conf_index_it->second + labels_offset_correction;
             out_scored_labels_to_append.emplace_back(conf_index_it->first,
-                                                     *conf_index_it->second,
-                                                     in_labes.at(*conf_index_it->second));
+                                                     recalculated_label_id,
+                                                     recalculated_label_id != 0 ? in_labes.at(recalculated_label_id) : "others");
         } catch (const std::out_of_range& ex) {
             throw std::out_of_range(std::string("Provided labels file doesn't contain classified label index\nException: ") + ex.what());
         }
@@ -66,6 +77,8 @@ IndexScore IndexScore::create_from_array(const float *out_blob_data_ptr, size_t 
             ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
         }
     }
+
+    ret.classification_indices_scale = out_blob_element_count;
     return ret;
 }
 

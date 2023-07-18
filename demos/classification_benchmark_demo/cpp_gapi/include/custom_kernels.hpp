@@ -34,6 +34,7 @@ struct IndexScore {
 private:
     ConfidenceMap max_confidence_with_indices;
     IndicesStorage max_element_indices;
+    size_t classification_indices_scale;
 };
 
 using GRect = cv::GOpaque<cv::Rect>;
