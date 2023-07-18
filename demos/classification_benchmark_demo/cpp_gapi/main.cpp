@@ -55,6 +55,7 @@
 #include <utils_gapi/stream_source.hpp>
 
 #include "classification_benchmark_demo_gapi.hpp"
+#include "custom_kernels.hpp"
 #include <models/classification_model.h>
 
 
@@ -77,37 +78,6 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-cv::gapi::wip::onevpl::CfgParam createFromString(const std::string &line) {
-    using namespace cv::gapi::wip;
-
-    if (line.empty()) {
-        throw std::runtime_error("Cannot parse CfgParam from emply line");
-    }
-
-    std::string::size_type name_endline_pos = line.find(':');
-    if (name_endline_pos == std::string::npos) {
-        throw std::runtime_error("Cannot parse CfgParam from: " + line +
-                                 "\nExpected separator \":\"");
-    }
-
-    std::string name = line.substr(0, name_endline_pos);
-    std::string value = line.substr(name_endline_pos + 1);
-
-    return cv::gapi::wip::onevpl::CfgParam::create(name, value,
-                                                   /* vpp params strongly optional */
-                                                   name.find("vpp.") == std::string::npos);
-}
-
-static std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::string& cfg_params) {
-    std::vector<cv::gapi::wip::onevpl::CfgParam> source_cfgs;
-    std::stringstream params_list(cfg_params);
-    std::string line;
-    while (std::getline(params_list, line, ',')) {
-        source_cfgs.push_back(createFromString(line));
-    }
-    return source_cfgs;
-}
-
 static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
     if (type == "opencv") {
         return cv::gapi::combine(cv::gapi::core::cpu::kernels(), cv::gapi::imgproc::cpu::kernels());
@@ -123,130 +93,6 @@ static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
 namespace nets {
 G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
 }
-
-struct IndexScore {
-    using IndicesStorage = std::list<size_t>;
-    using ConfidenceMap = std::multimap<float, typename IndicesStorage::iterator>;
-
-    using ClassDescription = std::tuple<float, size_t, std::string>;
-    using LabelsStorage = std::vector<ClassDescription>;
-
-    IndexScore() = default;
-
-    void getScoredLabels(const std::vector<std::string> &in_labes,
-                         LabelsStorage &out_scored_labels_to_append) const {
-        try {
-            // fill starting from max confidence
-            for (auto conf_index_it = max_confidence_with_indices.rbegin();
-                 conf_index_it != max_confidence_with_indices.rend();
-                 ++conf_index_it) {
-                std::string str_label = in_labes.at(*conf_index_it->second);
-                out_scored_labels_to_append.emplace_back(conf_index_it->first, *conf_index_it->second,  std::move(str_label));
-            }
-        } catch (const std::out_of_range& ex) {
-            throw std::out_of_range(std::string("Provided labels file doesn't contain detected class index\nException: ") + ex.what());
-        }
-    }
-
-    static IndexScore create_from_array(const float *out_blob_data_ptr, size_t out_blob_element_count,
-                                        size_t top_k_amount) {
-        IndexScore ret;
-        if (!out_blob_data_ptr) {
-            return IndexScore();
-        }
-        // find top K
-        size_t i = 0;
-        // fill & sort topK with first K elements of N array: O(K*Log(K))
-        while(i < std::min(top_k_amount, out_blob_element_count)) {
-            ret.max_element_indices.push_back(i);
-            ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], std::prev(ret.max_element_indices.end()));
-            i++;
-        }
-
-        // search K elements through remnant N-K array elements
-        // greater than the minimum element in the pivot topK
-        // O((N-K)*Log(K))
-        for (i = top_k_amount; i < out_blob_element_count && !ret.max_confidence_with_indices.empty(); i++) {
-            const auto &low_confidence_it = ret.max_confidence_with_indices.begin();
-            if (out_blob_data_ptr[i] >= low_confidence_it->first) {
-                auto list_min_elem_it = low_confidence_it->second;
-                *list_min_elem_it = i;
-                ret.max_confidence_with_indices.erase(low_confidence_it);
-                ret.max_confidence_with_indices.emplace(out_blob_data_ptr[i], list_min_elem_it);
-            }
-        }
-        return ret;
-    }
-
-private:
-    ConfidenceMap max_confidence_with_indices;
-    IndicesStorage max_element_indices;
-};
-
-using GRect = cv::GOpaque<cv::Rect>;
-using GSize = cv::GOpaque<cv::Size>;
-using GIndexScore = cv::GOpaque<IndexScore>;
-
-namespace custom {
-G_API_OP(LocateROI, <GRect(GSize)>, "sample.custom.locate-roi") {
-    static cv::GOpaqueDesc outMeta(const cv::GOpaqueDesc &) {
-        return cv::empty_gopaque_desc();
-    }
-};
-
-G_API_OP(TopK, <GIndexScore(cv::GFrame, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
-    static cv::GOpaqueDesc outMeta(const cv::GFrameDesc &in, const cv::GMatDesc &, uint32_t) {
-        return cv::empty_gopaque_desc();
-    }
-};
-
-GAPI_OCV_KERNEL(OCVLocateROI, LocateROI) {
-    // This is the place where we can run extra analytics
-    // on the input image frame and select the ROI (region
-    // of interest) where we want to detect our objects (or
-    // run any other inference).
-    //
-    // Currently it doesn't do anything intelligent,
-    // but only crops the input image to square (this is
-    // the most convenient aspect ratio for detectors to use)
-
-    static void run(const cv::Size& in_size,
-                    cv::Rect &out_rect) {
-
-        // Identify the central point & square size (- some padding)
-        const auto center = cv::Point{in_size.width/2, in_size.height/2};
-        auto sqside = std::min(in_size.width, in_size.height);
-
-        // Now build the central square ROI
-        out_rect = cv::Rect{ center.x - sqside/2
-                             , center.y - sqside/2
-                             , sqside
-                             , sqside
-                            };
-    }
-};
-
-GAPI_OCV_KERNEL(OCVTopK, TopK) {
-    static void run(const cv::MediaFrame &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
-        // TODO extract labelId & classes
-
-        cv::MatSize out_blob_size = out_blob.size;
-        if (out_blob_size.dims() != 2) {
-            throw std::runtime_error(std::string("Incorrect inference result blob dimensions has been detected: ") +
-                                     std::to_string(out_blob_size.dims()) + ", expected: 2 for classification networks");
-        }
-
-        if (out_blob.type() != CV_32F) {
-            throw std::runtime_error(std::string("Incorrect inference result blob elements type has been detected: ") +
-                                     std::to_string(out_blob.type()) + ", expected: CV_32F for classification networks");
-        }
-        const float *out_blob_data_ptr = out_blob.ptr<float>();
-        const size_t out_blob_data_elem_count = out_blob.total();
-
-        out = IndexScore::create_from_array(out_blob_data_ptr, out_blob_data_elem_count, top_k_amount);
-    }
-};
-} // namespace custom
 
 int main(int argc, char* argv[]) {
     try {
@@ -286,55 +132,15 @@ int main(int argc, char* argv[]) {
         }
 
         // ----------------------------------------Read image classes-----------------------------------------
-        std::vector<unsigned> classIndices;
-        if (!FLAGS_gt.empty()) {
-            std::map<std::string, unsigned> classIndicesMap;
-            std::ifstream inputGtFile(FLAGS_gt);
-            if (!inputGtFile.is_open()) {
-                throw std::runtime_error("Can't open the ground truth file.");
-            }
-
-            std::string line;
-            while (std::getline(inputGtFile, line)) {
-                size_t separatorIdx = line.find(' ');
-                if (separatorIdx == std::string::npos) {
-                    throw std::runtime_error("The ground truth file has incorrect format.");
-                }
-                std::string imagePath = line.substr(0, separatorIdx);
-                size_t imagePathEndIdx = imagePath.rfind('/');
-                unsigned classIndex = static_cast<unsigned>(std::stoul(line.substr(separatorIdx + 1)));
-                if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
-                    throw std::runtime_error("The ground truth file has incorrect format.");
-                }
-                // README
-                // std::map type for classIndicesMap guarantees to sort out images by name.
-                // The same logic is applied in openImagesCapture() for DirReader source type,
-                // which produces data for sorted pictures.
-                // To be coherent in detection of ground truth for pictures we have to
-                // use the same sorting approach for a source and ground truth data
-                // If you're going to copy paste this code, remember that pictures need to be sorted
-                classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
-            }
-
-            for (size_t i = 0; i < imageNames.size(); i++) {
-                auto imageSearchResult = classIndicesMap.find(imageNames[i]);
-                if (imageSearchResult != classIndicesMap.end()) {
-                    classIndices.push_back(imageSearchResult->second);
-                } else {
-                    throw std::runtime_error("No class specified for image " + imageNames[i]);
-                }
-            }
-        } else {
-            classIndices.resize(imageNames.size());
-            std::fill(classIndices.begin(), classIndices.end(), 0);
-        }
+        std::vector<unsigned> classIndices = loadClassIndices(FLAGS_gt, imageNames);
 
         //------------------------------ Running routines ----------------------------------------------
         std::vector<std::string> labels = ClassificationModel::loadLabels(FLAGS_labels);
         for (const auto& classIndex : classIndices) {
             if (classIndex >= labels.size()) {
                 throw std::runtime_error("Class index " + std::to_string(classIndex) +
-                                         " is outside the range supported by the model.");
+                                         " is outside the range supported by the model with max index: " +
+                                         std::to_string(labels.size()));
             }
         }
 
@@ -382,7 +188,7 @@ int main(int argc, char* argv[]) {
              .pluginConfig(config.getLegacyConfig());
         // clang-format on
 
-        auto kernels = cv::gapi::kernels<custom::OCVLocateROI, custom::OCVTopK>();
+        auto kernels = cv::gapi::combine(custom::kernels(), util::getKernelPackage(FLAGS_kernel_package));
         auto pipeline = comp.compileStreaming(cv::compile_args(kernels, cv::gapi::networks(net)));
 
         /** Output container for result **/
@@ -475,20 +281,30 @@ int main(int argc, char* argv[]) {
                     throw std::out_of_range("No any classes detected");
                 }
 
-                size_t predicted_class_id = std::get<1>(*top_k_scored_labels.begin());
-                label = std::get<2>(*top_k_scored_labels.begin());
-
+                // pop the most suitable label for the class index
+                auto prediction_description_it = top_k_scored_labels.begin();
+                label = std::get<2>(*prediction_description_it);
                 if (!FLAGS_gt.empty()) {
-                    if (predicted_class_id == classIndices.at(framesNum % classIndices.size())) {
-                        predictionResult = PredictionResult::Correct;
-                        correctPredictionsCount++;
+                    // iterate over topK results and compare each against ground truth
+                    // to extract proper classification result.
+                    // It may appear a class with low confidence as well
+                    for (; prediction_description_it != top_k_scored_labels.end();
+                         ++prediction_description_it) {
+                        size_t predicted_class_id_to_test = std::get<1>(*prediction_description_it);
+                        if (predicted_class_id_to_test == classIndices.at(framesNum % classIndices.size())) {
+                            predictionResult = PredictionResult::Correct;
+                            correctPredictionsCount++;
+                            label = std::get<2>(*prediction_description_it);
+                            break;
+                        }
                     }
                 } else {
                     predictionResult = PredictionResult::Unknown;
                 }
             } catch (const std::out_of_range &ex) {
-                std::cerr << ex.what()
-                          << "\nPlease, make sure the model or the label file are correct";
+                throw std::runtime_error(std::string("Runtime error has been happened: ") +
+                                         ex.what() +
+                                         "\nPlease, make sure the model or the label file are suitable for the demo");
             }
 
             auto renderingStart = std::chrono::steady_clock::now();
@@ -496,7 +312,7 @@ int main(int argc, char* argv[]) {
             accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
 
             gridMat.textUpdate(metrics,
-                               frame_timestamp,  //from original image created timestamp
+                               frame_timestamp,
                                accuracy,
                                FLAGS_nt,
                                isTestMode,
@@ -507,7 +323,7 @@ int main(int argc, char* argv[]) {
             if (!FLAGS_no_show) {
                 cv::imshow("classification_demo_gapi", gridMat.outImg);
                 //--- Processing keyboard events
-                int key = cv::waitKey(1);
+                int key = cv::waitKey(delay);
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                     keepRunning = false;
                 } else if (32 == key || 'r' == key ||

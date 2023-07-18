@@ -73,3 +73,36 @@ cv::GMetaArg MediaCommonCapSrc::descr_of() const {
                                        cv::util::get<cv::GMatDesc>(CommonCapSrc::descr_of()).size}};
 }
 }  // namespace custom
+
+namespace util {
+cv::gapi::wip::onevpl::CfgParam createFromString(const std::string &line) {
+    using namespace cv::gapi::wip;
+
+    if (line.empty()) {
+        throw std::runtime_error("Cannot parse CfgParam from emply line");
+    }
+
+    std::string::size_type name_endline_pos = line.find(':');
+    if (name_endline_pos == std::string::npos) {
+        throw std::runtime_error("Cannot parse CfgParam from: " + line +
+                                 "\nExpected separator \":\"");
+    }
+
+    std::string name = line.substr(0, name_endline_pos);
+    std::string value = line.substr(name_endline_pos + 1);
+
+    return cv::gapi::wip::onevpl::CfgParam::create(name, value,
+                                                   /* vpp params strongly optional */
+                                                   name.find("vpp.") == std::string::npos);
+}
+
+std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::string& cfg_params) {
+    std::vector<cv::gapi::wip::onevpl::CfgParam> source_cfgs;
+    std::stringstream params_list(cfg_params);
+    std::string line;
+    while (std::getline(params_list, line, ',')) {
+        source_cfgs.push_back(createFromString(line));
+    }
+    return source_cfgs;
+}
+} // namespace util

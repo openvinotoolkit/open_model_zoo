@@ -18,8 +18,8 @@ static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
-static const char layout_message[] = "Optional. Specify inputs layouts."
-                                     " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
+static const char kernel_package_message[] =
+    "Optional. G-API kernel package type: opencv, fluid (by default opencv is used).";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
@@ -30,7 +30,6 @@ static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
-static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
@@ -57,7 +56,7 @@ static const char onevpl_pool_size_message[] = "OneVPL source applies this param
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_string(layout, "", layout_message);
+DEFINE_string(kernel_package, "opencv", kernel_package_message);
 DEFINE_string(gt, "", gt_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -65,7 +64,6 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 1, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -88,9 +86,8 @@ static void showUsage() {
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -layout \"<string>\"        " << layout_message << std::endl;
+    std::cout << "    -kernel_package \"<string>\" " << kernel_package_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;

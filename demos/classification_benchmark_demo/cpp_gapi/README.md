@@ -131,9 +131,7 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Path to a folder with images or path to an image file.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-    -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
-    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
     -gt "<path>"              Optional. Path to ground truth .txt file.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
     -nthreads "<integer>"     Optional. Specify count of threads.
