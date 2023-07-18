@@ -15,10 +15,11 @@ limitations under the License.
 """
 
 import numpy as np
+from scipy.special import log_softmax
 
 from ..representation import LanguageModelingAnnotation, LanguageModelingPrediction
 from .metric import PerImageEvaluationMetric
-from scipy.special import log_softmax
+
 
 class ScorePerplexity(PerImageEvaluationMetric):
     __provider__ = 'perplexity'
