@@ -53,7 +53,7 @@ class ExtractSQUADPrediction(Postprocessor):
                 optional=True, default=False, description="The SQuADv2 dataset with questions impossible to answer."
             ),
             'no_answer_score_threshold': NumberField(
-                optional=True, value_type=float, default=0.0, 
+                optional=True, value_type=float, default=0.0,
                 description="No answer for prediction scores below threshold for SQuADv2."
             )
         })
