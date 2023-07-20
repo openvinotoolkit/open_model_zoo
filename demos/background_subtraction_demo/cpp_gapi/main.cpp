@@ -18,10 +18,6 @@
 #include <gflags/gflags.h>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/core.hpp>
-#include <opencv2/gapi/cpu/core.hpp>
-#include <opencv2/gapi/cpu/imgproc.hpp>
-#include <opencv2/gapi/fluid/core.hpp>
-#include <opencv2/gapi/fluid/imgproc.hpp>
 #include <opencv2/gapi/garg.hpp>
 #include <opencv2/gapi/gcommon.hpp>
 #include <opencv2/gapi/gcomputation.hpp>
@@ -49,6 +45,7 @@
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
+#include <utils_gapi/kernel_package.hpp>
 #include <utils_gapi/stream_source.hpp>
 
 #include "background_subtraction_demo_gapi.hpp"
@@ -71,17 +68,6 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
     return true;
-}
-
-static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
-    if (type == "opencv") {
-        return cv::gapi::combine(cv::gapi::core::cpu::kernels(), cv::gapi::imgproc::cpu::kernels());
-    } else if (type == "fluid") {
-        return cv::gapi::combine(cv::gapi::core::fluid::kernels(), cv::gapi::imgproc::fluid::kernels());
-    } else {
-        throw std::logic_error("Unsupported kernel package type: " + type);
-    }
-    GAPI_Assert(false && "Unreachable code!");
 }
 
 }  // namespace util
