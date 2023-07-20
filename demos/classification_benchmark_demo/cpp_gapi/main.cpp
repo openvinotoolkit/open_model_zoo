@@ -181,9 +181,8 @@ int main(int argc, char* argv[]) {
         IndexScore infer_result;
 
         /** ---------------- The execution part ---------------- **/
-        FLAGS_loop = true; // override loop flag for benchmark
         cap = openImagesCapture(FLAGS_i,
-                                FLAGS_loop,
+                                true,
                                 read_type::safe,
                                 0,
                                 std::numeric_limits<size_t>::max(),

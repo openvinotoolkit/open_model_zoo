@@ -8,12 +8,6 @@
 
 #include <gflags/gflags.h>
 
-#include <utils/default_flags.hpp>
-
-DEFINE_INPUT_FLAGS
-DEFINE_OUTPUT_FLAGS
-
-
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
@@ -54,6 +48,7 @@ static const char onevpl_pool_size_message[] = "OneVPL source applies this param
 
 
 DEFINE_bool(h, false, help_message);
+DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(labels, "", labels_message);
 DEFINE_string(kernel_package, "opencv", kernel_package_message);
