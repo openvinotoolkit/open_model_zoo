@@ -42,7 +42,7 @@ void IndexScore::getScoredLabels(const std::vector<std::string> &in_labes,
         size_t recalculated_label_id = *conf_index_it->second + labels_offset_correction;
         try {
             out_scored_labels_to_append.emplace_back(conf_index_it->first,
-                                                     recalculated_label_id,
+                                                     *conf_index_it->second,
                                                      recalculated_label_id != 0 ? in_labes.at(recalculated_label_id) : "others");
         } catch (const std::out_of_range& ex) {
             throw std::out_of_range(std::string("Provided labels file doesn't contain classified label index\nException: ") + ex.what());

@@ -246,10 +246,12 @@ int main(int argc, char* argv[]) {
         IndexScore::LabelsStorage top_k_scored_labels;
         top_k_scored_labels.reserve(FLAGS_nt);
         int64_t timestamp = 0;
+        size_t total_produced_image_count = 0;
         while (keepRunning && elapsedSeconds < std::chrono::seconds(FLAGS_time) && pipeline.pull(cv::gout(output, infer_result, timestamp))) {
             std::chrono::milliseconds dur(timestamp);
             std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
             framesNum++;
+            size_t current_image_id = total_produced_image_count++;
 
             // scale ClassificationGridMat to show images bunch in 1 sec update interval
             // Logic bases on measurement frames count and time interval
@@ -290,7 +292,7 @@ int main(int argc, char* argv[]) {
                 for (; prediction_description_it != top_k_scored_labels.end();
                         ++prediction_description_it) {
                     size_t predicted_class_id_to_test = std::get<1>(*prediction_description_it);
-                    if (predicted_class_id_to_test == classIndices.at(framesNum % classIndices.size())) {
+                    if (predicted_class_id_to_test == classIndices.at(current_image_id % classIndices.size())) {
                         predictionResult = PredictionResult::Correct;
                         correctPredictionsCount++;
                         label = std::get<2>(*prediction_description_it);
