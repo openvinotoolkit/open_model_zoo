@@ -200,7 +200,6 @@ int main(int argc, char* argv[]) {
                 if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
                 }
-                // README
                 // std::map type for classIndicesMap guarantees to sort out images by name.
                 // The same logic is applied in openImagesCapture() for DirReader source type,
                 // which produces data for sorted pictures.

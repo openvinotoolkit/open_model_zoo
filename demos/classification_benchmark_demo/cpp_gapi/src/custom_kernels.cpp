@@ -39,8 +39,8 @@ void IndexScore::getScoredLabels(const std::vector<std::string> &in_labes,
     for (auto conf_index_it = max_confidence_with_indices.rbegin();
          conf_index_it != max_confidence_with_indices.rend();
          ++conf_index_it) {
+        size_t recalculated_label_id = *conf_index_it->second + labels_offset_correction;
         try {
-            size_t recalculated_label_id = *conf_index_it->second + labels_offset_correction;
             out_scored_labels_to_append.emplace_back(conf_index_it->first,
                                                      recalculated_label_id,
                                                      recalculated_label_id != 0 ? in_labes.at(recalculated_label_id) : "others");
@@ -53,7 +53,7 @@ void IndexScore::getScoredLabels(const std::vector<std::string> &in_labes,
 IndexScore IndexScore::create_from_array(const float *out_blob_data_ptr, size_t out_blob_element_count,
                                          size_t top_k_amount) {
     IndexScore ret;
-    if (!out_blob_data_ptr) {
+    if (!out_blob_data_ptr || !out_blob_element_count || !top_k_amount) {
         return IndexScore();
     }
     // find top K
@@ -65,10 +65,10 @@ IndexScore IndexScore::create_from_array(const float *out_blob_data_ptr, size_t 
         i++;
     }
 
-    // search K elements through remnant N-K array elements
+    // continue searching K elements through remnant N-K array elements
     // greater than the minimum element in the pivot topK
     // O((N-K)*Log(K))
-    for (i = top_k_amount; i < out_blob_element_count && !ret.max_confidence_with_indices.empty(); i++) {
+    for (; i < out_blob_element_count; i++) {
         const auto &low_confidence_it = ret.max_confidence_with_indices.begin();
         if (out_blob_data_ptr[i] >= low_confidence_it->first) {
             auto list_min_elem_it = low_confidence_it->second;
@@ -89,7 +89,7 @@ GAPI_OCV_KERNEL(OCVLocateROI, custom::LocateROI) {
     // run any other inference).
     //
     // Crops the input image to square (this is
-    // the most convenient aspect ratio for detectors to use)
+    // the most convenient aspect ratio for classificators to use)
 
     static void run(const cv::Size& in_size,
                     cv::Rect &out_rect) {
@@ -122,6 +122,9 @@ GAPI_OCV_KERNEL(OCVTopK, custom::TopK) {
         const float *out_blob_data_ptr = out_blob.ptr<float>();
         const size_t out_blob_data_elem_count = out_blob.total();
 
+        if (!out_blob_data_ptr || !out_blob_data_elem_count) {
+            throw std::runtime_error(std::string("Incorrect inference result blob elements data or size is empty"));
+        }
         out = IndexScore::create_from_array(out_blob_data_ptr, out_blob_data_elem_count, top_k_amount);
     }
 };

@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
 
         /** Get information about frame **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i,
-                                                               FLAGS_loop,
+                                                               false,
                                                                read_type::safe,
                                                                0,
                                                                std::numeric_limits<size_t>::max(),
@@ -196,6 +196,7 @@ int main(int argc, char* argv[]) {
         IndexScore infer_result;
 
         /** ---------------- The execution part ---------------- **/
+        FLAGS_loop = true; // override loop flag for benchmark
         cap = openImagesCapture(FLAGS_i,
                                 FLAGS_loop,
                                 read_type::safe,
@@ -235,7 +236,6 @@ int main(int argc, char* argv[]) {
         size_t framesNum = 0;
         long long correctPredictionsCount = 0;
         unsigned int framesNumOnCalculationStart = 0;
-        bool isStart = true;
         double accuracy = 0;
         bool isTestMode = true;
         std::chrono::steady_clock::duration elapsedSeconds = std::chrono::steady_clock::duration(0);
@@ -273,38 +273,32 @@ int main(int argc, char* argv[]) {
 
             PredictionResult predictionResult = PredictionResult::Incorrect;
             std::string label("UNKNOWN");
-            try {
-                top_k_scored_labels.clear();
-                infer_result.getScoredLabels(labels, top_k_scored_labels);
+            top_k_scored_labels.clear();
+            infer_result.getScoredLabels(labels, top_k_scored_labels);
 
-                if (top_k_scored_labels.empty()) {
-                    throw std::out_of_range("No any classes detected");
-                }
+            if (top_k_scored_labels.empty()) {
+                throw std::out_of_range("No any classes detected");
+            }
 
-                // pop the most suitable label for the class index
-                auto prediction_description_it = top_k_scored_labels.begin();
-                label = std::get<2>(*prediction_description_it);
-                if (!FLAGS_gt.empty()) {
-                    // iterate over topK results and compare each against ground truth
-                    // to extract proper classification result.
-                    // It may appear a class with low confidence as well
-                    for (; prediction_description_it != top_k_scored_labels.end();
-                         ++prediction_description_it) {
-                        size_t predicted_class_id_to_test = std::get<1>(*prediction_description_it);
-                        if (predicted_class_id_to_test == classIndices.at(framesNum % classIndices.size())) {
-                            predictionResult = PredictionResult::Correct;
-                            correctPredictionsCount++;
-                            label = std::get<2>(*prediction_description_it);
-                            break;
-                        }
+            // pop the most suitable label for the class index
+            auto prediction_description_it = top_k_scored_labels.begin();
+            label = std::get<2>(*prediction_description_it);
+            if (!FLAGS_gt.empty()) {
+                // iterate over topK results and compare each against ground truth
+                // to extract proper classification result.
+                // It may appear a class with low confidence as well
+                for (; prediction_description_it != top_k_scored_labels.end();
+                        ++prediction_description_it) {
+                    size_t predicted_class_id_to_test = std::get<1>(*prediction_description_it);
+                    if (predicted_class_id_to_test == classIndices.at(framesNum % classIndices.size())) {
+                        predictionResult = PredictionResult::Correct;
+                        correctPredictionsCount++;
+                        label = std::get<2>(*prediction_description_it);
+                        break;
                     }
-                } else {
-                    predictionResult = PredictionResult::Unknown;
                 }
-            } catch (const std::out_of_range &ex) {
-                throw std::runtime_error(std::string("Runtime error has been happened: ") +
-                                         ex.what() +
-                                         "\nPlease, make sure the model or the label file are suitable for the demo");
+            } else {
+                predictionResult = PredictionResult::Unknown;
             }
 
             auto renderingStart = std::chrono::steady_clock::now();
