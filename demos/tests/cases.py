@@ -267,7 +267,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={
             '-no_show': None,
-            '-time': '5',
+            '-time': '3',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),

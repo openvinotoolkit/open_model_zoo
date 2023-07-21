@@ -102,7 +102,12 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
     outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
 
     ppp.output().model().set_layout(outputLayout);
-    ppp.output().tensor().set_element_type(ov::element::f32).set_layout("NCHW");
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    if (ov::layout::has_batch(outputLayout)) {
+        ppp.output().tensor().set_layout("NCHW");
+    } else {
+        ppp.output().tensor().set_layout("CHW");
+    }
     model = ppp.build();
 }
 
