@@ -327,7 +327,6 @@ int main(int argc, char* argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        // TODO Not all metrics are functional
         logLatencyPerStage(readerMetrics.getTotal().latency,
                            -0.0,
                            -0.0,
