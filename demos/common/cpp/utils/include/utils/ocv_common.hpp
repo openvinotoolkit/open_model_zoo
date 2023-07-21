@@ -156,8 +156,8 @@ static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_la
         return "NC";
     }
     if (shape.size() == 3) {
-        return (shape[0] >= 1 && shape[0] <= 4) ? "CHW" :
-                                                  "HWC";
+        return (shape[0] >= 1 && shape[0] <= 4) ? "NHW" :
+                                                  "HWN";
     }
     if (shape.size() == 4) {
         if (shape[1] >= 1 && shape[1] <= 4) {
