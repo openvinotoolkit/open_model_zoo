@@ -1,6 +1,4 @@
-opencv_linux: '20220311_0602-4.5.5_090'
-opencv_windows: '20220311_0602-4.5.5_090'
 openvino_linux: '2023.0.0.9484'
 openvino_windows: '2023.0.0.10593'
-wheel_linux: '2023.1.0.dev20230623'
+wheel_linux: '2023.0.0-10926'
 wheel_windows: '2023.1.0.dev20230623'
