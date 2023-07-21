@@ -729,8 +729,9 @@ DEMOS = [
     )),
 
     PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
-                          '-o': '.'}),
+        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0002'),
+                          '-o': '.',
+                          '-ms': '1,2,3,0'}),
         single_option_cases('-i', *DATA_SEQUENCES['brain-tumor-nifti']),
     )),
 
@@ -1193,7 +1194,6 @@ DEMOS = [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
-                    ModelArg('mobilefacedet-v1-mxnet'),
                     ModelArg('mobilenet-yolo-v4-syg'),
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
