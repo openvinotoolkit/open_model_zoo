@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
             cv::GOpaque<cv::Rect> in_roi = custom::LocateROI::on(size);
 
             auto blob = cv::gapi::infer<nets::Classification>(in_roi, in);
-            cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
+            cv::GOpaque<IndexScore> index_score = custom::TopK::on(blob, FLAGS_nt);
 
             auto graph_inputs = cv::GIn(in);
             return cv::GComputation(std::move(graph_inputs),
