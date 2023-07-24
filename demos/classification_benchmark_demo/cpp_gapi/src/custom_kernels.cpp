@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023 Intel Corporation
+// Copyright (C) 2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,18 +10,10 @@
 #include <stdexcept>
 #include <utility>
 
-#include <ie_core.hpp>
-#include <ie_data.h>
-#include <ie_layouts.h>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/gapi/gscalar.hpp>
-#include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/operators.hpp>
-#include <opencv2/gapi/own/assert.hpp>
-#include <opencv2/imgproc.hpp>
-
 
 void IndexScore::getScoredLabels(const std::vector<std::string> &in_labes,
                                  LabelsStorage &out_scored_labels_to_append) const {
@@ -82,7 +74,7 @@ IndexScore IndexScore::create_from_array(const float *out_blob_data_ptr, size_t 
     return ret;
 }
 
-GAPI_OCV_KERNEL(OCVLocateROI, custom::LocateROI) {
+GAPI_OCV_KERNEL(OCVCentralCrop, custom::CentralCrop) {
     // This is the place where we can run extra analytics
     // on the input image frame and select the ROI (region
     // of interest) where we want to classify our objects (or
@@ -130,5 +122,5 @@ GAPI_OCV_KERNEL(OCVTopK, custom::TopK) {
 };
 
 cv::gapi::GKernelPackage custom::kernels() {
-    return cv::gapi::kernels<OCVLocateROI, OCVTopK>();
+    return cv::gapi::kernels<OCVCentralCrop, OCVTopK>();
 }

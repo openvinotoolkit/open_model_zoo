@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include <cpp/ie_cnn_network.h>
 #include <ie_allocator.hpp>
 #include <ie_common.h>
 #include <ie_input_info.hpp>
@@ -42,7 +41,7 @@ using GSize = cv::GOpaque<cv::Size>;
 using GIndexScore = cv::GOpaque<IndexScore>;
 
 namespace custom {
-G_API_OP(LocateROI, <GRect(GSize)>, "classification_benchmark.custom.locate-roi") {
+G_API_OP(CentralCrop, <GRect(GSize)>, "classification_benchmark.custom.locate-roi") {
     static cv::GOpaqueDesc outMeta(const cv::GOpaqueDesc &) {
         return cv::empty_gopaque_desc();
     }

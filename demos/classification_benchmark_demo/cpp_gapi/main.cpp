@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023 Intel Corporation
+// Copyright (C) 2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
             cv::GOpaque<int64_t> out_ts = cv::gapi::streaming::timestamp(in);
 
             auto size = cv::gapi::streaming::size(in);
-            cv::GOpaque<cv::Rect> in_roi = custom::LocateROI::on(size);
+            cv::GOpaque<cv::Rect> in_roi = custom::CentralCrop::on(size);
 
             auto blob = cv::gapi::infer<nets::Classification>(in_roi, in);
             cv::GOpaque<IndexScore> index_score = custom::TopK::on(blob, FLAGS_nt);
@@ -155,8 +155,7 @@ int main(int argc, char* argv[]) {
              .pluginConfig(config.getLegacyConfig());
         // clang-format on
 
-        auto kernels = cv::gapi::combine(custom::kernels(), util::getKernelPackage(FLAGS_kernel_package));
-        auto pipeline = comp.compileStreaming(cv::compile_args(kernels, cv::gapi::networks(net)));
+        auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(), cv::gapi::networks(net)));
 
         /** Output container for result **/
         cv::Mat output;
