@@ -108,7 +108,7 @@ GAPI_OCV_KERNEL(OCVLocateROI, custom::LocateROI) {
 };
 
 GAPI_OCV_KERNEL(OCVTopK, custom::TopK) {
-    static void run(const cv::MediaFrame &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
+    static void run(const cv::Mat &in, const cv::Mat &out_blob, uint32_t top_k_amount, IndexScore &out) {
         cv::MatSize out_blob_size = out_blob.size;
         if (out_blob_size.dims() != 2) {
             throw std::runtime_error(std::string("Incorrect inference result blob dimensions has been detected: ") +

@@ -29,13 +29,16 @@ bool CommonCapSrc::pull(cv::gapi::wip::Data& data) {
         GAPI_Assert(!first.empty());
         first_pulled = true;
         data = first;
-        return true;
+    } else {
+        cv::Mat frame = cap->read();
+        if (!frame.data) {
+            return false;
+        }
+        data = frame.clone();
     }
-    cv::Mat frame = cap->read();
-    if (!frame.data) {
-        return false;
-    }
-    data = frame.clone();
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    data.meta[cv::gapi::streaming::meta_tag::timestamp] =
+            int64_t{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count()};
     return true;
 }
 
@@ -60,9 +63,9 @@ cv::MediaFrame::View MediaBGRAdapter::access(cv::MediaFrame::Access) {
 
 bool MediaCommonCapSrc::pull(cv::gapi::wip::Data& data) {
     if (CommonCapSrc::pull(data)) {
+        auto &&original_meta = std::move(data.meta);
         data = cv::MediaFrame::Create<MediaBGRAdapter>(cv::util::get<cv::Mat>(data));
-        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-        data.meta[cv::gapi::streaming::meta_tag::timestamp] = int64_t{std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()};
+        data.meta = std::move(original_meta);
         return true;
     }
     return false;

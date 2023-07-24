@@ -48,8 +48,8 @@ G_API_OP(LocateROI, <GRect(GSize)>, "classification_benchmark.custom.locate-roi"
     }
 };
 
-G_API_OP(TopK, <GIndexScore(cv::GFrame, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
-    static cv::GOpaqueDesc outMeta(const cv::GFrameDesc &in, const cv::GMatDesc &, uint32_t) {
+G_API_OP(TopK, <GIndexScore(cv::GMat, cv::GMat, uint32_t)>, "classification_benchmark.custom.post_processing") {
+    static cv::GOpaqueDesc outMeta(const cv::GMatDesc &in, const cv::GMatDesc &, uint32_t) {
         return cv::empty_gopaque_desc();
     }
 };

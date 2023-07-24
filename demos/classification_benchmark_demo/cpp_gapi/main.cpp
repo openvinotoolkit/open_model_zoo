@@ -129,8 +129,8 @@ int main(int argc, char* argv[]) {
         }
 
         cv::GComputation comp([&] {
-            cv::GFrame in;
-            cv::GOpaque<int64_t> outTs = cv::gapi::streaming::timestamp(in);
+            cv::GMat in;
+            cv::GOpaque<int64_t> out_ts = cv::gapi::streaming::timestamp(in);
 
             auto size = cv::gapi::streaming::size(in);
             cv::GOpaque<cv::Rect> in_roi = custom::LocateROI::on(size);
@@ -138,9 +138,9 @@ int main(int argc, char* argv[]) {
             auto blob = cv::gapi::infer<nets::Classification>(in_roi, in);
             cv::GOpaque<IndexScore> index_score = custom::TopK::on(in, blob, FLAGS_nt);
 
-            cv::GMat bgr = cv::gapi::streaming::BGR(in);
             auto graph_inputs = cv::GIn(in);
-            return cv::GComputation(std::move(graph_inputs), cv::GOut(bgr, index_score, outTs));
+            return cv::GComputation(std::move(graph_inputs),
+                                    cv::GOut(cv::gapi::copy(in), index_score, out_ts));
         });
 
         /** Configure network **/
@@ -169,7 +169,7 @@ int main(int argc, char* argv[]) {
                                                                0,
                                                                std::numeric_limits<size_t>::max(),
                                                                stringToSize(FLAGS_res));
-        auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap));
+        auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::CommonCapSrc>(cap));
         pipeline.setSource(std::move(pipeline_inputs));
         std::string windowName = "Classification Benchmark demo G-API";
         int delay = 1;
@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
         int64_t timestamp = 0;
         size_t total_produced_image_count = 0;
         while (keepRunning && elapsedSeconds < std::chrono::seconds(FLAGS_time) && pipeline.pull(cv::gout(output, infer_result, timestamp))) {
-            std::chrono::milliseconds dur(timestamp);
+            std::chrono::microseconds dur(timestamp);
             std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
             framesNum++;
             size_t current_image_id = total_produced_image_count++;
