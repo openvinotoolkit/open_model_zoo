@@ -142,9 +142,6 @@ Options:
     -no_show                  Optional. Disable showing of processed images.
     -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
     -u                        Optional. List of monitors to show initially.
-    -use_onevpl                Optional. Use onevpl video decoding.
-    -onevpl_params             Optional. Parameters for onevpl video decoding. OneVPL source can be fine-grained by providing configuration parameters. Format: <prop name>:<value>,<prop name>:<value> Several important configuration parameters: 'mfxImplDescription.mfxDecoderDescription.decoder.CodecID' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_enums.html?highlight=mfx_codec_hevc#codecformatfourcc and 'mfxImplDescription.AccelerationMode' values: https://spec.oneapi.io/onevpl/2.7.0/API_ref/VPL_disp_api_enum.html?highlight=d3d11#mfxaccelerationmode(see `MFXSetConfigFilterProperty` by https://spec.oneapi.io/versions/latest/elements/oneVPL/source/index.html)
-    -onevpl_pool_size          OneVPL source applies this parameter as preallocated frames pool size. 0 leaves frames pool size default for your system. This parameter doesn't have a god default value. It must be adjusted for specific execution (video, model, system ...).
 ```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.

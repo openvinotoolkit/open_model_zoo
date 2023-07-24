@@ -31,7 +31,6 @@
 #include <opencv2/gapi/own/assert.hpp>
 #include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/gapi/util/optional.hpp>
-#include <opencv2/gapi/streaming/onevpl/source.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -129,23 +128,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        /** Get information about frame **/
-        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i,
-                                                               false,
-                                                               read_type::safe,
-                                                               0,
-                                                               std::numeric_limits<size_t>::max(),
-                                                               stringToSize(FLAGS_res));
-        const auto tmp = cap->read();
-        cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
-        cap.reset();
-        // NB: oneVPL source rounds up frame size by 16
-        // so size might be different from what ImagesCapture reads.
-        if (FLAGS_use_onevpl) {
-            frame_size.width  = cv::alignSize(frame_size.width, 16);
-            frame_size.height = cv::alignSize(frame_size.height, 16);
-        }
-
         cv::GComputation comp([&] {
             cv::GFrame in;
             cv::GOpaque<int64_t> outTs = cv::gapi::streaming::timestamp(in);
@@ -181,25 +163,13 @@ int main(int argc, char* argv[]) {
         IndexScore infer_result;
 
         /** ---------------- The execution part ---------------- **/
-        cap = openImagesCapture(FLAGS_i,
-                                true,
-                                read_type::safe,
-                                0,
-                                std::numeric_limits<size_t>::max(),
-                                stringToSize(FLAGS_res));
-        cv::gapi::wip::IStreamSource::Ptr media_cap;
-        if (FLAGS_use_onevpl) {
-            auto onevpl_params = util::parseVPLParams(FLAGS_onevpl_params);
-            if (FLAGS_onevpl_pool_size != 0) {
-                onevpl_params.push_back(
-                    cv::gapi::wip::onevpl::CfgParam::create_frames_pool_size(FLAGS_onevpl_pool_size));
-            }
-            media_cap = cv::gapi::wip::make_onevpl_src(FLAGS_i, std::move(onevpl_params));
-        } else {
-            media_cap = cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap);
-        }
-
-        auto pipeline_inputs = cv::gin(std::move(media_cap));
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i,
+                                                               true,
+                                                               read_type::safe,
+                                                               0,
+                                                               std::numeric_limits<size_t>::max(),
+                                                               stringToSize(FLAGS_res));
+        auto pipeline_inputs = cv::gin(cv::gapi::wip::make_src<custom::MediaCommonCapSrc>(cap));
         pipeline.setSource(std::move(pipeline_inputs));
         std::string windowName = "Classification Benchmark demo G-API";
         int delay = 1;
