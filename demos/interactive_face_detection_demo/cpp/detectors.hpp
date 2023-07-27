@@ -11,6 +11,7 @@
 
 struct BaseDetection {
     ov::InferRequest request;
+    ov::Tensor inTensor;
     std::string pathToModel;
     ov::Shape inShape;
     const bool doRawOutputMessages;

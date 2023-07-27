@@ -156,8 +156,13 @@ static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_la
         return "NC";
     }
     if (shape.size() == 3) {
-        return (shape[0] >= 1 && shape[0] <= 4) ? "CHW" :
-                                                  "HWC";
+        if (shape[0] == 1) {
+            return "NHW";
+        }
+        if (shape[2] == 1) {
+            return "HWN";
+        }
+        throw std::runtime_error("Can't guess layout for " + shape.to_string());
     }
     if (shape.size() == 4) {
         if (shape[1] >= 1 && shape[1] <= 4) {

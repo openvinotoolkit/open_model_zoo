@@ -96,13 +96,21 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     const ov::Shape& outputShape = output.get_partial_shape().get_max_shape();
 
-    ov::Layout outputLayout = getLayoutFromShape(outputShape, true);
-    outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
+    constexpr bool gues_layout = true;
+    ov::Layout outputLayout = getLayoutFromShape(outputShape, gues_layout);
     outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
     outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
 
     ppp.output().model().set_layout(outputLayout);
-    ppp.output().tensor().set_element_type(ov::element::f32).set_layout("NCHW");
+    ppp.output().tensor().set_element_type(ov::element::f32);
+    if (ov::layout::has_channels(outputLayout)) {
+        ppp.output().tensor().set_layout("NCHW");
+        outChannels = static_cast<int>(outputShape[ov::layout::channels_idx(outputLayout)]);
+    } else {
+        // deeplabv3
+        ppp.output().tensor().set_layout("NHW");
+        outChannels = 1;
+    }
     model = ppp.build();
 }
 

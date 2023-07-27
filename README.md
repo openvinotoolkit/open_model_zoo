@@ -1,8 +1,4 @@
 # [OpenVINO™ Toolkit](https://docs.openvino.ai/2023.0/index.html) - Open Model Zoo repository
-[![Stable release](https://img.shields.io/badge/version-2022.2.0-green.svg)](https://github.com/openvinotoolkit/open_model_zoo/releases/tag/2022.2.0)
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
-[![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
-
 This repository includes optimized deep learning models and a set of demos to expedite development of high-performance deep learning inference applications. Use these free pre-trained models instead of training your own models to speed-up the development and production deployment process.
 
 Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.

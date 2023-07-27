@@ -1,11 +1,6 @@
 name: Demos
 
-on:
-  pull_request:
-    branches: '**'
-
-permissions:
-  contents: read
+on: pull_request
 
 jobs:
   build:
@@ -16,10 +11,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: 3.7
+          cache: pip
       - name: python -m pip install --upgrade pip && python -m pip install numpy
         run: |
           python -m pip install --upgrade pip

@@ -49,6 +49,10 @@ omz_converter --list models.lst
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
+> **NOTE**: The results can significantly differ depending on the model used for background segmentation and outdoors camera images segmentation.
+
+![example](../segmentation_image.jpg)
+
 ## Running
 
 Running the demo with `-h` shows this help message:

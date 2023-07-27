@@ -83,6 +83,8 @@ Accuracy Checker supports following set of postprocessors:
 * `extract_answers_tokens` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
   * `max_answer` - maximum answer length (Optional, default value is 30).
   * `n_best_size` - total number of n-best prediction size for the answer (Optional, default value is 20).
+  * `v2_with_no_answers` - boolean value, if true indicates use of SQuADv2 dataset with some questions impossible to answer.
+  * `no_answer_score_threshold` - threshold value below which SQuADv2 predictions are ignored (prediction with no answer).
 * `bidaf_extract_answers_tokens` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringBiDAFAnnotation`, `QuestionAnsweringPrediction`.
 * `translate_3d_poses` - translating 3D poses. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. Shifts 3D coordinates of each predicted poses on corresponding translation vector.
 * `resize_super_resolution` - resizing super resolution predicted image. Supported representations: `SuperResolutionAnotation`, `SuperResolutionPrediction`.
