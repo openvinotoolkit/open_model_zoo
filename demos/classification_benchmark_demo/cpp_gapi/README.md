@@ -163,10 +163,11 @@ For example, use the following command-line command to run the application:
 The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for each of the following pipeline stages:
+* **G-API Pipeline Latency**: average time required to pass one frame through G-API pipeline (from reading the frame to displaying the results).
+* Latency for each of the following processing stages:
   * **Decoding** — capturing input data.
   * **Rendering** — generating output image.
+* **Output Latency**: average time required to get next frame from G-API pipeline
 
 You can use these metrics to measure application-level performance.
 

@@ -191,9 +191,12 @@ int main(int argc, char* argv[]) {
         top_k_scored_labels.reserve(FLAGS_nt);
         int64_t timestamp = 0;
         size_t total_produced_image_count = 0;
+        std::chrono::steady_clock::time_point output_latency_last_frame_appeared_ts = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::duration output_latency {0};
         while (keepRunning && elapsedSeconds < std::chrono::seconds(FLAGS_time) && pipeline.pull(cv::gout(output, infer_result, timestamp))) {
             std::chrono::microseconds dur(timestamp);
             std::chrono::time_point<std::chrono::steady_clock> frame_timestamp(dur);
+            output_latency += std::chrono::steady_clock::now() - output_latency_last_frame_appeared_ts;
             framesNum++;
             size_t current_image_id = total_produced_image_count++;
 
@@ -213,6 +216,8 @@ int main(int argc, char* argv[]) {
                 metrics = PerformanceMetrics();
                 startTime = std::chrono::steady_clock::now();
                 framesNum = 0;
+                output_latency = std::chrono::steady_clock::duration{0};
+                output_latency_last_frame_appeared_ts = std::chrono::steady_clock::now();
                 correctPredictionsCount = 0;
                 accuracy = 0;
             }
@@ -270,6 +275,8 @@ int main(int argc, char* argv[]) {
                             'R' == key) {  // press space or r to restart testing if needed
                     isTestMode = true;
                     framesNum = 0;
+                    output_latency = std::chrono::steady_clock::duration{0};
+                    output_latency_last_frame_appeared_ts = std::chrono::steady_clock::now();
                     framesNumOnCalculationStart = 0;
                     correctPredictionsCount = 0;
                     accuracy = 0;
@@ -279,6 +286,7 @@ int main(int argc, char* argv[]) {
                     presenter.handleKey(key);
                 }
             }
+            output_latency_last_frame_appeared_ts = std::chrono::steady_clock::now();
         }
 
         if (!FLAGS_gt.empty()) {
@@ -286,12 +294,14 @@ int main(int argc, char* argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
-        logLatencyPerStage(readerMetrics.getTotal().latency,
-                           -0.0,
-                           -0.0,
-                           -0.0,
-                           renderMetrics.getTotal().latency);
+        slog::info << "\tPipeline Latency: " << std::fixed << std::setprecision(1)
+                   << metrics.getTotal().latency << " ms" << slog::endl;
+        slog::info << "\tFPS: " << metrics.getTotal().fps << slog::endl;
+        slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(1)
+                   << readerMetrics.getTotal().latency << " ms" << slog::endl;
+        slog::info << "\tRendering:\t" << renderMetrics.getTotal().latency << " ms" << slog::endl;
+        slog::info << "\tOutput Latency:\t" << std::chrono::duration_cast<std::chrono::milliseconds>(output_latency).count() / framesNum
+                   << " ms" << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
