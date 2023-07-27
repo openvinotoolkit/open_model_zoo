@@ -22,7 +22,7 @@ from ..representation import (
     QuestionAnsweringBiDAFAnnotation
 )
 from ..annotation_converters._nlp_common import WordPieceTokenizer
-from ..config import NumberField,BoolField
+from ..config import NumberField, BoolField
 
 
 PrelimPrediction = namedtuple(

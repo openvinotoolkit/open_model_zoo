@@ -51,8 +51,8 @@ const int EmbeddingsGallery::unknown_id = TrackedObject::UNKNOWN_LABEL_IDX;
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
                                      bool crop_gallery, const detection::DetectorConfig& detector_config,
-                                     const VectorCNN& landmarks_det,
-                                     const VectorCNN& image_reid,
+                                     VectorCNN& landmarks_det,
+                                     VectorCNN& image_reid,
                                      bool use_greedy_matcher) :
     reid_threshold(threshold), use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
@@ -157,8 +157,8 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
     const cv::Mat& image,
     int min_size_fr, bool crop_gallery,
     detection::FaceDetection& detector,
-    const VectorCNN& landmarks_det,
-    const VectorCNN& image_reid,
+    VectorCNN& landmarks_det,
+    VectorCNN& image_reid,
     cv::Mat& embedding) {
     cv::Mat target = image;
     if (crop_gallery) {

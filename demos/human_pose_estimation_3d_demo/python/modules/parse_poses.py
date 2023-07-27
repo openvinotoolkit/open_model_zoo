@@ -12,8 +12,14 @@
 """
 
 import numpy as np
+import os
 
 from modules.pose import Pose, propagate_ids
+
+if hasattr(os, "add_dll_directory"):
+    for path in os.environ.get("PATH", "").split(";"):
+        if os.path.isdir(path):
+            os.add_dll_directory(path)
 try:
     from pose_extractor import extract_poses
 except ImportError as err:

@@ -110,9 +110,7 @@ DATA_SEQUENCES = {
         image_net_arg('00000094'),
     ],
 
-    'image-retrieval-video': [
-        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
-    ],
+    'image-retrieval-video': image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
 
     'instance-segmentation': [
         image_net_arg('00000001'),
