@@ -1009,8 +1009,8 @@ DEMOS = [
     )),
 
     PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=[
-        # Test video can't be decoded by default Windows configuration, test --help instead
-        TestCase({'--help': None}) if 'nt' == os.name else
+        # Test video can't be decoded by default Windows configuration, test -h instead
+        TestCase({'-h': None}) if 'nt' == os.name else
         TestCase({
             '--no_show': None,
             **MONITORS,
