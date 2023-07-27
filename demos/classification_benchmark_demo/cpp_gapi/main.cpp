@@ -4,35 +4,24 @@
 
 #include <stddef.h>
 
-#include <algorithm>
 #include <chrono>
 #include <exception>
-#include <fstream>
-#include <iomanip>
-#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <gflags/gflags.h>
-#include <opencv2/core.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/garg.hpp>
 #include <opencv2/gapi/gcommon.hpp>
 #include <opencv2/gapi/gcomputation.hpp>
 #include <opencv2/gapi/gmat.hpp>
 #include <opencv2/gapi/gproto.hpp>
-#include <opencv2/gapi/gstreaming.hpp>
-#include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
-#include <opencv2/gapi/own/assert.hpp>
-#include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/gapi/util/optional.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+
 
 #include <openvino/openvino.hpp>
 
@@ -155,7 +144,9 @@ int main(int argc, char* argv[]) {
              .pluginConfig(config.getLegacyConfig());
         // clang-format on
 
-        auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(), cv::gapi::networks(net)));
+        auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
+                                              cv::gapi::networks(net),
+                                              cv::gapi::streaming::queue_capacity{1}));
 
         /** Output container for result **/
         cv::Mat output;

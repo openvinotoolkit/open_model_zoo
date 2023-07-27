@@ -26,11 +26,7 @@ static const char no_show_message[] = "Optional. Disable showing of processed im
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char reverse_input_channels_message[] = "Optional. Switch the input channels order from BGR to RGB.";
-static const char mean_values_message[] =
-    "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
-static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
-                                           "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
+
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
