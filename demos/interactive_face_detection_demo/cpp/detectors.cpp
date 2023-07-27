@@ -30,7 +30,7 @@ FaceDetection::FaceDetection(const std::string &pathToModel,
 void FaceDetection::submitRequest(const cv::Mat& frame) {
     width = static_cast<float>(frame.cols);
     height = static_cast<float>(frame.rows);
-    resize2tensor(frame, request.get_input_tensor());
+    resize2tensor(frame, inTensor);
     request.start_async();
 }
 
@@ -83,6 +83,7 @@ std::shared_ptr<ov::Model> FaceDetection::read(const ov::Core& core) {
     ppp.output(output).tensor().set_element_type(ov::element::f32);
     model = ppp.build();
     ov::set_batch(model, 1);
+    inShape = model->input().get_shape();
     return model;
 }
 
@@ -193,7 +194,7 @@ AntispoofingClassifier::AntispoofingClassifier(const std::string& pathToModel, b
 void AntispoofingClassifier::submitRequest() {
     if (!enquedFaces)
         return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{inTensor, {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -202,9 +203,7 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
     if (!enabled()) {
         return;
     }
-    ov::Tensor batch = request.get_input_tensor();
-    batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -245,7 +244,7 @@ AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
 void AgeGenderDetection::submitRequest() {
     if (!enquedFaces)
         return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{inTensor, {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -254,9 +253,7 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    ov::Tensor batch = request.get_input_tensor();
-    batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -303,7 +300,7 @@ HeadPoseDetection::HeadPoseDetection(const std::string &pathToModel,
 
 void HeadPoseDetection::submitRequest()  {
     if (!enquedFaces) return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{inTensor, {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -312,9 +309,7 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    ov::Tensor batch = request.get_input_tensor();
-    batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -360,7 +355,7 @@ EmotionsDetection::EmotionsDetection(const std::string &pathToModel,
 
 void EmotionsDetection::submitRequest() {
     if (!enquedFaces) return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{inTensor, {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -369,9 +364,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    ov::Tensor batch = request.get_input_tensor();
-    batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -438,7 +431,7 @@ FacialLandmarksDetection::FacialLandmarksDetection(const std::string &pathToMode
 
 void FacialLandmarksDetection::submitRequest() {
     if (!enquedFaces) return;
-    request.set_input_tensor(ov::Tensor{request.get_input_tensor(), {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
+    request.set_input_tensor(ov::Tensor{inTensor, {0, 0, 0, 0}, {enquedFaces, inShape[1], inShape[2], inShape[3]}});
     request.start_async();
     enquedFaces = 0;
 }
@@ -447,9 +440,7 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    ov::Tensor batch = request.get_input_tensor();
-    batch.set_shape(inShape);
-    resize2tensor(face, ov::Tensor{batch, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
     enquedFaces++;
 }
 
@@ -514,6 +505,8 @@ void Load::into(ov::Core& core, const std::string & deviceName) const {
         ov::CompiledModel cml = core.compile_model(detector.read(core), deviceName);
         logCompiledModelInfo(cml, detector.pathToModel, deviceName);
         detector.request = cml.create_infer_request();
+        detector.inTensor = detector.request.get_input_tensor();
+        detector.inTensor.set_shape(detector.inShape);
     }
 }
 

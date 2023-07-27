@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import itertools
+import os
 import sys
+import typing
 from copy import deepcopy
 
 from args import (
@@ -24,9 +25,9 @@ from args import (
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
-TestCase = collections.namedtuple('TestCase', ['options', 'extra_models'])
-# TODO with Python3.7 use namedtuple defaults instead
-TestCase.__new__.__defaults__ = [],
+class TestCase(typing.NamedTuple):
+    options: dict
+    extra_models: list = []
 
 
 class Demo:
@@ -729,8 +730,9 @@ DEMOS = [
     )),
 
     PythonDemo(name='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
-                          '-o': '.'}),
+        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0002'),
+                          '-o': '.',
+                          '-ms': '1,2,3,0'}),
         single_option_cases('-i', *DATA_SEQUENCES['brain-tumor-nifti']),
     )),
 
@@ -1006,13 +1008,17 @@ DEMOS = [
                           '-ar': None})
     )),
 
-    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-       TestCase(options={'--no_show': None,
-                         **MONITORS,
-                         '-m': ModelArg('image-retrieval-0001')}),
-       single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-       single_option_cases('-g', image_retrieval_arg('gallery.txt')),
-    )),
+    PythonDemo(name='image_retrieval_demo', device_keys=['-d'], test_cases=[
+        # Test video can't be decoded by default Windows configuration, test -h instead
+        TestCase({'-h': None}) if 'nt' == os.name else
+        TestCase({
+            '--no_show': None,
+            **MONITORS,
+            '-i': DATA_SEQUENCES['image-retrieval-video'],
+            '-m': ModelArg('image-retrieval-0001'),
+            '-g': image_retrieval_arg('gallery.txt')
+        })
+    ]),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1193,7 +1199,6 @@ DEMOS = [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
-                    ModelArg('mobilefacedet-v1-mxnet'),
                     ModelArg('mobilenet-yolo-v4-syg'),
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v1-tiny-tf'),
