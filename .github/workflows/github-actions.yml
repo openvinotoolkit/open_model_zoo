@@ -1,4 +1,4 @@
-name: precommit
+name: github-actions
 on: pull_request
 jobs:
   build_demos-ubuntu-20:
