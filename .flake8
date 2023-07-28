@@ -38,4 +38,4 @@ ignore=
     # multiple statements on one line (colon/def)
     # ignored because putting a statement after a colon is harmless and
     # sometimes results in more compact code
-    E701,E704,
+    E701,E704,F401
