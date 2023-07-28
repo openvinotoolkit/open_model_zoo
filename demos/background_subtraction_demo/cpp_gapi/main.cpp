@@ -18,10 +18,6 @@
 #include <gflags/gflags.h>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/core.hpp>
-#include <opencv2/gapi/cpu/core.hpp>
-#include <opencv2/gapi/cpu/imgproc.hpp>
-#include <opencv2/gapi/fluid/core.hpp>
-#include <opencv2/gapi/fluid/imgproc.hpp>
 #include <opencv2/gapi/garg.hpp>
 #include <opencv2/gapi/gcommon.hpp>
 #include <opencv2/gapi/gcomputation.hpp>
@@ -49,6 +45,7 @@
 #include <utils/ocv_common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
+#include <utils_gapi/kernel_package.hpp>
 #include <utils_gapi/stream_source.hpp>
 
 #include "background_subtraction_demo_gapi.hpp"
@@ -71,48 +68,6 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
     return true;
-}
-
-static cv::gapi::GKernelPackage getKernelPackage(const std::string& type) {
-    if (type == "opencv") {
-        return cv::gapi::combine(cv::gapi::core::cpu::kernels(), cv::gapi::imgproc::cpu::kernels());
-    } else if (type == "fluid") {
-        return cv::gapi::combine(cv::gapi::core::fluid::kernels(), cv::gapi::imgproc::fluid::kernels());
-    } else {
-        throw std::logic_error("Unsupported kernel package type: " + type);
-    }
-    GAPI_Assert(false && "Unreachable code!");
-}
-
-cv::gapi::wip::onevpl::CfgParam createFromString(const std::string &line) {
-    using namespace cv::gapi::wip;
-
-    if (line.empty()) {
-        throw std::runtime_error("Cannot parse CfgParam from emply line");
-    }
-
-    std::string::size_type name_endline_pos = line.find(':');
-    if (name_endline_pos == std::string::npos) {
-        throw std::runtime_error("Cannot parse CfgParam from: " + line +
-                                 "\nExpected separator \":\"");
-    }
-
-    std::string name = line.substr(0, name_endline_pos);
-    std::string value = line.substr(name_endline_pos + 1);
-
-    return cv::gapi::wip::onevpl::CfgParam::create(name, value,
-                                                   /* vpp params strongly optional */
-                                                   name.find("vpp.") == std::string::npos);
-}
-
-static std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::string& cfg_params) {
-    std::vector<cv::gapi::wip::onevpl::CfgParam> source_cfgs;
-    std::stringstream params_list(cfg_params);
-    std::string line;
-    while (std::getline(params_list, line, ',')) {
-        source_cfgs.push_back(createFromString(line));
-    }
-    return source_cfgs;
 }
 
 }  // namespace util

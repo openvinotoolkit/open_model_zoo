@@ -1,4 +1,4 @@
-# Classification Benchmark C++ Demo
+# Classification Benchmark C++ G-API Demo
 
 ![](../classification_benchmark.gif)
 
@@ -18,7 +18,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/classification_benchmark_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/classification_benchmark_demo/cpp_gapi/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/model_tools/README.md) and Converter to download and, if necessary, convert models to OpenVINO IR format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -131,9 +131,7 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Path to a folder with images or path to an image file.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-    -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
-    -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.
     -gt "<path>"              Optional. Path to ground truth .txt file.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
     -nthreads "<integer>"     Optional. Specify count of threads.
@@ -144,9 +142,6 @@ Options:
     -no_show                  Optional. Disable showing of processed images.
     -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
     -u                        Optional. List of monitors to show initially.
-    -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
-    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
-    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
@@ -156,7 +151,7 @@ For higher FPS, it is recommended to use -nireq which slightly exceeds -nstreams
 For example, use the following command-line command to run the application:
 
 ```sh
-./classification_benchmark_demo -m <path_to_classification_model> \
+./classification_benchmark_demo_gapi -m <path_to_classification_model> \
                       -i <path_to_folder_with_images> \
                       -labels <path_to_file_with_list_of_labels> \
                       -gt <path_to_ground_truth_data_file> \
@@ -168,13 +163,11 @@ For example, use the following command-line command to run the application:
 The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
-* Latency for each of the following pipeline stages:
+* **G-API Pipeline Latency**: average time required to pass one frame through G-API pipeline (from reading the frame to displaying the results).
+* Latency for each of the following processing stages:
   * **Decoding** — capturing input data.
-  * **Preprocessing** — data preparation for inference.
-  * **Inference** — infering input data (images) and getting a result.
-  * **Postrocessing** — preparation inference result for output.
   * **Rendering** — generating output image.
+* **Output Latency**: average time required to get next frame from G-API pipeline
 
 You can use these metrics to measure application-level performance.
 

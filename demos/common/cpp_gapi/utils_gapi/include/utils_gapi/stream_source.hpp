@@ -11,6 +11,7 @@
 #include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/gapi/media.hpp>
 #include <opencv2/gapi/streaming/cap.hpp>
+#include <opencv2/gapi/streaming/onevpl/source.hpp>
 
 class ImagesCapture;
 namespace cv {
@@ -58,3 +59,8 @@ class MediaCommonCapSrc : public CommonCapSrc {
 };
 
 }  // namespace custom
+
+namespace util {
+cv::gapi::wip::onevpl::CfgParam createFromString(const std::string &line);
+std::vector<cv::gapi::wip::onevpl::CfgParam> parseVPLParams(const std::string& cfg_params);
+} // namespace util
