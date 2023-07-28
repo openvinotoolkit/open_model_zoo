@@ -5,7 +5,8 @@ exclude=
     # generated files
     demos/speech_recognition_deepspeech_demo/python/ctcdecode-numpy/ctcdecode_numpy/impl.py,
     models/public/mozilla-deepspeech-0.8.2/mds_convert_utils/memmapped_file_system_pb2.py,
-
+    tools/accuracy_checker/openvino/__init__.py
+    tools/model_tools/src/openvino/__init__.py
 select=
     # flake8-comprehensions issues
     C4,
@@ -38,4 +39,4 @@ ignore=
     # multiple statements on one line (colon/def)
     # ignored because putting a statement after a colon is harmless and
     # sometimes results in more compact code
-    E701,E704,F401
+    E701,E704,
