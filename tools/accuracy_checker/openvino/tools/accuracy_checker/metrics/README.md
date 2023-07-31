@@ -319,6 +319,16 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `normalised_quantile_loss` - q-risk normalized quantile loss for evaluation of time series forecasting models. Direction of metric's growth is higher-worse. Supported representations: `TimeSeriesForecastingAnnotation`, `TimeSeriesForecastingQuantilesPrediction`.
 * `log_loss` - classification metric based on probabilities. Direction of metric's growth is higher-worse. Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
 * `perplexity` - a measurement of how well a probability distribution or probability model predicts a sample. Metric is calculated as a percentage. Direction of metric's growth is higher-worse. Supported representations: `LanguageModelingAnnotation`, `LanguageModelingPrediction`.
+* `clip_score` - Calculates CLIP Score which is a text-to-image similarity metric. The score is bound between 0 and 100 and the closer to 100 the better.
+  * `clip_model_name` - string indicating the version of the CLIP model to use (`openai/clip-vit-base-patch16` is default). Available models are:
+    * openai/clip-vit-base-patch16
+    * openai/clip-vit-base-patch32
+    * openai/clip-vit-large-patch14-336
+    * openai/clip-vit-large-patch14
+  * `normalized_image` - identifier that generated image in normalized [0, 1] range.
+  * `channel_order` - identifier which channels order generated image has (`RGB` or `BGR`).
+
+
 
 ## Metrics profiling
 
