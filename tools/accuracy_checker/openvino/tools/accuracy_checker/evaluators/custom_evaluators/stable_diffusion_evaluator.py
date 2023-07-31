@@ -138,7 +138,7 @@ class StableDiffusionEvaluator(BaseCustomEvaluator):
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
 
-def scale_fit_to_window(dst_width:int, dst_height:int, image_width:int, image_height:int):
+def scale_fit_to_window(dst_width: int, dst_height: int, image_width: int, image_height: int):
     im_scale = min(dst_height / image_height, dst_width / image_width)
     return int(im_scale * image_width), int(im_scale * image_height)
 
@@ -162,9 +162,9 @@ def preprocess(image: PIL.Image.Image, height, width):
 class OVStableDiffusionPipeline(DiffusionPipeline):
     def __init__(
         self,
-        launcher: "BaseLauncher",
-        tokenizer: "CLIPTokenizer",
-        scheduler: Union["DDIMScheduler", "PNDMScheduler", "LMSDiscreteScheduler"],
+        launcher: "BaseLauncher", # noqa: F821
+        tokenizer: "CLIPTokenizer", # noqa: F821
+        scheduler: Union["DDIMScheduler", "PNDMScheduler", "LMSDiscreteScheduler"], # noqa: F821
         model_info: Dict,
         seed = None,
         num_inference_steps = 50
@@ -273,10 +273,10 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
 
     def _encode_prompt(
             self,
-            prompt:Union[str, List[str]],
-            num_images_per_prompt:int = 1,
-            do_classifier_free_guidance:bool = True,
-            negative_prompt:Union[str, List[str]] = None
+            prompt: Union[str, List[str]],
+            num_images_per_prompt: int = 1,
+            do_classifier_free_guidance: bool = True,
+            negative_prompt: Union[str, List[str]] = None
         ):
         batch_size = len(prompt) if isinstance(prompt, list) else 1
 
@@ -333,7 +333,7 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
 
         return text_embeddings
 
-    def prepare_latents(self, image:PIL.Image.Image = None, latent_timestep:torch.Tensor = None):
+    def prepare_latents(self, image: PIL.Image.Image = None, latent_timestep: "torch.Tensor" = None):
         latents_shape = (1, 4, self.height // 8, self.width // 8)
         noise = np.random.randn(*latents_shape).astype(np.float32)
         if image is None:
@@ -349,7 +349,7 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         latents = self.scheduler.add_noise(torch.from_numpy(latents), torch.from_numpy(noise), latent_timestep).numpy()
         return latents, meta
 
-    def postprocess_image(self, image:np.ndarray, meta:Dict, output_type:str = "np"):
+    def postprocess_image(self, image: np.ndarray, meta: Dict, output_type: str = "np"):
         if "padding" in meta:
             pad = meta["padding"]
             (_, end_h), (_, end_w) = pad[1:3]
@@ -372,7 +372,7 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
                 image = [cv2.resize(img, (orig_width, orig_width)) for img in image]
         return image
 
-    def get_timesteps(self, num_inference_steps:int, strength:float):
+    def get_timesteps(self, num_inference_steps: int, strength: float):
         # get the original timestep using init_timestep
         init_timestep = min(int(num_inference_steps * strength), num_inference_steps)
 

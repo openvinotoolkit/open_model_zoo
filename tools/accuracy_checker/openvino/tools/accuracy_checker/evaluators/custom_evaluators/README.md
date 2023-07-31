@@ -61,4 +61,4 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/opennmt_encoder_decoder_generator_evaluator.py`
 
 * **StableDiffusion Evaluator** demonstrates how to evaluate image generation for Stable Diffusion models family.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/custom_evaluators/stable_diffusion_evaluator.py`
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/stable_diffusion_evaluator.py`
