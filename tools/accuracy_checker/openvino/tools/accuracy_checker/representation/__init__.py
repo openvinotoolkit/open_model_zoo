@@ -113,6 +113,7 @@ from .time_series_representation import (
     TimeSeriesForecastingAnnotation,
     TimeSeriesForecastingQuantilesPrediction
 )
+from .text2image_generation import Text2ImageGenerationAnnotation, Text2ImageGenerationPrediction
 
 __all__ = [
     'BaseRepresentation',
@@ -239,5 +240,8 @@ __all__ = [
     'TimeSeriesForecastingQuantilesPrediction',
 
     'HandLandmarksAnnotation',
-    'HandLandmarksPrediction'
+    'HandLandmarksPrediction',
+
+    "Text2ImageGenerationAnnotation",
+    "Text2ImageGenerationPrediction"
 ]

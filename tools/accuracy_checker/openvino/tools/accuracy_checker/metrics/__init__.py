@@ -127,6 +127,7 @@ from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, Salienc
 
 from .time_series import NormalisedQuantileLoss
 from .distance import editdistance_eval
+from .clip_score import ClipScore
 
 __all__ = [
     'Metric',
@@ -260,4 +261,6 @@ __all__ = [
     'MeanOfAbsoluteDifference',
     'SpatialGradient',
     'MeanSquaredErrorWithMask',
+
+    'ClipScore',
 ]
