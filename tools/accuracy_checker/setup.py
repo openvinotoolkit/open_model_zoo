@@ -121,6 +121,6 @@ setup(
     install_requires=_requirements,
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile',
+    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile', "torchmetrics", "diffusers"
                               'kenlm @ git+https://github.com/kpu/kenlm.git@f01e12d83c7fd03ebe6656e0ad6d73a3e022bd50#egg=kenlm']}
 )

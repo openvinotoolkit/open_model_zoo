@@ -45,4 +45,3 @@ class PartiPromptsDatasetConverter(BaseFormatConverter):
                 progress_callback(example_id * 100 / num_iter)
 
         return ConverterReturn(annotations, {}, None)
-
