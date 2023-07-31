@@ -73,7 +73,8 @@ static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
                                           "throughput mode (for HETERO and MULTI device cases use format "
                                           "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video. If disabled and --output_resolution isn't set, "
+    "the resulting image is resized to a default view size: 1000x600 but keeping the aspect ratio";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char output_resolution_message[] =
     "Optional. Specify the maximum output window resolution "
@@ -225,7 +226,7 @@ int main(int argc, char* argv[]) {
             if (found == std::string::npos) {
                 outputResolution = result->asRef<ImageResult>().resultImage.size();
                 cv::Size viewSize = view.getSize();
-                if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                if (!FLAGS_no_show && (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width))
                     outputResolution = viewSize;
             } else {
                 outputResolution =
@@ -274,7 +275,7 @@ int main(int argc, char* argv[]) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
                         cv::Size viewSize = view.getSize();
-                        if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                        if (!FLAGS_no_show && (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width))
                             outputResolution = viewSize;
                     } else {
                         outputResolution = cv::Size{
@@ -323,7 +324,7 @@ int main(int argc, char* argv[]) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
                         cv::Size viewSize = view.getSize();
-                        if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                        if (!FLAGS_no_show && (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width))
                             outputResolution = viewSize;
                     } else {
                         outputResolution = cv::Size{
