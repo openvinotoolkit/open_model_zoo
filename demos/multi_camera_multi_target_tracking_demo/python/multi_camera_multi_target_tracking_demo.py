@@ -169,7 +169,7 @@ def run(params, config, capture, detector, reid):
         if frames_read and not set_output_params:
             set_output_params = True
             if len(params.output_video):
-                frame_size = [frame.shape[::-1] for frame in frames]
+                frame_size = [frame.shape[1::-1] for frame in frames]
                 fps = capture.get_fps()
                 target_width, target_height = get_target_size(
                     frame_size, None, **vars(config.visualization_config))
