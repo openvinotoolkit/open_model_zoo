@@ -142,7 +142,7 @@ class PythonDemo(Demo):
         self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
-        return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
+        return [sys.executable, '-W', 'error', str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
 
 
 def join_cases(*args):
