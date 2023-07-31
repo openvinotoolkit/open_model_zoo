@@ -33,18 +33,15 @@ class TestCase(typing.NamedTuple):
 class Demo:
     IMPLEMENTATION_TYPES = set()
 
-    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None):
+    def __init__(self, name, implementation, model_keys, device_keys, test_cases):
         self.implementation = implementation
-        self.subdirectory = name + '/' + implementation
+        self.model_keys = model_keys
         self.device_keys = device_keys
-        self.model_keys = model_keys if model_keys else ['-m']
-
         self.test_cases = test_cases
-
+        self.subdirectory = name + '/' + implementation
         self._exec_name = self.subdirectory.replace('/', '_')
         self.parser = None
         self.supported_devices = None
-
         Demo.IMPLEMENTATION_TYPES.add(implementation)
 
     def models_lst_path(self, source_dir):
@@ -131,9 +128,8 @@ class Demo:
 
 
 class CppDemo(Demo):
-    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None):
+    def __init__(self, name, implementation='cpp', model_keys=('-m',), device_keys=('-d',), test_cases=None):
         super().__init__(name, implementation, model_keys, device_keys, test_cases)
-
         self._exec_name = self._exec_name.replace('_cpp', '')
 
     def fixed_args(self, source_dir, build_dir):
@@ -141,16 +137,12 @@ class CppDemo(Demo):
 
 
 class PythonDemo(Demo):
-    def __init__(self, name, implementation='python', model_keys=None, device_keys=None, test_cases=None):
-        super().__init__(name, implementation, model_keys, device_keys, test_cases)
-
+    def __init__(self, name, model_keys=('-m',), device_keys=('-d',), test_cases=None):
+        super().__init__(name, 'python', model_keys, device_keys, test_cases)
         self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
-        cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
-
-        return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py')),
-            *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
+        return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
 
 
 def join_cases(*args):
@@ -1064,22 +1056,33 @@ DEMOS = [
                           '-m': ModelArg('midasnet')})
     )),
 
-    PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'],
-               model_keys=['-m', '--m_segmentation', '--m_reid'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
-                DataPatternArg('multi-camera-multi-target-tracking/repeated')]}),
+    PythonDemo('multi_camera_multi_target_tracking_demo', model_keys=['-m', '--m_segmentation', '--m_reid'], test_cases=combine_cases(
         [
-            TestCase(options={'-m': ModelArg('person-detection-retail-0013')}),
-            TestCase(options={'--m_segmentation': ModelArg('instance-segmentation-security-0228')}),
+            TestCase({
+                '--m_segmentation': ModelArg('instance-segmentation-security-0228'),
+                '--m_reid': ModelArg('person-reidentification-retail-0277'),
+                '--output_video': 'multi_camera_multi_target_tracking_demo.avi',
+            }),
+            *combine_cases(
+                single_option_cases(
+                    '--m_reid',
+                    ModelArg('person-reidentification-retail-0286'),
+                    ModelArg('person-reidentification-retail-0287'),
+                    ModelArg('person-reidentification-retail-0288'),
+                ),
+                TestCase({
+                    '-m': ModelArg('person-detection-retail-0013'),
+                    **MONITORS
+                }),
+            ),
         ],
-        single_option_cases('--m_reid',
-            ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')
-        ),
+        TestCase({
+            '-i': [
+                DataPatternArg('multi-camera-multi-target-tracking'),
+                DataPatternArg('multi-camera-multi-target-tracking/repeated'),
+            ],
+            '--no_show': None,
+        }),
     )),
 
     PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
