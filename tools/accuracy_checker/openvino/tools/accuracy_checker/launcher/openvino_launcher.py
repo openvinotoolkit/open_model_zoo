@@ -321,7 +321,7 @@ class OpenVINOLauncher(Launcher):
                 required_shape[-1*len(shape):] = shape
                 shape = required_shape
             p_shape = PartialShape(
-                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
+                [Dimension(d if d != 0 else -1) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
             partial_shapes[self.input_to_index[name]] = p_shape
         self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)
