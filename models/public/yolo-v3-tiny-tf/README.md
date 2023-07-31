@@ -91,9 +91,9 @@ The model was trained on [Common Objects in Context (COCO)](https://cocodataset.
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1, 13, 13, 255`. The anchor values are `81,82, 135,169, 344,319`.
+1. The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1, 255, 13, 13`. The anchor values are `81,82, 135,169, 344,319`.
 
-2. The array of detection summary info, name - `conv2d_12/BiasAdd/YoloRegion`,  shape - `1, 26, 26, 255`. The anchor values are `23,27, 37,58, 81,82`.
+2. The array of detection summary info, name - `conv2d_12/BiasAdd/YoloRegion`,  shape - `1, 255, 26, 26`. The anchor values are `23,27, 37,58, 81,82`.
 
 For each case format is `B, Cx, Cy, N*85`, where:
 
