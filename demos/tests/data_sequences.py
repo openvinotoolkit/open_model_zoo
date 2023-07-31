@@ -137,9 +137,11 @@ DATA_SEQUENCES = {
         image_net_arg('00017293'),
         image_net_arg('00040547'),
         image_net_arg('00000002'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
     ],
 
-    'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 11,
+    'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 13,
 
     'object-detection-demo': [
         image_net_arg('00000001'),
