@@ -98,7 +98,7 @@ Options:
     -nthreads "<integer>"     Optional. Number of threads.
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Do not show processed video.
+    -no_show                  Optional. Do not show processed video. If disabled and --output_resolution isn't set, the resulting image is resized to a default view size: 1000x600 but keeping the aspect ratio
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
     -jc                       Optional. Flag of using compression for jpeg images. Default value if false. Only for jr architecture type.
