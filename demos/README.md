@@ -16,7 +16,7 @@
    omz_demos_bert_question_answering_embedding_demo_python
    omz_demos_bert_question_answering_demo_python
    omz_demos_classification_benchmark_demo_cpp
-   omz_demos_gesture_recognition_demo_cpp_gapi
+   omz_demos_classification_benchmark_demo_cpp_gapi
    omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
