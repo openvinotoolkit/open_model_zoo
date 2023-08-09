@@ -367,7 +367,9 @@ def main():
     if args.output_nifti and is_nifti_data:
         for seg_res in list_seg_result:
             nii_filename = os.path.join(args.path_to_output, 'output_{}.nii.gz'.format(list_seg_result.index(seg_res)))
-            nib.save(nib.Nifti1Image(seg_res, affine=affine), nii_filename)
+            # Nifti1Image expects uint8, but brain-tumor-segmentation-0001 gives int64.
+            # brain-tumor-segmentation-0002 gives uint8
+            nib.save(nib.Nifti1Image(seg_res.astype(np.uint8), affine=affine), nii_filename)
             log.debug("Result nifti file was saved to {}".format(nii_filename))
 
 if __name__ == "__main__":
