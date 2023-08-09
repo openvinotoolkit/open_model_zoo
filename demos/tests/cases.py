@@ -333,9 +333,7 @@ DEMOS = [
             TestCase(options={'-at': 'openpose',
                               '-m': ModelArg('human-pose-estimation-0001')}
             ),
-            # TestCase(options={'-at': 'higherhrnet',
-            #                   '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}
-            # ),
+            TestCase({'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -358,6 +356,7 @@ DEMOS = [
                     ModelArg('single-image-super-resolution-1033'),
                     ModelArg('text-image-super-resolution-0001'))
             ),
+            # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
             # TestCase(options={'-at': 'deblur',
             #     '-m': ModelArg('deblurgan-v2')}
             # ),
@@ -497,8 +496,8 @@ DEMOS = [
                 TestCase(options={'-at': 'ssd'}),
                 [
                     *single_option_cases('-m',
-                        # ModelArg('efficientdet-d0-tf'),  conversion fail
-                        # ModelArg('efficientdet-d1-tf'),
+                        ModelArg('efficientdet-d0-tf'),
+                        ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
@@ -618,10 +617,10 @@ DEMOS = [
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'),
-                    # ModelArg('ocrnet-hrnet-w48-paddle'),  # ticket 95904
+                    ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'),
-                    # ModelArg('erfnet'),  # TODO add after CI is up
+                    ModelArg('erfnet'),
                 )),
         ],
     )),
@@ -673,9 +672,9 @@ DEMOS = [
             ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
-            # ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
-            # ModelArg('person-reidentification-retail-0288')
+            ModelArg('person-reidentification-retail-0288'),
         ),
     )),
 
@@ -875,6 +874,7 @@ DEMOS = [
        })
     )),
 
+    # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
     # PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
     #     TestCase(options={'-i': DataPatternArg('face-detection-adas'),
     #                       **MONITORS,
@@ -982,8 +982,8 @@ DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
         [
-            # TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-            # TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+            TestCase({'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            TestCase({'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -1135,8 +1135,8 @@ DEMOS = [
                 TestCase(options={'--architecture_type': 'ssd'}),
                 [
                     *single_option_cases('-m',
-                        # ModelArg('efficientdet-d0-tf'),  conversion fail
-                        # ModelArg('efficientdet-d1-tf'),
+                        ModelArg('efficientdet-d0-tf'),
+                        ModelArg('efficientdet-d1-tf'),
                         ModelArg('face-detection-0200'),
                         ModelArg('face-detection-0202'),
                         ModelArg('face-detection-0204'),
@@ -1286,10 +1286,10 @@ DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'),
-                    # ModelArg('ocrnet-hrnet-w48-paddle'),  # ticket 95904
+                    ModelArg('ocrnet-hrnet-w48-paddle'),
                     ModelArg('pspnet-pytorch'),
                     ModelArg('drn-d-38'),
-                    # ModelArg('erfnet'),  # TODO add after CI is up
+                    ModelArg('erfnet'),
                 )),
             TestCase(options={
                 '-m': ModelArg('f3net'),
@@ -1423,7 +1423,6 @@ DEMOS = [
         [
             *single_option_cases('-m_i',
                 ModelArg('instance-segmentation-security-0002'),
-                # ModelArg('instance-segmentation-security-0091'), # Slow model
                 ModelArg('instance-segmentation-security-0228'),
                 ModelArg('instance-segmentation-security-1039'),
                 ModelArg('instance-segmentation-security-1040')),
