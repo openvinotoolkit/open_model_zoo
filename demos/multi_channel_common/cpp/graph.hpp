@@ -32,7 +32,7 @@ static inline std::queue<ov::InferRequest> compile(std::shared_ptr<ov::Model>&& 
     core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
     ov::CompiledModel compiled = core.compile_model(model, device, {
         {ov::hint::performance_mode(ov::hint::PerformanceMode::THROUGHPUT)},
-        {ov::hint::num_requests(performanceHintNumRequests)}});
+        {ov::hint::num_requests(4)}});
     unsigned maxRequests = compiled.get_property(ov::optimal_number_of_infer_requests) + 1;
     logCompiledModelInfo(compiled, modelPath, device);
     slog::info << "\tNumber of network inference requests: " << std::to_string(maxRequests) << slog::endl;
