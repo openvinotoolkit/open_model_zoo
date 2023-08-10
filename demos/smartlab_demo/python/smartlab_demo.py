@@ -195,10 +195,10 @@ def main():
     """
     cap_top = cv2.VideoCapture(args.topview)
     if not cap_top.isOpened():
-        raise ValueError(f"Can't read an video or frame from {args.topview}")
+        raise ValueError(f"Can't open a video or frame from {args.topview}")
     cap_side = cv2.VideoCapture(args.sideview)
     if not cap_side.isOpened():
-        raise ValueError(f"Can't read an video or frame from {args.sideview}")
+        raise ValueError(f"Can't open a video or frame from {args.sideview}")
 
     video_loop(
         args, cap_top, cap_side, detector, segmentor, evaluator, display)

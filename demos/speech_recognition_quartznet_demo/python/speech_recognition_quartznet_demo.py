@@ -48,16 +48,16 @@ class QuartzNet:
         if len(model.inputs) != 1:
             raise RuntimeError('QuartzNet must have one input')
         self.input_tensor_name = model.inputs[0].get_any_name()
-        model_input_shape = model.inputs[0].shape
+        model_input_shape = model.inputs[0].get_partial_shape()
         if len(model_input_shape) != 3:
             raise RuntimeError('QuartzNet input must be 3-dimensional')
         if model_input_shape[1] != input_shape[1]:
             raise RuntimeError("QuartzNet input second dimension can't be reshaped")
-        if model_input_shape[2] % self.pad_to:
+        if model_input_shape[2].is_static and model_input_shape[2].get_length() % self.pad_to:
             raise RuntimeError(f'{self.pad_to} must be a divisor of QuartzNet input third dimension')
         if len(model.outputs) != 1:
             raise RuntimeError('QuartzNet must have one output')
-        model_output_shape = model.outputs[0].shape
+        model_output_shape = model.outputs[0].get_partial_shape()
         if len(model_output_shape) != 3:
             raise RuntimeError('QuartzNet output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char

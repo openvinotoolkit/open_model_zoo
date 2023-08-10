@@ -1359,12 +1359,13 @@ DEMOS = [
         ],
     )),
 
-    PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        single_option_cases('-m',
+    PythonDemo('speech_recognition_quartznet_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
             ModelArg('quartznet-15x5-en'),
-            # ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
-        )
+            ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'),
+        ),
+        TestCase({'-i': TestDataArg('how_are_you_doing.wav')}),
     )),
 
     PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
