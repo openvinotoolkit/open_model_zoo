@@ -24,30 +24,30 @@ jobs:
           wget https://storage.openvinotoolkit.org/repositories/openvino/packages/2022.3/linux/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
           tar xf l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64.tgz
           sudo l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/install_dependencies/install_openvino_dependencies.sh
-      - name: Cache OpenCV
-        id: opencv-cache
-        uses: actions/cache@v3
+      - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ${{ github.workspace }}/opencv
-          key: ${{ runner.os }}-opencv-cache
-      - if: ${{ steps.opencv-cache.outputs.cache-hit != 'true' }}
-        name: Checlout OpenCV
-        uses: actions/checkout@v3
+          max-size: "2000M"
+          # key: ccache
+          # restore-keys: ccache
+      - uses: actions/checkout@v3
         with:
           repository: opencv/opencv
           path: opencv
-      - if: ${{ steps.opencv-cache.outputs.cache-hit != 'true' }}
-        name: Compile OpenCV
+      - name: Compile OpenCV
         run: |
           mkdir opencv/build
           cd opencv/build
-          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_INF_ENGINE=ON -DOpenVINO_DIR=$GITHUB_WORKSPACE/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/runtime/cmake/ ..
-          cmake --build . -j $((`nproc`*2+2))
+          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_INF_ENGINE=y -DOpenVINO_DIR=$GITHUB_WORKSPACE/l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/runtime/cmake/ -DCMAKE_CXX_LINKER_LAUNCHER=ccache ..
+          cmake --build . -j $((${{ steps.cpu-cores.outputs.count }}*2+2))
       - name: build_demos.sh
         run: |
           source l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/setupvars.sh
           OpenCV_DIR=$GITHUB_WORKSPACE/opencv/build ./demos/build_demos.sh --build_dir=build
+      - uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/downloader-cache-dir
+          key: downloader-cache-dir
       - name: run_tests.py
         run: |
           source l_openvino_toolkit_ubuntu20_2022.3.0.9052.9752fafe8eb_x86_64/setupvars.sh
-          python ~/r/z/demos/tests/run_tests.py --demo-build-dir build/intel64/Release/ --test-data-dir ~/Downloads/test-data/ --device CPU --demos cpp_gapi
+          python demos/tests/run_tests.py --demo-build-dir build/intel64/Release/ --test-data-dir ~/Downloads/test-data/ --device CPU --downloader-cache-dir ${{ github.workspace }}/downloader-cache-dir --demos cpp_gapi
