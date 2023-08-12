@@ -34,6 +34,7 @@ import csv
 import json
 import os
 import shlex
+import ssl
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
@@ -41,6 +42,9 @@ import timeit
 import importlib
 
 from pathlib import Path
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
 
 from args import ArgContext, Arg, ModelArg
 from cases import Demo
@@ -50,6 +54,7 @@ scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
 }
+COCO128_URL = "https://ultralytics.com/assets/coco128.zip"
 
 
 def parser_paths_list(supported_devices):
@@ -63,7 +68,7 @@ def build_argparser():
     parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
         help='directory with demo binaries')
     parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
-        help='directory with test data')
+        help='directory with test data and where to unzip {COCO128_URL}')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
@@ -234,6 +239,13 @@ def main():
 
     print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
+
+    no_verify_because_of_windows = ssl.create_default_context()
+    no_verify_because_of_windows.check_hostname = False
+    no_verify_because_of_windows.verify_mode = ssl.CERT_NONE
+    with urlopen(COCO128_URL, context=no_verify_because_of_windows) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
+        with ZipFile(BytesIO(zipresp.read())) as zfile:
+            zfile.extractall(args.test_data_dir)
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
