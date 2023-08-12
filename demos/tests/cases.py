@@ -25,6 +25,9 @@ from args import (
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
+UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS = {'-u': 'cdm', '--no_show': None}
+
+
 class TestCase(typing.NamedTuple):
     options: dict
     extra_models: list = []
@@ -167,12 +170,20 @@ DEMOS = [
     CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-at': 'maskrcnn',
             **MONITORS,
-            '-i': DataPatternArg('instance-segmentation'),
+            '-i': DataPatternArg('coco128-subset-480x640x3'),
         }),
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
     )),
+
+    CppDemo('face_detection_mtcnn_demo', 'cpp_gapi', ('-m_p', '-m_r', '-m_o'), ('-d_p', '-d_r', '-d_o'), [TestCase({
+        '-i': DataPatternArg('coco128-every-480x640x3'),
+        '-m_p': ModelArg('mtcnn-p'),
+        '-m_r': ModelArg('mtcnn-r'),
+        '-m_o': ModelArg('mtcnn-o'),
+        **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+    })]),
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
             model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
@@ -180,7 +191,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('gaze-estimation-adas')}),
+            '-i': TestDataArg('coco128/images/train2017/')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
@@ -193,32 +204,45 @@ DEMOS = [
             ModelArg('face-detection-retail-0004')),
     )),
 
-    CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
-            model_keys=['-m_a', '-m_d'],
-            device_keys=['-d_a', '-d_d'],
-            test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-                          '-m_d': ModelArg('person-detection-asl-0001')}),
-        [
-            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-        ],
-    )),
+    # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
+    # CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
+    #         model_keys=['-m_a', '-m_d'],
+    #         device_keys=['-d_a', '-d_d'],
+    #         test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
+    #     [
+    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+    #     ],
+    # )),
 
-    CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
-            model_keys=['-m_p', '-m_r', '-m_o'],
-            device_keys=['-d_p', '-d_r', '-d_o'],
-            test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          '-i': image_net_arg('00000002'),
-                          '-m_p': ModelArg('mtcnn-p'),
-                          '-m_r': ModelArg('mtcnn-r'),
-                          '-m_o': ModelArg('mtcnn-o')}),
-    )),
+    CppDemo(
+        'interactive_face_detection_demo', 'cpp_gapi',
+        ('-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'), ('-d', '--dag', '--dem', '--dlm', '--dhp', '--dam'),
+        combine_cases(
+            [
+                TestCase({
+                    '-m': ModelArg('face-detection-retail-0004'),
+                    '--mag': ModelArg('age-gender-recognition-retail-0013'),
+                    '--mam': ModelArg('anti-spoof-mn3'),
+                    '--mem': ModelArg('emotions-recognition-retail-0003'),
+                    '--mhp': ModelArg('head-pose-estimation-adas-0001'),
+                    '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
+                }),
+                TestCase({'-m': ModelArg('face-detection-adas-0001')})
+            ],
+            TestCase({
+                '-i': DataPatternArg('coco128-every-480x640x3'),
+                **MONITORS,
+                '--noshow': None
+            }),
+        )
+    ),
 
     CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
             model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
@@ -226,14 +250,15 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('smart-classroom-demo'),
+            '-i': DataPatternArg('coco128-subset-480x640x3'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         [
             *combine_cases(
                 [
                     TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
-                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
-                        '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
+                    # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
+                    # TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
+                    #     '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
                     # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
                     # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
                     # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
@@ -370,26 +395,6 @@ DEMOS = [
     CppDemo(name='interactive_face_detection_demo',
             model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
             device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--noshow': None,
-            **MONITORS,
-            '-i': DataPatternArg('375x500')}),
-        [
-            TestCase(options={
-                '-m': ModelArg('face-detection-retail-0004'),
-                '--mag': ModelArg('age-gender-recognition-retail-0013'),
-                '--mam': ModelArg('anti-spoof-mn3'),
-                '--mem': ModelArg('emotions-recognition-retail-0003'),
-                '--mhp': ModelArg('head-pose-estimation-adas-0001'),
-                '--mlm': ModelArg('facial-landmarks-35-adas-0002'),
-            }),
-            TestCase(options={'-m': ModelArg('face-detection-adas-0001')})
-        ]
-    )),
-
-    CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '--mag', '--mem', '--mlm', '--mhp', '--mam'],
-            device_keys=['-d', '--dag', '--dem', '--dlm', '--dhp', '--dam'],
-            test_cases=combine_cases(
         TestCase(options={'--noshow': None,
             **MONITORS,
             '-i': DataPatternArg('375x500')}),
