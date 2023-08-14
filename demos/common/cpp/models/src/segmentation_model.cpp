@@ -96,8 +96,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     const ov::Shape& outputShape = output.get_partial_shape().get_max_shape();
 
-    constexpr bool gues_layout = true;
-    ov::Layout outputLayout = getLayoutFromShape(outputShape, gues_layout);
+    ov::Layout outputLayout = getLayoutFromShape(outputShape);
     outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
     outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
 

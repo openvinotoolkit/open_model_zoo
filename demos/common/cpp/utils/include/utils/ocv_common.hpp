@@ -114,14 +114,14 @@ static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
 struct IntervalCondition {
     using DimType = size_t;
     using IndexType = size_t;
-    using ConditionChecker = std::function<bool(IndexType, const ov::Shape&)>;
+    using ConditionChecker = std::function<bool(IndexType, const ov::PartialShape&)>;
 
     template<class Cond>
     constexpr IntervalCondition(IndexType i1, IndexType i2, Cond c) :
-        impl([=](IndexType i0, const ov::Shape& shape) {
-            return c(shape[i0], shape[i1]) && c(shape[i0], shape[i2]);})
+        impl([=](IndexType i0, const ov::PartialShape& shape) {
+            return c(shape[i0].get_max_length(), shape[i1].get_max_length()) && c(shape[i0].get_max_length(), shape[i2].get_max_length());})
     {}
-    bool operator() (IndexType i0, const ov::Shape& shape) const { return impl(i0, shape); }
+    bool operator() (IndexType i0, const ov::PartialShape& shape) const { return impl(i0, shape); }
 private:
     ConditionChecker impl;
 };
@@ -132,7 +132,7 @@ IntervalCondition makeCond(Args&&...args) {
 }
 using LayoutCondition = std::tuple<size_t/*dim index*/, IntervalCondition, std::string>;
 
-static inline std::tuple<bool, ov::Layout> makeGuesLayoutFrom4DShape(const ov::Shape& shape) {
+static inline std::tuple<bool, ov::Layout> makeGuesLayoutFrom4DShape(const ov::PartialShape& shape) {
     // at the moment we make assumption about NCHW & NHCW only
     // if hypothetical C value is less than hypothetical H and W - then
     // out assumption is correct and we pick a corresponding layout
@@ -151,7 +151,7 @@ static inline std::tuple<bool, ov::Layout> makeGuesLayoutFrom4DShape(const ov::S
     return {false, ov::Layout{}};
 }
 
-static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_layout = false) {
+static inline ov::Layout getLayoutFromShape(const ov::PartialShape& shape) {
     if (shape.size() == 2) {
         return "NC";
     }
@@ -165,10 +165,10 @@ static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_la
         throw std::runtime_error("Can't guess layout for " + shape.to_string());
     }
     if (shape.size() == 4) {
-        if (shape[1] >= 1 && shape[1] <= 4) {
+        if (ov::Interval{1, 4}.contains(shape[1].get_interval())) {
             return "NCHW";
         }
-        if (shape[3] >= 1 && shape[3] <= 4) {
+        if (ov::Interval{1, 4}.contains(shape[3].get_interval())) {
             return "NHWC";
         }
         if (shape[1] == shape[2]) {
@@ -177,17 +177,14 @@ static inline ov::Layout getLayoutFromShape(const ov::Shape& shape, bool gues_la
         if (shape[2] == shape[3]) {
             return "NCHW";
         }
-        if (gues_layout) {
-            bool guesResult = false;
-            ov::Layout guessedLayout;
-            std::tie(guesResult, guessedLayout) = makeGuesLayoutFrom4DShape(shape);
-            if (guesResult) {
-                return guessedLayout;
-            }
+        bool guesResult = false;
+        ov::Layout guessedLayout;
+        std::tie(guesResult, guessedLayout) = makeGuesLayoutFrom4DShape(shape);
+        if (guesResult) {
+            return guessedLayout;
         }
     }
-    throw std::runtime_error(std::string("Usupported " + std::to_string(shape.size()) + "D shape: ") +
-                             shape.to_string());
+    throw std::runtime_error("Usupported " + std::to_string(shape.size()) + "D shape");
 }
 
 /**
