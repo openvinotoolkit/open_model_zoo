@@ -177,6 +177,32 @@ DEMOS = [
             ModelArg('instance-segmentation-security-0091')),
     )),
 
+    CppDemo('classification_benchmark_demo', 'cpp_gapi', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('alexnet'),
+            # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
+            # ModelArg('densenet-121-tf'),
+            ModelArg('googlenet-v1'),
+            # ModelArg('googlenet-v1-tf'),
+            # ModelArg('googlenet-v3'),
+            ModelArg('googlenet-v3-pytorch'),
+            # ModelArg('mixnet-l'),
+            # ModelArg('mobilenet-v2'),
+            ModelArg('mobilenet-v2-pytorch'),
+            ModelArg('repvgg-a0'),
+            ModelArg('repvgg-b1'),
+            ModelArg('repvgg-b3'),
+            ModelArg('resnet-50-pytorch'),
+        ),
+        TestCase({
+            '-time': '5',
+            '-i': TestDataArg('coco128/images/train2017/'),
+            '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
+    )),
+
     CppDemo('face_detection_mtcnn_demo', 'cpp_gapi', ('-m_p', '-m_r', '-m_o'), ('-d_p', '-d_r', '-d_o'), [TestCase({
         '-i': DataPatternArg('coco128-every-480x640x3'),
         '-m_p': ModelArg('mtcnn-p'),
@@ -302,6 +328,7 @@ DEMOS = [
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
+            ModelArg('resnet-50-pytorch'),
     ))),
 
     CppDemo(name='crossroad_camera_demo',
