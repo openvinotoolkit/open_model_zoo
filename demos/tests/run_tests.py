@@ -240,10 +240,7 @@ def main():
     print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
 
-    no_verify_because_of_windows = ssl.create_default_context()
-    no_verify_because_of_windows.check_hostname = False
-    no_verify_because_of_windows.verify_mode = ssl.CERT_NONE
-    with urlopen(COCO128_URL, context=no_verify_because_of_windows) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
+    with urlopen(COCO128_URL) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
 
