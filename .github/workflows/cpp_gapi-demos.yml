@@ -1,6 +1,6 @@
 name: github-actions
 on:
-  pull_request:
+  pull_request: null
   schedule:
     - cron:  '00 3 * * *'  # Run every day at 3:00 to regenerate cache
 jobs:
@@ -16,7 +16,7 @@ jobs:
           curl https://storage.openvinotoolkit.org/repositories/openvino/packages/master/2023.1.0.dev20230728/l_openvino_toolkit_ubuntu20_2023.1.0.dev20230728_x86_64.tgz | tar --directory ov --strip-components 1 -xz
           sudo ov/install_dependencies/install_openvino_dependencies.sh
           sudo apt install libgtk2.0-dev pkg-config  # smart_classroom_demo_gapi's OpenCV error asks to install them
-      - uses: hendrikmuhs/ccache-action@v1.2
+      - uses: hendrikmuhs/ccache-action@v1.2.10
         with:
           key: ubuntu-20.04  # This action prepends and appends its strings to the key
           restore-keys: ubuntu-20.04
