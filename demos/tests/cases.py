@@ -193,6 +193,7 @@ DEMOS = [
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
+            ModelArg('resnet-50-pytorch'),
         ),
         TestCase({
             '-time': '5',
@@ -327,6 +328,7 @@ DEMOS = [
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
+            ModelArg('resnet-50-pytorch'),
     ))),
 
     CppDemo(name='crossroad_camera_demo',
