@@ -873,7 +873,10 @@ def init_telemetry():
     except ImportError:
         return None
     try:
-        telemetry = tm.Telemetry(tid='G-W5E9RNLD4H', app_name='Accuracy Checker', app_version=__version__, backend='ga4')
+        telemetry = tm.Telemetry(tid='G-W5E9RNLD4H',
+                                 app_name='Accuracy Checker',
+                                 app_version=__version__,
+                                 backend='ga4')
         return telemetry
     except Exception: # pylint:disable=W0703
         return None

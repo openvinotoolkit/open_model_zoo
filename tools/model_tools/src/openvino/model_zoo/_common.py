@@ -146,7 +146,10 @@ def get_version():
 @contextlib.contextmanager
 def telemetry_session(app_name, tool):
     version = get_version()
-    telemetry = Telemetry(tid='G-W5E9RNLD4H', app_name=app_name, app_version=version, backend='ga4')
+    telemetry = Telemetry(tid='G-W5E9RNLD4H',
+                          app_name=app_name,
+                          app_version=version,
+                          backend='ga4')
     telemetry.start_session('md')
     telemetry.send_event('md', 'version', version)
     try:
