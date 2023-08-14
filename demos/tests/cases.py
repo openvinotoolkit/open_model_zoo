@@ -1321,22 +1321,34 @@ DEMOS = [
        ]
     )),
 
-    # PythonDemo(name='smartlab_demo', device_keys=['-d'],
-    #     model_keys=['-m_ta', '-m_tm', '-m_sa', '-m_sm', '-m_en', '-m_de'],
-    #     test_cases=combine_cases(
-    #     [
-    #         TestCase(options={'-tv': TestDataArg('stream_1_top.mp4'),
-    #             '-sv': TestDataArg('stream_1_left.mp4'),
-    #             '-m_ta': ModelArg('smartlab-object-detection-0001'),
-    #             '-m_tm': ModelArg('smartlab-object-detection-0002'),
-    #             '-m_sa': ModelArg('smartlab-object-detection-0003'),
-    #             '-m_sm': ModelArg('smartlab-object-detection-0004'),
-    #             '--mode': 'mstcn',  # TODO: test multiview
-    #             '-m_en': ModelArg('smartlab-sequence-modelling-0001'),
-    #             '-m_de': ModelArg('smartlab-sequence-modelling-0002'),
-    #         }),
-    #     ],
-    # )),
+    PythonDemo(
+        'smartlab_demo',
+        model_keys=('--m_topall', '--m_topmove', '--m_sideall', '--m_sidemove', '--m_encoder', '--m_encoder_top', '--m_encoder_side', '--m_decoder'),
+        test_cases=combine_cases(
+            [
+                TestCase({
+                    '--mode': 'multiview',
+                    '--m_encoder_top': ModelArg('smartlab-action-recognition-0001-encoder-top'),
+                    '--m_encoder_side': ModelArg('smartlab-action-recognition-0001-encoder-side'),
+                    '--m_decoder': ModelArg('smartlab-action-recognition-0001-decoder'),
+                }),
+                TestCase({
+                    '--mode': 'mtcnn',
+                    '--m_encoder': ModelArg('smartlab-sequence-modelling-0001'),
+                    '--m_decoder': ModelArg('smartlab-sequence-modelling-0002')
+                })
+            ],
+            TestCase({
+                '--topview': TestDataArg('stream_1_top.mp4'),
+                '--sideview': TestDataArg('stream_1_left.mp4'),
+                '--m_topall': ModelArg('smartlab-object-detection-0001'),
+                '--m_topmove': ModelArg('smartlab-object-detection-0001'),
+                '--m_sideall': ModelArg('smartlab-object-detection-0003'),
+                '--m_sidemove': ModelArg('smartlab-object-detection-0004'),
+                '--no_show': None
+            })
+        )
+    ),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
