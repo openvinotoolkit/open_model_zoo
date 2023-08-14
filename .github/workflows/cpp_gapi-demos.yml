@@ -16,6 +16,7 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ubuntu-20.04  # This action prepends and appends its strings to the key
+          restore-keys: ubuntu-20.04
           max-size: "100M"
       - uses: actions/cache@v3
         id: cache
