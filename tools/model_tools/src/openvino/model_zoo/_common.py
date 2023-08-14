@@ -87,7 +87,7 @@ try:
     from openvino_telemetry import Telemetry
 except ImportError:
     class Telemetry:
-        def __init__(self, tid=None, app_name=None, app_version=None): pass
+        def __init__(self, tid=None, app_name=None, app_version=None, backend=None): pass
 
         def start_session(self, category): pass
 
@@ -146,7 +146,7 @@ def get_version():
 @contextlib.contextmanager
 def telemetry_session(app_name, tool):
     version = get_version()
-    telemetry = Telemetry(tid='UA-17808594-29', app_name=app_name, app_version=version)
+    telemetry = Telemetry(tid='G-W5E9RNLD4H', app_name=app_name, app_version=version, backend='ga4')
     telemetry.start_session('md')
     telemetry.send_event('md', 'version', version)
     try:
