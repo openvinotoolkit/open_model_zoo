@@ -1,5 +1,8 @@
 name: github-actions
-on: pull_request
+on:
+  pull_request
+  schedule:
+    - cron:  '00 3 * * *'  # Run every day at 3:00 to regenerate cache
 jobs:
   cpp_gapi-demos:
     runs-on: ubuntu-20.04
@@ -9,6 +12,8 @@ jobs:
           submodules: recursive
       - name: Download OpenVINO
         run: |
+          echo "${{ github.event_name }}"
+          echo "${{ github.event.action }}"
           mkdir ov
           curl https://storage.openvinotoolkit.org/repositories/openvino/packages/master/2023.1.0.dev20230728/l_openvino_toolkit_ubuntu20_2023.1.0.dev20230728_x86_64.tgz | tar --directory ov --strip-components 1 -xz
           sudo ov/install_dependencies/install_openvino_dependencies.sh
@@ -18,11 +23,13 @@ jobs:
           key: ubuntu-20.04  # This action prepends and appends its strings to the key
           restore-keys: ubuntu-20.04
           max-size: "100M"
+          restore: ${{ github.event_name == 'pull_request'}}
       - uses: actions/cache@v3
         id: cache
         with:
           path: ${{ github.workspace }}/cache
           key: cpp_gapi-demos-ubuntu-20.04
+          lookup-only: ${{ github.event_name != 'pull_request'}}
       - if: ${{ !steps.cache.outputs.cache-hit }}
         uses: actions/checkout@v3
         with:
