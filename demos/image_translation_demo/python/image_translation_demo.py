@@ -104,6 +104,8 @@ def main():
     number_of_objects = len(reference_images)
 
     if use_seg:
+        if number_of_objects != len(input_images):
+            raise RuntimeError("Number of --input_images and --reference_images mast match")
         samples = [input_images, number_of_objects * [''], reference_images, number_of_objects * ['']]
     else:
         samples = [number_of_objects * [''], input_semantics, reference_images, reference_semantics]
