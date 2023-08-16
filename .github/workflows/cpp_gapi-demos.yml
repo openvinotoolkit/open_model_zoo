@@ -28,12 +28,12 @@ jobs:
           path: ${{ github.workspace }}/cache
           key: cpp_gapi-demos-ubuntu-20.04
           lookup-only: ${{ github.event_name != 'pull_request'}}
-      - if: ${{ !steps.cache.outputs.cache-hit }}
+      - if: ${{ !steps.cache.outputs.cache-hit || github.event_name != 'pull_request' }}
         uses: actions/checkout@v3
         with:
           repository: opencv/opencv
           path: cache/opencv
-      - if: ${{ !steps.cache.outputs.cache-hit }}
+      - if: ${{ !steps.cache.outputs.cache-hit || github.event_name != 'pull_request' }}
         name: Compile OpenCV
         run: |
           rm -rf cache/opencv/.git/  # Minimize cache
