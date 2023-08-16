@@ -181,12 +181,25 @@ DEMOS = [
         single_option_cases(
             '-m',
             ModelArg('alexnet'),
+            ModelArg('caffenet'),
+            ModelArg('convnext-tiny'),
             # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
             # ModelArg('densenet-121-tf'),
+            ModelArg('dla-34'),
+            # ModelArg('efficientnet-b0'),
+            ModelArg('efficientnet-v2-b0'),
+            ModelArg('efficientnet-v2-s'),
             ModelArg('googlenet-v1'),
             # ModelArg('googlenet-v1-tf'),
+            ModelArg('googlenet-v2'),
+            # ModelArg('googlenet-v2-tf'),
             # ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
+            # ModelArg('googlenet-v4-tf'),
+            ModelArg('hbonet-0.25'),
+            ModelArg('hbonet-1.0'),
+            # ModelArg('inception-resnet-v2-tf'),
+            ModelArg('levit-128s'),
             # ModelArg('mixnet-l'),
             # ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
@@ -317,11 +330,24 @@ DEMOS = [
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
             ModelArg('alexnet'),
+            ModelArg('caffenet'),
+            ModelArg('convnext-tiny'),
             ModelArg('densenet-121-tf'),
+            ModelArg('dla-34'),
+            ModelArg('efficientnet-b0'),
+            ModelArg('efficientnet-v2-b0'),
+            ModelArg('efficientnet-v2-s'),
             ModelArg('googlenet-v1'),
             ModelArg('googlenet-v1-tf'),
+            ModelArg('googlenet-v2'),
+            ModelArg('googlenet-v2-tf'),
             ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
+            ModelArg('googlenet-v4-tf'),
+            ModelArg('hbonet-0.25'),
+            ModelArg('hbonet-1.0'),
+            ModelArg('inception-resnet-v2-tf'),
+            ModelArg('levit-128s'),
             ModelArg('mixnet-l'),
             ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
@@ -412,9 +438,8 @@ DEMOS = [
             # TestCase(options={'-at': 'deblur',
             #     '-m': ModelArg('deblurgan-v2')}
             # ),
-            TestCase(options={'-at': 'jr',
-               '-m': ModelArg('fbcnn')}
-            )
+            TestCase({'-at': 'jr', '-m': ModelArg('fbcnn')}),
+            TestCase({'-at': 'style', '-m': ModelArg('fast-neural-style-mosaic-onnx')}),
         ]
     )),
 
@@ -541,6 +566,8 @@ DEMOS = [
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
+                        ModelArg('faster_rcnn_inception_resnet_v2_atrous_coco'),
+                        ModelArg('faster_rcnn_resnet50_coco'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                         ModelArg('pedestrian-detection-adas-0002'),
@@ -882,11 +909,24 @@ DEMOS = [
             *single_option_cases(
                 '-m',
                 ModelArg('alexnet'),
+                ModelArg('caffenet'),
+                ModelArg('convnext-tiny'),
                 ModelArg('densenet-121-tf'),
+                ModelArg('dla-34'),
+                ModelArg('efficientnet-b0'),
+                ModelArg('efficientnet-v2-b0'),
+                ModelArg('efficientnet-v2-s'),
                 ModelArg('googlenet-v1'),
                 ModelArg('googlenet-v1-tf'),
+                ModelArg('googlenet-v2'),
+                ModelArg('googlenet-v2-tf'),
                 ModelArg('googlenet-v3'),
                 ModelArg('googlenet-v3-pytorch'),
+                ModelArg('googlenet-v4-tf'),
+                ModelArg('hbonet-0.25'),
+                ModelArg('hbonet-1.0'),
+                ModelArg('inception-resnet-v2-tf'),
+                ModelArg('levit-128s'),
                 ModelArg('mixnet-l'),
                 ModelArg('mobilenet-v2-pytorch'),
                 ModelArg('repvgg-a0'),
@@ -902,13 +942,18 @@ DEMOS = [
         ]
     )),
 
-    PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
-       TestCase(options={
-           '--no_show': None,
-           **MONITORS,
-           '-i': DataPatternArg('classification'),
-           '-m': ModelArg('colorization-v2'),
-       })
+    PythonDemo('colorization_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('colorization-v2'),
+            ModelArg('colorization-siggraph'),
+            ModelFileArg('colorization-siggraph', 'colorization-siggraph.onnx'),
+        ),
+        TestCase({
+            '-i': DataPatternArg('classification'),
+            '-m': ModelArg('colorization-v2'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
@@ -1105,10 +1150,16 @@ DEMOS = [
         ]
     )),
 
-    PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, **MONITORS,
-                          '-i': DataPatternArg('object-detection-demo'),
-                          '-m': ModelArg('midasnet')})
+    PythonDemo('monodepth_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('fcrn-dp-nyu-depth-v2-tf'),
+            ModelArg('midasnet'),
+        ),
+        TestCase({
+            '-i': DataPatternArg('object-detection-demo'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     PythonDemo('multi_camera_multi_target_tracking_demo', model_keys=['-m', '--m_segmentation', '--m_reid'], test_cases=combine_cases(
@@ -1201,6 +1252,8 @@ DEMOS = [
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
+                        ModelArg('faster_rcnn_inception_resnet_v2_atrous_coco'),
+                        ModelArg('faster_rcnn_resnet50_coco'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                         ModelArg('pedestrian-detection-adas-0002'),
@@ -1408,9 +1461,14 @@ DEMOS = [
         )
     ),
 
-    PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-                          '-m': ModelArg('aclnet')}),
+    PythonDemo('sound_classification_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('aclnet'),
+            ModelArg('aclnet-int8'),
+            ModelFileArg('aclnet-int8', 'aclnet_des_53_int8.onnx'),
+        ),
+        TestCase({'-i': TestDataArg('how_are_you_doing.wav')}),
     )),
 
     PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
