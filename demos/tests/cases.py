@@ -879,7 +879,8 @@ DEMOS = [
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
         [
-            *single_option_cases('-m',
+            *single_option_cases(
+                '-m',
                 ModelArg('alexnet'),
                 ModelArg('densenet-121-tf'),
                 ModelArg('googlenet-v1'),
@@ -890,7 +891,9 @@ DEMOS = [
                 ModelArg('mobilenet-v2-pytorch'),
                 ModelArg('repvgg-a0'),
                 ModelArg('repvgg-b1'),
-                ModelArg('repvgg-b3')),
+                ModelArg('repvgg-b3'),
+                ModelArg('resnet-50-pytorch'),
+            ),
 
             TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
                         '--reverse_input_channels': None,
@@ -1045,6 +1048,24 @@ DEMOS = [
             '-g': image_retrieval_arg('gallery.txt')
         })
     ]),
+
+    PythonDemo('image_translation_demo', ('--translation_model', '--segmentation_model'), test_cases=combine_cases(
+        [
+            TestCase({
+                '--input_images': TestDataArg('coco128/images/train2017/'),
+                '--reference_images': TestDataArg('coco128/images/train2017/')
+            }),
+            TestCase({
+                '--input_images': TestDataArg('coco128/images/train2017/000000000009.jpg'),
+                '--reference_images': TestDataArg('coco128/images/train2017/000000000025.jpg')
+            }),
+        ],
+        TestCase({
+            '--translation_model': ModelArg('cocosnet'),
+            '--segmentation_model': ModelArg('hrnet-v2-c1-segmentation'),
+            '-o': '.'
+        }),
+    )),
 
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -1295,6 +1316,16 @@ DEMOS = [
                 ]
             ),
         ],
+    )),
+
+    PythonDemo('place_recognition_demo', test_cases=combine_cases(
+        single_option_cases('-m', ModelArg('netvlad-tf'), ModelFileArg('netvlad-tf', 'model_frozen.pb')),
+        TestCase({
+            '--input': TestDataArg('coco128/images/train2017/'),
+            '--gallery_folder': TestDataArg('coco128/images/train2017/'),
+            '--output': 'place_recognition_demo.avi',
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     PythonDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
