@@ -182,6 +182,12 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         self.num_inference_steps = num_inference_steps
 
     def compile(self, launcher):
+        unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
+        if not unet_shapes[0][0].is_dynamic:
+            unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
+            unet_shapes[0][0] = -1
+            unet_shapes[2][0] = -1
+            self.unet_model.reshape(dict(zip(self.unet_model.inputs, unet_shapes)))
         self.unet = launcher.ie_core.compile_model(self.unet_model, launcher.device)
         self.text_encoder = launcher.ie_core.compile_model(self.text_encoder_model, launcher.device)
         self.vae_decoder = launcher.ie_core.compile_model(self.vae_decoder_model, launcher.device)
@@ -191,8 +197,8 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         self._unet_output = self.unet.output(0)
         self._vae_d_output = self.vae_decoder.output(0)
         self._vae_e_output = self.vae_encoder.output(0) if self.vae_encoder is not None else None
-        self.height = self.unet.input(0).shape[2] * 8 #if self.height is None else self.height
-        self.width = self.unet.input(0).shape[3] * 8 #if self.width is None else self.width
+        self.height = unet_shapes[0][2].get_length() * 8 if not unet_shapes[0][2].is_dynamic else 512
+        self.width = unet_shapes[0][3].get_length() * 8 if not unet_shapes[0][3].is_dynamic else 512
 
     def get_models(self):
         model_dict = {"text_encoder": self.text_encoder_model, "unet": self.unet_model, "vae_decoder": self.vae_decoder}
