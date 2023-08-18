@@ -23,7 +23,7 @@ inception-resnet-v2-tf
 levit-128s
 # mixnet-l
 # mobilenet-v1-0.25-128
-mobilenet-v1-1.0-224
+# mobilenet-v1-1.0-224
 # mobilenet-v1-1.0-224-tf
 # mobilenet-v2
 # mobilenet-v2-1.0-224
@@ -43,17 +43,18 @@ resnest-50-pytorch
 resnet-18-pytorch
 resnet-34-pytorch
 resnet-50-pytorch
-resnet-50-tf
+# resnet-50-tf
 resnet18-xnor-binary-onnx-0001
 resnet50-binary-0001
 rexnet-v1-x1.0
 se-inception
 se-resnet-50
 se-resnext-50
-shufflenet-v2-x0.5
+# shufflenet-v2-x0.5
 shufflenet-v2-x1.0
-squeezenet1.0
-squeezenet1.1
+# squeezenet1.0
+# squeezenet1.1
 swin-tiny-patch4-window7-224
+t2t-vit-14
 vgg16
 vgg19
