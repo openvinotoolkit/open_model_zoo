@@ -19,21 +19,19 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2.10
         with:
           key: ubuntu-20.04  # This action prepends and appends its strings to the key
-          restore-keys: ubuntu-20.04
-          max-size: "100M"
           restore: ${{ github.event_name == 'pull_request'}}
-      - uses: actions/cache@v3
+      - if: ${{ github.event_name == 'pull_request'}}
+        uses: actions/cache/restore@v3
         id: cache
         with:
           path: ${{ github.workspace }}/cache
-          key: cpp_gapi-demos-ubuntu-20.04
-          lookup-only: ${{ github.event_name != 'pull_request'}}
-      - if: ${{ !steps.cache.outputs.cache-hit || github.event_name != 'pull_request' }}
+          key: ubuntu20_2023.1.0.dev20230728
+      - if: ${{ !steps.cache.outputs.cache-hit }}
         uses: actions/checkout@v3
         with:
           repository: opencv/opencv
           path: cache/opencv
-      - if: ${{ !steps.cache.outputs.cache-hit || github.event_name != 'pull_request' }}
+      - if: ${{ !steps.cache.outputs.cache-hit }}
         name: Compile OpenCV
         run: |
           rm -rf cache/opencv/.git/  # Minimize cache
@@ -60,3 +58,7 @@ jobs:
         run: |
           source ov/setupvars.sh
           python demos/tests/run_tests.py --demo-build-dir build/intel64/Release/ --test-data-dir . --device CPU --downloader-cache-dir ${{ github.workspace }}/cache/downloader/ --precisions FP16 --demos cpp_gapi
+      - uses: actions/cache/save@v3
+        with:
+          path: ${{ github.workspace }}/cache
+          key: ubuntu20_2023.1.0.dev20230728
