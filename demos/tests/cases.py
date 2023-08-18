@@ -1155,7 +1155,7 @@ DEMOS = [
     PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         [
             TestCase(options={
-                '-i': str(OMZ_DIR / 'models/intel/handwritten-english-recognition-0001/assets/handwritten-english-recognition-0001.png'),
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-english-recognition-0001/assets/handwritten-english-recognition-0001.jpg'),
                 '-m': ModelArg('handwritten-english-recognition-0001'),
                 '-cl': str(OMZ_DIR / 'data/dataset_classes/gnhk.txt')
             }),
