@@ -8,14 +8,14 @@ densenet-121
 dla-34
 efficientnet-b0
 efficientnet-b0-pytorch
+efficientnet-v2-b0
+efficientnet-v2-s
 googlenet-v1
 # googlenet-v1-tf
 googlenet-v2
 googlenet-v2-tf
 # googlenet-v3
 googlenet-v3-pytorch
-efficientnet-v2-b0
-efficientnet-v2-s
 googlenet-v4-tf
 hbonet-0.25
 hbonet-1.0
