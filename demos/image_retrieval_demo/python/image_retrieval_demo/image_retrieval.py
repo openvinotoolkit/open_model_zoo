@@ -19,7 +19,7 @@ import numpy as np
 
 import cv2
 from sklearn.metrics.pairwise import cosine_distances # pylint: disable=import-error
-from tqdm import tqdm
+from tqdm import tqdm#
 
 from image_retrieval_demo.common import from_list, crop_resize
 
