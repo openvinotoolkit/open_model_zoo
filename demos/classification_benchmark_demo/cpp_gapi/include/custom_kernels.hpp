@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+#include <ie_allocator.hpp>
+#include <ie_common.h>
+#include <ie_input_info.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/gkernel.hpp>
 #include <opencv2/gapi/gmat.hpp>

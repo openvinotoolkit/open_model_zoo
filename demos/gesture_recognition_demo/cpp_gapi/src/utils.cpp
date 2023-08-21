@@ -11,10 +11,6 @@
 #include <stdexcept>
 #include <utility>
 
-// #include <cpp/ie_cnn_network.h>
-// #include <ie_core.hpp>
-// #include <ie_input_info.hpp>
-// #include <ie_layouts.h>
 #include <openvino/openvino.hpp>
 
 #define _USE_MATH_DEFINES
