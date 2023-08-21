@@ -96,8 +96,7 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
         throw std::runtime_error("Doesn't support conversion from not dense cv::Mat");
     }
     auto precision = isMatFloat ? ov::element::f32 : ov::element::u8;
-    auto allocator = std::make_shared<SharedTensorAllocator>(mat);
-    return ov::Tensor(precision, ov::Shape{ 1, height, width, channels }, ov::Allocator(allocator));
+    return ov::Tensor(precision, ov::Shape{ 1, height, width, channels }, SharedMatAllocator{mat});
 }
 
 static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {

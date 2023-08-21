@@ -17,31 +17,15 @@
 #pragma once
 
 #include <opencv2/core.hpp>
-#include <openvino/runtime/allocator.hpp>
 
-// To prevent false-positive clang compiler warning
-// (https://github.com/openvinotoolkit/openvino/pull/11092#issuecomment-1073846256):
-// warning: destructor called on non-final 'SharedTensorAllocator' that has virtual functions
-// but non-virtual destructor [-Wdelete-non-abstract-non-virtual-dtor]
-// SharedTensorAllocator class declared as final
+struct SharedMatAllocator {
+    const cv::Mat mat;
 
-class SharedTensorAllocator final : public ov::AllocatorImpl {
-public:
-    SharedTensorAllocator(const cv::Mat& img) : img(img) {}
-
-    ~SharedTensorAllocator() = default;
-
-    void* allocate(const size_t bytes, const size_t) override {
-        return bytes <= img.rows * img.step[0] ? img.data : nullptr;
+    void* allocate(size_t bytes, size_t) {
+        return bytes <= mat.rows * mat.step[0] ? mat.data : nullptr;
     }
-
-    void deallocate(void* handle, const size_t bytes, const size_t) override {}
-
-    bool is_equal(const AllocatorImpl& other) const override {
-        auto other_tensor_allocator = dynamic_cast<const SharedTensorAllocator*>(&other);
-        return other_tensor_allocator != nullptr && other_tensor_allocator == this;
+    void deallocate(void*, size_t, size_t) {}
+    bool is_equal(const SharedMatAllocator& other) const noexcept {
+        return this == &other;
     }
-
-private:
-    const cv::Mat img;
 };

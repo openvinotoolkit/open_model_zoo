@@ -18,11 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include <cpp/ie_cnn_network.h>
 #include <gflags/gflags.h>
-#include <ie_core.hpp>
-#include <ie_input_info.hpp>
-#include <ie_layouts.h>
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/garg.hpp>
@@ -205,19 +201,16 @@ int main(int argc, char* argv[]) {
                                 stringToSize(FLAGS_res));
 
         if (FLAGS_fd_reshape) {
-            InferenceEngine::Core core;
-            const auto network = core.ReadNetwork(FLAGS_m_fd);
-            const auto layerName = network.getInputsInfo().begin()->first;
-            const auto layerData = network.getInputsInfo().begin()->second;
-            auto layerDims = layerData->getTensorDesc().getDims();
+            ov::Output<const ov::Node> input = ov::Core{}.read_model(FLAGS_m_fd)->input();
+            ov::Shape inShape = input.get_shape();
 
             const double imageAspectRatio = std::round(100. * frame_size.width / frame_size.height) / 100.;
-            const double networkAspectRatio = std::round(100. * layerDims[3] / layerDims[2]) / 100.;
+            const double networkAspectRatio = std::round(100. * inShape[3] / inShape[2]) / 100.;
             const double aspectRatioThreshold = 0.01;
 
             if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-                layerDims[3] = static_cast<unsigned long>(layerDims[2] * imageAspectRatio);
-                face_net.cfgInputReshape(layerName, layerDims);
+                inShape[3] = static_cast<unsigned long>(inShape[2] * imageAspectRatio);
+                face_net.cfgInputReshape(input.get_any_name(), inShape);
             }
         }
         auto head_net =
