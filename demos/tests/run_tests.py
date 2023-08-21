@@ -40,6 +40,7 @@ import sys
 import tempfile
 import timeit
 import importlib
+import warnings
 
 from pathlib import Path
 from io import BytesIO
@@ -202,6 +203,7 @@ def get_models(case, keys):
 
 
 def main():
+    warnings.filterwarnings("error")
     args = build_argparser().parse_args()
 
     DEMOS = scopes[args.scope]
