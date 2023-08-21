@@ -25,7 +25,8 @@ jobs:
         id: cache
         with:
           path: ${{ github.workspace }}/cache
-          key: ubuntu20_2023.1.0.dev20230811
+          key: unused
+          restore-keys: ubuntu20_2023.1.0.dev20230811-
       - if: ${{ !steps.cache.outputs.cache-hit }}
         uses: actions/checkout@v3
         with:
@@ -61,4 +62,4 @@ jobs:
       - uses: actions/cache/save@v3
         with:
           path: ${{ github.workspace }}/cache
-          key: ubuntu20_2023.1.0.dev20230811
+          key: ubuntu20_2023.1.0.dev20230811-${{ github.event.repository.updated_at }}
