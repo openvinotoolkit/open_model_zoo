@@ -145,6 +145,9 @@ class PythonDemo(Demo):
         self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
+        if self._exec_name == 'image_retrieval_demo':
+            # sklearn has DeprecationWarning
+            return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
         return [sys.executable, '-W', 'error', str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
 
 
