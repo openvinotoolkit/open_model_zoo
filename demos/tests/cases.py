@@ -183,8 +183,6 @@ DEMOS = [
     CppDemo('classification_benchmark_demo', 'cpp_gapi', test_cases=combine_cases(
         single_option_cases(
             '-m',
-            ModelArg('alexnet'),
-            ModelArg('caffenet'),
             ModelArg('convnext-tiny'),
             # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
             # ModelArg('densenet-121'),
@@ -194,9 +192,7 @@ DEMOS = [
             ModelArg('efficientnet-b0-pytorch'),
             ModelArg('efficientnet-v2-b0'),
             ModelArg('efficientnet-v2-s'),
-            ModelArg('googlenet-v1'),
             # ModelArg('googlenet-v1-tf'),
-            ModelArg('googlenet-v2'),
             # ModelArg('googlenet-v2-tf'),
             # ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
@@ -230,17 +226,12 @@ DEMOS = [
             ModelArg('resnet18-xnor-binary-onnx-0001'),
             ModelArg('resnet50-binary-0001'),
             ModelArg('rexnet-v1-x1.0'),
-            ModelArg('se-inception'),
-            ModelArg('se-resnet-50'),
-            ModelArg('se-resnext-50'),
             # ModelArg('shufflenet-v2-x0.5'),
             ModelArg('shufflenet-v2-x1.0'),
             # ModelArg('squeezenet1.0'),
             # ModelArg('squeezenet1.1'),
             ModelArg('swin-tiny-patch4-window7-224'),
             ModelArg('t2t-vit-14'),
-            ModelArg('vgg16'),
-            ModelArg('vgg19'),
         ),
         TestCase({
             '-time': '5',
