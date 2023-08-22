@@ -145,8 +145,8 @@ class PythonDemo(Demo):
         self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
-        if self._exec_name == 'image_retrieval_demo':
-            # sklearn has DeprecationWarning
+        if self._exec_name in ('image_retrieval_demo', 'time_series_forecasting_demo', 'object_detection_demo'):
+            # sklearn has DeprecationWarning, RuntimeWarning: overflow encountered in exp for yolo-v4-tf
             return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
         return [sys.executable, '-W', 'error', str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
 
