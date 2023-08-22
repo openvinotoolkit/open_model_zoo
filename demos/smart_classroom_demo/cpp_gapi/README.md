@@ -72,7 +72,7 @@ Options:
     -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                          Optional. Enable reading the input in a loop.
     -read_limit                    Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                    Optional. Name of the output file(s) to save.
+    -o "<path>"                    Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
     -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
     -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.

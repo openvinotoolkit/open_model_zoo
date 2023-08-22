@@ -101,7 +101,7 @@ General:
                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --output_resolution OUTPUT_RESOLUTION

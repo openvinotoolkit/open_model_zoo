@@ -68,7 +68,7 @@ Options:
     -m_a                     Required. Path to an .xml file with a trained gesture recognition model.
     -m_d                     Required. Path to an .xml file with a trained person detector model.
     -i                       Required. Path to a video file or a device node of a webcam.
-    -o                       Optional. Name of the output file(s) to save.
+    -o                       Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
     -limit                   Optional. Number of frames to store in output. If -1 is set, all frames are stored.
     -c                       Required. Path to a file with gesture classes.
     -s                       Optional. Path to a directory with video samples of gestures.

@@ -104,7 +104,7 @@ Options:
     -loop                        Optional. Enable reading the input in a loop.
     -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
     -read_limit                  Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                  Optional. Name of the output file(s) to save.
+    -o "<path>"                  Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
     -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
