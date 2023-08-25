@@ -17,6 +17,7 @@
 #include <map>
 
 #include <algorithm>
+#include <iterator>
 #include <cctype>
 #include <sstream>
 
@@ -75,6 +76,13 @@ std::vector<std::string> split(const std::string& s, char delim) {
         result.push_back(item);
     }
     return result;
+}
+
+std::string merge(std::initializer_list<std::string> list, const char* delim) {
+    std::stringstream ss;
+    std::copy(list.begin(), list.end(),
+              std::ostream_iterator<std::string>(ss, delim));
+    return ss.str();
 }
 
 std::vector<std::string> parseDevices(const std::string& device_string) {

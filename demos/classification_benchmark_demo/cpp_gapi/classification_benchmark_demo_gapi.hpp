@@ -8,6 +8,11 @@
 
 #include <gflags/gflags.h>
 
+#include <gapi_features.hpp>
+#include <utils/args_helper.hpp>
+
+#include "execution_providers.hpp"
+
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
@@ -26,8 +31,14 @@ static const char no_show_message[] = "Optional. Disable showing of processed im
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char ep_message[] = "Optional. List of inference execution providers.";
-
+#ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+static const std::string ep_message_str("Optional. List of inference execution providers: " +
+                                    merge(getSupportedEP(), ",") +
+                                    " - separated by \";\". Each provider followed by its device. Use \":\" as <provider:device> separator");
+static const char *ep_message = ep_message_str.c_str();
+#else // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+static const char ep_message[] = "Optional. Inference execution providers are not supported";
+#endif // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
@@ -67,5 +78,7 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-    std::cout << "    -e                        " << ep_message << std::endl;
+#ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+    std::cout << "    -ep                       " << ep_message << std::endl;
+#endif // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
 }

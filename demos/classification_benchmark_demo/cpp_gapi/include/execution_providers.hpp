@@ -16,15 +16,17 @@
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/infer/onnx.hpp>
 
+#include <gapi_features.hpp>
+
 using execution_provider_t = std::string;
 using execution_provider_arg_t = std::string;
 using execution_provider_desription_t = std::pair<execution_provider_t, execution_provider_arg_t>;
 using execution_providers_t = std::stack<execution_provider_desription_t>;
 
 
-inline const std::list<execution_provider_t> getSupportedEP() {
+inline const std::initializer_list<execution_provider_t> getSupportedEP() {
 #ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
-    static const std::list<execution_provider_t> providers{"DML", "OVEP"};
+    static const std::initializer_list<execution_provider_t> providers{"DML", "OVEP"};
     return providers;
 #else // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
     return {};
@@ -51,16 +53,16 @@ static void applyOVEPProvider(ExecNetwork &net, const std::string &device_name) 
 }
 
 template<class ExecNetwork, class ...Args>
-void applyProvider(ExecNetwork& net, const execution_provider_desription_t &multiple_ep = execution_provider_desription_t{})
+void applyProvider(ExecNetwork& net, execution_providers_t multiple_ep = execution_providers_t{}) {
+    if (multiple_ep.empty()) {
+        return;
+    }
     static const std::map<execution_provider_t, provider_applicator_t<ExecNetwork>> maps{
         {"DML",  &applyDMLProvider<ExecNetwork>},
         {"OVEP", &applyOVEPProvider<ExecNetwork>}};
-    if (multiple_ep.empty()) {
-        return net;
-    }
 
     execution_provider_t provider;
-    execution_provider_device_t device;
+    execution_provider_arg_t device;
     while(!multiple_ep.empty()) {
         std::tie(provider, device) = multiple_ep.top();
         multiple_ep.pop();

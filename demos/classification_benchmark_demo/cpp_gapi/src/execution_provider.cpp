@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#include "utils/args_helper.hpp"
 #include "execution_providers.hpp"
 
 
@@ -18,17 +19,14 @@ execution_providers_t createProvidersFromString(const std::string &str){
     std::stringstream params_list(str);
     try {
         std::string line;
-        std::string::size_type endline_pos = std::string::npos;
         while (std::getline(params_list, line, ';')) {
-            std::string::size_type name_endline_pos = line.find(':');
-            if (name_endline_pos == std::string::npos) {
+            std::vector<std::string> splitted_line = split(line, ':');
+            if (splitted_line.size() != 2) {
                 throw std::runtime_error("Cannot parse execution provider from string: " + line +
-                                        ". Name and value should be separated by \":\"" );
+                                        ". Provider name and its device must be separated by \":\" - <provider>:<device>");
             }
 
-            std::string name = line.substr(0, name_endline_pos);
-            std::string value = line.substr(name_endline_pos + 2);
-            providers.emplace(std::move(name), std::move(value));
+            providers.emplace(std::move(splitted_line[0]), std::move(splitted_line[1]));
         }
     } catch (const std::exception& ex) {
         std::cerr << "Invalid -ep format: " << ex.what() << std::endl;

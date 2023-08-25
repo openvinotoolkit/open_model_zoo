@@ -67,28 +67,27 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
 }
 
 template<class ExecNetwork>
-cv::gapi::ie::Params<ExecNetwork>
-        create_execution_network(const std::string &model_path,
-                                 const ModelConfig &config,
-                                 const execution_providers_t &multiple_ep = execution_providers_t{}) {
+cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
+                                               const ModelConfig &config,
+                                               const execution_providers_t &multiple_ep = execution_providers_t{}) {
     if (multiple_ep.empty()) {
         // clang-format off
         const auto net =
-            cv::gapi::ie::Params<nets::Classification>{
+            cv::gapi::ie::Params<ExecNetwork>{
                 model_path,  // path to topology IR
                 fileNameNoExt(model_path) + ".bin",  // path to weights
                 config.deviceName  // device specifier
             }.cfgNumRequests(config.maxAsyncRequests)
             .pluginConfig(config.getLegacyConfig());
-        return net;
+        return cv::gapi::networks(net);
     }
 #ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
     auto net =
-            cv::gapi::ie::Params<nets::Classification>{
+            cv::gapi::onnx::Params<ExecNetwork>{
                 FLAGS_m
             };
     applyProvider(net, multiple_ep);
-    return net;
+    return cv::gapi::networks(net);
 #else // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
     throw std::runtime_error(std::string("G-API execution providers are not available in OPENCV: ") +
                              CV_VERSION +
@@ -166,7 +165,7 @@ int main(int argc, char* argv[]) {
         auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
         execution_providers_t providers = createProvidersFromString(FLAGS_ep);
-        nets += cv::gapi::networks(util::create_execution_network<nets::Classification>(FLAGS_m, config, providers));
+        nets += util::create_execution_network<nets::Classification>(FLAGS_m, config, providers);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
                                               nets,
                                               cv::gapi::streaming::queue_capacity{1}));
