@@ -93,7 +93,7 @@ ModelConfig ConfigFactory::getCommonConfig(const std::string& flags_d, uint32_t 
     return config;
 }
 
-std::map<std::string, std::string> ModelConfig::getLegacyConfig() {
+std::map<std::string, std::string> ModelConfig::getLegacyConfig() const {
     std::map<std::string, std::string> config;
     for (const auto& item : compiledModelConfig) {
         config[item.first] = item.second.as<std::string>();

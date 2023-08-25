@@ -20,6 +20,7 @@
 #include <opencv2/gapi/gproto.hpp>
 #include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/onnx.hpp>
 #include <opencv2/gapi/util/optional.hpp>
 
 
@@ -39,8 +40,12 @@
 
 #include "classification_benchmark_demo_gapi.hpp"
 #include "custom_kernels.hpp"
+#include "execution_providers.hpp"
 #include <models/classification_model.h>
 
+namespace nets {
+G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
+}
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
@@ -61,11 +66,36 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-}  // namespace util
-
-namespace nets {
-G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
+template<class ExecNetwork>
+cv::gapi::ie::Params<ExecNetwork>
+        create_execution_network(const std::string &model_path,
+                                 const ModelConfig &config,
+                                 const execution_providers_t &multiple_ep = execution_providers_t{}) {
+    if (multiple_ep.empty()) {
+        // clang-format off
+        const auto net =
+            cv::gapi::ie::Params<nets::Classification>{
+                model_path,  // path to topology IR
+                fileNameNoExt(model_path) + ".bin",  // path to weights
+                config.deviceName  // device specifier
+            }.cfgNumRequests(config.maxAsyncRequests)
+            .pluginConfig(config.getLegacyConfig());
+        return net;
+    }
+#ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+    auto net =
+            cv::gapi::ie::Params<nets::Classification>{
+                FLAGS_m
+            };
+    applyProvider(net, multiple_ep);
+    return net;
+#else // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+    throw std::runtime_error(std::string("G-API execution providers are not available in OPENCV: ") +
+                             CV_VERSION +
+                             "\nPlease make sure you are using 4.9.0 at least");
+#endif // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
 }
+}  // namespace util
 
 int main(int argc, char* argv[]) {
     try {
@@ -133,19 +163,12 @@ int main(int argc, char* argv[]) {
         });
 
         /** Configure network **/
+        auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
-        // clang-format off
-        const auto net =
-            cv::gapi::ie::Params<nets::Classification>{
-                FLAGS_m,  // path to topology IR
-                fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
-                FLAGS_d  // device specifier
-            }.cfgNumRequests(config.maxAsyncRequests)
-             .pluginConfig(config.getLegacyConfig());
-        // clang-format on
-
+        execution_providers_t providers = createProvidersFromString(FLAGS_ep);
+        nets += cv::gapi::networks(util::create_execution_network<nets::Classification>(FLAGS_m, config, providers));
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
-                                              cv::gapi::networks(net),
+                                              nets,
                                               cv::gapi::streaming::queue_capacity{1}));
 
         /** Output container for result **/
