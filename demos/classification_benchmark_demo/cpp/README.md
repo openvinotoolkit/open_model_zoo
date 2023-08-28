@@ -1,6 +1,6 @@
 # Classification Benchmark C++ Demo
 
-![](./classification_benchmark.gif)
+![](../classification_benchmark.gif)
 
 The demo visualizes OpenVINO performance on inference of neural networks for image classification.
 
@@ -43,6 +43,8 @@ omz_converter --list models.lst
 * dla-34
 * efficientnet-b0
 * efficientnet-b0-pytorch
+* efficientnet-v2-b0
+* efficientnet-v2-s
 * googlenet-v1
 * googlenet-v1-tf
 * googlenet-v2
@@ -62,10 +64,10 @@ omz_converter --list models.lst
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
-* mobilenet-v3-large-1.0-224-tf
-* mobilenet-v3-small-1.0-224-tf
 * mobilenet-v3-large-1.0-224-paddle
+* mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-paddle
+* mobilenet-v3-small-1.0-224-tf
 * nfnet-f0
 * octave-resnet-26-0.25
 * regnetx-3.2gf
@@ -88,6 +90,7 @@ omz_converter --list models.lst
 * squeezenet1.0
 * squeezenet1.1
 * swin-tiny-patch4-window7-224
+* t2t-vit-14
 * vgg16
 * vgg19
 

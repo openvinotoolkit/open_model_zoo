@@ -63,7 +63,7 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher) const;
+                    const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& results_fetcher);
 
     /** @brief Config */
     Config m_config;
@@ -72,15 +72,14 @@ protected:
     /** @brief Model outputs info */
     ov::OutputVector m_outInfo_;
     /** @brief Model layout */
-    ov::Layout m_modelLayout;
+    ov::Layout m_desired_layout;
     /** @brief Model input shape */
     ov::Shape m_modelShape;
     /** @brief Compled model */
     ov::CompiledModel m_compiled_model;
     /** @brief Inference request */
-    mutable ov::InferRequest m_infer_request;
-    /** @brief Name of the input tensor */
-    std::string m_input_tensor_name;
+    ov::InferRequest m_infer_request;
+    ov::Tensor m_in_tensor;
     /** @brief Names of output tensors */
     std::vector<std::string> m_output_tensors_names;
 };
@@ -90,9 +89,9 @@ public:
     explicit VectorCNN(const CnnConfig& config);
 
     void Compute(const cv::Mat& image,
-                 cv::Mat* vector, cv::Size outp_shape = cv::Size()) const;
+                 cv::Mat* vector, cv::Size outp_shape = cv::Size());
     void Compute(const std::vector<cv::Mat>& images,
-                 std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
+                 std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size());
     int maxBatchSize() const;
 };
 

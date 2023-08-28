@@ -25,17 +25,11 @@ void CnnDLSDKBase::Load() {
     if (inputs.size() != 1) {
         throw std::runtime_error("Network should have only one input");
     }
-
-    ov::Layout desiredLayout = {"NHWC"};
-
-    m_input_tensor_name = model->input().get_any_name();
-
-    m_modelLayout = ov::layout::get_layout(model->input());
-    if (m_modelLayout.empty())
-        m_modelLayout = {"NCHW"};
-
-    m_modelShape = model->input().get_shape();
-
+    m_desired_layout = {"NHWC"};
+    ov::Layout model_layout = ov::layout::get_layout(model->input());
+    if (model_layout.empty()) {
+        model_layout = {"NCHW"};
+    }
     ov::OutputVector outputs = model->outputs();
     for (auto& item : outputs) {
         const std::string name = item.get_any_name();
@@ -46,47 +40,43 @@ void CnnDLSDKBase::Load() {
 
     ppp.input().tensor()
         .set_element_type(ov::element::u8)
-        .set_layout(desiredLayout);
+        .set_layout(m_desired_layout);
     ppp.input().preprocess()
-        .convert_layout(m_modelLayout)
+        .convert_layout(model_layout)
         .convert_element_type(ov::element::f32);
-    ppp.input().model().set_layout(m_modelLayout);
+    ppp.input().model().set_layout(model_layout);
 
     model = ppp.build();
 
     slog::info << "PrePostProcessor configuration:" << slog::endl;
     slog::info << ppp << slog::endl;
 
+    m_modelShape = model->input().get_shape();
+    m_modelShape[ov::layout::batch_idx(m_desired_layout)] = m_config.m_max_batch_size;
     // allow 1...max_batch range, actual will be set at inference time
     ov::set_batch(model, {1, m_config.m_max_batch_size});
-
-    m_modelShape[ov::layout::batch_idx(m_modelLayout)] = m_config.m_max_batch_size;
 
     m_compiled_model = m_config.m_core.compile_model(model, m_config.m_deviceName);
     logCompiledModelInfo(m_compiled_model, m_config.m_path_to_model, m_config.m_deviceName, m_config.m_model_type);
 
     m_infer_request = m_compiled_model.create_infer_request();
+    m_in_tensor = m_infer_request.get_input_tensor();
+    m_in_tensor.set_shape(m_modelShape);
 }
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
-        const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) const {
-    ov::Tensor input_tensor = m_infer_request.get_tensor(m_input_tensor_name);
-
+        const std::function<void(const std::map<std::string, ov::Tensor>&, size_t)>& fetch_results) {
     size_t num_imgs = frames.size();
 
-    size_t h = m_modelShape[ov::layout::height_idx(m_modelLayout)];
-    size_t w = m_modelShape[ov::layout::width_idx(m_modelLayout)];
-    size_t c = m_modelShape[ov::layout::channels_idx(m_modelLayout)];
-
-    // shrink tensor from default m_config.m_max_batch_size to actual num of images;
-    input_tensor.set_shape({ num_imgs, h, w, c });
-
+    size_t h = m_modelShape[ov::layout::height_idx(m_desired_layout)];
+    size_t w = m_modelShape[ov::layout::width_idx(m_desired_layout)];
+    size_t c = m_modelShape[ov::layout::channels_idx(m_desired_layout)];
+    std::cout << m_in_tensor.get_shape() << ' ' << num_imgs << ' ' << m_modelShape << '\n';
     for (size_t i = 0; i < num_imgs; i++) {
-        resize2tensor(frames[i], ov::Tensor{ input_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} });
+        resize2tensor(frames[i], ov::Tensor{ m_in_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} });
     }
-
-    m_infer_request.set_input_tensor(ov::Tensor{ input_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
+    m_infer_request.set_input_tensor(ov::Tensor{ m_in_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
 
     m_infer_request.infer();
 
@@ -105,13 +95,13 @@ VectorCNN::VectorCNN(const Config& config) : CnnDLSDKBase(config) {
     }
 }
 
-void VectorCNN::Compute(const cv::Mat& frame, cv::Mat* vector, cv::Size outp_shape) const {
+void VectorCNN::Compute(const cv::Mat& frame, cv::Mat* vector, cv::Size outp_shape) {
     std::vector<cv::Mat> output;
     Compute({frame}, &output, outp_shape);
     *vector = output[0];
 }
 
-void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors, cv::Size outp_shape) const {
+void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>* vectors, cv::Size outp_shape) {
     if (images.empty()) {
         return;
     }

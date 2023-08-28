@@ -12,9 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from args import image_net_arg, brats_arg, image_retrieval_arg
+from args import TestDataArg, image_net_arg, brats_arg, image_retrieval_arg
 
 DATA_SEQUENCES = {
+    'coco128-every-480x640x3': [
+        TestDataArg('coco128/images/train2017/000000000009.jpg'),
+        TestDataArg('coco128/images/train2017/000000000089.jpg'),
+        TestDataArg('coco128/images/train2017/000000000110.jpg'),
+        TestDataArg('coco128/images/train2017/000000000110.jpg'),  # Repeat for reid
+        TestDataArg('coco128/images/train2017/000000000133.jpg'),
+        TestDataArg('coco128/images/train2017/000000000144.jpg'),
+        TestDataArg('coco128/images/train2017/000000000164.jpg'),
+        TestDataArg('coco128/images/train2017/000000000192.jpg'),
+        TestDataArg('coco128/images/train2017/000000000194.jpg'),
+        TestDataArg('coco128/images/train2017/000000000196.jpg'),
+        TestDataArg('coco128/images/train2017/000000000208.jpg'),
+        TestDataArg('coco128/images/train2017/000000000250.jpg'),
+        TestDataArg('coco128/images/train2017/000000000257.jpg'),
+        TestDataArg('coco128/images/train2017/000000000307.jpg'),
+        TestDataArg('coco128/images/train2017/000000000321.jpg'),
+        TestDataArg('coco128/images/train2017/000000000332.jpg'),
+        TestDataArg('coco128/images/train2017/000000000349.jpg'),
+        TestDataArg('coco128/images/train2017/000000000382.jpg'),
+        TestDataArg('coco128/images/train2017/000000000387.jpg'),
+        TestDataArg('coco128/images/train2017/000000000389.jpg'),
+        TestDataArg('coco128/images/train2017/000000000397.jpg'),
+        TestDataArg('coco128/images/train2017/000000000419.jpg'),
+        TestDataArg('coco128/images/train2017/000000000438.jpg'),
+        TestDataArg('coco128/images/train2017/000000000443.jpg'),
+        TestDataArg('coco128/images/train2017/000000000450.jpg'),
+        TestDataArg('coco128/images/train2017/000000000508.jpg'),
+        TestDataArg('coco128/images/train2017/000000000510.jpg'),
+        TestDataArg('coco128/images/train2017/000000000520.jpg'),
+        TestDataArg('coco128/images/train2017/000000000531.jpg'),
+        TestDataArg('coco128/images/train2017/000000000532.jpg'),
+        TestDataArg('coco128/images/train2017/000000000569.jpg'),
+        TestDataArg('coco128/images/train2017/000000000589.jpg'),
+        TestDataArg('coco128/images/train2017/000000000595.jpg'),
+        TestDataArg('coco128/images/train2017/000000000605.jpg'),
+        TestDataArg('coco128/images/train2017/000000000612.jpg'),
+        TestDataArg('coco128/images/train2017/000000000626.jpg'),
+    ],
+
+    # It takes long to run on 'coco128-every-480x640x3' thus use a subset.
+    # This may indicate threre's a bug in smart_classroom_demo/cpp_gapi,
+    # but running on a video didn't show any problem
+    'coco128-subset-480x640x3': [
+        TestDataArg('coco128/images/train2017/000000000009.jpg'),
+        TestDataArg('coco128/images/train2017/000000000089.jpg'),
+        TestDataArg('coco128/images/train2017/000000000110.jpg'),
+        TestDataArg('coco128/images/train2017/000000000110.jpg'),  # Repeat for reid
+        TestDataArg('coco128/images/train2017/000000000133.jpg'),
+        TestDataArg('coco128/images/train2017/000000000144.jpg'),
+        TestDataArg('coco128/images/train2017/000000000164.jpg'),
+        TestDataArg('coco128/images/train2017/000000000192.jpg'),
+        TestDataArg('coco128/images/train2017/000000000194.jpg'),
+        TestDataArg('coco128/images/train2017/000000000196.jpg'),
+        TestDataArg('coco128/images/train2017/000000000208.jpg'),
+        TestDataArg('coco128/images/train2017/000000000250.jpg'),
+        TestDataArg('coco128/images/train2017/000000000257.jpg'),
+        TestDataArg('coco128/images/train2017/000000000307.jpg'),
+        TestDataArg('coco128/images/train2017/000000000321.jpg'),
+        TestDataArg('coco128/images/train2017/000000000332.jpg'),
+        TestDataArg('coco128/images/train2017/000000000349.jpg'),
+    ],
+
     '375x500': [
         image_net_arg('00000009'),
         image_net_arg('00000022'),
@@ -110,9 +172,7 @@ DATA_SEQUENCES = {
         image_net_arg('00000094'),
     ],
 
-    'image-retrieval-video': [
-        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
-    ],
+    'image-retrieval-video': image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
 
     'instance-segmentation': [
         image_net_arg('00000001'),
@@ -139,9 +199,11 @@ DATA_SEQUENCES = {
         image_net_arg('00017293'),
         image_net_arg('00040547'),
         image_net_arg('00000002'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
     ],
 
-    'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 11,
+    'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 13,
 
     'object-detection-demo': [
         image_net_arg('00000001'),
@@ -211,12 +273,10 @@ DATA_SEQUENCES = {
         image_net_arg('00048316'),
     ],
 
-    # reduced test set for mask rcnn demo
+    # Test batch 2: not enough GPU memory for greater batch
     'instance-segmentaion-mask-rcnn': [
         image_net_arg('00002790'),
         image_net_arg('00005809'),
-#        image_net_arg('00038629'),
-#        image_net_arg('00048316')
     ],
 
     'single-image-super-resolution': [

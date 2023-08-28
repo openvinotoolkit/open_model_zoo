@@ -14,6 +14,11 @@
  limitations under the License.
 """
 
+import os
+if hasattr(os, "add_dll_directory"):
+    for path in os.environ.get("PATH", "").split(";"):
+        if os.path.isdir(path):
+            os.add_dll_directory(path)
 try:
     from monitors_extension import Presenter
 except ImportError:

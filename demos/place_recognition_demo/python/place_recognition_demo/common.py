@@ -33,8 +33,7 @@ def max_central_square_crop(image):
 
 def crop_resize(image, input_size):
     ''' Makes max-sized central squared crop and resize to input_size '''
-
-    image = max_central_square_crop(image)
-    image = cv2.resize(image, (input_size[1], input_size[0]))
-    image = np.expand_dims(image, axis=0)
-    return image
+    if input_size[0].is_static and input_size[1].is_static:
+        image = max_central_square_crop(image)
+        image = cv2.resize(image, (input_size[1].get_length(), input_size[0].get_length()))
+    return np.expand_dims(image, axis=0)

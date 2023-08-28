@@ -99,6 +99,12 @@ class Detector(IEModel, DetectorInterface):
         return detections
 
 
+def _remove_batch_dim_from_each_element_because_outputs_itself_is_a_list_representing_a_batch(outputs):
+    for idx, obj in enumerate(outputs):
+        assert 1 == obj.shape[0]
+        outputs[idx] = obj[0]
+
+
 class VectorCNN(IEModel):
     """Wrapper class for a network returning a vector"""
 
@@ -112,6 +118,7 @@ class VectorCNN(IEModel):
         for id, frame in enumerate(batch):
             super().forward_async(frame, id)
         outputs = self.grab_all_async()
+        _remove_batch_dim_from_each_element_because_outputs_itself_is_a_list_representing_a_batch(outputs)
         return outputs
 
     def forward_async(self, batch):

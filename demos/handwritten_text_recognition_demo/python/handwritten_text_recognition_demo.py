@@ -59,6 +59,8 @@ def get_characters(args):
 
 def preprocess_input(image_name, height, width):
     src = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
+    if src is None:
+        raise RuntimeError(f"Failed to imread {image_name}")
     ratio = float(src.shape[1]) / float(src.shape[0])
     tw = int(height * ratio)
     rsz = cv2.resize(src, (tw, height), interpolation=cv2.INTER_AREA).astype(np.float32)

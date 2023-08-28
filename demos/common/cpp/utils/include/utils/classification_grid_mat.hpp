@@ -16,13 +16,15 @@
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>
 
+#include "utils/performance_metrics.hpp"
+
 enum class PredictionResult { Correct, Incorrect, Unknown };
 
-class GridMat {
+class ClassificationGridMat {
 public:
     cv::Mat outImg;
 
-    explicit GridMat(Presenter& presenter,
+    explicit ClassificationGridMat(Presenter& presenter,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
                      const cv::Size aspectRatio = cv::Size{16, 9},
                      double targetFPS = 60)
@@ -48,7 +50,7 @@ public:
 
         textSize = cv::getTextSize("", fontType, fontScale, thickness, &baseline);
         accuracyMessageSize = cv::getTextSize("Accuracy (top 0): 0.000", fontType, fontScale, thickness, &baseline);
-        testMessageSize = cv::getTextSize(GridMat::testMessage, fontType, fontScale, thickness, &baseline);
+        testMessageSize = cv::getTextSize(ClassificationGridMat::testMessage, fontType, fontScale, thickness, &baseline);
     }
 
     void textUpdate(PerformanceMetrics& metrics,
@@ -83,7 +85,7 @@ public:
         if (isFpsTest) {
             cv::putText(
                 outImg,
-                GridMat::testMessage,
+                ClassificationGridMat::testMessage,
                 cv::Point(outImg.cols - testMessageSize.width - textPadding, (textSize.height + textPadding) * 2),
                 fontType,
                 fontScale,
@@ -150,4 +152,4 @@ private:
     cv::Size testMessageSize;
 };
 
-constexpr const char GridMat::testMessage[];
+constexpr const char ClassificationGridMat::testMessage[];

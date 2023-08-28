@@ -26,7 +26,7 @@ import nibabel as nib
 from PIL import Image, ImageSequence
 from argparse import ArgumentParser, SUPPRESS
 from fnmatch import fnmatch
-from scipy.ndimage import interpolation
+from scipy.ndimage import zoom
 
 from openvino.runtime import Core, get_version, PartialShape
 
@@ -175,7 +175,7 @@ def normalize(image, mask, full_intensities_range):
 def resample_np(data, output_shape, order):
     assert len(data.shape) == len(output_shape)
     factor = [float(o) / i for i, o in zip(data.shape, output_shape)]
-    return interpolation.zoom(data, zoom=factor, order=order)
+    return zoom(data, zoom=factor, order=order)
 
 
 def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
@@ -367,7 +367,9 @@ def main():
     if args.output_nifti and is_nifti_data:
         for seg_res in list_seg_result:
             nii_filename = os.path.join(args.path_to_output, 'output_{}.nii.gz'.format(list_seg_result.index(seg_res)))
-            nib.save(nib.Nifti1Image(seg_res, affine=affine), nii_filename)
+            # Nifti1Image expects uint8, but brain-tumor-segmentation-0001 gives int64.
+            # brain-tumor-segmentation-0002 gives uint8
+            nib.save(nib.Nifti1Image(seg_res.astype(np.uint8), affine=affine), nii_filename)
             log.debug("Result nifti file was saved to {}".format(nii_filename))
 
 if __name__ == "__main__":

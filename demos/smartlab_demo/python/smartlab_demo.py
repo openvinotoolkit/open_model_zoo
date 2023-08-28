@@ -49,16 +49,17 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('-m_sm', '--m_sidemove', help='Required. Path to sidetview moving class model.',
                       required=True, type=str)
-    args.add_argument('--mode', default='multiview', help='Optional. action recognition mode: multiview or mstcn',
+    args.add_argument('--mode', default='multiview', help='Optional. Action recognition mode: multiview or mstcn',
                       type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required for mstcn mode. Path to encoder model.',
                       required=False, type=str)
-    args.add_argument('-m_en_t', '--m_encoder_top', help='Required for multivew mode. Path to encoder model.',
+    args.add_argument('-m_en_t', '--m_encoder_top', help='Required for multiview mode. Path to encoder model for top view.',
                       required=False, type=str)
-    args.add_argument('-m_en_s', '--m_encoder_side', help='Required for multivew mode. Path to encoder model.',
+    args.add_argument('-m_en_s', '--m_encoder_side', help='Required for multiview mode. Path to encoder model for side view.',
                       required=False, type=str)
     args.add_argument('-m_de', '--m_decoder', help='Required. Path to decoder model.',
                       required=True, type=str)
+    args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
 
     return parser
 
@@ -179,26 +180,26 @@ def main():
     '''Video Segmentation Variables'''
     if (args.mode == "multiview"):
         segmentor = Segmentor(core, args.device, args.m_encoder_side, args.m_encoder_top, args.m_decoder)
-    elif (args.mode == "mstcn"):
+    elif (args.mode == "mtcnn"):
         segmentor = SegmentorMstcn(core, args.device, args.m_encoder, args.m_decoder)
     else:
-        ValueError(f"Not supported mode: {args.sideview}")
+        raise ValueError(f"Not supported mode: {args.sideview}")
 
     '''Score Evaluation Variables'''
     evaluator = Evaluator()
 
     '''Display Obj Detection, Action Segmentation and Score Evaluation Result'''
-    display = Display()
+    display = Display(not args.no_show)
 
     """
         Process the video.
     """
     cap_top = cv2.VideoCapture(args.topview)
     if not cap_top.isOpened():
-        raise ValueError(f"Can't read an video or frame from {args.topview}")
+        raise ValueError(f"Can't open a video or frame from {args.topview}")
     cap_side = cv2.VideoCapture(args.sideview)
     if not cap_side.isOpened():
-        raise ValueError(f"Can't read an video or frame from {args.sideview}")
+        raise ValueError(f"Can't open a video or frame from {args.sideview}")
 
     video_loop(
         args, cap_top, cap_side, detector, segmentor, evaluator, display)

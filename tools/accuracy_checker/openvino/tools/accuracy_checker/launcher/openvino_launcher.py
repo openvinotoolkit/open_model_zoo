@@ -24,7 +24,7 @@ import numpy as np
 from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
-    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
+    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS, AUTO_DEVICE_KEYWORD, AUTO_SINGLE_DEVICE_KEYWORD,
     get_cpu_extension,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator,
@@ -242,6 +242,9 @@ class OpenVINOLauncher(Launcher):
     def _is_multi(self):
         return self._device.startswith(MULTI_DEVICE_KEYWORD)
 
+    def _is_auto(self):
+        return self._device.startswith(AUTO_SINGLE_DEVICE_KEYWORD)
+
     def _devices_list(self):
         device = self._device
         if self._is_hetero():
@@ -249,6 +252,10 @@ class OpenVINOLauncher(Launcher):
         if self._is_multi():
             device = self._device[len(MULTI_DEVICE_KEYWORD):]
             device = re.sub(NIREQ_REGEX, '', device)
+        if self._is_auto():
+            if device == AUTO_SINGLE_DEVICE_KEYWORD:
+                return [self._device]
+            device = self._device[len(AUTO_DEVICE_KEYWORD):]
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
@@ -314,7 +321,7 @@ class OpenVINOLauncher(Launcher):
                 required_shape[-1*len(shape):] = shape
                 shape = required_shape
             p_shape = PartialShape(
-                [Dimension(d) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
+                [Dimension(d if d != 0 else -1) if not isinstance(d, tuple) else Dimension(d[0], d[1]) for d in shape])
             partial_shapes[self.input_to_index[name]] = p_shape
         self.network.reshape(partial_shapes)
         self.dyn_input_layers, self._partial_shapes = self.get_dynamic_inputs(self.network)

@@ -32,12 +32,11 @@
 #include <pipelines/async_pipeline.h>
 #include <pipelines/metadata.h>
 #include <utils/args_helper.hpp>
+#include <utils/classification_grid_mat.hpp>
 #include <utils/common.hpp>
 #include <utils/config_factory.h>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
-
-#include "grid_mat.hpp"
 
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
@@ -201,6 +200,12 @@ int main(int argc, char* argv[]) {
                 if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
                 }
+                // std::map type for classIndicesMap guarantees to sort out images by name.
+                // The same logic is applied in openImagesCapture() for DirReader source type,
+                // which produces data for sorted pictures.
+                // To be coherent in detection of ground truth for pictures we have to
+                // use the same sorting approach for a source and ground truth data
+                // If you're going to copy paste this code, remember that pictures need to be sorted
                 classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
             }
 
@@ -241,12 +246,12 @@ int main(int argc, char* argv[]) {
         int height;
         std::vector<std::string> gridMatRowsCols = split(FLAGS_res, 'x');
         if (gridMatRowsCols.size() != 2) {
-            throw std::runtime_error("The value of GridMat resolution flag is not valid.");
+            throw std::runtime_error("The value of ClassificationGridMat resolution flag is not valid.");
         } else {
             width = std::stoi(gridMatRowsCols[0]);
             height = std::stoi(gridMatRowsCols[1]);
         }
-        GridMat gridMat(presenter, cv::Size(width, height));
+        ClassificationGridMat gridMat(presenter, cv::Size(width, height));
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
         double accuracy = 0;
@@ -267,7 +272,7 @@ int main(int argc, char* argv[]) {
             if (isTestMode && elapsedSeconds >= testDuration) {
                 isTestMode = false;
                 typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-                gridMat = GridMat(presenter,
+                gridMat = ClassificationGridMat(presenter,
                                   cv::Size(width, height),
                                   cv::Size(16, 9),
                                   (framesNum - framesNumOnCalculationStart) /

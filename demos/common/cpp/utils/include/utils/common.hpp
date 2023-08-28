@@ -188,3 +188,6 @@ inline void logBasicModelInfo(const std::shared_ptr<ov::Model>& model) {
 
     return;
 }
+
+std::vector<unsigned> loadClassIndices(const std::string &groundtruth_filepath,
+                                       const std::vector<std::string> &imageNames);
