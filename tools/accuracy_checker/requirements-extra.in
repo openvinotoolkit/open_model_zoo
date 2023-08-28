@@ -30,7 +30,7 @@ pyclipper>=1.2.1
 # brain tumor segmentation
 nibabel>=3.2.1
 # nncf's upperbound: https://github.com/openvinotoolkit/nncf/blob/a8af39627647ddbb89ef33cf42ff42e9c048b981/setup.py#L106
-scipy >=1.5.4,<1.11
+scipy>=1.5.4
 
 # dicom images reading
 pydicom>=2.1.2
