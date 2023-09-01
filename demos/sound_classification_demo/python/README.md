@@ -67,6 +67,8 @@ You can use the following command to do inference on GPU with a pre-trained soun
 python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --sample_rate 16000
 ```
 
+An example audio file can be taken from https://storage.openvinotoolkit.org/models_contrib/speech/2021.2/librispeech_s5/how_are_you_doing_today.wav.
+
 ## Demo Output
 
 The demo uses console to display the predictions. It shows classification of each clip and total prediction of whole audio.

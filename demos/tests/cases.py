@@ -145,7 +145,10 @@ class PythonDemo(Demo):
         self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
-        return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
+        if self._exec_name in ('image_retrieval_demo', 'time_series_forecasting_demo', 'object_detection_demo'):
+            # sklearn has DeprecationWarning, RuntimeWarning: overflow encountered in exp for yolo-v4-tf
+            return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
+        return [sys.executable, '-W', 'error', str(source_dir / self.subdirectory / (self._exec_name + '.py'))]
 
 
 def join_cases(*args):
@@ -175,6 +178,67 @@ DEMOS = [
         single_option_cases('-m',
             ModelArg('instance-segmentation-person-0007'),
             ModelArg('instance-segmentation-security-0091')),
+    )),
+
+    CppDemo('classification_benchmark_demo', 'cpp_gapi', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('convnext-tiny'),
+            # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
+            # ModelArg('densenet-121'),
+            # ModelArg('densenet-121-tf'),
+            ModelArg('dla-34'),
+            # ModelArg('efficientnet-b0'),
+            ModelArg('efficientnet-b0-pytorch'),
+            ModelArg('efficientnet-v2-b0'),
+            ModelArg('efficientnet-v2-s'),
+            # ModelArg('googlenet-v1-tf'),
+            # ModelArg('googlenet-v2-tf'),
+            # ModelArg('googlenet-v3'),
+            ModelArg('googlenet-v3-pytorch'),
+            # ModelArg('googlenet-v4-tf'),
+            ModelArg('hbonet-0.25'),
+            ModelArg('hbonet-1.0'),
+            # ModelArg('inception-resnet-v2-tf'),
+            ModelArg('levit-128s'),
+            # ModelArg('mixnet-l'),
+            # ModelArg('mobilenet-v1-0.25-128'),
+            # ModelArg('mobilenet-v1-1.0-224'),
+            # ModelArg('mobilenet-v1-1.0-224-tf'),
+            # ModelArg('mobilenet-v2'),
+            # ModelArg('mobilenet-v2-1.0-224'),
+            # ModelArg('mobilenet-v2-1.4-224'),
+            ModelArg('mobilenet-v2-pytorch'),
+            # ModelArg('mobilenet-v3-large-1.0-224-paddle'),  # TODO: enable after paddle pip conflicts resolution
+            # ModelArg('mobilenet-v3-large-1.0-224-tf'),
+            # ModelArg('mobilenet-v3-small-1.0-224-paddle'),
+            # ModelArg('mobilenet-v3-small-1.0-224-tf'),
+            ModelArg('nfnet-f0'),
+            ModelArg('regnetx-3.2gf'),
+            ModelArg('repvgg-a0'),
+            ModelArg('repvgg-b1'),
+            ModelArg('repvgg-b3'),
+            ModelArg('resnest-50-pytorch'),
+            ModelArg('resnet-18-pytorch'),
+            ModelArg('resnet-34-pytorch'),
+            ModelArg('resnet-50-pytorch'),
+            # ModelArg('resnet-50-tf'),
+            ModelArg('resnet18-xnor-binary-onnx-0001'),
+            ModelArg('resnet50-binary-0001'),
+            ModelArg('rexnet-v1-x1.0'),
+            # ModelArg('shufflenet-v2-x0.5'),
+            ModelArg('shufflenet-v2-x1.0'),
+            # ModelArg('squeezenet1.0'),
+            # ModelArg('squeezenet1.1'),
+            ModelArg('swin-tiny-patch4-window7-224'),
+            ModelArg('t2t-vit-14'),
+        ),
+        TestCase({
+            '-time': '5',
+            '-i': TestDataArg('coco128/images/train2017/'),
+            '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     CppDemo('face_detection_mtcnn_demo', 'cpp_gapi', ('-m_p', '-m_r', '-m_o'), ('-d_p', '-d_r', '-d_o'), [TestCase({
@@ -289,19 +353,64 @@ DEMOS = [
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
-        single_option_cases('-m',
+        single_option_cases(
+            '-m',
             ModelArg('alexnet'),
+            ModelArg('caffenet'),
+            ModelArg('convnext-tiny'),
+            ModelArg('densenet-121'),
             ModelArg('densenet-121-tf'),
+            ModelArg('dla-34'),
+            ModelArg('efficientnet-b0'),
+            ModelArg('efficientnet-b0-pytorch'),
+            ModelArg('efficientnet-v2-b0'),
+            ModelArg('efficientnet-v2-s'),
             ModelArg('googlenet-v1'),
             ModelArg('googlenet-v1-tf'),
+            ModelArg('googlenet-v2'),
+            ModelArg('googlenet-v2-tf'),
             ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
+            ModelArg('googlenet-v4-tf'),
+            ModelArg('hbonet-0.25'),
+            ModelArg('hbonet-1.0'),
+            ModelArg('inception-resnet-v2-tf'),
+            ModelArg('levit-128s'),
             ModelArg('mixnet-l'),
+            ModelArg('mobilenet-v1-0.25-128'),
+            ModelArg('mobilenet-v1-1.0-224'),
+            ModelArg('mobilenet-v1-1.0-224-tf'),
             ModelArg('mobilenet-v2'),
+            ModelArg('mobilenet-v2-1.0-224'),
+            ModelArg('mobilenet-v2-1.4-224'),
             ModelArg('mobilenet-v2-pytorch'),
+            # ModelArg('mobilenet-v3-large-1.0-224-paddle'),  # TODO: enable after paddle pip conflicts resolution
+            ModelArg('mobilenet-v3-large-1.0-224-tf'),
+            # ModelArg('mobilenet-v3-small-1.0-224-paddle'),
+            ModelArg('mobilenet-v3-small-1.0-224-tf'),
+            ModelArg('nfnet-f0'),
+            ModelArg('regnetx-3.2gf'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
+            ModelArg('resnest-50-pytorch'),
+            ModelArg('resnet-18-pytorch'),
+            ModelArg('resnet-34-pytorch'),
+            ModelArg('resnet-50-pytorch'),
+            ModelArg('resnet-50-tf'),
+            ModelArg('resnet18-xnor-binary-onnx-0001'),
+            ModelArg('resnet50-binary-0001'),
+            ModelArg('rexnet-v1-x1.0'),
+            ModelArg('se-inception'),
+            ModelArg('se-resnet-50'),
+            ModelArg('se-resnext-50'),
+            ModelArg('shufflenet-v2-x0.5'),
+            ModelArg('shufflenet-v2-x1.0'),
+            ModelArg('squeezenet1.0'),
+            ModelArg('squeezenet1.1'),
+            ModelArg('t2t-vit-14'),
+            ModelArg('vgg16'),
+            ModelArg('vgg19'),
     ))),
 
     CppDemo(name='crossroad_camera_demo',
@@ -311,8 +420,18 @@ DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-vehicle-bike-detection-crossroad')}),
-        TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
-        single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
+        single_option_cases(
+            '-m',
+            ModelArg('person-vehicle-bike-detection-crossroad-0078'),
+            ModelArg('person-vehicle-bike-detection-crossroad-1016'),
+        ),
+        single_option_cases(
+            '-m_pa',
+            None,
+            ModelArg('person-attributes-recognition-crossroad-0230'),
+            ModelArg('person-attributes-recognition-crossroad-0234'),
+            ModelArg('person-attributes-recognition-crossroad-0238'),
+        ),
         single_option_cases('-m_reid',
             None,
             ModelArg('person-reidentification-retail-0277'),
@@ -385,9 +504,8 @@ DEMOS = [
             # TestCase(options={'-at': 'deblur',
             #     '-m': ModelArg('deblurgan-v2')}
             # ),
-            TestCase(options={'-at': 'jr',
-               '-m': ModelArg('fbcnn')}
-            )
+            TestCase({'-at': 'jr', '-m': ModelArg('fbcnn')}),
+            TestCase({'-at': 'style', '-m': ModelArg('fast-neural-style-mosaic-onnx')}),
         ]
     )),
 
@@ -514,6 +632,8 @@ DEMOS = [
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
+                        ModelArg('faster_rcnn_inception_resnet_v2_atrous_coco'),
+                        ModelArg('faster_rcnn_resnet50_coco'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                         ModelArg('pedestrian-detection-adas-0002'),
@@ -521,6 +641,10 @@ DEMOS = [
                         ModelArg('person-detection-0200'),
                         ModelArg('person-detection-0201'),
                         ModelArg('person-detection-0202'),
+                        ModelArg('person-detection-0203'),
+                        ModelArg('person-detection-0301'),
+                        ModelArg('person-detection-0302'),
+                        ModelArg('person-detection-0303'),
                         ModelArg('person-detection-retail-0013'),
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
@@ -537,7 +661,7 @@ DEMOS = [
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
                         ModelArg('vehicle-detection-0201'),
-                        ModelArg('vehicle-detection-0201'),
+                        ModelArg('vehicle-detection-0202'),
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106'),
                         ModelArg('vehicle-license-plate-detection-barrier-0123')),
@@ -606,7 +730,12 @@ DEMOS = [
             None,
             ModelArg('license-plate-recognition-barrier-0001'),
             ModelArg('license-plate-recognition-barrier-0007')),
-        single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
+        single_option_cases(
+            '-m_va',
+            None,
+            ModelArg('vehicle-attributes-recognition-barrier-0039'),
+            ModelArg('vehicle-attributes-recognition-barrier-0042'),
+        ),
     )),
 
     CppDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -702,6 +831,7 @@ DEMOS = [
                     TestCase(options={'-m_tr': ModelArg('text-recognition-0014'),
                                       '-tr_pt_first': None,
                                       '-tr_o_blb_nm': 'logits'}),
+                    TestCase({'-m_tr': ModelArg('handwritten-score-recognition-0003'), '-m_tr_ss': '0123456789._'})
                 ]),
             *combine_cases(
                 TestCase(options={'-dt': 'simple'}),
@@ -741,6 +871,7 @@ DEMOS = [
             TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
+            TestCase({'--architecture_type': 'en-mean', '-m_en': ModelArg('weld-porosity-detection-0001')}),
             *combine_cases(
                TestCase(options={'--architecture_type': 'en-de'}),
                [
@@ -852,18 +983,66 @@ DEMOS = [
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '--labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt')}),
         [
-            *single_option_cases('-m',
+            *single_option_cases(
+                '-m',
                 ModelArg('alexnet'),
+                ModelArg('caffenet'),
+                ModelArg('convnext-tiny'),
+                ModelArg('densenet-121'),
                 ModelArg('densenet-121-tf'),
+                ModelArg('dla-34'),
+                ModelArg('efficientnet-b0'),
+                ModelArg('efficientnet-b0-pytorch'),
+                ModelArg('efficientnet-v2-b0'),
+                ModelArg('efficientnet-v2-s'),
                 ModelArg('googlenet-v1'),
                 ModelArg('googlenet-v1-tf'),
+                ModelArg('googlenet-v2'),
+                ModelArg('googlenet-v2-tf'),
                 ModelArg('googlenet-v3'),
                 ModelArg('googlenet-v3-pytorch'),
+                ModelArg('googlenet-v4-tf'),
+                ModelArg('hbonet-0.25'),
+                ModelArg('hbonet-1.0'),
+                ModelArg('inception-resnet-v2-tf'),
+                ModelArg('levit-128s'),
                 ModelArg('mixnet-l'),
+                ModelArg('mobilenet-v1-0.25-128'),
+                ModelArg('mobilenet-v1-1.0-224'),
+                ModelArg('mobilenet-v1-1.0-224-tf'),
+                ModelArg('mobilenet-v2'),
+                ModelArg('mobilenet-v2-1.0-224'),
+                ModelArg('mobilenet-v2-1.4-224'),
                 ModelArg('mobilenet-v2-pytorch'),
+                # ModelArg('mobilenet-v3-large-1.0-224-paddle'),  # TODO: enable after paddle pip conflicts resolution
+                ModelArg('mobilenet-v3-large-1.0-224-tf'),
+                # ModelArg('mobilenet-v3-small-1.0-224-paddle'),
+                ModelArg('mobilenet-v3-small-1.0-224-tf'),
+                ModelArg('nfnet-f0'),
+                ModelArg('regnetx-3.2gf'),
                 ModelArg('repvgg-a0'),
                 ModelArg('repvgg-b1'),
-                ModelArg('repvgg-b3')),
+                ModelArg('repvgg-b3'),
+                ModelArg('resnest-50-pytorch'),
+                ModelArg('resnet-18-pytorch'),
+                ModelArg('resnet-34-pytorch'),
+                ModelArg('resnet-50-pytorch'),
+                ModelArg('resnet-50-tf'),
+                ModelArg('resnet18-xnor-binary-onnx-0001'),
+                ModelArg('resnet50-binary-0001'),
+                ModelArg('rexnet-v1-x1.0'),
+                ModelArg('se-inception'),
+                ModelArg('se-resnet-50'),
+                ModelArg('se-resnext-50'),
+                ModelArg('shufflenet-v2-x0.5'),
+                ModelArg('shufflenet-v2-x1.0'),
+                ModelArg('squeezenet1.0'),
+                ModelArg('squeezenet1.1'),
+                ModelArg('swin-tiny-patch4-window7-224'),
+                ModelArg('t2t-vit-14'),
+                ModelArg('vgg16'),
+                ModelArg('vgg19'),
+            ),
 
             TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
                         '--reverse_input_channels': None,
@@ -872,13 +1051,18 @@ DEMOS = [
         ]
     )),
 
-    PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
-       TestCase(options={
-           '--no_show': None,
-           **MONITORS,
-           '-i': DataPatternArg('classification'),
-           '-m': ModelArg('colorization-v2'),
-       })
+    PythonDemo('colorization_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('colorization-v2'),
+            ModelArg('colorization-siggraph'),
+            ModelFileArg('colorization-siggraph', 'colorization-siggraph.onnx'),
+        ),
+        TestCase({
+            '-i': DataPatternArg('classification'),
+            '-m': ModelArg('colorization-v2'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
@@ -965,6 +1149,11 @@ DEMOS = [
     PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         [
             TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-english-recognition-0001/assets/handwritten-english-recognition-0001.jpg'),
+                '-m': ModelArg('handwritten-english-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/gnhk.txt')
+            }),
+            TestCase(options={
                 '-i': str(OMZ_DIR / 'models/intel/handwritten-japanese-recognition-0001/assets/handwritten-japanese-recognition-0001.png'),
                 '-m': ModelArg('handwritten-japanese-recognition-0001'),
                 '-cl': str(OMZ_DIR / 'data/dataset_classes/kondate_nakayosi.txt')
@@ -1019,6 +1208,24 @@ DEMOS = [
         })
     ]),
 
+    PythonDemo('image_translation_demo', ('--translation_model', '--segmentation_model'), test_cases=combine_cases(
+        [
+            TestCase({
+                '--input_images': TestDataArg('coco128/images/train2017/'),
+                '--reference_images': TestDataArg('coco128/images/train2017/')
+            }),
+            TestCase({
+                '--input_images': TestDataArg('coco128/images/train2017/000000000009.jpg'),
+                '--reference_images': TestDataArg('coco128/images/train2017/000000000025.jpg')
+            }),
+        ],
+        TestCase({
+            '--translation_model': ModelArg('cocosnet'),
+            '--segmentation_model': ModelArg('hrnet-v2-c1-segmentation'),
+            '-o': '.'
+        }),
+    )),
+
     PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
@@ -1034,6 +1241,26 @@ DEMOS = [
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-de-en-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-de-en-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-de-en-0002', 'tokenizer_tgt'),
+                '-i': [
+                    'Der schnelle Braunfuchs springt über den faulen Hund.'
+                    'Die fünf Boxzauberer springen schnell.',
+                    'Dohlen lieben meine große Quarzsphinx.'
+                ],
+            }),
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-en-de-0002'),
+                '--tokenizer-src': ModelFileArg('machine-translation-nar-en-de-0002', 'tokenizer_src'),
+                '--tokenizer-tgt': ModelFileArg('machine-translation-nar-en-de-0002', 'tokenizer_tgt'),
+                '-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.',
+                    'Jackdaws love my big sphinx of quartz.'
+                ],
+            }),
             TestCase(options={
                 '-m': ModelArg('machine-translation-nar-en-ru-0002'),
                 '--tokenizer-src': ModelFileArg('machine-translation-nar-en-ru-0002', 'tokenizer_src'),
@@ -1057,17 +1284,24 @@ DEMOS = [
         ]
     )),
 
-    PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, **MONITORS,
-                          '-i': DataPatternArg('object-detection-demo'),
-                          '-m': ModelArg('midasnet')})
+    PythonDemo('monodepth_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('fcrn-dp-nyu-depth-v2-tf'),
+            ModelArg('midasnet'),
+        ),
+        TestCase({
+            '-i': DataPatternArg('object-detection-demo'),
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
     )),
 
     PythonDemo('multi_camera_multi_target_tracking_demo', model_keys=['-m', '--m_segmentation', '--m_reid'], test_cases=combine_cases(
         [
             TestCase({
                 '--m_segmentation': ModelArg('instance-segmentation-security-0228'),
-                '--m_reid': ModelArg('person-reidentification-retail-0277'),
+                '--m_reid': ModelArg('vehicle-reid-0001'),
+                '--config': str(OMZ_DIR / 'demos/multi_camera_multi_target_tracking_demo/python/configs/vehicle.py'),
                 '--output_video': 'multi_camera_multi_target_tracking_demo.avi',
             }),
             *combine_cases(
@@ -1153,6 +1387,8 @@ DEMOS = [
                         ModelArg('face-detection-retail-0004'),
                         ModelArg('face-detection-retail-0005'),
                         ModelArg('face-detection-retail-0044'),
+                        ModelArg('faster_rcnn_inception_resnet_v2_atrous_coco'),
+                        ModelArg('faster_rcnn_resnet50_coco'),
                         ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                         ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                         ModelArg('pedestrian-detection-adas-0002'),
@@ -1177,7 +1413,7 @@ DEMOS = [
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
                         ModelArg('vehicle-detection-0201'),
-                        ModelArg('vehicle-detection-0201'),
+                        ModelArg('vehicle-detection-0202'),
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106'),
                         ModelArg('person-detection-0106')),
@@ -1270,6 +1506,16 @@ DEMOS = [
         ],
     )),
 
+    PythonDemo('place_recognition_demo', test_cases=combine_cases(
+        single_option_cases('-m', ModelArg('netvlad-tf'), ModelFileArg('netvlad-tf', 'model_frozen.pb')),
+        TestCase({
+            '--input': TestDataArg('coco128/images/train2017/'),
+            '--gallery_folder': TestDataArg('coco128/images/train2017/'),
+            '--output': 'place_recognition_demo.avi',
+            **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
+        })
+    )),
+
     PythonDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS}),
         [
@@ -1342,7 +1588,7 @@ DEMOS = [
                 '--topview': TestDataArg('stream_1_top.mp4'),
                 '--sideview': TestDataArg('stream_1_left.mp4'),
                 '--m_topall': ModelArg('smartlab-object-detection-0001'),
-                '--m_topmove': ModelArg('smartlab-object-detection-0001'),
+                '--m_topmove': ModelArg('smartlab-object-detection-0002'),
                 '--m_sideall': ModelArg('smartlab-object-detection-0003'),
                 '--m_sidemove': ModelArg('smartlab-object-detection-0004'),
                 '--no_show': None
@@ -1350,9 +1596,14 @@ DEMOS = [
         )
     ),
 
-    PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
-                          '-m': ModelArg('aclnet')}),
+    PythonDemo('sound_classification_demo', test_cases=combine_cases(
+        single_option_cases(
+            '-m',
+            ModelArg('aclnet'),
+            ModelArg('aclnet-int8'),
+            ModelFileArg('aclnet-int8', 'aclnet_des_53_int8.onnx'),
+        ),
+        TestCase({'-i': TestDataArg('how_are_you_doing.wav')}),
     )),
 
     PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(

@@ -90,7 +90,7 @@ class ImageRetrieval:
         embeddings = [None for _ in self.impaths]
 
         index = 0
-        for image in tqdm(images, desc='Computing embeddings of gallery images.'):
+        for image in tqdm(images, desc='Computing embeddings of gallery images'):
             embeddings[index] = self.model.predict(image).reshape([-1])
             index += 1
 

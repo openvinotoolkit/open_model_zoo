@@ -9,8 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include <ie_common.h>
-
 #include "tracker.hpp"
 
 namespace {
