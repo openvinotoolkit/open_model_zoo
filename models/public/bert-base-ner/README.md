@@ -102,4 +102,4 @@ The model can be used in the following demos provided by the Open Model Zoo to s
 
 ## Legal Information
 
-The original model is distributed under [MIT License](https://huggingface.co/dslim/bert-base-NER).
+The original model is distributed under [Apache License, Version 2.0](https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE).
