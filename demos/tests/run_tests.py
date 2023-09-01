@@ -34,7 +34,6 @@ import csv
 import json
 import os
 import shlex
-import ssl
 import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
