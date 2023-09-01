@@ -82,5 +82,4 @@ The model can be used in the following demos provided by the Open Model Zoo to s
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE).
-A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
+[mit License](https://huggingface.co/gpt2).
