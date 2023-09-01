@@ -57,7 +57,7 @@ python3 speech_recognition_quartznet_demo.py -m quartznet-15x5-en.xml -i audio.w
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-An example audio file can be taken from OpenVINO [test data](https://storage.openvinotoolkit.org/data/test_data/) folder.
+An example audio file can be taken from https://storage.openvinotoolkit.org/models_contrib/speech/2021.2/librispeech_s5/how_are_you_doing_today.wav.
 
 ## Demo Output
 
