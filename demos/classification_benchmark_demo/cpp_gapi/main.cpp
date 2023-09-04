@@ -37,10 +37,10 @@
 #include <utils/slog.hpp>
 #include <utils_gapi/kernel_package.hpp>
 #include <utils_gapi/stream_source.hpp>
+#include <utils_gapi/backend_builder.hpp>
 
 #include "classification_benchmark_demo_gapi.hpp"
 #include "custom_kernels.hpp"
-#include "execution_providers.hpp"
 #include <models/classification_model.h>
 
 namespace nets {
@@ -66,12 +66,23 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
+inference_backends_t ParseInferenceBackends(const std::string &str, char sep = ','){
+    inference_backends_t backends;
+    std::stringstream params_list(str);
+    std::string line;
+    while (std::getline(params_list, line, sep)) {
+        backends.push(BackendDescription::parseFromArgs(line));
+    }
+    return backends;
+}
+
 template<class ExecNetwork>
 cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
                                                const ModelConfig &config,
-                                               const execution_providers_t &multiple_ep = execution_providers_t{}) {
+                                               const inference_backends_t &multiple_ep = inference_backends_t{}) {
     if (multiple_ep.empty()) {
         // clang-format off
+        // use IE backend by default
         const auto net =
             cv::gapi::ie::Params<ExecNetwork>{
                 model_path,  // path to topology IR
@@ -81,18 +92,8 @@ cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
             .pluginConfig(config.getLegacyConfig());
         return cv::gapi::networks(net);
     }
-#ifdef GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
-    auto net =
-            cv::gapi::onnx::Params<ExecNetwork>{
-                FLAGS_m
-            };
-    applyProvider(net, multiple_ep);
-    return cv::gapi::networks(net);
-#else // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
-    throw std::runtime_error(std::string("G-API execution providers are not available in OPENCV: ") +
-                             CV_VERSION +
-                             "\nPlease make sure you are using 4.9.0 at least");
-#endif // GAPI_IE_EXECUTION_PROVIDERS_AVAILABLE
+
+    return applyBackend<ExecNetwork>(model_path, config, multiple_ep);
 }
 }  // namespace util
 
@@ -164,8 +165,8 @@ int main(int argc, char* argv[]) {
         /** Configure network **/
         auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
-        execution_providers_t providers = createProvidersFromString(FLAGS_ep);
-        nets += util::create_execution_network<nets::Classification>(FLAGS_m, config, providers);
+        inference_backends_t backends = util::ParseInferenceBackends(FLAGS_backend);
+        nets += util::create_execution_network<nets::Classification>(FLAGS_m, config, backends);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
                                               nets,
                                               cv::gapi::streaming::queue_capacity{1}));

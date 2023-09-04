@@ -82,7 +82,11 @@ std::string merge(std::initializer_list<std::string> list, const char* delim) {
     std::stringstream ss;
     std::copy(list.begin(), list.end(),
               std::ostream_iterator<std::string>(ss, delim));
-    return ss.str();
+    std::string result = ss.str();
+    if (!result.empty()) {
+        result.resize(result.size() - strlen(delim));
+    }
+    return result;
 }
 
 std::vector<std::string> parseDevices(const std::string& device_string) {
