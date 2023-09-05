@@ -37,6 +37,11 @@ static void applyDefaultProvider(ExecNetwork &,
         throw std::runtime_error("ONNX CPU execution provider must be only provider in the provider list or "
                                  "be the last in order");
     }
+
+    const BackendDescription &backend = backends.front();
+    if(backend.properties.size() >= 2) {
+        throw std::runtime_error("ONNX CPU execution provider doesn't support any arguments");
+    }
 }
 
 template <class ExecNetwork>

@@ -19,7 +19,11 @@ using backend_applicator_t = std::function<cv::gapi::GNetPackage(const std::stri
 template <class ExecNetwork>
 static cv::gapi::GNetPackage applyIEBackend(const std::string &model_path,
                                             const ModelConfig &config,
-                                            const inference_backends_t &multiple_ep) {
+                                            const inference_backends_t &backends) {
+    const BackendDescription &backend = backends.front();
+    if(!backend.properties.empty()) {
+        throw std::runtime_error("IE backend doesn't support any arguments");
+    }
     const auto net =
             cv::gapi::ie::Params<ExecNetwork>{
                 model_path,                          // path to topology IR
@@ -33,7 +37,11 @@ static cv::gapi::GNetPackage applyIEBackend(const std::string &model_path,
 template <class ExecNetwork>
 static cv::gapi::GNetPackage applyOVBackend(const std::string &model_path,
                                             const ModelConfig &config,
-                                            const inference_backends_t &multiple_ep) {
+                                            const inference_backends_t &backends) {
+    const BackendDescription &backend = backends.front();
+    if(!backend.properties.empty()) {
+        throw std::runtime_error("OV backend doesn't support any arguments");
+    }
     const auto net =
             cv::gapi::ov::Params<ExecNetwork>{
                 model_path,                          // path to topology IR
@@ -47,12 +55,12 @@ static cv::gapi::GNetPackage applyOVBackend(const std::string &model_path,
 template <class ExecNetwork>
 static cv::gapi::GNetPackage applyONNXBackend(const std::string &model_path,
                                               const ModelConfig &config,
-                                              const inference_backends_t &multiple_ep) {
+                                              const inference_backends_t &backends) {
     auto net =
             cv::gapi::onnx::Params<ExecNetwork>{
                 model_path
             };
-    applyONNXProviders(net, config, multiple_ep);
+    applyONNXProviders(net, config, backends);
     return cv::gapi::networks(net);
 }
 
@@ -60,8 +68,8 @@ static cv::gapi::GNetPackage applyONNXBackend(const std::string &model_path,
 template<class ExecNetwork>
 cv::gapi::GNetPackage applyBackend(const std::string &model_path,
                                    const ModelConfig &config,
-                                   inference_backends_t multiple_ep = inference_backends_t{}) {
-    if (multiple_ep.empty()) {
+                                   inference_backends_t backends = inference_backends_t{}) {
+    if (backends.empty()) {
        throw std::runtime_error("No G-API backend specified");
     }
     static const std::map<std::string, backend_applicator_t<ExecNetwork>> maps{
@@ -76,12 +84,12 @@ cv::gapi::GNetPackage applyBackend(const std::string &model_path,
 #endif
     };
 
-    const BackendDescription &backend = multiple_ep.front();
+    const BackendDescription &backend = backends.front();
     const auto it = maps.find(backend.name);
     if (it == maps.end()) {
         throw std::runtime_error("Cannot apply unknown G-API backend: " + backend.name +
                                  "\nPlease, check on available backend list: " +
                                  merge(getSupportedInferenceBackends(), ","));
     }
-    return it->second(model_path, config, multiple_ep);
+    return it->second(model_path, config, backends);
 }

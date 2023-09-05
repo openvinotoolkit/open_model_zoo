@@ -79,8 +79,8 @@ inference_backends_t ParseInferenceBackends(const std::string &str, char sep = '
 template<class ExecNetwork>
 cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
                                                const ModelConfig &config,
-                                               const inference_backends_t &multiple_ep = inference_backends_t{}) {
-    if (multiple_ep.empty()) {
+                                               const inference_backends_t &backends = inference_backends_t{}) {
+    if (backends.empty()) {
         // clang-format off
         // use IE backend by default
         const auto net =
@@ -93,7 +93,7 @@ cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
         return cv::gapi::networks(net);
     }
 
-    return applyBackend<ExecNetwork>(model_path, config, multiple_ep);
+    return applyBackend<ExecNetwork>(model_path, config, backends);
 }
 }  // namespace util
 
