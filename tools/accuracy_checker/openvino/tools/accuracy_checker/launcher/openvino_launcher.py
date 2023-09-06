@@ -746,7 +746,7 @@ class OpenVINOLauncher(Launcher):
 
     def inputs_info_for_meta(self, inputs=None):
         if inputs:
-            return {layer_name: np.shape(data) for layer_name, data in inputs.items()}
+            return {layer_name: data[0].shape if type(data) == tuple else np.shape(data) for layer_name, data in inputs.items()}
         return {
             layer_name: parse_partial_shape(layer.get_partial_shape()) for layer_name, layer in self.inputs.items()
             if layer_name not in self.const_inputs + self.image_info_inputs}
