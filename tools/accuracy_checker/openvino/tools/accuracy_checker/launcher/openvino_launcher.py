@@ -174,7 +174,7 @@ class OpenVINOLauncher(Launcher):
         raw_results = []
         for infer_inputs in inputs:
             if self._do_reshape:
-                input_shapes = {layer_name: list(data[0].shape) for layer_name, data in infer_inputs.items()}
+                input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
             if self.infer_request is None:
                 self.infer_request = self.exec_network.create_infer_request()
@@ -759,7 +759,7 @@ class OpenVINOLauncher(Launcher):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
             try:
                 if template_shapes:
-                    input_shapes = {layer_name: template_shapes.get(layer_name, list(data[0].shape))
+                    input_shapes = {layer_name: template_shapes.get(layer_name, data.shape)
                                     for layer_name, data in input_data[0].items()}
                     self._reshape_input(input_shapes)
                     self.load_network(self.network)
@@ -774,8 +774,7 @@ class OpenVINOLauncher(Launcher):
                 if self.dynamic_shapes_policy == 'dynamic':
                     raise e
                 self.is_dynamic = False
-        self._reshape_input({layer_name: template_shapes.get(layer_name, list(data[0].shape))
-                                    for layer_name, data in input_data[0].items()})
+        self._reshape_input({layer_name: data.shape for layer_name, data in input_data[0].items()})
 
     def resolve_undefined_batch(self):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
@@ -807,7 +806,7 @@ class OpenVINOLauncher(Launcher):
             data = data.astype(precision)
         if layer_name in self.dyn_input_layers:
             self._do_reshape = not self.is_dynamic
-            return data, template
+            return data
         data_shape = np.shape(data)
         if data_shape != layer_shape:
             if self.allow_reshape_input:
