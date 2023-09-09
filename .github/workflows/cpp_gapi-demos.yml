@@ -43,7 +43,7 @@ jobs:
       - name: build_demos.sh
         run: |
           source ov/setupvars.sh
-          OpenCV_DIR=$GITHUB_WORKSPACE/cache/opencv/build CMAKE_CXX_COMPILER_LAUNCHER=ccache CMAKE_CXX_LINKER_LAUNCHER=ccache ./demos/build_demos.sh --build_dir=build
+          OpenCV_DIR=$GITHUB_WORKSPACE/cache/opencv/build CMAKE_CXX_COMPILER_LAUNCHER=ccache CMAKE_CXX_LINKER_LAUNCHER=ccache ./demos/build_demos.sh --build_dir=build  # TODO: add CMAKE_CXX_FLAGS=-Werror after background_subtraction_demo/cpp_gapi is updated to ov2.0
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11

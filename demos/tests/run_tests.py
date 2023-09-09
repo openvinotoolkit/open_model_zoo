@@ -40,6 +40,7 @@ import sys
 import tempfile
 import timeit
 import importlib
+import warnings
 
 from pathlib import Path
 from io import BytesIO
@@ -135,7 +136,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     try:
         subprocess.check_output(
             [
-                sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
+                sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'downloader.py'),
                 '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
                 '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
                 '--jobs', '9',
@@ -152,7 +153,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     try:
         subprocess.check_output(
             [
-                sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'converter.py'),
                 '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
                 '--precisions', ','.join(model_precisions), '--jobs', 'auto',
                 *(['--mo', str(mo_path)] if mo_path else []),
@@ -202,6 +203,7 @@ def get_models(case, keys):
 
 
 def main():
+    warnings.filterwarnings("error")
     args = build_argparser().parse_args()
 
     DEMOS = scopes[args.scope]
@@ -212,7 +214,7 @@ def main():
     auto_tools_dir = omz_dir / 'tools/model_tools'
 
     model_info_list = json.loads(subprocess.check_output(
-        [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
+        [sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
 
     model_info = {}
@@ -276,7 +278,7 @@ def main():
 
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
-                    [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
+                    [sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'info_dumper.py'),
                         '--list', str(demo.models_lst_path(demos_dir))],
                     universal_newlines=True)):
                 models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
