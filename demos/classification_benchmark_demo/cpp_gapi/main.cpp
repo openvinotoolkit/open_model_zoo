@@ -18,9 +18,6 @@
 #include <opencv2/gapi/gcomputation.hpp>
 #include <opencv2/gapi/gmat.hpp>
 #include <opencv2/gapi/gproto.hpp>
-#include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
-#include <opencv2/gapi/infer/onnx.hpp>
 #include <opencv2/gapi/util/optional.hpp>
 
 
@@ -66,7 +63,7 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-inference_backends_t ParseInferenceBackends(const std::string &str, char sep = ','){
+inference_backends_t ParseInferenceBackends(const std::string &str, char sep = ',') {
     inference_backends_t backends;
     std::stringstream params_list(str);
     std::string line;
@@ -74,26 +71,6 @@ inference_backends_t ParseInferenceBackends(const std::string &str, char sep = '
         backends.push(BackendDescription::parseFromArgs(line));
     }
     return backends;
-}
-
-template<class ExecNetwork>
-cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
-                                               const ModelConfig &config,
-                                               const inference_backends_t &backends = inference_backends_t{}) {
-    if (backends.empty()) {
-        // clang-format off
-        // use IE backend by default
-        const auto net =
-            cv::gapi::ie::Params<ExecNetwork>{
-                model_path,  // path to topology IR
-                fileNameNoExt(model_path) + ".bin",  // path to weights
-                config.deviceName  // device specifier
-            }.cfgNumRequests(config.maxAsyncRequests)
-            .pluginConfig(config.getLegacyConfig());
-        return cv::gapi::networks(net);
-    }
-
-    return applyBackend<ExecNetwork>(model_path, config, backends);
 }
 }  // namespace util
 
@@ -166,7 +143,7 @@ int main(int argc, char* argv[]) {
         auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
         inference_backends_t backends = util::ParseInferenceBackends(FLAGS_backend);
-        nets += util::create_execution_network<nets::Classification>(FLAGS_m, config, backends);
+        nets += create_execution_network<nets::Classification>(FLAGS_m, config, backends);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
                                               nets,
                                               cv::gapi::streaming::queue_capacity{1}));

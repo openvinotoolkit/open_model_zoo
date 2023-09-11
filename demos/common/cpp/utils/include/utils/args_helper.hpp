@@ -33,6 +33,7 @@ void parseInputFilesArguments(std::vector<std::string>& files);
 
 std::vector<std::string> split(const std::string& s, char delim);
 std::string merge(std::initializer_list<std::string> list, const char *delim);
+std::string merge(const std::vector<std::string> &list, const char *delim);
 
 std::vector<std::string> parseDevices(const std::string& device_string);
 

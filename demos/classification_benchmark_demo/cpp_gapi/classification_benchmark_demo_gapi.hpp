@@ -29,7 +29,7 @@ static const char no_show_message[] = "Optional. Disable showing of processed im
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const std::string backend_message_str("Optional. Specify an inference backend (the list of available backends: " +
+static const std::string backend_message_str("Optional. See README.md for details. Specify an inference backend (the list of available backends: " +
                                              merge(getSupportedInferenceBackends(), ",") + ")");
 static const char *backend_message = backend_message_str.c_str();
 
@@ -47,7 +47,7 @@ DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_string(backend, "", backend_message);
+DEFINE_string(backend, "IE", backend_message);
 
 /**
  * \brief This function shows a help message
@@ -72,5 +72,5 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-    std::cout << "    -backend                    " << backend_message << std::endl;
+    std::cout << "    -backend                  " << backend_message << std::endl;
 }

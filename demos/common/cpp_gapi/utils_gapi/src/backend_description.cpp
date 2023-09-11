@@ -6,14 +6,6 @@
 #include "utils_gapi/backend_description.hpp"
 #include "utils_gapi/kernel_package.hpp"
 
-BackendDescription::BackendDescription(const std::vector<std::string> &fields) {
-    name = fields.at(0);
-
-    auto fields_it = fields.begin();
-    std::advance(fields_it, 1);
-    properties.insert(properties.end(), fields_it, fields.end());
-}
-
 BackendDescription BackendDescription::parseFromArgs(const std::string &arg, char sep) {
     std::vector<std::string> splitted_line = split(arg, sep);
     if (splitted_line.empty()) {
@@ -21,7 +13,10 @@ BackendDescription BackendDescription::parseFromArgs(const std::string &arg, cha
                                  ". Backend name and its fields must be separated by \"" + sep  +
                                  "\". Example: <backend>" + sep + "<provider> " + sep + "<device>");
     }
-    return BackendDescription(splitted_line);
+
+    auto props_it = splitted_line.begin();
+    std::advance(props_it, 1);
+    return BackendDescription(splitted_line[0], props_it, splitted_line.end());
 }
 
 std::initializer_list<std::string> getSupportedInferenceBackends() {

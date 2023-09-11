@@ -78,15 +78,22 @@ std::vector<std::string> split(const std::string& s, char delim) {
     return result;
 }
 
-std::string merge(std::initializer_list<std::string> list, const char* delim) {
+template <class It>
+static std::string merge_impl(It begin, It end, const char* delim) {
     std::stringstream ss;
-    std::copy(list.begin(), list.end(),
-              std::ostream_iterator<std::string>(ss, delim));
+    std::copy(begin, end, std::ostream_iterator<std::string>(ss, delim));
     std::string result = ss.str();
     if (!result.empty()) {
         result.resize(result.size() - strlen(delim));
     }
     return result;
+}
+std::string merge(std::initializer_list<std::string> list, const char* delim) {
+    return merge_impl(list.begin(), list.end(), delim);
+}
+
+std::string merge(const std::vector<std::string> &list, const char *delim) {
+    return merge_impl(list.begin(), list.end(), delim);
 }
 
 std::vector<std::string> parseDevices(const std::string& device_string) {
