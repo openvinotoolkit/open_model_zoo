@@ -34,9 +34,11 @@ struct BackendApplicator<ExecNetwork,
 };
 
 namespace {
-template<class ExecNetwork>
+struct CPUProvider{};
+template<class ExecNetwork, class Provider = CPUProvider>
 struct ProviderApplicator {
-    static void apply(ExecNetwork &, const ModelConfig &, const inference_backends_t &backends) {
+    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
+        static_assert(std::is_same<Provider, CPUProvider>::value, "Unsupported ONNX provider requested. Please add a partial specialization if required");
         if (backends.size() > 1) {
             throw std::runtime_error("ONNX CPU execution provider must be only provider in the provider list or "
                                      "be the last in order");
@@ -50,18 +52,6 @@ struct ProviderApplicator {
 };
 
 #ifdef GAPI_ONNX_BACKEND_EP_EXTENSION
-template<class ExecNetwork, class Provider>
-struct ProviderApplicator {
-    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
-        std::string ep_selected_device = config.deviceName;
-        const BackendDescription &backend = backends.front();
-        if (backend.properties.size() >= 2) {
-            ep_selected_device = backend.properties[1]; // second arg for ONNX is device
-        }
-        net.cfgAddExecutionProvider(Provider(ep_selected_device));
-    }
-};
-
 template<class ExecNetwork>
 struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::DirectML> {
     static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
@@ -72,6 +62,18 @@ struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::DirectML> {
         }
         net.cfgAddExecutionProvider(cv::gapi::onnx::ep::DirectML(ep_selected_device))
            .cfgDisableMemPattern();
+    }
+};
+
+template<class ExecNetwork>
+struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::OpenVINO> {
+    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
+        std::string ep_selected_device = config.deviceName;
+        const BackendDescription &backend = backends.front();
+        if (backend.properties.size() >= 2) {
+            ep_selected_device = backend.properties[1]; // second arg for ONNX is device
+        }
+        net.cfgAddExecutionProvider(cv::gapi::onnx::ep::OpenVINO(ep_selected_device));
     }
 };
 #endif // GAPI_ONNX_BACKEND_EP_EXTENSION
@@ -109,7 +111,7 @@ void applyONNXProviders(ExecNetwork& net, const ModelConfig &config, inference_b
             }
             it->second(net, config, backend_cfgs);
         } else {
-            ProviderApplicator<ExecNetwork>::apply(net, config, backend_cfgs);
+            ProviderApplicator<ExecNetwork, CPUProvider>::apply(net, config, backend_cfgs);
         }
         // pop backed/provider processed
         backend_cfgs.pop();
