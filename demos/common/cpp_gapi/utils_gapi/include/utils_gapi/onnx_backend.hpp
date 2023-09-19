@@ -37,7 +37,7 @@ namespace {
 struct CPUProvider{};
 template<class ExecNetwork, class Provider = CPUProvider>
 struct ProviderApplicator {
-    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
+    static void apply(ExecNetwork &, const ModelConfig &, const inference_backends_t &backends) {
         static_assert(std::is_same<Provider, CPUProvider>::value, "Unsupported ONNX provider requested. Please add a partial specialization if required");
         if (backends.size() > 1) {
             throw std::runtime_error("ONNX CPU execution provider must be only provider in the provider list or "
