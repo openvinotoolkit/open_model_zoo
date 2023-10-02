@@ -146,6 +146,8 @@ Options:
     -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
     -u                        Optional. List of monitors to show initially.
     -backend <string>         Optional. Specify an inference backend. The list of available backends depends on openCV version. Default value is IE. See README.md for details
+    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
+    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
