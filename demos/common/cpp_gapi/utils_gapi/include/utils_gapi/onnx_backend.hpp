@@ -23,11 +23,17 @@ void applyONNXProviders(ExecNetwork& net, const ModelConfig &config, inference_b
 template<class ExecNetwork>
 struct BackendApplicator<ExecNetwork,
                          cv::gapi::onnx::Params> {
-    static cv::gapi::GNetPackage apply(const std::string &model_path, const ModelConfig & config, const inference_backends_t &backends) {
+    static cv::gapi::GNetPackage apply(const std::string &model_path, const BackendsConfig &config, const inference_backends_t &backends) {
         auto net =
             cv::gapi::onnx::Params<ExecNetwork>{
                 model_path
             };
+
+        // check on normalization
+        if (config.mean_values.empty() && config.scale_values.empty()) {
+            net.cfgNormalize({false});
+        }
+
         applyONNXProviders(net, config, backends);
         return cv::gapi::networks(net);
     }
@@ -37,7 +43,7 @@ namespace {
 struct CPUProvider{};
 template<class ExecNetwork, class Provider = CPUProvider>
 struct ProviderApplicator {
-    static void apply(ExecNetwork &, const ModelConfig &, const inference_backends_t &backends) {
+    static void apply(ExecNetwork &, const BackendsConfig &, const inference_backends_t &backends) {
         static_assert(std::is_same<Provider, CPUProvider>::value, "Unsupported ONNX provider requested. Please add a partial specialization if required");
         if (backends.size() > 1) {
             throw std::runtime_error("ONNX CPU execution provider must be only provider in the provider list or "
@@ -54,7 +60,7 @@ struct ProviderApplicator {
 #ifdef GAPI_ONNX_BACKEND_EP_EXTENSION
 template<class ExecNetwork>
 struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::DirectML> {
-    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
+    static void apply(ExecNetwork &net, const BackendsConfig &config, const inference_backends_t &backends) {
         std::string ep_selected_device = config.deviceName;
         const BackendDescription &backend = backends.front();
         if (backend.properties.size() >= 2) {
@@ -67,7 +73,7 @@ struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::DirectML> {
 
 template<class ExecNetwork>
 struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::OpenVINO> {
-    static void apply(ExecNetwork &net, const ModelConfig &config, const inference_backends_t &backends) {
+    static void apply(ExecNetwork &net, const BackendsConfig &config, const inference_backends_t &backends) {
         std::string ep_selected_device = config.deviceName;
         const BackendDescription &backend = backends.front();
         if (backend.properties.size() >= 2) {
@@ -80,20 +86,20 @@ struct ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::OpenVINO> {
 }
 
 template<class ExecNetwork, class ...Args>
-void applyONNXProviders(ExecNetwork& net, const ModelConfig &config, inference_backends_t backend_cfgs) {
+void applyONNXProviders(ExecNetwork& net, const BackendsConfig &config, inference_backends_t backend_cfgs) {
     if (backend_cfgs.empty()) {
         return;
     }
     static const std::map<std::string,
                           std::function<void(ExecNetwork&,
-                                             const ModelConfig &,
+                                             const BackendsConfig &,
                                              const inference_backends_t &)>
                          > maps {
         {"CPU",  &ProviderApplicator<ExecNetwork>::apply},
         {"",     &ProviderApplicator<ExecNetwork>::apply},
 #ifdef GAPI_ONNX_BACKEND_EP_EXTENSION
         {"DML",  &ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::DirectML>::apply},
-        {"OVEP", &ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::OpenVINO>::apply}
+        {"OV",   &ProviderApplicator<ExecNetwork, cv::gapi::onnx::ep::OpenVINO>::apply}
 #endif // GAPI_ONNX_BACKEND_EP_EXTENSION
     };
 

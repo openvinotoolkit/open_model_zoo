@@ -16,7 +16,7 @@
 
 template<class ExecNetwork>
 cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
-                                               const ModelConfig &config,
+                                               const BackendsConfig &config,
                                                const inference_backends_t &backends = inference_backends_t{}) {
     if (backends.empty()) {
         throw std::runtime_error("No G-API backend specified.\nPlease select a backend from the list: " +
@@ -24,7 +24,7 @@ cv::gapi::GNetPackage create_execution_network(const std::string &model_path,
     }
     static const std::map<std::string,
                           std::function<cv::gapi::GNetPackage(const std::string &,
-                                                              const ModelConfig &,
+                                                              const BackendsConfig &,
                                                               const inference_backends_t &)>
                          > maps {
 #ifdef GAPI_IE_BACKEND

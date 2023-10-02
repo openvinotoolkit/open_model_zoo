@@ -19,19 +19,23 @@
 template<class ExecNetwork>
 struct BackendApplicator<ExecNetwork,
                          cv::gapi::ov::Params> {
-    static cv::gapi::GNetPackage apply(const std::string &model_path, const ModelConfig & config, const inference_backends_t &backends) {
+    static cv::gapi::GNetPackage apply(const std::string &model_path, const BackendsConfig &config, const inference_backends_t &backends) {
         const BackendDescription &backend = backends.front();
         if(!backend.properties.empty()) {
             throw std::runtime_error(backend.name + " backend doesn't support any arguments. Please remove: " +
                                      merge(backend.properties, "/") + " from backend argument list");
         }
-        const auto net =
+        auto net =
             cv::gapi::ov::Params<ExecNetwork>{
                 model_path,                          // path to topology IR
                 fileNameNoExt(model_path) + ".bin",  // path to weights
                 config.deviceName                    // device specifier
             }.cfgNumRequests(config.maxAsyncRequests)
             .cfgPluginConfig(config.getLegacyConfig());
+        // E#96606
+        if (!config.mean_values.empty() || !config.scale_values.empty()) {
+            throw std::runtime_error(backend.name + " backend doesn't support neither `mean_values` nor `scale_values` at the moment");
+        }
         return cv::gapi::networks(net);
     }
 };

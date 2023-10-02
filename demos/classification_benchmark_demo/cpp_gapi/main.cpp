@@ -143,7 +143,11 @@ int main(int argc, char* argv[]) {
         auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
         inference_backends_t backends = util::ParseInferenceBackends(FLAGS_backend);
-        nets += create_execution_network<nets::Classification>(FLAGS_m, config, backends);
+        nets += create_execution_network<nets::Classification>(FLAGS_m,
+                                                               BackendsConfig {config,
+                                                                              FLAGS_mean_values,
+                                                                              FLAGS_scale_values},
+                                                               backends);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
                                               nets,
                                               cv::gapi::streaming::queue_capacity{1}));

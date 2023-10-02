@@ -11,7 +11,7 @@ const std::initializer_list<std::string> getONNXSupportedEP() {
     static const std::initializer_list<std::string> providers{
         "CPU"
 #ifdef GAPI_ONNX_BACKEND_EP_EXTENSION
-        , "DML", "OVEP"
+        , "DML", "OV"
 #endif
     };
     return providers;

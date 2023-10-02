@@ -32,6 +32,10 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 static const std::string backend_message_str("Optional. Specify an inference backend. The list of available backends: " +
                                              merge(getSupportedInferenceBackends(), ",") + ". Default value is IE. See README.md for details");
 static const char *backend_message = backend_message_str.c_str();
+static const char mean_values_message[] =
+    "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+                                           "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
@@ -48,6 +52,8 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(backend, "IE", backend_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
  * \brief This function shows a help message
@@ -73,4 +79,6 @@ static void showUsage() {
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -backend                  " << backend_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }

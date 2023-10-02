@@ -19,6 +19,14 @@ BackendDescription BackendDescription::parseFromArgs(const std::string &arg, cha
     return BackendDescription(splitted_line[0], props_it, splitted_line.end());
 }
 
+BackendsConfig::BackendsConfig(const ModelConfig &src,
+                               const std::string &mean_values,
+                               const std::string &scale_values) :
+    ModelConfig(src),
+    mean_values(mean_values),
+    scale_values(scale_values) {
+}
+
 std::initializer_list<std::string> getSupportedInferenceBackends() {
     static const std::initializer_list<std::string> backends{
 #ifdef GAPI_IE_BACKEND

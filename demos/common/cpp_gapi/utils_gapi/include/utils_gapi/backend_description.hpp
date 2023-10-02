@@ -24,6 +24,14 @@ struct BackendDescription {
     std::vector<std::string> properties;
 };
 
+struct BackendsConfig: ModelConfig {
+    BackendsConfig(const ModelConfig &src,
+                   const std::string &mean_values = "",
+                   const std::string &scale_values = "");
+    std::string mean_values;
+    std::string scale_values;
+};
+
 using inference_backends_t = std::queue<BackendDescription>;
 
 std::initializer_list<std::string> getSupportedInferenceBackends();
@@ -31,5 +39,5 @@ std::initializer_list<std::string> getSupportedInferenceBackends();
 template<class ExecNetwork,
          template <class> class Params>
 struct BackendApplicator {
-    static cv::gapi::GNetPackage apply(const std::string&, const ModelConfig &, const inference_backends_t &);
+    static cv::gapi::GNetPackage apply(const std::string&, const BackendsConfig &, const inference_backends_t &);
 };
