@@ -166,7 +166,7 @@ For example, use the following command-line command to run the application:
 
 To let the demo find onnx libs copy `onnxruntime_providers_openvino.dll` from `lib` and `onnxruntime.dll`, `onnxruntime_providers_shared.dll` from `bin` dirs  of onnxruntume install to the folder with the demo executable.
 
-The inference backend is specified by -backend flag. Depends on openCV version there might be different backends available: `IE` starting from openCV 4.5.2, `ONNX` from 4.7.1 and `OV` from 4.8. The possible device value for `"ONNX/DML/<device>` can be found using `set OPENCV_LOG_LEVEL=INFO` and running the demo with `-backend ONNX/DML/`. Search for `Available DirectML adapters:`. For `-backend ONNX/OVEP/<device>` the device is the same as the one selected for `--use_openvino` while compiling `onnxruntime`.
+The inference backend is specified by -backend flag. Depends on openCV version there might be different backends available: `IE` starting from openCV 4.5.2, `ONNX` from 4.7.1 and `OV` from 4.8. The possible device value for `"ONNX/DML/<device>` can be found using `set OPENCV_LOG_LEVEL=INFO` and running the demo with `-backend ONNX/DML/`. Search for `Available DirectML adapters:`. For `-backend ONNX/OV/<device>` the device is the same as the one selected for `--use_openvino` while compiling `onnxruntime`.
 
 ## Demo Output
 
