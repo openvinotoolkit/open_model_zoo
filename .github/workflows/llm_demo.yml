@@ -7,13 +7,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Download OpenVINO
+      - name: Install OpenVINO and OpenCV
         run: |
           mkdir ov
           curl https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.1/linux/l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64.tgz | tar --directory ov --strip-components 1 -xz
           sudo ov/install_dependencies/install_openvino_dependencies.sh
           sudo apt install libopencv-dev
-      - name: Build demo
+      - name: Build llm_demo
         run: |
           mkdir build
           cd build
@@ -24,8 +24,9 @@ jobs:
           python-version: 3.11
       - uses: actions/checkout@v4
         with:
-          repository: https://huggingface.co/openlm-research/open_llama_3b_v2
+          repository: openlm-research/open_llama_3b_v2
           lfs: true
+          github-server-url: https://huggingface.co
       - name: Convert
         run: |
           ls
