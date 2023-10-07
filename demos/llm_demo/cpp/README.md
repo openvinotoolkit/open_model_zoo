@@ -18,7 +18,7 @@ Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
 
    ```sh
    git lfs install
-   python -m pip install git+https://github.com/huggingface/optimum-intel.git
+   python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu onnx git+https://github.com/huggingface/optimum-intel.git
    ```
 
 2. Download and convert the model
