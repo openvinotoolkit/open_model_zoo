@@ -142,6 +142,7 @@ find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs)
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
 add_subdirectory(thirdparty/gflags)
+add_subdirectory(thirdparty/llama.cpp)
 add_subdirectory(common/cpp)
 
 find_package(OpenCV QUIET COMPONENTS gapi)

@@ -1,3 +1,6 @@
 [submodule "demos/thirdparty/gflags"]
 	path = demos/thirdparty/gflags
 	url = https://github.com/gflags/gflags.git
+[submodule "demos/thirdparty/llama.cpp"]
+	path = demos/thirdparty/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git
