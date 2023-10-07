@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) try {
             BATCH_SIZE, {1, std::numeric_limits<ov::Dimension::value_type>::max()}
         }}
     };
-    for (const ov::Output<const ov::Node>& input : model->inputs()) {
+    for (const ov::Output<ov::Node>& input : model->inputs()) {
         for (const std::string& name : input.get_names()) {
             if (name.find("past_key_values") == 0) {
                 ov::PartialShape shape = input.get_partial_shape();
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) try {
     }
     model->reshape(shapes);
     ov::InferRequest ireq = core.compile_model(model, "CPU", {ov::cache_dir("llm-cache")}).create_infer_request();
-    for (const ov::Output<const ov::Node>& input : model->inputs()) {
+    for (const ov::Output<ov::Node>& input : model->inputs()) {
         for (const std::string& name : input.get_names()) {
             if (name.find("past_key_values") == 0) {
                 ireq.get_tensor(input).set_shape(input.get_partial_shape().get_min_shape());
