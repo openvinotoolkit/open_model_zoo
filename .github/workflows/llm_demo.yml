@@ -14,10 +14,9 @@ jobs:
           sudo ov/install_dependencies/install_openvino_dependencies.sh
           sudo apt install libopencv-dev
       - name: Build llm_demo
-        working-directory: build
         run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=../ov/runtime/cmake ../demos
-          cmake --build . --target llm_demo --config Release -j
+          cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=ov/runtime/cmake demos
+          cmake --build build --target llm_demo --config Release -j
       - uses: actions/checkout@v4
         with:
           repository: openlm-research/open_llama_3b_v2
@@ -28,11 +27,12 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
+          cache: 'pip'
       - name: Download and convert open_llama_3b_v2 and the vocab
         working-directory: open_llama_3b_v2
         run: |
           git lfs checkout
-          python -m pip install git+https://github.com/huggingface/optimum-intel.git
+          python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu git+https://github.com/huggingface/optimum-intel.git
           python -c "from optimum.intel.openvino import OVModelForCausalLM; model = OVModelForCausalLM.from_pretrained('.', export=True); model.save_pretrained('.')"
           python ../demos/thirdparty/llama.cpp/convert.py . --vocab-only --outfile vocab.gguf
       - name: Run llm_demo
