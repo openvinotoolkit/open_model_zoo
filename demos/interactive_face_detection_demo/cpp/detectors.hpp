@@ -32,7 +32,7 @@ struct FaceDetection : BaseDetection {
     std::string output;
     std::string labels_output;
     double detectionThreshold;
-    int objectSize;
+    size_t objectSize;
     float width;
     float height;
     size_t model_input_width;

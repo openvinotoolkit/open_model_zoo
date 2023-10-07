@@ -87,7 +87,7 @@ struct ClassificationResult : public ResultBase {
 };
 
 struct DetectedObject : public cv::Rect2f {
-    unsigned int labelID;
+    size_t labelID;
     std::string label;
     float confidence;
 };
