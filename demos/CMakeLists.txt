@@ -145,6 +145,7 @@ add_subdirectory(thirdparty/gflags)
 add_subdirectory(thirdparty/llama.cpp)
 if(COMPILER_IS_GCC_LIKE)  # Disable the warnings from llama.cpp
     target_compile_options(llama PRIVATE -Wno-implicit-fallthrough -Wno-unused-function)
+    target_compile_options(common PRIVATE -Wno-unused-function)
 endif()
 add_subdirectory(common/cpp)
 
