@@ -2,7 +2,7 @@ name: github-actions
 on: pull_request
 jobs:
   llm_demo:
-    runs-on: aks-linux-8-cores
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -13,9 +13,11 @@ jobs:
           curl https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.1/linux/l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64.tgz | tar --directory ov --strip-components 1 -xz
           sudo ov/install_dependencies/install_openvino_dependencies.sh
           sudo apt install libopencv-dev
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
+      - name: Build llm_demo
+        working-directory: build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=../ov/runtime/cmake ../demos
+          cmake --build . --target llm_demo --config Release -j
       - uses: actions/checkout@v4
         with:
           repository: openlm-research/open_llama_3b_v2
@@ -23,20 +25,17 @@ jobs:
           path: open_llama_3b_v2
           lfs: true
           github-server-url: https://huggingface.co
-      - name: Convert
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Download and convert open_llama_3b_v2 and the vocab
+        working-directory: open_llama_3b_v2
         run: |
-          cd open_llama_3b_v2
           git lfs checkout
           python -m pip install git+https://github.com/huggingface/optimum-intel.git
           python -c "from optimum.intel.openvino import OVModelForCausalLM; model = OVModelForCausalLM.from_pretrained('.', export=True); model.save_pretrained('.')"
           python ../demos/thirdparty/llama.cpp/convert.py . --vocab-only --outfile vocab.gguf
-      - name: Build llm_demo
-        run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=../ov/runtime/cmake ../demos
-          cmake --build . --target llm_demo --config Release -j
-      - name: llm_demo
+      - name: Run llm_demo
         run: |
           source ov/setupvars.sh
-          ./build/intel64/Release/llm_demo open_llama_3b_v2/openvino_model.xml /open_llama_3b_v2/vocab.gguf "return 0"
+          ./build/intel64/Release/llm_demo open_llama_3b_v2/openvino_model.xml open_llama_3b_v2/vocab.gguf "return 0"
