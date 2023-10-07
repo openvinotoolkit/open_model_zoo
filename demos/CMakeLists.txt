@@ -143,6 +143,9 @@ find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(thirdparty/llama.cpp)
+if(COMPILER_IS_GCC_LIKE)  # Disable the warnings from llama.cpp
+    target_compile_options(llama PRIVATE -Wno-implicit-fallthrough -Wno-unused-function)
+endif()
 add_subdirectory(common/cpp)
 
 find_package(OpenCV QUIET COMPONENTS gapi)

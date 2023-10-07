@@ -36,7 +36,7 @@ jobs:
           git lfs checkout
           python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu onnx git+https://github.com/huggingface/optimum-intel.git
           source ../ov/setupvars.sh
-          python -c "from optimum.intel.openvino import OVModelForCausalLM; model = OVModelForCausalLM.from_pretrained('.', export=True); model.save_pretrained('.')"
+          python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('.', export=True).save_pretrained('.')"
           python ../demos/thirdparty/llama.cpp/convert.py . --vocab-only --outfile vocab.gguf
       - name: Run llm_demo
         run: |
