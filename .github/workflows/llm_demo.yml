@@ -15,8 +15,10 @@ jobs:
           sudo apt install libopencv-dev
       - name: Build llm_demo
         run: |
-          cmake -Sdemos -Bbuild -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=ov/runtime/cmake
-          cmake --build build --target llm_demo --config Release -j
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=ov/runtime/cmake ..
+          cmake --build . --target llm_demo --config Release -j
       - uses: actions/checkout@v4
         with:
           repository: openlm-research/open_llama_3b_v2
