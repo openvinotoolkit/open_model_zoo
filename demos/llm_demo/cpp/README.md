@@ -34,7 +34,7 @@ Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
 
 ## Running
 
-Usage: `llm_demo <model_path> <vocab_path> '<prompt>'`
+Usage: `llm_demo <model_path> <vocab_path> "<prompt>"`
 
 Example: `llm_demo openvino_model.xml vocab.gguf "1+1="`
 
