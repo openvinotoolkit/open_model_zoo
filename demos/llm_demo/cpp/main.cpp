@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) try {
     ireq.get_tensor("attention_mask").data<int64_t>()[0] = 1;
     constexpr size_t SPECIAL_EOS_ID = 2;
     while (out_token != SPECIAL_EOS_ID) {
-        for (const ov::Output<const ov::Node>& input : model->inputs()) {
+        for (const ov::Output<ov::Node>& input : model->inputs()) {
             for (const std::string& name : input.get_names()) {
                 if (name.find("past_key_values") == 0) {
                     ireq.set_tensor(input, ireq.get_tensor("present" + name.substr(15)));

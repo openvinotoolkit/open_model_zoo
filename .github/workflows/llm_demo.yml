@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: openlm-research/open_llama_3b_v2
+          ref: main
           path: open_llama_3b_v2
           lfs: true
           github-server-url: https://huggingface.co
