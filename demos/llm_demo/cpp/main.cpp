@@ -57,10 +57,6 @@ int main(int argc, char* argv[]) try {
     }
     model->reshape(shapes);
     ov::InferRequest ireq = core.compile_model(model, "CPU", {ov::cache_dir("llm-cache")}).create_infer_request();
-    ireq.get_tensor("input_ids").set_shape({BATCH_SIZE, prompt.size()});
-    std::copy(prompt.begin(), prompt.end(), ireq.get_tensor("input_ids").data<int64_t>());
-    ireq.get_tensor("attention_mask").set_shape({BATCH_SIZE, prompt.size()});
-    std::fill_n(ireq.get_tensor("attention_mask").data<int64_t>(), prompt.size(), 1);
     for (const ov::Output<const ov::Node>& input : model->inputs()) {
         for (const std::string& name : input.get_names()) {
             if (name.find("past_key_values") == 0) {
@@ -69,6 +65,10 @@ int main(int argc, char* argv[]) try {
             }
         }
     }
+    ireq.get_tensor("input_ids").set_shape({BATCH_SIZE, prompt.size()});
+    ireq.get_tensor("attention_mask").set_shape({BATCH_SIZE, prompt.size()});
+    std::copy(prompt.begin(), prompt.end(), ireq.get_tensor("input_ids").data<int64_t>());
+    std::fill_n(ireq.get_tensor("attention_mask").data<int64_t>(), prompt.size(), 1);
     ireq.infer();
     size_t n_vocab = llama_n_vocab(vocab.get());
     if (ireq.get_tensor("logits").get_shape().back() != n_vocab) {

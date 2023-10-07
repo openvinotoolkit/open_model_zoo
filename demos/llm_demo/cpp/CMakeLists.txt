@@ -3,6 +3,6 @@
 #
 
 add_demo(NAME llm_demo SOURCES main.cpp DEPENDENCIES llama common)
-if(MSVC)  # Disable the warning from llama.cpp
-    target_compile_options(llm_demo PRIVATE /wd4996)
+if(MSVC)  # Disable the warnings from llama.cpp
+    target_compile_options(llm_demo PRIVATE /wd4146 /wd4305 /wd4715 /wd4996)
 endif()
