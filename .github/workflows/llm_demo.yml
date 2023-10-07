@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=ov/runtime/cmake ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=../ov/runtime/cmake ..
           cmake --build . --target llm_demo --config Release -j
       - uses: actions/checkout@v4
         with:
