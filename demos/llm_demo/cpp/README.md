@@ -1,6 +1,6 @@
 # LLM C++ Demo
 
-This application showcases inference of large language model (LLM). Unlike most of other demos, this application doesn't have a rich set of command line arguments to encourage the reader to explore and modify the source code.
+This application showcases inference of s large language model (LLM). Unlike most of other demos, this application doesn't have a rich set of command line arguments to encourage the reader to explore and modify the source code.
 
 ## How it works
 

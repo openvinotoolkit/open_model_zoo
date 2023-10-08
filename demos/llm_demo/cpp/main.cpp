@@ -5,7 +5,6 @@
 #include <common.h>  // llama.cpp
 #include <llama.h>
 #include <openvino/openvino.hpp>
-#include <utils/slog.hpp>
 
 namespace {
 void print_token(const llama_model& vocab, llama_token out_token) {
@@ -23,7 +22,7 @@ void print_token(const llama_model& vocab, llama_token out_token) {
 
 int main(int argc, char* argv[]) try {
     if (argc != 4) {
-        throw std::runtime_error(std::string{"Usage : "} + argv[0] + " <model_path> <vocab_path> '<prompt>'");
+        throw std::runtime_error(std::string{"Usage: "} + argv[0] + " <model_path> <vocab_path> '<prompt>'");
     }
     llama_model_params params;
     params.vocab_only = true;
@@ -99,9 +98,9 @@ int main(int argc, char* argv[]) try {
     }
     std::cout << '\n';
 } catch (const std::exception& error) {
-    slog::err << error.what() << slog::endl;
+    std::cerr << error.what() << '\n';
     return 1;
 } catch (...) {
-    slog::err << "Non-exception object thrown" << slog::endl;
+    std::cerr << "Non-exception object thrown\n";
     return 1;
 }

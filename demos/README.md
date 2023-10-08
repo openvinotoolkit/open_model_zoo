@@ -42,6 +42,7 @@
    omz_demos_image_translation_demo_python
    omz_demos_instance_segmentation_demo_python
    omz_demos_interactive_face_detection_demo_cpp
+   omz_demos_llm_demo_cpp
    omz_demos_machine_translation_demo_python
    omz_demos_monodepth_demo_python
    omz_demos_mri_reconstruction_demo_cpp
@@ -123,6 +124,7 @@ The Open Model Zoo includes the following demos:
 - [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/cpp/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Interactive Face Detection G-API\* Demo](./interactive_face_detection_demo/cpp_gapi/README.md) - G-API based Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
+- [LLM C++ Demo](./llm_demo/cpp/README.md) - This application showcases inference of a large language model (LLM) including LLaMA 2.
 - [Machine Translation Python\* Demo](./machine_translation_demo/python/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
 - [Mask R-CNN C++ Demo for TensorFlow\* Object Detection API](./mask_rcnn_demo/cpp/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
 - [Monodepth Python\* Demo](./monodepth_demo/python/README.md) - The demo demonstrates how to run monocular depth estimation models.
