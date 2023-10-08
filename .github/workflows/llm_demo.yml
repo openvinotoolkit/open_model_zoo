@@ -33,7 +33,6 @@ jobs:
       - name: Download and convert open_llama_3b_v2 and the vocab
         working-directory: open_llama_3b_v2
         run: |
-          git lfs checkout
           python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu onnx git+https://github.com/huggingface/optimum-intel.git
           source ../ov/setupvars.sh
           python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('.', export=True).save_pretrained('.')"
