@@ -36,6 +36,6 @@ Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
 
 Usage: `llm_demo <model_path> <vocab_path> "<prompt>"`
 
-Example: `llm_demo openvino_model.xml vocab.gguf "1+1="`
+Example: `llm_demo openvino_model.xml vocab.gguf "Why is the Sun yellow?"`
 
 Follow https://github.com/ggerganov/llama.cpp/discussions/366#discussioncomment-5384744 to enable non ASCII characters for Windows cmd.
