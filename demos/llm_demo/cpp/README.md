@@ -25,7 +25,7 @@ Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
 
    ```sh
    git clone https://huggingface.co/openlm-research/open_llama_3b_v2
-   python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('open_llama_3b_v2', export=True).save_pretrained('open_llama_3b_v2')"
+   python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('open_llama_3b_v2/', export=True).save_pretrained('open_llama_3b_v2/')"
    ```
 
 3. Convert the vocab

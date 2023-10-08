@@ -31,12 +31,11 @@ jobs:
           python-version: 3.11
           cache: 'pip'
       - name: Download and convert open_llama_3b_v2 and the vocab
-        working-directory: open_llama_3b_v2
         run: |
           python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu onnx git+https://github.com/huggingface/optimum-intel.git
-          source ../ov/setupvars.sh
-          python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('.', export=True).save_pretrained('.')"
-          python ../demos/thirdparty/llama.cpp/convert.py . --vocab-only --outfile vocab.gguf
+          source ov/setupvars.sh
+          python -c "from optimum.intel.openvino import OVModelForCausalLM; OVModelForCausalLM.from_pretrained('open_llama_3b_v2/', export=True).save_pretrained('open_llama_3b_v2/')"
+          python demos/thirdparty/llama.cpp/convert.py open_llama_3b_v2/ --vocab-only --outfile open_llama_3b_v2/vocab.gguf
       - name: Run llm_demo
         run: |
           source ov/setupvars.sh
