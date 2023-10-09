@@ -18,8 +18,6 @@
 #include <opencv2/gapi/gcomputation.hpp>
 #include <opencv2/gapi/gmat.hpp>
 #include <opencv2/gapi/gproto.hpp>
-#include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/util/optional.hpp>
 
 
@@ -36,11 +34,15 @@
 #include <utils/slog.hpp>
 #include <utils_gapi/kernel_package.hpp>
 #include <utils_gapi/stream_source.hpp>
+#include <utils_gapi/backend_builder.hpp>
 
 #include "classification_benchmark_demo_gapi.hpp"
 #include "custom_kernels.hpp"
 #include <models/classification_model.h>
 
+namespace nets {
+G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
+}
 
 namespace util {
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
@@ -61,11 +63,16 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-}  // namespace util
-
-namespace nets {
-G_API_NET(Classification, <cv::GMat(cv::GMat)>, "classification");
+inference_backends_t ParseInferenceBackends(const std::string &str, char sep = ',') {
+    inference_backends_t backends;
+    std::stringstream params_list(str);
+    std::string line;
+    while (std::getline(params_list, line, sep)) {
+        backends.push(BackendDescription::parseFromArgs(line));
+    }
+    return backends;
 }
+}  // namespace util
 
 int main(int argc, char* argv[]) {
     try {
@@ -133,19 +140,16 @@ int main(int argc, char* argv[]) {
         });
 
         /** Configure network **/
+        auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
-        // clang-format off
-        const auto net =
-            cv::gapi::ie::Params<nets::Classification>{
-                FLAGS_m,  // path to topology IR
-                fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
-                FLAGS_d  // device specifier
-            }.cfgNumRequests(config.maxAsyncRequests)
-             .pluginConfig(config.getLegacyConfig());
-        // clang-format on
-
+        inference_backends_t backends = util::ParseInferenceBackends(FLAGS_backend);
+        nets += create_execution_network<nets::Classification>(FLAGS_m,
+                                                               BackendsConfig {config,
+                                                                              FLAGS_mean_values,
+                                                                              FLAGS_scale_values},
+                                                               backends);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
-                                              cv::gapi::networks(net),
+                                              nets,
                                               cv::gapi::streaming::queue_capacity{1}));
 
         /** Output container for result **/

@@ -31,7 +31,7 @@ struct ModelConfig {
     ov::AnyMap compiledModelConfig;
 
     std::set<std::string> getDevices();
-    std::map<std::string, std::string> getLegacyConfig();
+    std::map<std::string, std::string> getLegacyConfig() const;
 
 protected:
     std::set<std::string> devices;
