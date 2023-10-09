@@ -478,3 +478,30 @@ class LPIPS(BaseRegressionMetric):
                 sl._modules[module_id] = feats[int(module_id)] # pylint: disable=W0212
             setattr(loss.net, 'slice{}'.format(slice_id), sl)
         return loss
+
+
+class PeakSignalToNoiseRatioIFRNet(BaseRegressionMetric):
+    __provider__ = 'psnr_ifrnet'
+
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
+                        StyleTransferAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
+                        StyleTransferPrediction)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self._psnr_differ, *args, **kwargs)
+
+    def _psnr_differ(self, annotation_image, prediction_image):
+        prediction = np.asarray(prediction_image) / 255.0
+        annotation = np.asarray(annotation_image) / 255.0
+
+        psnr = -10 * math.log10(np.mean((prediction - annotation) * (prediction - annotation)))
+        return psnr
+
+    @classmethod
+    def get_common_meta(cls):
+        meta = super().get_common_meta()
+        meta['target'] = 'higher-better'
+        meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
+        meta['postfix'] = 'Db'
+        return meta

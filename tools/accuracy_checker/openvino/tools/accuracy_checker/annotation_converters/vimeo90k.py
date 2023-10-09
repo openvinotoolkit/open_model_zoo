@@ -50,3 +50,30 @@ class Vimeo90KSuperResolutionDatasetConverter(BaseFormatConverter):
             annotations.append(SuperResolutionAnnotation(
                 MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target))
         return ConverterReturn(annotations, None, None)
+
+class Vimeo90K_IFRNetDataset(BaseFormatConverter):
+    __provider__ = 'vimeo90k_interp'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'annotation_file': PathField(description='testing split file'),
+        })
+        return params
+
+    def configure(self):
+        self.annotation_file = self.get_value_from_config('annotation_file')
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        test_set = read_txt(self.annotation_file)
+        annotations = []
+        for sept in test_set:
+            target = 'target/{}/im2.png'.format(sept)
+            input0 = 'input/{}/im1.png'.format(sept)
+            input1 = 'input/{}/im3.png'.format(sept)
+            input_data = [ input0, input1 ]
+            annotations.append(SuperResolutionAnnotation(
+                MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target)
+            )
+        return ConverterReturn(annotations, None, None)

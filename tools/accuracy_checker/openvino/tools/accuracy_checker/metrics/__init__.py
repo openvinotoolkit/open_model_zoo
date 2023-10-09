@@ -73,7 +73,7 @@ from .regression import (
 )
 from .image_quality_assessment import (
     StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS,
-    PeakSignalToNoiseRatioWithBlockingEffectFactor
+    PeakSignalToNoiseRatioWithBlockingEffectFactor, PeakSignalToNoiseRatioIFRNet
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
@@ -254,6 +254,7 @@ __all__ = [
     'PeakSignalToNoiseRatio',
     'StructuralSimilarity',
     'PeakSignalToNoiseRatioWithBlockingEffectFactor',
+    'PeakSignalToNoiseRatioIFRNet',
 
     'NormalisedQuantileLoss',
     'editdistance_eval',

@@ -770,7 +770,13 @@ class Transpose(Preprocessor):
         self.axes = self.get_value_from_config('axes')
 
     def process(self, image, annotation_meta=None):
-        image.data = np.transpose(image.data, self.axes)
+        def process_data(data):
+            return np.transpose(data, self.axes)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(data_fragment) for data_fragment in image.data
+        ]
+
         return image
 
     @property
