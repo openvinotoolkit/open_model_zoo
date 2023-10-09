@@ -29,9 +29,24 @@ struct BackendApplicator<ExecNetwork,
                 model_path
             };
 
-        // check on normalization
         if (config.mean_values.empty() && config.scale_values.empty()) {
             net.cfgNormalize({false});
+        } else if (!config.mean_values.empty() && !config.scale_values.empty()) {
+            std::vector<float> means;
+            split(config.mean_values, ' ', means);
+
+            std::vector<float> scales;
+            split(config.scale_values, ' ', scales);
+
+            if (means.size() != 3  || scales.size() != 3) {
+                throw std::runtime_error("`mean_values` and `scale_values` must be 3-components vectors "
+                                         "with a space symbol as separator between component values");
+            }
+            net.cfgMeanStd({cv::Scalar(means[0], means[1], means[2])},
+                           {cv::Scalar(scales[0], scales[1], scales[2])});
+        } else {
+            throw std::runtime_error(backends.front().name + " requires both `mean_values` and 'scale_values' "
+                                     "to be set or both unset. Please check the command arguments");
         }
 
         applyONNXProviders(net, config, backends);

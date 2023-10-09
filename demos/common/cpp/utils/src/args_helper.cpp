@@ -78,6 +78,19 @@ std::vector<std::string> split(const std::string& s, char delim) {
     return result;
 }
 
+void split(const std::string& s, char delim, std::vector<float> &out) {
+    std::stringstream ss(s);
+    std::string item;
+
+    while (getline(ss, item, delim)) {
+        try {
+            out.push_back(std::stof(item));
+        } catch (...) {
+            throw std::runtime_error("cannot split the string: \"" + s + "\" onto floats");
+        }
+    }
+}
+
 template <class It>
 static std::string merge_impl(It begin, It end, const char* delim) {
     std::stringstream ss;
