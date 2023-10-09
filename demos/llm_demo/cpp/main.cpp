@@ -8,7 +8,7 @@
 
 namespace {
 void print_token(const llama_model& vocab, llama_token out_token) {
-    std::array<char, 13> decoded;
+    std::array<char, 24> decoded;
     int length = llama_token_to_piece(&vocab, out_token, decoded.data(), decoded.size());
     if (length <= 0) {
         throw std::runtime_error("Unexpected number of chars for the token: " + std::to_string(length));
@@ -31,8 +31,6 @@ int main(int argc, char* argv[]) try {
     if (!vocab) {
         throw std::runtime_error("Failed to load vocab");
     }
-    constexpr bool add_bos = true;
-    std::vector<llama_token> prompt = llama_tokenize(vocab.get(), argv[3], add_bos);
     ov::Core core;
     std::shared_ptr<ov::Model> model = core.read_model(argv[1]);
     constexpr size_t BATCH_SIZE = 1;
@@ -64,6 +62,8 @@ int main(int argc, char* argv[]) try {
             }
         }
     }
+    constexpr bool add_bos = true;
+    std::vector<llama_token> prompt = llama_tokenize(vocab.get(), argv[3], add_bos);
     ireq.get_tensor("input_ids").set_shape({BATCH_SIZE, prompt.size()});
     ireq.get_tensor("attention_mask").set_shape({BATCH_SIZE, prompt.size()});
     std::copy(prompt.begin(), prompt.end(), ireq.get_tensor("input_ids").data<int64_t>());
