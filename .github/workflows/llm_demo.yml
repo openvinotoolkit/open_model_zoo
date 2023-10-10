@@ -2,7 +2,7 @@ name: github-actions
 on: pull_request
 jobs:
   llm_demo:
-    runs-on: ubuntu-latest-16-cores
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
         with:
