@@ -117,11 +117,7 @@ std::shared_ptr<InternalModelData> ModelYoloV3ONNX::preprocess(const InputData& 
 
 namespace {
 float getScore(const ov::Tensor& scoresTensor, size_t classInd, size_t boxInd) {
-    const float* scoresPtr = scoresTensor.data<float>();
-    const auto shape = scoresTensor.get_shape();
-    int N = shape[2];
-
-    return scoresPtr[classInd * N + boxInd];
+    return scoresTensor.data<float>()[classInd * scoresTensor.get_shape()[2] + boxInd];
 }
 }
 
@@ -144,7 +140,7 @@ std::unique_ptr<ResultBase> ModelYoloV3ONNX::postprocess(InferenceResult& infRes
     // Generate detection results
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     size_t numberOfBoxes = indicesShape.size() == 3 ? indicesShape[1] : indicesShape[0];
-    int indicesStride = indicesShape.size() == 3 ? indicesShape[2] : indicesShape[1];
+    size_t indicesStride = indicesShape.size() == 3 ? indicesShape[2] : indicesShape[1];
 
     for (size_t i = 0; i < numberOfBoxes; ++i) {
         int batchInd = indicesData[i * indicesStride];
