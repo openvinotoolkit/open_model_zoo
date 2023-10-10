@@ -305,7 +305,7 @@ def add_demos_pages(output_root, parent_element):
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
-        if md_path.samefile('demos/llm_demo/cpp/README.md'):
+        if md_path.samefile(OMZ_ROOT / 'demos/llm_demo/cpp/README.md'):
             models_lines = ()
         else:
             with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
