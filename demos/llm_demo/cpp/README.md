@@ -10,7 +10,7 @@ The demo loads a model (`.xml` and `.bin`) to OpenVINO™ and a provided vocab (
 
 ### LLaMA 2
 
-Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks/254-llm-chatbot to convert the model to intermediate representation (IR) (`.xml` and `.bin`) format. Use [../../thirdparty/llama.cpp/models/ggml-vocab-llama.gguf](../../thirdparty/llama.cpp/models/ggml-vocab-llama.gguf) as a vocab.
+Follow https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks/254-llm-chatbot to convert the model to intermediate representation (IR) (`.xml` and `.bin`) format. Use `<omz_dir>/demos/thirdparty/llama.cpp/models/ggml-vocab-llama.gguf` as a vocab.
 
 ### OpenLLaMA
 

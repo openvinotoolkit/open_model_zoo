@@ -305,8 +305,11 @@ def add_demos_pages(output_root, parent_element):
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
-        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
-            models_lines = models_lst.readlines()
+        if md_path.samefile('demos/llm_demo/cpp/README.md'):
+            models_lines = ()
+        else:
+            with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+                models_lines = models_lst.readlines()
 
         with (md_path).open('r', encoding="utf-8") as demo_readme:
             raw_demo_readme = demo_readme.read()
@@ -391,7 +394,7 @@ def main():
         if md_path not in documentation_md_paths:
             raise RuntimeError(f'{all_md_paths[md_path]}: '
                                f'Relative link to non-online documentation file "{md_path}". '
-                               f'Replace it by `{OMZ_PREFIX + md_path.as_posix()}`')
+                               f'Replace it with `{OMZ_PREFIX + md_path.as_posix()}`')
 
     with (output_root / 'DoxygenLayout.xml').open('wb') as layout_file:
         ET.ElementTree(doxygenlayout_element).write(layout_file)
