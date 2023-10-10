@@ -7,6 +7,7 @@ exclude=
     models/public/mozilla-deepspeech-0.8.2/mds_convert_utils/memmapped_file_system_pb2.py,
     tools/accuracy_checker/openvino/__init__.py
     tools/model_tools/src/openvino/__init__.py
+    demos/thirdparty/llama.cpp/
 select=
     # flake8-comprehensions issues
     C4,
