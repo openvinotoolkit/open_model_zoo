@@ -29,6 +29,7 @@ For the tests to work, the test data directory must contain:
 """
 
 import argparse
+import certifi
 import contextlib
 import csv
 import json
@@ -240,7 +241,8 @@ def main():
 
     print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
-
+    os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+    os.environ["SSL_CERT_FILE"] = certifi.where()
     with urlopen(COCO128_URL) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
