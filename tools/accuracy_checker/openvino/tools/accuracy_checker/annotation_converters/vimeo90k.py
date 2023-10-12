@@ -17,7 +17,7 @@ limitations under the License.
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..data_readers import MultiFramesInputIdentifier
 from ..config import PathField, BoolField
-from ..representation import SuperResolutionAnnotation. ImageProcessingAnnotation
+from ..representation import SuperResolutionAnnotation, ImageProcessingAnnotation
 from ..utils import read_txt
 
 
