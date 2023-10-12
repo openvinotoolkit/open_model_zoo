@@ -8,6 +8,9 @@
 
 #include <gflags/gflags.h>
 
+#include <utils_gapi/backend_description.hpp>
+#include <utils/args_helper.hpp>
+
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
@@ -26,7 +29,13 @@ static const char no_show_message[] = "Optional. Disable showing of processed im
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-
+static const std::string backend_message_str("Optional. Specify an inference backend. The list of available backends: " +
+                                             merge(getSupportedInferenceBackends(), ",") + ". Default value is IE. See README.md for details");
+static const char *backend_message = backend_message_str.c_str();
+static const char mean_values_message[] =
+    "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
+static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
+                                           "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
@@ -42,6 +51,9 @@ DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(backend, "IE", backend_message);
+DEFINE_string(mean_values, "", mean_values_message);
+DEFINE_string(scale_values, "", scale_values_message);
 
 /**
  * \brief This function shows a help message
@@ -66,4 +78,7 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -backend                  " << backend_message << std::endl;
+    std::cout << "    -mean_values              " << mean_values_message << std::endl;
+    std::cout << "    -scale_values             " << scale_values_message << std::endl;
 }

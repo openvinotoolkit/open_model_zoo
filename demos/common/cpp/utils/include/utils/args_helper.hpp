@@ -32,6 +32,9 @@ void readInputFilesArguments(std::vector<std::string>& files, const std::string&
 void parseInputFilesArguments(std::vector<std::string>& files);
 
 std::vector<std::string> split(const std::string& s, char delim);
+void split(const std::string& s, char delim, std::vector<float> &out);
+std::string merge(std::initializer_list<std::string> list, const char *delim);
+std::string merge(const std::vector<std::string> &list, const char *delim);
 
 std::vector<std::string> parseDevices(const std::string& device_string);
 

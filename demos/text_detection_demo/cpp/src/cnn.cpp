@@ -53,7 +53,7 @@ Cnn::Cnn(
     m_model->reshape({ {m_input_name, input_shape} });
 
     m_channels = input_shape[ov::layout::channels_idx(input_layout)];
-    m_input_size = cv::Size(input_shape[ov::layout::width_idx(input_layout)], input_shape[ov::layout::height_idx(input_layout)]);
+    m_input_size = cv::Size(int(input_shape[ov::layout::width_idx(input_layout)]), int(input_shape[ov::layout::height_idx(input_layout)]));
 
     // Collect output names
     ov::OutputVector outputs = m_model->outputs();
