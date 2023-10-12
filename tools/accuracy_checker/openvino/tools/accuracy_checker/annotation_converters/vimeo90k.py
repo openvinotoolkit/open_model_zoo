@@ -17,7 +17,7 @@ limitations under the License.
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..data_readers import MultiFramesInputIdentifier
 from ..config import PathField, BoolField
-from ..representation import SuperResolutionAnnotation
+from ..representation import SuperResolutionAnnotation. ImageProcessingAnnotation
 from ..utils import read_txt
 
 
@@ -73,7 +73,7 @@ class Vimeo90K_IFRNetDataset(BaseFormatConverter):
             input0 = 'input/{}/im1.png'.format(sept)
             input1 = 'input/{}/im3.png'.format(sept)
             input_data = [ input0, input1 ]
-            annotations.append(SuperResolutionAnnotation(
+            annotations.append(ImageProcessingAnnotation(
                 MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target)
             )
         return ConverterReturn(annotations, None, None)
