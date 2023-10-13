@@ -64,7 +64,6 @@ class StructuralSimilarity(BaseRegressionMetric):
         meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
         return meta
 
-
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
@@ -78,13 +77,20 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         parameters = super().parameters()
         parameters.update({
             'scale_border': NumberField(
-                optional=True, min_value=0, default=4, description="Scale border.", value_type=int
+                optional=True, min_value=0, default=4, 
+		description="Scale border - the number of pixels to crop from the height and width of the image.", 
+		value_type=int
             ),
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
             ),
-            'normalized_images': BoolField(optional=True, default=False, description='images in [0, 1] range or not')
+            'normalized_images': BoolField(
+                optional=True, default=False, description='images in [0, 1] range or not'),
+            'unweighted_average': BoolField(
+                optional=True, default=False, description="calculate metric as for grayscale image or not"
+                " (3-channel images by default use weighted average of R, G, B channels)."
+            ) 
         })
 
         return parameters
@@ -96,12 +102,14 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         super().configure()
         self.scale_border = self.get_value_from_config('scale_border')
         self.color_order = self.get_value_from_config('color_order')
+        self.unweighted_average = self.get_value_from_config('unweighted_average')
         channel_order = {
             'BGR': [2, 1, 0],
             'RGB': [0, 1, 2],
         }
         self.channel_order = channel_order[self.color_order]
         self.normalized_images = self.get_value_from_config('normalized_images')
+        self.color_scale = 255 if not self.normalized_images else 1
         self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
@@ -123,7 +131,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
                 cv2.COLOR_BGR2GRAY if self.color_order == 'BGR' else cv2.COLOR_RGB2GRAY
             ).astype(float)
         image_difference = (prediction - ground_truth) / self.color_scale
-        if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
+        if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3 and not self.unweighted_average:
             r_channel_diff = image_difference[:, :, self.channel_order[0]]
             g_channel_diff = image_difference[:, :, self.channel_order[1]]
             b_channel_diff = image_difference[:, :, self.channel_order[2]]
@@ -131,11 +139,11 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
 
             mse = np.mean(channels_diff ** 2)
-            if mse == 0:
-                return np.Infinity
         else:
             mse = np.mean(image_difference ** 2)
 
+        if mse == 0:
+            return np.Infinity
         return -10 * math.log10(mse)
 
     @classmethod
@@ -478,30 +486,3 @@ class LPIPS(BaseRegressionMetric):
                 sl._modules[module_id] = feats[int(module_id)] # pylint: disable=W0212
             setattr(loss.net, 'slice{}'.format(slice_id), sl)
         return loss
-
-
-class PeakSignalToNoiseRatioIFRNet(BaseRegressionMetric):
-    __provider__ = 'psnr_ifrnet'
-
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
-                        StyleTransferAnnotation)
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
-                        StyleTransferPrediction)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self._psnr_differ, *args, **kwargs)
-
-    def _psnr_differ(self, annotation_image, prediction_image):
-        prediction = np.asarray(prediction_image) / 255.0
-        annotation = np.asarray(annotation_image) / 255.0
-
-        psnr = -10 * math.log10(np.mean((prediction - annotation) * (prediction - annotation)))
-        return psnr
-
-    @classmethod
-    def get_common_meta(cls):
-        meta = super().get_common_meta()
-        meta['target'] = 'higher-better'
-        meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
-        meta['postfix'] = 'Db'
-        return meta
