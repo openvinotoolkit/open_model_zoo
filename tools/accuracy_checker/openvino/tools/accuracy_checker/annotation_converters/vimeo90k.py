@@ -51,7 +51,7 @@ class Vimeo90KSuperResolutionDatasetConverter(BaseFormatConverter):
                 MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target))
         return ConverterReturn(annotations, None, None)
 
-class Vimeo90K_IntermediateFrameDatasetConverter(BaseFormatConverter):
+class Vimeo90KIntermediateFrameDatasetConverter(BaseFormatConverter):
     __provider__ = 'vimeo90k_interp'
 
     @classmethod
