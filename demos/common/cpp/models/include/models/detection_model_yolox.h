@@ -47,7 +47,7 @@ protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
     void setStridesGrids();
 
-    double boxIOUThreshold;
+    float boxIOUThreshold;
     std::vector<std::pair<size_t, size_t>> grids;
     std::vector<size_t> expandedStrides;
     static const size_t numberOfClasses = 80;

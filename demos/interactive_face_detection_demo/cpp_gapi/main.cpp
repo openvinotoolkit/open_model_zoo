@@ -590,15 +590,8 @@ int main(int argc, char* argv[]) {
     const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
     std::unique_ptr<Presenter> presenter;
 
-    /** Get information about frame **/
-    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
-    const auto tmp = cap->read();
-    cap.reset();
-    if (!tmp.data) {
-        throw std::runtime_error("Couldn't grab first frame");
-    }
-    cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0, FLAGS_lim);
     /** ---------------- The execution part ---------------- **/
+    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0);
     stream.setSource<custom::CommonCapSrc>(cap);
 
     /** Save output result **/

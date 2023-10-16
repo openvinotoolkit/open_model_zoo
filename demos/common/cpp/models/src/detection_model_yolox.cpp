@@ -112,8 +112,8 @@ void ModelYoloX::setStridesGrids() {
 std::shared_ptr<InternalModelData> ModelYoloX::preprocess(const InputData& inputData,
                                                           ov::InferRequest& request) {
     const auto& origImg = inputData.asRef<ImageInputData>().inputImage;
-    double scale = std::min(static_cast<double>(netInputWidth) / origImg.cols,
-                            static_cast<double>(netInputHeight) / origImg.rows);
+    float scale = std::min(static_cast<float>(netInputWidth) / origImg.cols,
+                           static_cast<float>(netInputHeight) / origImg.rows);
 
     cv::Mat resizedImage = resizeImageExt(origImg, netInputWidth, netInputHeight, resizeMode,
                                           interpolationMode, nullptr, cv::Scalar(114, 114, 114));
