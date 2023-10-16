@@ -11,7 +11,7 @@ void print_token(const llama_model& vocab, llama_token out_token) {
     std::array<char, 24> decoded;
     int length = llama_token_to_piece(&vocab, out_token, decoded.data(), decoded.size());
     if (length < 0) {
-        throw std::runtime_error("Unexpected number of chars (" + std::to_string(length) + " for the token " + std::to_string(out_token));
+        throw std::runtime_error("Unexpected number of chars (" + std::to_string(-length) + ") for the token " + std::to_string(out_token));
     }
     for (int idx = 0; idx < length; ++idx) {
         std::cout << decoded[idx];
