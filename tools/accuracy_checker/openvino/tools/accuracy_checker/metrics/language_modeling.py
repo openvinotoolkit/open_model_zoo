@@ -15,7 +15,13 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.special import log_softmax
+from ..utils import UnsupportedPackage
+
+try:
+    from scipy.special import log_softmax as scipy_log_softmax
+except ImportError as import_error:
+    scipy_log_softmax = UnsupportedPackage('scipy', import_error.msg)
+
 
 from ..representation import LanguageModelingAnnotation, LanguageModelingPrediction
 from .metric import PerImageEvaluationMetric
@@ -34,7 +40,16 @@ class ScorePerplexity(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         def cross_entropy(logits, target):
-            return nll_loss(log_softmax(logits, 1), target)
+            log_softmax_res = log_softmax(logits, 1)
+            if -np.inf in log_softmax_res:
+                log_softmax_res = scipy_log_softmax(logits, 1)
+                if isinstance(scipy_log_softmax, UnsupportedPackage):
+                    scipy_log_softmax.raise_error(self.__provider__)
+            return nll_loss(log_softmax_res, target)
+
+        def log_softmax(x, dim):
+            e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+            return np.log(e_x / e_x.sum(axis=-1, keepdims=True))
 
         def nll_loss(logs, targets):
             out = logs[range(len(targets)), targets]

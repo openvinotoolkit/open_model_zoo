@@ -370,6 +370,11 @@ The main difference between this converter and `super_resolution` in data organi
 * `squad_emb` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Embedding Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `testing_file` - path to testing file.
   * `vocab_file` - path to model co vocabulary file.
+  * `class_token_first` - Add [CLS] token to the begin of sequence. If False, will be added as the last token.
+  * `enable_padding` - pad input sequence to max length.
+  * `tokenizer_dir` - path to a directory containing vocabulary files required by the transformers tokenizer
+  * `model_id` - model id of a predefined tokenizer hosted inside a model repo on huggingface.co.
+  * `lower_case` - converts output to lower case.
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
