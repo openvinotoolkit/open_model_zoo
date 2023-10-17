@@ -31,6 +31,7 @@ try:
 except ImportError as import_err:
     convolve2d = UnsupportedPackage('scipy', import_err)
 
+
 def _ssim(annotation_image, prediction_image):
     prediction = np.asarray(prediction_image)
     ground_truth = np.asarray(annotation_image)
@@ -64,6 +65,7 @@ class StructuralSimilarity(BaseRegressionMetric):
         meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
         return meta
 
+
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
@@ -77,9 +79,9 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         parameters = super().parameters()
         parameters.update({
             'scale_border': NumberField(
-                optional=True, min_value=0, default=4, 
-		description="Scale border - the number of pixels to crop from the height and width of the image.", 
-		value_type=int
+                optional=True, min_value=0, default=4,
+                description="Scale border - the number of pixels to crop from the height and width of the image.",
+                value_type=int
             ),
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
@@ -89,8 +91,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
                 optional=True, default=False, description='images in [0, 1] range or not'),
             'unweighted_average': BoolField(
                 optional=True, default=False, description="calculate metric as for grayscale image or not"
-                " (3-channel images by default use weighted average of R, G, B channels)."
-            ) 
+                                                          " (3-channel images by default use weighted average of R, G, B channels)."
+            )
         })
 
         return parameters
