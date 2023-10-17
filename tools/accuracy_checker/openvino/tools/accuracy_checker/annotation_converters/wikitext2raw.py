@@ -17,9 +17,10 @@ limitations under the License.
 import numpy as np
 
 from ..representation import LanguageModelingAnnotation
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
+from ._nlp_common import get_tokenizer
 
 try:
     from tokenizers import Tokenizer, pre_tokenizers, decoders
@@ -42,6 +43,19 @@ class Wikitext2RawConverter(BaseFormatConverter):
             'testing_file': PathField(description="Path to testing file."),
             'merges_file': PathField(description="Path to merges file."),
             'vocab_file': PathField(description='Path to vocabulary file.'),
+            'class_token_first': BoolField(
+                optional=True, default=True,
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.'),
+            'enable_padding': BoolField(optional=True, default=True, description='pad input sequence to max length'),
+            'tokenizer_dir': PathField(
+                optional=True, is_directory=True,
+                description='A path to a directory containing vocabulary files required by the transformers tokenizer'
+            ),
+            'model_id': StringField(
+                optional=True,
+                description='The model id of a predefined tokenizer hosted inside a model repo on huggingface.co'
+            ),
+            'lower_case': BoolField(optional=True, default=False, description='converts output to lower case'),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
                 optional=True, default=128, value_type=int
@@ -57,15 +71,19 @@ class Wikitext2RawConverter(BaseFormatConverter):
         self.vocab_file = self.get_value_from_config('vocab_file')
         self.merges_file = self.get_value_from_config('merges_file')
         self.max_seq_length = int(self.get_value_from_config('max_seq_length'))
-        self.tokenizer = Tokenizer(BPE.from_file(str(self.vocab_file), str(self.merges_file)))
+        self.model_id = self.get_value_from_config('model_id')
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer, self.external_tok = get_tokenizer(self.config, self.lower_case)
+        if not self.external_tok:
+            self.tokenizer = Tokenizer(BPE.from_file(str(self.vocab_file), str(self.merges_file)))
+            self.tokenizer.decoder = decoders.ByteLevel()
         self.tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
-        self.tokenizer.decoder = decoders.ByteLevel()
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         with open(str(self.testing_file), encoding="utf-8") as f:
             text = f.read()
 
-        tokens = self.tokenizer.encode_batch([text])
+        tokens = self.tokenizer([text]) if self.external_tok else self.tokenizer.encode_batch([text])
 
         encoding = tokens[0]
         annotations = []
@@ -73,13 +91,15 @@ class Wikitext2RawConverter(BaseFormatConverter):
         for idx in range(0, len(encoding.ids) - self.max_seq_length + 1, self.max_seq_length):
             ids = encoding.ids[idx: idx + self.max_seq_length]
             tokens = encoding.tokens[idx:idx + self.max_seq_length]
-            identifier = ['input_ids_{}'.format(idx), 'labels_{}'.format(idx)]
+            attention_mask = encoding.attention_mask[idx:idx + self.max_seq_length]
+            identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'labels_{}'.format(idx)]
             annotation = LanguageModelingAnnotation(
                 identifier,
                 np.array(unique_id),
                 np.array([ids]),
                 tokens,
                 labels=np.array(ids),
+                input_mask=np.array([attention_mask])
             )
             annotations.append(annotation)
             unique_id += 1

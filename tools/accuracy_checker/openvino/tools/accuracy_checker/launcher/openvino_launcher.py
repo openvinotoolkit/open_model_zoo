@@ -806,7 +806,7 @@ class OpenVINOLauncher(Launcher):
             data = data.astype(precision)
         if layer_name in self.dyn_input_layers:
             self._do_reshape = not self.is_dynamic
-            return data, template
+            return data
         data_shape = np.shape(data)
         if data_shape != layer_shape:
             if self.allow_reshape_input:
@@ -836,7 +836,7 @@ class OpenVINOLauncher(Launcher):
                 template = [1] * (np.ndim(data) - len(template)) + template
             if len(template) > np.ndim(data):
                 template = template[0]
-        if len(layout) == len(data_shape):
+        if layout and len(layout) == len(data_shape):
             if template is not None:
                 new_template = [template[l_dim] for l_dim in layout]
                 template = new_template
