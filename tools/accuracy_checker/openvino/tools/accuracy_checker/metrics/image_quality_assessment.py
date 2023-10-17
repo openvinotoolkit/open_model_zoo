@@ -91,7 +91,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
                 optional=True, default=False, description='images in [0, 1] range or not'),
             'unweighted_average': BoolField(
                 optional=True, default=False, description="calculate metric as for grayscale image or not"
-                                                          " (3-channel images by default use weighted average of R, G, B channels)."
+                                                          " (3-channel images by default use weighted average"
+                                                          " of R, G, B channels)."
             )
         })
 
