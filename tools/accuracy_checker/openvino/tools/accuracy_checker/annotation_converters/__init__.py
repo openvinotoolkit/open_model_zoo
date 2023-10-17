@@ -110,7 +110,7 @@ from .conll_ner import CONLLDatasetConverter
 from .background_matting import BackgroundMattingConverter, VideoBackgroundMatting
 from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
-from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
+from .vimeo90k import Vimeo90KSuperResolutionDatasetConverter, Vimeo90KIntermediateFrameDatasetConverter
 from .lmdb import LMDBConverter
 from .electricity_time_series_forecasting import ElectricityTimeSeriesForecastingConverter
 from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
@@ -239,6 +239,7 @@ __all__ = [
     'TacotronDataConverter',
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
+    'Vimeo90KIntermediateFrameDatasetConverter',
     'LMDBConverter',
     'ElectricityTimeSeriesForecastingConverter',
     'KaldiSpeechRecognitionDataConverter',

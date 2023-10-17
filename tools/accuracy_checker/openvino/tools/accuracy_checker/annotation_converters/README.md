@@ -750,6 +750,8 @@ The main difference between this converter and `super_resolution` in data organi
 * `vimeo90k` - converts Vimeo-90K dataset for a systematic evaluation of video processing algorithms to `SuperResolutionAnnotation`.
   * `annotation_file` - path to text file with list of dataset setuplets included in test.
   * `add_flow` - allows annotation of flow data (optional, default `False`).
+* `vimeo90k_interp` - converts Vimeo-90K intermediate frame interpolation dataset for a systematic evaluation of video processing algorithms to `ImageProcessingAnnotation`.
+  * `annotation_file` - path to text file with list of dataset setuplets included in test.
 * `kaldi_asr_data` - converts preprocessed Kaldi\* features dataset to `CharacterRecognitionAnnotation`.
    * `annotation_file` - file with gt transcription table.
    * `data_dir` - directory with ark files.
