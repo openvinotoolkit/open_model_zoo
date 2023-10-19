@@ -876,7 +876,10 @@ def init_telemetry():
         telemetry = tm.Telemetry(tid='G-W5E9RNLD4H',
                                  app_name='Accuracy Checker',
                                  app_version=__version__,
-                                 backend='ga4')
+                                 backend='ga4',
+                                 enable_opt_in_dialog=False,
+                                 disable_in_ci=True
+                                 )
         return telemetry
     except Exception: # pylint:disable=W0703
         return None
