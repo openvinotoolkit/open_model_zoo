@@ -15,16 +15,13 @@
 """
 
 from cv2 import VideoWriter
+import logging as log
 
-default_limit_callback_suppressed = False
+DEFAULT_LIMIT_WARN_THROTTLE_INTERVAL_FRAMES = 500
+
 def on_limit_reached_default(frame, number, limit):
-    global default_limit_callback_suppressed
-
-    if not default_limit_callback_suppressed:
-        print("WARNING:\n\mVideoWriter will skip writing next frame due to frame limit configured: {0}.".format(limit))
-        print("If you want to turn off this limitation please set `-limit 0`")
-        default_limit_callback_suppressed = True
-
+    if (number - limit) % DEFAULT_LIMIT_WARN_THROTTLE_INTERVAL_FRAMES == 1:
+        log.warning("VideoWriter will skip writing next frame due to frame limit applied: {0}.\nIf you want to turn off this limitation please set `-limit 0`".format(limit))
 
 class LazyVideoWriter(VideoWriter):
     def __init__(self):

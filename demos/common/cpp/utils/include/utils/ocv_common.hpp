@@ -321,20 +321,39 @@ private:
     cv::Scalar stdScales;
 };
 
+using OnLimitCallbackType = std::function<void(const cv::Mat&, unsigned, unsigned)>;
+static void on_limit_reached_default(const cv::Mat&, unsigned frame_index, unsigned limit) {
+
+    static const unsigned throttle_interval_frames_count = 500;
+    if ((frame_index - limit) % throttle_interval_frames_count == 0) {
+        slog::warn << "VideoWriter will skip writing further frames due to frame limit applied: "
+                   << limit << "\nIf you want to turn off this limitation please set `-limit 0` as the demo parameter\n"
+                   << slog::endl;
+    }
+}
+
 class LazyVideoWriter {
     cv::VideoWriter writer;
     unsigned nwritten;
+    unsigned nframes;
 public:
     const std::string filenames;
     const double fps;
     const unsigned lim;
+    OnLimitCallbackType on_limit_callback;
 
-    LazyVideoWriter(const std::string& filenames, double fps, unsigned lim) :
-        nwritten{1}, filenames{filenames}, fps{fps}, lim{lim} {}
+    LazyVideoWriter(const std::string& filenames, double fps, unsigned lim,
+                    OnLimitCallbackType callback = on_limit_reached_default) :
+        nwritten{1}, nframes{1}, filenames{filenames}, fps{fps}, lim{lim}, on_limit_callback{callback} {}
     void write(const cv::Mat& im) {
-        if (writer.isOpened() && (nwritten < lim || 0 == lim)) {
-            writer.write(im);
-            ++nwritten;
+        if (writer.isOpened()) {
+            if((nwritten < lim || 0 == lim)) {
+                writer.write(im);
+                ++nwritten;
+            } else {
+                on_limit_callback(im, nframes, lim);
+            }
+            ++nframes;
             return;
         }
         if (!writer.isOpened() && !filenames.empty()) {
