@@ -35,6 +35,8 @@
 #include "models/internal_model_data.h"
 #include "models/results.h"
 
+static constexpr unsigned log_throttle_interval_frames_count = 500;
+
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName,
                                            const cv::Size& inputImgSize,
                                            const std::string& layout)
@@ -106,9 +108,10 @@ void SuperResolutionModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& mode
     const ov::Shape& outShape = model->output().get_shape();
 
     const ov::Layout outputLayout("NCHW");
-    const auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    netOutputWidth = outShape[ov::layout::width_idx(outputLayout)];
+    netOutputHeight = outShape[ov::layout::height_idx(outputLayout)];
     const auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
-    changeInputSize(model, static_cast<int>(outWidth / inWidth));
+    changeInputSize(model, static_cast<int>(netOutputWidth / inWidth));
 }
 
 void SuperResolutionModel::changeInputSize(std::shared_ptr<ov::Model>& model, int coeff) {
@@ -155,8 +158,15 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
     }
 
-    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight) {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight ||
+        !is_aspect_ratio_equal(std::make_tuple(img.cols, img.rows),
+                               std::make_tuple(netOutputWidth, netOutputHeight))) {
+        static unsigned counter = 0;
+        if (counter++ % log_throttle_interval_frames_count == 0) {
+            slog::warn << "\tChosen model aspect ratio for resolution: " << netOutputWidth << "x" << netOutputHeight
+                       << " doesn't match initial image aspect ratio for resolution: " << img.cols << "x" << img.rows
+                       << ". You may observe video disproportions. To avoid this please use a suitable model" << slog::endl;
+        }
     }
     const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
     const size_t width = lrInputTensor.get_shape()[ov::layout::width_idx(layout)];
@@ -237,8 +247,15 @@ std::shared_ptr<InternalModelData> SuperResolutionChannelJoint::preprocess(const
     const ov::Tensor lrInputTensor = request.get_tensor(inputsNames[0]);
     const ov::Layout layout("NCHW");
 
-    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight) {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
+    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight ||
+        !is_aspect_ratio_equal(std::make_tuple(img.cols, img.rows),
+                               std::make_tuple(netOutputWidth, netOutputHeight))) {
+        static unsigned counter = 0;
+        if (counter++ % log_throttle_interval_frames_count == 0) {
+            slog::warn << "\tChosen model aspect ratio for resolution: " << netOutputWidth << "x" << netOutputHeight
+                       << " doesn't match initial image aspect ratio for resolution: " << img.cols << "x" << img.rows
+                       << ". You may observe video disproportions. To avoid this please use a suitable model" << slog::endl;
+        }
     }
 
     const size_t height = lrInputTensor.get_shape()[ov::layout::height_idx(layout)];
@@ -297,10 +314,11 @@ void SuperResolutionChannelJoint::prepareInputsOutputs(std::shared_ptr<ov::Model
     const ov::Shape& outShape = model->output().get_shape();
 
     const ov::Layout outputLayout("NCHW");
-    const auto outWidth = outShape[ov::layout::width_idx(outputLayout)];
+    netOutputWidth = outShape[ov::layout::width_idx(outputLayout)];
+    netOutputHeight = outShape[ov::layout::height_idx(outputLayout)];
     const auto inWidth = lrShape[ov::layout::width_idx(outputLayout)];
 
-    changeInputSize(model, static_cast<int>(outWidth / inWidth));
+    changeInputSize(model, static_cast<int>(netOutputWidth / inWidth));
 
     ov::set_batch(model, 3);
 }
