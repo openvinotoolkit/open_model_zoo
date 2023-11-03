@@ -26,6 +26,9 @@ def on_limit_reached_default(frame, number, limit):
 class LazyVideoWriter(VideoWriter):
     def __init__(self):
         VideoWriter.__init__(self)
+        self.frames_processed = 0
+        self.output_limit = 0
+        self.on_limit_callback = None
 
     def open(self, output, fourcc, fps, output_limit, output_resolution, on_limit_callback = on_limit_reached_default):
         super().open(output, fourcc, fps, output_resolution)
@@ -39,8 +42,9 @@ class LazyVideoWriter(VideoWriter):
             if self.output_limit <= 0 or self.frames_processed <= self.output_limit:
                 super().write(frame)
             else:
-                self.on_limit_callback(frame, self.frames_processed, self.output_limit)
+                if self.on_limit_callback is not None:
+                    self.on_limit_callback(frame, self.frames_processed, self.output_limit)
+            self.frames_processed += 1
 
-        self.frames_processed += 1
 
 
