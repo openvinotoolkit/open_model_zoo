@@ -75,8 +75,8 @@ public:
     /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the
     /// result structure.
     virtual int64_t submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData);
-    virtual int64_t submitData(std::vector<InputData>::iterator inputDataBegin,
-                               std::vector<InputData>::iterator inputDataEnd,
+    virtual int64_t submitData(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                               std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
                                const std::shared_ptr<MetaData>& metaData);
 
     /// Gets available data from the queue

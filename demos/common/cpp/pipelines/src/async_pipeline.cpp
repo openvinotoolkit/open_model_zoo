@@ -76,8 +76,8 @@ void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     }
 }
 
-int64_t AsyncPipeline::submitData(std::vector<InputData>::iterator inputDataBegin,
-                                  std::vector<InputData>::iterator inputDataEnd,
+int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                  std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
                                   const std::shared_ptr<MetaData>& metaData) {
     auto frameID = inputFrameId;
 

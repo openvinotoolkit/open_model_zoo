@@ -40,9 +40,9 @@ public:
     virtual ~ModelBase() {}
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) = 0;
-    virtual std::shared_ptr<InternalModelData> preprocess(std::vector<InputData>::iterator inputDataBegin,
-                                                          std::vector<InputData>::iterator inputDataEnd,
-                                                          ov::InferRequest& request) {};
+    virtual std::shared_ptr<InternalModelData> preprocess(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                                          std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
+                                                          ov::InferRequest& request) {return {};};
     virtual ov::CompiledModel compileModel(const ModelConfig& config, ov::Core& core);
     virtual void onLoadCompleted(const std::vector<ov::InferRequest>& requests) {}
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;

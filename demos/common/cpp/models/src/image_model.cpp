@@ -32,8 +32,8 @@ ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize, con
     : ModelBase(modelFileName, layout),
       useAutoResize(useAutoResize) {}
 
-std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<InputData>::iterator inputDataBegin,
-                                                          std::vector<InputData>::iterator inputDataEnd,
+std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                                          std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
                                                           ov::InferRequest& request) {
 
     const ov::Tensor& frameTensor = request.get_tensor(inputsNames[0]);  // first input should be image
@@ -47,11 +47,15 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<InputData>
     char* memoryBlob = nullptr;
     size_t image_index = 0;
     bool isMatFloat = false;
+    int origImg_cols = 0;
+    int origImg_rows = 0;
     for (auto inputDataIt = inputDataBegin; inputDataIt != inputDataEnd; ++inputDataIt ) {
-        const auto& origImg = inputDataIt->asRef<ImageInputData>().inputImage;
+        const auto& origImg = (*inputDataIt)->asRef<ImageInputData>().inputImage;
+        origImg_cols = origImg.cols;
+        origImg_rows = origImg.rows;
         auto img = inputTransform(origImg);
 
-        auto matType = mat.type() & CV_MAT_DEPTH_MASK;
+        auto matType = img.type() & CV_MAT_DEPTH_MASK;
         if (matType != CV_8U && matType != CV_32F) {
             throw std::runtime_error("Unsupported mat type for wrapping");
         }
@@ -83,7 +87,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<InputData>
     auto precision = isMatFloat ? ov::element::f32 : ov::element::u8;
     auto batched_tensor =  ov::Tensor(precision, ov::Shape{ batch, height, width, channels }, memoryBlob);
     request.set_tensor(inputsNames[0],batched_tensor);
-    return std::make_shared<InternalImageModelData>(origImg.cols, origImg.rows);
+    return std::make_shared<InternalImageModelData>(origImg_cols, origImg_rows);
 }
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, ov::InferRequest& request) {

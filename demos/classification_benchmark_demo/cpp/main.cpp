@@ -76,7 +76,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
-DEFINE_uint32(nireq_per_batch, 2, num_inf_req_per_batch_message);
+DEFINE_uint32(nireq_per_batch, 1, num_inf_req_per_batch_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
@@ -268,9 +268,16 @@ int main(int argc, char* argv[]) {
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
         // batch setup
-        std::vector<InputData> inputDataVector {inputImages.begin(), inputImages.end()};
-        auto inputImagesBeginIt = inputDataVector.begin();
-        auto inputImagesEndIt = inputDataVector.begin();
+        std::vector<std::shared_ptr<InputData>> inputDataVector;
+        std::transform(inputImages.begin(), inputImages.end(), std::back_inserter(inputDataVector), [](const auto &src) {
+            return std::make_shared<ImageInputData>(src);
+        });
+        auto inputImagesDataBeginIt = inputDataVector.begin();
+        auto inputImagesDataEndIt = inputImagesDataBeginIt;
+        std::advance(inputImagesDataEndIt, FLAGS_nireq_per_batch);
+
+        auto inputImagesBeginIt = inputImages.begin();
+        auto inputImagesEndIt = inputImagesBeginIt;
         std::advance(inputImagesEndIt, FLAGS_nireq_per_batch);
 
         auto classIndicesBeginIt = classIndices.begin();
@@ -298,8 +305,8 @@ int main(int argc, char* argv[]) {
             if (pipeline.isReadyToProcess()) {
                 auto imageStartTime = std::chrono::steady_clock::now();
 
-                pipeline.submitData(inputImagesBeginIt, inputImagesEndIt,
-                                    std::make_shared<ClassificationImageMetaData>(inputImagesBeginIt, inputImagesEndIt
+                pipeline.submitData(inputImagesDataBeginIt, inputImagesDataEndIt,
+                                    std::make_shared<ClassificationImageBatchMetaData>(inputImagesBeginIt, inputImagesEndIt,
                                                                                   imageStartTime,
                                                                                   classIndicesBeginIt, classIndicesEndIt));
                 //nextImageIndex++;
@@ -307,15 +314,21 @@ int main(int argc, char* argv[]) {
                     //nextImageIndex = 0;
                 //}
 
+                ++inputImagesDataBeginIt;
+                ++inputImagesDataEndIt;
                 ++inputImagesBeginIt;
                 ++inputImagesEndIt;
                 ++classIndicesBeginIt;
                 ++classIndicesEndIt;
 
-                if (inputImagesEndIt == inputDataVector.end()) {
-                    inputImagesBeginIt = inputDataVector.begin();
+                if (inputImagesEndIt == inputImages.end()) {
+                    inputImagesBeginIt = inputImages.begin();
                     inputImagesEndIt = inputImagesBeginIt;
                     std::advance(inputImagesEndIt, FLAGS_nireq_per_batch);
+
+                    inputImagesDataBeginIt = inputDataVector.begin();
+                    inputImagesDataEndIt = inputImagesDataBeginIt;
+                    std::advance(inputImagesDataEndIt, FLAGS_nireq_per_batch);
 
                     classIndicesBeginIt = classIndices.begin();
                     classIndicesEndIt = classIndicesBeginIt;
@@ -339,9 +352,9 @@ int main(int argc, char* argv[]) {
                     classificationResult.metaData->asRef<const ClassificationImageBatchMetaData>();
 
                 //auto outputImg = classificationImageMetaData.img;
-                const std::vector<ClassificationImageMetaData> &outputImagesMD = classificationImageBatchMetaData.metadatas;
-                for (const ClassificationImageMetaData &classificationImageMetaData : outputImagesMD) {
-                    auto outputImg = classificationImageMetaData.img;
+                const std::vector<std::shared_ptr<ClassificationImageMetaData>> &outputImagesMD = classificationImageBatchMetaData.metadatas;
+                for (const std::shared_ptr<ClassificationImageMetaData> &classificationImageMetaData : outputImagesMD) {
+                    auto outputImg = classificationImageMetaData->img;
                     if (outputImg.empty()) {
                         throw std::invalid_argument("Renderer: image provided in metadata is empty");
                     }
@@ -350,7 +363,7 @@ int main(int argc, char* argv[]) {
                     if (!FLAGS_gt.empty()) {
                         for (size_t i = 0; i < FLAGS_nt; i++) {
                             unsigned predictedClass = classificationResult.topLabels[i].id;
-                            if (predictedClass == classificationImageMetaData.groundTruthId) {
+                            if (predictedClass == classificationImageMetaData->groundTruthId) {
                                 predictionResult = PredictionResult::Correct;
                                 correctPredictionsCount++;
                                 label = classificationResult.topLabels[i].label;
