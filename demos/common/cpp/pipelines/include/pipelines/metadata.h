@@ -49,3 +49,26 @@ struct ClassificationImageMetaData : public ImageMetaData {
         : ImageMetaData(img, timeStamp),
           groundTruthId(groundTruthId) {}
 };
+
+
+struct ClassificationImageBatchMetaData : public MetaData {
+    std::vector<std::shared_ptr<ClassificationImageMetaData>> metadatas;
+
+    ClassificationImageMetaData(const std::vector<cv::Mat>::iterator imagesBeginIt,
+                                const std::vector<cv::Mat>::iterator imagesEndIt,
+                                std::chrono::steady_clock::time_point timeStamp,
+                                std::vector<unsigned int>::iterator groundTruthIdsBeginIt,
+                                const std::vector<unsigned int>::iterator groundTruthIdsEndIt)
+        : MetaData(){
+        size_t images_count = std::distance(imagesBeginIt, imagesEndIt);
+        size_t gt_count = std::distance(groundTruthIdsBeginIt, groundTruthIdsEndIt);
+        if (images_count != gt_count) {
+            throw std::runtime_error("images.size() != groundTruthIds.size()");
+        }
+
+        metadatas.reserve(images_count);
+        for (; imagesBeginIt != imagesEndIt;) {
+            metadatas.push_back(std::make_shared<ClassificationImageMetaData>(*it++, timeStamp, *groundTruthIdsBeginIt++));
+        }
+    }
+};

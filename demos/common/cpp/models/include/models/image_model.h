@@ -38,7 +38,9 @@ public:
     ImageModel(const std::string& modelFileName, bool useAutoResize, const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
-
+    std::shared_ptr<InternalModelData> preprocess(std::vector<InputData>::iterator inputDataBegin,
+                                                  std::vector<InputData>::iterator inputDataEnd,
+                                                  ov::InferRequest& request) override;
 protected:
     bool useAutoResize;
 

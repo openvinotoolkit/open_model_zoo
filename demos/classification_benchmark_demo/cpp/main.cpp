@@ -51,6 +51,7 @@ static const char target_device_message[] = "Optional. Specify the target device
 static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
+static const char num_inf_req_per_batch_message[] = "Optional. Number of infer requests per batch.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
@@ -75,6 +76,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
+DEFINE_uint32(nireq_per_batch, 2, num_inf_req_per_batch_message);
 DEFINE_uint32(nt, 5, ntop_message);
 DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
@@ -265,6 +267,15 @@ int main(int argc, char* argv[]) {
         std::size_t nextImageIndex = 0;
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
+        // batch setup
+        std::vector<InputData> inputDataVector {inputImages.begin(), inputImages.end()};
+        auto inputImagesBeginIt = inputDataVector.begin();
+        auto inputImagesEndIt = inputDataVector.begin();
+        std::advance(inputImagesEndIt, FLAGS_nireq_per_batch);
+
+        auto classIndicesBeginIt = classIndices.begin();
+        auto classIndicesEndIt = classIndicesBeginIt;
+        std::advance(classIndicesEndIt, FLAGS_nireq_per_batch);
         while (keepRunning && elapsedSeconds < std::chrono::seconds(FLAGS_time)) {
             if (elapsedSeconds >= testDuration - fpsCalculationDuration && framesNumOnCalculationStart == 0) {
                 framesNumOnCalculationStart = framesNum;
@@ -287,14 +298,30 @@ int main(int argc, char* argv[]) {
             if (pipeline.isReadyToProcess()) {
                 auto imageStartTime = std::chrono::steady_clock::now();
 
-                pipeline.submitData(ImageInputData(inputImages[nextImageIndex]),
-                                    std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex],
+                pipeline.submitData(inputImagesBeginIt, inputImagesEndIt,
+                                    std::make_shared<ClassificationImageMetaData>(inputImagesBeginIt, inputImagesEndIt
                                                                                   imageStartTime,
-                                                                                  classIndices[nextImageIndex]));
-                nextImageIndex++;
-                if (nextImageIndex == imageNames.size()) {
-                    nextImageIndex = 0;
+                                                                                  classIndicesBeginIt, classIndicesEndIt));
+                //nextImageIndex++;
+                //if (nextImageIndex == imageNames.size()) {
+                    //nextImageIndex = 0;
+                //}
+
+                ++inputImagesBeginIt;
+                ++inputImagesEndIt;
+                ++classIndicesBeginIt;
+                ++classIndicesEndIt;
+
+                if (inputImagesEndIt == inputDataVector.end()) {
+                    inputImagesBeginIt = inputDataVector.begin();
+                    inputImagesEndIt = inputImagesBeginIt;
+                    std::advance(inputImagesEndIt, FLAGS_nireq_per_batch);
+
+                    classIndicesBeginIt = classIndices.begin();
+                    classIndicesEndIt = classIndicesBeginIt;
+                    std::advance(classIndicesEndIt, FLAGS_nireq_per_batch);
                 }
+
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them
@@ -308,58 +335,61 @@ int main(int argc, char* argv[]) {
                 if (!classificationResult.metaData) {
                     throw std::invalid_argument("Renderer: metadata is null");
                 }
-                const ClassificationImageMetaData& classificationImageMetaData =
-                    classificationResult.metaData->asRef<const ClassificationImageMetaData>();
+                const ClassificationImageBatchMetaData& classificationImageBatchMetaData =
+                    classificationResult.metaData->asRef<const ClassificationImageBatchMetaData>();
 
-                auto outputImg = classificationImageMetaData.img;
-
-                if (outputImg.empty()) {
-                    throw std::invalid_argument("Renderer: image provided in metadata is empty");
-                }
-                PredictionResult predictionResult = PredictionResult::Incorrect;
-                std::string label = classificationResult.topLabels.front().label;
-                if (!FLAGS_gt.empty()) {
-                    for (size_t i = 0; i < FLAGS_nt; i++) {
-                        unsigned predictedClass = classificationResult.topLabels[i].id;
-                        if (predictedClass == classificationImageMetaData.groundTruthId) {
-                            predictionResult = PredictionResult::Correct;
-                            correctPredictionsCount++;
-                            label = classificationResult.topLabels[i].label;
-                            break;
-                        }
+                //auto outputImg = classificationImageMetaData.img;
+                const std::vector<ClassificationImageMetaData> &outputImagesMD = classificationImageBatchMetaData.metadatas;
+                for (const ClassificationImageMetaData &classificationImageMetaData : outputImagesMD) {
+                    auto outputImg = classificationImageMetaData.img;
+                    if (outputImg.empty()) {
+                        throw std::invalid_argument("Renderer: image provided in metadata is empty");
                     }
-                } else {
-                    predictionResult = PredictionResult::Unknown;
-                }
-                framesNum++;
-                gridMat.updateMat(outputImg, label, predictionResult);
-                accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
-                gridMat.textUpdate(metrics,
-                                   classificationResult.metaData->asRef<ImageMetaData>().timeStamp,
-                                   accuracy,
-                                   FLAGS_nt,
-                                   isTestMode,
-                                   !FLAGS_gt.empty(),
-                                   presenter);
-                renderMetrics.update(renderingStart);
-                elapsedSeconds = std::chrono::steady_clock::now() - startTime;
-                if (!FLAGS_no_show) {
-                    cv::imshow("classification_demo", gridMat.outImg);
-                    //--- Processing keyboard events
-                    int key = cv::waitKey(1);
-                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                        keepRunning = false;
-                    } else if (32 == key || 'r' == key ||
-                               'R' == key) {  // press space or r to restart testing if needed
-                        isTestMode = true;
-                        framesNum = 0;
-                        framesNumOnCalculationStart = 0;
-                        correctPredictionsCount = 0;
-                        accuracy = 0;
-                        elapsedSeconds = std::chrono::steady_clock::duration(0);
-                        startTime = std::chrono::steady_clock::now();
+                    PredictionResult predictionResult = PredictionResult::Incorrect;
+                    std::string label = classificationResult.topLabels.front().label;
+                    if (!FLAGS_gt.empty()) {
+                        for (size_t i = 0; i < FLAGS_nt; i++) {
+                            unsigned predictedClass = classificationResult.topLabels[i].id;
+                            if (predictedClass == classificationImageMetaData.groundTruthId) {
+                                predictionResult = PredictionResult::Correct;
+                                correctPredictionsCount++;
+                                label = classificationResult.topLabels[i].label;
+                                break;
+                            }
+                        }
                     } else {
-                        presenter.handleKey(key);
+                        predictionResult = PredictionResult::Unknown;
+                    }
+                    framesNum += 1;
+                    gridMat.updateMat(outputImg, label, predictionResult);
+                    accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
+                    gridMat.textUpdate(metrics,
+                                       classificationResult.metaData->asRef<ImageMetaData>().timeStamp,
+                                       accuracy,
+                                       FLAGS_nt,
+                                       isTestMode,
+                                       !FLAGS_gt.empty(),
+                                       presenter);
+                    renderMetrics.update(renderingStart);
+                    elapsedSeconds = std::chrono::steady_clock::now() - startTime;
+                    if (!FLAGS_no_show) {
+                        cv::imshow("classification_demo", gridMat.outImg);
+                        //--- Processing keyboard events
+                        int key = cv::waitKey(1);
+                        if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                            keepRunning = false;
+                        } else if (32 == key || 'r' == key ||
+                                'R' == key) {  // press space or r to restart testing if needed
+                            isTestMode = true;
+                            framesNum = 0;
+                            framesNumOnCalculationStart = 0;
+                            correctPredictionsCount = 0;
+                            accuracy = 0;
+                            elapsedSeconds = std::chrono::steady_clock::duration(0);
+                            startTime = std::chrono::steady_clock::now();
+                        } else {
+                            presenter.handleKey(key);
+                        }
                     }
                 }
             }
