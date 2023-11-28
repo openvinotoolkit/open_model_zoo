@@ -86,6 +86,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
 DEFINE_string(mean_values, "", mean_values_message);
 DEFINE_string(scale_values, "", scale_values_message);
+DEFINE_string(config, "", "Path to the configuration file (optional)");
 
 static void showUsage() {
     std::cout << std::endl;
@@ -111,6 +112,7 @@ static void showUsage() {
     std::cout << "    -reverse_input_channels   " << reverse_input_channels_message << std::endl;
     std::cout << "    -mean_values              " << mean_values_message << std::endl;
     std::cout << "    -scale_values             " << scale_values_message << std::endl;
+    std::cout << "    -config                   " << "Path to config file" << std::endl;
 }
 
 bool ParseAndCheckCommandLine(int argc, char* argv[]) {
@@ -135,6 +137,44 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     }
 
     return true;
+}
+
+
+std::map<std::string, std::string> parseConfigFile() {
+    std::map<std::string, std::string> config;
+
+    std::ifstream file(FLAGS_config);
+    if(!file.is_open()) {
+        std::cerr << "Can't open file " << FLAGS_config << " for read" << std::endl;
+        exit(-1);
+    }
+
+    std::string option;
+    while (std::getline(file, option)) {
+        if (option.empty() || option[0] == '#') {
+            continue;
+        }
+        size_t spacePos = option.find_first_of(" \t\n\r");
+        if(spacePos == std::string::npos) {
+            std::cerr << "Invalid config parameter format. Space separator required here: " << option;
+            exit(-1);
+        }
+
+        std::string key, value;
+        if (spacePos != std::string::npos) {
+            key = option.substr(0, spacePos);
+            size_t valueStart = option.find_first_not_of(" \t\n\r", spacePos);
+            if(valueStart == std::string::npos) {
+                std::cerr << "An invalid config parameter value detected, it mustn't be empty: " << option;
+                exit(-1);
+            }
+            size_t valueEnd = option.find_last_not_of(" \t\n\r");
+            value = option.substr(valueStart, valueEnd - valueStart + 1);
+            config[key] = value;
+        }
+    }
+
+    return config;
 }
 
 cv::Mat centerSquareCrop(const cv::Mat& image) {
@@ -235,6 +275,10 @@ int main(int argc, char* argv[]) {
 
         slog::info << ov::get_openvino_version() << slog::endl;
         ov::Core core;
+        if (!FLAGS_config.empty()) {
+            const auto configs = parseConfigFile();
+            core.set_property(FLAGS_d, {configs.begin(), configs.end()});
+        }
 
         std::unique_ptr<ClassificationModel> model(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels, FLAGS_layout));
         model->setInputsPreprocessing(FLAGS_reverse_input_channels, FLAGS_mean_values, FLAGS_scale_values);
@@ -377,7 +421,7 @@ int main(int argc, char* argv[]) {
                     gridMat.updateMat(outputImg, label, predictionResult);
                     accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                     gridMat.textUpdate(metrics,
-                                       classificationResult.metaData->asRef<ImageMetaData>().timeStamp,
+                                       classificationImageMetaData->timeStamp,
                                        accuracy,
                                        FLAGS_nt,
                                        isTestMode,

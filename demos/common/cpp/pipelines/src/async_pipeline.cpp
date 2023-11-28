@@ -95,6 +95,7 @@ int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::itera
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
+                std::cout << "callback has been called" << std::endl;
                 try {
                     if (ex) {
                         std::rethrow_exception(ex);
@@ -111,7 +112,9 @@ int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::itera
                     }
 
                     completedInferenceResults.emplace(frameID, result);
+                    std::cout << "before setRequestIdle: " << std::endl;
                     requestsPool->setRequestIdle(request);
+                    std::cout << "after setRequestIdle: " << std::endl;
                 } catch (...) {
                     if (!callbackException) {
                         callbackException = std::current_exception();
