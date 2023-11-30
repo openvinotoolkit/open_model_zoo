@@ -108,6 +108,7 @@ int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::itera
 
                     for (const auto& outName : model->getOutputsNames()) {
                         auto tensor = request.get_tensor(outName);
+                        std::cout << "-S- output tensorName: " << outName << ", tensor ptr: " << reinterpret_cast<void*>(tensor.data()) << ", size: " << tensor.get_size() << std::endl;
                         result.outputsData.emplace(outName, tensor);
                     }
 

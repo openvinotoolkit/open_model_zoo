@@ -43,7 +43,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<std::share
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
     const size_t height = tensorShape[ov::layout::height_idx(layout)];
     const size_t channels = tensorShape[ov::layout::channels_idx(layout)];
-
+    std::cout << "ImageModel::preprocess: batch: " << batch << ", width: " << width << ", height: " << height << ", channels: " << channels << std::endl;
     char* memoryBlob = nullptr;
     size_t image_index = 0;
     bool isMatFloat = false;
@@ -75,6 +75,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<std::share
             img = resizeImageExt(img, width, height, resizeMode, interpolationMode);
         }
         size_t sizeInBytes = img.total() * img.elemSize();
+        std::cout << "image size in bytes: " << sizeInBytes << std::endl;
         if (!memoryBlob) {
             memoryBlob = new char[sizeInBytes * batch]; // intended memory leak
         }
@@ -84,9 +85,10 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(std::vector<std::share
         image_index++;
     }
 
+    std::cout << "isMatFloat: " << isMatFloat << std::endl;
     auto precision = isMatFloat ? ov::element::f32 : ov::element::u8;
     auto batched_tensor =  ov::Tensor(precision, ov::Shape{ batch, height, width, channels }, memoryBlob);
-    request.set_tensor(inputsNames[0],batched_tensor);
+    request.set_tensor(inputsNames[0], batched_tensor);
     return std::make_shared<InternalImageModelData>(origImg_cols, origImg_rows);
 }
 
