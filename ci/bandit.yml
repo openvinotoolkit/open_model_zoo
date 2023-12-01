@@ -1,4 +1,3 @@
-
 ### This config may optionally select a subset of tests to run or skip by
 ### filling out the 'tests' and 'skips' lists given below. If no tests are
 ### specified for inclusion then it is assumed all tests are desired. The skips

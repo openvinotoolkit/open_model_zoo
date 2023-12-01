@@ -19,7 +19,7 @@ import errno
 import itertools
 import json
 import os
-import pickle # nosec - disable B403:import-pickle check
+import pickle  # nosec # disable B403:import-pickle check
 import struct
 import sys
 import zlib
@@ -282,10 +282,10 @@ def read_json(file: Union[str, Path], *args, **kwargs):
 
 def read_pickle(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open('rb') as content:
-        return pickle.load(content, *args, **kwargs) # nosec - disable B301:pickle check
+        return pickle.load(content, *args, **kwargs)  # nosec # disable B301:pickle check
 
 
-class RenameUnpickler(pickle.Unpickler): # nosec - disable B301:pickle check
+class RenameUnpickler(pickle.Unpickler):  # nosec # disable B301:pickle check
     def __init__(self, file, renaming_mapping, *args, **kwargs):
         self.renaming_mapping = renaming_mapping
         super().__init__(file, *args, **kwargs)

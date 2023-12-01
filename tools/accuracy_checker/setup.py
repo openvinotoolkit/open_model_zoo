@@ -20,7 +20,7 @@ import re
 import sys
 import warnings
 import platform
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec # disable B404:import-subprocess check
 from distutils.version import LooseVersion
 from pathlib import Path
 from setuptools import find_packages, setup # pylint:disable=W9902

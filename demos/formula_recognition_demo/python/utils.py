@@ -19,7 +19,7 @@ import json
 import logging as log
 import os
 import re
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec # disable B404:import-subprocess check
 import tempfile
 from enum import Enum
 from multiprocessing.pool import ThreadPool
