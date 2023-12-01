@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle  # nosec # disable B403:import-pickle check
+import pickle  # nosec B403  # disable import-pickle check
 from functools import partial
 import numpy as np
 
