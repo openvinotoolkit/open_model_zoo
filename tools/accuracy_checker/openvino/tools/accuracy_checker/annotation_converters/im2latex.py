@@ -36,7 +36,7 @@ def read_vocab(vocab_path):
     """
     if vocab_path.suffix == '.pkl':
         with open(vocab_path, "rb") as f:
-            vocab_dict = pkl.load(f)  # nosec B301  # disable  pickle load check
+            vocab_dict = pkl.load(f)  # nosec B301  # disable pickle load check
     elif vocab_path.suffix == '.json':
         with open(vocab_path, "r", encoding='UTF-8') as f:
             vocab_dict = json.load(f)
