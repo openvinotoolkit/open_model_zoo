@@ -68,47 +68,48 @@ Running the application with the `-h` option yields the following usage message:
 smart_classroom_demo_gapi [OPTION]
 Options:
 
-    -h                             Print a usage message.
-    -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-    -loop                          Optional. Enable reading the input in a loop.
-    -read_limit                    Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                    Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
-    -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
-    -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
-    -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
-    -m_lm '<path>'                 Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
-    -m_reid '<path>'               Required. Path to the Face Reidentification Retail model (.xml) file.
+    -h                                          Print a usage message.
+    -i                                          Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
+    -loop                                       Optional. Enable reading the input in a loop.
+    -read_limit                                 Optional. Read length limit before stopping or restarting reading the input.
+    -o "<path>"                                 Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
+    -limit "<num>"                              Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+    -m_act '<path>'                             Required. Path to the Person/Action Detection Retail model (.xml) file.
+    -m_fd '<path>'                              Required. Path to the Face Detection model (.xml) file.
+    -m_lm '<path>'                              Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
+    -m_reid '<path>'                            Required. Path to the Face Reidentification Retail model (.xml) file.
           Or
-    -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
-    -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
-    -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
-    -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
-    -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
-    -r                             Optional. Output Inference results as raw values.
-    -ad                            Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set
-    -t_ad                          Optional. Probability threshold for person/action detection.
-    -t_ar                          Optional. Probability threshold for action recognition.
-    -t_fd                          Optional. Probability threshold for face detections.
-    -inh_fd                        Optional. Input image height for face detector.
-    -inw_fd                        Optional. Input image width for face detector.
-    -exp_r_fd                      Optional. Expand ratio for bbox before face recognition.
-    -t_reid                        Optional. Cosine distance threshold between two vectors for face reidentification.
-    -fg                            Optional. Path to a faces gallery in .json format.
-    -teacher_id                    Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.
-    -no_show                       Optional. Don't show output.
-    -min_ad                        Optional. Minimum action duration in seconds.
-    -d_ad                          Optional. Maximum time difference between actions in seconds.
-    -student_ac                    Optional. List of student actions separated by a comma.
-    -top_ac                        Optional. List of student actions (for top-k mode) separated by a comma.
-    -teacher_ac                    Optional. List of teacher actions separated by a comma.
-    -top_id                        Optional. Target action name.
-    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter 'top_id'
-    -crop_gallery                  Optional. Crop images during faces gallery creation.
-    -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
-    -min_size_fr                   Optional. Minimum input size for faces during database registration.
-    -al                            Optional. Output file name to save per-person action detections in.
-    -ss_t                          Optional. Number of frames to smooth actions.
-    -u                             Optional. List of monitors to show initially.
+    -d_act '<device>'                           Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_fd '<device>'                            Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_lm '<device>'                            Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -d_reid '<device>'                          Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
+    -greedy_reid_matching                       Optional. Use faster greedy matching algorithm in face reid.
+    -person_action_detection_input_layout       Optional. Model input layout for the Person/Action Detection Retail model.
+    -r                                          Optional. Output Inference results as raw values.
+    -ad                                         Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set
+    -t_ad                                       Optional. Probability threshold for person/action detection.
+    -t_ar                                       Optional. Probability threshold for action recognition.
+    -t_fd                                       Optional. Probability threshold for face detections.
+    -inh_fd                                     Optional. Input image height for face detector.
+    -inw_fd                                     Optional. Input image width for face detector.
+    -exp_r_fd                                   Optional. Expand ratio for bbox before face recognition.
+    -t_reid                                     Optional. Cosine distance threshold between two vectors for face reidentification.
+    -fg                                         Optional. Path to a faces gallery in .json format.
+    -teacher_id                                 Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.
+    -no_show                                    Optional. Don't show output.
+    -min_ad                                     Optional. Minimum action duration in seconds.
+    -d_ad                                       Optional. Maximum time difference between actions in seconds.
+    -student_ac                                 Optional. List of student actions separated by a comma.
+    -top_ac                                     Optional. List of student actions (for top-k mode) separated by a comma.
+    -teacher_ac                                 Optional. List of teacher actions separated by a comma.
+    -top_id                                     Optional. Target action name.
+    -a_top                                      Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter 'top_id'
+    -crop_gallery                               Optional. Crop images during faces gallery creation.
+    -t_reg_fd                                   Optional. Probability threshold for face detections during database registration.
+    -min_size_fr                                Optional. Minimum input size for faces during database registration.
+    -al                                         Optional. Output file name to save per-person action detections in.
+    -ss_t                                       Optional. Number of frames to smooth actions.
+    -u                                          Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields an error message.
