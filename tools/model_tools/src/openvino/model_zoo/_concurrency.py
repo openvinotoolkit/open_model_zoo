@@ -14,7 +14,7 @@
 
 import concurrent.futures
 import queue
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 
 from openvino.model_zoo import _reporting

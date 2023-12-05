@@ -35,7 +35,7 @@ import json
 import os
 import shlex
 import ssl
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 import tempfile
 import timeit
@@ -245,7 +245,7 @@ def main():
     no_verify_because_of_windows = ssl.create_default_context()
     no_verify_because_of_windows.check_hostname = False
     no_verify_because_of_windows.verify_mode = ssl.CERT_NONE
-    with urlopen(COCO128_URL, context=no_verify_because_of_windows) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
+    with urlopen(COCO128_URL, context=no_verify_because_of_windows) as zipresp:  # nosec B310  # disable urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
 
