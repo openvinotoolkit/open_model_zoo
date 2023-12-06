@@ -18,7 +18,7 @@ from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
 import warnings
-import pickle  # nosec - disable B403:import-pickle check
+import pickle  # nosec B403  # disable import-pickle check
 import numpy as np
 import yaml
 
@@ -383,7 +383,7 @@ def read_annotation(annotation_file: Path, log=True):
     annotation_file = Path(annotation_file)
 
     result = []
-    loader_cls = pickle.Unpickler # nosec - disable B301:pickle check
+    loader_cls = pickle.Unpickler  # nosec B301  # disable pickle check
     with annotation_file.open('rb') as file:
         loader = loader_cls(file)
         try:

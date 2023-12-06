@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle as pkl # nosec - disable B403:import-pickle check
+import pickle as pkl  # nosec B403  # disable import-pickle check
 import json
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 from ..representation import CharacterRecognitionAnnotation
@@ -36,7 +36,7 @@ def read_vocab(vocab_path):
     """
     if vocab_path.suffix == '.pkl':
         with open(vocab_path, "rb") as f:
-            vocab_dict = pkl.load(f) # nosec - disable B301: pickle load check
+            vocab_dict = pkl.load(f)  # nosec B301  # disable pickle load check
     elif vocab_path.suffix == '.json':
         with open(vocab_path, "r", encoding='UTF-8') as f:
             vocab_dict = json.load(f)

@@ -13,6 +13,14 @@ Intel is committed to the respect of human rights and avoiding complicity in hum
 ## License
 Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
+## Telemetry
+OpenVINO™ collects software performance and usage data for the purpose of improving OpenVINO™ tools. This data is collected directly by OpenVINO™ or through the use of Google Analytics 4.
+You can opt-out at any time by running the command:
+
+``` bash
+opt_in_out --opt_out
+```
+
 ## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
 * [Pre-Trained Models](https://docs.openvino.ai/2023.0/model_zoo.html)

@@ -35,7 +35,7 @@ import csv
 import json
 import os
 import shlex
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 import tempfile
 import timeit
@@ -243,7 +243,7 @@ def main():
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
     os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
     os.environ["SSL_CERT_FILE"] = certifi.where()
-    with urlopen(COCO128_URL) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
+    with urlopen(COCO128_URL) as zipresp:  # nosec B310  # disable urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
 
