@@ -927,7 +927,7 @@ def provide_precision_and_layout(launchers, input_precisions, input_layouts):
 
 
 def provide_model_type(launcher, arguments):
-    if 'model_type' in arguments:
+    if 'model_type' in arguments and arguments.model_type is not None:
         launcher['_model_type'] = arguments.model_type
     if launcher['framework'] in ['dlsdk', 'openvino', 'g-api'] and 'model_is_blob' in arguments:
         launcher['_model_is_blob'] = arguments.model_is_blob
