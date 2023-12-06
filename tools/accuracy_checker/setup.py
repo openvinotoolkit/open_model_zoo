@@ -115,7 +115,9 @@ setup(
     entry_points={
         "console_scripts": [
             "accuracy_check=openvino.tools.accuracy_checker.main:main",
-            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main"]},
+            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main",
+            "dump_inputs=openvino.tools.accuracy_checker.input_damping.dump_inputs:main"
+        ]},
     zip_safe=False,
     python_requires='>=3.8',
     install_requires=_requirements,
