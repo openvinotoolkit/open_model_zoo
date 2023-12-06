@@ -19,7 +19,7 @@ import numpy as np
 import cv2
 
 from .base_custom_evaluator import BaseCustomEvaluator
-from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, create_model
+from .base_models import BaseDLSDKModel, BaseOpenVINOModel, BaseCascadeModel, BaseOpenCVModel, create_model
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
@@ -119,7 +119,8 @@ class CocosnetCascadeModel(BaseCascadeModel):
             raise ConfigError('network_info should contain cocosnet_network field')
         self._test_mapping = {
             'dlsdk': CocosnetModel,
-            'openvino': CoCosNetModelOV
+            'openvino': CoCosNetModelOV,
+            'opencv': CocosnetModelOpenCV
         }
         self._check_mapping = {
             'dlsdk': GanCheckModel,
@@ -190,6 +191,33 @@ class CocosnetModel(BaseDLSDKModel):
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
         return results, prediction
 
+class CocosnetModelOpenCV(BaseOpenCVModel):
+    def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
+        self.adapter = create_adapter(network_info.get('adapter'))
+        super().__init__(network_info, launcher, suffix, delayed_model_loading)
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = self.output_blob
+        self.input_names = list(self.input_shapes.keys())
+
+    def fit_to_input(self, input_data):
+        inputs = {}
+        for value, key in zip(input_data, self.input_names):
+            value = np.expand_dims(value, 0)
+            value = np.transpose(value, (0, 3, 1, 2))
+            inputs[key] = value
+        return inputs
+
+    def predict(self, identifiers, input_data):
+        results = []
+        prediction = None
+        for current_input in input_data:
+            data = self.fit_to_input(current_input)
+            for input_name in data.keys():
+                self.network.setInput(data[input_name].astype(np.float32), input_name)
+            prediction = self.network.forward(self.output_names)
+            dict_result = dict(zip(self.output_names, prediction))
+            results.append(*self.adapter.process(dict_result, identifiers, [{}]))
+        return results, prediction
 
 class CoCosNetModelOV(BaseOpenVINOModel):
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):

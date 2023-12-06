@@ -410,17 +410,58 @@ class BaseONNXModel:
 
 class BaseOpenCVModel:
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
-        self.network_info = network_info
         self.launcher = launcher
         self.default_model_suffix = suffix
         if not delayed_model_loading:
-            self.network = launcher.create_network(network_info['model'], network_info.get('weights', ''))
             network_info.update(launcher.config)
-            input_shapes = launcher.get_inputs_from_config(network_info)
-            self.input_blob = next(iter(input_shapes))
-            self.input_shape = input_shapes[self.input_blob]
-            self.network.setInputsNames(list(self.input_blob))
-            self.output_blob = next(iter(self.network.getUnconnectedOutLayersNames()))
+            self.load_model(network_info)
+
+    def load_model(self, network_info):
+        model, weights = self.automatic_model_search(network_info)
+        self.network = self.launcher.create_network(model, weights)
+        self.set_input_and_output(network_info)
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
+        if model.is_dir():
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list:
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list and not blob_list:
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
+                    if not model_list:
+                        model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+        accepted_suffixes = ['.blob', '.xml', '.onnx']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+        if model.suffix in ['.blob', '.onnx']:
+            return model, None
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
+        return model, weights
+
+    def set_input_and_output(self, network_info):
+        self.input_shapes = self.launcher.get_inputs_from_config(network_info)
+        self.input_blob = next(iter(self.input_shapes.keys()))
+        self.input_shape = self.input_shapes[self.input_blob]
+        self.network.setInputsNames(list(self.input_shapes.keys()))
+        self.output_names = self.network.getUnconnectedOutLayersNames()
+        self.output_blob = next(iter(list(self.network.getUnconnectedOutLayersNames())))
 
     def fit_to_input(self, input_data):
         return {self.input_blob: input_data.astype(np.float32)}

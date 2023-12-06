@@ -37,10 +37,12 @@ def build_stages(models_info, preprocessors_config, launcher, model_args, delaye
     stages_mapping = OrderedDict([
         ('pnet', {
             'caffe': CaffeProposalStage, 'dlsdk': DLSDKProposalStage,
-            'dummy': DummyProposalStage, 'openvino': OpenVINOProposalStage}),
+            'dummy': DummyProposalStage, 'openvino': OpenVINOProposalStage,
+            'opencv': OpenCVProposalStage}),
         ('rnet', {'caffe': CaffeRefineStage, 'dlsdk': DLSDKRefineStage,
-                  'openvino': OpenVINORefineStage}),
-        ('onet', {'caffe': CaffeOutputStage, 'dlsdk': DLSDKOutputStage, 'openvino': OpenVINOOutputStage})
+                  'openvino': OpenVINORefineStage, 'opencv': OpenCVRefineStage}),
+        ('onet', {'caffe': CaffeOutputStage, 'dlsdk': DLSDKOutputStage, 'openvino': OpenVINOOutputStage,
+                  'opencv': OpenCVOutputStage})
     ])
     framework = launcher.config['framework']
     common_preprocessor = PreprocessingExecutor(preprocessors_config)
@@ -480,6 +482,110 @@ class DLSDKModelMixin:
                 config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
         self.model_info['outputs'] = config_outputs
 
+class OpenCVModelMixin:
+    def _infer(self, input_blobs, batch_meta):
+        for meta in batch_meta:
+            meta['input_shape'] = []
+        results = []
+        output_names = self.network.getUnconnectedOutLayersNames()
+        input_shapes = dict()
+        for feed_dict in input_blobs:
+            for layer_name, data in feed_dict.items():
+                self.network.setInput(data.astype(np.float32), layer_name)
+                input_shapes.update({layer_name: data.shape})
+
+            list_prediction = self.network.forward(output_names)
+            dict_result = dict(zip(output_names, list_prediction))
+            results.append(dict_result)
+            for meta in batch_meta:
+                meta['input_shape'].append(input_shapes)
+
+        return results
+
+    def release(self):
+        self.input_feeder.release()
+        del self.network
+
+    def fit_to_input(self, data, layer_name, layout, precision, template=None):
+        layer_shape = self.inputs[layer_name]
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+            data = np.transpose(data, layout)
+        if precision:
+            data = data.astype(precision)
+        return data
+
+    def prepare_model(self, model_name):
+        model, weights = self.auto_model_search(self.model_info, model_name)
+        return model, weights
+
+    def auto_model_search(self, network_info, default_model_name):
+        self.default_model_name = default_model_name
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).rglob('{}.xml'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.xml'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            if not weights.exists():
+                weights_list = list(weights_dir.glob('*.bin'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+        weights = get_path(weights)
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_name, model))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+        return model, weights
+
+    def load_network(self, network, launcher, model_prefix, network_info):
+        self.update_input_output_info(model_prefix, network_info)
+        self.inputs = launcher.get_inputs_from_config(network_info)
+        self.input_feeder = InputFeeder(
+            network_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
+
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
+        self.network = launcher.create_network(network_info['model'], network_info['weights'])
+        self.load_network(self.network, launcher, model_prefix, network_info)
+
+    def update_input_output_info(self, model_prefix, network_info):
+        def generate_name(prefix, with_prefix, layer_name):
+            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+        if model_prefix is None:
+            return
+        config_inputs = network_info.get('inputs', [])
+        network_with_prefix = False
+        if config_inputs:
+            config_with_prefix = config_inputs[0]['name'].startswith(model_prefix)
+            if config_with_prefix == network_with_prefix:
+                return
+            for c_input in config_inputs:
+                c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
+            network_info['inputs'] = config_inputs
+        config_outputs = network_info['outputs']
+        for key, value in config_outputs.items():
+            config_with_prefix = value.startswith(model_prefix)
+            if config_with_prefix != network_with_prefix:
+                config_outputs[key] = generate_name(model_prefix, network_with_prefix, value)
+        network_info['outputs'] = config_outputs
 
 class OVModelMixin(BaseOpenVINOModel):
     def _infer(self, input_blobs, batch_meta):
@@ -743,6 +849,31 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
                 output_callback(out)
         return raw_outputs
 
+class OpenCVProposalStage(OpenCVModelMixin, ProposalBaseStage):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        self.adapter = None
+        if not delayed_model_loading:
+            self.inputs = launcher.get_inputs_from_config(model_info)
+            model_xml, model_bin = self.prepare_model(self.default_model_name)
+            model_info.update({'model': model_xml, 'weights': model_bin})
+            self.load_model(model_info, launcher, 'pnet_')
+            pnet_outs = model_info['outputs']
+            pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+            # pnet_adapter_config.update({'regions_format': 'hw'})
+            self.adapter = create_adapter(pnet_adapter_config)
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        if output_callback:
+            for out in raw_outputs:
+                output_callback(out)
+        return raw_outputs
 
 class OpenVINORefineStage(RefineBaseStage, OVModelMixin):
     def __init__(
@@ -782,6 +913,30 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
             output_callback(transform_for_callback(batch_size, raw_outputs))
         return raw_outputs
 
+class OpenCVRefineStage(OpenCVModelMixin, RefineBaseStage):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        if not delayed_model_loading:
+            self.inputs = launcher.get_inputs_from_config(model_info)
+            model_xml, model_bin = self.prepare_model(self.default_model_name)
+            model_info.update({'model': model_xml, 'weights': model_bin})
+            self.load_model(model_info, launcher, 'pnet_')
+            pnet_outs = model_info['outputs']
+            pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+            # pnet_adapter_config.update({'regions_format': 'hw'})
+            self.adapter = create_adapter(pnet_adapter_config)
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        if output_callback:
+            batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+            output_callback(transform_for_callback(batch_size, raw_outputs))
+        return raw_outputs
 
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(
@@ -793,6 +948,28 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model()
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
+
+    def predict(self, input_blobs, batch_meta, output_callback=None):
+        raw_outputs = self._infer(input_blobs, batch_meta)
+        return raw_outputs
+
+class OpenCVOutputStage(OpenCVModelMixin, OutputBaseStage):
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
+        if not delayed_model_loading:
+            self.inputs = launcher.get_inputs_from_config(model_info)
+            model_xml, model_bin = self.prepare_model(self.default_model_name)
+            model_info.update({'model': model_xml, 'weights': model_bin})
+            self.load_model(model_info, launcher, 'pnet_')
+            pnet_outs = model_info['outputs']
+            pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+            # pnet_adapter_config.update({'regions_format': 'hw'})
+            self.adapter = create_adapter(pnet_adapter_config)
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
