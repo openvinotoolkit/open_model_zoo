@@ -1,0 +1,41 @@
+evaluations:
+  - name: text-to-speech-en-0002
+    module: custom_evaluators.text_to_speech_evaluator.TextToSpeechEvaluatorGan
+    module_config:
+      network_info:
+        encoder: {}
+
+        decoder:
+          inputs:
+            z: z
+            z_mask: z_mask
+          max_regression_len: '0'
+      adapter:
+        type: multi_output_regression
+        outputs:
+          - logw
+          - x_m
+          - x_res
+          - x_mask
+          - mel
+        keep_shape: True
+
+      launchers:
+        - framework: openvino
+
+      datasets:
+        - name: acoustic_gan
+          metrics:
+            - type: relative_l2_error
+              presenter: print_vector
+              reference:
+                logw@mean: 0.000001
+                logw@std: 0
+                mel@mean: 0
+                mel@std: 0
+                x_m@mean: 0.000001
+                x_m@std: 0
+                x_mask@mean: 0
+                x_mask@std: 0
+                x_res@mean: 0.000001
+                x_res@std: 0
