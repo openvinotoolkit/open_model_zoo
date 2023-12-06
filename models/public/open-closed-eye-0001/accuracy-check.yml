@@ -20,6 +20,13 @@ models:
     launchers:
       - framework: openvino
         adapter: classification
+      - framework: opencv
+        inputs:
+          - name: input.1
+            type: INPUT
+            shape: 3, 32, 32
+        adapter: classification
+
     datasets:
       - name: mrlEyes_2018_01
         preprocessing:

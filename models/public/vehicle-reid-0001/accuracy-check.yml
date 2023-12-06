@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter: reid
 
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 208, 208
+        adapter: reid
+
     datasets:
       - name: veri776
 

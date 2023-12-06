@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter: classification
 
+      - framework: opencv
+        inputs:
+          - name: actual_input_1
+            type: INPUT
+            shape: 3, 128, 128
+        adapter: classification
+
     datasets:
       - name: antispoof_test_data
 

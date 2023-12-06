@@ -26,6 +26,12 @@ models:
     launchers:
       - framework: openvino
         adapter: ssd
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 512, 512
+        adapter: ssd
 
     datasets:
       - name: VOC2007_detection

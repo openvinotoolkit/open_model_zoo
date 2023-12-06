@@ -47,6 +47,20 @@ models:
         inputs:
           - name: image_shape
             type: ORIG_IMAGE_INFO
+
+      - framework: opencv
+        adapter:
+          type: yolo_v3_onnx
+          boxes_out: yolonms_layer_1/ExpandDims_1:0
+          scores_out: yolonms_layer_1/ExpandDims_3:0
+          indices_out: yolonms_layer_1/concat_2:0
+        inputs:
+          - name: image_shape
+            type: ORIG_IMAGE_INFO
+            shape: 2
+          - name: input_1
+            type: INPUT
+            shape: 3, 416, 416
     datasets:
       - name: ms_coco_detection_80_class_without_background
         reader: pillow_imread

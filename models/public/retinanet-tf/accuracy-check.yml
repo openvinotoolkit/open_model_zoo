@@ -4,6 +4,13 @@ models:
       - framework: openvino
         adapter: ssd
 
+      - framework: opencv
+        inputs:
+          - name: input_1
+            type: INPUT
+            shape: 3, 1333, 1333
+        adapter: ssd
+
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:

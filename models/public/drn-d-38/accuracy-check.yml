@@ -5,6 +5,15 @@ models:
         adapter:
           type: segmentation
           make_argmax: true
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 1024, 2048
+        adapter:
+          type: segmentation
+          make_argmax: true
+
     datasets:
       - name: cityscapes
         metrics:

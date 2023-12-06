@@ -34,6 +34,16 @@ models:
             type: INPUT
             value: "input_ids"
             precision: I32
+      - framework: opencv
+        inputs:
+          - name: "input"
+            type: INPUT
+            value: "input_ids"
+            precision: I32
+            shape: 1024
+        adapter:
+          type: common_language_modeling
+          logits_output: "output"
 
     datasets:
       - name: WikiText_2_raw_gpt2

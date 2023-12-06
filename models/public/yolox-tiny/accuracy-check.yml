@@ -46,6 +46,12 @@ models:
     launchers:
       - framework: openvino
         adapter: yolox
+      - framework: opencv
+        inputs:
+          - name: images
+            type: INPUT
+            shape: 3, 416, 416
+        adapter: yolox
     datasets:
       - name: ms_coco_detection_80_class_without_background
 

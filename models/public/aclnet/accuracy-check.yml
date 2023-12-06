@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter: classification
 
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 1, 1, 16000
+        adapter: classification
+
     datasets:
       - name: sound_classification
 

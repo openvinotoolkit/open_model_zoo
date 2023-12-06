@@ -38,6 +38,12 @@ models:
     launchers:
       - framework: openvino
         adapter: segmentation
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 320, 320
+        adapter: segmentation
 
     datasets:
       - name: ADEChallengeData2016

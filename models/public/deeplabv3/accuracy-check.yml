@@ -4,6 +4,13 @@ models:
       - framework: openvino
         adapter: segmentation
 
+      - framework: opencv
+        inputs:
+          - name: mul_1/placeholder_port_1
+            type: INPUT
+            shape: 3, 513, 513
+        adapter: segmentation
+
     datasets:
       - name: VOC2012_Segmentation
         preprocessing:

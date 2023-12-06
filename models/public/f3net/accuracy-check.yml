@@ -27,6 +27,12 @@ models:
     launchers:
       - framework: openvino
         adapter: salient_object_detection
+      - framework: opencv
+        inputs:
+          - name: input.1
+            type: INPUT
+            shape: 3, 352, 352
+        adapter: salient_object_detection
     datasets:
       - name: PASCAL-S
         preprocessing:

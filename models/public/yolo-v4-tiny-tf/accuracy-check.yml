@@ -2,7 +2,7 @@ models:
   - name: yolo-v4-tiny-tf
     launchers:
       - framework: tf
-        model:   yolo-v4-tiny.pb
+        model: yolo-v4-tiny.pb
         adapter:
           type: yolo_v3
           anchors: 10,14,23,27,37,58,81,82,135,169,344,319
@@ -76,6 +76,24 @@ models:
           outputs:
             - conv2d_20/BiasAdd
             - conv2d_17/BiasAdd
+      - framework: opencv
+        inputs:
+          - name: image_input
+            type: INPUT
+            shape: 3, 416, 416
+        adapter:
+          type: yolo_v3
+          anchors: 10,14,23,27,37,58,81,82,135,169,344,319
+          num: 2
+          coords: 4
+          classes: 80
+          threshold: 0.001
+          anchor_masks: [[1, 2, 3], [3, 4, 5]]
+          raw_output: True
+          outputs:
+            - conv2d_20/BiasAdd/Add
+            - conv2d_17/BiasAdd/Add
+
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:

@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter: reid
 
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
+        adapter: reid
+
     datasets:
       - name: lfw_bin
 

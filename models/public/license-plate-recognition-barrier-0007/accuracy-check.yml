@@ -5,6 +5,13 @@ models:
       - framework: openvino
         adapter: lpr
 
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 24, 94
+        adapter: lpr
+
     datasets:
       - name: synthetic_chinese_license_plates
 

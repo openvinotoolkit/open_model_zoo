@@ -6,6 +6,13 @@ models:
         adapter:
           type: single_human_pose_estimation
 
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 384, 288
+        adapter: single_human_pose_estimation
+
     datasets:
       - name: ms_coco_single_keypoints
         preprocessing:

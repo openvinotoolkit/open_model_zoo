@@ -79,6 +79,19 @@ models:
           do_lower: True
           # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to vocab.txt
           vocabulary_file: vitstr-small-patch16-224/vocab.txt
+      - framework: opencv
+        inputs:
+          - name: image
+            type: INPUT
+            shape: 1, 224, 224
+        adapter:
+          type: simple_decoder
+          eos_label: '[s]'
+          start_label: '[GO]'
+          start_index: 1
+          do_lower: True
+          # Use option "accuracy_check [...] --model_attributes <path_to_folder_with_downloaded_models>" to provide path to vocab.txt
+          vocabulary_file: vitstr-small-patch16-224/vocab.txt
 
     datasets:
       - name: ICDAR2013

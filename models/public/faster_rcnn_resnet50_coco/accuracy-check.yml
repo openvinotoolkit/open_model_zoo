@@ -1,5 +1,5 @@
 models:
-  - name:  faster_rcnn_resnet50_coco
+  - name: faster_rcnn_resnet50_coco
     launchers:
       - framework: openvino
         adapter: ssd
@@ -7,6 +7,17 @@ models:
           - name: image_info
             type: CONST_INPUT
             value: [[600, 1024, 1]]
+
+      - framework: opencv
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 1024, 1]]
+            shape: 3
+          - name: image_tensor
+            type: INPUT
+            shape: 3, 600, 1024
+        adapter: ssd
 
     datasets:
       - name: ms_coco_detection_91_classes

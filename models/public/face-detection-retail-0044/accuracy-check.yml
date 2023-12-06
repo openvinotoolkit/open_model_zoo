@@ -10,6 +10,13 @@ models:
       - framework: openvino
         adapter: ssd
 
+      - framework: opencv
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
     datasets:
       - name: wider
 

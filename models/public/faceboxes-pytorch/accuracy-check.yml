@@ -8,6 +8,16 @@ models:
           boxes_out: "boxes"
           scores_out: "scores"
 
+      - framework: opencv
+        inputs:
+          - name: input.1
+            type: INPUT
+            shape: 3, 1024, 1024
+        adapter:
+          type: faceboxes
+          boxes_out: "boxes"
+          scores_out: "scores"
+
     datasets:
       - name: wider
 

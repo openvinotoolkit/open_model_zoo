@@ -15,6 +15,25 @@ models:
           multiple_labels: True
           outputs:
             - boxes
+      - framework: opencv
+        inputs:
+          - name: image
+            type: INPUT
+            shape: 3, 608, 608
+        adapter:
+          type: yolof
+          anchors: 16,16,32,32,64,64,128,128,256,256,512,512
+          num: 6
+          cells: [38]
+          coords: 4
+          classes: 80
+          threshold: 0.05
+          raw_output: true
+          output_format: BHW
+          multiple_labels: true
+          outputs:
+            - boxes
+
     datasets:
       - name: ms_coco_detection_80_class_without_background
 

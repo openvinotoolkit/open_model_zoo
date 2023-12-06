@@ -10,6 +10,18 @@ models:
           heatmaps_out: heatmaps
           nms_heatmaps_out: heatmaps
 
+      - framework: opencv
+        inputs:
+          - name: image
+            type: INPUT
+            shape: 3, 512, 512
+        allow_reshape_input: true
+        adapter:
+          type: human_pose_estimation_hrnet
+          embeddings_out: embeddings
+          heatmaps_out: heatmaps
+          nms_heatmaps_out: heatmaps
+
     datasets:
       - name: ms_coco_val2017_keypoints_5k_images
 

@@ -45,6 +45,15 @@ models:
           type: ultra_lightweight_face_detection
           boxes_out: "boxes"
           scores_out: "scores"
+      - framework: opencv
+        inputs:
+          - name: input
+            type: INPUT
+            shape: 3, 240, 320
+        adapter:
+          type: ultra_lightweight_face_detection
+          boxes_out: "boxes"
+          scores_out: "scores"
 
     datasets:
       - name: wider
