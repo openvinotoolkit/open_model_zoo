@@ -78,7 +78,6 @@ namespace config {
 std::tuple<NetsFlagsPack, ArgsFlagsPack, preparation::FGFlagsPack> packDemoFlags() {
     using namespace preparation;
     return std::make_tuple(NetsFlagsPack{FLAGS_m_act,
-                                         FLAGS_person_action_detection_input_layout,
                                          FLAGS_m_fd,
                                          FLAGS_m_lm,
                                          FLAGS_m_reid,
@@ -123,7 +122,6 @@ int main(int argc, char* argv[]) {
         const auto fd_model_path         = FLAGS_m_fd;
         const auto fr_model_path         = FLAGS_m_reid;
         const auto lm_model_path         = FLAGS_m_lm;
-        const auto ad_model_input_layout = FLAGS_person_action_detection_input_layout;
 
         /** Pack demo flags to appropriate unions **/
         config::NetsFlagsPack netsFlags;

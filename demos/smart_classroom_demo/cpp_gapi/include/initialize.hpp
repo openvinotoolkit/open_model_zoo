@@ -112,7 +112,6 @@ struct ArgsFlagsPack {
 
 struct NetsFlagsPack {
     std::string m_act;
-    std::string person_action_detection_input_layout;
     std::string m_fd;
     std::string m_lm;
     std::string m_reid;
@@ -213,8 +212,7 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
                 flags.m_act,
                 fileNameNoExt(flags.m_act) + ".bin",
                 flags.d_act,
-            }.cfgOutputLayers(outputBlobList)
-             .cfgInputModelLayout(flags.person_action_detection_input_layout);  // OV backend assumes NCHW by default if not specified
+            }.cfgOutputLayers(outputBlobList);
         // clang-format on
 
         networks += cv::gapi::networks(action_net);

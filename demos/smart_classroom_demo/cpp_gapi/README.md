@@ -84,7 +84,6 @@ Options:
     -d_lm '<device>'                            Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'                          Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. The application looks for a suitable plugin for the specified device.
     -greedy_reid_matching                       Optional. Use faster greedy matching algorithm in face reid.
-    -person_action_detection_input_layout       Optional. Model input layout for the Person/Action Detection Retail model.
     -r                                          Optional. Output Inference results as raw values.
     -ad                                         Optional. Output file name to save per-person action statistics in. Requires -teacher_id and -a_top to be unset and -fg to be set
     -t_ad                                       Optional. Probability threshold for person/action detection.

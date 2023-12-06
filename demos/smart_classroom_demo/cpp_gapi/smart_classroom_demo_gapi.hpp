@@ -39,8 +39,6 @@ static const char target_device_message_face_reid[] =
     "(the list of available devices is shown below). Default value is CPU. "
     "The application looks for a suitable plugin for the specified device.";
 static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
-static const char person_action_detection_input_layout_message[] =
-    "Optional. Model input layout for the Person/Action Detection Retail model.";
 static const char face_threshold_output_message[] = "Optional. Probability threshold for face detections.";
 static const char person_threshold_output_message[] = "Optional. Probability threshold for person/action detection.";
 static const char action_threshold_output_message[] = "Optional. Probability threshold for action recognition.";
@@ -84,7 +82,6 @@ DEFINE_string(d_fd, "CPU", target_device_message_face_detection);
 DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
 DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
-DEFINE_string(person_action_detection_input_layout, "NHWC", person_action_detection_input_layout_message);
 DEFINE_string(ad, "", act_stat_output_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t_ad, 0.3, person_threshold_output_message);
@@ -135,7 +132,6 @@ static void showUsage() {
     std::cout << "    -d_lm '<device>'                               " << target_device_message_landmarks_regression << std::endl;
     std::cout << "    -d_reid '<device>'                             " << target_device_message_face_reid << std::endl;
     std::cout << "    -greedy_reid_matching                          " << greedy_reid_matching_message << std::endl;
-    std::cout << "    -person_action_detection_input_layout          " << person_action_detection_input_layout_message << std::endl;
     std::cout << "    -r                                             " << raw_output_message << std::endl;
     std::cout << "    -ad                                            " << act_stat_output_message << std::endl;
     std::cout << "    -t_ad                                          " << person_threshold_output_message << std::endl;
