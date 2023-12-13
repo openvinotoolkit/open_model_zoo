@@ -90,6 +90,7 @@ def main():
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
         encoder_target_device = args.device
+        decoder_target_device = args.device
     else:
         encoder_target_device = decoder_target_device
 

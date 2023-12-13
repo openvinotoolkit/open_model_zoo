@@ -16,7 +16,7 @@ limitations under the License.
 
 from .loader import Loader, StoredPredictionBatch
 
-from .pickle_loader import PickleLoader # nosec - disable B403:import-pickle check
+from .pickle_loader import PickleLoader  # nosec B403  # disable import-pickle check
 from .xml_loader import XMLLoader
 from .json_loader import JSONLoader
 

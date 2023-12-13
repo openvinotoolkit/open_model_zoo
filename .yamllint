@@ -10,6 +10,7 @@ yaml-files:
 #    which yamllint complains about.
 
 ignore: |
+  ci/bandit.yml
   demos/thirdparty/
   tools/accuracy_checker/dataset_definitions.yml
   tools/accuracy_checker/configs/

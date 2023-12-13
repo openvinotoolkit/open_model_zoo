@@ -251,7 +251,7 @@ DEMOS = [
 
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
             model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
-            device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
+            device_keys=['-d', '-d_fd', '-d_hp', '-d_lm', '-d_es'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -443,7 +443,7 @@ DEMOS = [
 
     CppDemo(name='gaze_estimation_demo',
             model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
-            device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
+            device_keys=['-d', '-d_fd', '-d_hp', '-d_lm', '-d_es'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -1239,7 +1239,7 @@ DEMOS = [
             ModelArg('instance-segmentation-security-1040')),
     )),
 
-    PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
+    PythonDemo(name='machine_translation_demo', device_keys=['-d'], test_cases=combine_cases(
         [
             TestCase(options={
                 '-m': ModelArg('machine-translation-nar-de-en-0002'),
