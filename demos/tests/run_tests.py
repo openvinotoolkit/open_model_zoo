@@ -29,13 +29,13 @@ For the tests to work, the test data directory must contain:
 """
 
 import argparse
+import certifi
 import contextlib
 import csv
 import json
 import os
 import shlex
-import ssl
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 import tempfile
 import timeit
@@ -241,11 +241,9 @@ def main():
 
     print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
-
-    no_verify_because_of_windows = ssl.create_default_context()
-    no_verify_because_of_windows.check_hostname = False
-    no_verify_because_of_windows.verify_mode = ssl.CERT_NONE
-    with urlopen(COCO128_URL, context=no_verify_because_of_windows) as zipresp:  # nosec - disable B310: urllib_urlopen because url is hardcoded
+    os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+    os.environ["SSL_CERT_FILE"] = certifi.where()
+    with urlopen(COCO128_URL) as zipresp:  # nosec B310  # disable urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
 

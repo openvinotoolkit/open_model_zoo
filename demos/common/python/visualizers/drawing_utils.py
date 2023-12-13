@@ -25,7 +25,7 @@ class ColorPalette:
         if n == 0:
             raise ValueError('ColorPalette accepts only the positive number of colors')
         if rng is None:
-            rng = random.Random(0xACE)  # nosec - disable B311:random check
+            rng = random.Random(0xACE)  # nosec B311  # disable random check
 
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]

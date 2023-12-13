@@ -16,7 +16,7 @@ import contextlib
 import platform
 import re
 import shlex
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 
 from pathlib import Path
 
