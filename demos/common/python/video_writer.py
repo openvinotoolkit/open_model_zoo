@@ -45,6 +45,3 @@ class LazyVideoWriter(VideoWriter):
                 if self.on_limit_callback is not None:
                     self.on_limit_callback(frame, self.frames_processed, self.output_limit)
             self.frames_processed += 1
-
-
-
