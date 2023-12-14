@@ -50,6 +50,9 @@ public:
              const std::string& layout = "");
 
     std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, ov::InferRequest& request) override;
+    std::shared_ptr<InternalModelData> preprocess(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                                                std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
+                                                                ov::InferRequest& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

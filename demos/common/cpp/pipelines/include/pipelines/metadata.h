@@ -40,6 +40,31 @@ struct ImageMetaData : public MetaData {
     ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) : img(img), timeStamp(timeStamp) {}
 };
 
+struct ImageBatchMetaData : public MetaData {
+    std::chrono::steady_clock::time_point timeStamp;
+    std::vector<std::shared_ptr<ImageMetaData>> metadatas;
+
+    ImageBatchMetaData() {}
+
+    ImageBatchMetaData(std::vector<cv::Mat>::iterator imagesBeginIt,
+                       const std::vector<cv::Mat>::iterator imagesEndIt,
+                       std::chrono::steady_clock::time_point timeStamp) : timeStamp(timeStamp) {
+        size_t images_count = std::distance(imagesBeginIt, imagesEndIt);
+        metadatas.reserve(images_count);
+        for (; imagesBeginIt != imagesEndIt;) {
+            metadatas.push_back(std::make_shared<ImageMetaData>(*imagesBeginIt++, timeStamp));
+        }
+    }
+
+    void add(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) {
+        metadatas.push_back(std::make_shared<ImageMetaData>(img, timeStamp));
+        this->timeStamp = timeStamp;
+    }
+    void clear() {
+        metadatas.clear();
+    }
+};
+
 struct ClassificationImageMetaData : public ImageMetaData {
     unsigned int groundTruthId;
 

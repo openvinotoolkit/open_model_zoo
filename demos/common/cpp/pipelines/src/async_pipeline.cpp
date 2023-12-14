@@ -95,7 +95,6 @@ int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::itera
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
-                std::cout << "callback has been called" << std::endl;
                 try {
                     if (ex) {
                         std::rethrow_exception(ex);
@@ -108,14 +107,11 @@ int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::itera
 
                     for (const auto& outName : model->getOutputsNames()) {
                         auto tensor = request.get_tensor(outName);
-                        std::cout << "-S- output tensorName: " << outName << ", tensor ptr: " << reinterpret_cast<void*>(tensor.data()) << ", size: " << tensor.get_size() << std::endl;
                         result.outputsData.emplace(outName, tensor);
                     }
 
                     completedInferenceResults.emplace(frameID, result);
-                    std::cout << "before setRequestIdle: " << std::endl;
                     requestsPool->setRequestIdle(request);
-                    std::cout << "after setRequestIdle: " << std::endl;
                 } catch (...) {
                     if (!callbackException) {
                         callbackException = std::current_exception();

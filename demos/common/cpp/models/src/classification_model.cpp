@@ -44,19 +44,9 @@ ClassificationModel::ClassificationModel(const std::string& modelFileName,
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
     const ov::Tensor& indicesTensor = infResult.outputsData.find(outputsNames[0])->second;
-    const void* indicesTensorBuffer = reinterpret_cast<const void*>(indicesTensor.data());
-    std::cout << "-S- indices tensor data: " << indicesTensorBuffer <<  ", size: " << indicesTensor.get_size() << std::endl;
     const int* indicesPtr = indicesTensor.data<int>();
-    for (int i = 0; i < indicesTensor.get_size(); i++){
-        std::cout << "-S- index[" << i << "]: " << indicesPtr[i] <<std::endl;
-    }
     const ov::Tensor& scoresTensor = infResult.outputsData.find(outputsNames[1])->second;
     const float* scoresPtr = scoresTensor.data<float>();
-    const void* scoresTensorBuffer = reinterpret_cast<const void*>(scoresTensor.data());
-    std::cout << "-S- scores tensor data: " << scoresTensorBuffer << ", size: " << scoresTensor.get_size() <<std::endl;
-    for (int i = 0; i < scoresTensor.get_size(); i++){
-        std::cout << "-S- score[" << i << "]: " << scoresPtr[i] <<std::endl;
-    }
 
     ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
@@ -64,7 +54,6 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
     result->topLabels.reserve(scoresTensor.get_size());
     for (size_t i = 0; i < scoresTensor.get_size(); ++i) {
         int ind = indicesPtr[i];
-         std::cout << "-S- index???[" << i << "]: " << ind << ", labels size: " << labels.size() <<std::endl;
         if (ind < 0 || ind >= static_cast<int>(labels.size())) {
             throw std::runtime_error(std::string("Invalid index: ") + std::to_string(ind) + " for the class label is found during postprocessing, label size: " + std::to_string(labels.size()));
         }
