@@ -273,7 +273,7 @@ DEMOS = [
             device_keys=['-d_a', '-d_d'],
             test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          '-i': DataPatternArg('coco128-every-480x640x3'),
                           '-m_d': ModelArg('person-detection-asl-0001')}),
         [
             TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
