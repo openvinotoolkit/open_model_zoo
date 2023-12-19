@@ -50,11 +50,11 @@ DetectedActions ActionDetection::fetchResults(const std::vector<cv::Mat>& ssd_re
             cv::MatSize anchor_dims(nullptr);
             anchor_dims = head_anchors[head_id] == 1 ? add_conf_out[anchor_id].size
                                                      : add_conf_out[anchor_id + num_heads - 1].size;
-            anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
-            anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
-            size_t action_dimention_idx = new_network_ ? 1 : 3;
+            anchor_height = anchor_dims[1];
+            anchor_width = anchor_dims[2];
+            size_t action_dimention_idx = 3;
             if (static_cast<size_t>(anchor_dims[action_dimention_idx]) != config_.num_action_classes) {
-                throw std::logic_error("The number of specified actions and the number of actions predicted by"
+                throw std::logic_error("The number of specified actions and the number of actions predicted by "
                                        "the Person/Action Detection Retail model must match");
             }
             const int anchor_size = anchor_height * anchor_width;

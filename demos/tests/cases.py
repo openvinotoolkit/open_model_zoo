@@ -268,22 +268,21 @@ DEMOS = [
             ModelArg('face-detection-retail-0004')),
     )),
 
-    # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
-    # CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
-    #         model_keys=['-m_a', '-m_d'],
-    #         device_keys=['-d_a', '-d_d'],
-    #         test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #                       '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
-    #     [
-    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-    #     ],
-    # )),
+    CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
+            model_keys=['-m_a', '-m_d'],
+            device_keys=['-d_a', '-d_d'],
+            test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': DataPatternArg('coco128-every-480x640x3'),
+                          '-m_d': ModelArg('person-detection-asl-0001')}),
+        [
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+        ],
+    )),
 
     CppDemo(
         'interactive_face_detection_demo', 'cpp_gapi',
@@ -320,9 +319,8 @@ DEMOS = [
             *combine_cases(
                 [
                     TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
-                    # TODO: enable after https://github.com/TolyaTalamanov fixes G-API
-                    # TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
-                    #     '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
+                        '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
                     # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
                     # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
                     # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
