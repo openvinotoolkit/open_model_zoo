@@ -2,7 +2,7 @@ models:
   - name: yolo-v3-tiny-tf
     launchers:
       - framework: tf
-        model:   yolo-v3-tiny.pb
+        model:   yolo-v3-tiny-tf.pb
         adapter:
           type: yolo_v3
           anchors: tiny_yolo_v3
