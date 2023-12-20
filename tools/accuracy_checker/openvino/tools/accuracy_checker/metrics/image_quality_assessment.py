@@ -10,6 +10,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import os
 import math
 import tempfile
 from pathlib import Path
@@ -472,13 +473,18 @@ class LPIPS(BaseRegressionMetric):
             'squeeze': torchvision.models.squeezenet1_1,
             'vgg': torchvision.models.vgg16
         }
-        with tempfile.TemporaryDirectory(prefix='lpips_model', dir=Path.cwd()) as model_dir:
-            weights = model_weights[net]
-            if isinstance(weights, tuple):
-                weights = weights[1] if torch.__version__ <= '1.6.0' else weights[0]
-            preloaded_weights = torch.utils.model_zoo.load_url(
-                weights, model_dir=model_dir, progress=False, map_location='cpu'
-            )
+        weights = model_weights[net]
+        if isinstance(weights, tuple):
+            weights = weights[1] if torch.__version__ <= '1.6.0' else weights[0]
+
+        weights_path=weights.split('/')[-1]
+        if os.path.isfile(weights_path):
+            preloaded_weights = torch.load(weights_path)
+        else:
+            with tempfile.TemporaryDirectory(prefix='lpips_model', dir=Path.cwd()) as model_dir:
+                preloaded_weights = torch.utils.model_zoo.load_url(
+                    weights, model_dir=model_dir, progress=False, map_location='cpu'
+                )
         model = model_classes[net](pretrained=False)
         model.load_state_dict(preloaded_weights)
         feats = model.features
