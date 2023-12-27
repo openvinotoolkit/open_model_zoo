@@ -29,6 +29,7 @@
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/render/render.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -191,7 +192,7 @@ int main(int argc, char* argv[]) {
         // MTCNN Refinement detection network
         // clang-format off
         auto mtcnnr_net =
-            cv::gapi::ie::Params<nets::MTCNNRefinement>{
+            cv::gapi::ov::Params<nets::MTCNNRefinement>{
                 FLAGS_m_r,  // path to topology IR
                 fileNameNoExt(FLAGS_m_r) + ".bin",  // path to weights
                 FLAGS_d_r,  // device specifier
@@ -200,7 +201,7 @@ int main(int argc, char* argv[]) {
 
         // MTCNN Output detection network
         auto mtcnno_net =
-            cv::gapi::ie::Params<nets::MTCNNOutput>{
+            cv::gapi::ov::Params<nets::MTCNNOutput>{
                 FLAGS_m_o,  // path to topology IR
                 fileNameNoExt(FLAGS_m_o) + ".bin",  // path to weights
                 FLAGS_d_o,  // device specifier
@@ -213,13 +214,13 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < pyramid_levels; ++i) {
             std::string net_id = get_pnet_level_name(level_size[i]);
             std::vector<size_t> reshape_dims = {1, 3, size_t(level_size[i].width), size_t(level_size[i].height)};
-            cv::gapi::ie::Params<cv::gapi::Generic> mtcnnp_net{
+            cv::gapi::ov::Params<cv::gapi::Generic> mtcnnp_net{
                 net_id,  // tag
                 FLAGS_m_p,  // path to topology IR
                 fileNameNoExt(FLAGS_m_p) + ".bin",  // path to weights
                 FLAGS_d_p,  // device specifier
             };
-            mtcnnp_net.cfgInputReshape("data", reshape_dims);
+            mtcnnp_net.cfgReshape(reshape_dims);
             networks_mtcnn += cv::gapi::networks(mtcnnp_net);
         }
 
