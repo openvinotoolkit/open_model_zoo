@@ -51,7 +51,7 @@ DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_string(backend, "IE", backend_message);
+DEFINE_string(backend, "OV", backend_message);
 DEFINE_string(mean_values, "", mean_values_message);
 DEFINE_string(scale_values, "", scale_values_message);
 
