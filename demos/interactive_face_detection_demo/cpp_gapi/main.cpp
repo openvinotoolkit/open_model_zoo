@@ -38,7 +38,6 @@
 #include <opencv2/gapi/gproto.hpp>
 #include <opencv2/gapi/gstreaming.hpp>
 #include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/infer/parsers.hpp>
 #include <opencv2/gapi/streaming/format.hpp>

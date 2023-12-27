@@ -28,7 +28,6 @@
 #include <opencv2/gapi/gstreaming.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/render/render.hpp>
 #include <opencv2/highgui.hpp>
