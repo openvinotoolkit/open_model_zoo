@@ -171,15 +171,16 @@ class Dataset:
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
+
+        if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
+            _save_annotation()
+
         no_recursion = (meta or {}).get('no_recursion', False)
         annotation = _create_subset(annotation, config, no_recursion)
         dataset_analysis = config.get('analyze_dataset', False)
 
         if dataset_analysis:
             meta = _run_dataset_analysis(meta)
-
-        if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
-            _save_annotation()
 
         return annotation, meta
 
