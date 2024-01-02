@@ -198,7 +198,7 @@ class Dataset:
             'dataset_size': self.size
         }
         convert_annotation = True
-        subsample_size = config.get('subsample_size')
+        subsample_size = get_subsample_size(config)
         subsample_meta = {'subset': False, 'shuffle': False}
         if not ignore_subset_settings(config):
 
@@ -767,7 +767,7 @@ class DataProvider:
         return annotations
 
     def set_annotation(self, annotation, meta):
-        subsample_size = self.dataset_config.get('subsample_size')
+        subsample_size = get_subsample_size(self.dataset_config)
         if subsample_size is not None:
             subsample_seed = self.dataset_config.get('subsample_seed', 666)
 
@@ -791,7 +791,7 @@ class DataProvider:
             'annotation_saving': False,
             'dataset_size': self.size
         }
-        subsample_size = config.get('subsample_size')
+        subsample_size = get_subsample_size(config)
         subsample_meta = {'subset': False, 'shuffle': False}
         convert_annotation = True
         if not ignore_subset_settings(config):
@@ -834,19 +834,35 @@ def ignore_subset_settings(config):
     return False
 
 
-def _create_subset(annotation, config, no_recursion=False):
-    subsample_size = config.get('subsample_size')
-    if not ignore_subset_settings(config):
+def get_subsample_size(config):
+    size = config.get('subsample_size')
+    sub_evaluation = config.get('sub_evaluation', False)
+    if sub_evaluation:
+        subset_metrics = config.get('subset_metrics',[])
+        for item in subset_metrics:
+            subset_size = item.get('subset_size')
+            if size is None or subset_size == size:
+                # first subset_metrics or matching subsample_size
+                size = subset_size
+                break
+    return size
 
+
+def _create_subset(annotation, config, no_recursion=False):
+    if ignore_subset_settings(config):
+        if config.get('subsample_size') is not None:
+            warnings.warn("Subset selection parameters will be ignored")
+            config.pop('subsample_size', None)
+            config.pop('subsample_seed', None)
+            config.pop('shuffle', None)
+        if config.get('sub_evaluation') is not None:
+            warnings.warn("Sub evaluation will be ignored")
+            config.pop('sub_evaluation', None)
+    else:
+        subsample_size = get_subsample_size(config)
         if subsample_size is not None:
             subsample_seed = config.get('subsample_seed', 666)
             shuffle = config.get('shuffle', True)
             annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle, no_recursion)
-
-    elif subsample_size is not None:
-        warnings.warn("Subset selection parameters will be ignored")
-        config.pop('subsample_size', None)
-        config.pop('subsample_seed', None)
-        config.pop('shuffle', None)
 
     return annotation
