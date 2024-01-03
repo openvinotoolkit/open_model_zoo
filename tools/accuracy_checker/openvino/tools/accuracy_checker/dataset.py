@@ -111,6 +111,11 @@ class Dataset:
                 optional=True, default=False,
                 description='save subset ids to file specified in subset_file parameter'
             ),
+            'sub_evaluation': BoolField(
+                optional=True, default=False,
+                description='if subset_metrics defined use subset size and metrics for evaluation'
+            ),            
+            'subset_metrics': ListField(allow_empty=False, optional=True, description='list of metrics for subset evaluation'),            
             'batch': NumberField(value_type=int, min_value=1, optional=True, description='batch size for data read'),
             '_profile': BoolField(optional=True, default=False, description='allow metric profiling'),
             '_report_type': StringField(optional=True, choices=['json', 'csv'], description='type profiling report'),
