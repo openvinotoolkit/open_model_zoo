@@ -881,6 +881,8 @@ def _add_subset_specific_arg(dataset_entry, arguments):
         dataset_entry['subset_file'] = arguments.subset_file
     if 'store_subset' in arguments and arguments.store_subset:
         dataset_entry['store_subset'] = arguments.store_subset
+    if 'sub_evaluation' in arguments and arguments.sub_evaluation:
+        dataset_entry['sub_evaluation'] = arguments.sub_evaluation
 
 
 def prepare_commandline_conversion_mapping(commandline_conversion, args):
