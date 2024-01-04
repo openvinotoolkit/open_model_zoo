@@ -255,7 +255,7 @@ DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': TestDataArg('coco128/images/train2017/')}),
+            '-i': DataPatternArg('coco128-every-480x640x3')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
