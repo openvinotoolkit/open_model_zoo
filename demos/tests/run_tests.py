@@ -51,12 +51,14 @@ from args import ArgContext, Arg, ModelArg
 from cases import Demo
 from data_sequences import DATA_SEQUENCES
 
+import requests
+
 scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
 }
 COCO128_URL = "https://ultralytics.com/assets/coco128.zip"
-
+VIDEO_URL = "https://storage.openvinotoolkit.org/data/test_data/videos/head-pose-face-detection-male.mp4"
 
 def parser_paths_list(supported_devices):
     paths = supported_devices.split(',')
@@ -246,6 +248,10 @@ def main():
     with urlopen(COCO128_URL) as zipresp:  # nosec B310  # disable urllib_urlopen because url is hardcoded
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
+
+    r = requests.get(VIDEO_URL)
+    with open("video.mp4", 'wb') as f:
+        f.write(r.content)
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
