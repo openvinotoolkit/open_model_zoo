@@ -1,7 +1,7 @@
 inflect>=5.3.0
 librosa>=0.8.0;python_version < '3.11'
 matplotlib>=3.3.4,<3.8
-pyparsing<3.0
+pyparsing
 motmetrics>=1.2.0
 nibabel>=3.2.1
 numpy>=1.16.6
