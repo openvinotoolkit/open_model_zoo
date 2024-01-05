@@ -249,13 +249,9 @@ def main():
         with ZipFile(BytesIO(zipresp.read())) as zfile:
             zfile.extractall(args.test_data_dir)
 
-    try:
-        r = requests.get(VIDEO_URL)
-        with open("video.mp4", 'wb') as f:
-            f.write(r.content)
-            print('Video for demos downloaded successfully')
-    except requests.exceptions.HTTPError as err:
-        print(err)
+    r = requests.get(VIDEO_URL)
+    with open("video.mp4", 'wb') as f:
+        f.write(r.content)
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:

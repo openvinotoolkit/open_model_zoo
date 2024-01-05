@@ -35,8 +35,7 @@ jobs:
       - if: ${{ !steps.cache.outputs.cache-hit }}
         name: Compile OpenCV
         run: |
-          sudo apt install pkg-config
-          sudo apt install ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
+          sudo apt install pkg-config ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
           rm -rf cache/opencv/.git/  # Minimize cache
           mkdir cache/opencv/build
           cd cache/opencv/build
