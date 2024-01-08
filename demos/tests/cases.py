@@ -254,8 +254,7 @@ DEMOS = [
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm', '-d_es'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': TestDataArg('coco128/images/train2017/')}),
+            **MONITORS}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
@@ -266,6 +265,10 @@ DEMOS = [
             '-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004')),
+        single_option_cases(
+            '-i',
+            str('video.mp4'),
+            DataPatternArg('coco128-every-480x640x3')),
     )),
 
     CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
