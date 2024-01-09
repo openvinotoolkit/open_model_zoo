@@ -853,7 +853,7 @@ def get_subsample_size(config):
     size = config.get('subsample_size')
     sub_evaluation = config.get('sub_evaluation', False)
     if sub_evaluation:
-        subset_metrics = config.get('subset_metrics',[])
+        subset_metrics = config.get('subset_metrics', [])
         for item in subset_metrics:
             subset_size = item.get('subset_size')
             if size is None or subset_size == size:

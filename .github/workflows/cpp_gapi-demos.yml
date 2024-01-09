@@ -15,7 +15,8 @@ jobs:
           mkdir ov
           curl https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.2/linux/l_openvino_toolkit_ubuntu20_2023.2.0.13089.cfd42bd2cb0_x86_64.tgz | tar --directory ov --strip-components 1 -xz
           sudo ov/install_dependencies/install_openvino_dependencies.sh
-          sudo apt install libgtk2.0-dev pkg-config  # smart_classroom_demo_gapi's OpenCV error asks to install them
+          # smart_classroom_demo_gapi's OpenCV error asks to install libgtk2.0-dev pkg-config, the rest are for OpenCV video
+          sudo apt install libgtk2.0-dev pkg-config ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
       - uses: hendrikmuhs/ccache-action@v1.2.10
         with:
           key: ubuntu20_2023.2.0.13089.cfd42bd2cb0  # This action prepends and appends its strings to the key
@@ -35,7 +36,6 @@ jobs:
       - if: ${{ !steps.cache.outputs.cache-hit }}
         name: Compile OpenCV
         run: |
-          sudo apt install pkg-config ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
           rm -rf cache/opencv/.git/  # Minimize cache
           mkdir cache/opencv/build
           cd cache/opencv/build
@@ -63,4 +63,4 @@ jobs:
       - uses: actions/cache/save@v3
         with:
           path: ${{ github.workspace }}/cache
-          key: ubuntu20_2023.1.0.12185.47b736f63ed-${{ github.event.repository.updated_at }}
+          key: ubuntu20_2023.2.0.13089.cfd42bd2cb0-${{ github.event.repository.updated_at }}
