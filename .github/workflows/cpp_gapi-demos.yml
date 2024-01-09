@@ -35,7 +35,7 @@ jobs:
       - if: ${{ !steps.cache.outputs.cache-hit }}
         name: Compile OpenCV
         run: |
-          sudo apt install pkg-config ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
+          sudo apt install ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
           rm -rf cache/opencv/.git/  # Minimize cache
           mkdir cache/opencv/build
           cd cache/opencv/build
@@ -63,4 +63,4 @@ jobs:
       - uses: actions/cache/save@v3
         with:
           path: ${{ github.workspace }}/cache
-          key: ubuntu20_2023.1.0.12185.47b736f63ed-${{ github.event.repository.updated_at }}
+          key: ubuntu20_2023.2.0.13089.cfd42bd2cb0-${{ github.event.repository.updated_at }}
