@@ -106,7 +106,7 @@ class ModelEvaluator(BaseEvaluator):
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
         metric_dispatcher = None
         if not delayed_annotation_loading:
-            metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+            metric_dispatcher = MetricsExecutor(get_config_metrics(dataset_config), dataset)
             if metric_dispatcher.profile_metrics:
                 metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
@@ -159,7 +159,7 @@ class ModelEvaluator(BaseEvaluator):
                     )
                     config_errors.extend(
                         MetricsExecutor.validate_config(
-                            dataset_config.get('metrics', []), fetch_only=True,
+                            get_config_metrics(dataset_config), fetch_only=True,
                             uri_prefix='{}.metrics'.format(current_dataset_uri))
                     )
 
@@ -227,7 +227,7 @@ class ModelEvaluator(BaseEvaluator):
         adapter_type = None
         if adapter:
             adapter_type = adapter if isinstance(adapter, str) else adapter.get('type')
-        metrics = dataset_config.get('metrics', [])
+        metrics = get_config_metrics(dataset_config)
         metric_info = [metric['type'] for metric in metrics]
         details.update({
             'metrics': metric_info,
@@ -773,10 +773,10 @@ class ModelEvaluator(BaseEvaluator):
     def provide_metric_references(cls, conf, return_header=True):
         processing_info = cls.get_processing_info(conf)
         dataset_config = conf['datasets'][0]
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), postpone_metrics=True)
+        metric_dispatcher = MetricsExecutor(get_config_metrics(dataset_config), postpone_metrics=True)
         extracted_results, extracted_meta = [], []
         for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(
-            dataset_config.get('metrics', []), False):
+            get_config_metrics(dataset_config), False):
             result, metadata = result_presenter.extract_result(metric_result, names_from_refs=True)
             if isinstance(result, list):
                 extracted_results.extend(result)
@@ -788,3 +788,18 @@ class ModelEvaluator(BaseEvaluator):
         if not return_header:
             return report
         return header, report
+
+
+def get_config_metrics(config):
+    metrics = None
+    sub_evaluation = config.get('sub_evaluation', False)
+    if sub_evaluation is not None:
+        size = config.get('subsample_size')
+        subset_metrics = config.get('subset_metrics',[])
+        for item in subset_metrics:
+            subset_size = item.get('subset_size')
+            if size is None or subset_size == size:
+                # first subset_metrics or matching subsample_size
+                metrics = item.get('metrics')
+                break
+    return config.get('metrics',[]) if (metrics is None) else metrics

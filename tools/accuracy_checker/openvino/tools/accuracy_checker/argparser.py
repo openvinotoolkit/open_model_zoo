@@ -129,6 +129,13 @@ def add_dataset_related_args(parser):
         help='file name for saving or reading identifiers subset',
         required=False
     )
+    dataset_related_args.add_argument(
+        '--sub_evaluation',
+        help='attempt to use subset size and metrics for sub evaluation',
+        type=cast_to_bool,
+        default=False,
+        required=False
+    )
 
 
 def add_profiling_related_args(parser):
