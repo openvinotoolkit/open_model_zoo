@@ -254,7 +254,7 @@ More detailed information about annotation conversion you can find in [Annotatio
 
 - `subset_metrics` - list of dataset subsets with uniqe size and metrics, computed if `--sub_evaluation` flag enabled. If `subsample_size` is defined then only subset with matching `subset_size` is evaluated, otherwise by default the first subset is validated. See [Sub evaluation with subset metrics](#Sub-evaluation-with-subset-metrics).
   - `subset_size` - size of dataset subset to evaluate, its value is compared with `subsample_size` to select desired subset for evaluation.
-  - `metrics` - list of metrics specific for defined subset size 
+  - `metrics` - list of metrics specific for defined subset size
 
 Example of dataset definition:
 
@@ -314,7 +314,7 @@ You may optionally enable `sub_evaluation` flag to quickly get results for subse
 The `subset_metrics` needs to provide subsets with different `subset_size` and `metrics`.
 If `subset_metrics` consist several entries, you may use `subsample_size` value to select desired `subset_size`, otherwise the first defined `subset_size` will be used.
 
-Note: Enabling `sub_evaluation` flag has no effect when accuracy config has no `subset_metrics` defined. 
+Note: Enabling `sub_evaluation` flag has no effect when accuracy config has no `subset_metrics` defined.
 
 Example:
 
