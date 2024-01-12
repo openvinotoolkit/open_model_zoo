@@ -386,3 +386,47 @@ class TestAnnotationConversion:
         assert len(dataset.data_provider) == 1
         assert dataset.identifiers == ['1']
         assert dataset.data_provider.full_size == 2
+
+    def test_sub_evaluation_annotation_conversion_subset_ratio_from_subset_metrics(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'sub_evaluation': True,
+            'subset_metrics': [{'subset_size': '50%'}]
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        subset_maker_mock = mocker.patch(
+            'openvino.tools.accuracy_checker.dataset.make_subset'
+        )
+        Dataset.load_annotation(config)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True, False)
+
+    def test_sub_evaluation_annotation_convered_saved_before_subset(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'annotation': Path('custom'),
+            'sub_evaluation': True,
+            'subset_metrics': [{'subset_size': '50%'}]
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'openvino.tools.accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        annotation_saver_mock = mocker.patch(
+            'openvino.tools.accuracy_checker.dataset.save_annotation'
+        )
+        mocker.patch('pathlib.Path.exists', return_value=False)
+        subset_maker_mock = mocker.patch(
+            'openvino.tools.accuracy_checker.dataset.make_subset'
+        )
+        Dataset.load_annotation(config)
+        annotation_saver_mock.assert_called_once_with(converted_annotation, None, Path('custom'), None, config)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True, False)
