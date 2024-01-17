@@ -1,5 +1,6 @@
 # How to Contribute Models to Open Model Zoo
 
+> [!NOTE]
 > Open Model Zoo is in maintenance mode as a source of models. Check out model tutorials in [Jupyter notebooks](https://github.com/openvinotoolkit/openvino_notebooks).
 
 We appreciate your intention to contribute model to the OpenVINO&trade; Open Model Zoo (OMZ). OMZ is licensed under the Apache\* License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Note that we accept models under permissive licenses, such as **MIT**, **Apache 2.0**, and **BSD-3-Clause**. Otherwise, it might take longer time to get your model approved.
