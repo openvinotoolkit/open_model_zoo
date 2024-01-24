@@ -1066,14 +1066,6 @@ DEMOS = [
         })
     )),
 
-    # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
-    # PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': DataPatternArg('face-detection-adas'),
-    #                       **MONITORS,
-    #                       '--no_show': None,
-    #                       '-m': ModelArg('deblurgan-v2')}),
-    # )),
-
     PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'],
                model_keys=['-m_p', '-m_r', '-m_o'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
