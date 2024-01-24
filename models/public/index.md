@@ -11,7 +11,6 @@
    omz_models_public_device_support
    omz_models_model_aclnet
    omz_models_model_aclnet_int8
-   omz_models_model_alexnet
    omz_models_model_anti_spoof_mn3
    omz_models_model_background_matting_mobilenetv2
    omz_models_model_bert_base_ner
@@ -175,7 +174,6 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
-| AlexNet                     | Caffe\*                            | [alexnet](./alexnet/README.md)   | 56.598%/79.812% | 1.5 | 60.965 |
 | AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/README.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/README.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | ConvNeXt Tiny               | PyTorch\*                          | [convnext-tiny](./convnext-tiny/README.md) | 82.05%/95.86% | 8.9419 | 28.5892 |
