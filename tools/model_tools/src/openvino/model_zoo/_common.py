@@ -36,6 +36,7 @@ if not MODEL_ROOT.exists() or not DATASET_DEFINITIONS.exists():
 KNOWN_FRAMEWORKS = {
     'caffe': None,
     'dldt': None,
+    'mxnet': None,
     'onnx': None,
     'paddle': None,
     'pytorch': 'pytorch_to_onnx.py',
