@@ -25,7 +25,6 @@
    omz_models_model_convnext_tiny
    omz_models_model_ctdet_coco_dlav0_512
    omz_models_model_ctpn
-   omz_models_model_deblurgan_v2
    omz_models_model_deeplabv3
    omz_models_model_densenet_121
    omz_models_model_densenet_121_tf

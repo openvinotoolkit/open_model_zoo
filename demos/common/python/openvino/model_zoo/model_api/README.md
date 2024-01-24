@@ -61,7 +61,6 @@ The following tasks can be solved with wrappers usage:
 |----------------------------|--------------------|
 | Background Matting         | <ul><li>`VideoBackgroundMatting`</li><li>`ImageMattingWithBackground`</li><li>`PortraitBackgroundMatting`</li></ul> |
 | Classification             | <ul><li>`Classification`</li></ul> |
-| Deblurring                 | <ul><li>`Deblurring`</li></ul> |
 | Human Pose Estimation      | <ul><li>`HpeAssociativeEmbedding`</li><li>`OpenPose`</li></ul> |
 | Instance Segmentation      | <ul><li>`MaskRCNNModel`</li><li>`YolactModel`</li></ul> |
 | Monocular Depth Estimation | <ul><li> `MonoDepthModel`</li></ul> |

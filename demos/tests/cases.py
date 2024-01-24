@@ -501,10 +501,6 @@ DEMOS = [
                     ModelArg('single-image-super-resolution-1033'),
                     ModelArg('text-image-super-resolution-0001'))
             ),
-            # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
-            # TestCase(options={'-at': 'deblur',
-            #     '-m': ModelArg('deblurgan-v2')}
-            # ),
             TestCase({'-at': 'jr', '-m': ModelArg('fbcnn')}),
             TestCase({'-at': 'style', '-m': ModelArg('fast-neural-style-mosaic-onnx')}),
         ]
