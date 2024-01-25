@@ -23,7 +23,7 @@ public:
     std::map<std::string, ov::Tensor> Infer(const cv::Mat& frame) override;
 
     std::vector<cv::RotatedRect> postProcess(
-        const std::map<std::string, ov::runtime::Tensor>& output_tensors, const cv::Size& image_size,
+        const std::map<std::string, ov::Tensor>& output_tensors, const cv::Size& image_size,
         const cv::Size& image_shape, float cls_conf_threshold, float link_conf_threshold);
 private:
     cv::Mat decodeImageByJoin(
