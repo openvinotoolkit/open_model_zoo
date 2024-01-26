@@ -64,8 +64,8 @@ OpenVINO™ launcher config example:
 launchers:
   - framework: openvino
     device: CPU
-    model: path_to_model/alexnet.xml
-    weights: path_to_weights/alexnet.bin
+    model: path_to_model/ensenet-121-tf.xml
+    weights: path_to_weights/ensenet-121-tf.bin
     adapter: classification
 ```
 
@@ -135,8 +135,8 @@ OpenVINO™ launcher config example:
 launchers:
   - framework: dlsdk
     device: CPU
-    model: path_to_model/alexnet.xml
-    weights: path_to_weights/alexnet.bin
+    model: path_to_model/ensenet-121-tf.xml
+    weights: path_to_weights/ensenet-121-tf.bin
     adapter: classification
 ```
 

@@ -356,7 +356,6 @@ DEMOS = [
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases(
             '-m',
-            ModelArg('alexnet'),
             ModelArg('caffenet'),
             ModelArg('convnext-tiny'),
             ModelArg('densenet-121'),
@@ -986,7 +985,6 @@ DEMOS = [
         [
             *single_option_cases(
                 '-m',
-                ModelArg('alexnet'),
                 ModelArg('caffenet'),
                 ModelArg('convnext-tiny'),
                 ModelArg('densenet-121'),

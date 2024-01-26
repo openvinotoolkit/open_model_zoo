@@ -39,7 +39,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `val15.txt` - annotation file used for ILSVRC 2015
 
 ### Datasets in dataset_definitions.yml
-* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: [alexnet](../models/public/alexnet/README.md), [vgg16](../models/public/vgg16/README.md))
+* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: [densenet-121-tf](../models/public/densenet-121-tf/README.md), [vgg16](../models/public/vgg16/README.md))
 * `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [se-resnet-50](../models/public/se-resnet-50/README.md), [se-resnext-50](../models/public/se-resnext-50/README.md))
 * `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: [googlenet-v2-tf](../models/public/googlenet-v2-tf/README.md), [resnet-50-tf](../models/public/resnet-50-tf/README.md))
 

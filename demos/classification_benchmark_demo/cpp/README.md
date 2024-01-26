@@ -35,7 +35,6 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* alexnet
 * caffenet
 * convnext-tiny
 * densenet-121

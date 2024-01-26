@@ -184,15 +184,27 @@ Example:
 
 ```yaml
 models:
-- name: model_name
+- name: densenet-121-tf
   launchers:
-    - framework: caffe
-      model:   bvlc_alexnet.prototxt
-      weights: bvlc_alexnet.caffemodel
+    - framework: openvino
       adapter: classification
-      batch: 128
+
   datasets:
-    - name: dataset_name
+    - name: imagenet_1000_classes
+      preprocessing:
+        - type: resize
+          size: 256
+        - type: crop
+          size: 224
+      metrics:
+        - name: accuracy@top1
+          type: accuracy
+          top_k: 1
+          reference: 0.7446
+        - name: accuracy@top5
+          type: accuracy
+          top_k: 5
+          reference: 0.9213
 ```
 Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
 Example of global definitions file can be found at `<omz_dir>/data/dataset_definitions.yml`. Global definitions will be merged with evaluation config in the runtime by dataset name.

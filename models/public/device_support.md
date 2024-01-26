@@ -4,7 +4,6 @@
 |------------|-----|-----|
 | aclnet | YES |    |
 | aclnet-int8 | YES |    |
-| alexnet | YES | YES |
 | anti-spoof-mn3 | YES | YES |
 | background-matting-mobilenetv2 | YES |    |
 | bert-base-ner | YES |    |
