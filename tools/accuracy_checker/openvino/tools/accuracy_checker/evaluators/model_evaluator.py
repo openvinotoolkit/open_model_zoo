@@ -793,7 +793,7 @@ class ModelEvaluator(BaseEvaluator):
 def get_config_metrics(config):
     metrics = None
     sub_evaluation = config.get('sub_evaluation', False)
-    if sub_evaluation is not None:
+    if sub_evaluation:
         size = config.get('subsample_size')
         subset_metrics = config.get('subset_metrics', [])
         for item in subset_metrics:
