@@ -171,7 +171,7 @@ cv::Mat get_all(const std::vector<cv::Point>& points, int w, int h, std::unorder
 } // namespace
 
 
-std::map<std::string, ov::runtime::Tensor> TextDetector::Infer(const cv::Mat& frame) {
+std::map<std::string, ov::Tensor> TextDetector::Infer(const cv::Mat& frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     cv::Mat resizedImg = frame;
@@ -184,7 +184,7 @@ std::map<std::string, ov::runtime::Tensor> TextDetector::Infer(const cv::Mat& fr
     m_infer_request.infer();
 
     // Processing output
-    std::map<std::string, ov::runtime::Tensor> output_tensors;
+    std::map<std::string, ov::Tensor> output_tensors;
     for (const auto& output_name : m_output_names) {
         output_tensors[output_name] = m_infer_request.get_tensor(output_name);
     }
@@ -197,7 +197,7 @@ std::map<std::string, ov::runtime::Tensor> TextDetector::Infer(const cv::Mat& fr
 }
 
 std::vector<cv::RotatedRect> TextDetector::postProcess(
-    const std::map<std::string, ov::runtime::Tensor>& output_tensors,
+    const std::map<std::string, ov::Tensor>& output_tensors,
     const cv::Size& image_size, const cv::Size& input_shape,
     float cls_conf_threshold, float link_conf_threshold) {
     const int kMinArea = 300;

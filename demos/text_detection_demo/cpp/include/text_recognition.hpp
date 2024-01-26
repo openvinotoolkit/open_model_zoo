@@ -30,7 +30,7 @@ public:
         size_t end_token,
         bool use_auto_resize = false);
 
-    std::map<std::string, ov::runtime::Tensor> Infer(const cv::Mat& frame) override;
+    std::map<std::string, ov::Tensor> Infer(const cv::Mat& frame) override;
 
     const cv::Size& input_size() const { return m_input_size; }
 
