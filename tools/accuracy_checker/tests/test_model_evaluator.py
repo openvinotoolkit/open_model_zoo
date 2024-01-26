@@ -17,7 +17,7 @@ limitations under the License.
 from unittest.mock import Mock, MagicMock
 
 from openvino.tools.accuracy_checker.evaluators import ModelEvaluator
-
+from openvino.tools.accuracy_checker.evaluators.model_evaluator import get_config_metrics
 
 class TestModelEvaluator:
     def setup_method(self):
@@ -142,6 +142,58 @@ class TestModelEvaluator:
         assert self.metric.update_metrics_on_batch.call_count == 1
         assert not self.postprocessor.process_dataset.called
         assert self.postprocessor.full_process.called
+
+    def test_model_evaluator_get_config_metrics(self, mocker):
+        dataset_config = { 
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+            'subset_metrics': [{'subset_size': '20%', 
+                'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
+        }
+        metric = {'type': 'accuracy', 'top_k': 1, 'reference': 0.78}
+        selected_metric = get_config_metrics(dataset_config)[0]
+
+        assert metric['reference'] == selected_metric['reference']
+        assert metric['top_k'] == selected_metric['top_k']
+
+    def test_model_evaluator_get_config_metrics_is_first_subset_metrics(self, mocker):
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+            'subset_metrics': [
+                {'subset_size': '10%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]},
+                {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
+        }
+        subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.65}
+        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+
+        assert subset_metric['reference'] == selected_metric['reference']
+        assert subset_metric['top_k'] == selected_metric['top_k']
+
+    def test_model_evaluator_get_config_metrics_with_subsample_size_from_subset_metrics(self, mocker):
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 'subsample_size': '20%', 
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+            'subset_metrics': [
+                {'subset_size': '10%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]},
+                {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
+        }
+        subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.72}
+        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+
+        assert subset_metric['reference'] == selected_metric['reference']
+        assert subset_metric['top_k'] == selected_metric['top_k']
+
+
+    def test_model_evaluator_get_config_metrics_from_subset_metrics(self, mocker):
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+            'subset_metrics': [{'subset_size': '20%', 
+                'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
+        }
+        subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.65}
+        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+
+        assert subset_metric['reference'] == selected_metric['reference']
+        assert subset_metric['top_k'] == selected_metric['top_k']
+
 
 
 class TestModelEvaluatorAsync:
