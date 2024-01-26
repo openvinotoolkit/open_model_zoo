@@ -14,7 +14,6 @@
    omz_models_model_anti_spoof_mn3
    omz_models_model_background_matting_mobilenetv2
    omz_models_model_bert_base_ner
-   omz_models_model_brain_tumor_segmentation_0001
    omz_models_model_brain_tumor_segmentation_0002
    omz_models_model_caffenet
    omz_models_model_cocosnet
@@ -73,7 +72,6 @@
    omz_models_model_mask_rcnn_resnet50_atrous_coco
    omz_models_model_midasnet
    omz_models_model_mixnet_l
-   omz_models_model_mobilefacedet_v1_mxnet
    omz_models_model_mobilenet_ssd
    omz_models_model_mobilenet_v1_0_25_128
    omz_models_model_mobilenet_v1_1_0_224
@@ -97,7 +95,6 @@
    omz_models_model_netvlad_tf
    omz_models_model_nfnet_f0
    omz_models_model_ocrnet_hrnet_w48_paddle
-   omz_models_model_octave_resnet_26_0_25
    omz_models_model_open_closed_eye_0001
    omz_models_model_pelee_coco
    omz_models_model_pspnet_pytorch
@@ -198,7 +195,6 @@ You can download models and convert them into OpenVINO™ IR format (\*.xml + \*
 | MobileNet V3 Large 1.0      | TensorFlow\*<br>Paddle\*                   | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/README.md)<br>[mobilenet-v3-large-1.0-224-paddle](./mobilenet-v3-large-1.0-224-paddle/README.md) | 75.30%/92.62%<br>75.248%/92.32% | 0.4450<br>0.4565 | 5.4721<br>5.468 |
 | NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/README.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/README.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
-| ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/README.md)     | 76.076%/92.584%| 3.768 | 15.99 |
 | open-closed-eye-0001        | PyTorch\*                          | [open-closed-eye-0001](./open-closed-eye-0001/README.md) |  95.84%   | 0.0014 | 0.0113|
 | RepVGG A0                   | PyTorch\*                          | [repvgg-a0](./repvgg-a0/README.md) | 72.40%/90.49% | 2.7286 | 8.3094 |
 | RepVGG B1                   | PyTorch\*                          | [repvgg-b1](./repvgg-b1/README.md) | 78.37%/94.09% | 23.6472 | 51.8295|
@@ -264,7 +260,6 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
-| Brain Tumor Segmentation  | MXNet\*        | [brain-tumor-segmentation-0001](./brain-tumor-segmentation-0001/README.md) | 92.4003% | 409.996 | 38.192 |
 | Brain Tumor Segmentation 2| PyTorch\*      | [brain-tumor-segmentation-0002](./brain-tumor-segmentation-0002/README.md) | 91.4826% | 300.801 | 4.51  |
 
 ## Object Detection Models
@@ -286,7 +281,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Face Detection Retail                | Caffe\*                  | [face-detection-retail-0044](./face-detection-retail-0044/README.md) | 83.00% | 1.067 | 0.588 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| 40.69% | 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
-| MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | Mobilenet-yolo-v4-syg                | Keras\*                  | [mobilenet-yolo-v4-syg](./mobilenet-yolo-v4-syg/README.md)| 	86.35%| 65.981 | 61.922 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | NanoDet with ShuffleNetV2 1.5x, size=416 | PyTorch\*            | [nanodet-m-1.5x-416](./nanodet-m-1.5x-416/README.md) | 27.38%/26.63% | 2.3895 | 2.0534 |

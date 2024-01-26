@@ -10,7 +10,6 @@ Frameworks supported by the Open Model Zoo:
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
 * PaddlePaddle\*
-* MXNet\*
 
 Open Model Zoo also supports models already in the ONNX format.
 
