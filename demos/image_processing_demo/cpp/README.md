@@ -3,7 +3,6 @@
 This demo processes the image according to the selected type of processing. The demo can work with the next types:
 
 * `super_resolution`
-* `deblurring`
 * `jpeg_restoration`
 * `style_transfer`
 
@@ -15,11 +14,7 @@ All images on result frame will be marked one of these flags:
 * 'R' - result image.
 * 'D' - difference image (|result - original|).
 
-1. Example for deblurring type (left - source image, right - image after deblurring):
-
-![](./assets/image_processing_deblurred_image.png)
-
-2. Example for super_resolution type:
+1. Example for super_resolution type:
 
 Low resolution:
 
@@ -33,13 +28,13 @@ Super resolution:
 
 ![](./assets/street_resolution.png)
 
-3. Example for jpeg_restoration type:
+2. Example for jpeg_restoration type:
 
 ![](./assets/parrots_restoration.png)
 
 For this type of image processing user can use flag `-jc`. It allows to perform compression before the inference (useful when user wants to test model on high quality jpeg images).
 
-4. Example for style_transfer:
+3. Example for style_transfer:
 
 ![](./assets/style_transfer.jpg)
 
@@ -51,8 +46,6 @@ For `super_resolution` user can choose the next models:
 * [single-image-super-resolution-1032](../../../models/intel/single-image-super-resolution-1032/README.md) enhances the resolution of the input image by a factor of 4.
 * [single-image-super-resolution-1033](../../../models/intel/single-image-super-resolution-1033/README.md) enhances the resolution of the input image by a factor of 3.
 * [text-image-super-resolution-0001](../../../models/intel/text-image-super-resolution-0001/README.md) - a tiny model to 3x upscale scanned images with text.
-
-For `deblurring` user can use [deblurgan-v2](../../../models/public/deblurgan-v2/README.md) - generative adversarial network for single image motion deblurring.
 
 For `jpeg_restoration` user can use [fbcnn](../../../models/public/fbcnn/README.md) - flexible blind convolutional neural network for JPEG artifacts removal.
 
@@ -73,7 +66,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/model
 * single-image-super-resolution-1032
 * single-image-super-resolution-1033
 * text-image-super-resolution-0001
-* deblurgan-v2
 * fbcnn
 * fast-neural-style-mosaic-onnx
 
@@ -87,7 +79,7 @@ image_processing_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, 'deblur' for Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
+    -at "<type>"              Required. Type of the model, either 'sr' for Super Resolution task, 'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, 'jr' for JPEGRestoration, 'style' for Style Transfer task.
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -layout "<string>"        Optional. Specify inputs layouts. Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.

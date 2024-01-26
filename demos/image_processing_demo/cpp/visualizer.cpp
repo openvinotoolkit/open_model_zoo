@@ -33,8 +33,6 @@
 Visualizer::Visualizer(const std::string& type) {
     if (type == "sr")
         winName = "Image Processing Demo - Super Resolution (press A for help)";
-    else if (type == "deblur")
-        winName = "Image Processing Demo - Deblurring (press A for help)";
     else if (type == "jr")
         winName = "Image Processing Demo - JPEG Restoration (press A for help)";
 }

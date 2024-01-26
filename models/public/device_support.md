@@ -17,7 +17,6 @@
 | convnext-tiny | YES |    |
 | ctdet_coco_dlav0_512 | YES | YES |
 | ctpn | YES | YES |
-| deblurgan-v2 | YES | YES |
 | deeplabv3 | YES | YES |
 | densenet-121 | YES | YES |
 | densenet-121-tf | YES | YES |

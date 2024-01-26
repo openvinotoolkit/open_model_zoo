@@ -33,7 +33,6 @@
    omz_demos_handwritten_text_recognition_demo_python
    omz_demos_human_pose_estimation_demo_cpp
    omz_demos_human_pose_estimation_demo_python
-   omz_demos_deblurring_demo_python
    omz_demos_image_inpainting_demo_python
    omz_demos_image_processing_demo_cpp
    omz_demos_image_retrieval_demo_python
@@ -101,7 +100,6 @@ The Open Model Zoo includes the following demos:
 - [Classification Benchmark C++ G-API Demo](./classification_benchmark_demo/cpp_gapi/README.md) - Classification Benchmark C++ G-API version.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
-- [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
 - [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
 - [Face Detection MTCNN C++ G-API\* Demo](./face_detection_mtcnn_demo/cpp_gapi/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images. G-API version.
 - [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
@@ -115,7 +113,7 @@ The Open Model Zoo includes the following demos:
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
 - [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
 - [Image Inpainting Python\* Demo](./image_inpainting_demo/python/README.md) - Demo application for GMCNN inpainting network.
-- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application for deblurring and enhancing the resolution of the input image.
+- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application for enhancing the resolution of the input image.
 - [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/cpp/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
 - [Image Segmentation Python\* Demo](./segmentation_demo/python/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
