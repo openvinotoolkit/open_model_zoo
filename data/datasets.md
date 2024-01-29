@@ -263,7 +263,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `lfw_landmark.txt` - file with facial landmarks coordinates for annotation images of LFW dataset
 
 ### Datasets in dataset_definitions.yml
-* `lfw` used for evaluation models on LFW dataset for face recognition task. (model example: [face-reidentification-retail-0095](../models/public/face-reidentification-retail-0095/README.md))
+* `lfw` used for evaluation models on LFW dataset for face recognition task. (model example: [face-reidentification-retail-0095](../models/intel/face-reidentification-retail-0095/README.md))
 
 ## NYU Depth Dataset V2
 
