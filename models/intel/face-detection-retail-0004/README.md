@@ -51,6 +51,7 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
 
+* [Face Recognition C++ Demo](../../../demos/face_recognition_demo/cpp/README.md)
 * [Face Recognition Python\* Demo](../../../demos/face_recognition_demo/python/README.md)
 * [Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp/README.md)
 * [G-API Gaze Estimation Demo](../../../demos/gaze_estimation_demo/cpp_gapi/README.md)

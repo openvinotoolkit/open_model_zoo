@@ -79,6 +79,7 @@ omz_converter --name <model_name>
 
 The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
 
+* [Face Recognition C++ Demo](../../../demos/face_recognition_demo/cpp/README.md)
 * [Interactive Face Detection C++ Demo](../../../demos/interactive_face_detection_demo/cpp/README.md)
 * [G-API Interactive Face Detection Demo](../../../demos/interactive_face_detection_demo/cpp_gapi/README.md)
 
