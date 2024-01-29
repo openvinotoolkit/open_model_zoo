@@ -254,8 +254,7 @@ DEMOS = [
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm', '-d_es'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': TestDataArg('coco128/images/train2017/')}),
+            **MONITORS}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
@@ -266,6 +265,10 @@ DEMOS = [
             '-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004')),
+        single_option_cases(
+            '-i',
+            str('video.mp4'),
+            DataPatternArg('coco128-every-480x640x3')),
     )),
 
     CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
@@ -353,7 +356,6 @@ DEMOS = [
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases(
             '-m',
-            ModelArg('alexnet'),
             ModelArg('caffenet'),
             ModelArg('convnext-tiny'),
             ModelArg('densenet-121'),
@@ -498,10 +500,6 @@ DEMOS = [
                     ModelArg('single-image-super-resolution-1033'),
                     ModelArg('text-image-super-resolution-0001'))
             ),
-            # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
-            # TestCase(options={'-at': 'deblur',
-            #     '-m': ModelArg('deblurgan-v2')}
-            # ),
             TestCase({'-at': 'jr', '-m': ModelArg('fbcnn')}),
             TestCase({'-at': 'style', '-m': ModelArg('fast-neural-style-mosaic-onnx')}),
         ]
@@ -983,7 +981,6 @@ DEMOS = [
         [
             *single_option_cases(
                 '-m',
-                ModelArg('alexnet'),
                 ModelArg('caffenet'),
                 ModelArg('convnext-tiny'),
                 ModelArg('densenet-121'),
@@ -1062,14 +1059,6 @@ DEMOS = [
             **UTILIZATION_MONITORS_AND_NO_SHOW_COMMAND_LINE_OPTIONS
         })
     )),
-
-    # TODO: enable after https://github.com/openvinotoolkit/open_model_zoo/issues/3690 is resolved
-    # PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
-    #     TestCase(options={'-i': DataPatternArg('face-detection-adas'),
-    #                       **MONITORS,
-    #                       '--no_show': None,
-    #                       '-m': ModelArg('deblurgan-v2')}),
-    # )),
 
     PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'],
                model_keys=['-m_p', '-m_r', '-m_o'], test_cases=combine_cases(

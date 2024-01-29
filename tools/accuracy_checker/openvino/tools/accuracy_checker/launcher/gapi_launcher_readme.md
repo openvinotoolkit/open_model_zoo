@@ -32,8 +32,8 @@ G-API launcher config example:
 launchers:
   - framework: g-api
     device: CPU
-    model: path_to_model/alexnet.xml
-    weights: path_to_weights/alexnet.bin
+    model: path_to_model/densenet-121-tf.xml
+    weights: path_to_weights/densenet-121-tf.bin
     inputs:
       - name: 'data'
         type: INPUT

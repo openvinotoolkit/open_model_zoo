@@ -4,11 +4,9 @@
 |------------|-----|-----|
 | aclnet | YES |    |
 | aclnet-int8 | YES |    |
-| alexnet | YES | YES |
 | anti-spoof-mn3 | YES | YES |
 | background-matting-mobilenetv2 | YES |    |
 | bert-base-ner | YES |    |
-| brain-tumor-segmentation-0001 | YES |    |
 | brain-tumor-segmentation-0002 | YES |    |
 | caffenet | YES | YES |
 | cocosnet | YES |     |
@@ -18,7 +16,6 @@
 | convnext-tiny | YES |    |
 | ctdet_coco_dlav0_512 | YES | YES |
 | ctpn | YES | YES |
-| deblurgan-v2 | YES | YES |
 | deeplabv3 | YES | YES |
 | densenet-121 | YES | YES |
 | densenet-121-tf | YES | YES |
@@ -69,7 +66,6 @@
 | mask_rcnn_resnet50_atrous_coco | YES |     |
 | midasnet | YES |     |
 | mixnet-l | YES | YES |
-| mobilefacedet-v1-mxnet | YES | YES |
 | mobilenet-ssd | YES | YES |
 | mobilenet-v1-0.25-128 | YES | YES |
 | mobilenet-v1-1.0-224 | YES | YES |
@@ -95,7 +91,6 @@
 | netvlad-tf | YES |    |
 | nfnet-f0 | YES | YES |
 | ocrnet-hrnet-w48-paddle | YES |     |
-| octave-resnet-26-0.25 | YES | YES |
 | open-closed-eye-0001 | YES |     |
 | pelee-coco | YES | YES |
 | pspnet-pytorch | YES |     |

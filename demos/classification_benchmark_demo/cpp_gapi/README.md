@@ -35,7 +35,6 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* alexnet
 * caffenet
 * convnext-tiny
 * densenet-121
@@ -69,7 +68,6 @@ omz_converter --list models.lst
 * mobilenet-v3-small-1.0-224-paddle
 * mobilenet-v3-small-1.0-224-tf
 * nfnet-f0
-* octave-resnet-26-0.25
 * regnetx-3.2gf
 * repvgg-a0
 * repvgg-b1
