@@ -20,8 +20,6 @@
    omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
-   omz_demos_face_detection_mtcnn_demo_cpp_gapi
-   omz_demos_face_detection_mtcnn_demo_python
    omz_demos_face_recognition_demo_python
    omz_demos_formula_recognition_demo_python
    omz_demos_gaze_estimation_demo_cpp_gapi
@@ -100,8 +98,6 @@ The Open Model Zoo includes the following demos:
 - [Classification Benchmark C++ G-API Demo](./classification_benchmark_demo/cpp_gapi/README.md) - Classification Benchmark C++ G-API version.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
-- [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
-- [Face Detection MTCNN C++ G-API\* Demo](./face_detection_mtcnn_demo/cpp_gapi/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images. G-API version.
 - [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.

@@ -39,8 +39,8 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `val15.txt` - annotation file used for ILSVRC 2015
 
 ### Datasets in dataset_definitions.yml
-* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: [densenet-121-tf](../models/public/densenet-121-tf/README.md), [vgg16](../models/public/vgg16/README.md))
-* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [se-resnet-50](../models/public/se-resnet-50/README.md), [se-resnext-50](../models/public/se-resnext-50/README.md))
+* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model example: [densenet-121-tf](../models/public/densenet-121-tf/README.md))
+* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes.
 * `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: [googlenet-v2-tf](../models/public/googlenet-v2-tf/README.md), [resnet-50-tf](../models/public/resnet-50-tf/README.md))
 
 ## Common Objects in Context (COCO)
@@ -89,7 +89,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
     * `wider_face_val_bbx_gt.txt` - annotation file
 
 ### Datasets in dataset_definitions.yml
-* `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model example: [mtcnn](../models/public/mtcnn/README.md))
+* `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model example: [faceboxes-pytorch](../models/public/faceboxes-pytorch/README.md))
 * `wider_without_bkgr` used for evaluation models on WIDER Face dataset where the face is class zero. (model example: [face-detection-0204](../models/intel/face-detection-0204/README.md))
 
 ## Visual Object Classes Challenge 2012 (VOC2012)
@@ -138,8 +138,8 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `Main/test.txt` - image sets file for detection tasks
 
 ### Datasets in dataset_definitions.yml
-* `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [mobilenet-ssd](../models/public/mobilenet-ssd/README.md), [ssd300](../models/public/ssd300/README.md))
-* `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [yolo-v1-tiny-tf](../models/public/yolo-v1-tiny-tf/README.md))
+* `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model example: [yolo-v1-tiny-tf](../models/public/yolo-v1-tiny-tf/README.md))
+* `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model example: [yolo-v1-tiny-tf](../models/public/yolo-v1-tiny-tf/README.md))
 
 ## SYGData0829
 
@@ -263,7 +263,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `lfw_landmark.txt` - file with facial landmarks coordinates for annotation images of LFW dataset
 
 ### Datasets in dataset_definitions.yml
-* `lfw` used for evaluation models on LFW dataset for face recognition task. (model examples: [Sphereface](../models/public/Sphereface/README.md))
+* `lfw` used for evaluation models on LFW dataset for face recognition task. (model example: [face-reidentification-retail-0095](../models/public/face-reidentification-retail-0095/README.md))
 
 ## NYU Depth Dataset V2
 

@@ -1,9 +1,9 @@
 # A list of models that covers all Model Downloader/Converter features
 
 faceboxes-pytorch # PyTorch (external module), Google Drive downloads, --model-param
-mobilenet-v3-small-1.0-224-tf # used for quantization testing
+bert-base-ner # regex replacement
 mobilenet-v1-0.25-128 # TensorFlow, HTTP downloads
 mobilenet-v2-pytorch # PyTorch (torchvision)
-mtcnn # Caffe, HTTPS downloads, composite model, regex replacement
+forward-tacotron # HTTPS downloads, composite model
 deeplabv3 # archive unpacking
 single-image-super-resolution-1032 # DLDT
