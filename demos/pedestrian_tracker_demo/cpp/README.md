@@ -48,7 +48,6 @@ omz_converter --list models.lst
   - faster-rcnn-resnet101-coco-sparse-60-0001
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
-  - pelee-coco
   - person-detection-0106
   - person-detection-0200
   - person-detection-0201
@@ -63,8 +62,6 @@ omz_converter --list models.lst
   - person-vehicle-bike-detection-2004
   - rfcn-resnet101-coco-tf
   - retinanet-tf
-  - ssd300
-  - ssd512
   - ssd-resnet34-1200-onnx
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco

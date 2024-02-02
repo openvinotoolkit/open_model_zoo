@@ -51,7 +51,6 @@ omz_converter --list models.lst
 * face-detection-adas-0001
 * face-detection-retail-0004
 * face-detection-retail-0005
-* face-detection-retail-0044
 * gaze-estimation-adas-0002
 * head-pose-estimation-adas-0001
 * open-closed-eye-0001

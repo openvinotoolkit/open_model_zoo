@@ -26,7 +26,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **MTCNN Evaluator** shows how to run MTCNN model.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py`.
-  Configuration file example: `<omz_dir>/models/public/mtcnn/accuracy-check.yml`.
 
 * **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0005` model via Accuracy Checker.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/openvino/tools/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py`.

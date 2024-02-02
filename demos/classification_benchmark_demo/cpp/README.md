@@ -35,18 +35,14 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* caffenet
 * convnext-tiny
-* densenet-121
 * densenet-121-tf
 * dla-34
 * efficientnet-b0
 * efficientnet-b0-pytorch
 * efficientnet-v2-b0
 * efficientnet-v2-s
-* googlenet-v1
 * googlenet-v1-tf
-* googlenet-v2
 * googlenet-v2-tf
 * googlenet-v3
 * googlenet-v3-pytorch
@@ -57,15 +53,11 @@ omz_converter --list models.lst
 * levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
-* mobilenet-v1-1.0-224
 * mobilenet-v1-1.0-224-tf
-* mobilenet-v2
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
-* mobilenet-v3-large-1.0-224-paddle
 * mobilenet-v3-large-1.0-224-tf
-* mobilenet-v3-small-1.0-224-paddle
 * mobilenet-v3-small-1.0-224-tf
 * nfnet-f0
 * regnetx-3.2gf
@@ -80,17 +72,9 @@ omz_converter --list models.lst
 * resnet18-xnor-binary-onnx-0001
 * resnet50-binary-0001
 * rexnet-v1-x1.0
-* se-inception
-* se-resnet-50
-* se-resnext-50
-* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
-* squeezenet1.0
-* squeezenet1.1
 * swin-tiny-patch4-window7-224
 * t2t-vit-14
-* vgg16
-* vgg19
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -112,13 +96,6 @@ It has the following format:
 Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
 "Labels" file contains the list of human-readable labels, one line for each class.
-
-Please note that you should use `<omz_dir>/data/dataset_classes/imagenet_2015.txt` labels file with the following models:
-
-* googlenet-v2
-* se-inception
-* se-resnet-50
-* se-resnext-50
 
 and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all other models supported by the demo.
 

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/abs/1801.04381) network intended to perform object detection. The difference between this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v1_coco` model can detect objects.
+The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/abs/1801.04381) network intended to perform object detection.
 
 ## Specification
 

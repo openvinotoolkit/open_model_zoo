@@ -118,8 +118,8 @@ from openvino.model_zoo.model_api.adapters import OpenvinoAdapter, create_core
 # read input image using opencv
 input_data = cv2.imread("sample.png")
 
-# define the path to mobilenet-ssd model in IR format
-model_path = "public/mobilenet-ssd/FP32/mobilenet-ssd.xml"
+# define the path to efficientdet-d0-tf model in IR format
+model_path = "public/efficientdet-d0-tf/FP32/efficientdet-d0-tf.xml"
 
 # create adapter for OpenVINO™ runtime, pass the model path
 model_adapter = OpenvinoAdapter(create_core(), model_path, device="CPU")
