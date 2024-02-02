@@ -32,5 +32,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --saved_model_dir=$conv_dir/mobilenet_v3_small_224_1.0_float.savedmodel
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

@@ -53,5 +53,4 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/dla-34.onnx
 framework: pytorch
-quantizable: true
 license: https://raw.githubusercontent.com/ucbdrive/dla/master/LICENSE

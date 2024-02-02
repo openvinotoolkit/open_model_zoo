@@ -49,7 +49,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/resnet-18-pytorch.onnx
-quantizable: true
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
 model_info:
   model_type: Classification

@@ -1,4 +1,0 @@
-# A list of models for testing quantization features.
-
-# default quantization config
-mobilenet-v1-0.25-128

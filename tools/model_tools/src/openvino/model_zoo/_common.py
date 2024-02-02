@@ -79,9 +79,6 @@ KNOWN_TASK_TYPES = {
     'background_matting',
 }
 
-KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
-assert KNOWN_QUANTIZED_PRECISIONS.keys() <= KNOWN_PRECISIONS
-
 
 try:
     from openvino_telemetry import Telemetry

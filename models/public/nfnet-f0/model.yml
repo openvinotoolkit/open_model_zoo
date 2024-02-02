@@ -47,5 +47,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=probs
 framework: onnx
-quantizable: true
 license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

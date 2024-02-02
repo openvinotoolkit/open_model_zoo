@@ -38,5 +38,4 @@ model_optimizer_args:
   - --output=InceptionV3/Predictions/Softmax
   - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

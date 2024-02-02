@@ -39,5 +39,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=ConvPred/ConvPred
   - --input_meta=$dl_dir/NYU_FCRN.ckpt.meta
-quantizable: true
 license: https://raw.githubusercontent.com/iro-cp/FCRN-DepthPrediction/master/LICENSE
