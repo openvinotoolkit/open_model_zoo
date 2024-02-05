@@ -8,7 +8,6 @@
 | background-matting-mobilenetv2 | YES |    |
 | bert-base-ner | YES |    |
 | brain-tumor-segmentation-0002 | YES |    |
-| caffenet | YES | YES |
 | cocosnet | YES |     |
 | colorization-siggraph | YES | YES |
 | colorization-v2 | YES | YES |
@@ -17,7 +16,6 @@
 | ctdet_coco_dlav0_512 | YES | YES |
 | ctpn | YES | YES |
 | deeplabv3 | YES | YES |
-| densenet-121 | YES | YES |
 | densenet-121-tf | YES | YES |
 | detr-resnet50 | YES |    |
 | dla-34 | YES | YES |
@@ -30,7 +28,6 @@
 | efficientnet-v2-s | YES |     |
 | erfnet | YES |    |
 | f3net | YES | YES |
-| face-detection-retail-0044 | YES |     |
 | face-recognition-resnet100-arcface-onnx | YES |     |
 | faceboxes-pytorch | YES |     |
 | facenet-20180408-102900 | YES | YES |
@@ -44,9 +41,7 @@
 | forward-tacotron-duration-prediction | YES |    |
 | forward-tacotron-regression | YES |    |
 | gmcnn-places2-tf | YES | YES |
-| googlenet-v1 | YES | YES |
 | googlenet-v1-tf | YES | YES |
-| googlenet-v2 | YES | YES |
 | googlenet-v2-tf | YES | YES |
 | googlenet-v3 | YES | YES |
 | googlenet-v3-pytorch | YES | YES |
@@ -66,33 +61,23 @@
 | mask_rcnn_resnet50_atrous_coco | YES |     |
 | midasnet | YES |     |
 | mixnet-l | YES | YES |
-| mobilenet-ssd | YES | YES |
 | mobilenet-v1-0.25-128 | YES | YES |
-| mobilenet-v1-1.0-224 | YES | YES |
 | mobilenet-v1-1.0-224-tf | YES | YES |
-| mobilenet-v2 | YES | YES |
 | mobilenet-v2-1.0-224 | YES | YES |
 | mobilenet-v2-1.4-224 | YES | YES |
 | mobilenet-v2-pytorch | YES | YES |
 | mobilenet-v3-large-1.0-224-tf | YES | YES |
 | mobilenet-v3-small-1.0-224-tf | YES | YES |
-| mobilenet-v3-large-1.0-224-paddle | YES | YES |
-| mobilenet-v3-small-1.0-224-paddle | YES | YES |
 | mobilenet-yolo-v4-syg | YES |     |
 | modnet-photographic-portrait-matting | YES | YES |
 | modnet-webcam-portrait-matting | YES | YES |
 | mozilla-deepspeech-0.6.1 | YES |    |
 | mozilla-deepspeech-0.8.2 | YES |    |
-| mtcnn-o | YES |     |
-| mtcnn-p | YES |     |
-| mtcnn-r | YES |     |
 | nanodet-m-1.5x-416 | YES |     |
 | nanodet-plus-m-1.5x-416 | YES |     |
 | netvlad-tf | YES |    |
 | nfnet-f0 | YES | YES |
-| ocrnet-hrnet-w48-paddle | YES |     |
 | open-closed-eye-0001 | YES |     |
-| pelee-coco | YES | YES |
 | pspnet-pytorch | YES |     |
 | quartznet-15x5-en | YES |    |
 | regnetx-3.2gf | YES | YES |
@@ -109,18 +94,9 @@
 | rexnet-v1-x1.0 | YES |     |
 | rfcn-resnet101-coco-tf | YES | YES |
 | robust-video-matting-mobilenetv3 |     |     |
-| se-inception | YES | YES |
-| se-resnet-50 | YES | YES |
-| se-resnext-50 | YES | YES |
-| shufflenet-v2-x0.5 | YES | YES |
 | shufflenet-v2-x1.0 | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES |
-| Sphereface | YES | YES |
-| squeezenet1.0 | YES | YES |
-| squeezenet1.1 | YES | YES |
 | ssd-resnet34-1200-onnx | YES | YES |
-| ssd300 | YES | YES |
-| ssd512 | YES | YES |
 | ssd_mobilenet_v1_coco | YES | YES |
 | ssd_mobilenet_v1_fpn_coco | YES | YES |
 | ssdlite_mobilenet_v2 | YES | YES |
@@ -131,8 +107,6 @@
 | ultra-lightweight-face-detection-slim-320 | YES | YES |
 | vehicle-license-plate-detection-barrier-0123 | YES | YES |
 | vehicle-reid-0001 | YES | YES |
-| vgg16 | YES | YES |
-| vgg19 | YES | YES |
 | vitstr-small-patch16-224 | YES |     |
 | wav2vec2-base | YES |    |
 | wavernn-rnn | YES | YES |

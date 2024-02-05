@@ -6,13 +6,10 @@ efficientdet-d1-tf
 faster-rcnn-resnet101-coco-sparse-60-0001
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
-pelee-coco
 person-detection-????
 person-vehicle-bike-detection-????
 rfcn-resnet101-coco-tf
 retinanet-tf
-ssd300
-ssd512
 ssd-resnet34-1200-onnx
 ssd_mobilenet_v1_coco
 ssd_mobilenet_v1_fpn_coco

@@ -30,14 +30,11 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* mobilenet-ssd
 * pedestrian-and-vehicle-detector-adas-0001
 * pedestrian-detection-adas-0002
 * person-detection-retail-0013
 * person-vehicle-bike-detection-crossroad-0078
 * person-vehicle-bike-detection-crossroad-1016
-* ssd300
-* ssd512
 * ssd_mobilenet_v1_coco
 * ssd_mobilenet_v1_fpn_coco
 * ssdlite_mobilenet_v2
@@ -84,7 +81,7 @@ optional arguments:
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-python3 single_human_pose_estimation_demo.py -d CPU --model_od <path_to_model>/mobilenet-ssd.xml --model_hpe <path_to_model>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
+python3 single_human_pose_estimation_demo.py -d CPU --model_od <path_to_model>/ssdlite_mobilenet_v2.xml --model_hpe <path_to_model>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
 ```
 
 >**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.

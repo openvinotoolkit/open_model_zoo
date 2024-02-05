@@ -36,7 +36,7 @@ class TestOMZModel(unittest.TestCase):
         self.assertIsInstance(model.vocab(), dict)
 
     def test_load_public_composite(self):
-        model = omz.OMZModel.download('mtcnn-p', precision='FP32')
+        model = omz.OMZModel.download('wavernn-rnn', precision='FP32')
         xml_path = model.model_path
 
         self.assertTrue(os.path.exists(xml_path))

@@ -36,7 +36,6 @@ omz_converter --list models.lst
 * face-detection-adas-0001
 * face-detection-retail-0004
 * face-detection-retail-0005
-* face-detection-retail-0044
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

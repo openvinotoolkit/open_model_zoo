@@ -144,9 +144,9 @@ class TestModelEvaluator:
         assert self.postprocessor.full_process.called
 
     def test_model_evaluator_get_config_metrics(self, mocker):
-        dataset_config = { 
-            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
-            'subset_metrics': [{'subset_size': '20%', 
+        dataset_config = {
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}],
+            'subset_metrics': [{'subset_size': '20%',
                 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
         }
         metric = {'type': 'accuracy', 'top_k': 1, 'reference': 0.78}
@@ -156,8 +156,8 @@ class TestModelEvaluator:
         assert metric['top_k'] == selected_metric['top_k']
 
     def test_model_evaluator_get_config_metrics_is_first_subset_metrics(self, mocker):
-        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 
-            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True',
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}],
             'subset_metrics': [
                 {'subset_size': '10%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]},
                 {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
@@ -169,8 +169,8 @@ class TestModelEvaluator:
         assert subset_metric['top_k'] == selected_metric['top_k']
 
     def test_model_evaluator_get_config_metrics_with_subsample_size_from_subset_metrics(self, mocker):
-        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 'subsample_size': '20%', 
-            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 'subsample_size': '20%',
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}],
             'subset_metrics': [
                 {'subset_size': '10%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]},
                 {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
@@ -183,9 +183,9 @@ class TestModelEvaluator:
 
 
     def test_model_evaluator_get_config_metrics_from_subset_metrics(self, mocker):
-        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True', 
-            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}], 
-            'subset_metrics': [{'subset_size': '20%', 
+        dataset_config_sub_evaluation = { 'sub_evaluation' : 'True',
+            'metrics': [{'type': 'accuracy', 'top_k': 1, 'reference': 0.78}],
+            'subset_metrics': [{'subset_size': '20%',
                 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
         }
         subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.65}

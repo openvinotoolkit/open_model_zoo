@@ -24,15 +24,12 @@ faster_rcnn_inception_resnet_v2_atrous_coco
 faster_rcnn_resnet50_coco
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
-pelee-coco
 person-detection-????
 person-detection-retail-0013
 person-vehicle-bike-detection-????
 product-detection-0001
 retinanet-tf
 rfcn-resnet101-coco-tf
-ssd300
-ssd512
 ssd_mobilenet_v1_coco
 ssd_mobilenet_v1_fpn_coco
 ssd-resnet34-1200-onnx
