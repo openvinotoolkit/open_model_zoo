@@ -89,11 +89,3 @@ See how to evaluate model with using predefined configuration file for [densenet
     ```sh
     accuracy_check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td GPU
     ```
-5. Also you can quantize full-precision models in the IR format into low-precision versions via [Model Quantizer](../../../tools/model_tools/README.md)
-   ```sh
-   omz_quantizer --name densenet-121-tf --dataset_dir DATASET_DIR --model_dir MODEL_DIR
-   ```
-   Run evaluation for quantized model:
-    ```sh
-    accuracy_check -c OMZ_ROOT/models/public/densenet-121-tf/accuracy-check.yml -s DATASET_DIR -m MODEL_DIR/public/densenet-121-tf/FP16-INT8 -d OMZ_ROOT/tools/accuracy_checker/dataset_definitions.yml -td CPU GPU
-    ```

@@ -53,7 +53,7 @@ class ModelFile:
 class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
-        description, license_url, precisions, quantization_output_precisions,
+        description, license_url, precisions,
         task_type, conversion_to_onnx_args, converter_to_onnx, composite_model_name, input_info,
         model_info
     ):
@@ -66,7 +66,6 @@ class Model:
         self.description = description
         self.license_url = license_url
         self.precisions = precisions
-        self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
         self.model_info = model_info
         self.conversion_to_onnx_args = conversion_to_onnx_args
@@ -128,14 +127,10 @@ class Model:
                     raise validation.DeserializationError(
                         'Conversion to ONNX not supported for "{}" framework'.format(framework))
 
-            quantized = model.get('quantized', None)
-            if quantized is not None and quantized != 'INT8':
-                raise validation.DeserializationError('"quantized": expected "INT8", got {!r}'.format(quantized))
-
             if 'model_optimizer_args' in model:
                 mo_args = [validation.validate_string('"model_optimizer_args" #{}'.format(i), arg)
                     for i, arg in enumerate(model['model_optimizer_args'])]
-                precisions = {f'FP16-{quantized}', f'FP32-{quantized}'} if quantized is not None else {'FP16', 'FP32'}
+                precisions = {'FP16', 'FP32'}
             else:
                 if framework != 'dldt':
                     raise validation.DeserializationError('Model not in IR format, but no conversions defined')
@@ -161,13 +156,6 @@ class Model:
 
                 precisions = set(files_per_precision.keys())
 
-            quantizable = model.get('quantizable', False)
-            if not isinstance(quantizable, bool):
-                raise validation.DeserializationError(
-                    '"quantizable": expected a boolean, got {!r}'.format(quantizable))
-
-            quantization_output_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys() if quantizable else set()
-
             description = validation.validate_string('"description"', model['description'])
 
             license_url = validation.validate_string('"license"', model['license'])
@@ -176,13 +164,13 @@ class Model:
                 known_task_types)
 
             return cls(name, subdirectory, files, postprocessings, mo_args, framework,
-                description, license_url, precisions, quantization_output_precisions,
+                description, license_url, precisions,
                 task_type, conversion_to_onnx_args, known_frameworks[framework],
                 composite_model_name, input_info, model_info)
 
 class CompositeModel:
     def __init__(self, name, subdirectory, task_type, model_stages, description, framework,
-        license_url, precisions, quantization_output_precisions, composite_model_name
+        license_url, precisions, composite_model_name
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -192,7 +180,6 @@ class CompositeModel:
         self.framework = framework
         self.license_url = license_url
         self.precisions = precisions
-        self.quantization_output_precisions = quantization_output_precisions
         self.composite_model_name = composite_model_name
         self.input_info = []
 
@@ -222,11 +209,10 @@ class CompositeModel:
                 model_stages.append(Model.deserialize(model_part, model_part_name, model_subdirectory, name,
                                                       known_frameworks=known_frameworks, known_task_types=known_task_types))
 
-            quantization_output_precisions = model_stages[0].quantization_output_precisions
             precisions = model_stages[0].precisions
 
             return cls(name, subdirectory, task_type, model_stages, description, framework,
-                license_url, precisions, quantization_output_precisions, name)
+                license_url, precisions, name)
 
 class ModelLoadingMode(enum.Enum):
     all = 0 # return all models

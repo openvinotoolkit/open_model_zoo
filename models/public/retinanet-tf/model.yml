@@ -33,5 +33,4 @@ model_optimizer_args:
   - --transformations_config=$mo_ext_dir/front/tf/retinanet.json
   - --input_model=$dl_dir/retinanet_resnet50_coco_best_v2.1.0.pb
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/fizyr/keras-retinanet/master/LICENSE

@@ -33,7 +33,6 @@ def to_info(model):
         'accuracy_config': str(accuracy_config) if accuracy_config.exists() else None,
         'model_config': str(model_config) if model_config.exists() else None,
         'precisions': sorted(model.precisions),
-        'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
         'task_type': str(model.task_type),
         'input_info': [

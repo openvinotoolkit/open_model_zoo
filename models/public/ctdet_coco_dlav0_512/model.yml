@@ -74,5 +74,4 @@ model_optimizer_args:
   - --output=center_heatmap,width_height,regression
   - --input_model=$conv_dir/ctdet_coco_dlav0_512.onnx
 framework: pytorch
-quantizable: true
 license: https://raw.githubusercontent.com/xingyizhou/CenterNet/master/LICENSE

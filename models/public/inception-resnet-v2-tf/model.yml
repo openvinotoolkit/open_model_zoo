@@ -38,5 +38,4 @@ model_optimizer_args:
   - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd
   - --input_model=$dl_dir/inception_resnet_v2.pb
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

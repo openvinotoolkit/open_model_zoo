@@ -93,5 +93,4 @@ model_optimizer_args:
   - --input_model=$conv_dir/inception_v1.frozen.pb
   - --reverse_input_channels
 framework: tf
-quantizable: true
 license: https://github.com/tensorflow/models/blob/master/LICENSE
