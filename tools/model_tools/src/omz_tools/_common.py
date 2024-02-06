@@ -28,7 +28,7 @@ DATASET_DEFINITIONS = PACKAGE_DIR / 'data/dataset_definitions.yml'
 
 if not MODEL_ROOT.exists() or not DATASET_DEFINITIONS.exists():
     # We are run directly from OMZ rather than from an installed environment.
-    _OMZ_ROOT = PACKAGE_DIR.parents[4]
+    _OMZ_ROOT = PACKAGE_DIR.parents[3]
     MODEL_ROOT = _OMZ_ROOT / 'models'
     DATASET_DEFINITIONS = _OMZ_ROOT / 'data/dataset_definitions.yml'
 

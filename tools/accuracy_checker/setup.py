@@ -75,7 +75,7 @@ def find_version(*path):
     raise RuntimeError("Unable to find version string.")
 
 long_description = read("README.md")
-version = find_version("openvino/tools/accuracy_checker", "__init__.py")
+version = find_version("accuracy_checker", "__init__.py")
 
 
 def prepare_requirements():
