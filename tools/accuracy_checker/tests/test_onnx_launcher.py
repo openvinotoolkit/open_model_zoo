@@ -15,13 +15,13 @@ limitations under the License.
 """
 
 import pytest
-pytest.importorskip('openvino.tools.accuracy_checker.launcher.onnx_launcher')
+pytest.importorskip('accuracy_checker.launcher.onnx_launcher')
 
 import cv2
 import numpy as np
 
-from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
-from openvino.tools.accuracy_checker.config import ConfigError
+from accuracy_checker.launcher.launcher import create_launcher
+from accuracy_checker.config import ConfigError
 
 
 def old_onnxrunitme(models_dir):

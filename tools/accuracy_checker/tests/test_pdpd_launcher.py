@@ -20,8 +20,8 @@ pytest.importorskip('paddle')
 import cv2
 import numpy as np
 
-from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
-from openvino.tools.accuracy_checker.config import ConfigError
+from accuracy_checker.launcher.launcher import create_launcher
+from accuracy_checker.config import ConfigError
 
 
 def get_pdpd_test_model(models_dir):

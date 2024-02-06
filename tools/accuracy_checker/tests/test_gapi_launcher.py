@@ -17,13 +17,13 @@ limitations under the License.
 import pytest
 pytest.importorskip('openvino.inference_engine')
 pytest.importorskip('cv2.gapi.ie.params')
-pytest.importorskip('openvino.tools.accuracy_checker.launcher.gapi_launcher')
+pytest.importorskip('accuracy_checker.launcher.gapi_launcher')
 
 import cv2
 import numpy as np
 
-from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
-from openvino.tools.accuracy_checker.config import ConfigError
+from accuracy_checker.launcher.launcher import create_launcher
+from accuracy_checker.config import ConfigError
 
 
 def get_gapi_test_model(models_dir):
