@@ -48,7 +48,7 @@ pip install openmodelzoo_modelapi-0.0.0-py3-none-any.whl --force-reinstall
 
 To verify the package is installed, you might use the following command:
 ```sh
-python -c "from openvino.model_zoo import model_api"
+python -c "from model_zoo import model_api"
 ```
 
 ## Model API Wrappers
@@ -110,9 +110,9 @@ Once the SSD model wrapper instance is created, we get the predictions by the mo
 ```python
 import cv2
 # import model wrapper class
-from openvino.model_zoo.model_api.models import SSD
+from model_zoo.model_api.models import SSD
 # import inference adapter and helper for runtime setup
-from openvino.model_zoo.model_api.adapters import OpenvinoAdapter, create_core
+from model_zoo.model_api.adapters import OpenvinoAdapter, create_core
 
 
 # read input image using opencv

@@ -20,7 +20,7 @@ import subprocess  # nosec B404  # disable import-subprocess check
 
 from pathlib import Path
 
-from openvino.model_zoo._version import __version__
+from omz_tools._version import __version__
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 MODEL_ROOT = PACKAGE_DIR / 'models'

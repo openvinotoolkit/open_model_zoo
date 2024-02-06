@@ -35,7 +35,7 @@ from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.runtime import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from model_api.performance_metrics import PerformanceMetrics

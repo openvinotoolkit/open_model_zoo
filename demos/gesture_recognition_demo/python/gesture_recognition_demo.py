@@ -36,7 +36,7 @@ from gesture_recognition_demo.action_recognizer import ActionRecognizer
 from gesture_recognition_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from model_api.performance_metrics import PerformanceMetrics

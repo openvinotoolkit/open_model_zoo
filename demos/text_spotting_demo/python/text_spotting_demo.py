@@ -29,7 +29,7 @@ from openvino.runtime import Core, get_version
 from text_spotting_demo.tracker import StaticIOUTracker
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture

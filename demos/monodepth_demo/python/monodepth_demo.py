@@ -25,7 +25,7 @@ import numpy as np
 import logging as log
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 from model_api.models import MonoDepthModel, OutputTransform
 from model_api.pipelines import get_user_config, AsyncPipeline

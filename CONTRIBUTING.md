@@ -74,7 +74,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
+[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`omz_tools._common`](tools/model_tools/src/omz_tools/_common.py) module.
 
 **`model_info`** (*optional*)
 

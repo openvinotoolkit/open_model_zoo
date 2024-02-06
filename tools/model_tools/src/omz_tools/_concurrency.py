@@ -17,7 +17,7 @@ import queue
 import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 
-from openvino.model_zoo import _reporting
+from omz_tools import _reporting
 
 
 class _QueuedOutputContext(_reporting.JobContext):

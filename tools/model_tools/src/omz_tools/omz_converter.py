@@ -23,10 +23,10 @@ import sys
 from openvino.runtime import Core, serialize
 from pathlib import Path
 
-from openvino.model_zoo import (
+from omz_tools import (
     _configuration, _common, _concurrency, _reporting,
 )
-from openvino.model_zoo.download_engine import validation
+from omz_tools.download_engine import validation
 
 ModelOptimizerProperties = collections.namedtuple('ModelOptimizerProperties',
     ['cmd_prefix', 'extra_args', 'base_dir'])

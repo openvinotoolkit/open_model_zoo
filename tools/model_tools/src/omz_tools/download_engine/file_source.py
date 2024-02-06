@@ -15,7 +15,7 @@
 import re
 import requests
 
-from openvino.model_zoo.download_engine import base, validation
+from omz_tools.download_engine import base, validation
 
 
 class FileSource(base.TaggedBase):

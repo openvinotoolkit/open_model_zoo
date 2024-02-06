@@ -15,7 +15,7 @@
 import re
 import shutil
 
-from openvino.model_zoo.download_engine import base, validation
+from omz_tools.download_engine import base, validation
 
 class Postproc(base.TaggedBase):
     types = {}

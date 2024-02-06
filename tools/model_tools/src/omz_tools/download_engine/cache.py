@@ -20,7 +20,7 @@ import tempfile
 
 from pathlib import Path
 
-from openvino.model_zoo.download_engine import base, validation
+from omz_tools.download_engine import base, validation
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 

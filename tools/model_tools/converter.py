@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import openvino.model_zoo.omz_converter
+import omz_tools.omz_converter
 
 if __name__ == '__main__':
-    openvino.model_zoo.omz_converter.main()
+    omz_tools.omz_converter.main()

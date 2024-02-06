@@ -26,7 +26,7 @@ import numpy as np
 from openvino.runtime import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 from utils import crop
 from landmarks_detector import LandmarksDetector

@@ -26,7 +26,7 @@ import cv2
 from instance_segmentation_demo.tracker import StaticIOUTracker
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 from model_api.models import MaskRCNNModel, YolactModel, OutputTransform
 from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
