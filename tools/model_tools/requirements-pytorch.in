@@ -4,3 +4,4 @@ scipy>=1.5.4
 torch>=1.8.1
 torchvision>=0.9.1
 yacs>=0.1.8
+numpy<1.24  # quartznet-15x5-en
