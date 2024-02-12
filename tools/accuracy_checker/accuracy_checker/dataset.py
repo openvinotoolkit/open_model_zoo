@@ -58,15 +58,9 @@ from .data_readers import (
 from .logging import print_info
 
 MODULES_RENAMING = {
-                    'accuracy_checker': 'accuracy_checker',
-                    'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker':
-                        [
-                            'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker',
-                            'thirdparty.open_model_zoo.tools.accuracy_checker.accuracy_checker',
-                            'accuracy_checker',
-                        ],
-                    'thirdparty.open_model_zoo.tools.accuracy_checker.accuracy_checker':
-                        'accuracy_checker',
+                    'openvino.tools.accuracy_checker': 'accuracy_checker',
+                    'libs.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker': 'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker',
+                    'thirdparty.open_model_zoo.tools.accuracy_checker.openvino.tools.accuracy_checker': 'libs.open_model_zoo.tools.accuracy_checker.accuracy_checker',
                 }
 
 
