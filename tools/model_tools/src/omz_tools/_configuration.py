@@ -20,8 +20,8 @@ import shlex
 import sys
 import yaml
 
-from openvino.model_zoo import _common
-from openvino.model_zoo.download_engine import cache, file_source, postprocessing, validation
+from omz_tools import _common
+from omz_tools.download_engine import cache, file_source, postprocessing, validation
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 EXCLUDED_MODELS = []

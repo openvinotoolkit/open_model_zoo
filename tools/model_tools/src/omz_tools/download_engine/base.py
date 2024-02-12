@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from openvino.model_zoo.download_engine import validation
+from omz_tools.download_engine import validation
 
 
 class TaggedBase:

@@ -18,7 +18,7 @@ import numpy as np
 import pytest
 
 from .common import make_segmentation_representation, make_instance_segmentation_representation
-from openvino.tools.accuracy_checker.utils import UnsupportedPackage
+from accuracy_checker.utils import UnsupportedPackage
 
 try:
     import pycocotools.mask as maskUtils

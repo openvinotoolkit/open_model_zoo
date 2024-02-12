@@ -18,8 +18,8 @@ import sys
 
 from pathlib import Path
 
-from openvino.model_zoo import _configuration, _common
-from openvino.model_zoo.download_engine.downloader import Downloader
+from omz_tools import _configuration, _common
+from omz_tools.download_engine.downloader import Downloader
 
 
 class DownloaderArgumentParser(argparse.ArgumentParser):

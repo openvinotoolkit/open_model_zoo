@@ -16,19 +16,19 @@ limitations under the License.
 
 import pytest
 
-pytest.importorskip('openvino.tools.accuracy_checker.launcher.dlsdk_launcher')
+pytest.importorskip('accuracy_checker.launcher.dlsdk_launcher')
 import cv2
 import numpy as np
 
 from pathlib import Path
 from unittest.mock import PropertyMock
-from openvino.tools.accuracy_checker.config import ConfigError
-from openvino.tools.accuracy_checker.launcher import DLSDKLauncher
-from openvino.tools.accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
-from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
+from accuracy_checker.config import ConfigError
+from accuracy_checker.launcher import DLSDKLauncher
+from accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
+from accuracy_checker.launcher.launcher import create_launcher
 from tests.common import update_dict
-from openvino.tools.accuracy_checker.data_readers import DataRepresentation
-from openvino.tools.accuracy_checker.utils import contains_all
+from accuracy_checker.data_readers import DataRepresentation
+from accuracy_checker.utils import contains_all
 try:
     import ngraph as ng
 except ImportError:
@@ -61,7 +61,7 @@ def mock_inference_engine(mocker):
 @pytest.fixture()
 def mock_inputs(mocker):
     mocker.patch(
-        'openvino.tools.accuracy_checker.launcher.input_feeder.InputFeeder._parse_inputs_config',
+        'accuracy_checker.launcher.input_feeder.InputFeeder._parse_inputs_config',
         return_value=({}, ['data'], None)
     )
 
@@ -192,7 +192,7 @@ class TestDLSDKLauncherAffinity:
             })
 
         mocker.patch(
-            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
@@ -215,7 +215,7 @@ class TestDLSDKLauncherAffinity:
         affinity_map = {'conv1': 'GPU'}
 
         mocker.patch(
-            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
@@ -226,7 +226,7 @@ class TestDLSDKLauncherAffinity:
         affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
-            'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
@@ -343,7 +343,7 @@ class TestDLSDKLauncherConfig:
 
         with pytest.raises(ValueError):
             mocker.patch(
-                'openvino.tools.accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher.inputs',
+                'accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher.inputs',
                 new_callable=PropertyMock(return_value={'data1': [3, 227, 227], 'data2': [3, 227, 227]})
             )
             create_launcher(launcher_config)

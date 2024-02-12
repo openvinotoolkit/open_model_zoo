@@ -75,7 +75,7 @@ def find_version(*path):
     raise RuntimeError("Unable to find version string.")
 
 long_description = read("README.md")
-version = find_version("openvino/tools/accuracy_checker", "__init__.py")
+version = find_version("accuracy_checker", "__init__.py")
 
 
 def prepare_requirements():
@@ -114,8 +114,8 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "accuracy_check=openvino.tools.accuracy_checker.main:main",
-            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main"]},
+            "accuracy_check=accuracy_checker.main:main",
+            "convert_annotation=accuracy_checker.annotation_converters.convert:main"]},
     zip_safe=False,
     python_requires='>=3.8',
     install_requires=_requirements,

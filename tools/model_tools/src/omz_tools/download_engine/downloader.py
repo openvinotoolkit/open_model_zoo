@@ -24,8 +24,8 @@ import types
 from pathlib import Path
 from typing import Set
 
-from openvino.model_zoo import _common, _concurrency, _reporting
-from openvino.model_zoo.download_engine import cache
+from omz_tools import _common, _concurrency, _reporting
+from omz_tools.download_engine import cache
 
 DOWNLOAD_TIMEOUT = 5 * 60
 

@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-from openvino.model_zoo import _configuration, _common
+from omz_tools import _configuration, _common
 
 def to_info(model):
     accuracy_config = _common.MODEL_ROOT / model.subdirectory / 'accuracy-check.yml'

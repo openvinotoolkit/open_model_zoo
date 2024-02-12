@@ -1,7 +1,7 @@
 import unittest
 import os
 
-import openvino.model_zoo.models as omz
+import omz_tools.models as omz
 
 
 class TestOMZModel(unittest.TestCase):

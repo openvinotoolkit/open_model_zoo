@@ -19,10 +19,10 @@ import yaml
 
 from pathlib import Path
 
-from openvino.model_zoo import (
+from omz_tools import (
     _configuration, _common, omz_downloader, omz_converter
 )
-from openvino.model_zoo.download_engine import validation
+from omz_tools.download_engine import validation
 
 
 def list_models():

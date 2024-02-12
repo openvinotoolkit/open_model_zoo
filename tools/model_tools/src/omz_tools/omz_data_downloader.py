@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-from openvino.model_zoo import _common
+from omz_tools import _common
 
 def copy_data(output_dir):
     data_path = output_dir / 'data'
