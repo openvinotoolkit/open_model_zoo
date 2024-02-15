@@ -74,6 +74,7 @@ from .text_classification import (
     RTEConverter,
     ColumnDataset
 )
+from .url_classification import UrlClassificationConverter 
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
@@ -204,6 +205,7 @@ __all__ = [
     'RTEConverter',
     'SST2Converter',
     'ColumnDataset',
+    'UrlClassificationConverter',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
