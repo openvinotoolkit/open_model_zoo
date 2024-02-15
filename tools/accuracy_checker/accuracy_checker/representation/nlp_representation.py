@@ -142,10 +142,10 @@ class TextClassificationAnnotation(ClassificationAnnotation):
         self.tokens = tokens if tokens is not None else []
 
 class UrlClassificationAnnotation(ClassificationAnnotation):
-    def __init__(self, identifier, label, input_x_word, dropout_keep_prob):
+    def __init__(self, identifier, label, input_1, input_2):
         super().__init__(identifier, label)
-        self.input_x_word = input_x_word
-        self.dropout_keep_prob = dropout_keep_prob
+        self.input_1 = input_1
+        self.input_2 = input_2
 
 class BERTNamedEntityRecognitionAnnotation(SequenceClassificationAnnotation):
     def __init__(self, identifier, input_ids, input_mask, segment_ids, label_id, valid_ids=None, label_mask=None):

@@ -35,7 +35,7 @@ def is_in(a,x):
         return False 
 
 
-def tokenize_urls_with_dict(urls, word_dict = None): 
+def tokenize_urls_with_dict(urls, word_dict, unknown_key): 
     tokenized_urls = [] 
     word_vocab = sorted(list(word_dict.keys()))
     for url in urls:
@@ -45,15 +45,13 @@ def tokenize_urls_with_dict(urls, word_dict = None):
             if is_in(word_vocab, word): 
                 word_id = word_dict[word]
             else: 
-                word_id = word_dict["<UNK>"] 
+                word_id = word_dict[unknown_key] 
             url_tokens.append(word_id)
         tokenized_urls.append(url_tokens)
     
     return tokenized_urls 
 
 
-
-UrlInputExample = namedtuple('UrlInputExample', ['url', 'label'])
 class UrlClassificationConverter(BaseFormatConverter):
     __provider__ = 'urlnet'
     annotation_types = (UrlClassificationAnnotation, )
@@ -93,24 +91,37 @@ class UrlClassificationConverter(BaseFormatConverter):
 
 
     @staticmethod
-    def get_url_annotation(id, url_data, label):
+    def get_url_annotation(id, input1, input2, label):
         identifier = [
-            'input_x_word_{}'.format(id),
-            'dropout_keep_prob_{}'.format(id)
+            'input_1_{}'.format(id),
+            'input_2_{}'.format(id)
         ]
 
-        dropout = np.float32(1)
-        return UrlClassificationAnnotation(identifier, label, np.array(url_data), np.array(dropout))
+        return UrlClassificationAnnotation(identifier, label, np.array(input1), np.array(input2))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         urls, labels = self.read_data()  
         with open(self.words_dict, 'rb') as f:
             word_vocab = pickle.load(f)
 
+        print(f"Loaded {self.words_dict.name} with {len(word_vocab)} tokens")
+
         special_tokens = {}
+        invalid_tokens = 0
+        unknown_key = '<UKN>'
         for key, value in word_vocab.items():
             if len(key) == 1 and not key[0].isalnum():
                 special_tokens[key] = value
+            if len(key) > 1 and not key.isalnum():
+                if key == '<UNKNOWN>' or key == '<UNK>':
+                    unknown_key = key
+                else:
+                # elif "'" not in key and "_" not in key and "-" not in key:
+                    invalid_tokens+=1
+                    # print(f"Token {value} key `{key}` with non-alphanumerical chars ?")
+
+        print(f"Words dict consist {invalid_tokens} invalid tokens")
+        print(f"Words dict defines {len(special_tokens)} non-alphanumerical delimit characters")
 
         for key, value in special_tokens.items():
             word_vocab['<<'+key+'>>'] = word_vocab[key]
@@ -122,13 +133,15 @@ class UrlClassificationConverter(BaseFormatConverter):
                 if key in url:
                    urls[i] = url.replace(key, new_key) 
 
-        tokenized_urls = tokenize_urls_with_dict(urls, word_vocab) 
+        tokenized_urls = tokenize_urls_with_dict(urls, word_vocab, unknown_key) 
         padded_sequences = pad_sequences(tokenized_urls, maxlen=self.max_len_words, padding='post', truncating='post')
 
         padded_sequences = padded_sequences.astype(np.int32)            
 
         annotations = []
         for id, input_x_word in enumerate(padded_sequences):
-            annotations.append(self.get_url_annotation(id, input_x_word, labels[id]))
+            input_1 = input_x_word[0:100]
+            input_2 = input_x_word[100:200]
+            annotations.append(self.get_url_annotation(id, input_1, input_2, labels[id]))
 
         return ConverterReturn(annotations, None, None)
