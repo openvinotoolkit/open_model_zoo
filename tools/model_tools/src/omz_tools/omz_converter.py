@@ -20,7 +20,7 @@ import shutil
 import string
 import sys
 
-from openvino.runtime import Core, serialize
+from openvino import Core, serialize
 from pathlib import Path
 
 from omz_tools import (

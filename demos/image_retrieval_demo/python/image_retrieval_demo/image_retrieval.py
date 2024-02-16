@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from image_retrieval_demo.common import from_list, crop_resize
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 
 class IEModel(): # pylint: disable=too-few-public-methods

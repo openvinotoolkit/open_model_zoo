@@ -28,7 +28,7 @@ from types import SimpleNamespace as namespace
 import cv2 as cv
 import numpy as np
 import sympy
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 from tqdm import tqdm
 
 START_TOKEN = 0

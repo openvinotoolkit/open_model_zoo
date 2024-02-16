@@ -139,7 +139,7 @@ def get_package_path(python_executable, package_name):
 
 def get_version():
     try:
-        from openvino.runtime import get_version as ov_get_version
+        from openvino import get_version as ov_get_version
         ov_version = ov_get_version()
         version_match = re.match(r"^([0-9]+).([0-9]+)*", ov_version)
         return f"{version_match.group(0)}-{__version__}"

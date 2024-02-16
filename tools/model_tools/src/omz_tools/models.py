@@ -170,7 +170,7 @@ class OMZModel:
                 self.model = self.ie.read_model(self.model_path)
             except AttributeError:
                 raise TypeError('ie is not specified or is of the wrong type.'
-                                'Please check ie is of openvino.runtime.Core type.')
+                                'Please check ie is of openvino.Core type.')
 
         return self.model.inputs
 

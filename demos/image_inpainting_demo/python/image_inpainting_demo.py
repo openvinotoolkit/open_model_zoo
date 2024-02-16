@@ -20,7 +20,7 @@ from time import perf_counter
 
 import numpy as np
 import cv2
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting

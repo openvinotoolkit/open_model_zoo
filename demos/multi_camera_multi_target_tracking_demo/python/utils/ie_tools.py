@@ -16,7 +16,7 @@ import logging as log
 import numpy as np
 import cv2
 
-from openvino.runtime import AsyncInferQueue
+from openvino import AsyncInferQueue
 
 
 class IEModel:

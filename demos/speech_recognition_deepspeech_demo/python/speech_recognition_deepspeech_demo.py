@@ -16,7 +16,7 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline

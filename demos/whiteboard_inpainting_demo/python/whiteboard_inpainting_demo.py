@@ -20,7 +20,7 @@ from time import perf_counter
 import sys
 from pathlib import Path
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, check_pressed_keys

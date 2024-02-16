@@ -15,7 +15,7 @@
 """
 
 import logging as log
-from openvino.runtime import Core, get_version, AsyncInferQueue
+from openvino import Core, get_version, AsyncInferQueue
 
 
 def load_core():

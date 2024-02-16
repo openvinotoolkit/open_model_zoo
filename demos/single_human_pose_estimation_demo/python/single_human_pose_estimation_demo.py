@@ -7,7 +7,7 @@ import logging as log
 from time import perf_counter
 import cv2
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from detector import Detector
 from estimator import HumanPoseEstimator

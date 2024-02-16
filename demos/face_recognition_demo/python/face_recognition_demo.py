@@ -23,7 +23,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))

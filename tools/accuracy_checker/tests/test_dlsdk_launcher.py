@@ -40,7 +40,7 @@ def no_available_myriad():
 
 
 def no_available_gpu():
-    from openvino.runtime import Core
+    from openvino import Core
     return 'GPU' not in Core().available_devices
 
 
