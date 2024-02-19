@@ -20,7 +20,7 @@ import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer

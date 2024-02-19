@@ -22,7 +22,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 from utils.codec import CTCCodec
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)

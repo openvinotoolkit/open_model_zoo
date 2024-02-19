@@ -21,7 +21,7 @@ import multiprocessing
 from pathlib import Path
 import re
 import numpy as np
-from openvino.runtime import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
+from openvino import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS, AUTO_DEVICE_KEYWORD, AUTO_SINGLE_DEVICE_KEYWORD,

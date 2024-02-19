@@ -18,7 +18,7 @@ import logging as log
 
 import numpy as np
 
-from openvino.runtime import PartialShape, set_batch, Layout
+from openvino import PartialShape, set_batch, Layout
 from utils.wav_processing import (
     fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
 )

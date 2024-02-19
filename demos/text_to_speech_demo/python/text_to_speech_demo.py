@@ -24,7 +24,7 @@ from argparse import ArgumentParser, SUPPRESS
 from tqdm import tqdm
 import numpy as np
 import wave
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE

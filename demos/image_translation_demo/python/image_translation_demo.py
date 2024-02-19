@@ -18,7 +18,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
 from image_translation_demo.preprocessing import (

@@ -15,7 +15,7 @@
 """
 
 import logging as log
-from openvino.runtime import AsyncInferQueue
+from openvino import AsyncInferQueue
 
 
 class Module:

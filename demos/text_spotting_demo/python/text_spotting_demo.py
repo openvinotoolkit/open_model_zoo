@@ -24,7 +24,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 from scipy.special import softmax
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from text_spotting_demo.tracker import StaticIOUTracker
 

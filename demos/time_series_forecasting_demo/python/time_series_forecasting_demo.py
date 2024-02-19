@@ -20,7 +20,7 @@ from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 from accuracy_checker.dataset import read_annotation
 
 
