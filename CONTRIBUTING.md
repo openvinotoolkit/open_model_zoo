@@ -74,7 +74,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
+[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`omz_tools._common`](tools/model_tools/src/omz_tools/_common.py) module.
 
 **`model_info`** (*optional*)
 
@@ -270,7 +270,7 @@ Learn the detailed structure and headers naming convention from any model docume
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
 
-Copyright &copy; 2018-2023 Intel Corporation
+Copyright &copy; 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 ```

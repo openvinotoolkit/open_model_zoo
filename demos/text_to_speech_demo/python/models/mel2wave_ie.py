@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import logging as log
 
 import numpy as np
 
-from openvino.runtime import PartialShape, set_batch, Layout
+from openvino import PartialShape, set_batch, Layout
 from utils.wav_processing import (
     fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
 )

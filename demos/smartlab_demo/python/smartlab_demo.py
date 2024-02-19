@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2021-2023 Intel Corporation
+ Copyright (c) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import concurrent.futures
 
 from display import Display
 from evaluator import Evaluator
-from openvino.runtime import Core
+from openvino import Core
 from argparse import ArgumentParser, SUPPRESS
 from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector

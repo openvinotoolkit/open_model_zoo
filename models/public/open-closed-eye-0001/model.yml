@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,5 +31,4 @@ model_optimizer_args:
   - --scale_values=[255, 255, 255]
   - --output=19
   - --input_model=$dl_dir/open-closed-eye.onnx
-quantizable: true
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

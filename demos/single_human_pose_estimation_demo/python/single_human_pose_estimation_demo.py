@@ -7,13 +7,13 @@ import logging as log
 from time import perf_counter
 import cv2
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from detector import Detector
 from estimator import HumanPoseEstimator
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture

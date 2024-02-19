@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021-2023 Intel Corporation
+ Copyright (c) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods

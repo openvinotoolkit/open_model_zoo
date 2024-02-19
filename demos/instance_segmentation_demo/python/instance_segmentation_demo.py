@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import cv2
 from instance_segmentation_demo.tracker import StaticIOUTracker
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 from model_api.models import MaskRCNNModel, YolactModel, OutputTransform
 from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter

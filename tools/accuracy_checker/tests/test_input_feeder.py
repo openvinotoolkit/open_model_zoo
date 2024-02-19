@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2023 Intel Corporation
+Copyright (c) 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ limitations under the License.
 import pytest
 import re
 import numpy as np
-from openvino.tools.accuracy_checker.config import ConfigError
-from openvino.tools.accuracy_checker.launcher.input_feeder import InputFeeder
-from openvino.tools.accuracy_checker.data_readers import DataRepresentation
+from accuracy_checker.config import ConfigError
+from accuracy_checker.launcher.input_feeder import InputFeeder
+from accuracy_checker.data_readers import DataRepresentation
 
 # InputInfo from openvino is needed here, but there is no appropriate API
 # to create InputInfo with specific shape, therefore lets use analog

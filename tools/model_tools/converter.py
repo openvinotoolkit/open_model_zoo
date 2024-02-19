@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2021-2023 Intel Corporation
+# Copyright (c) 2021-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-import openvino.model_zoo.omz_converter
+import omz_tools.omz_converter
 
 if __name__ == '__main__':
-    openvino.model_zoo.omz_converter.main()
+    omz_tools.omz_converter.main()

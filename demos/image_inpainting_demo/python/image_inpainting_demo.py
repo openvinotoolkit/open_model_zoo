@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from time import perf_counter
 
 import numpy as np
 import cv2
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting

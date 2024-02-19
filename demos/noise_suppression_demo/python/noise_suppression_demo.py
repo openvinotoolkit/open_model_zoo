@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Copyright (C) 2022-2023 Intel Corporation
+Copyright (C) 2022-2024 Intel Corporation
 SPDX-License-Identifier: Apache-2.0
 """
 import copy
@@ -14,7 +14,7 @@ from time import perf_counter
 import numpy as np
 import wave
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

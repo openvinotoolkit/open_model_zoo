@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,5 +74,4 @@ model_optimizer_args:
   - --output=center_heatmap,width_height,regression
   - --input_model=$conv_dir/ctdet_coco_dlav0_512.onnx
 framework: pytorch
-quantizable: true
 license: https://raw.githubusercontent.com/xingyizhou/CenterNet/master/LICENSE

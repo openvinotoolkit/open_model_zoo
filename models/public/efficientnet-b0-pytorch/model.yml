@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,7 +74,6 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/efficientnet-b0.onnx
 framework: pytorch
-quantizable: true
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE
 model_info:
   model_type: Classification

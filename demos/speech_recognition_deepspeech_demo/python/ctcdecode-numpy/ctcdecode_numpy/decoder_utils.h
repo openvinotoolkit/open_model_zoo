@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020-2023 Intel Corporation
+* Copyright (c) 2020-2024 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on decoder_utils.h from https://github.com/parlance/ctcdecode,

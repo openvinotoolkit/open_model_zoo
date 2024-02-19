@@ -38,4 +38,4 @@ Now try edit config, to run SampLeNet on other device or framework (e.g., Caffe,
 ###  Additional useful resources
 
 * large collection of configuration files for models from Open Model Zoo. You can find instruction how to use predefined configuration [here](../configs/README.md)
-* config at `<omz_dir>/tools/accuracy_checker/sample/opencv_sample_config.yml` for running SampleNet via [OpenCV launcher](../openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md).
+* config at `<omz_dir>/tools/accuracy_checker/sample/opencv_sample_config.yml` for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md).

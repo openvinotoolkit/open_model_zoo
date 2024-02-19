@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer

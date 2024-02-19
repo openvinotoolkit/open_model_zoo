@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ from types import SimpleNamespace as namespace
 import cv2 as cv
 import numpy as np
 import sympy
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 from tqdm import tqdm
 
 START_TOKEN = 0

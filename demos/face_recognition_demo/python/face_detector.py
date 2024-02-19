@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018-2023 Intel Corporation
+ Copyright (c) 2018-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import numpy as np
 from ie_module import Module
 from utils import resize_input
 
-from openvino.runtime import PartialShape
+from openvino import PartialShape
 
 
 class FaceDetector(Module):

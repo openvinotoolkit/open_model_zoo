@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Intel Corporation
+# Copyright (C) 2018-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
@@ -8,7 +8,7 @@ import sys
 
 import numpy as np
 import cv2 as cv
-from openvino.runtime import Core
+from openvino import Core
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('mri_reconstruction_demo')
