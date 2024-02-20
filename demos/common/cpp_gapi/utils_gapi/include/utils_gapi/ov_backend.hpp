@@ -32,10 +32,25 @@ struct BackendApplicator<ExecNetwork,
                 config.deviceName                    // device specifier
             }.cfgNumRequests(config.maxAsyncRequests)
             .cfgPluginConfig(config.getLegacyConfig());
-        // E#96606
-        if (!config.mean_values.empty() || !config.scale_values.empty()) {
-            throw std::runtime_error(backend.name + " backend doesn't support neither `mean_values` nor `scale_values` at the moment");
+            
+        if (!config.mean_values.empty() && !config.scale_values.empty()) {
+            std::vector<float> means;
+            split(config.mean_values, ' ', means);
+
+            std::vector<float> scales;
+            split(config.scale_values, ' ', scales);
+
+            if (means.size() != 3  || scales.size() != 3) {
+                throw std::runtime_error("`mean_values` and `scale_values` must be 3-components vectors "
+                                         "with a space symbol as separator between component values");
+            }
+            net.cfgMean(means).cfgScale(scales);
         }
+        else if (!config.mean_values.empty() && config.scale_values.empty() || config.mean_values.empty() && !config.scale_values.empty() ) {
+            throw std::runtime_error(backends.front().name + " requires both `mean_values` and 'scale_values' "
+                                     "to be set or both unset. Please check the command arguments");
+        }
+
         return cv::gapi::networks(net);
     }
 };
