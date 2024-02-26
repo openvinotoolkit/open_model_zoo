@@ -32,16 +32,6 @@ struct BackendApplicator<ExecNetwork,
         if (config.mean_values.empty() && config.scale_values.empty()) {
             net.cfgNormalize({false});
         } else if (!config.mean_values.empty() && !config.scale_values.empty()) {
-            std::vector<float> means;
-            split(config.mean_values, ' ', means);
-
-            std::vector<float> scales;
-            split(config.scale_values, ' ', scales);
-
-            if (means.size() != 3  || scales.size() != 3) {
-                throw std::runtime_error("`mean_values` and `scale_values` must be 3-components vectors "
-                                         "with a space symbol as separator between component values");
-            }
             net.cfgMeanStd({cv::Scalar(means[0], means[1], means[2])},
                            {cv::Scalar(scales[0], scales[1], scales[2])});
         } else {

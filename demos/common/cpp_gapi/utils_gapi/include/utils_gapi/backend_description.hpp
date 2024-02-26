@@ -28,8 +28,8 @@ struct BackendsConfig: ModelConfig {
     BackendsConfig(const ModelConfig &src,
                    const std::vector<float> &mean_values,
                    const std::vector<float> &scale_values);
-    std::string mean_values;
-    std::string scale_values;
+    std::vector<float> mean_values;
+    std::vector<float> scale_values;
 };
 
 using inference_backends_t = std::queue<BackendDescription>;
