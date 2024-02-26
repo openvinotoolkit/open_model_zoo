@@ -39,7 +39,6 @@ struct BackendApplicator<ExecNetwork,
         if(!config.scale_values.empty()) {
             net.cfgScale(config.scale_values);
         }
-
         return cv::gapi::networks(net);
     }
 };
