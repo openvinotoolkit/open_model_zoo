@@ -22,7 +22,7 @@ import logging as log
 import cv2
 import numpy as np
 
-from openvino.runtime import AsyncInferQueue
+from openvino import AsyncInferQueue
 
 
 def center_crop(frame, crop_size):

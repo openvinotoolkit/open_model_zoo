@@ -18,7 +18,7 @@ import logging as log
 from pathlib import Path
 
 try:
-    from openvino.runtime import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version, Dimension
+    from openvino import AsyncInferQueue, Core, PartialShape, layout_helpers, get_version, Dimension
     openvino_absent = False
 except ImportError:
     openvino_absent = True

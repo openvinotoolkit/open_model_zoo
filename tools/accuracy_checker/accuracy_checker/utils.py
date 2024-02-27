@@ -977,7 +977,7 @@ def ov_new_api_available():
     except ImportError:
         return None
     try:
-        from openvino.runtime import Core # noqa: F401
+        from openvino import Core # noqa: F401
         return True
     except ImportError:
         return False

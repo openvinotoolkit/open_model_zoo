@@ -23,7 +23,7 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.runtime import Core, get_version, PartialShape, Dimension
+from openvino import Core, get_version, PartialShape, Dimension
 from tokenizers import Tokenizer, pre_tokenizers, decoders
 from tokenizers.models import BPE
 

@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 import cv2 as cv
 import numpy as np
 import logging as log

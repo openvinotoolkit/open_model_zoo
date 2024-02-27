@@ -28,7 +28,7 @@ from argparse import ArgumentParser, SUPPRESS
 from fnmatch import fnmatch
 from scipy.ndimage import zoom
 
-from openvino.runtime import Core, get_version, PartialShape
+from openvino import Core, get_version, PartialShape
 
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)

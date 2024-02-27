@@ -20,7 +20,7 @@ import shutil
 import string
 import sys
 
-from openvino.runtime import Core, serialize
+from openvino import Core, save_model
 from pathlib import Path
 
 from omz_tools import (
@@ -193,7 +193,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             rt_model.set_rt_info(val, ['model_info', 'labels'])
         except KeyError:
             pass
-        serialize(rt_model, str(mo_output_dir / model.name) + '.xml')
+        save_model(rt_model, str(mo_output_dir / model.name) + '.xml', "FP16" == data_type)
     return True
 
 def num_jobs_arg(value_str):

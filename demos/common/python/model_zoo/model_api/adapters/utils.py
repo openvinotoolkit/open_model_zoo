@@ -15,7 +15,7 @@
 """
 
 from typing import Optional
-from openvino.runtime import layout_helpers
+from openvino import layout_helpers
 
 
 class Layout:

@@ -14,7 +14,7 @@
 import logging as log
 import numpy as np
 
-from openvino.runtime import Core, get_version, PartialShape
+from openvino import Core, get_version, PartialShape
 
 
 class InferenceEngine:

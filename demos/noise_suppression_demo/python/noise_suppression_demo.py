@@ -14,7 +14,7 @@ from time import perf_counter
 import numpy as np
 import wave
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

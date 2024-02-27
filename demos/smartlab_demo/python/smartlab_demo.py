@@ -22,7 +22,7 @@ import concurrent.futures
 
 from display import Display
 from evaluator import Evaluator
-from openvino.runtime import Core
+from openvino import Core
 from argparse import ArgumentParser, SUPPRESS
 from segmentor import Segmentor, SegmentorMstcn
 from object_detection.detector import Detector
