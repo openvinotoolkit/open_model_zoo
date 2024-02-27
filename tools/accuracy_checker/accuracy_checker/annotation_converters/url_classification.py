@@ -19,38 +19,9 @@ import tensorflow as tf
 from collections import namedtuple
 import numpy as np
 import pickle
-from bisect import bisect_left 
-from keras.preprocessing.sequence import pad_sequences
-
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, BoolField, ConfigError
 from ..representation import UrlClassificationAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
-
-
-def is_in(a,x): 
-    i = bisect_left(a,x)
-    if i != len(a) and a[i] == x: 
-        return True 
-    else:
-        return False 
-
-
-def tokenize_urls_with_dict(urls, word_dict, unknown_key): 
-    tokenized_urls = [] 
-    word_vocab = sorted(list(word_dict.keys()))
-    for url in urls:
-        url_tokens = [] 
-        words = url.split(' ')
-        for word in words:
-            if is_in(word_vocab, word): 
-                word_id = word_dict[word]
-            else: 
-                word_id = word_dict[unknown_key] 
-            url_tokens.append(word_id)
-        tokenized_urls.append(url_tokens)
-    
-    return tokenized_urls 
-
 
 class UrlClassificationConverter(BaseFormatConverter):
     __provider__ = 'urlnet'
@@ -60,35 +31,80 @@ class UrlClassificationConverter(BaseFormatConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'annotation_file': PathField(description='Path to urlnet dataset file'),
-            'input_file': PathField(description='Path to words_dict.p pickle file'),
-            'max_len_words': NumberField(
-                description='The maximum number of words in a URL.',
-                optional=True, default=200, value_type=int
-            ),
+            'annotation_file': PathField(description='Path to test dataset file'),
+            'input_file': PathField(description='Path to input_1 tokens data (pickle) file'),
+            'lower_input': BoolField(optional=True, default=True, 
+                                     description='Lower case dataset input text'),
+            'num_input_tokens': NumberField(value_type=int, optional=True, default=100, 
+                                            description='Number input tokens'),
+            'num_tokens_subsets': NumberField(value_type=int, optional=True, default=4, 
+                                            description='Number token subsets')
         })
         return params
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
-        self.words_dict = self.get_value_from_config('input_file')
-        self.max_len_words = self.get_value_from_config('max_len_words')
+        self.input_1_test = self.get_value_from_config('input_file')
+        self.lower_input = self.get_value_from_config('lower_input')
+        self.sampling_num = self.get_value_from_config('num_input_tokens')
+        self.sub_num = self.get_value_from_config('num_tokens_subsets')
+
+        if self.sampling_num < self.sub_num:
+            raise ConfigError(f'num_input_tokens ({self.sampling_num}) must be higher than num_tokens_subsets ({self.sub_num})')
+        if self.sampling_num % self.sub_num != 0:
+            raise ConfigError(f'num_input_tokens ({self.sampling_num}) must be a multiple of num_tokens_subsets ({self.sub_num})')
+
+    def texts_to_char_seq(self, texts):
+        sub_sampling_len = int(self.sampling_num / self.sub_num)
+        sampling_chars = []
+        for text in texts:
+            sampling_char = []
+            char_list = [
+                ord(i) if ord(i) < 128 else 0
+                for i in list(text)
+            ]
+            if len(char_list) % self.sub_num != 0:
+                char_list.extend([0] * (self.sub_num - len(char_list) % self.sub_num))
+
+            sub_chars_len = int(len(char_list) / self.sub_num)
+            if sub_chars_len >= sub_sampling_len:
+                sampling_char_tmp = [
+                    char_list[i: i + sub_sampling_len]
+                    for i in range(0, len(char_list), sub_chars_len)
+                ]
+            else:
+                sampling_char_tmp = [
+                    char_list[i: i + sub_chars_len]
+                    for i in range(0, len(char_list), sub_chars_len)
+                ]
+                for sub_char_seq in sampling_char_tmp:
+                    sub_char_seq.extend(
+                        [0] * (sub_sampling_len - len(sub_char_seq))
+                    )
+            for sub in sampling_char_tmp:
+                sampling_char.extend(sub)
+            sampling_chars.append(sampling_char)
+        return np.array(sampling_chars, dtype='int32') 
+
+
 
     def read_data(self): 
         with open(self.annotation_file, 'r') as file: 
             urls = []
             labels = []
-            for line in file.readlines(): 
-                items = line.split('\t') 
-                label = int(items[0]) 
-                if label == 1: 
-                    labels.append(1) 
-                else: 
-                    labels.append(0) 
-                url = items[1][:-1]
-                urls.append(url) 
+            for line in file:
+                items = line.split("\t")
+                if len(items) != 2:
+                    continue
+                if items[1].strip() == "":
+                    continue
+                label = int(items[0])
+                labels.append(label)
+                text = items[1][:-1]
+                if self.lower_input:
+                    text = text.lower()
+                urls.append(text)
         return urls, labels 
-
 
     @staticmethod
     def get_url_annotation(id, input1, input2, label):
@@ -101,47 +117,23 @@ class UrlClassificationConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         urls, labels = self.read_data()  
-        with open(self.words_dict, 'rb') as f:
-            word_vocab = pickle.load(f)
 
-        print(f"Loaded {self.words_dict.name} with {len(word_vocab)} tokens")
+        with open(self.input_1_test, 'rb') as f:
+            input_words_tokens = pickle.load(f)
 
-        special_tokens = {}
-        invalid_tokens = 0
-        unknown_key = '<UKN>'
-        for key, value in word_vocab.items():
-            if len(key) == 1 and not key[0].isalnum():
-                special_tokens[key] = value
-            if len(key) > 1 and not key.isalnum():
-                if key == '<UNKNOWN>' or key == '<UNK>':
-                    unknown_key = key
-                else:
-                # elif "'" not in key and "_" not in key and "-" not in key:
-                    invalid_tokens+=1
-                    # print(f"Token {value} key `{key}` with non-alphanumerical chars ?")
+        print(f"Len of input_words_tokens {len(input_words_tokens)}")
 
-        print(f"Words dict consist {invalid_tokens} invalid tokens")
-        print(f"Words dict defines {len(special_tokens)} non-alphanumerical delimit characters")
+        inpit_chars_tokens =  self.texts_to_char_seq(urls)
+        print(f"Len of inpit_chars_tokens {len(inpit_chars_tokens)}")
 
-        for key, value in special_tokens.items():
-            word_vocab['<<'+key+'>>'] = word_vocab[key]
-            del word_vocab[key]
-
-        for key, value in special_tokens.items():
-            new_key = ' <<' + key + '>> '
-            for i, url in enumerate(urls):
-                if key in url:
-                   urls[i] = url.replace(key, new_key) 
-
-        tokenized_urls = tokenize_urls_with_dict(urls, word_vocab, unknown_key) 
-        padded_sequences = pad_sequences(tokenized_urls, maxlen=self.max_len_words, padding='post', truncating='post')
-
-        padded_sequences = padded_sequences.astype(np.int32)            
+        inpit_chars_tokens =  self.texts_to_char_seq(urls)
+        print(f"Len of labels {len(labels)}")
 
         annotations = []
-        for id, input_x_word in enumerate(padded_sequences):
-            input_1 = input_x_word[0:100]
-            input_2 = input_x_word[100:200]
-            annotations.append(self.get_url_annotation(id, input_1, input_2, labels[id]))
+        for id, label in enumerate(labels):
+            input_1 = input_words_tokens[id]
+            input_2 = inpit_chars_tokens[id]
+
+            annotations.append(self.get_url_annotation(id, input_1, input_2, label))
 
         return ConverterReturn(annotations, None, None)
