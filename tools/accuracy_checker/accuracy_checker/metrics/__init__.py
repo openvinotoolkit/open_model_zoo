@@ -30,6 +30,7 @@ from .classification import (
     MetthewsCorrelation,
     RocAucScore,
     AcerScore,
+    URLNetAccuracy,
 )
 from .detection import (
     DetectionMAP,
@@ -243,6 +244,7 @@ __all__ = [
     'FrechetInceptionDistance',
 
     'AcerScore',
+    'URLNetAccuracy',
 
     'SalienceMapMAE',
     'SalienceMapFMeasure',

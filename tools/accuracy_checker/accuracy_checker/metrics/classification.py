@@ -20,13 +20,14 @@ from ..representation import (
     ClassificationAnnotation,
     ClassificationPrediction,
     TextClassificationAnnotation,
+    UrlClassificationAnnotation,
     ArgMaxClassificationPrediction,
     AnomalySegmentationAnnotation,
     AnomalySegmentationPrediction
 )
 
 from ..config import NumberField, StringField, ConfigError, BoolField
-from .metric import PerImageEvaluationMetric
+from .metric import Metric, PerImageEvaluationMetric
 from .average_meter import AverageMeter
 from ..utils import UnsupportedPackage
 
@@ -35,7 +36,6 @@ try:
 except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
     confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
-
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -671,3 +671,56 @@ class AcerScore(PerImageEvaluationMetric):
     @classmethod
     def get_common_meta(cls):
         return {'target': 'higher-worse'}
+
+
+class URLNetAccuracy(Metric):
+    __provider__ = 'urlnet_score'
+
+    annotation_types = (UrlClassificationAnnotation, )
+    prediction_types = (ClassificationPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._annotations = []
+        self._predictions = []
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(
+                value_type=float, min_value=0.01, max_value=0.99, optional=True, default=0.5,
+                description="The threshold for ouput predictions when output is considered malcious or not."
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def update(self, annotation, prediction):
+        loss, accuracy = prediction.scores
+
+        self._annotations.append(annotation.label)
+        self._predictions.append(accuracy)
+        return accuracy
+
+    def evaluate(self, annotations, predictions):
+        
+        y_pred = [1 if x > self.threshold else 0 for x in self._predictions]
+        y_true = self._annotations
+
+        TN, FP, FN, TP = confusion_matrix(y_true, y_pred).ravel()
+        # roc_auc = roc_auc_score(y_true, y_pred).tolist()
+        accuracy = (TP+TN)/(TP+FP+FN+TN)
+
+        return accuracy
+
+    def reset(self):
+        self._annotations = []
+        self._predictions = []
+
+    @classmethod
+    def get_common_meta(cls):
+        return {'target': 'higher-better', 'names': ['accuracy']}
+
