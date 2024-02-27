@@ -32,8 +32,8 @@ struct BackendApplicator<ExecNetwork,
         if (config.mean_values.empty() && config.scale_values.empty()) {
             net.cfgNormalize({false});
         } else if (!config.mean_values.empty() && !config.scale_values.empty()) {
-            net.cfgMeanStd({cv::Scalar(means[0], means[1], means[2])},
-                           {cv::Scalar(scales[0], scales[1], scales[2])});
+            net.cfgMeanStd({cv::Scalar(config.mean_values[0], config.mean_values[1], config.mean_values[2])},
+                           {cv::Scalar(config.scale_values[0], config.scale_values[1], config.scale_values[2])});
         } else {
             throw std::runtime_error(backends.front().name + " requires both `mean_values` and 'scale_values' "
                                      "to be set or both unset. Please check the command arguments");
