@@ -88,7 +88,7 @@ class UrlClassificationConverter(BaseFormatConverter):
 
 
     def read_data(self):
-        with open(self.annotation_file, 'r') as file:
+        with open(self.annotation_file, 'r', encoding='utf-8') as file:
             urls = []
             labels = []
             for line in file:
@@ -103,7 +103,7 @@ class UrlClassificationConverter(BaseFormatConverter):
                 if self.lower_input:
                     text = text.lower()
                 urls.append(text)
-        return urls, labels 
+        return urls, labels
 
     @staticmethod
     def get_url_annotation(i, input1, input2, label):
@@ -115,9 +115,9 @@ class UrlClassificationConverter(BaseFormatConverter):
         return UrlClassificationAnnotation(identifier, label, np.array(input1), np.array(input2))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        urls, labels = self.read_data()  
+        urls, labels = self.read_data()
 
-        with open(self.input_1_test, 'rb') as f:
+        with open(self.input_1_test, 'rb', encoding='utf-8') as f:
             input_words_tokens = pickle.load(f)
 
         inpit_chars_tokens =  self.texts_to_char_seq(urls)
