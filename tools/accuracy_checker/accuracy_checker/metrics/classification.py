@@ -673,8 +673,8 @@ class AcerScore(PerImageEvaluationMetric):
         return {'target': 'higher-worse'}
 
 
-class URLNetAccuracy(Metric):
-    __provider__ = 'urlnet_score'
+class UrlClassificationScore(Metric):
+    __provider__ = 'url_classification_score'
 
     annotation_types = (UrlClassificationAnnotation, )
     prediction_types = (ClassificationPrediction, )
@@ -699,21 +699,17 @@ class URLNetAccuracy(Metric):
         self.threshold = self.get_value_from_config('threshold')
 
     def update(self, annotation, prediction):
-        loss, accuracy = prediction.scores
-
+        _, accuracy = prediction.scores
         self._annotations.append(annotation.label)
         self._predictions.append(accuracy)
         return accuracy
 
     def evaluate(self, annotations, predictions):
-        
         y_pred = [1 if x > self.threshold else 0 for x in self._predictions]
         y_true = self._annotations
-
         TN, FP, FN, TP = confusion_matrix(y_true, y_pred).ravel()
         # roc_auc = roc_auc_score(y_true, y_pred).tolist()
         accuracy = (TP+TN)/(TP+FP+FN+TN)
-
         return accuracy
 
     def reset(self):
@@ -723,4 +719,3 @@ class URLNetAccuracy(Metric):
     @classmethod
     def get_common_meta(cls):
         return {'target': 'higher-better', 'names': ['accuracy']}
-

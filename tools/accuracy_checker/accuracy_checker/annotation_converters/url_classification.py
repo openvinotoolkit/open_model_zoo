@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 import pickle
+import numpy as np
 from ..config import PathField, NumberField, BoolField, ConfigError
 from ..representation import UrlClassificationAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -30,11 +30,11 @@ class UrlClassificationConverter(BaseFormatConverter):
         params.update({
             'annotation_file': PathField(description='Path to test dataset file'),
             'input_file': PathField(description='Path to input_1 tokens data (pickle) file'),
-            'lower_input': BoolField(optional=True, default=True, 
+            'lower_input': BoolField(optional=True, default=True,
                                      description='Lower case dataset input text'),
-            'num_input_tokens': NumberField(value_type=int, optional=True, default=100, 
+            'num_input_tokens': NumberField(value_type=int, optional=True, default=100,
                                             description='Number input tokens'),
-            'num_tokens_subsets': NumberField(value_type=int, optional=True, default=4, 
+            'num_tokens_subsets': NumberField(value_type=int, optional=True, default=4,
                                             description='Number token subsets')
         })
         return params
@@ -83,12 +83,12 @@ class UrlClassificationConverter(BaseFormatConverter):
             for sub in sampling_char_tmp:
                 sampling_char.extend(sub)
             sampling_chars.append(sampling_char)
-        return np.array(sampling_chars, dtype='int32') 
+        return np.array(sampling_chars, dtype='int32')
 
 
 
-    def read_data(self): 
-        with open(self.annotation_file, 'r') as file: 
+    def read_data(self):
+        with open(self.annotation_file, 'r') as file:
             urls = []
             labels = []
             for line in file:
@@ -106,10 +106,10 @@ class UrlClassificationConverter(BaseFormatConverter):
         return urls, labels 
 
     @staticmethod
-    def get_url_annotation(id, input1, input2, label):
+    def get_url_annotation(i, input1, input2, label):
         identifier = [
-            'input_1_{}'.format(id),
-            'input_2_{}'.format(id)
+            'input_1_{}'.format(i),
+            'input_2_{}'.format(i)
         ]
 
         return UrlClassificationAnnotation(identifier, label, np.array(input1), np.array(input2))
@@ -123,10 +123,10 @@ class UrlClassificationConverter(BaseFormatConverter):
         inpit_chars_tokens =  self.texts_to_char_seq(urls)
 
         annotations = []
-        for id, label in enumerate(labels):
-            input_1 = input_words_tokens[id]
-            input_2 = inpit_chars_tokens[id]
+        for i, label in enumerate(labels):
+            input_1 = input_words_tokens[i]
+            input_2 = inpit_chars_tokens[i]
 
-            annotations.append(self.get_url_annotation(id, input_1, input_2, label))
+            annotations.append(self.get_url_annotation(i, input_1, input_2, label))
 
         return ConverterReturn(annotations, None, None)
