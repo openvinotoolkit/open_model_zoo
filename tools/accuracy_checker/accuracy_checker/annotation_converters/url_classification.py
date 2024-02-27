@@ -121,13 +121,7 @@ class UrlClassificationConverter(BaseFormatConverter):
         with open(self.input_1_test, 'rb') as f:
             input_words_tokens = pickle.load(f)
 
-        print(f"Len of input_words_tokens {len(input_words_tokens)}")
-
         inpit_chars_tokens =  self.texts_to_char_seq(urls)
-        print(f"Len of inpit_chars_tokens {len(inpit_chars_tokens)}")
-
-        inpit_chars_tokens =  self.texts_to_char_seq(urls)
-        print(f"Len of labels {len(labels)}")
 
         annotations = []
         for id, label in enumerate(labels):
