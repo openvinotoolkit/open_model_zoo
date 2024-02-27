@@ -15,9 +15,6 @@ limitations under the License.
 """
 
 import numpy as np
-import tensorflow as tf
-from collections import namedtuple
-import numpy as np
 import pickle
 from ..config import PathField, NumberField, BoolField, ConfigError
 from ..representation import UrlClassificationAnnotation
@@ -50,9 +47,11 @@ class UrlClassificationConverter(BaseFormatConverter):
         self.sub_num = self.get_value_from_config('num_tokens_subsets')
 
         if self.sampling_num < self.sub_num:
-            raise ConfigError(f'num_input_tokens ({self.sampling_num}) must be higher than num_tokens_subsets ({self.sub_num})')
+            raise ConfigError(
+                f'num_input_tokens ({self.sampling_num}) must be higher than num_tokens_subsets ({self.sub_num})')
         if self.sampling_num % self.sub_num != 0:
-            raise ConfigError(f'num_input_tokens ({self.sampling_num}) must be a multiple of num_tokens_subsets ({self.sub_num})')
+            raise ConfigError(
+                f'num_input_tokens ({self.sampling_num}) must be a multiple of num_tokens_subsets ({self.sub_num})')
 
     def texts_to_char_seq(self, texts):
         sub_sampling_len = int(self.sampling_num / self.sub_num)
