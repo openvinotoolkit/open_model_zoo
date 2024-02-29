@@ -143,10 +143,18 @@ int main(int argc, char* argv[]) {
         auto nets = cv::gapi::networks();
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
         inference_backends_t backends = util::ParseInferenceBackends(FLAGS_backend);
+        std::vector<float> means;
+        split(FLAGS_mean_values, ' ', means);
+        std::vector<float> scales;
+        split(FLAGS_scale_values, ' ', scales);
+        if ((means.size() != 3 && !means.empty()) || (scales.size() != 3 && !scales.empty())) {
+            throw std::runtime_error("`mean_values` and `scale_values` must be 3-components vectors "
+                                     "with a space symbol as separator between component values");
+        }
         nets += create_execution_network<nets::Classification>(FLAGS_m,
                                                                BackendsConfig {config,
-                                                                              FLAGS_mean_values,
-                                                                              FLAGS_scale_values},
+                                                                              means,
+                                                                              scales},
                                                                backends);
         auto pipeline = comp.compileStreaming(cv::compile_args(custom::kernels(),
                                               nets,

@@ -20,8 +20,8 @@ BackendDescription BackendDescription::parseFromArgs(const std::string &arg, cha
 }
 
 BackendsConfig::BackendsConfig(const ModelConfig &src,
-                               const std::string &mean_values,
-                               const std::string &scale_values) :
+                               const std::vector<float> &mean_values,
+                               const std::vector<float> &scale_values) :
     ModelConfig(src),
     mean_values(mean_values),
     scale_values(scale_values) {

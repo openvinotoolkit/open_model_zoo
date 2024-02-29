@@ -32,9 +32,12 @@ struct BackendApplicator<ExecNetwork,
                 config.deviceName                    // device specifier
             }.cfgNumRequests(config.maxAsyncRequests)
             .cfgPluginConfig(config.getLegacyConfig());
-        // E#96606
-        if (!config.mean_values.empty() || !config.scale_values.empty()) {
-            throw std::runtime_error(backend.name + " backend doesn't support neither `mean_values` nor `scale_values` at the moment");
+
+        if(!config.mean_values.empty()){
+            net.cfgMean(config.mean_values);
+        }
+        if(!config.scale_values.empty()) {
+            net.cfgScale(config.scale_values);
         }
         return cv::gapi::networks(net);
     }
