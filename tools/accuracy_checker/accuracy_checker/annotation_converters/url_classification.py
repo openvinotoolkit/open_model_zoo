@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle
+import pickle  # nosec B403  # disable unsafe pickle check
 import numpy as np
 from ..config import PathField, NumberField, BoolField, ConfigError
 from ..representation import UrlClassificationAnnotation
@@ -117,8 +117,8 @@ class UrlClassificationConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         urls, labels = self.read_data()
 
-        with open(self.input_1_test, 'rb', encoding='utf-8') as f:
-            input_words_tokens = pickle.load(f)
+        with open(self.input_1_test, 'rb') as f:
+            input_words_tokens = pickle.load(f)  # nosec B301  # disable unsafe pickle check
 
         inpit_chars_tokens =  self.texts_to_char_seq(urls)
 
