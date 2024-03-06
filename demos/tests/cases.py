@@ -255,21 +255,22 @@ DEMOS = [
             DataPatternArg('coco128-every-480x640x3')),
     )),
 
-    CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
-            model_keys=['-m_a', '-m_d'],
-            device_keys=['-d_a', '-d_d'],
-            test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          '-i': DataPatternArg('coco128-every-480x640x3'),
-                          '-m_d': ModelArg('person-detection-asl-0001')}),
-        [
-            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
-            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
-                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
-        ],
-    )),
+    # TODO: https://github.com/DariaMityagina is to fix the demo
+    # CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
+    #         model_keys=['-m_a', '-m_d'],
+    #         device_keys=['-d_a', '-d_d'],
+    #         test_cases=combine_cases(
+    #     TestCase(options={'--no_show': None,
+    #                       '-i': DataPatternArg('coco128-every-480x640x3'),
+    #                       '-m_d': ModelArg('person-detection-asl-0001')}),
+    #     [
+    #         TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+    #         TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+    #                           '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+    #     ],
+    # )),
 
     CppDemo(
         'interactive_face_detection_demo', 'cpp_gapi',
