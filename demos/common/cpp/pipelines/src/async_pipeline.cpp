@@ -76,6 +76,60 @@ void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     }
 }
 
+int64_t AsyncPipeline::submitData(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                  std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
+                                  const std::shared_ptr<MetaData>& metaData) {
+    auto frameID = inputFrameId;
+
+    auto request = requestsPool->getIdleRequest();
+    if (!request) {
+        return -1;
+    }
+
+    auto startTime = std::chrono::steady_clock::now();
+    auto internalModelData = model->preprocess(inputDataBegin, inputDataEnd, request);
+    preprocessMetrics.update(startTime);
+
+    request.set_callback(
+        [this, request, frameID, internalModelData, metaData, startTime](std::exception_ptr ex) mutable {
+            {
+                const std::lock_guard<std::mutex> lock(mtx);
+                inferenceMetrics.update(startTime);
+                try {
+                    if (ex) {
+                        std::rethrow_exception(ex);
+                    }
+                    InferenceResult result;
+
+                    result.frameId = frameID;
+                    result.metaData = std::move(metaData);
+                    result.internalModelData = std::move(internalModelData);
+
+                    for (const auto& outName : model->getOutputsNames()) {
+                        auto tensor = request.get_tensor(outName);
+                        result.outputsData.emplace(outName, tensor);
+                    }
+
+                    completedInferenceResults.emplace(frameID, result);
+                    requestsPool->setRequestIdle(request);
+                } catch (...) {
+                    if (!callbackException) {
+                        callbackException = std::current_exception();
+                    }
+                }
+            }
+            condVar.notify_one();
+        });
+
+    inputFrameId++;
+    if (inputFrameId < 0)
+        inputFrameId = 0;
+
+    request.start_async();
+
+    return frameID;
+}
+
 int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData) {
     auto frameID = inputFrameId;
 

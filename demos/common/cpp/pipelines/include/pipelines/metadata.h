@@ -40,6 +40,31 @@ struct ImageMetaData : public MetaData {
     ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) : img(img), timeStamp(timeStamp) {}
 };
 
+struct ImageBatchMetaData : public MetaData {
+    std::chrono::steady_clock::time_point timeStamp;
+    std::vector<std::shared_ptr<ImageMetaData>> metadatas;
+
+    ImageBatchMetaData() {}
+
+    ImageBatchMetaData(std::vector<cv::Mat>::iterator imagesBeginIt,
+                       const std::vector<cv::Mat>::iterator imagesEndIt,
+                       std::chrono::steady_clock::time_point timeStamp) : timeStamp(timeStamp) {
+        size_t images_count = std::distance(imagesBeginIt, imagesEndIt);
+        metadatas.reserve(images_count);
+        for (; imagesBeginIt != imagesEndIt;) {
+            metadatas.push_back(std::make_shared<ImageMetaData>(*imagesBeginIt++, timeStamp));
+        }
+    }
+
+    void add(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) {
+        metadatas.push_back(std::make_shared<ImageMetaData>(img, timeStamp));
+        this->timeStamp = timeStamp;
+    }
+    void clear() {
+        metadatas.clear();
+    }
+};
+
 struct ClassificationImageMetaData : public ImageMetaData {
     unsigned int groundTruthId;
 
@@ -48,4 +73,27 @@ struct ClassificationImageMetaData : public ImageMetaData {
                                 unsigned int groundTruthId)
         : ImageMetaData(img, timeStamp),
           groundTruthId(groundTruthId) {}
+};
+
+
+struct ClassificationImageBatchMetaData : public MetaData {
+    std::vector<std::shared_ptr<ClassificationImageMetaData>> metadatas;
+
+    ClassificationImageBatchMetaData(std::vector<cv::Mat>::iterator imagesBeginIt,
+                                const std::vector<cv::Mat>::iterator imagesEndIt,
+                                std::chrono::steady_clock::time_point timeStamp,
+                                std::vector<unsigned int>::iterator groundTruthIdsBeginIt,
+                                const std::vector<unsigned int>::iterator groundTruthIdsEndIt)
+        : MetaData(){
+        size_t images_count = std::distance(imagesBeginIt, imagesEndIt);
+        size_t gt_count = std::distance(groundTruthIdsBeginIt, groundTruthIdsEndIt);
+        if (images_count != gt_count) {
+            throw std::runtime_error("images.size() != groundTruthIds.size()");
+        }
+
+        metadatas.reserve(images_count);
+        for (; imagesBeginIt != imagesEndIt;) {
+            metadatas.push_back(std::make_shared<ClassificationImageMetaData>(*imagesBeginIt++, timeStamp, *groundTruthIdsBeginIt++));
+        }
+    }
 };

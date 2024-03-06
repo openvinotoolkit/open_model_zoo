@@ -55,7 +55,7 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
     for (size_t i = 0; i < scoresTensor.get_size(); ++i) {
         int ind = indicesPtr[i];
         if (ind < 0 || ind >= static_cast<int>(labels.size())) {
-            throw std::runtime_error("Invalid index for the class label is found during postprocessing");
+            throw std::runtime_error(std::string("Invalid index: ") + std::to_string(ind) + " for the class label is found during postprocessing, label size: " + std::to_string(labels.size()));
         }
         result->topLabels.emplace_back(ind, labels[ind], scoresPtr[i]);
     }

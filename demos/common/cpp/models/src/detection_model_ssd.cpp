@@ -53,6 +53,21 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
     return DetectionModel::preprocess(inputData, request);
 }
 
+std::shared_ptr<InternalModelData> ModelSSD::preprocess(std::vector<std::shared_ptr<InputData>>::iterator inputDataBegin,
+                                                                std::vector<std::shared_ptr<InputData>>::iterator inputDataEnd,
+                                                                ov::InferRequest& request) {
+    if (inputsNames.size() > 1) {
+        const auto& imageInfoTensor = request.get_tensor(inputsNames[1]);
+        const auto info = imageInfoTensor.data<float>();
+        info[0] = static_cast<float>(netInputHeight);
+        info[1] = static_cast<float>(netInputWidth);
+        info[2] = 1;
+        request.set_tensor(inputsNames[1], imageInfoTensor);
+    }
+
+    return DetectionModel::preprocess(inputDataBegin, inputDataEnd, request);
+}
+
 std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     return outputsNames.size() > 1 ? postprocessMultipleOutputs(infResult) : postprocessSingleOutput(infResult);
 }
