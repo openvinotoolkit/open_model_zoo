@@ -65,7 +65,7 @@ class PipelinedModel(BaseCascadeModel):
     def create_pipeline(self, launcher, netowrk_info=None):
         tokenizer_config = self.config.get("tokenizer_id", "openai/clip-vit-large-patch14")
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_config)
-        scheduler_config = self.config.get("sheduler_config", {})
+        scheduler_config = self.config.get("scheduler_config", {})
         scheduler = LMSDiscreteScheduler.from_config(scheduler_config)
         netowrk_info = netowrk_info or self.network_info
         self.pipe = OVStableDiffusionPipeline(
@@ -164,7 +164,7 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         self,
         launcher: "BaseLauncher", # noqa: F821
         tokenizer: "CLIPTokenizer", # noqa: F821
-        scheduler: Union["DDIMScheduler", "PNDMScheduler", "LMSDiscreteScheduler"], # noqa: F821
+        scheduler: Union["LMSDiscreteScheduler"], # noqa: F821
         model_info: Dict,
         seed = None,
         num_inference_steps = 50
@@ -255,14 +255,24 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         if accepts_eta:
             extra_step_kwargs["eta"] = eta
 
+        # lcm_dreamshaper-v7 consist extra unet input
+        is_extra_input = len(self.unet.inputs) == 4 and self.unet.inputs[3].any_name == 'timestep_cond'
+        if is_extra_input:
+            batch_size = len(prompt) if isinstance(prompt, list) else 1
+            w = torch.tensor(guidance_scale).repeat(batch_size)
+            w_embedding = self.get_w_embedding(w, embedding_dim=256)
+
         for t in self.progress_bar(timesteps):
             # expand the latents if we are doing classifier free guidance
             latent_model_input = np.concatenate([latents] * 2) if do_classifier_free_guidance else latents
             latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
 
+            inputs = [ latent_model_input, np.array(t, dtype=np.float32), text_embeddings ]
+            if is_extra_input:
+                inputs.append(w_embedding)
+
             # predict the noise residual
-            noise_pred = self.unet(
-                [latent_model_input, np.array(t, dtype=np.float32), text_embeddings])[self._unet_output]
+            noise_pred = self.unet(inputs)[self._unet_output]
             # perform guidance
             if do_classifier_free_guidance:
                 noise_pred_uncond, noise_pred_text = noise_pred[0], noise_pred[1]
@@ -455,3 +465,27 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
             model = getattr(self, part_model_id, None)
             if model is not None:
                 self.launcher.print_input_output_info(model, part)
+
+    @staticmethod
+    def get_w_embedding(w, embedding_dim=512, dtype=torch.float32):
+        """
+        see https://github.com/google-research/vdm/blob/dc27b98a554f65cdc654b800da5aa1846545d41b/model_vdm.py#L298
+        Args:
+        timesteps: torch.Tensor: generate embedding vectors at these timesteps
+        embedding_dim: int: dimension of the embeddings to generate
+        dtype: data type of the generated embeddings
+        Returns:
+        embedding vectors with shape `(len(timesteps), embedding_dim)`
+        """
+        assert len(w.shape) == 1
+        w = w * 1000.0
+
+        half_dim = embedding_dim // 2
+        emb = torch.log(torch.tensor(10000.0)) / (half_dim - 1)
+        emb = torch.exp(torch.arange(half_dim, dtype=dtype) * -emb)
+        emb = w.to(dtype)[:, None] * emb[None, :]
+        emb = torch.cat([torch.sin(emb), torch.cos(emb)], dim=1)
+        if embedding_dim % 2 == 1:  # zero pad
+            emb = torch.nn.functional.pad(emb, (0, 1))
+        assert emb.shape == (w.shape[0], embedding_dim)
+        return emb
