@@ -1,5 +1,6 @@
 onnx>=1.13
 scipy>=1.5.4
+mpmath<1.4
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch>=1.8.1
 torchvision>=0.9.1
