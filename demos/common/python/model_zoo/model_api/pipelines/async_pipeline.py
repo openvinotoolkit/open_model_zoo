@@ -54,29 +54,35 @@ def parse_value_per_device(devices: Set[str], values_string: str)-> Dict[str, in
 
 
 def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Dict[str, str]:
+    from openvino import Core, properties
     config = {}
 
     devices = set(parse_devices(flags_d))
 
     device_nstreams = parse_value_per_device(devices, flags_nstreams)
+    core = Core()
     for device in devices:
+        supported_properties = core.get_property(device, properties.supported_properties())
         if device == 'CPU':  # CPU supports a few special performance-oriented keys
             # limit threading for CPU portion of inference
             if flags_nthreads:
-                config['CPU_THREADS_NUM'] = str(flags_nthreads)
+                config[device]['CPU_THREADS_NUM'] = str(flags_nthreads)
 
-            config['CPU_BIND_THREAD'] = 'NO'
-
-            # for CPU execution, more throughput-oriented execution via streams
-            config['CPU_THROUGHPUT_STREAMS'] = str(device_nstreams[device]) \
-                if device in device_nstreams else 'CPU_THROUGHPUT_AUTO'
+            config[device]['ENABLE_CPU_PINNING'] = 'NO'
+            if "CPU_THROUGHPUT_STREAMS" in supported_properties:
+                # for CPU execution, more throughput-oriented execution via streams
+                config[device]['CPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'CPU_THROUGHPUT_AUTO'))
+            else:
+                config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
         elif device == 'GPU':
-            config['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams[device]) \
-                if device in device_nstreams else 'GPU_THROUGHPUT_AUTO'
+            if "GPU_THROUGHPUT_STREAMS" in supported_properties:
+                config['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
+            else:
+                config["GPU"]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
             if 'MULTI' in flags_d and 'CPU' in devices:
                 # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config['GPU_PLUGIN_THROTTLE'] = '1'
+                config[device]['GPU_PLUGIN_THROTTLE'] = '1'
     return config
 
 
