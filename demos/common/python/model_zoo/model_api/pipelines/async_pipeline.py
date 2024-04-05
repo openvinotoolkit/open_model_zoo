@@ -76,9 +76,9 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
                 config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
         elif device == 'GPU':
             if "GPU_THROUGHPUT_STREAMS" in supported_properties:
-                config['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
+                config[device]['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
             else:
-                config["GPU"]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
+                config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
             if 'MULTI' in flags_d and 'CPU' in devices:
                 # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
