@@ -2,7 +2,8 @@
 
 OpenVINO™ launcher is one of the supported wrappers for easily launching models within Accuracy Checker tool. This launcher uses OpenVINO™ with support API 2.0 as inference backend and accepts for executing networks in OpenVINO™ supported formats.
 
-**Note**: the tool by default executes OpenVINO™ with API2.0 if it is available. In order to run model with API1.0 you need specify `--use_new_api False` parametrs, see [this section](#deprecated-how-to-configure-openvino-api-10-launcher) for details how to setup Accuracy Cheker launcher for API 1.0 and [migration instruction](#migrate-accuracy-checker-configuration-from-openvino-api-10-to-20) for configs.
+**Note**: the tool by default executes OpenVINO™ with API2.0 if it is available. In order to run model with API1.0 you need specify `--use_new_api False` parametrs, see [this section](#deprecated-how-to-configure-openvino-api-10-launcher) for details how to setup Accuracy Checker launcher for API 1.0 and
+[migration instruction](#migrate-accuracy-checker-configuration-from-openvino-api-1-0-to-2-0) for configs.
 
 For enabling OpenVINO™ launcher you need to add `framework: openvino` in launchers section of your configuration file and provide following parameters:
 

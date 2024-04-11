@@ -1,6 +1,6 @@
 # How to use predefined configuration files
 
-**Note**: Since 2022.1 all provided Open Model Zoo configuration files switched to work with OpenVINO™ API 2.0. For launching models with API 1.0, additional actions may be required, see [config migration guide](../accuracy_checker/launcher/openvino_launcher_readme.md#migrate-accuracy-checker-configuration-from-openvino-api-10-to-20).
+**Note**: Since 2022.1 all provided Open Model Zoo configuration files switched to work with OpenVINO™ API 2.0. For launching models with API 1.0, additional actions may be required, see [config migration guide](../accuracy_checker/launcher/openvino_launcher_readme.md#migrate-accuracy-checker-configuration-from-openvino-api-1-0-to-2-0).
 
 
 ## Structure
