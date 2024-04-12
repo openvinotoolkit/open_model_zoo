@@ -16,7 +16,7 @@ imagecodecs~=2022.2.22;python_version>="3.8"
 
 # reid
 # python3.6 dropped in v1.0
-scikit-learn~=0.24.1
+scikit-learn>=0.24.1
 
 # cpu extension usage
 py-cpuinfo>=7.0.0
