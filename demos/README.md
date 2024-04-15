@@ -177,7 +177,7 @@ For the open-source version of OpenVINO, set the following variables:
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
 Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows) variable before building the demos.
 
-### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
+### Build the Demo Applications on Linux*
 
 The officially supported Linux* build environment is the following:
 
@@ -220,7 +220,7 @@ cmake --build .
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
 for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
-### <a name="build_demos_windows"></a>Build the Demos Applications on Microsoft Windows* OS
+### Build the Demos Applications on Microsoft Windows* OS
 
 The recommended Windows* build environment is the following:
 
@@ -279,7 +279,7 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="python_requirements"></a>Dependencies for Python* Demos
+### Dependencies for Python* Demos
 
 The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
@@ -287,13 +287,13 @@ The dependencies for Python demos must be installed before running. It can be ac
 python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-### <a name="python_model_api"></a>Python\* model API package
+### Python\* model API package
 
 Python* ModelAPI is factored out as a separate package. Refer to the
-[Python Model API documentation](common/python/model_zoo/model_api/README.md#installing-python-model-api-package)
+[Python Model API documentation](./common/python/model_zoo/model_api/README.md#installing-python-model-api-package)
 to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
 
-### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
+###Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
 This requires you to have Python development files (headers and import libraries) installed.
@@ -307,7 +307,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 
 Once the modules are built, add the demo build folder to the `PYTHONPATH` environment variable.
 
-### <a name="build_specific_demos"></a>Build Specific Demos
+### Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
 but add `--target <demo1> <demo2> ...` to the `cmake --build` command or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.

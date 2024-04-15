@@ -864,7 +864,7 @@ The main difference between this converter and `super_resolution` in data organi
 * `parti_prompts` - convert [PartiPrompts](https://github.com/google-research/parti) for text to image generation benchmarking to `Text2ImageGenerationAnnotation`.
   * `annotation_file` - path to annotation file in csv format.
 
-## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
+## Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.
 Dataset meta file is JSON file, which can contain the following parameters:
