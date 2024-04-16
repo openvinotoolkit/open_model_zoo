@@ -25,10 +25,10 @@ from ...utils import contains_all, extract_image_representations, read_json, Uns
 from ...representation import ClassificationPrediction
 from ...logging import print_info
 
-# try:
-#     from tqdm import tqdm
-# except ImportError as error:
-tqdm = UnsupportedPackage('tqdm', error.msg)
+try:
+    from tqdm import tqdm
+except ImportError as error:
+    tqdm = UnsupportedPackage('tqdm', error.msg)
 
 try:
     import open_clip
@@ -159,7 +159,7 @@ class OpenVinoClipModel(BaseCascadeModel):
         with torch.no_grad(), autocast():
             zeroshot_weights = []
             iterator = classnames
-            if isinstance(tqdm, UnsupportedPackage):
+            if not isinstance(tqdm, UnsupportedPackage):
                 iterator = tqdm(classnames, mininterval=2)
 
             for classname in iterator:
@@ -190,7 +190,6 @@ class OpenVinoClipModel(BaseCascadeModel):
             network = launcher.read_network(str(model), str(weights))
         else:
             network = launcher.read_network(str(model), None)
-        self.set_model(network, )
         setattr(self, "{}_model".format(network_list["name"]), network)
 
     def print_input_output_info(self):
