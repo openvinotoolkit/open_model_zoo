@@ -49,6 +49,7 @@ class OpenVinoClipEvaluator(BaseCustomEvaluator):
 
         zeroshot_weights = self.model.zero_shot_classifier(self.dataset.data_reader.data_source)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_data, _ = extract_image_representations(batch_inputs)
 
             batch_raw_prediction, batch_prediction = self.model.predict(
