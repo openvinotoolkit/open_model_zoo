@@ -15,18 +15,25 @@ limitations under the License.
 """
 import os
 import numpy as np
-import open_clip
-import PIL
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
 
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
 from ...config import ConfigError
-from ...utils import contains_all, extract_image_representations, read_json
+from ...utils import contains_all, extract_image_representations, read_json, UnsupportedPackage
 from ...representation import ClassificationPrediction
 from ...logging import print_info
+
+# try:
+#     from tqdm import tqdm
+# except ImportError as error:
+tqdm = UnsupportedPackage('tqdm', error.msg)
+
+try:
+    import open_clip
+except ImportError as error:
+    open_clip = UnsupportedPackage('open_clip', error.msg)
 
 
 class OpenVinoClipEvaluator(BaseCustomEvaluator):
@@ -102,7 +109,7 @@ class OpenVinoClipModel(BaseCascadeModel):
     def predict(self, identifiers, input_data, zeroshot_weights):
         preds = []
         for idx, image_data in zip(identifiers, input_data):
-            image = self.transform(PIL.Image.fromarray(image_data))
+            image = torch.from_numpy(image_data)
             image_features = self.encode_image(image.unsqueeze(0))
             image_features = F.normalize(image_features, dim=-1)
             logits = 100. * image_features @ zeroshot_weights
@@ -151,7 +158,11 @@ class OpenVinoClipModel(BaseCascadeModel):
         autocast = torch.cuda.amp.autocast
         with torch.no_grad(), autocast():
             zeroshot_weights = []
-            for classname in tqdm(classnames, mininterval=2):
+            iterator = classnames
+            if isinstance(tqdm, UnsupportedPackage):
+                iterator = tqdm(classnames, mininterval=2)
+
+            for classname in iterator:
                 texts = [template.format(c=classname) for template in templates]
                 tokenized_texts = self.tokenizer(texts).to(device)  # tokenize
                 class_embeddings = self.encode_text(tokenized_texts, self.torch_model)
