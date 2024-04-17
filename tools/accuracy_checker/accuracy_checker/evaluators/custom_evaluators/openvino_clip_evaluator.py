@@ -18,6 +18,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from contextlib import suppress
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
 from ...config import ConfigError
@@ -155,8 +156,7 @@ class OpenVinoClipModel(BaseCascadeModel):
         print_info('Encoding zeroshot weights for {} imagenet classes'.format(len(classnames)))
 
         # Code source https://github.com/mlfoundations/open_clip/blob/main/src/training/zero_shot.py
-        autocast = torch.cuda.amp.autocast
-        with torch.no_grad(), autocast():
+        with torch.no_grad(), suppress():
             zeroshot_weights = []
             iterator = classnames
             if not isinstance(tqdm, UnsupportedPackage):
