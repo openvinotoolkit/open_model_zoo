@@ -84,6 +84,7 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
                 # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 if 'CPU' in devices:
+                    config['MULTI'].update(config['CPU'])
                     config['MULTI']['GPU_PLUGIN_THROTTLE'] = '1'
 
     if 'MULTI' in flags_d:
