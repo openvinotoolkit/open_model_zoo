@@ -88,8 +88,12 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
                     config['MULTI']['GPU_PLUGIN_THROTTLE'] = '1'
 
     if 'MULTI' in flags_d:
+        if 'CPU' in devices:
+            config['MULTI'].update(config['CPU'])
+        print(config)
         return config['MULTI']
     else:
+        print(config)
         return config[flags_d]
 
 
