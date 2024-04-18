@@ -55,7 +55,7 @@ def parse_value_per_device(devices: Set[str], values_string: str)-> Dict[str, in
 
 def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Dict[str, str]:
     from openvino import Core, properties
-    config = {}
+    config = {'CPU':{}, 'GPU':{}, 'MULTI':{}, 'AUTO':{}}
 
     devices = set(parse_devices(flags_d))
 
@@ -79,11 +79,17 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
                 config[device]['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
             else:
                 config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
-            if 'MULTI' in flags_d and 'CPU' in devices:
+            if 'MULTI' in flags_d:
+                config['MULTI'].update(config[device])
                 # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config[device]['GPU_PLUGIN_THROTTLE'] = '1'
-    return config
+                if 'CPU' in devices:
+                    config['MULTI']['GPU_PLUGIN_THROTTLE'] = '1'
+
+    if 'MULTI' in flags_d:
+        return config['MULTI']
+    else:
+        return config[flags_d]
 
 
 class AsyncPipeline:
