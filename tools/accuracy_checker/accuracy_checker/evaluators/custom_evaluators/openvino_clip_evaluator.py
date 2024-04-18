@@ -15,10 +15,7 @@ limitations under the License.
 """
 import os
 import numpy as np
-import torch
-import torch.nn.functional as F
 
-from contextlib import suppress
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
 from ...config import ConfigError
@@ -87,8 +84,6 @@ class OpenVinoClipModel(BaseCascadeModel):
 
     def create_pipeline(self, launcher, network_info):
         orig_model_name = self.config.get("orig_model_name", "ViT-B-16-plus-240")
-        pretrained = self.config.get("pretrained", "laion400m_e32")
-
         self.load_models(network_info, launcher, True)
 
         self.text_encoder = launcher.ie_core.compile_model(self.text_encoder_model, launcher.device)
@@ -101,20 +96,17 @@ class OpenVinoClipModel(BaseCascadeModel):
             self.templates_file = None
 
         self.classnames_file = self.config.get("classnames", "classnames.json")
-
-        self.torch_model, _, self.transform = open_clip.create_model_and_transforms(orig_model_name,
-                                                                                    pretrained=pretrained,
-                                                                                    cache_dir=None)
+        self.parameters_file = self.config.get("pretrained_model_params", None)
         self.tokenizer = open_clip.get_tokenizer(orig_model_name)
 
     def predict(self, identifiers, input_data, zeroshot_weights):
         preds = []
         for idx, image_data in zip(identifiers, input_data):
-            image = torch.from_numpy(image_data)
-            image_features = self.encode_image(image.unsqueeze(0))
-            image_features = F.normalize(image_features, dim=-1)
+            image = np.expand_dims(image_data, axis=0)
+            image_features = self.encode_image(image)
+            image_features = self.normalize(image_features, axis=-1)
             logits = 100. * image_features @ zeroshot_weights
-            preds.append(ClassificationPrediction(idx, logits.squeeze(0)))
+            preds.append(ClassificationPrediction(idx, np.squeeze(logits, axis=0)))
         return None, preds
 
     def get_network(self):
@@ -124,26 +116,36 @@ class OpenVinoClipModel(BaseCascadeModel):
             model_list.append({"name": model_part_name, "model": model})
         return model_list
 
-    def encode_image(self, image, normalize: bool = False):
-        '''
-        Code source https://github.com/AlexKoff88/CLIP_benchmark/blob/openvino/clip_benchmark/models/openvino_clip.py
-        '''
+    def encode_image(self, image):
         features = self.image_encoder(image)
-        features = torch.from_numpy(features[self.image_encoder.output()])
-        return F.normalize(features, dim=-1) if normalize else features
+        return features[self.image_encoder.output()]
 
-    def encode_text(self, text, normalize: bool = False):
-        # Code source https://github.com/AlexKoff88/CLIP_benchmark/blob/openvino/clip_benchmark/models/openvino_clip.py
-        x = self.torch_model.token_embedding(text)
-        x = x + self.torch_model.positional_embedding
-        x = x.permute(1, 0, 2)
-        x = torch.asarray(x).contiguous()
-        x = self.text_encoder((x, self.torch_model.attn_mask))
-        x = torch.from_numpy(x[self.text_encoder.output()])
-        x = x.permute(1, 0, 2)
-        x = self.torch_model.ln_final(x)
-        x = x[np.arange(x.shape[0]), text.argmax(dim=-1)] @ self.torch_model.text_projection
-        return F.normalize(x, dim=-1) if normalize else x
+    def encode_text(self, texts, params):
+        text = self.tokenizer(texts).to('cpu')
+        indices = text.detach().cpu().numpy()
+
+        x = params['token_embedding'][indices]
+        x = x + params['positional_embedding']
+        x = x.transpose(1, 0, 2)
+        x = self.text_encoder((x, params['attn_mask']))
+        x = x[self.text_encoder.output()]
+        x = x.transpose(1, 0, 2)
+        x = self.layer_norm(x, params['gamma'], params['beta'])
+        x = x[np.arange(x.shape[0]), np.argmax(indices, axis=-1)] @ params['text_projection']
+        return x
+
+    @staticmethod
+    def get_pretrained_model_params(path):
+        params = {}
+        open_clip_params = np.load(path)
+        params['attn_mask'] = open_clip_params['attn_mask']
+        params['token_embedding'] = open_clip_params['token_embedding']
+        params['positional_embedding'] = open_clip_params['positional_embedding']
+        params['text_projection'] = open_clip_params['text_projection']
+        params['normalized_shape'] = open_clip_params['normalized_shape']
+        params['gamma'] = open_clip_params['gamma']
+        params['beta'] = open_clip_params['beta']
+        return params
 
     def zero_shot_classifier(self, data_source):
         classnames = read_json(os.path.join(data_source, self.classnames_file))
@@ -152,25 +154,22 @@ class OpenVinoClipModel(BaseCascadeModel):
         else:
             templates = ["a photo of a {c}"]
 
-        device = 'cpu'
+        params = self.get_pretrained_model_params(os.path.join(data_source, self.parameters_file))
         print_info('Encoding zeroshot weights for {} imagenet classes'.format(len(classnames)))
 
-        # Code source https://github.com/mlfoundations/open_clip/blob/main/src/training/zero_shot.py
-        with torch.no_grad(), suppress():
-            zeroshot_weights = []
-            iterator = classnames
-            if not isinstance(tqdm, UnsupportedPackage):
-                iterator = tqdm(classnames, mininterval=2)
+        zeroshot_weights = []
+        iterator = classnames
+        if not isinstance(tqdm, UnsupportedPackage):
+            iterator = tqdm(classnames, mininterval=2)
 
-            for classname in iterator:
-                texts = [template.format(c=classname) for template in templates]
-                tokenized_texts = self.tokenizer(texts).to(device)  # tokenize
-                class_embeddings = self.encode_text(tokenized_texts, self.torch_model)
-                class_embedding = F.normalize(class_embeddings, dim=-1).mean(dim=0)
-                class_embedding /= class_embedding.norm()
-                zeroshot_weights.append(class_embedding)
-            zeroshot_weights = torch.stack(zeroshot_weights, dim=1).to(device)
-        return zeroshot_weights
+        for classname in iterator:
+            texts = [template.format(c=classname) for template in templates]
+            class_embeddings = self.encode_text(texts, params)
+            class_embedding = self.normalize(class_embeddings, axis=-1)
+            class_embedding = np.mean(class_embedding, axis=0)
+            class_embedding /= np.linalg.norm(class_embedding, ord=2)
+            zeroshot_weights.append(class_embedding)
+        return np.stack(zeroshot_weights, axis=1)
 
     def load_models(self, network_info, launcher, log=False):
         if isinstance(network_info, dict):
@@ -199,3 +198,23 @@ class OpenVinoClipModel(BaseCascadeModel):
             model = getattr(self, part_model_id, None)
             if model is not None:
                 self.launcher.print_input_output_info(model, part)
+
+    @staticmethod
+    def layer_norm(input_array, gamma, beta, epsilon=1e-5):
+        """
+        Input array layer normalization (aka torch.nn.LayerNorm).
+        """
+        mean = np.mean(input_array, axis=-1, keepdims=True)
+        std = np.std(input_array, axis=-1, keepdims=True)
+        normalized = (input_array - mean) / np.sqrt(std ** 2 + epsilon)
+        return normalized * gamma + beta
+
+    @staticmethod
+    def normalize(input_array, p=2, axis=-1, epsilon=1e-12):
+        """
+        Input array normalization using the p-norm (aka torch.nn.functional.normalize).
+        """
+        norm = np.linalg.norm(input_array, ord=p, axis=axis, keepdims=True)
+        norm = np.maximum(norm, epsilon)
+        normalized = input_array / norm
+        return normalized
