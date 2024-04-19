@@ -27,7 +27,7 @@ pyclipper>=1.2.1
 
 # brain tumor segmentation
 nibabel>=3.2.1
-scipy >=1.5.4,<1.11.0
+scipy >=1.5.4,<=1.8.0
 
 # dicom images reading
 pydicom>=2.1.2
