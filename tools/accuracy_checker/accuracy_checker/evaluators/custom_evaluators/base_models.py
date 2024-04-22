@@ -87,6 +87,44 @@ class BaseCascadeModel:
                 network_info.update({part: part_info})
         return network_info
 
+    @staticmethod
+    def automatic_model_search(network_info):
+        model = Path(network_info['model'])
+        model_name = network_info["name"]
+        if model.is_dir():
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(model_name)))
+                if not model_list:
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}*.xml'.format(model_name)))
+                blob_list = list(model.glob('*{}*.blob'.format(model_name)))
+                onnx_list = list(model.glob('*{}*.onnx'.format(model_name)))
+                if not model_list and not blob_list and not onnx_list:
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
+                    onnx_list = list(model.glob('*.onnx'))
+                if not model_list:
+                    model_list = blob_list if blob_list else onnx_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(model_name))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(model_name))
+            model = model_list[0]
+        accepted_suffixes = ['.xml', '.onnx']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(model_name, model))
+        if model.suffix in ['.blob', '.onnx']:
+            return model, None
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('{} - Found weights: {}'.format(model_name, weights))
+        return model, weights
+
 
 class BaseDLSDKModel:
     def __init__(self, network_info, launcher, suffix=None, delayed_model_loading=False):
