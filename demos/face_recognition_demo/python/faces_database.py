@@ -36,6 +36,13 @@ class FacesDatabase:
 
         @staticmethod
         def cosine_dist(x, y):
+            # cosine() returns 1 - cosine_similarity. cosine_similarity
+            # belongs to the interval
+            # [-1, 1] (https://en.wikipedia.org/wiki/Cosine_similarity).
+            # (1 - cosine_similarity) belongs to the interval [0, 2].
+            # To provide a probability like interpretation of the
+            # similarity measure, the interval is scaled down by the
+            # factor of two.
             return cosine(x, y) * 0.5
 
     def __init__(self, path, face_identifier, landmarks_detector, face_detector=None, no_show=False):
