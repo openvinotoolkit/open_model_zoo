@@ -55,7 +55,7 @@ def parse_value_per_device(devices: Set[str], values_string: str)-> Dict[str, in
 
 def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Dict[str, str]:
     from openvino import Core, properties
-    config = {'CPU':{}, 'GPU':{}, 'MULTI':{}, 'AUTO':{}, 'HETERO':{}, 'NPU':{}}
+    config = {}
 
     devices = set(parse_devices(flags_d))
 
@@ -66,43 +66,25 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
         if device == 'CPU':  # CPU supports a few special performance-oriented keys
             # limit threading for CPU portion of inference
             if flags_nthreads:
-                config[device]['CPU_THREADS_NUM'] = str(flags_nthreads)
+                config['CPU_THREADS_NUM'] = str(flags_nthreads)
 
-            config[device]['ENABLE_CPU_PINNING'] = 'NO'
+            config['ENABLE_CPU_PINNING'] = 'NO'
             if "CPU_THROUGHPUT_STREAMS" in supported_properties:
                 # for CPU execution, more throughput-oriented execution via streams
-                config[device]['CPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'CPU_THROUGHPUT_AUTO'))
+                config['CPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'CPU_THROUGHPUT_AUTO'))
             else:
-                config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
+                config["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
         elif device == 'GPU':
             if "GPU_THROUGHPUT_STREAMS" in supported_properties:
-                config[device]['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
+                config['GPU_THROUGHPUT_STREAMS'] = str(device_nstreams.get(device, 'GPU_THROUGHPUT_AUTO'))
             else:
-                config[device]["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
-            if 'MULTI' in flags_d:
-                config['MULTI'].update(config[device])
+                config["NUM_STREAMS"] = str(device_nstreams.get(device, -1))
+            if ('MULTI' in flags_d or 'HETERO' in flags_d) and 'CPU' in devices:
                 # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config['MULTI']['GPU_PLUGIN_THROTTLE'] = '1'
-            if 'HETERO' in flags_d:
-                config['HETERO'].update(config[device])
-                # multi-device execution with the CPU + GPU performs best with GPU throttling hint,
-                # which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config['HETERO']['GPU_PLUGIN_THROTTLE'] = '1'
+                config['GPU_PLUGIN_THROTTLE'] = '1'
                  
-
-    if 'MULTI' in flags_d:
-        if 'CPU' in devices:
-            config['MULTI'].update(config['CPU'])
-        device_config = config['MULTI']
-    elif 'HETERO' in flags_d:
-        if 'CPU' in devices:
-            config['HETERO'].update(config['CPU'])
-        device_config = config['HETERO']
-    else:
-        device_config = config[flags_d]
-
-    return device_config
+    return config
 
 
 class AsyncPipeline:
