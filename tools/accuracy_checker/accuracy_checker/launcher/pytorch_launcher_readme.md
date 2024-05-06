@@ -12,6 +12,7 @@ For enabling PyTorch launcher you need to add `framework: pytorch` in launchers 
 * `module_kwargs` - dictionary (`key`: `value` where `key` is argument name, `value` is argument value) which represent network module keyword arguments.
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 * `batch` - batch size for running model (Optional, default 1).
+* `use_openvino_backend` - use torch.compile feature with `openvino` backend (Optional, default `False`)
 
 In turn if you model has several inputs you need to specify them in config, using specific parameter: `inputs`.
 Each input description should has following info:
