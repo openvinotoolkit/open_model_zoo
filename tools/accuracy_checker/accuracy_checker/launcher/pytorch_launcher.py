@@ -51,7 +51,9 @@ class PyTorchLauncher(Launcher):
             'batch': NumberField(value_type=int, min_value=1, optional=True, description="Batch size.", default=1),
             'output_names': ListField(
                 optional=True, value_type=str, description='output tensor names'
-            )
+            ),
+            'use_openvino_backend': BoolField(
+                optional=True, default=False, description='use torch.compile feature with openvino backend')
         })
         return parameters
 
@@ -66,6 +68,13 @@ class PyTorchLauncher(Launcher):
                 import_error.msg)) from import_error
         self._torch = torch
         self.validate_config(config_entry)
+        self.is_openvino_backend = config_entry.get('use_openvino_backend')
+        if self.is_openvino_backend:
+            try:
+                import openvino.torch # pylint: disable=C0415
+            except ImportError as import_error:
+                raise ValueError("torch.compile is supported from OpenVINO 2023.1\n{}".format(
+                    import_error.msg)) from import_error
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
         self.device = self.get_value_from_config('device')
@@ -123,6 +132,9 @@ class PyTorchLauncher(Launcher):
                 module.load_state_dict(state, strict=False)
             module.to(self.device)
             module.eval()
+            if self.is_openvino_backend:
+                opts = {"device" : f"{self.device}"}
+                module = self._torch.compile(module, backend="openvino", options=opts)
             return module
 
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
