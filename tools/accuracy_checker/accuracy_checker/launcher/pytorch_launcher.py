@@ -20,7 +20,7 @@ import importlib
 from collections import OrderedDict
 
 import numpy as np
-from ..config import PathField, StringField, DictField, NumberField, ListField
+from ..config import PathField, StringField, DictField, NumberField, ListField, BoolField
 from .launcher import Launcher
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
