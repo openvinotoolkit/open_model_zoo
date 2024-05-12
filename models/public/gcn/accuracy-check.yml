@@ -4,7 +4,10 @@ evaluations:
     module_config:
       launchers:
         - framework: dgl
+          device: CPU
           model: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\gcn_model.pt
+          module: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\GCN.py
+          module_name: GCN
 
       datasets:
         - name: tmp
