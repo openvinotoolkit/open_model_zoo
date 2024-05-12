@@ -1,0 +1,27 @@
+evaluations:
+  - name: gcn
+    module: custom_evaluators.dgl_evaluator.DGLEvaluator
+    module_config:
+      launchers:
+        - framework: dgl
+          model: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\gcn_model.pt
+
+      datasets:
+        - name: tmp
+          reader: graph(dgl)_reader
+          data_source: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\default_graph.bin
+          annotation_conversion:
+            converter: dgl
+            graph_path: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\data.bin
+          
+          metrics:
+            - type: clip_accuracy
+              presenter: print_vector
+              reference:
+                clip_accuracy: 0.565
+                video_accuracy: 0.565283
+                mean: 0.565141
+      # data_source: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\default_graph.bin
+      # metrics:
+      # - type: accuracy
+
