@@ -34,7 +34,8 @@ from ..representation import (
 )
 from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
 from ..utils import (
-    get_path, OrderedSet, cast_to_bool, is_relative_to, start_telemetry, send_telemetry_event, end_telemetry
+    get_path, OrderedSet, cast_to_bool, is_relative_to, start_telemetry, send_telemetry_event, 
+    end_telemetry, AtomicWriteFileHandle
 )
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
@@ -327,7 +328,7 @@ def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config
         annotation_dir = annotation_file.parent
         if not annotation_dir.exists():
             annotation_dir.mkdir(parents=True)
-        with annotation_file.open('wb') as file:
+        with AtomicWriteFileHandle(annotation_file,'wb') as file:
             if conversion_meta:
                 pickle.dump(conversion_meta, file)
             for representation in annotation:
@@ -337,7 +338,7 @@ def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config
         meta_dir = meta_file.parent
         if not meta_dir.exists():
             meta_dir.mkdir(parents=True)
-        with meta_file.open('wt') as file:
+        with AtomicWriteFileHandle(meta_file, 'wt') as file:
             json.dump(meta, file)
 
 
