@@ -148,7 +148,9 @@ class TestAtomicWriteFileHandle:
         for i in range(num_threads):
             thread = threading.Thread(target=thread_write_to_file, args=(target_file_path, data_chunks[i], i))
             threads.append(thread)
-            thread.start()
+            
+        for thread in threads:
+            thread.start()            
 
         for thread in threads:
             thread.join()
