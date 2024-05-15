@@ -990,7 +990,7 @@ class AtomicWriteFileHandle:
     def __init__(self, file_path, open_mode):
         self.target_path = file_path
         self.mode = open_mode
-        self.temp_fd, self.temp_path = tempfile.mkstemp()
+        self.temp_fd, self.temp_path = tempfile.mkstemp(dir=os.path.dirname(file_path))
         self.temp_file = os.fdopen(self.temp_fd, open_mode)
 
     def write(self, data):
