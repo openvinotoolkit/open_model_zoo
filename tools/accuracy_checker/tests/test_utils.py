@@ -14,9 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
-import threading
-from accuracy_checker.utils import concat_lists, contains_all, contains_any, overrides, zipped_transform, AtomicWriteFileHandle
+from accuracy_checker.utils import concat_lists, contains_all, contains_any, overrides, zipped_transform
 
 
 def test_concat_lists():
@@ -127,37 +125,3 @@ class TestOverrides:
 
         assert overrides(B, 'foo', A)
         assert not overrides(C, 'foo', A)
-
-
-def thread_write_to_file(file_path, data, thread_id):
-    with AtomicWriteFileHandle(file_path, 'wt') as file:
-        file.write(f"Thread {thread_id}: {data}\n")
-
-
-class TestAtomicWriteFileHandle:
-
-    def test_multithreaded_atomic_file_write(self):
-        target_file_path = "test_atomic_file.txt"
-        threads = []
-        num_threads = 8
-        data_chunks = [f"Data chunk {i}" for i in range(num_threads)]
-
-        if os.path.exists(target_file_path):
-            os.remove(target_file_path)
-
-        for i in range(num_threads):
-            thread = threading.Thread(target=thread_write_to_file, args=(target_file_path, data_chunks[i], i))
-            threads.append(thread)
-            
-        for thread in threads:
-            thread.start()            
-
-        for thread in threads:
-            thread.join()
-
-        with open(target_file_path, 'r') as file:
-            lines = file.readlines()
-
-        os.remove(target_file_path)
-
-        assert any(data_chunk in line for line in lines for data_chunk in data_chunks), f"data_chunks data not found in the file"

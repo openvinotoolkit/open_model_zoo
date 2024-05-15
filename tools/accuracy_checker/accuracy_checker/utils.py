@@ -24,7 +24,6 @@ import struct
 import sys
 import zlib
 import re
-import tempfile
 from enum import Enum
 
 from pathlib import Path
@@ -982,38 +981,3 @@ def ov_new_api_available():
         return True
     except ImportError:
         return False
-
-
-class AtomicWriteFileHandle:
-    """Ensure the file is written once in case of multi processes or threads."""
-
-    def __init__(self, file_path, open_mode):
-        self.target_path = file_path
-        self.mode = open_mode
-        self.temp_fd, self.temp_path = tempfile.mkstemp(dir=os.path.dirname(file_path))
-        self.temp_file = os.fdopen(self.temp_fd, open_mode)
-
-    def write(self, data):
-        self.temp_file.write(data)
-
-    def writelines(self, lines):
-        self.temp_file.writelines(lines)
-
-    def close(self):
-        if not self.temp_file.closed:
-            self.temp_file.close()
-            if not os.path.exists(self.target_path):
-                os.rename(self.temp_path, self.target_path)
-            else:
-                os.remove(self.temp_path)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    # Mimic other file object methods as needed
-    def __getattr__(self, item):
-        """Delegate attribute access to the underlying temporary file object."""
-        return getattr(self.temp_file, item)
