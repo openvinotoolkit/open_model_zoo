@@ -23,7 +23,7 @@ def thread_access_file(file_path, data_dict, thread_id, write_lines):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             read_lines = len(file.readlines())
-            # when new thread sees file it must have all lines already written
+            # when a new thread reads a file, all lines must already be written
             if read_lines != write_lines:
                 warn_message = f"Thread {thread_id}: Incorrect number of lines read from {file_path} ({read_lines} != {write_lines})"
                 warnings.warn(warn_message)
@@ -53,7 +53,7 @@ class TestAtomicWriteFileHandle:
         for thread in threads:
             thread.start()
 
-        for i,thread in enumerate(threads):
+        for thread in threads:
             thread.join()
 
         with open(target_file_path, 'r') as file:
