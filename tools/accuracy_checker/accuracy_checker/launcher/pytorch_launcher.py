@@ -71,7 +71,7 @@ class PyTorchLauncher(Launcher):
         self.is_openvino_backend = config_entry.get('use_openvino_backend')
         if self.is_openvino_backend:
             try:
-                import openvino.torch # pylint: disable=C0415
+                import openvino.torch # pylint: disable=C0415, W0611
             except ImportError as import_error:
                 raise ValueError("torch.compile is supported from OpenVINO 2023.1\n{}".format(
                     import_error.msg)) from import_error
