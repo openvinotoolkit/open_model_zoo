@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2022-2023 Intel Corporation
+// Copyright (C) 2022-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ protected:
     void prepareInputsOutputs(std::shared_ptr<ov::Model>& model) override;
     void setStridesGrids();
 
-    double boxIOUThreshold;
+    float boxIOUThreshold;
     std::vector<std::pair<size_t, size_t>> grids;
     std::vector<size_t> expandedStrides;
     static const size_t numberOfClasses = 80;

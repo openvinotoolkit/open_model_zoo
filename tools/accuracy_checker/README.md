@@ -123,7 +123,7 @@ Sometimes it can be useful to run the tool as a script for debugging or enabling
 To use Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory, for example, `<open_model_zoo>/tools/accuracy_checker/main.py`, with the following code:
 
 ```python
-from openvino.tools.accuracy_checker.main import main
+from accuracy_checker.main import main
 
 if __name__ == '__main__':
     main()
@@ -161,6 +161,8 @@ Use `-h, --help` to get the full list of command-line options. Some arguments ar
 - `--shuffle` allows shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
 - `--intermediate_metrics_results` enables intermediate metrics results printing. Default is `False`
 - `--metrics_interval` number of iterations for updated metrics result printing if `--intermediate_metrics_results` flag enabled. Default is 1000.
+- `--sub_evaluation` enables evaluation of subset of dataset with predefined `subset_metrics`. Default is `False`.
+  See [Sub evaluation with subset metrics](#sub-evaluation-with-subset-metrics)
 
 You are also able to replace some command-line arguments with the environment variables for path prefixing. Supported list of variables includes:
 * `DEFINITIONS_FILE` - equivalent of `-d`, `-definitions`.
@@ -183,15 +185,27 @@ Example:
 
 ```yaml
 models:
-- name: model_name
+- name: densenet-121-tf
   launchers:
-    - framework: caffe
-      model:   bvlc_alexnet.prototxt
-      weights: bvlc_alexnet.caffemodel
+    - framework: openvino
       adapter: classification
-      batch: 128
+
   datasets:
-    - name: dataset_name
+    - name: imagenet_1000_classes
+      preprocessing:
+        - type: resize
+          size: 256
+        - type: crop
+          size: 224
+      metrics:
+        - name: accuracy@top1
+          type: accuracy
+          top_k: 1
+          reference: 0.7446
+        - name: accuracy@top5
+          type: accuracy
+          top_k: 5
+          reference: 0.9213
 ```
 Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
 Example of global definitions file can be found at `<omz_dir>/data/dataset_definitions.yml`. Global definitions will be merged with evaluation config in the runtime by dataset name.
@@ -205,17 +219,17 @@ Each launcher configuration starts with setting `framework` name.
 Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_runtime*, *pytorch*, *paddlepaddle* supported.
 Launcher description can have differences.
 
-- [How to configure Caffe launcher](openvino/tools/accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure OpenVINO launcher](openvino/tools/accuracy_checker/launcher/openvino_launcher_readme.md)
-- [How to configure OpenCV launcher](openvino/tools/accuracy_checker/launcher/opencv_launcher_readme.md)
-- [How to configure G-API launcher](openvino/tools/accuracy_checker/launcher/gapi_launcher_readme.md)
-- [How to configure MXNet Launcher](openvino/tools/accuracy_checker/launcher/mxnet_launcher_readme.md)
-- [How to configure TensorFlow Launcher](openvino/tools/accuracy_checker/launcher/tf_launcher_readme.md)
-- [How to configure TensorFlow Lite Launcher](openvino/tools/accuracy_checker/launcher/tf_lite_launcher_readme.md)
-- [How to configure TensorFlow 2.0 Launcher](openvino/tools/accuracy_checker/launcher/tf2_launcher_readme.md)
-- [How to configure ONNX Runtime Launcher](openvino/tools/accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
-- [How to configure PyTorch Launcher](openvino/tools/accuracy_checker/launcher/pytorch_launcher_readme.md)
-- [How to configure PaddlePaddle Launcher](openvino/tools/accuracy_checker/launcher/pdpd_launcher_readme.md)
+- [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
+- [How to configure OpenVINO launcher](accuracy_checker/launcher/openvino_launcher_readme.md)
+- [How to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md)
+- [How to configure G-API launcher](accuracy_checker/launcher/gapi_launcher_readme.md)
+- [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
+- [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)
+- [How to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md)
+- [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
+- [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
+- [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
+- [How to configure PaddlePaddle Launcher](accuracy_checker/launcher/pdpd_launcher_readme.md)
 
 ### Datasets
 
@@ -248,8 +262,15 @@ You can convert annotation in-place using:
 
 or use existing annotation file and dataset meta:
 - `annotation` - path to annotation file, you must **convert annotation to representation of dataset problem first**, you may choose one of the converters from *annotation-converters* if there is already converter for your dataset or write your own.
-- `dataset_meta`: path to metadata file (generated by converter).
-More detailed information about annotation conversion you can find in [Annotation Conversion Guide](openvino/tools/accuracy_checker/annotation_converters/README.md).
+- `dataset_meta` - path to metadata file (generated by converter).
+More detailed information about annotation conversion you can find in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
+
+- `subset_metrics` - list of dataset subsets with unique size and metrics, computed if `--sub_evaluation`
+  flag enabled. If `subsample_size` is defined then only subset with matching `subset_size` is evaluated,
+  otherwise by default the first subset is validated.
+  See [Sub evaluation with subset metrics](#sub-evaluation-with-subset-metrics).
+  - `subset_size` - size of dataset subset to evaluate, its value is compared with `subsample_size` to select desired subset for evaluation.
+  - `metrics` - list of metrics specific for defined subset size
 
 Example of dataset definition:
 
@@ -282,11 +303,11 @@ will be picked from the *definitions* file.
 
 You can use the following instructions:
 
-- [How to convert annotations](openvino/tools/accuracy_checker/annotation_converters/README.md)
-- [How to use preprocessing](openvino/tools/accuracy_checker/preprocessor/README.md)
-- [How to use postprocessing](openvino/tools/accuracy_checker/postprocessor/README.md)
-- [How to use metrics](openvino/tools/accuracy_checker/metrics/README.md)
-- [How to use readers](openvino/tools/accuracy_checker/data_readers/README.md)
+- [How to convert annotations](accuracy_checker/annotation_converters/README.md)
+- [How to use preprocessing](accuracy_checker/preprocessor/README.md)
+- [How to use postprocessing](accuracy_checker/postprocessor/README.md)
+- [How to use metrics](accuracy_checker/metrics/README.md)
+- [How to use readers](accuracy_checker/data_readers/README.md)
 
 You may optionally provide `reference` field for metric, if you want the calculated metric
 tested against a specific value (reported in canonical paper).
@@ -303,11 +324,43 @@ metrics:
   threshold: 0.005
 ```
 
+### Sub-evaluation with subset metrics
+
+You may optionally enable `sub_evaluation` flag to quickly get results for subset of big dataset.
+The `subset_metrics` needs to provide subsets with different `subset_size` and `metrics`.
+If `subset_metrics` consist several entries, you may use `subsample_size` value to select desired `subset_size`, otherwise the first defined `subset_size` will be used.
+
+Note: Enabling `sub_evaluation` flag has no effect when accuracy config has no `subset_metrics` defined.
+
+Example:
+
+```yaml
+metrics:
+- type: accuracy
+  top_k: 5
+  reference: 86.43
+subset_metrics:
+  - subset_size: "10%"
+    metrics:
+      - type: accuracy
+        top_k: 5
+        reference: 86.13
+  - subset_size: "20%"
+    metrics:
+      - type: accuracy
+        top_k: 5
+        reference: 86.23
+        top_k: 1
+        reference: 76.42
+```
+
+
+
 ### Testing New Models
 
 Typical workflow for testing a new model includes:
 
-1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](openvino/tools/accuracy_checker/annotation_converters/README.md).
+1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
 2. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 3. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 4. Create entry in config file and execute.
@@ -316,4 +369,4 @@ Typical workflow for testing a new model includes:
 
 Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
 In some cases, this validation pipeline can be unsuitable, for example, when you have a sequence of models. You can customize validation pipeline using your own evaluator.
-Find more details about custom evaluations in the [related section](openvino/tools/accuracy_checker/evaluators/custom_evaluators/README.md).
+Find more details about custom evaluations in the [related section](accuracy_checker/evaluators/custom_evaluators/README.md).

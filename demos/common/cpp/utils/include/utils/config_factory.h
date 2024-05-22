@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2023 Intel Corporation
+// Copyright (C) 2020-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ struct ModelConfig {
     ov::AnyMap compiledModelConfig;
 
     std::set<std::string> getDevices();
-    std::map<std::string, std::string> getLegacyConfig();
+    std::map<std::string, std::string> getLegacyConfig() const;
 
 protected:
     std::set<std::string> devices;

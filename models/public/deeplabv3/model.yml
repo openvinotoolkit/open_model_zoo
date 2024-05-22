@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,5 +35,4 @@ model_optimizer_args:
   - --output=ArgMax
   - --input_model=$dl_dir/deeplabv3_mnv2_pascal_train_aug/frozen_inference_graph.pb
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

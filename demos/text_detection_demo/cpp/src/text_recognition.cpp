@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2023 Intel Corporation
+// Copyright (C) 2019-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -224,7 +224,7 @@ TextRecognizer::TextRecognizer(
     m_infer_request_decoder = compiled_model_decoder.create_infer_request();
 }
 
-std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& frame) {
+std::map<std::string, ov::Tensor> TextRecognizer::Infer(const cv::Mat& frame) {
     std::chrono::steady_clock::time_point begin_enc = std::chrono::steady_clock::now();
 
     cv::Mat image;
@@ -243,7 +243,7 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
     m_infer_request.infer();
 
     // Processing output
-    std::map<std::string, ov::runtime::Tensor> output_tensors;
+    std::map<std::string, ov::Tensor> output_tensors;
     for (const auto& output_name : m_output_names) {
         output_tensors[output_name] = m_infer_request.get_tensor(output_name);
     }
@@ -261,10 +261,10 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
     // Processing encoder output
     // tensors here are set for concrete network
     // in case of different network this needs to be changed or generalized
-    ov::runtime::Tensor features_tensor = output_tensors[m_features_name];
+    ov::Tensor features_tensor = output_tensors[m_features_name];
     m_infer_request_decoder.set_tensor(m_features_name, features_tensor);
 
-    ov::runtime::Tensor out_enc_hidden_tensor = output_tensors[m_out_enc_hidden_name];
+    ov::Tensor out_enc_hidden_tensor = output_tensors[m_out_enc_hidden_name];
     m_infer_request_decoder.set_tensor(m_in_dec_hidden_name, out_enc_hidden_tensor);
 
     float* input_data_decoder = m_infer_request_decoder.get_tensor(m_in_dec_symbol_name).data<float>();
@@ -272,7 +272,7 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
     input_data_decoder[0] = 0;
     size_t num_classes = m_infer_request_decoder.get_tensor(m_out_dec_symbol_name).get_size();
 
-    ov::runtime::Tensor targets(ov::element::f32, { 1, MAX_NUM_DECODER, num_classes });
+    ov::Tensor targets(ov::element::f32, { 1, MAX_NUM_DECODER, num_classes });
     float* data_targets = targets.data<float>();
 
     for (size_t num_decoder = 0; num_decoder < MAX_NUM_DECODER; num_decoder++) {
@@ -290,7 +290,7 @@ std::map<std::string, ov::runtime::Tensor> TextRecognizer::Infer(const cv::Mat& 
 
         input_data_decoder[0] = float(argmax);
 
-        ov::runtime::Tensor out_enc_hidden_tensor = m_infer_request_decoder.get_tensor(m_out_enc_hidden_name);
+        ov::Tensor out_enc_hidden_tensor = m_infer_request_decoder.get_tensor(m_out_enc_hidden_name);
         m_infer_request_decoder.set_tensor(m_in_dec_hidden_name, out_enc_hidden_tensor);
     }
 

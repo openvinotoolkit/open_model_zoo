@@ -10,9 +10,6 @@ based on configuration files in the models' directories.
 * Model Converter: `omz_converter` converts the models that are not in the
   OpenVINO™ IR format into that format using Model Optimizer.
 
-* Model Quantizer: `omz_quantizer` quantizes full-precision models in the IR
-  format into low-precision versions using Post-Training Optimization Toolkit.
-
 *  Model Information Dumper: `omz_info_dumper` prints information about the models
   in a stable machine-readable format.
 
@@ -74,12 +71,6 @@ additional dependencies.
   .. code-block:: sh
 
     python -mpip install --user -r ./requirements-tensorflow.in
-
-.. tab:: PaddlePaddle
-
-  .. code-block:: sh
-
-    python -mpip install --user -r ./requirements-paddle.in
 
 @endsphinxdirective
 -->
@@ -199,7 +190,7 @@ a subset of models. See the "Shared options" section.
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 | ``--precisions``            | By default, the script will produce models in every precision that is supported for conversion. Use this parameter to only produce models in a specific precision. If the specified precision is not supported for a model, that model will be skipped.          | ``omz_converter --all --precisions=FP16``                                                       |
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
-| ``--add_mo_arg``            | Add extra Model Optimizer arguments to the ones specified in the model configuration. The option can be repeated to add multiple arguments                                                                                                                       | ``omz_converter --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent``   |
+| ``--add_mo_arg``            | Add extra Model Optimizer arguments to the ones specified in the model configuration. The option can be repeated to add multiple arguments                                                                                                                       | ``omz_converter --name=densenet-121-tf --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent``   |
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 | ``-j``/``--jobs``           | Run multiple conversion commands concurrently. The argument to the option must be either a maximum number of concurrently executed commands, or "auto", in which case the number of CPUs in the system is used. By default, all commands are run sequentially.   | ``omz_converter --all -j8 # run up to 8 commands at a time``                                    |
 +-----------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
@@ -228,66 +219,6 @@ The script will attempt to locate Model Optimizer using several methods:
 
 4. Otherwise, the script will fail.
 
-
-## Model Quantizer Usage
-
-Before you run the model quantizer, you must prepare a directory with
-the datasets required for the quantization process. This directory will be
-referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the [Dataset Preparation Guide](../../data/datasets.md).
-
-The basic usage is to run the script like this:
-
-```sh
-omz_quantizer --all --dataset_dir <DATASET_DIR>
-```
-
-This will quantize all models for which quantization is supported. Other models
-are ignored.
-
-The `--all` option can be replaced with other filter options to quantize only
-a subset of models. See the "Shared options" section.
-
-<!--
-@sphinxdirective
-
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| Parameter                 | Explanation                                                                                                                                                                                                                                                                                                         | Example                                                                                 |
-+===========================+=====================================================================================================================================================================================================================================================================================================================+=========================================================================================+
-| ``--model_dir``           | The current directory must be the root of a tree of model files create by the model converter. Use this parameter to specify a different model tree path                                                                                                                                                            | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --model_dir my/model/directory``     |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``-o``/``--output_dir``   | By default, the script will download models into a directory tree rooted in the current directory. Use this parameter to download into a different directory. Note: models in intermediate format are placed to this directory too.                                                                                 | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --output_dir my/output/directory``   |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``--precisions``          | By default, the script will produce models in every precision that is supported as a quantization output. Use this parameter to only produce models in a specific precision.                                                                                                                                        | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8``             |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``--target_device``       | It's possible to specify a target device for Post-Training Optimization Toolkitto optimize for. The supported values are those accepted by the "target\_device" option in Post-Training Optimization Toolkit's config files. If this option is unspecified, Post-Training Optimization Toolkit's default is used.   | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --target_device VPU``               |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``--dry_run``             | The script can print the quantization commands without actually running them. With this option specified, the configuration file for Post-Training Optimization Toolkit will still be created, so that you can inspect it.                                                                                          | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --dry_run``                          |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``-p``/``--python``       | By default, the script will run Model Optimizer using the same Python executable that was used to run the script itself. Apply this parameter to use a different Python executable.                                                                                                                                 | ``omz_quantizer --all --dataset_dir <DATASET_DIR> --python my/python``                 |
-+---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-@endsphinxdirective
--->
-
-The script will attempt to locate Post-Training Optimization Toolkit using several methods:
-
-1. If the `--pot` option was specified, then its value will be used as the path
-   to the script to run:
-
-   ```sh
-   omz_quantizer --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
-   ```
-
-2. Otherwise, if the selected Python executable can find the `pot` entrypoint,
-   then it will be used.
-
-3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
-   script has been executed, the environment variables set by that script will
-   be used to locate Post-Training Optimization Toolkit within the OpenVINO toolkit.
-
-4. Otherwise, the script will fail.
-
-
 ## Model Information Dumper Usage
 
 The basic usage is to run the script like this:
@@ -314,7 +245,7 @@ describing a single model. Each such object has the following keys:
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``description``                      | Text describing the model. Paragraphs are separated by line feed characters.                                                                                                                                                                                                        |
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``framework``                        | A string identifying the framework whose format the model is downloaded in. Current possible values are ``dldt`` (Inference Engine IR), ``caffe``, ``mxnet``, ``onnx``, ``pytorch`` and ``tf`` (TensorFlow). Additional possible values might be added in the future.               |
+| ``framework``                        | A string identifying the framework whose format the model is downloaded in. Current possible values are ``dldt`` (Inference Engine IR), ``caffe``, ``onnx``, ``pytorch`` and ``tf`` (TensorFlow). Additional possible values might be added in the future.               |
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``license_url``                      | A URL for the license that the model is distributed under.                                                                                                                                                                                                                          |
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -329,8 +260,6 @@ describing a single model. Each such object has the following keys:
 |                                      | * `FP32`                                                                                                                                                                                                                                                                            |
 |                                      | * `FP32-INT1`                                                                                                                                                                                                                                                                       |
 |                                      | * `FP32-INT8`                                                                                                                                                                                                                                                                       |
-+--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``quantization_output_precisions``   | The list of precisions that the model can be quantized to by the model quantizer. Current possible values are ``FP16-INT8`` and ``FP32-INT8``; additional possible values might be added in the future.                                                                             |
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``subdirectory``                     | The subdirectory of the output tree into which the downloaded or converted files will be placed by the downloader or the converter, respectively.                                                                                                                                   |
 +--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -395,7 +324,7 @@ tool will process:
 +==============+===================================================================================================================================================================================================================================================================================+===========================================+
 | ``--all``    | Selects all models                                                                                                                                                                                                                                                                | ``omz_TOOL --all``                        |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| ``--name``   | takes a comma-separated list of patterns and selects models that match at least one of these patterns. The patterns may contain shell-style wildcards. See https://docs.python.org/3/library/fnmatch.html for a full description of the pattern syntax. For composite models, the name of composite model is accepted, as well as the names of individual models it consists of.   | ``omz_TOOL --name 'mtcnn,densenet-*'``    |
+| ``--name``   | takes a comma-separated list of patterns and selects models that match at least one of these patterns. The patterns may contain shell-style wildcards. See https://docs.python.org/3/library/fnmatch.html for a full description of the pattern syntax. For composite models, the name of composite model is accepted, as well as the names of individual models it consists of.   | ``omz_TOOL --name 'wavernn,densenet-*'``    |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
 | ``--list``   | takes a path to a file that must contain a list of patterns and selects models that match at least one of those patterns. For composite models, the name of composite model is accepted, as well as the names of individual models it consists of                                 | ``omz_TOOL --list my.lst``                |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
@@ -442,7 +371,7 @@ OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.
 and/or other countries.
 
 
-Copyright &copy; 2018-2023 Intel Corporation
+Copyright &copy; 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,8 +8,6 @@
 #include <iomanip>
 #include <memory>
 #include <utility>
-
-#include <ie_common.h>
 
 #include "tracker.hpp"
 

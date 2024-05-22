@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import logging as log
 import cv2
 import numpy as np
 
-from openvino.runtime import AsyncInferQueue
+from openvino import AsyncInferQueue
 
 
 def center_crop(frame, crop_size):

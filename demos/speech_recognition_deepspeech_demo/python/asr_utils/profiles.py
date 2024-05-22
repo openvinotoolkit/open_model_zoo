@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019-2023 Intel Corporation
+# Copyright (C) 2019-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 PROFILES = {
@@ -26,10 +26,10 @@ PROFILES = {
         # in_state_c, in_state_h, out_state_c, out_state_h, in_data, out_data (str), IR node names
         'in_state_c': 'previous_state_c:0',
         'in_state_h': 'previous_state_h:0',
-        'out_state_c': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd',
-        'out_state_h': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1',
+        'out_state_c': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd:0',
+        'out_state_h': 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1:0',
         'in_data': 'input_node',
-        'out_data': 'logits',  # Despite being named logits, output is probabilities after softmax
+        'out_data': 'logits:0',  # Despite being named logits, output is probabilities after softmax
 
         # === CTC decoder and LM parameters ===
         # log_probs (bool), True is input data contains base e log(probabilities), False if simply probabilities.

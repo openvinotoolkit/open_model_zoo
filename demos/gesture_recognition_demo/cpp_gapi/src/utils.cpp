@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -11,23 +11,17 @@
 #include <stdexcept>
 #include <utility>
 
-#include <cpp/ie_cnn_network.h>
-#include <ie_core.hpp>
-#include <ie_input_info.hpp>
-#include <ie_layouts.h>
+#include <openvino/openvino.hpp>
 
 #define _USE_MATH_DEFINES
 
 cv::Scalar getNetShape(const std::string& path) {
-    const auto network = InferenceEngine::Core{}.ReadNetwork(path);
-    const auto layerData = network.getInputsInfo().begin()->second;
-    const auto layerDims = layerData->getTensorDesc().getDims();
-
-    const int step = layerDims.size() == 5 ? 1 : 0;
-    return cv::Scalar(static_cast<double>(layerDims[0 + step]),
-                      static_cast<double>(layerDims[1 + step]),
-                      static_cast<double>(layerDims[2 + step]),
-                      static_cast<double>(layerDims[3 + step]));
+    ov::Shape shape = ov::Core{}.read_model(path)->input().get_shape();
+    const int step = shape.size() == 5 ? 1 : 0;
+    return cv::Scalar(static_cast<double>(shape[0 + step]),
+                      static_cast<double>(shape[1 + step]),
+                      static_cast<double>(shape[2 + step]),
+                      static_cast<double>(shape[3 + step]));
 }
 
 void erase(std::string& str, const char symbol) {

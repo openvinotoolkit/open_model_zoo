@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2023 Intel Corporation
+// Copyright (C) 2020-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -38,7 +38,7 @@
 #include <opencv2/gapi/gproto.hpp>
 #include <opencv2/gapi/gstreaming.hpp>
 #include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/infer/parsers.hpp>
 #include <opencv2/gapi/streaming/format.hpp>
 #include <opencv2/highgui.hpp>
@@ -469,7 +469,7 @@ int main(int argc, char* argv[]) {
     auto pipeline = cv::GComputation(cv::GIn(in), std::move(outs));
     /** ---------------- End of graph ---------------- **/
     /** Configure networks **/
-    auto det_net = cv::gapi::ie::Params<Faces>{
+    auto det_net = cv::gapi::ov::Params<Faces>{
         FLAGS_m,  // path to model
         fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
         FLAGS_d  // device to use
@@ -478,7 +478,7 @@ int main(int argc, char* argv[]) {
 
     // clang-format off
     auto age_net =
-        cv::gapi::ie::Params<AgeGender>{
+        cv::gapi::ov::Params<AgeGender>{
             FLAGS_mag,  // path to model
             fileNameNoExt(FLAGS_mag) + ".bin",  // path to weights
             FLAGS_dag  // device to use
@@ -494,7 +494,7 @@ int main(int argc, char* argv[]) {
 
     // clang-format off
     auto hp_net =
-        cv::gapi::ie::Params<HeadPose>{
+        cv::gapi::ov::Params<HeadPose>{
             FLAGS_mhp,  // path to model
             fileNameNoExt(FLAGS_mhp) + ".bin",  // path to weights
             FLAGS_dhp  // device to use
@@ -510,7 +510,7 @@ int main(int argc, char* argv[]) {
 
     // clang-format off
     auto lm_net =
-        cv::gapi::ie::Params<FacialLandmark>{
+        cv::gapi::ov::Params<FacialLandmark>{
             FLAGS_mlm,  // path to model
             fileNameNoExt(FLAGS_mlm) + ".bin",  // path to weights
             FLAGS_dlm  // device to use
@@ -524,7 +524,7 @@ int main(int argc, char* argv[]) {
         slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
     }
 
-    auto am_net = cv::gapi::ie::Params<ASpoof>{
+    auto am_net = cv::gapi::ov::Params<ASpoof>{
         FLAGS_mam,  // path to model
         fileNameNoExt(FLAGS_mam) + ".bin",  // path to weights
         FLAGS_dam  // device to use
@@ -535,7 +535,7 @@ int main(int argc, char* argv[]) {
         slog::info << "Anti Spoof DISABLED." << slog::endl;
     }
 
-    auto emo_net = cv::gapi::ie::Params<Emotions>{
+    auto emo_net = cv::gapi::ov::Params<Emotions>{
         FLAGS_mem,  // path to model
         fileNameNoExt(FLAGS_mem) + ".bin",  // path to weights
         FLAGS_dem  // device to use
@@ -590,15 +590,8 @@ int main(int argc, char* argv[]) {
     const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
     std::unique_ptr<Presenter> presenter;
 
-    /** Get information about frame **/
-    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
-    const auto tmp = cap->read();
-    cap.reset();
-    if (!tmp.data) {
-        throw std::runtime_error("Couldn't grab first frame");
-    }
-    cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0, FLAGS_lim);
     /** ---------------- The execution part ---------------- **/
+    std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, read_type::safe, 0);
     stream.setSource<custom::CommonCapSrc>(cap);
 
     /** Save output result **/

@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/infer/parsers.hpp>
 #include <openvino/openvino.hpp>
 
@@ -188,26 +189,26 @@ void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string&
 
 void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv::Size& act_net_in_size, cv::Scalar& reid_net_in_size) {
     if (!flags.m_act.empty()) {
-        const std::array<std::string, 7> action_detector_5 = {"mbox_loc1/out/conv/flat",
-                                                              "mbox_main_conf/out/conv/flat/softmax/flat",
-                                                              "mbox/priorbox",
-                                                              "out/anchor1",
-                                                              "out/anchor2",
-                                                              "out/anchor3",
-                                                              "out/anchor4"};
-        const std::array<std::string, 7> action_detector_6 = {"ActionNet/out_detection_loc",
-                                                              "ActionNet/out_detection_conf",
-                                                              "ActionNet/action_heads/out_head_1_anchor_1",
-                                                              "ActionNet/action_heads/out_head_2_anchor_1",
-                                                              "ActionNet/action_heads/out_head_2_anchor_2",
-                                                              "ActionNet/action_heads/out_head_2_anchor_3",
-                                                              "ActionNet/action_heads/out_head_2_anchor_4"};
+        const std::vector<std::string> action_detector_5 = {"mbox_loc1/out/conv/flat",
+                                                            "mbox_main_conf/out/conv/flat/softmax/flat",
+                                                            "mbox/priorbox",
+                                                            "out/anchor1",
+                                                            "out/anchor2",
+                                                            "out/anchor3",
+                                                            "out/anchor4"};
+        const std::vector<std::string> action_detector_6 = {"ActionNet/out_detection_loc",
+                                                            "ActionNet/out_detection_conf",
+                                                            "ActionNet/action_heads/out_head_1_anchor_1",
+                                                            "ActionNet/action_heads/out_head_2_anchor_1",
+                                                            "ActionNet/action_heads/out_head_2_anchor_2",
+                                                            "ActionNet/action_heads/out_head_2_anchor_3",
+                                                            "ActionNet/action_heads/out_head_2_anchor_4"};
         /** Create action detector net's parameters **/
-        std::array<std::string, 7> outputBlobList =
+        std::vector<std::string> outputBlobList =
             isNetForSixActions(flags.m_act) ? action_detector_6 : action_detector_5;
         // clang-format off
         auto action_net =
-            cv::gapi::ie::Params<nets::PersonDetActionRec>{
+            cv::gapi::ov::Params<nets::PersonDetActionRec>{
                 flags.m_act,
                 fileNameNoExt(flags.m_act) + ".bin",
                 flags.d_act,
@@ -228,12 +229,11 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
         /** Create face detector net's parameters **/
         // clang-format off
         auto det_net =
-            cv::gapi::ie::Params<nets::FaceDetector>{
+            cv::gapi::ov::Params<nets::FaceDetector>{
                 flags.m_fd,
                 fileNameNoExt(flags.m_fd) + ".bin",
                 flags.d_fd,
-            }.cfgInputReshape("data",
-                              {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
+            }.cfgReshape({1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         // clang-format on
 
         networks += cv::gapi::networks(det_net);
@@ -245,7 +245,7 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
 
     if (!flags.m_fd.empty() && !flags.m_reid.empty() && !flags.m_lm.empty()) {
         /** Create landmarks detector net's parameters **/
-        auto landm_net = cv::gapi::ie::Params<nets::LandmarksDetector>{
+        auto landm_net = cv::gapi::ov::Params<nets::LandmarksDetector>{
             flags.m_lm,
             fileNameNoExt(flags.m_lm) + ".bin",
             flags.d_lm,
@@ -257,7 +257,7 @@ void configNets(const NetsFlagsPack& flags, cv::gapi::GNetPackage& networks, cv:
             slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
         }
         /** Create reidentification net's parameters **/
-        auto reident_net = cv::gapi::ie::Params<nets::FaceReidentificator>{
+        auto reident_net = cv::gapi::ov::Params<nets::FaceReidentificator>{
             flags.m_reid,
             fileNameNoExt(flags.m_reid) + ".bin",
             flags.d_reid,

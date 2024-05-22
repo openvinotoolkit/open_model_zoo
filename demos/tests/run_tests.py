@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2019-2023 Intel Corporation
+# Copyright (c) 2019-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,28 +29,36 @@ For the tests to work, the test data directory must contain:
 """
 
 import argparse
+import certifi
 import contextlib
 import csv
 import json
 import os
 import shlex
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 import sys
 import tempfile
 import timeit
 import importlib
+import warnings
 
 from pathlib import Path
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
 
 from args import ArgContext, Arg, ModelArg
 from cases import Demo
 from data_sequences import DATA_SEQUENCES
 
+import requests
+
 scopes = {
     'base': importlib.import_module('cases').DEMOS,
     'performance': importlib.import_module('performance_cases').DEMOS,
 }
-
+COCO128_URL = "https://ultralytics.com/assets/coco128.zip"
+VIDEO_URL = "https://storage.openvinotoolkit.org/data/test_data/videos/head-pose-face-detection-male.mp4"
 
 def parser_paths_list(supported_devices):
     paths = supported_devices.split(',')
@@ -63,7 +71,7 @@ def build_argparser():
     parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
         help='directory with demo binaries')
     parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
-        help='directory with test data')
+        help='directory with test data and where to unzip {COCO128_URL}')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested). '
         'For testing demos of specific implementation pass one (or more) of the next values: cpp, cpp_gapi, python.')
@@ -130,7 +138,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     try:
         subprocess.check_output(
             [
-                sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
+                sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'downloader.py'),
                 '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
                 '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
                 '--jobs', '9',
@@ -147,7 +155,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     try:
         subprocess.check_output(
             [
-                sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'converter.py'),
                 '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
                 '--precisions', ','.join(model_precisions), '--jobs', 'auto',
                 *(['--mo', str(mo_path)] if mo_path else []),
@@ -197,6 +205,7 @@ def get_models(case, keys):
 
 
 def main():
+    warnings.filterwarnings("error")
     args = build_argparser().parse_args()
 
     DEMOS = scopes[args.scope]
@@ -207,7 +216,7 @@ def main():
     auto_tools_dir = omz_dir / 'tools/model_tools'
 
     model_info_list = json.loads(subprocess.check_output(
-        [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
+        [sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
 
     model_info = {}
@@ -234,6 +243,15 @@ def main():
 
     print(f"{len(demos_to_test)} demos will be tested:")
     print(*[demo.subdirectory for demo in demos_to_test], sep =',')
+    os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+    os.environ["SSL_CERT_FILE"] = certifi.where()
+    with urlopen(COCO128_URL) as zipresp:  # nosec B310  # disable urllib_urlopen because url is hardcoded
+        with ZipFile(BytesIO(zipresp.read())) as zfile:
+            zfile.extractall(args.test_data_dir)
+
+    r = requests.get(VIDEO_URL)
+    with open("video.mp4", 'wb') as f:
+        f.write(r.content)
 
     with temp_dir_as_path() as global_temp_dir:
         if args.models_dir:
@@ -264,7 +282,7 @@ def main():
 
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
-                    [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
+                    [sys.executable, '-W', 'error', '--', str(auto_tools_dir / 'info_dumper.py'),
                         '--list', str(demo.models_lst_path(demos_dir))],
                     universal_newlines=True)):
                 models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]

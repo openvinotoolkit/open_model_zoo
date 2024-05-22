@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2023 Intel Corporation
+Copyright (c) 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ pytest.importorskip('tensorflow')
 import cv2
 import numpy as np
 
-from openvino.tools.accuracy_checker.launcher.launcher import create_launcher
-from openvino.tools.accuracy_checker.config import ConfigError
+from accuracy_checker.launcher.launcher import create_launcher
+from accuracy_checker.config import ConfigError
 
 
 def no_tf2():

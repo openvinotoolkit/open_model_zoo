@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2023 Intel Corporation
+// Copyright (C) 2018-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,6 +17,7 @@
 #include <map>
 
 #include <algorithm>
+#include <iterator>
 #include <cctype>
 #include <sstream>
 
@@ -75,6 +76,37 @@ std::vector<std::string> split(const std::string& s, char delim) {
         result.push_back(item);
     }
     return result;
+}
+
+void split(const std::string& s, char delim, std::vector<float> &out) {
+    std::stringstream ss(s);
+    std::string item;
+
+    while (getline(ss, item, delim)) {
+        try {
+            out.push_back(std::stof(item));
+        } catch (...) {
+            throw std::runtime_error("cannot split the string: \"" + s + "\" onto floats");
+        }
+    }
+}
+
+template <class It>
+static std::string merge_impl(It begin, It end, const char* delim) {
+    std::stringstream ss;
+    std::copy(begin, end, std::ostream_iterator<std::string>(ss, delim));
+    std::string result = ss.str();
+    if (!result.empty()) {
+        result.resize(result.size() - strlen(delim));
+    }
+    return result;
+}
+std::string merge(std::initializer_list<std::string> list, const char* delim) {
+    return merge_impl(list.begin(), list.end(), delim);
+}
+
+std::string merge(const std::vector<std::string> &list, const char *delim) {
+    return merge_impl(list.begin(), list.end(), delim);
 }
 
 std::vector<std::string> parseDevices(const std::string& device_string) {

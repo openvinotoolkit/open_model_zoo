@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021-2023 Intel Corporation
+ Copyright (c) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
@@ -36,8 +36,8 @@ class IEModel: # pylint: disable=too-few-public-methods
         log.info('Reading model {}'.format(model_path))
         self.model = core.read_model(model_path)
         self.input_tensor_name = self.model.inputs[0].get_any_name()
-        self.input_size = self.model.input(self.input_tensor_name).shape
-        self.nchw_layout = self.input_size[1] == 3
+        self.input_size = self.model.input(self.input_tensor_name).get_partial_shape()
+        self.nchw_layout = self.input_size[1].is_static and self.input_size[1] == 3
         compiled_model = core.compile_model(self.model, device)
         self.output_tensor = compiled_model.outputs[0]
         self.infer_request = compiled_model.create_infer_request()
@@ -92,6 +92,6 @@ class PlaceRecognition:
             images.append(image)
 
         embeddings = np.vstack([self.model.predict(image) for image in tqdm(
-            images, desc='Computing embeddings of gallery images.')])
+            images, desc='Computing embeddings of gallery images')])
 
         return embeddings

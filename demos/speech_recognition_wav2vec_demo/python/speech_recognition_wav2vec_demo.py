@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2021-2023 Intel Corporation
+ Copyright (C) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import sys
 import numpy as np
 import wave
 
-from openvino.runtime import Core, get_version, PartialShape
+from openvino import Core, get_version, PartialShape
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 

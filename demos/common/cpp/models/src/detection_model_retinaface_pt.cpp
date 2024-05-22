@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
         throw std::logic_error("RetinaFacePT model wrapper expects models that have only 1 input");
     }
 
-    const ov::Shape& inputShape = model->input().get_shape();
+    const ov::Shape& inputShape = model->input().get_partial_shape().get_max_shape();
     const ov::Layout& inputLayout = getInputLayout(model->input());
 
     if (inputShape[ov::layout::channels_idx(inputLayout)] != 3) {
@@ -94,7 +94,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
         ppp.output(outTensorName)
             .tensor()
             .set_element_type(ov::element::f32)
-            .set_layout(output.get_shape().size() == 4 ? nchw : chw);
+            .set_layout(output.get_partial_shape().size() == 4 ? nchw : chw);
 
         if (outTensorName.find("bbox") != std::string::npos) {
             outputsNames[OUT_BOXES] = outTensorName;
@@ -106,7 +106,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OUT_LANDMARKS + 1));
             outputsNames[OUT_LANDMARKS] = outTensorName;
             landmarksNum =
-                output.get_shape()[ov::layout::width_idx(chw)] / 2;  // Each landmark consist of 2 variables (x and y)
+                output.get_partial_shape()[ov::layout::width_idx(chw)].get_length() / 2;  // Each landmark consist of 2 variables (x and y)
         } else {
             continue;
         }

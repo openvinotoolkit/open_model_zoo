@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer
@@ -43,7 +43,7 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
+                      help='Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
@@ -90,6 +90,7 @@ def main():
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
         encoder_target_device = args.device
+        decoder_target_device = args.device
     else:
         encoder_target_device = decoder_target_device
 

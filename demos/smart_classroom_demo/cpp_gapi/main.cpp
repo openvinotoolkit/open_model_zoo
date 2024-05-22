@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -117,11 +117,11 @@ int main(int argc, char* argv[]) {
         }
 
         /** Prepare parameters **/
-        const std::string video_path = FLAGS_i;
-        const auto ad_model_path = FLAGS_m_act;
-        const auto fd_model_path = FLAGS_m_fd;
-        const auto fr_model_path = FLAGS_m_reid;
-        const auto lm_model_path = FLAGS_m_lm;
+        const std::string video_path     = FLAGS_i;
+        const auto ad_model_path         = FLAGS_m_act;
+        const auto fd_model_path         = FLAGS_m_fd;
+        const auto fr_model_path         = FLAGS_m_reid;
+        const auto lm_model_path         = FLAGS_m_lm;
 
         /** Pack demo flags to appropriate unions **/
         config::NetsFlagsPack netsFlags;

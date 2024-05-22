@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """
 
 import logging as log
-from openvino.runtime import Core, get_version, AsyncInferQueue
+from openvino import Core, get_version, AsyncInferQueue
 
 
 def load_core():

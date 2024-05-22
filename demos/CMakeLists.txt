@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Intel Corporation
+# Copyright (C) 2018-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -149,7 +149,12 @@ if(NOT OpenCV_FOUND)
     message(WARNING "No suitable OpenCV version detected, GAPI demos skipped")
     set(GAPI_DEMO_DISABLED ON)
 else()
-    add_subdirectory(common/cpp_gapi)
+    if(OpenCV_VERSION VERSION_LESS "4.8")
+        message(WARNING "OpenCV version lower than 4.8 detected, GAPI demos skipped")
+        set(GAPI_DEMO_DISABLED ON)
+    else()
+        add_subdirectory(common/cpp_gapi)
+    endif()
 endif()
 
 add_subdirectory(multi_channel_common/cpp)

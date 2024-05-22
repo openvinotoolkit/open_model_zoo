@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@
 #include <opencv2/imgproc.hpp>
 #include <openvino/openvino.hpp>
 
-#include <models/deblurring_model.h>
 #include <models/image_model.h>
 #include <models/input_data.h>
 #include <models/jpeg_restoration_model.h>
@@ -58,8 +57,8 @@ DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the model, either 'sr' for Super Resolution task, "
-                                 "'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, 'deblur' for "
-                                 "Deblurring, 'jr' for JPEGRestoration, 'style' for Style Transfer task.";
+                                 "'sr_channel_joint' for Super Resolution model that accepts and returns 1 channel image, "
+                                 "'jr' for JPEGRestoration, 'style' for Style Transfer task.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char layout_message[] = "Optional. Specify inputs layouts."
                                      " Ex. NCHW or input0:NCHW,input1:NC in case of more than one input.";
@@ -164,9 +163,6 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     }
     if (type == "sr_channel_joint") {
         return std::unique_ptr<ImageModel>(new SuperResolutionChannelJoint(FLAGS_m, frameSize, FLAGS_layout));
-    }
-    if (type == "deblur") {
-        return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize, FLAGS_layout));
     }
     if (type == "jr") {
         return std::unique_ptr<ImageModel>(new JPEGRestorationModel(FLAGS_m, frameSize, doCompression, FLAGS_layout));

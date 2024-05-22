@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2023 Intel Corporation
+// Copyright (C) 2018-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
 
             std::vector<cv::RotatedRect> rects;
             if (text_detector != nullptr) {
-                std::map<std::string, ov::runtime::Tensor> output_tensors = text_detector->Infer(image);
+                std::map<std::string, ov::Tensor> output_tensors = text_detector->Infer(image);
 
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                 rects = text_detector->postProcess(output_tensors, image.size(), text_detector->input_size(),
@@ -306,9 +306,9 @@ int main(int argc, char* argv[]) {
                 std::string res = "";
                 double conf = 1.0;
                 if (text_recognition != nullptr) {
-                    std::map<std::string, ov::runtime::Tensor> output_tensors = text_recognition->Infer(cropped_text);
+                    std::map<std::string, ov::Tensor> output_tensors = text_recognition->Infer(cropped_text);
 
-                    ov::runtime::Tensor out_tensor = output_tensors.begin()->second;
+                    ov::Tensor out_tensor = output_tensors.begin()->second;
                     if (FLAGS_tr_o_blb_nm != "") {
                         const auto& it = output_tensors.find(FLAGS_tr_o_blb_nm);
                         if (it == output_tensors.end()) {

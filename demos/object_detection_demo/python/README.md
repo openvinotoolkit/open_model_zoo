@@ -40,7 +40,7 @@ Async API operates with a notion of the "Infer Request" that encapsulates the in
 
 ## Model API
 
-The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/model_zoo/model_api/README.md).
 
 The generalized interface of wrappers with its unified results representation provides the support of multiple different object detection model topologies in one demo.
 
@@ -89,13 +89,11 @@ omz_converter --list models.lst
   - face-detection-adas-0001
   - face-detection-retail-0004
   - face-detection-retail-0005
-  - face-detection-retail-0044
   - faster-rcnn-resnet101-coco-sparse-60-0001
   - faster_rcnn_inception_resnet_v2_atrous_coco
   - faster_rcnn_resnet50_coco
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
-  - pelee-coco
   - person-detection-0106
   - person-detection-0200
   - person-detection-0201
@@ -113,8 +111,6 @@ omz_converter --list models.lst
   - product-detection-0001
   - retinanet-tf
   - rfcn-resnet101-coco-tf
-  - ssd300
-  - ssd512
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco
   - ssd-resnet34-1200-onnx
@@ -232,7 +228,7 @@ Inference options:
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -269,7 +265,7 @@ You can use the following command to do inference on GPU with a pre-trained obje
 python3 object_detection_demo.py \
   -d GPU \
   -i <path_to_video>/inputVideo.mp4 \
-  -m <path_to_model>/ssd300.xml \
+  -m <path_to_model>/efficientdet-d0-tf.xml \
   -at ssd \
   --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
@@ -299,7 +295,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Running with OpenVINO Model Server
 
-You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
 
 Exemplary command:
 

@@ -35,17 +35,14 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* alexnet
-* caffenet
 * convnext-tiny
-* densenet-121
 * densenet-121-tf
 * dla-34
 * efficientnet-b0
 * efficientnet-b0-pytorch
-* googlenet-v1
+* efficientnet-v2-b0
+* efficientnet-v2-s
 * googlenet-v1-tf
-* googlenet-v2
 * googlenet-v2-tf
 * googlenet-v3
 * googlenet-v3-pytorch
@@ -56,18 +53,13 @@ omz_converter --list models.lst
 * levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
-* mobilenet-v1-1.0-224
 * mobilenet-v1-1.0-224-tf
-* mobilenet-v2
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
 * mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-tf
-* mobilenet-v3-large-1.0-224-paddle
-* mobilenet-v3-small-1.0-224-paddle
 * nfnet-f0
-* octave-resnet-26-0.25
 * regnetx-3.2gf
 * repvgg-a0
 * repvgg-b1
@@ -80,16 +72,9 @@ omz_converter --list models.lst
 * resnet18-xnor-binary-onnx-0001
 * resnet50-binary-0001
 * rexnet-v1-x1.0
-* se-inception
-* se-resnet-50
-* se-resnext-50
-* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
-* squeezenet1.0
-* squeezenet1.1
 * swin-tiny-patch4-window7-224
-* vgg16
-* vgg19
+* t2t-vit-14
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -111,13 +96,6 @@ It has the following format:
 Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
 "Labels" file contains the list of human-readable labels, one line for each class.
-
-Please note that you should use `<omz_dir>/data/dataset_classes/imagenet_2015.txt` labels file with the following models:
-
-* googlenet-v2
-* se-inception
-* se-resnet-50
-* se-resnext-50
 
 and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all other models supported by the demo.
 
@@ -142,6 +120,9 @@ Options:
     -no_show                  Optional. Disable showing of processed images.
     -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
     -u                        Optional. List of monitors to show initially.
+    -backend <string>         Optional. Specify an inference backend. The list of available backends depends on openCV version. Default value is IE. See README.md for details
+    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
+    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
@@ -157,6 +138,10 @@ For example, use the following command-line command to run the application:
                       -gt <path_to_ground_truth_data_file> \
                       -u CDM
 ```
+
+To let the demo find onnx libs copy `onnxruntime_providers_openvino.dll` from `lib` and `onnxruntime.dll`, `onnxruntime_providers_shared.dll` from `bin` dirs  of onnxruntume install to the folder with the demo executable.
+
+The inference backend is specified by -backend flag. Depends on openCV version there might be different backends available: `IE` starting from openCV 4.2.0, `ONNX` from 4.5.1 and `OV` from 4.8. The possible device value for `ONNX/DML/<device>` can be found using `set OPENCV_LOG_LEVEL=INFO` and running the demo with `-backend ONNX/DML/`. Search for `Available DirectML adapters:`. For `-backend ONNX/OV/<device>` the device is the same as the one selected for `--use_openvino` while compiling `onnxruntime`.
 
 ## Demo Output
 

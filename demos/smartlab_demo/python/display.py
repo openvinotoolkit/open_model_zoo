@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021-2023 Intel Corporation
+ Copyright (c) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ from pathlib import Path
 
 
 class Display:
-    def __init__(self):
+    def __init__(self, show):
         '''Score Evaluation Variables'''
+        self.show = show
         self.wait_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/wait.png'), cv2.IMREAD_UNCHANGED)
         self.no_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/no.png'), cv2.IMREAD_UNCHANGED)
         self.done_icon = cv2.imread(str(Path(__file__).resolve().parents[0] / 'icon/done.png'), cv2.IMREAD_UNCHANGED)
@@ -202,4 +203,5 @@ class Display:
         result_image = np.concatenate((frame_top, frame_side), axis=1)
         result_image = np.concatenate((result_image, self.score_board), axis=0)
 
-        cv2.imshow("Smart Science Lab", result_image)
+        if self.show:
+            cv2.imshow("Smart Science Lab", result_image)

@@ -62,19 +62,16 @@ omz_downloader --list models.lst
 
 Running the demo with `-h` shows this help message:
 ```
-usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -sv SIDEVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_sa M_SIDEALL
-                        -m_sm M_SIDEMOVE -m_de M_DECODER -m_en M_ENCODER [-m_en_t M_ENCODER_TOP -m_en_s M_ENCODER_SIDE]
+usage: smartlab_demo.py [-h] [-d DEVICE] -tv TOPVIEW -sv SIDEVIEW -m_ta M_TOPALL -m_tm M_TOPMOVE -m_sa M_SIDEALL -m_sm M_SIDEMOVE [--mode MODE] [-m_en M_ENCODER] [-m_en_t M_ENCODER_TOP] [-m_en_s M_ENCODER_SIDE] -m_de M_DECODER [--no_show]
 
 Options:
   -h, --help            Show this help message and exit.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target to infer on CPU or GPU.
   -tv TOPVIEW, --topview TOPVIEW
-                        Required. Topview stream to be processed. The input must be a single image, a folder of images, video file or
-                        camera id.
+                        Required. Topview stream to be processed. The input must be a single image, a folder of images, video file or camera id.
   -sv SIDEVIEW, --sideview SIDEVIEW
-                        Required. SideView to be processed. The input must be a single image, a folder of images, video file or camera
-                        id.
+                        Required. SideView to be processed. The input must be a single image, a folder of images, video file or camera id.
   -m_ta M_TOPALL, --m_topall M_TOPALL
                         Required. Path to topview all class model.
   -m_tm M_TOPMOVE, --m_topmove M_TOPMOVE
@@ -84,14 +81,15 @@ Options:
   -m_sm M_SIDEMOVE, --m_sidemove M_SIDEMOVE
                         Required. Path to sidetview moving class model.
   --mode MODE           Optional. Action recognition mode: multiview or mstcn
-  -m_en_t M_ENCODER_TOP, --m_encoder_top M_ENCODER_TOP
-                        Required for multiview mode. Path to encoder model for topview.
-  -m_en_s M_ENCODER_SIDE, --m_encoder_side M_ENCODER_SIDE
-                        Required for multiview mode. Path to encoder model for sideview.
-  -m_de M_DECODER, --m_decoder M_DECODER
-                        Required for both multiview and mstcn mode. Path to decoder model.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required for mstcn mode. Path to encoder model.
+  -m_en_t M_ENCODER_TOP, --m_encoder_top M_ENCODER_TOP
+                        Required for multiview mode. Path to encoder model for top view.
+  -m_en_s M_ENCODER_SIDE, --m_encoder_side M_ENCODER_SIDE
+                        Required for multiview mode. Path to encoder model for side view.
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Required. Path to decoder model.
+  --no_show             Optional. Don't show output.
 ```
 
 For example, run the demo with multiview mode:
@@ -103,9 +101,9 @@ python3 smartlab_demo.py
     -m_tm "./intel/smartlab-object-detection-0002/FP32/smartlab-object-detection-0002.xml"
     -m_sa "./intel/smartlab-object-detection-0003/FP32/smartlab-object-detection-0003.xml"
     -m_sm "./intel/smartlab-object-detection-0004/FP32/smartlab-object-detection-0004.xml"
-    -m_en_t "./intel/smartlab-action-recognition-0001-encoder-top/FP32/smartlab-action-recognition-0001-encoder-top.xml"
-    -m_en_s "./intel/smartlab-action-recognition-0001-encoder-side/FP32/smartlab-action-recognition-0001-encoder-side.xml"
-    -m_de "./intel/smartlab-action-recognition-0001-decoder/FP32/smartlab-action-recognition-0001-decoder.xml"
+    -m_en_t "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-top/FP32/smartlab-action-recognition-0001-encoder-top.xml"
+    -m_en_s "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-0001-encoder-side/FP32/smartlab-action-recognition-0001-encoder-side.xml"
+    -m_de "./intel/smartlab-action-recognition-0001/smartlab-action-recognition-0001-decoder/FP32/smartlab-action-recognition-0001-decoder.xml"
 ```
 run the demo with mstcn mode:
 ```sh

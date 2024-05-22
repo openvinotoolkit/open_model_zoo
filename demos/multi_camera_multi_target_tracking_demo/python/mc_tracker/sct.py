@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -43,7 +43,7 @@ class ClusterFeature:
             self.clusters.append(feature_vec)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:
-            idx = random.randint(0, self.feature_len - 1) # nosec - disable B311:random check
+            idx = random.randint(0, self.feature_len - 1)  # nosec B311  # disable random check
             self.clusters_sizes[idx] += 1
             self.clusters[idx] += (feature_vec - self.clusters[idx]) / \
                                             self.clusters_sizes[idx]

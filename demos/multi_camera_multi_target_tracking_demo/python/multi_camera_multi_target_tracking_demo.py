@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -32,10 +32,10 @@ from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from model_api.performance_metrics import PerformanceMetrics

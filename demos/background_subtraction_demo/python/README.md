@@ -60,7 +60,7 @@ The demo workflow is the following:
 
 ## Model API
 
-The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/model_zoo/model_api/README.md).
 
 The generalized interface of wrappers with its unified results representation provides the support of multiple different background subtraction model topologies in one demo.
 
@@ -136,7 +136,7 @@ Inference options:
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
@@ -174,7 +174,7 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Running with OpenVINO Model Server
 
-You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
 
 Exemplary command:
 

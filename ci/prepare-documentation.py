@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2021-2023 Intel Corporation
+# Copyright (c) 2021-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import shutil
 import sys
 import urllib.parse
 import urllib.request
-import xml.etree.ElementTree as ET # nosec - disable B405:import-xml-etree check
+import xml.etree.ElementTree as ET  # nosec B405  # disable import-xml-etree check
 
 from pathlib import Path
 
@@ -378,12 +378,12 @@ def main():
     add_demos_pages(output_root, navindex_element)
 
     ovms_adapter_element = add_page(output_root, navindex_element, id='omz_model_api_ovms_adapter',
-        path='demos/common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md',
+        path='demos/common/python/model_zoo/model_api/adapters/ovms_adapter.md',
         title='OMZ Model API OVMS adapter')
     ovms_adapter_element.attrib[XML_ID_ATTRIBUTE] = 'omz_model_api_ovms_adapter'
 
     model_api_element = add_page(output_root, navindex_element, id='omz_python_model_api',
-        path='demos/common/python/openvino/model_zoo/model_api/README.md',
+        path='demos/common/python/model_zoo/model_api/README.md',
         title='OMZ Python Model API')
     model_api_element.attrib[XML_ID_ATTRIBUTE] = 'omz_python_model_api'
 

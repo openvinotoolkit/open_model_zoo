@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2020-2023 Intel Corporation
+ Copyright (c) 2020-2024 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,13 +20,13 @@ from time import perf_counter
 import sys
 from pathlib import Path
 
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, check_pressed_keys
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from images_capture import open_images_capture
@@ -74,7 +74,7 @@ def main():
     parser.add_argument('--loop', default=False, action='store_true',
                         help='Optional. Enable reading the input in a loop.')
     parser.add_argument('-o', '--output', required=False,
-                        help='Optional. Name of the output file(s) to save.')
+                        help='Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086')
     parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                         help='Optional. Number of frames to store in output. '
                              'If 0 is set, all frames are stored.')

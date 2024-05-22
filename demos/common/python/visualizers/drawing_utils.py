@@ -1,5 +1,5 @@
 """
- Copyright (c) 2022-2023 Intel Corporation
+ Copyright (c) 2022-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class ColorPalette:
         if n == 0:
             raise ValueError('ColorPalette accepts only the positive number of colors')
         if rng is None:
-            rng = random.Random(0xACE)  # nosec - disable B311:random check
+            rng = random.Random(0xACE)  # nosec B311  # disable random check
 
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]

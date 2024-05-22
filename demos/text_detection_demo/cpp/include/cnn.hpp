@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2023 Intel Corporation
+// Copyright (C) 2019-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -32,7 +32,7 @@ protected:
     ov::Core& m_core;
     cv::Size m_new_input_resolution;
     bool use_auto_resize;
-    int m_channels;
+    size_t m_channels;
     cv::Size m_input_size;
     std::string m_input_name;
     std::vector<std::string> m_output_names;

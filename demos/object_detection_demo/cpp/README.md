@@ -88,13 +88,11 @@ omz_converter --list models.lst
   - face-detection-adas-0001
   - face-detection-retail-0004
   - face-detection-retail-0005
-  - face-detection-retail-0044
   - faster-rcnn-resnet101-coco-sparse-60-0001
   - faster_rcnn_inception_resnet_v2_atrous_coco
   - faster_rcnn_resnet50_coco
   - pedestrian-and-vehicle-detector-adas-0001
   - pedestrian-detection-adas-0002
-  - pelee-coco
   - person-detection-0106
   - person-detection-0200
   - person-detection-0201
@@ -113,8 +111,6 @@ omz_converter --list models.lst
   - retinaface-resnet50-pytorch
   - retinanet-tf
   - rfcn-resnet101-coco-tf
-  - ssd300
-  - ssd512
   - ssd-resnet34-1200-onnx
   - ssd_mobilenet_v1_coco
   - ssd_mobilenet_v1_fpn_coco
@@ -162,7 +158,7 @@ Options:
     -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd, yolo, yolov3-onnx or yolox
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-    -o "<path>"               Optional. Name of the output file(s) to save.
+    -o "<path>"               Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -labels "<path>"          Optional. Path to a file with labels mapping.
@@ -194,7 +190,7 @@ You can use the following command to do inference on GPU with a pre-trained obje
 ./object_detection_demo \
   -d GPU \
   -i <path_to_video>/inputVideo.mp4 \
-  -m <path_to_model>/ssd300.xml \
+  -m <path_to_model>/efficientdet-d0-tf.xml \
   -at ssd \
   -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```

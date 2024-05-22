@@ -1,10 +1,10 @@
-// Copyright (C) 2018-2023 Intel Corporation
+// Copyright (C) 2018-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
 
-#include <details/ie_exception.hpp>
+#include <opencv2/core.hpp>
 
 #define PT_CHECK(cond) CV_Assert(cond);
 

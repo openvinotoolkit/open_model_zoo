@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2021-2023 Intel Corporation
+ Copyright (c) 2021-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -35,14 +35,13 @@ with open(SETUP_DIR / 'requirements_ovms.txt') as f:
 
 packages = find_packages(str(SETUP_DIR))
 packages.remove('visualizers')
-package_dir = {'openvino': str(SETUP_DIR / 'openvino')}
 
 setup(
     name='openmodelzoo-modelapi',
     version='0.0.0',
     author='Intel® Corporation',
     license='OSI Approved :: Apache Software License',
-    url='https://github.com/openvinotoolkit/open_model_zoo/tree/develop/demos/common/python/openvino',
+    url='https://github.com/openvinotoolkit/open_model_zoo/tree/master/demos/common/python/model_zoo/model_api',
     description='Model API: model wrappers and pipelines from Open Model Zoo',
     python_requires = ">=3.7",
     classifiers=[
@@ -50,7 +49,6 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     packages=packages,
-    package_dir=package_dir,
     install_requires=required,
     extras_require={'ovms': ovms_required}
 )

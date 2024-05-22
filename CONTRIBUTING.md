@@ -1,15 +1,13 @@
 # How to Contribute Models to Open Model Zoo
 
+> [!NOTE]
 > Open Model Zoo is in maintenance mode as a source of models. Check out model tutorials in [Jupyter notebooks](https://github.com/openvinotoolkit/openvino_notebooks).
 
 We appreciate your intention to contribute model to the OpenVINO&trade; Open Model Zoo (OMZ). OMZ is licensed under the Apache\* License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Note that we accept models under permissive licenses, such as **MIT**, **Apache 2.0**, and **BSD-3-Clause**. Otherwise, it might take longer time to get your model approved.
 
 Frameworks supported by the Open Model Zoo:
-* Caffe\*
 * TensorFlow\*
 * PyTorch\* (via conversion to ONNX\*)
-* PaddlePaddle\*
-* MXNet\*
 
 Open Model Zoo also supports models already in the ONNX format.
 
@@ -35,9 +33,7 @@ Name your model in OMZ according to the following rules:
 - Add a suffix according to framework identifier (see **`framework`** description in the [configuration file](#configuration-file) section for examples), if the model is a reimplementation of an existing model from another framework
 
 This name will be used for downloading, converting, and other operations.
-Examples of model names:
-- `resnet-50-pytorch`
-- `mobilenet-v2-1.0-224`
+An example of model name is `resnet-50-pytorch`
 
 ### Files Location
 
@@ -78,7 +74,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`openvino.model_zoo._common`](tools/model_tools/src/openvino/model_zoo/_common.py) module.
+[Model task type](tools/model_tools/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`omz_tools._common`](tools/model_tools/src/omz_tools/_common.py) module.
 
 **`model_info`** (*optional*)
 
@@ -158,38 +154,31 @@ URL of the model license.
 
 ### Example
 
-This example shows how to download the classification model [DenseNet-121*](models/public/densenet-121-tf/model.yml) pretrained in TensorFlow\* from Google Drive\* as an archive.
+This example shows how to download the classification model [efficientdet-d1-tf*](models/public/efficientdet-d1-tf/model.yml) pretrained in TensorFlow\*.
 
 ```
 description: >-
-  This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet
-  group of models designed to perform image classification. The weights were converted
-  from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
-  paper <https://arxiv.org/abs/1608.06993>
-task_type: classification
+  The "efficientdet-d1-tf" model is one of the EfficientDet <https://arxiv.org/abs/1911.09070>
+  models  designed to perform object detection. This model was pre-trained in TensorFlow*.
+  All the EfficientDet models have been pre-trained on the Common Objects in Context
+  (COCO) <https://cocodataset.org/#home> image database. For details about this family
+  of models, check out the Google AutoML repository <https://github.com/google/automl/tree/master/efficientdet>.
+task_type: detection
 files:
-  - name: tf-densenet121.tar.gz
-    size: 30597420
-    checksum: dcd6d36f6b07e0843ee35b1dce2c587204c8816d6ba25b7e1dbf2dc25fe2b51f49a2b9327579ce07904575f9325be8b6
-    source:
-      $type: google_drive
-      id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
-postprocessing:
-  - $type: unpack_archive
-    format: gztar
-    file: tf-densenet121.tar.gz
+  - name: efficientdet-d1_frozen.pb
+    size: 28613804
+    checksum: f89a4fe6072e5dddc71c0532261e1cd89a69472d92a85445437e8b57129708adbad35cf09a8e7603a25b05ee0ebdf4cb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2023.0/efficientdet-d1-tf/efficientdet-d1_frozen.pb
 input_info:
-  - name: Placeholder
-    shape: [1, 224, 224, 3]
+  - name: image_arrays
+    shape: [1, 640, 640, 3]
     layout: NHWC
 model_optimizer_args:
   - --reverse_input_channels
-  - --mean_values=Placeholder[123.68,116.78,103.94]
-  - --scale_values=Placeholder[58.8235294117647]
-  - --output=densenet121/predictions/Reshape_1
-  - --input_meta_graph=$dl_dir/tf-densenet121.ckpt.meta
+  - --input_model=$dl_dir/efficientdet-d1_frozen.pb
+  - --transformations_config=$mo_ext_dir/front/tf/automl_efficientdet.json
 framework: tf
-license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+license: https://raw.githubusercontent.com/google/automl/master/LICENSE
 ```
 
 ## Model Conversion
@@ -226,21 +215,32 @@ When the configuration file is ready, you must run the Accuracy Checker to obtai
 
 ### Example
 
-This example uses validation configuration file for [DenseNet-121](models/public/densenet-121-tf/accuracy-check.yml)\* from TensorFlow\*:
+This example uses validation configuration file for [efficientdet-d1-tf](models/public/efficientdet-d1-tf/accuracy-check.yml)\* from TensorFlow\*:
 ```
 models:
-  - name: densenet-121-tf
+  - name: efficientdet-d1-tf
     launchers:
       - framework: openvino
-        adapter: classification
-
+        adapter: ssd
     datasets:
-      - name: imagenet_1000_classes
+      - name: ms_coco_detection_90_class_without_background
         preprocessing:
           - type: resize
-            size: 256
-          - type: crop
-            size: 224
+            aspect_ratio_scale: fit_to_window
+            size: 640
+          - type: padding
+            size: 640
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            size: 640
+          - type: shift_labels
+            offset: 1
+
+        metrics:
+          - type: coco_precision
+            reference: 0.3754
 ```
 
 
@@ -262,7 +262,7 @@ The documentation should contain:
 * detailed description of input and output for original and converted models
 * the model's licensing terms
 
-Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/README.md)).
+Learn the detailed structure and headers naming convention from any model documentation (for example, [densenet-121-tf](./models/public/densenet-121-tf/README.md)).
 
 ## Legal Information
 
@@ -270,7 +270,7 @@ Learn the detailed structure and headers naming convention from any model docume
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
 
-Copyright &copy; 2018-2023 Intel Corporation
+Copyright &copy; 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 ```

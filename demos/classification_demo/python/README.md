@@ -14,7 +14,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Model API
 
-The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/openvino/model_zoo/model_api/README.md).
+The demo utilizes model wrappers, adapters and pipelines from [Python* Model API](../../common/python/model_zoo/model_api/README.md).
 
 The generalized interface of wrappers with its unified results representation provides the support of multiple different classification model topologies in one demo.
 
@@ -37,19 +37,14 @@ omz_converter --list models.lst
 
 ### Supported Models
 
-* alexnet
-* caffenet
 * convnext-tiny
-* densenet-121
 * densenet-121-tf
 * dla-34
 * efficientnet-b0
 * efficientnet-b0-pytorch
 * efficientnet-v2-b0
 * efficientnet-v2-s
-* googlenet-v1
 * googlenet-v1-tf
-* googlenet-v2
 * googlenet-v2-tf
 * googlenet-v3
 * googlenet-v3-pytorch
@@ -60,18 +55,13 @@ omz_converter --list models.lst
 * levit-128s
 * mixnet-l
 * mobilenet-v1-0.25-128
-* mobilenet-v1-1.0-224
 * mobilenet-v1-1.0-224-tf
-* mobilenet-v2
 * mobilenet-v2-1.0-224
 * mobilenet-v2-1.4-224
 * mobilenet-v2-pytorch
 * mobilenet-v3-large-1.0-224-tf
 * mobilenet-v3-small-1.0-224-tf
-* mobilenet-v3-large-1.0-224-paddle
-* mobilenet-v3-small-1.0-224-paddle
 * nfnet-f0
-* octave-resnet-26-0.25
 * regnetx-3.2gf
 * repvgg-a0
 * repvgg-b1
@@ -84,30 +74,15 @@ omz_converter --list models.lst
 * resnet18-xnor-binary-onnx-0001
 * resnet50-binary-0001
 * rexnet-v1-x1.0
-* se-inception
-* se-resnet-50
-* se-resnext-50
-* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
-* squeezenet1.0
-* squeezenet1.1
 * swin-tiny-patch4-window7-224
 * t2t-vit-14
-* vgg16
-* vgg19
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ### Required Files
 
 If you want to see classification results, you must use "-labels" flags to specify .txt file containing lists of classes and labels.
-
-Please note that you should use `<omz_dir>/data/dataset_classes/imagenet_2015.txt` labels file with the following models:
-
-* googlenet-v2
-* se-inception
-* se-resnet-50
-* se-resnext-50
 
 and `<omz_dir>/data/dataset_classes/imagenet_2012.txt` labels file with all other models supported by the demo.
 
@@ -149,7 +124,7 @@ Inference options:
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
@@ -183,7 +158,7 @@ python3 classification_demo.py -m <path_to_classification_model> \
 
 ## Running with OpenVINO Model Server
 
-You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/openvino/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
+You can also run this demo with model served in [OpenVINO Model Server](https://github.com/openvinotoolkit/model_server). Refer to [`OVMSAdapter`](../../common/python/model_zoo/model_api/adapters/ovms_adapter.md) to learn about running demos with OVMS.
 
 Exemplary command:
 

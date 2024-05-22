@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2023 Intel Corporation
+// Copyright (C) 2020-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ protected:
     float confidenceThreshold;
     std::vector<std::string> labels;
 
-    std::string getLabelName(int labelID) {
-        return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID);
+    std::string getLabelName(size_t labelID) {
+        return labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID);
     }
 };

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2019-2023 Intel Corporation
+ Copyright (c) 2019-2024 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ from gesture_recognition_demo.action_recognizer import ActionRecognizer
 from gesture_recognition_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/openvino/model_zoo'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python/model_zoo'))
 
 import monitors
 from model_api.performance_metrics import PerformanceMetrics
@@ -70,7 +70,7 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. Path to a video file or a device node of a web-camera.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
+                      help='Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2023 Intel Corporation
+Copyright (c) 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import re
 import sys
 import warnings
 import platform
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 from distutils.version import LooseVersion
 from pathlib import Path
 from setuptools import find_packages, setup # pylint:disable=W9902
@@ -75,7 +75,7 @@ def find_version(*path):
     raise RuntimeError("Unable to find version string.")
 
 long_description = read("README.md")
-version = find_version("openvino/tools/accuracy_checker", "__init__.py")
+version = find_version("accuracy_checker", "__init__.py")
 
 
 def prepare_requirements():
@@ -114,13 +114,13 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "accuracy_check=openvino.tools.accuracy_checker.main:main",
-            "convert_annotation=openvino.tools.accuracy_checker.annotation_converters.convert:main"]},
+            "accuracy_check=accuracy_checker.main:main",
+            "convert_annotation=accuracy_checker.annotation_converters.convert:main"]},
     zip_safe=False,
-    python_requires='>=3.5',
+    python_requires='>=3.8',
     install_requires=_requirements,
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile', "torchmetrics", "diffusers"
+    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile', "torchmetrics", "diffusers",
                               'kenlm @ git+https://github.com/kpu/kenlm.git@f01e12d83c7fd03ebe6656e0ad6d73a3e022bd50#egg=kenlm']}
 )

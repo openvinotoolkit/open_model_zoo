@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2023 Intel Corporation
+// Copyright (C) 2018-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -32,7 +32,7 @@ struct FaceDetection : BaseDetection {
     std::string output;
     std::string labels_output;
     double detectionThreshold;
-    int objectSize;
+    size_t objectSize;
     float width;
     float height;
     size_t model_input_width;

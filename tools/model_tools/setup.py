@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2021-2023 Intel Corporation
+# Copyright (c) 2021-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
 # limitations under the License.
 
 """
-This setup script is primarily intended to be used to package the model
-tools as part of the openvino-dev distribution. This is why it (along
-with setup.cfg) specifies only the bare minimum of distribution metadata.
-
 If you're an end user, you most likely don't need to run this. Just execute
 the scripts in this directory (downloader.py, etc.) directly.
 """
@@ -67,7 +63,7 @@ class CustomBuild(distutils.command.build_py.build_py):
     def run(self):
         super().run()
 
-        package_build_dir = Path(self.build_lib, 'openvino/model_zoo')
+        package_build_dir = Path(self.build_lib, 'omz_tools')
 
         if (package_build_dir / 'data').exists():
             shutil.rmtree(str(package_build_dir / 'data'))
@@ -107,11 +103,10 @@ class CustomBuild(distutils.command.build_py.build_py):
 
 setup(
     install_requires=read_text('requirements.in'),
-    version=get_version('src/openvino/model_zoo/_version.py'),
+    version=get_version('src/omz_tools/_version.py'),
     extras_require={
         'pytorch': read_text('requirements-pytorch.in').replace('--extra-index-url https://download.pytorch.org/whl/cpu\n', ''),
         'tensorflow2': read_text('requirements-tensorflow.in'),
-        'paddle': read_text('requirements-paddle.in')
     },
     cmdclass={
         'build_py': CustomBuild,

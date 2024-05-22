@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2023 Intel Corporation
+Copyright (c) 2018-2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from argparse import Namespace
 
 import pytest
 from .common import mock_filesystem
-from openvino.tools.accuracy_checker.config import ConfigReader, ConfigError
+from accuracy_checker.config import ConfigReader, ConfigError
 
 
 class TestConfigReader:
@@ -76,7 +76,7 @@ class TestConfigReader:
             'datasets': self.global_datasets
         }
 
-        self.module = 'openvino.tools.accuracy_checker.config.ConfigReader'
+        self.module = 'accuracy_checker.config.ConfigReader'
         self.arguments = Namespace(**{
             'models': Path('models/'),
             'extensions': Path('extensions/'),
@@ -107,7 +107,7 @@ class TestConfigReader:
             'target_tags': None, 'cpu_extensions_mode': None,
             'model_attributes': None
         })
-        mocker.patch('openvino.tools.accuracy_checker.utils.get_path', return_value=Path.cwd())
+        mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
         mocker.patch('yaml.safe_load', return_value=config)
         mocker.patch('pathlib.Path.open')
 

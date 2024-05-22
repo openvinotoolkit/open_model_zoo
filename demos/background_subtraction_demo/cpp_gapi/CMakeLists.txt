@@ -1,9 +1,14 @@
-# Copyright (C) 2022-2023 Intel Corporation
+# Copyright (C) 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 if (NOT TARGET utils_gapi)
     message(WARNING "background_subtraction_demo_gapi skipped. No suitable OpenCV version detected.")
+    return()
+endif()
+
+if(OpenVINO_VERSION_MAJOR VERSION_GREATER_EQUAL 2024)
+    message(WARNING "background_subtraction_demo_gapi skipped. G-API is not compatible with OpenVINO 2024.0.")
     return()
 endif()
 

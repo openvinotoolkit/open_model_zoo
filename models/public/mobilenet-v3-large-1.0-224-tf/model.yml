@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --saved_model_dir=$conv_dir/mobilenet_v3_large_224_1.0_float.savedmodel
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 model_info:
   model_type: Classification

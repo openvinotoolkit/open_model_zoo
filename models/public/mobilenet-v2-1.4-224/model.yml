@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Intel Corporation
+# Copyright (c) 2022-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,5 +39,4 @@ model_optimizer_args:
   - --output=MobilenetV2/Predictions/Reshape_1
   - --input_model=$dl_dir/mobilenet_v2_1.4_224_frozen.pb
 framework: tf
-quantizable: true
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

@@ -1,0 +1,66 @@
+name: github-actions
+on:
+  pull_request: null
+  schedule:
+    - cron:  '00 3 * * *'  # Run every day at 3:00 to regenerate cache
+jobs:
+  cpp_gapi-demos:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Download OpenVINO
+        run: |
+          mkdir ov
+          curl https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.2/linux/l_openvino_toolkit_ubuntu20_2023.2.0.13089.cfd42bd2cb0_x86_64.tgz | tar --directory ov --strip-components 1 -xz
+          sudo ov/install_dependencies/install_openvino_dependencies.sh
+          # smart_classroom_demo_gapi's OpenCV error asks to install libgtk2.0-dev pkg-config, the rest are for OpenCV video
+          sudo apt install libgtk2.0-dev pkg-config ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
+      - uses: hendrikmuhs/ccache-action@v1.2.10
+        with:
+          key: ubuntu20_2023.2.0.13089.cfd42bd2cb0  # This action prepends and appends its strings to the key
+          restore: ${{ github.event_name == 'pull_request'}}
+      - if: ${{ github.event_name == 'pull_request'}}
+        uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: ${{ github.workspace }}/cache
+          key: unused
+          restore-keys: ubuntu20_2023.2.0.13089.cfd42bd2cb0-
+      - if: ${{ !steps.cache.outputs.cache-hit }}
+        uses: actions/checkout@v3
+        with:
+          repository: opencv/opencv
+          path: cache/opencv
+      - if: ${{ !steps.cache.outputs.cache-hit }}
+        name: Compile OpenCV
+        run: |
+          rm -rf cache/opencv/.git/  # Minimize cache
+          mkdir cache/opencv/build
+          cd cache/opencv/build
+          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_INF_ENGINE=y -DOpenVINO_DIR=$GITHUB_WORKSPACE/ov/runtime/cmake/ -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache -DBUILD_TESTS=y -DVIDEOIO_ENABLE_PLUGINS=y -DBUILD_PERF_TESTS=n -DBUILD_EXAMPLES=n -DBUILD_opencv_apps=y -DWITH_OPENCL=n -DWITH_OPENCLAMDBLAS=n -DWITH_GSTREAMER=n -DWITH_V4L=ON -DWITH_LIBV4L=ON -DWITH_OPENCLAMDFFT=n -DWITH_VA=n -DWITH_VA_INTEL=n -DWITH_PROTOBUF=n -DBUILD_PROTOBUF=n -DBUILD_JAVA=n -DBUILD_opencv_java_bindings_generator=n -DBUILD_opencv_python2=n -DBUILD_opencv_python3=n -DWITH_IMGCODEC_HDR=y -DWITH_IMGCODEC_SUNRASTER=y -DWITH_IMGCODEC_PXM=y -DWITH_IMGCODEC_PFM=y -DWITH_PNG=y -DWITH_TIFF=n -DWITH_WEBP=n -DWITH_OPENJPEG=n -DWITH_JASPER=n -DWITH_OPENEXR=n -DBUILD_opencv_dnn=n -DBUILD_opencv_features2d=n -DBUILD_opencv_flann=n -DWITH_TBB=n -DBUILD_INFO_SKIP_EXTRA_MODULES=n -DBUILD_JASPER=n -DBUILD_PNG=n -DBUILD_OPENEXR=n -DBUILD_WEBP=n -DBUILD_ZLIB=n -DWITH_CUDA=n -DWITH_EIGEN=n -DWITH_GPHOTO2=n -DOPENCV_GAPI_GSTREAMER=n -DWITH_LAPACK=n -DWITH_MATLAB=n -DWITH_MFX=n -DWITH_QUIRC=n -DWITH_VTK=n -DINSTALL_PDB=n -DINSTALL_TESTS=n -DINSTALL_C_EXAMPLES=n -DINSTALL_PYTHON_EXAMPLES=n -DOPENCV_GENERATE_SETUPVARS=n -DWITH_1394=n -DWITH_FFMPEG=y -DWITH_GTK_2_X=y -DBUILD_JPEG=y -DWITH_IPP=y -DENABLE_CONFIG_VERIFICATION=y -DBUILD_LIST=core,gapi,highgui,imgcodecs,imgproc,videoio,video ..
+          cmake --build . -j $((`nproc`*2+2))
+      - name: build_demos.sh
+        run: |
+          source ov/setupvars.sh
+          OpenCV_DIR=$GITHUB_WORKSPACE/cache/opencv/build CMAKE_CXX_COMPILER_LAUNCHER=ccache CMAKE_CXX_LINKER_LAUNCHER=ccache ./demos/build_demos.sh --build_dir=build  # TODO: add CMAKE_CXX_FLAGS=-Werror after background_subtraction_demo/cpp_gapi is updated to ov2.0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install OMZ tools
+        run: |
+          python -m pip install --cache-dir cache/pip/ --upgrade pip
+          python -m pip install --cache-dir cache/pip/ --extra-index-url https://download.pytorch.org/whl/cpu openvino==2023.1.0 openvino-dev[onnx,pytorch,tensorflow2]==2023.1.0 tools/model_tools[pytorch,tensorflow2]
+          # Reinstall OMZ tools that could come from openvino-dev because pip doesn't promise the order of installation
+          python -m pip install --no-cache-dir --no-deps tools/model_tools
+          # Make sure OpenVINO is used from C++ package, not from PyPI
+          python -m pip uninstall -y openvino
+      - name: run_tests.py
+        run: |
+          source ov/setupvars.sh
+          python demos/tests/run_tests.py --demo-build-dir build/intel64/Release/ --test-data-dir . --device CPU --downloader-cache-dir ${{ github.workspace }}/cache/downloader/ --precisions FP16 --demos cpp_gapi
+      - uses: actions/cache/save@v3
+        with:
+          path: ${{ github.workspace }}/cache
+          key: ubuntu20_2023.2.0.13089.cfd42bd2cb0-${{ github.event.repository.updated_at }}

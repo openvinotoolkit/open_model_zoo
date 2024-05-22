@@ -16,11 +16,10 @@
    omz_demos_bert_question_answering_embedding_demo_python
    omz_demos_bert_question_answering_demo_python
    omz_demos_classification_benchmark_demo_cpp
+   omz_demos_classification_benchmark_demo_cpp_gapi
    omz_demos_classification_demo_python
    omz_demos_colorization_demo_python
    omz_demos_crossroad_camera_demo_cpp
-   omz_demos_face_detection_mtcnn_demo_cpp_gapi
-   omz_demos_face_detection_mtcnn_demo_python
    omz_demos_face_recognition_demo_python
    omz_demos_formula_recognition_demo_python
    omz_demos_gaze_estimation_demo_cpp_gapi
@@ -32,7 +31,6 @@
    omz_demos_handwritten_text_recognition_demo_python
    omz_demos_human_pose_estimation_demo_cpp
    omz_demos_human_pose_estimation_demo_python
-   omz_demos_deblurring_demo_python
    omz_demos_image_inpainting_demo_python
    omz_demos_image_processing_demo_cpp
    omz_demos_image_retrieval_demo_python
@@ -100,9 +98,6 @@ The Open Model Zoo includes the following demos:
 - [Classification Benchmark C++ G-API Demo](./classification_benchmark_demo/cpp_gapi/README.md) - Classification Benchmark C++ G-API version.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
-- [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
-- [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
-- [Face Detection MTCNN C++ G-API\* Demo](./face_detection_mtcnn_demo/cpp_gapi/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images. G-API version.
 - [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
@@ -114,7 +109,7 @@ The Open Model Zoo includes the following demos:
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
 - [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
 - [Image Inpainting Python\* Demo](./image_inpainting_demo/python/README.md) - Demo application for GMCNN inpainting network.
-- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application for deblurring and enhancing the resolution of the input image.
+- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application for enhancing the resolution of the input image.
 - [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/cpp/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
 - [Image Segmentation Python\* Demo](./segmentation_demo/python/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
@@ -182,7 +177,7 @@ For the open-source version of OpenVINO, set the following variables:
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
 Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows) variable before building the demos.
 
-### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
+### Build the Demo Applications on Linux*
 
 The officially supported Linux* build environment is the following:
 
@@ -225,7 +220,7 @@ cmake --build .
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
 for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
-### <a name="build_demos_windows"></a>Build the Demos Applications on Microsoft Windows* OS
+### Build the Demos Applications on Microsoft Windows* OS
 
 The recommended Windows* build environment is the following:
 
@@ -284,7 +279,7 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="python_requirements"></a>Dependencies for Python* Demos
+### Dependencies for Python* Demos
 
 The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
@@ -292,11 +287,13 @@ The dependencies for Python demos must be installed before running. It can be ac
 python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-### <a name="python_model_api"></a>Python\* model API package
+### Python\* model API package
 
-Python* ModelAPI is factored out as a sepparate package. Refer to the [Python Model API documentation](common/python/openvino/model_zoo/model_api/README.md#installing-python-model-api-package) to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
+Python* ModelAPI is factored out as a separate package. Refer to the
+[Python Model API documentation](./common/python/model_zoo/model_api/README.md#installing-python-model-api-package)
+to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
 
-### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
+###Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
 This requires you to have Python development files (headers and import libraries) installed.
@@ -310,7 +307,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 
 Once the modules are built, add the demo build folder to the `PYTHONPATH` environment variable.
 
-### <a name="build_specific_demos"></a>Build Specific Demos
+### Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
 but add `--target <demo1> <demo2> ...` to the `cmake --build` command or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.

@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2020-2023 Intel Corporation
+// Copyright (C) 2020-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,8 +96,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 
     const ov::Shape& outputShape = output.get_partial_shape().get_max_shape();
 
-    constexpr bool gues_layout = true;
-    ov::Layout outputLayout = getLayoutFromShape(outputShape, gues_layout);
+    ov::Layout outputLayout = getLayoutFromShape(outputShape);
     outHeight = static_cast<int>(outputShape[ov::layout::height_idx(outputLayout)]);
     outWidth = static_cast<int>(outputShape[ov::layout::width_idx(outputLayout)]);
 

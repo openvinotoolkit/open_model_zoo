@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020-2023 Intel Corporation
+ Copyright (C) 2020-2024 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -18,7 +18,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
 from image_translation_demo.preprocessing import (
@@ -104,6 +104,8 @@ def main():
     number_of_objects = len(reference_images)
 
     if use_seg:
+        if number_of_objects != len(input_images):
+            raise RuntimeError("Number of --input_images and --reference_images mast match")
         samples = [input_images, number_of_objects * [''], reference_images, number_of_objects * ['']]
     else:
         samples = [number_of_objects * [''], input_semantics, reference_images, reference_semantics]

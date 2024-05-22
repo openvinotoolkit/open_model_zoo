@@ -11,7 +11,7 @@ The following pretrained models can be used:
 
 * `face-detection-retail-0004` and `face-detection-adas-0001`, to detect faces and predict their bounding boxes;
 * `landmarks-regression-retail-0009`, to predict face keypoints;
-* `face-reidentification-retail-0095`, `Sphereface`, `facenet-20180408-102900` or `face-recognition-resnet100-arcface-onnx` to recognize persons.
+* `face-reidentification-retail-0095`, `facenet-20180408-102900` or `face-recognition-resnet100-arcface-onnx` to recognize persons.
 
 ## How it works
 
@@ -55,7 +55,6 @@ omz_converter --list models.lst
 * face-reidentification-retail-0095
 * facenet-20180408-102900
 * landmarks-regression-retail-0009
-* Sphereface
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -101,7 +100,7 @@ General:
                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is set, all frames are stored.
   --output_resolution OUTPUT_RESOLUTION

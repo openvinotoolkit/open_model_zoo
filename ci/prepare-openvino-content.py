@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2021-2023 Intel Corporation
+# Copyright (c) 2021-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ using Git attributes that begin with `omz.package`.
 """
 
 import argparse
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec B404  # disable import-subprocess check
 
 from pathlib import Path, PurePath
 

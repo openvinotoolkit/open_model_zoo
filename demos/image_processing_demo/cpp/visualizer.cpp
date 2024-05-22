@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021-2023 Intel Corporation
+// Copyright (C) 2021-2024 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@
 Visualizer::Visualizer(const std::string& type) {
     if (type == "sr")
         winName = "Image Processing Demo - Super Resolution (press A for help)";
-    else if (type == "deblur")
-        winName = "Image Processing Demo - Deblurring (press A for help)";
     else if (type == "jr")
         winName = "Image Processing Demo - JPEG Restoration (press A for help)";
 }

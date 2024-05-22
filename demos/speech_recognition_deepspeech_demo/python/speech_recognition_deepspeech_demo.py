@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2019-2023 Intel Corporation
+# Copyright (C) 2019-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
@@ -16,7 +16,7 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
-from openvino.runtime import Core, get_version
+from openvino import Core, get_version
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline

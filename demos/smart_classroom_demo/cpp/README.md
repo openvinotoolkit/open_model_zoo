@@ -56,7 +56,6 @@ omz_converter --list models.lst
 * person-detection-action-recognition-0006
 * person-detection-action-recognition-teacher-0002
 * person-detection-raisinghand-recognition-0001
-* Sphereface
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -72,7 +71,7 @@ Options:
     -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                          Optional. Enable reading the input in a loop.
     -read_limit                    Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                    Optional. Name of the output file(s) to save.
+    -o "<path>"                    Optional. Name of the output file(s) to save. Frames of odd width or height can be truncated. See https://github.com/opencv/opencv/pull/24086
     -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
     -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
