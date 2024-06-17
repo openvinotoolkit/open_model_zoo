@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstdint>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -104,6 +105,7 @@ static const char mean_values_message[] =
     "Optional. Normalize input by subtracting the mean values per channel. Example: \"255.0 255.0 255.0\"";
 static const char scale_values_message[] = "Optional. Divide input by scale values per channel. Division is applied "
                                            "after mean values subtraction. Example: \"255.0 255.0 255.0\"";
+static const char num_inf_req_per_batch_message[] = "Optional. ";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -115,6 +117,7 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
+DEFINE_uint32(nireq_per_batch, 1, num_inf_req_per_batch_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -127,6 +130,7 @@ DEFINE_string(masks, "", masks_message);
 DEFINE_bool(reverse_input_channels, false, reverse_input_channels_message);
 DEFINE_string(mean_values, "", mean_values_message);
 DEFINE_string(scale_values, "", scale_values_message);
+DEFINE_string(config, "", "Path to the configuration file (optional)");
 
 /**
  * \brief This function shows a help message
@@ -261,6 +265,100 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     }
     return true;
 }
+
+
+std::map<std::string, std::string> parseConfigFile() {
+    std::map<std::string, std::string> config;
+
+    std::ifstream file(FLAGS_config);
+    if(!file.is_open()) {
+        std::cerr << "Can't open file " << FLAGS_config << " for read" << std::endl;
+        exit(-1);
+    }
+
+    std::string option;
+    while (std::getline(file, option)) {
+        if (option.empty() || option[0] == '#') {
+            continue;
+        }
+        size_t spacePos = option.find_first_of(" \t\n\r");
+        if(spacePos == std::string::npos) {
+            std::cerr << "Invalid config parameter format. Space separator required here: " << option;
+            exit(-1);
+        }
+
+        std::string key, value;
+        if (spacePos != std::string::npos) {
+            key = option.substr(0, spacePos);
+            size_t valueStart = option.find_first_not_of(" \t\n\r", spacePos);
+            if(valueStart == std::string::npos) {
+                std::cerr << "An invalid config parameter value detected, it mustn't be empty: " << option;
+                exit(-1);
+            }
+            size_t valueEnd = option.find_last_not_of(" \t\n\r");
+            value = option.substr(valueStart, valueEnd - valueStart + 1);
+            config[key] = value;
+        }
+    }
+
+    return config;
+}
+
+
+std::vector<cv::Mat> renderDetectionBatchData(DetectionResult& result, const ColorPalette& palette, OutputTransform& outputTransform) {
+    if (!result.metaData) {
+        throw std::invalid_argument("Renderer: metadata is null");
+    }
+
+    const auto &batchedMetadata = result.metaData->asRef<ImageBatchMetaData>();
+    std::vector<cv::Mat> outputs;
+    outputs.reserve(batchedMetadata.metadatas.size());
+    for (auto &metadata : batchedMetadata.metadatas) {
+        auto outputImg = metadata->img;
+
+        if (outputImg.empty()) {
+            throw std::invalid_argument("Renderer: image provided in metadata is empty");
+        }
+        outputTransform.resize(outputImg);
+        // Visualizing result data over source image
+        if (FLAGS_r) {
+            slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+            slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        }
+
+        for (auto& obj : result.objects) {
+            if (FLAGS_r) {
+                slog::debug << " " << std::left << std::setw(9) << obj.label << " | " << std::setw(10) << obj.confidence
+                            << " | " << std::setw(4) << int(obj.x) << " | " << std::setw(4) << int(obj.y) << " | "
+                            << std::setw(4) << int(obj.x + obj.width) << " | " << std::setw(4) << int(obj.y + obj.height)
+                            << slog::endl;
+            }
+            outputTransform.scaleRect(obj);
+            std::ostringstream conf;
+            conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
+            const auto& color = palette[obj.labelID];
+            putHighlightedText(outputImg,
+                               obj.label + conf.str(),
+                               cv::Point2f(obj.x, obj.y - 5),
+                               cv::FONT_HERSHEY_COMPLEX_SMALL,
+                               1,
+                               color,
+                               2);
+            cv::rectangle(outputImg, obj, color, 2);
+        }
+
+        try {
+            for (auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
+                outputTransform.scaleCoord(lmark);
+                cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
+            }
+        } catch (const std::bad_cast&) {}
+        outputs.push_back(outputImg);
+    }
+    return outputs;
+}
+
+
 
 // Input image is stored inside metadata, as we put it there during submission stage
 cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette, OutputTransform& outputTransform) {
@@ -399,6 +497,10 @@ int main(int argc, char* argv[]) {
         slog::info << ov::get_openvino_version() << slog::endl;
 
         ov::Core core;
+        if (!FLAGS_config.empty()) {
+            const auto configs = parseConfigFile();
+            core.set_property(FLAGS_d, {configs.begin(), configs.end()});
+        }
 
         AsyncPipeline pipeline(std::move(model),
                                ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
@@ -418,20 +520,33 @@ int main(int argc, char* argv[]) {
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
 
+       // batch setup
+        std::vector<std::shared_ptr<InputData>> inputDataVector;
+        inputDataVector.reserve(FLAGS_nireq_per_batch);
+        auto image_batch_metadata = std::make_shared<ImageBatchMetaData>();
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 auto startTime = std::chrono::steady_clock::now();
 
-                //--- Capturing frame
-                curr_frame = cap->read();
-
-                if (curr_frame.empty()) {
-                    // Input stream is over
+                //--- Capturing nireq_per_batch frames
+                inputDataVector.clear();
+                image_batch_metadata->clear();
+                for (int i = 0; i < FLAGS_nireq_per_batch; i++) {
+                    curr_frame = cap->read();
+                    if (curr_frame.empty()) {
+                        // Input stream is over
+                        break;
+                    }
+                    inputDataVector.push_back(std::make_shared<ImageInputData>(curr_frame));
+                    image_batch_metadata->add(curr_frame, startTime);
+                }
+                if (inputDataVector.size() != FLAGS_nireq_per_batch) {
                     break;
                 }
-
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
+                auto inputImagesDataBeginIt = inputDataVector.begin();
+                auto inputImagesDataEndIt = inputImagesDataBeginIt;
+                std::advance(inputImagesDataEndIt, FLAGS_nireq_per_batch);
+                frameNum = pipeline.submitData(inputImagesDataBeginIt, inputImagesDataEndIt, image_batch_metadata);
             }
 
             if (frameNum == 0) {
@@ -455,28 +570,30 @@ int main(int argc, char* argv[]) {
             //    and use your own processing instead of calling renderDetectionData().
             while (keepRunning && (result = pipeline.getResult())) {
                 auto renderingStart = std::chrono::steady_clock::now();
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                std::vector<cv::Mat> outFrames = renderDetectionBatchData(result->asRef<DetectionResult>(), palette, outputTransform);
 
                 //--- Showing results and device information
-                presenter.drawGraphs(outFrame);
-                renderMetrics.update(renderingStart);
-                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                               outFrame,
-                               {10, 22},
-                               cv::FONT_HERSHEY_COMPLEX,
-                               0.65);
+                for (cv::Mat outFrame : outFrames) {
+                    presenter.drawGraphs(outFrame);
+                    renderMetrics.update(renderingStart);
+                    metrics.update(result->metaData->asRef<ImageBatchMetaData>().timeStamp,
+                                   outFrame,
+                                   {10, 22},
+                                   cv::FONT_HERSHEY_COMPLEX,
+                                   0.65);
 
-                videoWriter.write(outFrame);
-                framesProcessed++;
+                    videoWriter.write(outFrame);
+                    framesProcessed++;
 
-                if (!FLAGS_no_show) {
-                    cv::imshow("Detection Results", outFrame);
-                    //--- Processing keyboard events
-                    int key = cv::waitKey(1);
-                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                        keepRunning = false;
-                    } else {
-                        presenter.handleKey(key);
+                    if (!FLAGS_no_show) {
+                        cv::imshow("Detection Results", outFrame);
+                        //--- Processing keyboard events
+                        int key = cv::waitKey(1);
+                        if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                            keepRunning = false;
+                        } else {
+                            presenter.handleKey(key);
+                        }
                     }
                 }
             }
@@ -489,20 +606,22 @@ int main(int argc, char* argv[]) {
             result = pipeline.getResult();
             if (result != nullptr) {
                 auto renderingStart = std::chrono::steady_clock::now();
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                std::vector<cv::Mat> outFrames = renderDetectionBatchData(result->asRef<DetectionResult>(), palette, outputTransform);
                 //--- Showing results and device information
-                presenter.drawGraphs(outFrame);
-                renderMetrics.update(renderingStart);
-                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                               outFrame,
-                               {10, 22},
-                               cv::FONT_HERSHEY_COMPLEX,
-                               0.65);
-                videoWriter.write(outFrame);
-                if (!FLAGS_no_show) {
-                    cv::imshow("Detection Results", outFrame);
-                    //--- Updating output window
-                    cv::waitKey(1);
+                for (cv::Mat outFrame : outFrames) {
+                    presenter.drawGraphs(outFrame);
+                    renderMetrics.update(renderingStart);
+                    metrics.update(result->metaData->asRef<ImageBatchMetaData>().timeStamp,
+                                   outFrame,
+                                   {10, 22},
+                                   cv::FONT_HERSHEY_COMPLEX,
+                                   0.65);
+                    videoWriter.write(outFrame);
+                    if (!FLAGS_no_show) {
+                        cv::imshow("Detection Results", outFrame);
+                        //--- Updating output window
+                        cv::waitKey(1);
+                    }
                 }
             }
         }
