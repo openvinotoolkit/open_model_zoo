@@ -3,6 +3,7 @@ on:
   pull_request: null
   schedule:
     - cron:  '00 3 * * *'  # Run every day at 3:00 to regenerate cache
+permissions: read-all  # https://github.com/ossf/scorecard/blob/e23b8ad91fd6a64a0a971ca4fc0a4d1650725615/docs/checks.md#token-permissions
 jobs:
   cpp_gapi-demos:
     runs-on: ubuntu-20.04
