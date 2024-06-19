@@ -317,7 +317,7 @@ int main(int argc, char* argv[]) {
                     throw std::invalid_argument("Renderer: image provided in metadata is empty");
                 }
                 PredictionResult predictionResult = PredictionResult::Incorrect;
-                std::string label = classificationResult.topLabels.front().label;
+                std::string label = (classificationResult.topLabels.size() != 0) ? classificationResult.topLabels.front().label : "N/A";
                 if (!FLAGS_gt.empty()) {
                     for (size_t i = 0; i < FLAGS_nt; i++) {
                         unsigned predictedClass = classificationResult.topLabels[i].id;
