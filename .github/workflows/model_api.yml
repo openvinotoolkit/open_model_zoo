@@ -1,5 +1,6 @@
 name: model_api-github-actions
 on: pull_request
+permissions: read-all  # Required by https://github.com/ossf/scorecard/blob/e23b8ad91fd6a64a0a971ca4fc0a4d1650725615/docs/checks.md#token-permissions
 jobs:
   model_api-github-actions:
     strategy:
