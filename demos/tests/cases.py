@@ -233,6 +233,25 @@ DEMOS = [
         })
     )),
 
+    CppDemo(name='smart_framing_demo', implementation='cpp_gapi',
+            model_keys=['-m_yolo', '-m_sr'],
+            device_keys=['-d_yolo', '-d_sr'],
+            test_cases=combine_cases(
+        TestCase(options={'--noshow': None, '-at_sr': '3ch',
+            **MONITORS,
+            '-i': DataPatternArg('smart-classroom-demo'),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl.txt'),
+         }),
+        TestCase(options={
+            '-m_yolo' : ModelArg('yolo-v4-tiny-tf'),
+        }),
+        single_option_cases(
+            '-m_sr',
+            ModelArg('single-image-super-resolution-1032'),
+            ModelArg('single-image-super-resolution-1033')),
+
+    )),
+
     CppDemo(name='gaze_estimation_demo', implementation='cpp_gapi',
             model_keys=['-m', '-m_fd', '-m_hp', '-m_lm', '-m_es'],
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm', '-d_es'],
