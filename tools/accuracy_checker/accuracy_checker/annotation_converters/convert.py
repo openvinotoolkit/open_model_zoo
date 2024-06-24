@@ -16,9 +16,10 @@ limitations under the License.
 import warnings
 import platform
 import sys
-
+import os
 import copy
 import json
+import tempfile
 from pathlib import Path
 import pickle  # nosec B403  # disable import-pickle check
 from argparse import ArgumentParser
@@ -327,7 +328,7 @@ def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config
         annotation_dir = annotation_file.parent
         if not annotation_dir.exists():
             annotation_dir.mkdir(parents=True)
-        with annotation_file.open('wb') as file:
+        with AtomicWriteFileHandle(annotation_file,'wb') as file:
             if conversion_meta:
                 pickle.dump(conversion_meta, file)
             for representation in annotation:
@@ -337,7 +338,7 @@ def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config
         meta_dir = meta_file.parent
         if not meta_dir.exists():
             meta_dir.mkdir(parents=True)
-        with meta_file.open('wt') as file:
+        with AtomicWriteFileHandle(meta_file, 'wt') as file:
             json.dump(meta, file)
 
 
@@ -409,3 +410,38 @@ def analyze_dataset(annotations, metadata):
     else:
         metadata = {'data_analysis': data_analysis}
     return metadata
+
+class AtomicWriteFileHandle:
+    """Ensure the file is written once in case of multi processes or threads."""
+
+    def __init__(self, file_path, open_mode):
+        self.target_path = file_path
+        self.mode = open_mode
+
+        self.temp_fd, self.temp_path = tempfile.mkstemp(dir=os.path.dirname(file_path))
+        self.temp_file = os.fdopen(self.temp_fd, open_mode)
+
+    def write(self, data):
+        self.temp_file.write(data)
+
+    def writelines(self, lines):
+        self.temp_file.writelines(lines)
+
+    def close(self):
+        if not self.temp_file.closed:
+            self.temp_file.close()
+            if not os.path.exists(self.target_path):
+                os.rename(self.temp_path, self.target_path)
+            else:
+                os.remove(self.temp_path)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    # Mimic other file object methods as needed
+    def __getattr__(self, item):
+        """Delegate attribute access to the underlying temporary file object."""
+        return getattr(self.temp_file, item)
