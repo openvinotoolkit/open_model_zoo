@@ -29,7 +29,7 @@ from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField
 )
 
-REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor' ,'disk_features_extractor' ]
 DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
 DATA_SOURCE_IS_FILE = ['opencv_capture']
 
@@ -44,7 +44,8 @@ class DataRepresentation:
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
         elif isinstance(data, dict):
-            self.metadata['image_size'] = data.values().next().shape
+            if not 'input_as_dict_type' in self.metadata:
+                self.metadata['image_size'] = data.values().next().shape
         else:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
@@ -318,8 +319,10 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frame)
 
     def read_item(self, data_id):
+        input_is_dict = self.config.get('input_is_dict', False)
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
+            meta = {'input_as_dict_type' : True} if input_is_dict else {},
             identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
         )
         if self.multi_infer:
