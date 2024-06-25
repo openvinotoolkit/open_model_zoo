@@ -133,6 +133,7 @@ from .smartlab_action_recognition import SmartLabActionRecognition
 from .malware_classification import MalwareClassificationDatasetConverter
 from .cvat_hands_and_palm import CVATPalmDetectionConverter, CVATHandLandmarkConverter
 from .parti_prompts import PartiPromptsDatasetConverter
+from .hpatches import HpatchesConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -267,5 +268,6 @@ __all__ = [
     'MalwareClassificationDatasetConverter',
     'CVATPalmDetectionConverter',
     'CVATHandLandmarkConverter',
-    'PartiPromptsDatasetConverter'
+    'PartiPromptsDatasetConverter',
+    'HpatchesConverter'
 ]
