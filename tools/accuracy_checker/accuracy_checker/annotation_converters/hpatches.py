@@ -73,10 +73,6 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.sequences_dir = self.get_value_from_config('sequences_dir')
         self.max_num_keypoints = self.get_value_from_config('max_num_keypoints')
-        # self.adalam_config = self._kornia.feature.adalam.get_adalam_default_config()
-        # self.adalam_config["force_seed_mnn"] = False
-        # self.adalam_config["search_expansion"] = 16
-        # self.adalam_config["ransac_iters"] = 256
 
     def _get_new_image_size(self, h: int, w: int, side_size: int):
         aspect_ratio = w / h
