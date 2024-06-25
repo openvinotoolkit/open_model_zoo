@@ -40,7 +40,7 @@ class DataRepresentation:
         self.data = data
         self.metadata = meta or {}
 
-        if meta.get('input_is_dict_type'):
+        if self.metadata.get('input_is_dict_type'):
             return
         if np.isscalar(data):
             self.metadata['image_size'] = 1

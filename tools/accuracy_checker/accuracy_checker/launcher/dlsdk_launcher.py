@@ -20,7 +20,7 @@ import re
 import warnings
 from collections import OrderedDict
 import numpy as np
-import openvino.inference_engine as ie  # pylint: disable=package-absolute-imports
+import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, NIREQ_REGEX, VPU_PLUGINS,
