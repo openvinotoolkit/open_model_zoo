@@ -75,13 +75,13 @@ class DiskImageFeaturesExtractor(BaseReader):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update({'input_as_dict_type': BoolField(optional=True, default=True, description='Input data is dict type.')})
+        parameters.update({'input_is_dict_type': BoolField(optional=True, default=True, description='Model input is dict type.')})
+        parameters.update({'output_is_dict_type': BoolField(optional=True, default=True, description='Model output is dict type.')})
         return parameters
 
     def configure(self):
-        self.input_as_dict_type = self.get_value_from_config('input_as_dict_type')
-        self.multi_infer = self.get_value_from_config('multi_infer')
-        self.data_layout = self.get_value_from_config('data_layout')
+        self.input_as_dict_type = self.get_value_from_config('input_is_dict_type')
+        self.output_is_dict_type = self.get_value_from_config('output_is_dict_type')
 
     def read(self, data_id):
         assert(isinstance(data_id, AnnotationDataIdentifier))

@@ -179,18 +179,21 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if metadata[0].get('input_as_dict_type', False):
+                if metadata[0].get('input_is_dict_type'):
                     outputs = self.module(batch_input['input'])
-                    result_dict = self._convert_to_numpy(outputs)
                 else:
                     outputs = list(self.module(*batch_input.values()))
+                    for meta_ in metadata:
+                        meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
+
+                if metadata[0].get('output_is_dict_type'):
+                    result_dict = self._convert_to_numpy(outputs)
+                else:
                     result_dict = {
                         output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
                         for output_name, res in zip(self.output_names, outputs)
                     }
                 results.append(result_dict)
-                for meta_ in metadata:
-                    meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items() if 'shape' in data }
 
         return results
 

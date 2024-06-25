@@ -39,13 +39,15 @@ class DataRepresentation:
         self.identifier = identifier
         self.data = data
         self.metadata = meta or {}
+
+        if meta.get('input_is_dict_type'):
+            return
         if np.isscalar(data):
             self.metadata['image_size'] = 1
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
         elif isinstance(data, dict):
-            if not 'input_as_dict_type' in self.metadata:
-                self.metadata['image_size'] = data.values().next().shape
+            self.metadata['image_size'] = data.values().next().shape
         else:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
@@ -212,6 +214,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
         self.read_dispatcher.register(VideoFrameIdentifier, self._read_video_frame)
         self.multi_infer = False
+        self.data_layout = None
 
         self.validate_config(config, data_source)
         self.configure()
@@ -319,10 +322,13 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frame)
 
     def read_item(self, data_id):
-        input_is_dict = self.config.get('input_is_dict', False)
+        meta = {
+            'input_is_dict_type' : self.config.get('input_is_dict_type', False),
+            'output_is_dict_type' : self.config.get('output_is_dict_type', False),
+            }
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
-            meta = {'input_as_dict_type' : True} if input_is_dict else {},
+            meta = meta,
             identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
         )
         if self.multi_infer:

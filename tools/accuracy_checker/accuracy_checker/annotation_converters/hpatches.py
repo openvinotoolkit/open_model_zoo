@@ -87,14 +87,14 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
         return size
 
 
-    def _get_image_data(self, path, ref_image_size = None):
+    def _get_image_data(self, path, image_size = None):
         img = self._kornia.io.load_image(path, self._kornia.io.ImageLoadType.RGB32, device='cpu')[None, ...]
 
         h, w = img.shape[-2:]
         size = h, w
         size = self._get_new_image_size(h, w, 480)
-        if ref_image_size is not None and size != ref_image_size:
-            size = ref_image_size
+        if image_size and size != image_size:
+            size = image_size
         img = self._kornia.geometry.transform.resize(
             img,
             size,
@@ -113,7 +113,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
             "original_image_size": np.array([w, h]),
             "image" : img
         }
-        return data
+        return data, size
 
     def _read_homography(self, path):
         with open(path) as f:
@@ -154,15 +154,12 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
             if idx == 2:
                 img_path = Path(sequences_dir / seq / "1.ppm")
-                data0 = self._get_image_data(img_path)
+                data0, img_size0 = self._get_image_data(img_path)
 
             img_path = Path(sequences_dir / seq / f"{idx}.ppm")
 
-            data1 = self._get_image_data(img_path, data0['image'].shape[-2:])
+            data1, img_size1 = self._get_image_data(img_path, img_size0)
 
-            if data0['image'].shape != data1['image'].shape:
-                print(f"Warning sequence {seq} image 1 shape ({data0['image'].shape}) and image {id} shape ({data1['image'].shape}) are different!")
-                continue
             with self._torch.inference_mode():
                 inp = self._torch.cat([data0["image"], data1["image"]], dim=0)
                 features0, features1 = disk(inp, num_features, pad_if_not_divisible=True)

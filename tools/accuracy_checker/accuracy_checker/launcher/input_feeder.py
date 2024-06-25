@@ -504,8 +504,7 @@ class InputFeeder:
             return infers_data, template_for_shapes
 
         for layer_name, layer_data in batch_data.items():
-            layout = self.layouts_mapping.get(layer_name)
-            if meta[0].get('input_as_dict_type', False):
+            if meta[0].get('input_is_dict_type'):
                 layer_data_preprocessed = self.input_transform_func(
                     layer_data, layer_name,
                     layout,
@@ -513,6 +512,8 @@ class InputFeeder:
                 )
                 batch_data[layer_name] = layer_data_preprocessed
                 continue
+
+            layout = self.layouts_mapping.get(layer_name)
 
             if 'data_layout' in meta[0]:
                 data_layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT.get(meta[0]['data_layout'])
