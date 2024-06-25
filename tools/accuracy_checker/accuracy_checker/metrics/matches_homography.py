@@ -81,7 +81,7 @@ def sym_homography_error(kpts0, kpts1, T_0to1):
     )
     dist1_0 = np.sqrt(((kpts1_0 - kpts0) ** 2).sum(-1))
 
-    return torch.tensor((dist0_1 + dist1_0) / 2.0)
+    return ((dist0_1 + dist1_0) / 2.0).detach().cpu().numpy()
 
 
 def check_keys_recursive(d, pattern):
@@ -117,8 +117,8 @@ def eval_matches_homography(kp0, kp1, m0, scores0, H_gt) -> dict:
     pts0, pts1, _ = get_matches_scores(kp0, kp1, m0, scores0)
     err = sym_homography_error(pts0, pts1, H_gt)
     results = {}
-    results["prec@1px"] = (err < 1).float().mean().nan_to_num().item()
-    results["prec@3px"] = (err < 3).float().mean().nan_to_num().item()
+    results["prec@1px"] = np.nan_to_num((err < 1).astype(float).mean()).item()
+    results["prec@3px"] = np.nan_to_num((err < 1).astype(float).mean()).item()
     results["num_matches"] = pts0.shape[0]
     results["num_keypoints"] = (kp0.shape[0] + kp1.shape[0]) / 2.0
     return results
