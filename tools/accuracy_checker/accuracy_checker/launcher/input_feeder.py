@@ -484,6 +484,7 @@ class InputFeeder:
 
         batch_size = len(meta)
         template_for_shapes = {}
+
         if meta[0].get('multi_infer', False):
             num_splits = calculate_num_splits(batch_data, batch_size)
             infers_data = [{} for _ in range(num_splits)]
@@ -504,6 +505,15 @@ class InputFeeder:
 
         for layer_name, layer_data in batch_data.items():
             layout = self.layouts_mapping.get(layer_name)
+            if meta[0].get('input_as_dict_type', False):
+                layer_data_preprocessed = self.input_transform_func(
+                    layer_data, layer_name,
+                    layout,
+                    self.precision_mapping.get(layer_name), template
+                )
+                batch_data[layer_name] = layer_data_preprocessed
+                continue
+
             if 'data_layout' in meta[0]:
                 data_layout = LAYER_LAYOUT_TO_IMAGE_LAYOUT.get(meta[0]['data_layout'])
                 if layout is None and len(self.default_layout) == len(data_layout):

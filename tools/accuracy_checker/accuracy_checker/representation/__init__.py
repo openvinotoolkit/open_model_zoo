@@ -116,6 +116,8 @@ from .time_series_representation import (
 )
 from .text2image_generation import Text2ImageGenerationAnnotation, Text2ImageGenerationPrediction
 
+from .image_feature_representation import ImageFeatureAnnotation, ImageFeaturePrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -245,5 +247,9 @@ __all__ = [
     'HandLandmarksPrediction',
 
     "Text2ImageGenerationAnnotation",
-    "Text2ImageGenerationPrediction"
+    "Text2ImageGenerationPrediction",
+
+    'ImageFeatureAnnotation',
+    'ImageFeaturePrediction'
+
 ]
