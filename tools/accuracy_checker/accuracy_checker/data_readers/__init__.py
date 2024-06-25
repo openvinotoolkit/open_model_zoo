@@ -78,6 +78,7 @@ __all__ = [
     'NiftiImageReader',
     'TensorflowImageReader',
     'AnnotationFeaturesReader',
+    'DiskImageFeaturesExtractor',
     'WavReader',
     'FlacReader',
     'DicomReader',
