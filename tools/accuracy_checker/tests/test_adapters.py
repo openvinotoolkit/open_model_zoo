@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 import pytest
-
+import warnings
 from accuracy_checker.adapters import SSDAdapter, Adapter
 from accuracy_checker.config import ConfigError
 from .common import make_representation
@@ -76,9 +76,10 @@ def test_detection_adapter_batch_2():
 
 def test_dictionary_adapter_no_raise_warning_on_specific_args():
     adapter_config = {'type': 'age_gender', 'gender_out': 'gender', 'age_out': 'age'}
-    with pytest.warns(None) as record:
+    with pytest.warns(Warning) as expected_warning:
         Adapter.provide('age_gender', adapter_config)
-        assert len(record) == 0
+        warnings.warn("Expected warning - Ignore", UserWarning)
+        assert len(expected_warning) == 1
 
 
 def test_age_gender_adapter_raise_config_error_on_extra_args():

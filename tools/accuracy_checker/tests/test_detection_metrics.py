@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import pytest
+import warnings
 import numpy as np
 from accuracy_checker.metrics import DetectionMAP
 from accuracy_checker.metrics.detection import Recall, bbox_match
@@ -188,9 +189,10 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOU({})
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
-            assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+            assert len(expected_warnings) == 1
             assert n == 1
             assert tp[0] == 0
             assert fp[0] == 1
@@ -203,9 +205,10 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOA({})
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
-            assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+            assert len(expected_warnings) == 1
             assert n == 1
             assert tp[0] == 0
             assert fp[0] == 1
@@ -218,9 +221,10 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOA({})
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
-            assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+            assert len(expected_warnings) == 1
             assert n == 1
             assert tp[0] == 0
             assert fp[0] == 1
@@ -363,17 +367,20 @@ class TestRecall:
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], is_ground_truth=True)
         pred = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], score=1)
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             _test_metric_wrapper(Recall, multi_class_dataset())(gt, pred)
-        assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+
+        assert len(expected_warnings) == 1
 
     def test_on_dataset_without_background(self):
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], is_ground_truth=True)
         pred = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], score=1)
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             _test_metric_wrapper(Recall, multi_class_dataset_without_background())(gt, pred)
-        assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+        assert len(expected_warnings) == 1
 
     def test_not_gt_boxes_for_matching(self):
         gt = make_representation(["0 0 0 5 5"], is_ground_truth=True)
@@ -401,9 +408,11 @@ class TestMAP:
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], is_ground_truth=True)
         pred = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], score=1)
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             _test_metric_wrapper(DetectionMAP, multi_class_dataset())(gt, pred)
-        assert len(warnings) == 0
+            warnings.warn("Expected warning - Ignore", UserWarning)
+
+        assert len(expected_warnings) == 1
 
     def test_perfect_detection(self):
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], is_ground_truth=True)
@@ -434,9 +443,9 @@ class TestMAP:
     def test_no_detections_warn_user_warning(self):
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20"], is_ground_truth=True)
         pred = make_representation("", score=1)
-        with pytest.warns(UserWarning) as warnings:
+        with pytest.warns(UserWarning) as expected_warnings:
             map_ = _test_metric_wrapper(DetectionMAP, multi_class_dataset())(gt, pred)[0]
-            assert len(warnings) == 1
+            assert len(expected_warnings) == 1
 
             assert map_ == 0
 
@@ -444,11 +453,12 @@ class TestMAP:
         gt = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], is_ground_truth=True)
         pred = make_representation(["0 0 0 5 5; 1 10 10 20 20", "1 0 0 5 5"], score=1)
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             map_ = _test_metric_wrapper(DetectionMAP, multi_class_dataset_without_background())(gt, pred)
             mean = np.mean(map_)
+            warnings.warn("Expected warning - Ignore", UserWarning)
             assert 1.0 == mean
-        assert len(warnings) == 0
+            assert len(expected_warnings) == 1
 
     def test_not_gt_boxes_for_box_matching(self):
         gt = make_representation(["0 0 0 5 5"], is_ground_truth=True)
