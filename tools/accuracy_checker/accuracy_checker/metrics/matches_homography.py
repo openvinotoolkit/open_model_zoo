@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import numpy as np
 from collections import defaultdict
 import collections.abc as collections
+import numpy as np
 from .metric import Metric
 from ..representation import ImageFeatureAnnotation, ImageFeaturePrediction
 from ..utils import UnsupportedPackage
@@ -30,20 +30,19 @@ string_classes = (str, bytes)
 def map_tensor(input_, func):
     if isinstance(input_, string_classes):
         return input_
-    elif isinstance(input_, collections.Mapping):
+    if isinstance(input_, collections.Mapping):
         return {k: map_tensor(sample, func) for k, sample in input_.items()}
-    elif isinstance(input_, collections.Sequence):
+    if isinstance(input_, collections.Sequence):
         return [map_tensor(sample, func) for sample in input_]
-    elif input_ is None:
+    if input_ is None:
         return None
-    else:
-        return func(input_)
+    return func(input_)
 
 
 def index_batch(tensor_dict):
-    batch_size = len(next(iter(tensor_dict.values())))
+    batch_size = len(next(iter(tensor_dict.values()), None))
     for i in range(batch_size):
-        yield map_tensor(tensor_dict, lambda t: t[i])
+        yield map_tensor(tensor_dict, lambda t, idx=i: t[idx])
 
 
 def to_homogeneous(points):
@@ -56,11 +55,10 @@ def to_homogeneous(points):
     if isinstance(points, torch.Tensor):
         pad = points.new_ones(points.shape[:-1] + (1,))
         return torch.cat([points, pad], dim=-1)
-    elif isinstance(points, np.ndarray):
+    if isinstance(points, np.ndarray):
         pad = np.ones((points.shape[:-1] + (1,)), dtype=points.dtype)
         return np.concatenate([points, pad], axis=-1)
-    else:
-        raise ValueError
+    raise ValueError
 
 
 def from_homogeneous(points, eps=0.0):
@@ -88,11 +86,11 @@ def sym_homography_error(kpts0, kpts1, T_0to1):
 
 def check_keys_recursive(d, pattern):
     if isinstance(pattern, dict):
-        {check_keys_recursive(d[k], v) for k, v in pattern.items()}
+        for k, v in pattern.items():
+            check_keys_recursive(d[k], v)
     else:
         for k in pattern:
             assert k in d.keys()
-
 
 def get_matches_scores(kpts0, kpts1, matches0, mscores0):
     m0 = matches0 > -1
@@ -134,7 +132,7 @@ class MatchesHomography(Metric):
         self.metrics = defaultdict(list)
 
     def update(self, annotation, prediction):
-        annotations = annotation.features
+        annotations = annotation.identifier.data_id
 
         H_gt = annotations["H_0to1"]
         kp0, kp1 = annotations["keypoints0"][0], annotations["keypoints1"][0]

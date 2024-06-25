@@ -38,7 +38,7 @@ from .data_reader import (
     create_reader,
     REQUIRES_ANNOTATIONS
 )
-from .annotation_readers import AnnotationFeaturesReader
+from .annotation_readers import AnnotationFeaturesReader, DiskImageFeaturesExtractor
 from .binary_data_readers import PickleReader, ByteFileReader, LMDBReader
 from .medical_imaging_readers import NiftiImageReader, DicomReader
 from .audio_readers import WavReader, KaldiARKReader, FlacReader

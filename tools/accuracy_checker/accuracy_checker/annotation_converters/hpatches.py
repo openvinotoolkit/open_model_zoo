@@ -52,6 +52,10 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
             'max_num_keypoints': NumberField(
                 optional=True, default=512, value_type=int, min_value=128, max_value=2048,
                 description='Maksimum number of image keypoints.'
+            ),
+            'image_side_size': NumberField(
+                optional=True, default=480, value_type=int, min_value=128, max_value=2048,
+                description='Image short side size.'
             )
         })
 
@@ -73,14 +77,12 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.sequences_dir = self.get_value_from_config('sequences_dir')
         self.max_num_keypoints = self.get_value_from_config('max_num_keypoints')
-        # self.adalam_config = self._kornia.feature.adalam.get_adalam_default_config()
-        # self.adalam_config["force_seed_mnn"] = False
-        # self.adalam_config["search_expansion"] = 16
-        # self.adalam_config["ransac_iters"] = 256
+        self.side_size = self.get_value_from_config('image_side_size')
 
-    def _get_new_image_size(self, h: int, w: int, side_size: int):
+    def _get_new_image_size(self, h: int, w: int):
+        side_size = self.side_size
         aspect_ratio = w / h
-        if (aspect_ratio < 1.0):
+        if aspect_ratio < 1.0:
             size = int(side_size / aspect_ratio), side_size
         else:
             size = side_size, int(side_size * aspect_ratio)
@@ -92,7 +94,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
         h, w = img.shape[-2:]
         size = h, w
-        size = self._get_new_image_size(h, w, 480)
+        size = self._get_new_image_size(h, w)
         if image_size and size != image_size:
             size = image_size
         img = self._kornia.geometry.transform.resize(
@@ -115,8 +117,9 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
         }
         return data, size
 
-    def _read_homography(self, path):
-        with open(path) as f:
+    @staticmethod
+    def _read_homography(path):
+        with open(path, encoding="utf-8") as f:
             result = []
             for line in f.readlines():
                 while "  " in line:  # Remove double spaces
@@ -149,7 +152,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
         progress_reporter = TQDMReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations)
 
-        for id, item in enumerate(items):
+        for item_id, item in enumerate(items):
             seq, idx, _ = item
 
             if idx == 2:
@@ -158,7 +161,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
             img_path = Path(sequences_dir / seq / f"{idx}.ppm")
 
-            data1, img_size1 = self._get_image_data(img_path, img_size0)
+            data1, _ = self._get_image_data(img_path, img_size0)
 
             with self._torch.inference_mode():
                 inp = self._torch.cat([data0["image"], data1["image"]], dim=0)
@@ -179,15 +182,13 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
             sequence = f"{seq}/{idx}"
             annotated_id = AnnotationDataIdentifier(sequence, data)
-
             annotation = ImageFeatureAnnotation(
                 identifier = annotated_id,
-                features = data,
                 sequence = sequence
             )
             annotations.append(annotation)
-            progress_reporter.update(id, 1)
+            progress_reporter.update(item_id, 1)
+            break
 
         progress_reporter.finish()
         return ConverterReturn(annotations, None, None)
-

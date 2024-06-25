@@ -18,9 +18,8 @@ import numpy as np
 from .base_representation import BaseRepresentation
 
 class ImageFeatureAnnotation(BaseRepresentation):
-    def __init__(self, identifier, features, sequence):
+    def __init__(self, identifier, sequence):
         super().__init__(identifier)
-        self.features = features
         self.sequence = sequence
 
 class ImageFeaturePrediction(BaseRepresentation):
@@ -28,5 +27,3 @@ class ImageFeaturePrediction(BaseRepresentation):
         super().__init__(identifier)
         self.matches0 = matches0 if matches0 is not None else np.array([])
         self.matching_scores0 = matching_scores0 if matching_scores0 is not None else np.array([])
-
-

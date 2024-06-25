@@ -138,7 +138,6 @@ class PyTorchLauncher(Launcher):
                 module = self._torch.compile(module, backend="openvino", options=opts)
             return module
 
-
     def _convert_to_tensor(self, value, precision):
         if isinstance(value, self._torch.Tensor):
             return value
@@ -164,7 +163,6 @@ class PyTorchLauncher(Launcher):
         tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
         tensor = tensor.to(self.device)
         return tensor
-
 
     def _convert_to_numpy(self, input_dict):
         numpy_dict = {}
