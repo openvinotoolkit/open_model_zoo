@@ -188,7 +188,6 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
             )
             annotations.append(annotation)
             progress_reporter.update(item_id, 1)
-            break
 
         progress_reporter.finish()
         return ConverterReturn(annotations, None, None)
