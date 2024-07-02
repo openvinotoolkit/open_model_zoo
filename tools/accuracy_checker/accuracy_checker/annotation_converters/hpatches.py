@@ -115,7 +115,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
             "original_image_size": np.array([w, h]),
             "image" : img
         }
-        return data, size
+        return data
 
     @staticmethod
     def _read_homography(path):
@@ -131,6 +131,10 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
                     result.append(elements)
             return np.array(result).astype(float)
 
+    def get_image_features(self, model, data):
+        with self._torch.inference_mode():
+            return model(data["image"], self.max_num_keypoints, pad_if_not_divisible=True)[0]
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=50, **kwargs):
         annotations = []
         items = []
@@ -144,9 +148,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
             for i in range(2, 7):
                 items.append((seq, i, seq[0] == "i"))
 
-        device = 'cpu'
-        num_features = self.max_num_keypoints
-        disk = self._kornia.feature.DISK.from_pretrained("depth").to(device)
+        disk_model = self._kornia.feature.DISK().from_pretrained("depth")
 
         num_iterations = len(items)
         progress_reporter = TQDMReporter(print_interval=progress_interval)
@@ -157,15 +159,12 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
             if idx == 2:
                 img_path = Path(sequences_dir / seq / "1.ppm")
-                data0, img_size0 = self._get_image_data(img_path)
+                data0 = self._get_image_data(img_path)
+                features0 = self.get_image_features(disk_model, data0)
 
             img_path = Path(sequences_dir / seq / f"{idx}.ppm")
-
-            data1, _ = self._get_image_data(img_path, img_size0)
-
-            with self._torch.inference_mode():
-                inp = self._torch.cat([data0["image"], data1["image"]], dim=0)
-                features0, features1 = disk(inp, num_features, pad_if_not_divisible=True)
+            data1 = self._get_image_data(img_path)
+            features1 = self.get_image_features(disk_model, data1)
 
             H = self._read_homography(Path(sequences_dir / seq / f"H_1_{idx}"))
             H = data1["transform"] @ H @ np.linalg.inv(data0["transform"])
