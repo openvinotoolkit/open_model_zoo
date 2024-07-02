@@ -117,8 +117,9 @@ def eval_matches_homography(kp0, kp1, m0, scores0, H_gt) -> dict:
     pts0, pts1, _ = get_matches_scores(kp0, kp1, m0, scores0)
     err = sym_homography_error(pts0, pts1, H_gt)
     results = {}
+
     results["prec@1px"] = np.nan_to_num((err < 1).astype(float).mean()).item()
-    results["prec@3px"] = np.nan_to_num((err < 1).astype(float).mean()).item()
+    results["prec@3px"] = np.nan_to_num((err < 3).astype(float).mean()).item()
     results["num_matches"] = pts0.shape[0]
     results["num_keypoints"] = (kp0.shape[0] + kp1.shape[0]) / 2.0
     return results
