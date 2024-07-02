@@ -176,9 +176,9 @@ class TestRegressionMetric:
 
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
-        with pytest.warns(UserWarning) as warnings:
+        with pytest.warns(UserWarning) as expected_warnings:
             for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
-                assert len(warnings) == 1
+                assert len(expected_warnings) == 1
                 assert evaluation_result == expected
 
     def test_mae_on_interval_default_all_not_in_range_not_ignore_out_of_range(self):
