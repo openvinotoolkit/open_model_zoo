@@ -7,9 +7,11 @@ For enabling PyTorch launcher you need to add `framework: pytorch` in launchers 
 * `device` - specifies which device will be used for infer (`cpu`, `cuda` and so on).
 * `module`- PyTorch network module for loading.
 * `checkpoint` - pre-trained model checkpoint (Optional).
+* `state_key` - pre-trained model checkpoint state key (Optional).
 * `python_path` - appendix for PYTHONPATH for making network module visible in current python environment (Optional).
 * `module_args` - list of positional arguments for network module (Optional).
 * `module_kwargs` - dictionary (`key`: `value` where `key` is argument name, `value` is argument value) which represent network module keyword arguments.
+* `init_method` - method name to be called for module initialization (Optional).
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 * `batch` - batch size for running model (Optional, default 1).
 * `use_openvino_backend` - use torch.compile feature with `openvino` backend (Optional, default `False`)

@@ -84,7 +84,7 @@ class ConfigValidator(BaseValidator):
     WARN_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.WARN
     ERROR_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.ERROR
     IGNORE_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.IGNORE
-    acceptable_unknown_options = ['connector', '_command_line_mapping']
+    acceptable_unknown_options = ['connector', '_command_line_mapping', 'model']
 
     def __init__(self, config_uri, on_extra_argument=WARN_ON_EXTRA_ARGUMENT, fields=None, **kwargs):
         super().__init__(**kwargs)

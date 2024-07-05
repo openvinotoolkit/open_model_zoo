@@ -85,6 +85,7 @@ from .yolo import (
     YoloV5Adapter,
     YolorAdapter,
     YoloxAdapter,
+    YoloxsAdapter,
     YolofAdapter,
     # for adapter registration, it should be imported and added to __all__ list
     YoloV8DetectionAdapter
@@ -184,6 +185,7 @@ __all__ = [
     'YoloV5Adapter',
     'YolorAdapter',
     'YoloxAdapter',
+    'YoloxsAdapter',
     'YolofAdapter',
     'YoloV8DetectionAdapter',
 

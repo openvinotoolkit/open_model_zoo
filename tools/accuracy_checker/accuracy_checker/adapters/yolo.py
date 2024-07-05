@@ -27,6 +27,15 @@ from ..utils import get_or_parse_value
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h"])
 
 
+def xywh2xyxy(x):
+    y =  np.copy(x)
+    y[..., 0] = x[..., 0] - x[..., 2] / 2  # top left x
+    y[..., 1] = x[..., 1] - x[..., 3] / 2  # top left y
+    y[..., 2] = x[..., 0] + x[..., 2] / 2  # bottom right x
+    y[..., 3] = x[..., 1] + x[..., 3] / 2  # bottom right y
+    return y
+
+
 class YoloOutputProcessor:
     def __init__(self, coord_correct=None, size_correct=None, conf_correct=None,
                  prob_correct=None, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
@@ -789,13 +798,65 @@ class YoloxAdapter(YolorAdapter):
         self.img_size = img_size
 
 
-def xywh2xyxy(x):
-    y =  np.copy(x)
-    y[..., 0] = x[..., 0] - x[..., 2] / 2  # top left x
-    y[..., 1] = x[..., 1] - x[..., 3] / 2  # top left y
-    y[..., 2] = x[..., 0] + x[..., 2] / 2  # bottom right x
-    y[..., 3] = x[..., 1] + x[..., 3] / 2  # bottom right y
-    return y
+class YoloxsAdapter(Adapter):
+    __provider__ = 'yoloxs'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal objectiveness score value for valid detections.")
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        for identifier, output, meta in zip(identifiers, np.array([raw_outputs[self.output_blob]]), frame_meta):
+            if len(output.shape) == 3:
+                output = output.squeeze()
+
+            output_size_offset = 1
+            box_size = 4
+            score_size = 1
+            score_offset = 4
+            class_conf_offset = 5
+            num_classes = output.shape[output_size_offset] - box_size - score_size
+
+            class_confidence = np.expand_dims(
+                np.max(output[:, class_conf_offset: class_conf_offset + num_classes], axis=1), axis=1
+            )
+            class_predicted = np.expand_dims(
+                np.argmax(output[:, class_conf_offset: class_conf_offset + num_classes], axis=1), axis=1
+            )
+            confidence_mask = output[:, score_offset] * class_confidence.T > self.threshold
+
+            detections = np.concatenate((output[:, :class_conf_offset], class_confidence, class_predicted), axis=1)
+            detections = detections[confidence_mask.squeeze()]
+            detections[:,score_offset] *= detections[:,class_conf_offset]
+
+            image_resize_ratio = meta['scale_x']
+
+            boxes = xywh2xyxy(detections[:, :score_offset])
+            x_mins, y_mins, x_maxs, y_maxs = boxes.T
+            x_mins = x_mins / image_resize_ratio
+            y_mins = y_mins / image_resize_ratio
+            x_maxs = x_maxs / image_resize_ratio
+            y_maxs = y_maxs / image_resize_ratio
+
+            scores = detections[:,score_offset]
+            labels = class_predicted[confidence_mask.squeeze()]
+
+            result.append(DetectionPrediction(
+                identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs, meta
+            ))
+        return result
 
 
 class YoloV8DetectionAdapter(Adapter):
