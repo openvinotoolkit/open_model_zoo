@@ -815,6 +815,11 @@ class YoloxsAdapter(Adapter):
         self.threshold = self.get_value_from_config('threshold')
 
     def process(self, raw, identifiers, frame_meta):
+        if len(self.additional_output_mapping) > 0:
+            return self._process_split_output(raw, identifiers, frame_meta)
+        return self._process_output_blob(raw, identifiers, frame_meta)
+
+    def _process_output_blob(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
@@ -839,14 +844,14 @@ class YoloxsAdapter(Adapter):
 
             detections = np.concatenate((output[:, :class_conf_offset], class_confidence, class_predicted), axis=1)
             detections = detections[confidence_mask.squeeze()]
-            detections[:,score_offset] *= detections[:,class_conf_offset]
+            detections[:, score_offset] *= detections[:, class_conf_offset]
 
             image_resize_ratio = meta['scale_x']
 
             boxes = xywh2xyxy(detections[:, :score_offset])
             x_mins, y_mins, x_maxs, y_maxs = boxes.T / image_resize_ratio
 
-            scores = detections[:,score_offset]
+            scores = detections[:, score_offset]
             labels = class_predicted[confidence_mask.squeeze()]
 
             result.append(DetectionPrediction(
@@ -854,24 +859,7 @@ class YoloxsAdapter(Adapter):
             ))
         return result
 
-
-class YoloxsgetiAdapter(Adapter):
-    __provider__ = 'yoloxsgeti'
-    prediction_types = (DetectionPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
-                                     description="Minimal objectiveness score value for valid detections.")
-        })
-        return parameters
-
-    def configure(self):
-        self.threshold = self.get_value_from_config('threshold')
-
-    def process(self, raw, identifiers, frame_meta):
+    def _process_split_output(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
