@@ -819,7 +819,7 @@ class YoloxsAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
         for identifier, output, meta in zip(identifiers, np.array([raw_outputs[self.output_blob]]), frame_meta):
-            if len(output.shape) == 3:
+            if len(output.shape) > 2:
                 output = output.squeeze()
 
             output_size_offset = 1
@@ -844,14 +844,53 @@ class YoloxsAdapter(Adapter):
             image_resize_ratio = meta['scale_x']
 
             boxes = xywh2xyxy(detections[:, :score_offset])
-            x_mins, y_mins, x_maxs, y_maxs = boxes.T
-            x_mins = x_mins / image_resize_ratio
-            y_mins = y_mins / image_resize_ratio
-            x_maxs = x_maxs / image_resize_ratio
-            y_maxs = y_maxs / image_resize_ratio
+            x_mins, y_mins, x_maxs, y_maxs = boxes.T / image_resize_ratio
 
             scores = detections[:,score_offset]
             labels = class_predicted[confidence_mask.squeeze()]
+
+            result.append(DetectionPrediction(
+                identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs, meta
+            ))
+        return result
+
+
+class YoloxsgetiAdapter(Adapter):
+    __provider__ = 'yoloxsgeti'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal objectiveness score value for valid detections.")
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        for identifier, boxes, labels, meta in zip(identifiers,
+                                                   raw_outputs[self.additional_output_mapping['boxes']],
+                                                   raw_outputs[self.additional_output_mapping['labels']],
+                                                   frame_meta):
+            score_offset = 4
+            confidence_mask = boxes[:, score_offset] > self.threshold
+
+            if confidence_mask.size > 1:
+                confidence_mask = confidence_mask.squeeze()
+
+            boxes = boxes[confidence_mask]
+            labels = labels[confidence_mask]
+            scores = boxes[:, score_offset]
+
+            image_resize_ratio = meta['scale_x']
+            x_mins, y_mins, x_maxs, y_maxs = (boxes[:, :score_offset]).T / image_resize_ratio
 
             result.append(DetectionPrediction(
                 identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs, meta
