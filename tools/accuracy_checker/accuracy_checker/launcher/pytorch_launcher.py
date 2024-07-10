@@ -134,7 +134,7 @@ class PyTorchLauncher(Launcher):
                     init_method = getattr(module, init_method)
                     module = init_method()
                 else:
-                    raise ValueError(f'The module does not have the {init_method} method.')
+                    raise ValueError(f'Could not call the method {init_method} in the module {model_cls}.')
 
             if checkpoint:
                 checkpoint = self._torch.load(
