@@ -45,9 +45,9 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'sequences_dir': StringField(
+            'sequences_dir_name': StringField(
                 optional=True, default='hpatches-sequences-release',
-                description="Path to folder, where hpatches sequences are located."
+                description="Dataset subfolder name, where hpatches sequences are located."
             ),
             'max_num_keypoints': NumberField(
                 optional=True, default=512, value_type=int, min_value=128, max_value=2048,
@@ -75,7 +75,7 @@ class HpatchesConverter(DirectoryBasedAnnotationConverter):
 
 
         self.data_dir = self.get_value_from_config('data_dir')
-        self.sequences_dir = self.get_value_from_config('sequences_dir')
+        self.sequences_dir = self.get_value_from_config('sequences_dir_name')
         self.max_num_keypoints = self.get_value_from_config('max_num_keypoints')
         self.side_size = self.get_value_from_config('image_side_size')
 
