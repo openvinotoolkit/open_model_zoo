@@ -52,8 +52,12 @@ class PyTorchLauncher(Launcher):
             'output_names': ListField(
                 optional=True, value_type=str, description='output tensor names'
             ),
-            'use_openvino_backend': BoolField(
-                optional=True, default=False, description='use torch.compile feature with openvino backend')
+            'use_torch_compile': BoolField(
+                optional=True, default=False, description='Use torch.compile to optimize the module code'),
+            'torch_compile_kwargs': DictField(
+                key_type=str, validate_values=False, optional=True, default={},
+                description="dictionary of keyword arguments passed to torch.compile"
+            )
         })
         return parameters
 
@@ -68,8 +72,10 @@ class PyTorchLauncher(Launcher):
                 import_error.msg)) from import_error
         self._torch = torch
         self.validate_config(config_entry)
-        self.is_openvino_backend = config_entry.get('use_openvino_backend', False)
-        if self.is_openvino_backend:
+        self.use_torch_compile = config_entry.get('use_torch_compile', False)
+        self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
+        backend = self.compile_kwargs.get('backend', None)
+        if self.use_torch_compile and backend == 'openvino':
             try:
                 import openvino.torch # pylint: disable=C0415, W0611
             except ImportError as import_error:
@@ -133,9 +139,11 @@ class PyTorchLauncher(Launcher):
             module.to('cuda' if self.cuda else 'cpu')
             module.eval()
 
-            if self.is_openvino_backend:
-                opts = {"device" : f"{self.device}"}
-                module = self._torch.compile(module, backend="openvino", options=opts)
+            if self.use_torch_compile:
+                if hasattr(model_cls, 'compile'):
+                    module.compile()
+                module = self._torch.compile(module, **self.compile_kwargs)
+
             return module
 
     def _convert_to_tensor(self, value, precision):
