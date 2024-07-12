@@ -17,6 +17,8 @@ limitations under the License.
 from contextlib import contextmanager
 import sys
 import importlib
+import urllib
+import re
 from collections import OrderedDict
 
 import numpy as np
@@ -25,6 +27,7 @@ from .launcher import Launcher
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
+CHECKPOINT_URL_REGEX = r'^https?://.*\.pth(\?.*)?(#.*)?$'
 
 
 class PyTorchLauncher(Launcher):
@@ -37,6 +40,9 @@ class PyTorchLauncher(Launcher):
             'module': StringField(regex=MODULE_REGEX, description='Network module for loading'),
             'checkpoint': PathField(
                 check_exists=True, is_directory=False, optional=True, description='pre-trained model checkpoint'
+            ),
+            'checkpoint_url': StringField(optional=True, regex=CHECKPOINT_URL_REGEX,
+                                          description='url link to pre-trained model checkpoint'
             ),
             'state_key': StringField(optional=True, regex=r'\w+', description='pre-trained model checkpoint state key'),
             'python_path': PathField(
@@ -83,11 +89,14 @@ class PyTorchLauncher(Launcher):
         module_kwargs = config_entry.get("module_kwargs", {})
         self.device = self.get_value_from_config('device')
         self.cuda = 'cuda' in self.device
+        checkpoint = config_entry.get('checkpoint')
+        if checkpoint is None:
+            checkpoint = config_entry.get('checkpoint_url')
         self.module = self.load_module(
             config_entry['module'],
             module_args,
             module_kwargs,
-            config_entry.get('checkpoint'),
+            checkpoint,
             config_entry.get('state_key'),
             config_entry.get("python_path"),
             config_entry.get("init_method")
@@ -137,6 +146,8 @@ class PyTorchLauncher(Launcher):
                     raise ValueError(f'Could not call the method {init_method} in the module {model_cls}.')
 
             if checkpoint:
+                if re.match(CHECKPOINT_URL_REGEX, checkpoint):
+                    checkpoint = urllib.request.urlretrieve(checkpoint)[0]
                 checkpoint = self._torch.load(
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
                 )

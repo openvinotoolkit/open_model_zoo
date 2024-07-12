@@ -7,6 +7,7 @@ For enabling PyTorch launcher you need to add `framework: pytorch` in launchers 
 * `device` - specifies which device will be used for infer (`cpu`, `cuda` and so on).
 * `module`- PyTorch network module for loading.
 * `checkpoint` - pre-trained model checkpoint (Optional).
+* `checkpoint_url` - url link to pre-trained model checkpoint (Optional).
 * `state_key` - pre-trained model checkpoint state key (Optional).
 * `python_path` - appendix for PYTHONPATH for making network module visible in current python environment (Optional).
 * `module_args` - list of positional arguments for network module (Optional).
