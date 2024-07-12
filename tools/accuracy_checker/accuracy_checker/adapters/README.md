@@ -90,8 +90,9 @@ AccuracyChecker supports following set of adapters:
   * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
   * `num` - num parameter from DarkNet configuration file (Optional, default 5).
 * `yoloxs` - converting output of YOLOX model to `DetectionPrediction` representation.
-  * `threshold` - minimal objectness score value for valid detections (Optional, default 0.001).
-* * `yolo_v8_detection` - converting output of YOLO v8 family pretrained for object detection to `DetectionPrediction`.
+  * `score_threshold` - minimal accepted score for valid detections (Optional, default 0.001).
+  * `box_format_xywh` - enabling additional preprocessing when box format is xywh (default `False`).
+* `yolo_v8_detection` - converting output of YOLO v8 family pretrained for object detection to `DetectionPrediction`.
   * `conf_threshold` - minimal confidence for filtering valid detections (Optional, default 0.25).
   * `multi_label` - allow to use multiple labels for the same box coordinates (Optional, default True).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
