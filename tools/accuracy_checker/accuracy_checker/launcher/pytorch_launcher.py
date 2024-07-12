@@ -41,8 +41,8 @@ class PyTorchLauncher(Launcher):
             'checkpoint': PathField(
                 check_exists=True, is_directory=False, optional=True, description='pre-trained model checkpoint'
             ),
-            'checkpoint_url': StringField(optional=True, regex=CHECKPOINT_URL_REGEX,
-                                          description='url link to pre-trained model checkpoint'
+            'checkpoint_url': StringField(
+                optional=True, regex=CHECKPOINT_URL_REGEX, description='Url link to pre-trained model checkpoint.'
             ),
             'state_key': StringField(optional=True, regex=r'\w+', description='pre-trained model checkpoint state key'),
             'python_path': PathField(
@@ -146,7 +146,7 @@ class PyTorchLauncher(Launcher):
                     raise ValueError(f'Could not call the method {init_method} in the module {model_cls}.')
 
             if checkpoint:
-                if re.match(CHECKPOINT_URL_REGEX, checkpoint):
+                if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]
                 checkpoint = self._torch.load(
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
