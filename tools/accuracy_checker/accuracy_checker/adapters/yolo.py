@@ -828,6 +828,9 @@ class YoloxsAdapter(Adapter):
             if len(self.additional_output_mapping) > 0:
                 boxes = np.array(raw_outputs[self.additional_output_mapping['boxes']]).squeeze()
                 labels = np.array(raw_outputs[self.additional_output_mapping['labels']]).squeeze()
+                if not labels.shape:
+                    result.append(DetectionPrediction(identifier, [], [], [], [], [], [], meta))
+                    continue
                 scores = boxes[:, 4]
                 boxes = boxes[:, :4]
             else:
