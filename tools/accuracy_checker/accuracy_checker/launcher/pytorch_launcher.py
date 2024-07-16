@@ -17,6 +17,8 @@ limitations under the License.
 from contextlib import contextmanager
 import sys
 import importlib
+import urllib
+import re
 from collections import OrderedDict
 
 import numpy as np
@@ -25,6 +27,7 @@ from .launcher import Launcher
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
+CHECKPOINT_URL_REGEX = r'^https?://.*\.pth(\?.*)?(#.*)?$'
 
 
 class PyTorchLauncher(Launcher):
@@ -38,6 +41,10 @@ class PyTorchLauncher(Launcher):
             'checkpoint': PathField(
                 check_exists=True, is_directory=False, optional=True, description='pre-trained model checkpoint'
             ),
+            'checkpoint_url': StringField(
+                optional=True, regex=CHECKPOINT_URL_REGEX, description='Url link to pre-trained model checkpoint.'
+            ),
+            'state_key': StringField(optional=True, regex=r'\w+', description='pre-trained model checkpoint state key'),
             'python_path': PathField(
                 check_exists=True, is_directory=True, optional=True,
                 description='appendix for PYTHONPATH for making network module visible in current python environment'
@@ -46,6 +53,9 @@ class PyTorchLauncher(Launcher):
             'module_kwargs': DictField(
                 key_type=str, validate_values=False, optional=True, default={},
                 description='keyword arguments for network module'
+            ),
+            'init_method': StringField(
+                optional=True, regex=r'\w+', description='Method name to be called for module initialization.'
             ),
             'device': StringField(default='cpu', regex=DEVICE_REGEX),
             'batch': NumberField(value_type=int, min_value=1, optional=True, description="Batch size.", default=1),
@@ -79,13 +89,17 @@ class PyTorchLauncher(Launcher):
         module_kwargs = config_entry.get("module_kwargs", {})
         self.device = self.get_value_from_config('device')
         self.cuda = 'cuda' in self.device
+        checkpoint = config_entry.get('checkpoint')
+        if checkpoint is None:
+            checkpoint = config_entry.get('checkpoint_url')
         self.module = self.load_module(
             config_entry['module'],
             module_args,
             module_kwargs,
-            config_entry.get('checkpoint'),
+            checkpoint,
             config_entry.get('state_key'),
-            config_entry.get("python_path")
+            config_entry.get("python_path"),
+            config_entry.get("init_method")
         )
 
         self._batch = self.get_value_from_config('batch')
@@ -115,14 +129,25 @@ class PyTorchLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.output_names))
 
-    def load_module(self, model_cls, module_args, module_kwargs, checkpoint=None, state_key=None, python_path=None):
+    def load_module(self, model_cls, module_args, module_kwargs, checkpoint=None, state_key=None, python_path=None,
+                    init_method=None
+    ):
         module_parts = model_cls.split(".")
         model_cls = module_parts[-1]
         model_path = ".".join(module_parts[:-1])
         with append_to_path(python_path):
             model_cls = importlib.import_module(model_path).__getattribute__(model_cls)
             module = model_cls(*module_args, **module_kwargs)
+            if init_method is not None:
+                if hasattr(model_cls, init_method):
+                    init_method = getattr(module, init_method)
+                    module = init_method()
+                else:
+                    raise ValueError(f'Could not call the method {init_method} in the module {model_cls}.')
+
             if checkpoint:
+                if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
+                    checkpoint = urllib.request.urlretrieve(checkpoint)[0]
                 checkpoint = self._torch.load(
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
                 )
