@@ -62,8 +62,12 @@ class PyTorchLauncher(Launcher):
             'output_names': ListField(
                 optional=True, value_type=str, description='output tensor names'
             ),
-            'use_openvino_backend': BoolField(
-                optional=True, default=False, description='use torch.compile feature with openvino backend')
+            'use_torch_compile': BoolField(
+                optional=True, default=False, description='Use torch.compile to optimize the module code'),
+            'torch_compile_kwargs': DictField(
+                key_type=str, validate_values=False, optional=True, default={},
+                description="dictionary of keyword arguments passed to torch.compile"
+            )
         })
         return parameters
 
@@ -78,8 +82,10 @@ class PyTorchLauncher(Launcher):
                 import_error.msg)) from import_error
         self._torch = torch
         self.validate_config(config_entry)
-        self.is_openvino_backend = config_entry.get('use_openvino_backend')
-        if self.is_openvino_backend:
+        self.use_torch_compile = config_entry.get('use_torch_compile', False)
+        self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
+        backend = self.compile_kwargs.get('backend', None)
+        if self.use_torch_compile and backend == 'openvino':
             try:
                 import openvino.torch # pylint: disable=C0415, W0611
             except ImportError as import_error:
@@ -155,32 +161,70 @@ class PyTorchLauncher(Launcher):
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
-            module.to(self.device)
+            module.to('cuda' if self.cuda else 'cpu')
             module.eval()
-            if self.is_openvino_backend:
-                opts = {"device" : f"{self.device}"}
-                module = self._torch.compile(module, backend="openvino", options=opts)
+
+            if self.use_torch_compile:
+                if hasattr(model_cls, 'compile'):
+                    module.compile()
+                module = self._torch.compile(module, **self.compile_kwargs)
+
             return module
 
+    def _convert_to_tensor(self, value, precision):
+        if isinstance(value, self._torch.Tensor):
+            return value
+        return self._torch.from_numpy(value.astype(np.float32 if not precision else precision)).to(self.device)
+
     def fit_to_input(self, data, layer_name, layout, precision, template=None):
+
+        if layer_name == 'input' and isinstance(data[0], dict):
+            tensor_dict = {}
+            for key, val in data[0].items():
+                if isinstance(val, dict):
+                    sub_tensor = {}
+                    for k, value in val.items():
+                        sub_tensor[k] = self._convert_to_tensor(value, precision)
+                    tensor_dict[key] = sub_tensor
+                else:
+                    tensor_dict[key] = self._convert_to_tensor(val, precision)
+
+            return tensor_dict
+
         if layout is not None:
             data = np.transpose(data, layout)
         tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
         tensor = tensor.to(self.device)
         return tensor
 
+    def _convert_to_numpy(self, input_dict):
+        numpy_dict = {}
+        for key, value in input_dict.items():
+            if isinstance(value, self._torch.Tensor):
+                numpy_dict[key] = value.detach().cpu().numpy()
+            else:
+                numpy_dict[key] = value
+        return numpy_dict
+
     def predict(self, inputs, metadata=None, **kwargs):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                outputs = list(self.module(*batch_input.values()))
-                result_dict = {
-                    output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
-                    for output_name, res in zip(self.output_names, outputs)
-                }
+                if metadata[0].get('input_is_dict_type'):
+                    outputs = self.module(batch_input['input'])
+                else:
+                    outputs = list(self.module(*batch_input.values()))
+                    for meta_ in metadata:
+                        meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
+
+                if metadata[0].get('output_is_dict_type'):
+                    result_dict = self._convert_to_numpy(outputs)
+                else:
+                    result_dict = {
+                        output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
+                        for output_name, res in zip(self.output_names, outputs)
+                    }
                 results.append(result_dict)
-                for meta_ in metadata:
-                    meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
 
         return results
 

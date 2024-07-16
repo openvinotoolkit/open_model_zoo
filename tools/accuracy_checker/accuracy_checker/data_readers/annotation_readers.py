@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import ListField, ConfigError
+from ..config import ListField, BoolField, ConfigError
 from .data_reader import BaseReader, create_ann_identifier_key, AnnotationDataIdentifier
 from ..utils import contains_all
-
 
 class NCFDataReader(BaseReader):
     __provider__ = 'ncf_data_reader'
@@ -68,3 +67,38 @@ class AnnotationFeaturesReader(BaseReader):
     def reset(self):
         self.subset = range(len(self.data_source))
         self.counter = 0
+
+
+class DiskImageFeaturesExtractor(BaseReader):
+    __provider__ = 'disk_features_extractor'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({'input_is_dict_type': BoolField(
+            optional=True, default=True, description='Model input is dict type.')})
+        parameters.update({'output_is_dict_type': BoolField(
+            optional=True, default=True, description='Model output is dict type.')})
+        return parameters
+
+    def configure(self):
+        self.input_as_dict_type = self.get_value_from_config('input_is_dict_type')
+        self.output_is_dict_type = self.get_value_from_config('output_is_dict_type')
+
+    def read(self, data_id):
+        assert isinstance(data_id, AnnotationDataIdentifier)
+        data = data_id.data_id
+
+        required_keys = ["keypoints", "descriptors", "image_size", "oris"]
+
+        view0 = {
+            **{k: data[k + "0"] for k in required_keys if k + "0" in data},
+        }
+        view1 = {
+            **{k: data[k + "1"] for k in required_keys if k + "0" in data},
+        }
+
+        return {"image0": view0, "image1": view1}
+
+    def _read_list(self, data_id):
+        return self.read(data_id)
