@@ -809,13 +809,17 @@ class YoloxsAdapter(Adapter):
             'score_threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
                                      description="Minimal accepted score value for valid detections."),
             'box_format_xywh': BoolField(optional=True, default=False,
-                                         description="Indicates that box output format is xywh.")
+                                         description="Indicates that box output format is xywh."),
+            'boxes_out': StringField(optional=True, default='boxes', description="Boxes output layer name."),
+            'labels_out': StringField(optional=True, default='labels', description="Labels output layer name."),
         })
         return parameters
 
     def configure(self):
         self.score_threshold = self.get_value_from_config('score_threshold')
         self.box_format_xywh = self.get_value_from_config('box_format_xywh')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.labels_out = self.get_value_from_config('labels_out')
 
     def process(self, raw, identifiers, frame_meta):
         result = []
@@ -826,8 +830,8 @@ class YoloxsAdapter(Adapter):
 
         for identifier, meta in zip(identifiers, frame_meta):
             if len(self.additional_output_mapping) > 0:
-                boxes = np.array(raw_outputs[self.additional_output_mapping['boxes']]).squeeze()
-                labels = np.array(raw_outputs[self.additional_output_mapping['labels']]).squeeze()
+                boxes = np.array(raw_outputs[self.additional_output_mapping[self.boxes_out]]).squeeze()
+                labels = np.array(raw_outputs[self.additional_output_mapping[self.labels_out]]).squeeze()
                 if not labels.shape:
                     result.append(DetectionPrediction(identifier, [], [], [], [], [], [], meta))
                     continue
