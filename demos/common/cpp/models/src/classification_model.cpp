@@ -89,7 +89,7 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input  ------------------------------------------------------
     if (model->inputs().size() != 1) {
-        throw std::logic_error("Classification model wrapper supports topologies with only 1 input");
+        throw std::logic_error("Classification model wrapper supports topologies with only 1 input, but found: " + std::to_string(model->inputs().size()));
     }
     const auto& input = model->input();
     inputsNames.push_back(input.get_any_name());
@@ -158,11 +158,6 @@ void ClassificationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model
     model = ppp.build();
 
     // --------------------------- Adding softmax and topK output  ---------------------------
-
-    if (model->get_output_size() != 1) {
-        throw std::logic_error("Expected model's number of output equal to 1 (but found: " + std::to_string(model->get_output_size()) + ")");
-    }
-
     auto logitsNode = model->get_output_op(0)->input(0).get_source_output().get_node();
 
     const auto k = std::make_shared<ov::op::v0::Constant>(ov::element::i32, ov::Shape{}, std::vector<size_t>{nTop});
