@@ -25,7 +25,7 @@ For details, see [TensorFlow\* API docs](https://www.tensorflow.org/api_docs/pyt
 
 ### Original Model
 
-Image, name: `input_1`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
+Image, name: `keras_tensor`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - image height
@@ -37,7 +37,7 @@ Mean values - [123.68, 116.78, 103.94], scale values - [58.395,57.12,57.375].
 
 ### Converted Model
 
-Image, name: `input_1`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
+Image, name: `keras_tensor`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - image height

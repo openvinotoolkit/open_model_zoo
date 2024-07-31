@@ -30,7 +30,7 @@ def main():
     model = tf.keras.applications.DenseNet121(
         weights=str(args.input_dir / 'densenet121_weights_tf_dim_ordering_tf_kernels.h5')
     )
-    model.save(filepath=args.output_dir / 'densenet-121.savedmodel')
+    model.export(filepath=args.output_dir / 'densenet-121.savedmodel')
 
 
 if __name__ == '__main__':
