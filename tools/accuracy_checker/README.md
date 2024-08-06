@@ -1,35 +1,30 @@
 # Deep Learning accuracy validation framework
 
-<!--
-@sphinxdirective
+```{toctree}
+:maxdepth: 1
+:hidden:
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   omz_tools_accuracy_checker_adapters
-   omz_tools_accuracy_checker_annotation_converters
-   omz_tools_accuracy_checker_custom_evaluators
-   omz_tools_accuracy_checker_data_readers
-   omz_tools_accuracy_checker_caffe_launcher
-   omz_tools_accuracy_checker_gapi_launcher
-   omz_tools_accuracy_checker_mxnet_launcher
-   omz_tools_accuracy_checker_onnx_runtime_launcher
-   omz_tools_accuracy_checker_opencv_launcher
-   omz_tools_accuracy_checker_openvino_launcher
-   omz_tools_accuracy_checker_pdpd_launcher
-   omz_tools_accuracy_checker_pytorch_launcher
-   omz_tools_accuracy_checker_tf2_launcher
-   omz_tools_accuracy_checker_tf_lite_launcher
-   omz_tools_accuracy_checker_tf_launcher
-   omz_tools_accuracy_checker_configs
-   omz_tools_accuracy_checker_metrics
-   omz_tools_accuracy_checker_postprocessor
-   omz_tools_accuracy_checker_preprocessor
-   omz_tools_accuracy_checker_sample
-
-@endsphinxdirective
--->
+   Adapters <omz_tools_accuracy_checker_adapters>
+   Annotation Converters <omz_tools_accuracy_checker_annotation_converters>
+   Custom Evaluators for Accuracy Checker <omz_tools_accuracy_checker_custom_evaluators>
+   Data Readers <omz_tools_accuracy_checker_data_readers>
+   How to configure Caffe launcher <omz_tools_accuracy_checker_caffe_launcher>
+   How to configure G-API launcher <omz_tools_accuracy_checker_gapi_launcher>
+   How to configure MXNet launcher <omz_tools_accuracy_checker_mxnet_launcher>
+   How to configure ONNX Runtime launcher <omz_tools_accuracy_checker_onnx_runtime_launcher>
+   How to configure OpenCV launcher <omz_tools_accuracy_checker_opencv_launcher>
+   How to configure OpenVINO™ launcher <omz_tools_accuracy_checker_openvino_launcher>
+   How to configure PaddlePaddle launcher <omz_tools_accuracy_checker_pdpd_launcher>
+   How to configure PyTorch launcher <omz_tools_accuracy_checker_pytorch_launcher>
+   How to configure TensorFlow 2.0 launcher <omz_tools_accuracy_checker_tf2_launcher>
+   How to configure TensorFlow Lite launcher <omz_tools_accuracy_checker_tf_lite_launcher>
+   How to configure TensorFlow launcher <omz_tools_accuracy_checker_tf_launcher>
+   How to use predefined configuration files <omz_tools_accuracy_checker_configs>
+   Metrics <omz_tools_accuracy_checker_metrics>
+   Postprocessors <omz_tools_accuracy_checker_postprocessor>
+   Preprocessors <omz_tools_accuracy_checker_preprocessor>
+   Sample <omz_tools_accuracy_checker_sample>
+```
 
 The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
 

@@ -1,137 +1,131 @@
 # Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
-<!--
-@sphinxdirective
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: Device Support
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Device Support
-
-   omz_models_public_device_support
-   omz_models_model_aclnet
-   omz_models_model_aclnet_int8
-   omz_models_model_anti_spoof_mn3
-   omz_models_model_background_matting_mobilenetv2
-   omz_models_model_bert_base_ner
-   omz_models_model_brain_tumor_segmentation_0002
-   omz_models_model_cocosnet
-   omz_models_model_colorization_siggraph
-   omz_models_model_colorization_v2
-   omz_models_model_common_sign_language_0001
-   omz_models_model_convnext_tiny
-   omz_models_model_ctdet_coco_dlav0_512
-   omz_models_model_ctpn
-   omz_models_model_deeplabv3
-   omz_models_model_densenet_121_tf
-   omz_models_model_detr_resnet50
-   omz_models_model_dla_34
-   omz_models_model_drn_d_38
-   omz_models_model_efficientdet_d0_tf
-   omz_models_model_efficientdet_d1_tf
-   omz_models_model_efficientnet_b0
-   omz_models_model_efficientnet_b0_pytorch
-   omz_models_model_efficientnet_v2_b0
-   omz_models_model_efficientnet_v2_s
-   omz_models_model_erfnet
-   omz_models_model_f3net
-   omz_models_model_face_recognition_resnet100_arcface_onnx
-   omz_models_model_faceboxes_pytorch
-   omz_models_model_facenet_20180408_102900
-   omz_models_model_fast_neural_style_mosaic_onnx
-   omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_faster_rcnn_resnet50_coco
-   omz_models_model_fastseg_large
-   omz_models_model_fastseg_small
-   omz_models_model_fbcnn
-   omz_models_model_fcrn_dp_nyu_depth_v2_tf
-   omz_models_model_forward_tacotron
-   omz_models_model_gmcnn_places2_tf
-   omz_models_model_googlenet_v1_tf
-   omz_models_model_googlenet_v2_tf
-   omz_models_model_googlenet_v3
-   omz_models_model_googlenet_v3_pytorch
-   omz_models_model_googlenet_v4_tf
-   omz_models_model_gpt_2
-   omz_models_model_hbonet_0_25
-   omz_models_model_hbonet_1_0
-   omz_models_model_higher_hrnet_w32_human_pose_estimation
-   omz_models_model_hrnet_v2_c1_segmentation
-   omz_models_model_human_pose_estimation_3d_0001
-   omz_models_model_hybrid_cs_model_mri
-   omz_models_model_i3d_rgb_tf
-   omz_models_model_inception_resnet_v2_tf
-   omz_models_model_levit_128s
-   omz_models_model_license_plate_recognition_barrier_0007
-   omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco
-   omz_models_model_mask_rcnn_resnet50_atrous_coco
-   omz_models_model_midasnet
-   omz_models_model_mixnet_l
-   omz_models_model_mobilenet_v1_0_25_128
-   omz_models_model_mobilenet_v1_1_0_224_tf
-   omz_models_model_mobilenet_v2_1_0_224
-   omz_models_model_mobilenet_v2_1_4_224
-   omz_models_model_mobilenet_v2_pytorch
-   omz_models_model_mobilenet_v3_large_1_0_224_tf
-   omz_models_model_mobilenet_v3_small_1_0_224_tf
-   omz_models_model_mobilenet_yolo_v4_syg
-   omz_models_model_modnet_photographic_portrait_matting
-   omz_models_model_modnet_webcam_portrait_matting
-   omz_models_model_mozilla_deepspeech_0_6_1
-   omz_models_model_mozilla_deepspeech_0_8_2
-   omz_models_model_nanodet_m_1_5x_416
-   omz_models_model_nanodet_plus_m_1_5x_416
-   omz_models_model_netvlad_tf
-   omz_models_model_nfnet_f0
-   omz_models_model_open_closed_eye_0001
-   omz_models_model_pspnet_pytorch
-   omz_models_model_quartznet_15x5_en
-   omz_models_model_regnetx_3_2gf
-   omz_models_model_repvgg_a0
-   omz_models_model_repvgg_b1
-   omz_models_model_repvgg_b3
-   omz_models_model_resnest_50_pytorch
-   omz_models_model_resnet_18_pytorch
-   omz_models_model_resnet_34_pytorch
-   omz_models_model_resnet_50_pytorch
-   omz_models_model_resnet_50_tf
-   omz_models_model_retinaface_resnet50_pytorch
-   omz_models_model_retinanet_tf
-   omz_models_model_rexnet_v1_x1_0
-   omz_models_model_rfcn_resnet101_coco_tf
-   omz_models_model_robust_video_matting_mobilenetv3
-   omz_models_model_shufflenet_v2_x1_0
-   omz_models_model_single_human_pose_estimation_0001
-   omz_models_model_ssd_mobilenet_v1_coco
-   omz_models_model_ssd_mobilenet_v1_fpn_coco
-   omz_models_model_ssd_resnet34_1200_onnx
-   omz_models_model_ssdlite_mobilenet_v2
-   omz_models_model_swin_tiny_patch4_window7_224
-   omz_models_model_t2t_vit_14
-   omz_models_model_text_recognition_resnet_fc
-   omz_models_model_ultra_lightweight_face_detection_rfb_320
-   omz_models_model_ultra_lightweight_face_detection_slim_320
-   omz_models_model_vehicle_license_plate_detection_barrier_0123
-   omz_models_model_vehicle_reid_0001
-   omz_models_model_vitstr_small_patch16_224
-   omz_models_model_wav2vec2_base
-   omz_models_model_wavernn
-   omz_models_model_yolact_resnet50_fpn_pytorch
-   omz_models_model_yolo_v1_tiny_tf
-   omz_models_model_yolo_v2_tf
-   omz_models_model_yolo_v2_tiny_tf
-   omz_models_model_yolo_v3_onnx
-   omz_models_model_yolo_v3_tf
-   omz_models_model_yolo_v3_tiny_onnx
-   omz_models_model_yolo_v3_tiny_tf
-   omz_models_model_yolo_v4_tf
-   omz_models_model_yolo_v4_tiny_tf
-   omz_models_model_yolof
-   omz_models_model_yolox_tiny
-
-
-@endsphinxdirective
--->
+   Public Pre-Trained Models Device Support <omz_models_public_device_support>
+   aclnet <omz_models_model_aclnet>
+   aclnet-int8 <omz_models_model_aclnet_int8>
+   anti-spoof-mn3 <omz_models_model_anti_spoof_mn3>
+   background-matting-mobilenetv2 <omz_models_model_background_matting_mobilenetv2>
+   bert-base-ner <omz_models_model_bert_base_ner>
+   brain-tumor-segmentation-0002 <omz_models_model_brain_tumor_segmentation_0002>
+   cocosnet <omz_models_model_cocosnet>
+   colorization-siggraph <omz_models_model_colorization_siggraph>
+   colorization-v2 <omz_models_model_colorization_v2>
+   common-sign-language-0001 <omz_models_model_common_sign_language_0001>
+   convnext-tiny <omz_models_model_convnext_tiny>
+   ctdet_coco_dlav0_512 <omz_models_model_ctdet_coco_dlav0_512>
+   ctpn <omz_models_model_ctpn>
+   deeplabv3 <omz_models_model_deeplabv3>
+   densenet-121-tf <omz_models_model_densenet_121_tf>
+   detr-resnet50 <omz_models_model_detr_resnet50>
+   dla-34 <omz_models_model_dla_34>
+   drn-d-38 <omz_models_model_drn_d_38>
+   efficientdet-d0-tf <omz_models_model_efficientdet_d0_tf>
+   efficientdet-d1-tf <omz_models_model_efficientdet_d1_tf>
+   efficientnet-b0 <omz_models_model_efficientnet_b0>
+   efficientnet-b0-pytorch <omz_models_model_efficientnet_b0_pytorch>
+   efficientnet-v2-b0 <omz_models_model_efficientnet_v2_b0>
+   efficientnet-v2-s <omz_models_model_efficientnet_v2_s>
+   erfnet <omz_models_model_erfnet>
+   f3net <omz_models_model_f3net>
+   face-recognition-resnet100-arcface-onnx <omz_models_model_face_recognition_resnet100_arcface_onnx>
+   faceboxes-pytorch <omz_models_model_faceboxes_pytorch>
+   facenet-20180408-102900 <omz_models_model_facenet_20180408_102900>
+   fast-neural-style-mosaic-onnx <omz_models_model_fast_neural_style_mosaic_onnx>
+   faster_rcnn_inception_resnet_v2_atrous_coco <omz_models_model_faster_rcnn_inception_resnet_v2_atrous_coco>
+   faster_rcnn_resnet50_coco <omz_models_model_faster_rcnn_resnet50_coco>
+   fastseg-large <omz_models_model_fastseg_large>
+   fastseg-small <omz_models_model_fastseg_small>
+   fbcnn <omz_models_model_fbcnn>
+   fcrn-dp-nyu-depth-v2-tf <omz_models_model_fcrn_dp_nyu_depth_v2_tf>
+   forward-tacotron (composite) <omz_models_model_forward_tacotron>
+   gmcnn-places2-tf <omz_models_model_gmcnn_places2_tf>
+   googlenet-v1-tf <omz_models_model_googlenet_v1_tf>
+   googlenet-v2-tf <omz_models_model_googlenet_v2_tf>
+   googlenet-v3 <omz_models_model_googlenet_v3>
+   googlenet-v3-pytorch <omz_models_model_googlenet_v3_pytorch>
+   googlenet-v4-tf <omz_models_model_googlenet_v4_tf>
+   gpt-2 <omz_models_model_gpt_2>
+   hbonet-0.25 <omz_models_model_hbonet_0_25>
+   hbonet-1.0 <omz_models_model_hbonet_1_0>
+   higher-hrnet-w32-human-pose-estimation <omz_models_model_higher_hrnet_w32_human_pose_estimation>
+   hrnet-v2-c1-segmentation <omz_models_model_hrnet_v2_c1_segmentation>
+   human-pose-estimation-3d-0001 <omz_models_model_human_pose_estimation_3d_0001>
+   hybrid-cs-model-mri <omz_models_model_hybrid_cs_model_mri>
+   i3d-rgb-tf <omz_models_model_i3d_rgb_tf>
+   inception-resnet-v2-tf <omz_models_model_inception_resnet_v2_tf>
+   levit-128s <omz_models_model_levit_128s>
+   license-plate-recognition-barrier-0007 <omz_models_model_license_plate_recognition_barrier_0007>
+   mask_rcnn_inception_resnet_v2_atrous_coco <omz_models_model_mask_rcnn_inception_resnet_v2_atrous_coco>
+   mask_rcnn_resnet50_atrous_coco <omz_models_model_mask_rcnn_resnet50_atrous_coco>
+   midasnet <omz_models_model_midasnet>
+   mixnet-l <omz_models_model_mixnet_l>
+   mobilenet-v1-0.25-128 <omz_models_model_mobilenet_v1_0_25_128>
+   mobilenet-v1-1.0-224-tf <omz_models_model_mobilenet_v1_1_0_224_tf>
+   mobilenet-v2-1.0-224 <omz_models_model_mobilenet_v2_1_0_224>
+   mobilenet-v2-1.4-224 <omz_models_model_mobilenet_v2_1_4_224>
+   mobilenet-v2-pytorch <omz_models_model_mobilenet_v2_pytorch>
+   mobilenet-v3-large-1.0-224-tf <omz_models_model_mobilenet_v3_large_1_0_224_tf>
+   mobilenet-v3-small-1.0-224-tf <omz_models_model_mobilenet_v3_small_1_0_224_tf>
+   mobilenet-yolo-v4-syg <omz_models_model_mobilenet_yolo_v4_syg>
+   modnet-photographic-portrait-matting <omz_models_model_modnet_photographic_portrait_matting>
+   modnet-webcam-portrait-matting <omz_models_model_modnet_webcam_portrait_matting>
+   mozilla-deepspeech-0.6.1 <omz_models_model_mozilla_deepspeech_0_6_1>
+   mozilla-deepspeech-0.8.2 <omz_models_model_mozilla_deepspeech_0_8_2>
+   nanodet-m-1.5x-416 <omz_models_model_nanodet_m_1_5x_416>
+   nanodet-plus-m-1.5x-416 <omz_models_model_nanodet_plus_m_1_5x_416>
+   netvlad-tf <omz_models_model_netvlad_tf>
+   nfnet-f0 <omz_models_model_nfnet_f0>
+   open-closed-eye-0001 <omz_models_model_open_closed_eye_0001>
+   pspnet-pytorch <omz_models_model_pspnet_pytorch>
+   quartznet-15x5-en <omz_models_model_quartznet_15x5_en>
+   regnetx-3.2gf <omz_models_model_regnetx_3_2gf>
+   repvgg-a0 <omz_models_model_repvgg_a0>
+   repvgg-b1 <omz_models_model_repvgg_b1>
+   repvgg-b3 <omz_models_model_repvgg_b3>
+   resnest-50-pytorch <omz_models_model_resnest_50_pytorch>
+   resnet-18-pytorch <omz_models_model_resnet_18_pytorch>
+   resnet-34-pytorch <omz_models_model_resnet_34_pytorch>
+   resnet-50-pytorch <omz_models_model_resnet_50_pytorch>
+   resnet-50-tf <omz_models_model_resnet_50_tf>
+   retinaface-resnet50-pytorch <omz_models_model_retinaface_resnet50_pytorch>
+   retinanet-tf <omz_models_model_retinanet_tf>
+   rexnet-v1-x1.0 <omz_models_model_rexnet_v1_x1_0>
+   rfcn-resnet101-coco-tf <omz_models_model_rfcn_resnet101_coco_tf>
+   robust-video-matting-mobilenetv3 <omz_models_model_robust_video_matting_mobilenetv3>
+   shufflenet-v2-x1.0 <omz_models_model_shufflenet_v2_x1_0>
+   single-human-pose-estimation-0001 <omz_models_model_single_human_pose_estimation_0001>
+   ssd_mobilenet_v1_coco <omz_models_model_ssd_mobilenet_v1_coco>
+   ssd_mobilenet_v1_fpn_coco <omz_models_model_ssd_mobilenet_v1_fpn_coco>
+   ssd-resnet34-1200-onnx <omz_models_model_ssd_resnet34_1200_onnx>
+   ssdlite_mobilenet_v2 <omz_models_model_ssdlite_mobilenet_v2>
+   swin-tiny-patch4-window7-224 <omz_models_model_swin_tiny_patch4_window7_224>
+   t2t-vit-14 <omz_models_model_t2t_vit_14>
+   text-recognition-resnet-fc <omz_models_model_text_recognition_resnet_fc>
+   ultra-lightweight-face-detection-rfb-320 <omz_models_model_ultra_lightweight_face_detection_rfb_320>
+   ultra-lightweight-face-detection-slim-320 <omz_models_model_ultra_lightweight_face_detection_slim_320>
+   vehicle-license-plate-detection-barrier-0123 <omz_models_model_vehicle_license_plate_detection_barrier_0123>
+   vehicle-reid-0001 <omz_models_model_vehicle_reid_0001>
+   vitstr-small-patch16-224 <omz_models_model_vitstr_small_patch16_224>
+   wav2vec2-base <omz_models_model_wav2vec2_base>
+   wavernn (composite) <omz_models_model_wavernn>
+   yolact-resnet50-fpn-pytorch <omz_models_model_yolact_resnet50_fpn_pytorch>
+   yolo-v1-tiny-tf <omz_models_model_yolo_v1_tiny_tf>
+   yolo-v2-tf <omz_models_model_yolo_v2_tf>
+   yolo-v2-tiny-tf <omz_models_model_yolo_v2_tiny_tf>
+   yolo-v3-onnx <omz_models_model_yolo_v3_onnx>
+   yolo-v3-tf <omz_models_model_yolo_v3_tf>
+   yolo-v3-tiny-onnx <omz_models_model_yolo_v3_tiny_onnx>
+   yolo-v3-tiny-tf <omz_models_model_yolo_v3_tiny_tf>
+   yolo-v4-tf <omz_models_model_yolo_v4_tf>
+   yolo-v4-tiny-tf <omz_models_model_yolo_v4_tiny_tf>
+   yolof <omz_models_model_yolof>
+   yolox-tiny <omz_models_model_yolox_tiny>
+```
 
 OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
