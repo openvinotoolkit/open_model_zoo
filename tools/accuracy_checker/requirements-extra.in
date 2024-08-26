@@ -41,7 +41,7 @@ parasail~=1.2.4;platform_system=="Windows"
 fast-ctc-decode>=0.2.5;python_version<"3.11"
 
 # raw image formats processing
-rawpy~=0.17.1
+rawpy~=0.22.0
 
 # lmdb dataset support
 lmdb>=1.2.1
