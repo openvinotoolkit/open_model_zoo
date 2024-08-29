@@ -1,1 +1,1 @@
-tensorflow>=2.5,<2.15.0
+tensorflow>=2.5,<2.18.0
