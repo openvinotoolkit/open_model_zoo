@@ -7,7 +7,7 @@ networkx<=2.8.2
 scikit-image>=0.19.2
 
 imagecodecs~=2022.2.22;python_version=="3.8" or python_version=="3.9"
-imagecodecs~=2023.3.16;python_version>="3.11"
+imagecodecs~=2024.6.1;python_version>="3.11"
 
 # reid
 scikit-learn>=0.24.1;python_version<"3.11"
