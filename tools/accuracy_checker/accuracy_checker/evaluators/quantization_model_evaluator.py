@@ -609,6 +609,6 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     )
     postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_meta)
     if 'metrics' in dataset_config:
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), annotation_reader)
+        metric_dispatcher = MetricsExecutor(ModuleEvaluator.get_config_metrics(dataset_config), annotation_reader)
 
     return dataset, metric_dispatcher, preprocessor, postprocessor
