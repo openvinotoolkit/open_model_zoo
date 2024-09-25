@@ -381,8 +381,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     @property
     def _use_original_coco(self):
-        subsample_size = self.dataset.config.get('subsample_size')
-        if not subsample_size:
+        if not self.dataset.subsample_size:
             annotation_conversion_parameters = self.dataset.config.get('annotation_conversion', {})
             if 'annotation_file' in annotation_conversion_parameters:
                 annotation_file = Path(annotation_conversion_parameters['annotation_file'])

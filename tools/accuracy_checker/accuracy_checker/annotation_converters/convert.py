@@ -248,7 +248,7 @@ def make_subset_kaldi(annotation, size, shuffle=True, **kwargs):
                 indices = indices[:num_elem_to_add]
         else:
             if shuffle:
-                indices = np.random.shuffle(indices)
+                np.random.shuffle(indices)
         subset.extend([annotation[idx] for idx in indices])
         if len(subset) == size:
             break

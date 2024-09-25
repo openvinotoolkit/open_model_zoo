@@ -389,6 +389,10 @@ class Dataset:
     def labels(self):
         return self.data_provider.labels
 
+    @property
+    def subsample_size(self):
+        return get_subsample_size(self.config)
+
 
 def read_annotation(annotation_file: Path, log=True):
     annotation_file = Path(annotation_file)
