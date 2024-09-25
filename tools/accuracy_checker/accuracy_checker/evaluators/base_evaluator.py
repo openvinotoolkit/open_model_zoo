@@ -72,7 +72,7 @@ class BaseEvaluator:
                 csv_file, processing_info, metrics_results, metric_interval, metrics_meta
             )
 
-    # get right metrics from config    
+    # get right metrics from config
     @staticmethod
     def get_config_metrics(config):
         metrics = None
