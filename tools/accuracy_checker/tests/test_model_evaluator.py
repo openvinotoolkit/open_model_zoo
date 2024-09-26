@@ -17,7 +17,6 @@ limitations under the License.
 from unittest.mock import Mock, MagicMock
 
 from accuracy_checker.evaluators import ModelEvaluator
-from accuracy_checker.evaluators.model_evaluator import get_config_metrics
 
 class TestModelEvaluator:
     def setup_method(self):
@@ -150,7 +149,7 @@ class TestModelEvaluator:
                 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
         }
         metric = {'type': 'accuracy', 'top_k': 1, 'reference': 0.78}
-        selected_metric = get_config_metrics(dataset_config)[0]
+        selected_metric = ModelEvaluator.get_config_metrics(dataset_config)[0]
 
         assert metric['reference'] == selected_metric['reference']
         assert metric['top_k'] == selected_metric['top_k']
@@ -163,7 +162,7 @@ class TestModelEvaluator:
                 {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
         }
         subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.65}
-        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+        selected_metric = ModelEvaluator.get_config_metrics(dataset_config_sub_evaluation)[0]
 
         assert subset_metric['reference'] == selected_metric['reference']
         assert subset_metric['top_k'] == selected_metric['top_k']
@@ -176,7 +175,7 @@ class TestModelEvaluator:
                 {'subset_size': '20%', 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.72}]}]
         }
         subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.72}
-        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+        selected_metric = ModelEvaluator.get_config_metrics(dataset_config_sub_evaluation)[0]
 
         assert subset_metric['reference'] == selected_metric['reference']
         assert subset_metric['top_k'] == selected_metric['top_k']
@@ -189,7 +188,7 @@ class TestModelEvaluator:
                 'metrics': [{'type': 'accuracy', 'top_k': 5, 'reference': 0.65}]}]
         }
         subset_metric = {'type': 'accuracy', 'top_k': 5, 'reference': 0.65}
-        selected_metric = get_config_metrics(dataset_config_sub_evaluation)[0]
+        selected_metric = ModelEvaluator.get_config_metrics(dataset_config_sub_evaluation)[0]
 
         assert subset_metric['reference'] == selected_metric['reference']
         assert subset_metric['top_k'] == selected_metric['top_k']
