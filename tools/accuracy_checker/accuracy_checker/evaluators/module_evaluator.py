@@ -147,10 +147,10 @@ class ModuleEvaluator(BaseEvaluator):
     def provide_metric_references(cls, conf, return_header=True):
         processing_info = cls.get_processing_info(conf)
         dataset_config = conf['module_config']['datasets'][0]
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), postpone_metrics=True)
+        metric_dispatcher = MetricsExecutor(cls.get_config_metrics(dataset_config), postpone_metrics=True)
         extracted_results, extracted_meta = [], []
         for result_presenter, metric_result in metric_dispatcher.get_metric_result_template(
-            dataset_config.get('metrics', []), False):
+            cls.get_config_metrics(dataset_config), False):
             result, metadata = result_presenter.extract_result(metric_result, names_from_refs=True)
             if isinstance(result, list):
                 extracted_results.extend(result)
