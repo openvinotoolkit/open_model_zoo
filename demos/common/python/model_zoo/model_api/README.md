@@ -36,9 +36,9 @@ Alternatively, you can generate the package using a wheel. Follow the steps belo
 1. Build the wheel.
 
 ```sh
-python <omz_dir>/demos/common/python/setup.py bdist_wheel
+python -m build --wheel <omz_dir>/demos/common/python/
 ```
-The wheel should appear in the dist folder.
+The wheel should appear in the `dist` folder.
 Name example: `openmodelzoo_modelapi-0.0.0-py3-none-any.whl`
 
 2. Install the package in the clean environment with `--force-reinstall` key.

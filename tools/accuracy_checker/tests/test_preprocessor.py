@@ -18,7 +18,7 @@ from enum import Enum
 import cv2
 import numpy as np
 import pytest
-
+import warnings
 from accuracy_checker.config import ConfigError
 from accuracy_checker.preprocessor import (
     Crop,
@@ -168,11 +168,11 @@ class TestResize:
     def test_resize_with_both_provided_size_and_dst_height_dst_width_warn(self):
         input_image = np.ones((100, 50, 3))
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             resize = Preprocessor.provide(
                 'resize', {'type': 'resize', 'dst_width': 100, 'dst_height': 100, 'size': 200}
             )
-            assert len(warnings) == 1
+            assert len(expected_warnings) == 1
             result = resize(DataRepresentation(input_image)).data
             assert result.shape == (200, 200, 3)
 
@@ -540,9 +540,9 @@ class TestCrop:
 
     def test_crop_with_both_provided_size_and_dst_height_dst_width_warn(self):
         image = np.zeros((30, 40, 3))
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             crop = Crop({'dst_width': 100, 'dst_height': 100, 'size': 200, 'type': 'crop'})
-            assert len(warnings) == 1
+            assert len(expected_warnings) == 1
             result = crop.process(DataRepresentation(image))
             assert result.data.shape == (200, 200, 3)
             assert result.metadata == {'image_size': (30, 40, 3),
@@ -763,9 +763,9 @@ class TestPointAlignment:
     def test_point_alignment_both_provided_size_and_dst_height_dst_width_warn(self):
         input_image = np.ones((100, 50, 3))
 
-        with pytest.warns(None) as warnings:
+        with pytest.warns(Warning) as expected_warnings:
             point_aligner = PointAligner({'type': 'point_alignment', 'dst_width': 100, 'dst_height': 100, 'size': 200})
-            assert len(warnings) == 1
+            assert len(expected_warnings) == 1
             result = point_aligner(DataRepresentation(input_image), {}).data
             assert result.shape == (100, 50, 3)
 

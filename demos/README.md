@@ -1,77 +1,73 @@
 # Open Model Zoo Demos
 
-<!--
-@sphinxdirective
+```{toctree}
+:maxdepth: 1
+:hidden:
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
+   3D Human Pose Estimation Python Demo <omz_demos_human_pose_estimation_3d_demo_python>
+   3D Segmentation Python Demo <omz_demos_3d_segmentation_demo_python>
+   Action Recognition Python Demo <omz_demos_action_recognition_demo_python>
+   G-API Background Subtraction Demo <omz_demos_background_subtraction_demo_cpp_gapi>
+   Background subtraction Python Demo <omz_demos_background_subtraction_demo_python>
+   BERT Named Entity Recognition Python Demo <omz_demos_bert_named_entity_recognition_demo_python>
+   BERT Question Answering Embedding Python Demo <omz_demos_bert_question_answering_embedding_demo_python>
+   BERT Question Answering Python Demo <omz_demos_bert_question_answering_demo_python>
+   Classification Benchmark C++ Demo <omz_demos_classification_benchmark_demo_cpp>
+   Classification Benchmark C++ G-API Demo <omz_demos_classification_benchmark_demo_cpp_gapi>
+   Classification Python Demo <omz_demos_classification_demo_python>
+   Colorization Demo <omz_demos_colorization_demo_python>
+   Crossroad Camera C++ Demo <omz_demos_crossroad_camera_demo_cpp>
+   Face Recognition Python Demo <omz_demos_face_recognition_demo_python>
+   Formula Recognition Python Demo <omz_demos_formula_recognition_demo_python>
+   G-API Gaze Estimation Demo <omz_demos_gaze_estimation_demo_cpp_gapi>
+   G-API Interactive Face Detection Demo <omz_demos_interactive_face_detection_demo_cpp_gapi>
+   Gaze Estimation Demo <omz_demos_gaze_estimation_demo_cpp>
+   G-API Gesture Recognition Demo <omz_demos_gesture_recognition_demo_cpp_gapi>
+   Gesture Recognition Python Demo <omz_demos_gesture_recognition_demo_python>
+   GPT-2 Text Prediction Python Demo <omz_demos_gpt2_text_prediction_demo_python>
+   Handwritten Text Recognition Demo <omz_demos_handwritten_text_recognition_demo_python>
+   Human Pose Estimation C++ Demo <omz_demos_human_pose_estimation_demo_cpp>
+   Human Pose Estimation Python Demo <omz_demos_human_pose_estimation_demo_python>
+   Image Inpainting Python Demo <omz_demos_image_inpainting_demo_python>
+   Image Processing C++ Demo <omz_demos_image_processing_demo_cpp>
+   Image Retrieval Python Demo <omz_demos_image_retrieval_demo_python>
+   Image Segmentation C++ Demo <omz_demos_segmentation_demo_cpp>
+   Image Segmentation Python Demo <omz_demos_segmentation_demo_python>
+   Image Translation Demo <omz_demos_image_translation_demo_python>
+   Instance Segmentation Python Demo <omz_demos_instance_segmentation_demo_python>
+   Interactive Face Detection C++ Demo <omz_demos_interactive_face_detection_demo_cpp>
+   Machine Translation Python Demo <omz_demos_machine_translation_demo_python>
+   MonoDepth Python Demo <omz_demos_monodepth_demo_python>
+   MRI Reconstruction C++ Demo <omz_demos_mri_reconstruction_demo_cpp>
+   MRI Reconstruction Python Demo <omz_demos_mri_reconstruction_demo_python>
+   Multi Camera Multi Target Python Demo <omz_demos_multi_camera_multi_target_tracking_demo_python>
+   Multi-Channel Face Detection C++ Demo <omz_demos_multi_channel_face_detection_demo_cpp>
+   Multi-Channel Human Pose Estimation C++ Demo <omz_demos_multi_channel_human_pose_estimation_demo_cpp>
+   Multi-Channel Object Detection Yolov3 C++ Demo <omz_demos_multi_channel_object_detection_demo_yolov3_cpp>
+   Noise Suppression C++ Demo <omz_demos_noise_suppression_demo_cpp>
+   Noise Suppression Python Demo <omz_demos_noise_suppression_demo_python>
+   Object Detection C++ Demo <omz_demos_object_detection_demo_cpp>
+   Object Detection Python Demo <omz_demos_object_detection_demo_python>
+   Pedestrian Tracker C++ Demo <omz_demos_pedestrian_tracker_demo_cpp>
+   Place Recognition Python Demo <omz_demos_place_recognition_demo_python>
+   Security Barrier Camera C++ Demo <omz_demos_security_barrier_camera_demo_cpp>
+   Single Human Pose Estimation Demo (top-down pipeline) <omz_demos_single_human_pose_estimation_demo_python>
+   Smartlab Python Demo <omz_demos_smartlab_demo_python>
+   Smart Classroom C++ Demo <omz_demos_smart_classroom_demo_cpp>
+   Smart Classroom C++ G-API Demo <omz_demos_smart_classroom_demo_cpp_gapi>
+   Social Distance C++ Demo <omz_demos_social_distance_demo_cpp>
+   Sound Classification Python Demo <omz_demos_sound_classification_demo_python>
+   Speech Recognition DeepSpeech Python Demo <omz_demos_speech_recognition_deepspeech_demo_python>
+   Speech Recognition QuartzNet Python Demo <omz_demos_speech_recognition_quartznet_demo_python>
+   Speech Recognition Wav2Vec Python Demo <omz_demos_speech_recognition_wav2vec_demo_python>
+   TensorFlow Object Detection Mask R-CNNs Segmentation C++ Demo <omz_demos_mask_rcnn_demo_cpp>
+   Text Detection C++ Demo <omz_demos_text_detection_demo_cpp>
+   Text Spotting Python Demo <omz_demos_text_spotting_demo_python>
+   Text-to-speech Python Demo <omz_demos_text_to_speech_demo_python>
+   Time Series Forecasting Python Demo <omz_demos_time_series_forecasting_demo_python>
+   Whiteboard Inpainting Python Demo <omz_demos_whiteboard_inpainting_demo_python>
+```
 
-   omz_demos_human_pose_estimation_3d_demo_python
-   omz_demos_3d_segmentation_demo_python
-   omz_demos_action_recognition_demo_python
-   omz_demos_background_subtraction_demo_cpp_gapi
-   omz_demos_background_subtraction_demo_python
-   omz_demos_bert_named_entity_recognition_demo_python
-   omz_demos_bert_question_answering_embedding_demo_python
-   omz_demos_bert_question_answering_demo_python
-   omz_demos_classification_benchmark_demo_cpp
-   omz_demos_classification_benchmark_demo_cpp_gapi
-   omz_demos_classification_demo_python
-   omz_demos_colorization_demo_python
-   omz_demos_crossroad_camera_demo_cpp
-   omz_demos_face_recognition_demo_python
-   omz_demos_formula_recognition_demo_python
-   omz_demos_gaze_estimation_demo_cpp_gapi
-   omz_demos_interactive_face_detection_demo_cpp_gapi
-   omz_demos_gaze_estimation_demo_cpp
-   omz_demos_gesture_recognition_demo_cpp_gapi
-   omz_demos_gesture_recognition_demo_python
-   omz_demos_gpt2_text_prediction_demo_python
-   omz_demos_handwritten_text_recognition_demo_python
-   omz_demos_human_pose_estimation_demo_cpp
-   omz_demos_human_pose_estimation_demo_python
-   omz_demos_image_inpainting_demo_python
-   omz_demos_image_processing_demo_cpp
-   omz_demos_image_retrieval_demo_python
-   omz_demos_segmentation_demo_cpp
-   omz_demos_segmentation_demo_python
-   omz_demos_image_translation_demo_python
-   omz_demos_instance_segmentation_demo_python
-   omz_demos_interactive_face_detection_demo_cpp
-   omz_demos_machine_translation_demo_python
-   omz_demos_monodepth_demo_python
-   omz_demos_mri_reconstruction_demo_cpp
-   omz_demos_mri_reconstruction_demo_python
-   omz_demos_multi_camera_multi_target_tracking_demo_python
-   omz_demos_multi_channel_face_detection_demo_cpp
-   omz_demos_multi_channel_human_pose_estimation_demo_cpp
-   omz_demos_multi_channel_object_detection_demo_yolov3_cpp
-   omz_demos_noise_suppression_demo_cpp
-   omz_demos_noise_suppression_demo_python
-   omz_demos_object_detection_demo_cpp
-   omz_demos_object_detection_demo_python
-   omz_demos_pedestrian_tracker_demo_cpp
-   omz_demos_place_recognition_demo_python
-   omz_demos_security_barrier_camera_demo_cpp
-   omz_demos_single_human_pose_estimation_demo_python
-   omz_demos_smartlab_demo_python
-   omz_demos_smart_classroom_demo_cpp
-   omz_demos_smart_classroom_demo_cpp_gapi
-   omz_demos_social_distance_demo_cpp
-   omz_demos_sound_classification_demo_python
-   omz_demos_speech_recognition_deepspeech_demo_python
-   omz_demos_speech_recognition_quartznet_demo_python
-   omz_demos_speech_recognition_wav2vec_demo_python
-   omz_demos_mask_rcnn_demo_cpp
-   omz_demos_text_detection_demo_cpp
-   omz_demos_text_spotting_demo_python
-   omz_demos_text_to_speech_demo_python
-   omz_demos_time_series_forecasting_demo_python
-   omz_demos_whiteboard_inpainting_demo_python
-
-@endsphinxdirective
--->
 
 Open Model Zoo demos are console applications that provide templates to help implement specific deep learning inference scenarios. These applications show how to preprocess and postrpocess data for model inference and organize processing pipelines. Some pipelines collect analysis data from several models being inferred simultaneously. For example, [detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state](./interactive_face_detection_demo/cpp/README.md).
 
@@ -177,7 +173,7 @@ For the open-source version of OpenVINO, set the following variables:
 Alternatively, these values can be provided via command line while running `cmake`. See [CMake search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
 Also add paths to the built OpenVINO™ Runtime libraries to the `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows) variable before building the demos.
 
-### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
+### Build the Demo Applications on Linux*
 
 The officially supported Linux* build environment is the following:
 
@@ -220,7 +216,7 @@ cmake --build .
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
 for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
-### <a name="build_demos_windows"></a>Build the Demos Applications on Microsoft Windows* OS
+### Build the Demos Applications on Microsoft Windows* OS
 
 The recommended Windows* build environment is the following:
 
@@ -279,7 +275,7 @@ cmake -A x64 <open_model_zoo>/demos
   cmake --build . --config Debug
   ```
 
-### <a name="python_requirements"></a>Dependencies for Python* Demos
+### Dependencies for Python* Demos
 
 The dependencies for Python demos must be installed before running. It can be achieved with the following command:
 
@@ -287,13 +283,13 @@ The dependencies for Python demos must be installed before running. It can be ac
 python -mpip install --user -r <omz_dir>/demos/requirements.txt
 ```
 
-### <a name="python_model_api"></a>Python\* model API package
+### Python\* model API package
 
 Python* ModelAPI is factored out as a separate package. Refer to the
-[Python Model API documentation](common/python/model_zoo/model_api/README.md#installing-python-model-api-package)
+[Python Model API documentation](./common/python/model_zoo/model_api/README.md#installing-python-model-api-package)
 to learn about its installation. At the same time demos can find this package on their own. It's not required to install ModelAPI for demos.
 
-### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
+###Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
 This requires you to have Python development files (headers and import libraries) installed.
@@ -307,7 +303,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 
 Once the modules are built, add the demo build folder to the `PYTHONPATH` environment variable.
 
-### <a name="build_specific_demos"></a>Build Specific Demos
+### Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
 but add `--target <demo1> <demo2> ...` to the `cmake --build` command or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.

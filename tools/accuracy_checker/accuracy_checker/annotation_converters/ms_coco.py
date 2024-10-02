@@ -206,9 +206,10 @@ class MSCocoDetectionConverter(BaseFormatConverter):
                 image_full_path = self.images_dir / image[1]
                 if not check_file_existence(image_full_path):
                     content_errors.append('{}: does not exist'.format(image_full_path))
-            detection_annotation = DetectionAnnotation(image[1], image_labels, xmins, ymins, xmaxs, ymaxs)
-            detection_annotation.metadata['iscrowd'] = is_crowd
-            detection_annotations.append(detection_annotation)
+            if image_labels != []:
+                detection_annotation = DetectionAnnotation(image[1], image_labels, xmins, ymins, xmaxs, ymaxs)
+                detection_annotation.metadata['iscrowd'] = is_crowd
+                detection_annotations.append(detection_annotation)
             progress_reporter.update(image_id, 1)
 
         progress_reporter.finish()

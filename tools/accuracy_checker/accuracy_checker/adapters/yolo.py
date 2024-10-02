@@ -798,6 +798,74 @@ def xywh2xyxy(x):
     return y
 
 
+class YoloxsAdapter(Adapter):
+    __provider__ = 'yoloxs'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'score_threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal accepted score value for valid detections."),
+            'box_format_xywh': BoolField(optional=True, default=False,
+                                         description="Indicates that box output format is xywh."),
+            'boxes_out': StringField(optional=True, default='boxes', description="Boxes output layer name."),
+            'labels_out': StringField(optional=True, default='labels', description="Labels output layer name."),
+        })
+        return parameters
+
+    def configure(self):
+        self.score_threshold = self.get_value_from_config('score_threshold')
+        self.box_format_xywh = self.get_value_from_config('box_format_xywh')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.labels_out = self.get_value_from_config('labels_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        num_classes = 0
+        x_mins, y_mins, x_maxs, y_maxs = [], [], [], []
+
+        for identifier, meta in zip(identifiers, frame_meta):
+            if len(self.additional_output_mapping) > 0:
+                boxes = np.array(raw_outputs[self.additional_output_mapping[self.boxes_out]]).squeeze()
+                labels = np.array(raw_outputs[self.additional_output_mapping[self.labels_out]]).squeeze()
+                if not labels.shape:
+                    result.append(DetectionPrediction(identifier, [], [], [], [], [], [], meta))
+                    continue
+                scores = boxes[:, 4]
+                boxes = boxes[:, :4]
+            else:
+                output = np.array(raw_outputs[self.output_blob])
+                num_classes = output.shape[1] - 5
+                labels = np.argmax(output[:, 5: 5 + num_classes], axis=1)
+                scores = output[:, 4]
+                boxes = output[:, :4]
+
+            if num_classes > 0:
+                class_max_confidences = np.max(output[:, 5: 5 + num_classes], axis=1)
+                scores *= class_max_confidences
+
+            if self.box_format_xywh:
+                boxes = xywh2xyxy(boxes)
+
+            mask = scores > self.score_threshold
+            scores = scores[mask]
+            labels = labels[mask]
+            boxes = boxes[mask]
+
+            image_resize_ratio = meta['scale_x']
+            if boxes.size > 0 and image_resize_ratio > 0:
+                x_mins, y_mins, x_maxs, y_maxs = boxes.T / image_resize_ratio
+
+            result.append(DetectionPrediction(
+                identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs, meta
+            ))
+        return result
+
+
 class YoloV8DetectionAdapter(Adapter):
     """
     class adapter for yolov8, yolov8 support multiple tasks, this class for object detection.

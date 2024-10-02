@@ -29,7 +29,7 @@ from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField
 )
 
-REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor' ,'disk_features_extractor' ]
 DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
 DATA_SOURCE_IS_FILE = ['opencv_capture']
 
@@ -39,6 +39,9 @@ class DataRepresentation:
         self.identifier = identifier
         self.data = data
         self.metadata = meta or {}
+
+        if self.metadata.get('input_is_dict_type'):
+            return
         if np.isscalar(data):
             self.metadata['image_size'] = 1
         elif isinstance(data, list) and np.isscalar(data[0]):
@@ -211,6 +214,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
         self.read_dispatcher.register(VideoFrameIdentifier, self._read_video_frame)
         self.multi_infer = False
+        self.data_layout = None
 
         self.validate_config(config, data_source)
         self.configure()
@@ -318,8 +322,13 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frame)
 
     def read_item(self, data_id):
+        meta = {
+            'input_is_dict_type' : self.config.get('input_is_dict_type', False),
+            'output_is_dict_type' : self.config.get('output_is_dict_type', False),
+            }
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
+            meta = meta,
             identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
         )
         if self.multi_infer:
