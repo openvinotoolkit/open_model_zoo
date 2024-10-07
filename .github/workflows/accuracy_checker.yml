@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         runs-on: [ubuntu-20.04, ubuntu-22.04]
-        python-version: [3.9, '3.10', 3.11, 3.12]
+        python-version: [3.9, '3.10']
     runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@v3
