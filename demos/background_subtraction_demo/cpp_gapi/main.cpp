@@ -27,7 +27,7 @@
 #include <opencv2/gapi/gstreaming.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/infer.hpp>
-#include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/own/assert.hpp>
 #include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/gapi/util/optional.hpp>
@@ -147,13 +147,13 @@ int main(int argc, char* argv[]) {
         auto config = ConfigFactory::getUserConfig(FLAGS_d, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads);
         // clang-format off
         const auto net =
-            cv::gapi::ie::Params<cv::gapi::Generic>{
+            cv::gapi::ov::Params<cv::gapi::Generic>{
                 model->getName(),
                 FLAGS_m,  // path to topology IR
                 fileNameNoExt(FLAGS_m) + ".bin",  // path to weights
                 FLAGS_d  // device specifier
             }.cfgNumRequests(config.maxAsyncRequests)
-             .pluginConfig(config.getLegacyConfig());
+             .cfgPluginConfig(config.getLegacyConfig());
         // clang-format on
 
         slog::info << "The background matting model " << FLAGS_m << " is loaded to " << FLAGS_d << " device."
@@ -241,6 +241,8 @@ int main(int argc, char* argv[]) {
                 } else {
                     presenter.handleKey(key);
                 }
+            } else {
+                cv::imwrite("./background-substr-out.jpg", output);
             }
         }
         slog::info << "Metrics report:" << slog::endl;
