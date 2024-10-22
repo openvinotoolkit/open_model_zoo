@@ -472,7 +472,7 @@ class ConfigReader:
     @staticmethod
     def _previous_configuration_parameters_sharing(config, mode='models'):
         def _share_params_models(models_config):
-            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            shared_params = dict.fromkeys(CONFIG_SHARED_PARAMETERS, None)
             for model in models_config['models']:
                 launchers = model['launchers']
                 if not launchers:
@@ -485,7 +485,7 @@ class ConfigReader:
                             shared_params[parameter] = launcher[parameter]
 
         def _share_params_modules(modules_config):
-            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            shared_params = dict.fromkeys(CONFIG_SHARED_PARAMETERS, None)
             for evaluation in modules_config['evaluations']:
                 if 'module_config' not in evaluation:
                     continue

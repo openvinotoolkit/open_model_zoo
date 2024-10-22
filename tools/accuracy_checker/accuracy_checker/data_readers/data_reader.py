@@ -29,7 +29,7 @@ from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField
 )
 
-REQUIRES_ANNOTATIONS = ['annotation_features_extractor' ,'disk_features_extractor' ]
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor', 'disk_features_extractor' ]
 DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
 DATA_SOURCE_IS_FILE = ['opencv_capture']
 
@@ -325,7 +325,7 @@ class BaseReader(ClassProvider):
         meta = {
             'input_is_dict_type' : self.config.get('input_is_dict_type', False),
             'output_is_dict_type' : self.config.get('output_is_dict_type', False),
-            }
+        }
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
             meta = meta,

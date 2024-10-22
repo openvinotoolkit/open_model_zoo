@@ -54,4 +54,3 @@ launchers:
 
     adapter: classification
 ```
-
