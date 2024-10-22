@@ -27,7 +27,7 @@ jobs:
           PYTHONPATH=. python -m pylint --rcfile=.pylintrc `find -wholename '?*/**/*.py' -not -path "./tests/*" -not -path "./build/*"`
 
   check-basics:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
