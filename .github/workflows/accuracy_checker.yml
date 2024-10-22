@@ -31,6 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with: {python-version: 3.12}
+      - run: tree
       - run: python -m pip install -r ./src/ci/requirements-check-basics.in -r ./src/ci/requirements-documentation.in
       - run: python ./src/ci/check-basics.py
       - run: python ./src/ci/prepare-documentation.py ./prepared-documentation
