@@ -1,4 +1,4 @@
-openvino_linux: 'https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.1/linux/l_openvino_toolkit_ubuntu20_2023.1.0.12185.47b736f63ed_x86_64.tgz'
-openvino_windows: 'https://storage.openvinotoolkit.org/repositories/openvino/packages/2023.1/windows/w_openvino_toolkit_windows_2023.1.0.12185.47b736f63ed_x86_64.zip'
-wheel_linux: '2023.1.0'
-wheel_windows: '2023.1.0'
+openvino_linux: 'https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.4/linux/l_openvino_toolkit_ubuntu20_2024.4.0.16579.c3152d32c9c_x86_64.tgz'
+openvino_windows: 'https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.4/windows/w_openvino_toolkit_windows_2024.4.0.16579.c3152d32c9c_x86_64.zip'
+wheel_linux: '2024.4.0'
+wheel_windows: '2024.4.0'
