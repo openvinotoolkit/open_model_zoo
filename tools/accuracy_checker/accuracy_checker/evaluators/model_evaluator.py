@@ -64,6 +64,11 @@ class ModelEvaluator(BaseEvaluator):
         dataset_config = model_config['datasets'][0]
         dataset_name = dataset_config['name']
 
+        print(model_name)
+        print(launcher_config)
+        print(dataset_config)
+        print(dataset_name)
+
         postpone_model_loading = (
             not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
         )
@@ -90,6 +95,8 @@ class ModelEvaluator(BaseEvaluator):
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
+        print('from_configs ----------')
+        print(config_adapter, launcher, dataset)
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_mapping = getattr(launcher, "nodel_input_mapping", None) if not postpone_model_loading else {}

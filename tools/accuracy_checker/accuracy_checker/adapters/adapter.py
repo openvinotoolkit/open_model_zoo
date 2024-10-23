@@ -154,6 +154,7 @@ def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_lo
     label_map = None
     if dataset:
         metadata = dataset.metadata
+        print(metadata)
         if metadata:
             label_map = metadata.get('label_map')
 

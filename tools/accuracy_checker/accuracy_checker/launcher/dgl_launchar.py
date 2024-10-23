@@ -7,11 +7,12 @@ from ..config import PathField, StringField, NumberField, BoolField, ConfigError
 from .launcher import Launcher
 import importlib.util
 from pprint import pprint
+import torch
 
 import numpy as np
 
 class DGLLauncher(Launcher):
-    __provider__ = 'dgl'
+    __provider__ = 'DGL'
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
@@ -35,6 +36,8 @@ class DGLLauncher(Launcher):
                 )
             )
 
+        print(config_entry)
+
         self.validate_config(config_entry)
         self.device = self._get_device_to_infer(config_entry.get('device'))  # конфиг это параметры launchers из accuracy-check.yml
 
@@ -43,6 +46,11 @@ class DGLLauncher(Launcher):
             config_entry.get('module'),
             config_entry.get('module_name')
         )
+
+        self._batch = self.get_value_from_config('batch')
+
+        self._generate_inputs()
+        self.output_names = self.get_value_from_config('output_names') or ['output']
 
     def _get_device_to_infer(self, device):
         if device == 'CPU':
@@ -70,7 +78,28 @@ class DGLLauncher(Launcher):
         module.eval()
 
         return module
-        
+
+    def _generate_inputs(self):
+        config_inputs = self.config.get('inputs')
+        if not config_inputs:
+            self._inputs = {'input': (self.batch, ) + (-1, ) * 3}
+            return
+        input_shapes = OrderedDict()
+        for input_description in config_inputs:
+            input_shapes[input_description['name']] = input_description.get('shape', (self.batch, ) + (-1, ) * 3)
+        self._inputs = input_shapes
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def batch(self):
+        return self._batch
+
+    @property
+    def output_blob(self):
+        return next(iter(self.output_names))        
 
     @classmethod
     def parameters(cls):
@@ -86,10 +115,14 @@ class DGLLauncher(Launcher):
         return parameters
 
     def predict(self, inputs, metadata=None, **kwargs):
-        features = inputs.ndata['feat']
+        input_graph = inputs[0]['input'][0]
+        features = input_graph.ndata['feat']
         with torch.inference_mode():
-            predictions = self.module(inputs, features).argmax(dim=1)
-        return predictions
+            predictions = self.module(input_graph, features).argmax(dim=1)
+        result = [{
+            'output': predictions
+        }]
+        return result
     
     def release(self):
         """

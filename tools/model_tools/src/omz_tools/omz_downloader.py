@@ -16,6 +16,8 @@ import argparse
 import json
 import sys
 
+sys.path.insert(0, '..')
+
 from pathlib import Path
 
 from omz_tools import _configuration, _common

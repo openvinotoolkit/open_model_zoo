@@ -250,6 +250,8 @@ class Dataset:
         annotation_provider = AnnotationProvider(annotation, meta)
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = annotation_provider
+        print('dataset-------------')
+        print(data_reader_type, data_source, data_reader_config)
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
         self.data_provider = DataProvider(
             data_reader, annotation_provider, dataset_config=self.config, batch=self.batch
@@ -297,6 +299,7 @@ class Dataset:
     def convert_annotation(config):
         conversion_params = config.get('annotation_conversion')
         converter = conversion_params['converter']
+        print(converter)
         annotation_converter = BaseFormatConverter.provide(converter, conversion_params)
         results = annotation_converter.convert()
         annotation = results.annotations

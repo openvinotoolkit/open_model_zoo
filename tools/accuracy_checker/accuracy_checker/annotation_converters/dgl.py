@@ -10,7 +10,7 @@ MARS_IMAGE_PATTERN = re.compile(r'([\d]+)C(\d)')
 
 
 class DGLConverter(GraphFileBasedAnnotationConverter):
-    __provider__ = 'dgl'
+    __provider__ = 'DGL_converter'
     annotation_types = (ClassificationAnnotation, )
 
     def convert(self, check_content=False, **kwargs):
@@ -21,7 +21,7 @@ class DGLConverter(GraphFileBasedAnnotationConverter):
         labels = g.ndata["label"]
 
         annotation = [
-            ClassificationAnnotation(label=labels)
+            ClassificationAnnotation(identifier='', label=labels)
         ]
 
         return ConverterReturn(annotation, {'labels': labels}, None)

@@ -3,6 +3,7 @@ import numpy as np
 from ..config import StringField, ConfigError
 from .data_reader import BaseReader
 from ..utils import get_path, read_json
+from pathlib import Path
 import dgl
 
 
@@ -19,9 +20,9 @@ class DGLGraphReader(BaseReader):
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
-        print('read data')
+        print('\nread data')
         
-        graph = dgl.data.utils.load_graphs(Path(self.graph_path).__str__())
+        graph = dgl.data.utils.load_graphs(Path(data_path).__str__())
         g = graph[0][0]
 
         return g

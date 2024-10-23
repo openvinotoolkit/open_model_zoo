@@ -38,7 +38,6 @@ class ModelFile:
     @classmethod
     def deserialize(cls, file):
         name = validation.validate_relative_path('"name"', file['name'])
-
         with validation.deserialization_context('In file "{}"'.format(name)):
             size = validation.validate_nonnegative_int('"size"', file['size'])
 
@@ -243,6 +242,7 @@ def load_models(models_root, mode=ModelLoadingMode.all):
 
     composite_models = []
     composite_model_names = set()
+    # print(models_root)
 
     if mode in (ModelLoadingMode.all, ModelLoadingMode.composite_only):
 
@@ -287,6 +287,8 @@ def load_models(models_root, mode=ModelLoadingMode.all):
     if mode != ModelLoadingMode.composite_only:
         for config_path in sorted(models_root.glob('**/model.yml')):
             subdirectory = config_path.parent
+
+            # print(subdirectory)
 
             is_composite = (subdirectory.parent / 'composite-model.yml').exists()
             composite_model_name = None
@@ -333,6 +335,7 @@ def load_models_from_args(parser, args, models_root, **kwargs):
     if args.print_all:
         for model in load_models_or_die(models_root, **kwargs):
             print(model.name)
+            # pass
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])
