@@ -328,7 +328,7 @@ def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config
         annotation_dir = annotation_file.parent
         if not annotation_dir.exists():
             annotation_dir.mkdir(parents=True)
-        with AtomicWriteFileHandle(annotation_file,'wb') as file:
+        with AtomicWriteFileHandle(annotation_file, 'wb') as file:
             if conversion_meta:
                 pickle.dump(conversion_meta, file)
             for representation in annotation:

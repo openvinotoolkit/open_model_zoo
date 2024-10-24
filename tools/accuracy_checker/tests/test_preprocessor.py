@@ -18,7 +18,6 @@ from enum import Enum
 import cv2
 import numpy as np
 import pytest
-import warnings
 from accuracy_checker.config import ConfigError
 from accuracy_checker.preprocessor import (
     Crop,

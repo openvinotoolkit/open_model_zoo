@@ -25,3 +25,13 @@ jobs:
         run: |
           python -m pip install pylint==2.10.2
           PYTHONPATH=. python -m pylint --rcfile=.pylintrc `find -wholename '?*/**/*.py' -not -path "./tests/*" -not -path "./build/*"`
+
+  check-basics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: {python-version: 3.12}
+      - run: python -m pip install --requirement ./ci/requirements-check-basics.in --requirement ./ci/requirements-documentation.in
+      - run: python ./ci/check-basics.py
+      - run: python ./ci/prepare-documentation.py ./prepared-documentation/
