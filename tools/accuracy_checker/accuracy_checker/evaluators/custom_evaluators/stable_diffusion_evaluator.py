@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 import inspect
 from typing import Union, List, Optional, Dict
 import numpy as np
@@ -22,11 +21,8 @@ import cv2
 import PIL
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
-from ...config import ConfigError
-from ...utils import UnsupportedPackage, extract_image_representations, get_path
+from ...utils import UnsupportedPackage, extract_image_representations
 from ...representation import Text2ImageGenerationPrediction
-from ...logging import print_info
-
 
 try:
     from diffusers import DiffusionPipeline
@@ -68,9 +64,75 @@ class PipelinedModel(BaseCascadeModel):
         scheduler_config = self.config.get("scheduler_config", {})
         scheduler = LMSDiscreteScheduler.from_config(scheduler_config)
         netowrk_info = netowrk_info or self.network_info
+
+        self.load_models(netowrk_info, launcher, True)
+        compiled_models = self.get_compiled_models(launcher)
+
         self.pipe = OVStableDiffusionPipeline(
-            launcher, tokenizer, scheduler, self.network_info,
+            launcher, tokenizer, scheduler,
+            models_dict = compiled_models,
             seed=self.seed, num_inference_steps=self.num_steps)
+
+    def release(self):
+        del self.pipe
+
+    def load_models(self, model_info, launcher, log=False):
+        if isinstance(model_info, dict):
+            for model_name, model_dict in model_info.items():
+                model_dict["name"] = model_name
+                self.load_model(model_dict, launcher)
+        else:
+            for model_dict in model_info:
+                self.load_model(model_dict, launcher)
+
+        if log:
+            self.print_input_output_info()
+
+
+    def load_model(self, network_info, launcher):
+        model, weights = self.automatic_model_search(network_info)
+        if weights:
+            network = launcher.read_network(str(model), str(weights))
+        else:
+            network = launcher.read_network(str(model), None)
+        setattr(self, f"{network_info['name']}_model", network)
+
+    def print_input_output_info(self):
+        model_parts = ("text_encoder", "unet", "vae_decoder", "vae_encoder")
+        for part in model_parts:
+            part_model_id = f"{part}_model"
+            model = getattr(self, part_model_id, None)
+            if model is not None:
+                self.launcher.print_input_output_info(model, part)
+
+    def get_compiled_models(self, launcher):
+        unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
+        if not unet_shapes[0][0].is_dynamic:
+            unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
+            unet_shapes[0][0] = -1
+            unet_shapes[2][0] = -1
+            self.unet_model.reshape(dict(zip(self.unet_model.inputs, unet_shapes)))
+        height = unet_shapes[0][2].get_length() * 8 if not unet_shapes[0][2].is_dynamic else 512
+        width = unet_shapes[0][3].get_length() * 8 if not unet_shapes[0][3].is_dynamic else 512
+        unet = launcher.ie_core.compile_model(self.unet_model, launcher.device)
+        text_encoder = launcher.ie_core.compile_model(self.text_encoder_model, launcher.device)
+        vae_decoder = launcher.ie_core.compile_model(self.vae_decoder_model, launcher.device)
+        vae_encoder = None
+        if self.vae_encoder_model is not None:
+            vae_encoder = launcher.ie_core.compile_model(self.vae_encoder_model, launcher.device)
+
+        return { "unet": unet,
+                 "unet_shape" : (height, width),
+                 "text_encoder": text_encoder,
+                 "vae_decoder": vae_decoder,
+                 "vae_encoder": vae_encoder }
+
+    def reset_compiled_models(self):
+        self.unet = None
+        self.text_encoder = None
+        self.vae_decoder = None
+        self.vae_encoder = None
+
 
     def predict(self, identifiers, input_data, input_meta):
         preds = []
@@ -78,34 +140,6 @@ class PipelinedModel(BaseCascadeModel):
             pred = self.pipe(prompt, output_type="np")["sample"][0]
             preds.append(Text2ImageGenerationPrediction(idx, pred))
         return None, preds
-
-    def release(self):
-        del self.pipe
-
-    def load_network(self, network_list, launcher):
-        if self.pipe is None:
-            self.create_pipeline(launcher, network_list)
-            return
-        self.pipe.reset_compiled_models()
-        for network_dict in network_list:
-            self.pipe.load_network(network_dict["model"], network_dict["name"])
-        self.pipe.compile(launcher)
-
-    def load_model(self, network_list, launcher):
-        if self.pipe is None:
-            self.create_pipeline(launcher, network_list)
-            return
-        self.pipe.reset_compiled_models()
-        for network_dict in network_list:
-            self.pipe.load_model(network_dict, launcher)
-        self.pipe.compile(launcher)
-
-    def get_network(self):
-        models = self.pipe.get_models()
-        model_list = []
-        for model_part_name, model in models.items():
-            model_list.append({"name": model_part_name, "model": model})
-        return model_list
 
 
 class StableDiffusionEvaluator(BaseCustomEvaluator):
@@ -165,7 +199,7 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         launcher: "BaseLauncher", # noqa: F821
         tokenizer: "CLIPTokenizer", # noqa: F821
         scheduler: Union["LMSDiscreteScheduler"], # noqa: F821
-        model_info: Dict,
+        models_dict: Dict,
         seed = None,
         num_inference_steps = 50
     ):
@@ -173,48 +207,22 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         self.scheduler = scheduler
         self.launcher = launcher
         self.tokenizer = tokenizer
-        # self.height = height
-        # self.width = width
-        self.load_models(model_info, launcher, True)
-        self.compile(launcher)
+        self.unet = models_dict.get('unet')
+        self.text_encoder = models_dict.get('text_encoder')
+        self.vae_decoder = models_dict.get('vae_decoder')
+        self.vae_encoder = models_dict.get('vae_encoder')
+        (self.height, self.width) = models_dict.get('unet_shape')
+        self.set_models_outputs()
         if seed is not None:
             np.random.seed(seed)
         self.num_inference_steps = num_inference_steps
 
-    def compile(self, launcher):
-        unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
-        if not unet_shapes[0][0].is_dynamic:
-            unet_shapes = [inp.get_partial_shape() for inp in self.unet_model.inputs]
-            unet_shapes[0][0] = -1
-            unet_shapes[2][0] = -1
-            self.unet_model.reshape(dict(zip(self.unet_model.inputs, unet_shapes)))
-        self.unet = launcher.ie_core.compile_model(self.unet_model, launcher.device)
-        self.text_encoder = launcher.ie_core.compile_model(self.text_encoder_model, launcher.device)
-        self.vae_decoder = launcher.ie_core.compile_model(self.vae_decoder_model, launcher.device)
-        if self.vae_encoder_model is not None:
-            self.vae_encoder = launcher.ie_core.compile_model(self.vae_encoder_model, launcher.device)
+    def set_models_outputs(self):
         self._text_encoder_output = self.text_encoder.output(0)
         self._unet_output = self.unet.output(0)
         self._vae_d_output = self.vae_decoder.output(0)
         self._vae_e_output = self.vae_encoder.output(0) if self.vae_encoder is not None else None
-        self.height = unet_shapes[0][2].get_length() * 8 if not unet_shapes[0][2].is_dynamic else 512
-        self.width = unet_shapes[0][3].get_length() * 8 if not unet_shapes[0][3].is_dynamic else 512
 
-    def get_models(self):
-        model_dict = {"text_encoder": self.text_encoder_model, "unet": self.unet_model, "vae_decoder": self.vae_decoder}
-        if self.vae_encoder_model is not None:
-            model_dict["vae_encoder"] = self.vae_encoder_model
-        return model_dict
-
-    def reset_compiled_models(self):
-        self._text_encoder_output = None
-        self._unet_output = None
-        self._vae_d_output = None
-        self._vae_e_output = None
-        self.unet = None
-        self.text_encoder = None
-        self.vae_decoder = None
-        self.vae_encoder = None
 
     def __call__(
         self,
@@ -396,75 +404,6 @@ class OVStableDiffusionPipeline(DiffusionPipeline):
         timesteps = self.scheduler.timesteps[t_start:]
 
         return timesteps, num_inference_steps - t_start
-
-    def load_models(self, model_info, launcher, log=False):
-        if isinstance(model_info, dict):
-            for model_name, model_dict in model_info.items():
-                model_dict["name"] = model_name
-                self.load_model(model_dict, launcher)
-        else:
-            for model_dict in model_info:
-                self.load_model(model_dict, launcher)
-
-        if log:
-            self.print_input_output_info()
-
-    def load_network(self, model, model_name):
-        setattr(self, "{}_model".format(model_name), model)
-
-    def load_model(self, network_info, launcher):
-        model, weights = self.automatic_model_search(network_info)
-        if weights:
-            network = launcher.read_network(str(model), str(weights))
-        else:
-            network = launcher.read_network(str(model), None)
-        self.load_network(network, network_info["name"])
-
-    @staticmethod
-    def automatic_model_search(network_info):
-        model = Path(network_info['model'])
-        model_name = network_info["name"]
-        if model.is_dir():
-            is_blob = network_info.get('_model_is_blob')
-            if is_blob:
-                model_list = list(model.glob('*{}.blob'.format(model_name)))
-                if not model_list:
-                    model_list = list(model.glob('*.blob'))
-            else:
-                model_list = list(model.glob('*{}*.xml'.format(model_name)))
-                blob_list = list(model.glob('*{}*.blob'.format(model_name)))
-                onnx_list = list(model.glob('*{}*.onnx'.format(model_name)))
-                if not model_list and not blob_list and not onnx_list:
-                    model_list = list(model.glob('*.xml'))
-                    blob_list = list(model.glob('*.blob'))
-                    onnx_list = list(model.glob('*.onnx'))
-                if not model_list:
-                    model_list = blob_list if blob_list else onnx_list
-            if not model_list:
-                raise ConfigError('Suitable model for {} not found'.format(model_name))
-            if len(model_list) > 1:
-                raise ConfigError('Several suitable models for {} found'.format(model_name))
-            model = model_list[0]
-        accepted_suffixes = ['.xml', '.onnx']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(model_name, model))
-        if model.suffix in ['.blob', '.onnx']:
-            return model, None
-        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(model_name, weights))
-        return model, weights
-
-    def print_input_output_info(self):
-        model_parts = ("text_encoder", "unet", "vae_decoder", "vae_encoder")
-        for part in model_parts:
-            part_model_id = "{}_model".format(part)
-            model = getattr(self, part_model_id, None)
-            if model is not None:
-                self.launcher.print_input_output_info(model, part)
 
     @staticmethod
     def get_w_embedding(w, embedding_dim=512, dtype=torch.float32):
