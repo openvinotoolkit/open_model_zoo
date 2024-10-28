@@ -18,7 +18,6 @@ import inspect
 from typing import Union, List, Optional
 import numpy as np
 import PIL
-from diffusers.utils import torch_utils
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
 from ...utils import UnsupportedPackage, extract_image_representations
@@ -38,6 +37,11 @@ try:
     from diffusers import DDIMScheduler
 except ImportError as err_diff:
     DDIMScheduler = UnsupportedPackage("diffusers", err_diff)
+
+try:
+    from diffusers.utils import torch_utils
+except ImportError as err_diff:
+    torch_utils = UnsupportedPackage("diffusers.utils", err_diff)
 
 try:
     import torch
@@ -180,7 +184,7 @@ class OVLdmSuperResolutionPipeline(DiffusionPipeline):
         self._unet_output = self.unet.output(0)
         self._vqvae_output = self.vqvae.output(0)
         if seed is not None:
-            np.random.seed(seed)
+            torch.manual_seed(seed)
         self.num_inference_steps = num_inference_steps
 
     def __call__(
