@@ -261,6 +261,7 @@ class OVLdmSuperResolutionPipeline(DiffusionPipeline):
     @staticmethod
     def postprocess_image(image: np.ndarray, std=255, mean=0):
         image = image / 2 + 0.5
+        image = image.transpose(0, 2, 3, 1)
         image *= np.array(std, dtype=image.dtype)
         image += np.array(mean, dtype=image.dtype)
 
