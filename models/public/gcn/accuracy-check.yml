@@ -4,7 +4,7 @@ models:
   # module_config:
   launchers:
     - framework: DGL
-      adapter: classification
+      adapter: node_classification
       device: CPU
       model: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\gcn_model.pt
       module: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\GCN.py
@@ -21,6 +21,6 @@ models:
           converter: DGL_converter
           graph_path: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\data.bin
         metrics:
-          - name: accuracy
-            type: accuracy
-            reference: 0.7446
+          - name: node_accuracy_name
+            type: node_accuracy
+            reference: 0.778
