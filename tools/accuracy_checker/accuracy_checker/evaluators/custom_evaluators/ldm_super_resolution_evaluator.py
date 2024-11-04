@@ -94,13 +94,13 @@ class PipelinedModel(BaseCascadeModel):
         if log:
             self.print_input_output_info()
 
-    def load_model(self, network_info, launcher):
-        model, weights = self.automatic_model_search(network_info)
+    def load_model(self, network_list, launcher):
+        model, weights = self.automatic_model_search(network_list)
         if weights:
             network = launcher.read_network(str(model), str(weights))
         else:
             network = launcher.read_network(str(model), None)
-        setattr(self, f"{network_info['name']}_model", network)
+        setattr(self, f"{network_list['name']}_model", network)
 
     def print_input_output_info(self):
         model_parts = ("unet", "vqvae")
