@@ -4,8 +4,8 @@ models:
     - framework: DGL
       adapter: node_classification
       device: CPU
-      model: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\gcn_model.pt
-      module: C:\Users\Atikin\Desktop\Programming\open_model_zoo\tools\model_tools\src\omz_tools\public\gcn\GCN.py
+      model: gcn_model.pt
+      module: GCN.py
       module_name: GCN
       batch: 32
       output_names:
@@ -14,10 +14,10 @@ models:
   datasets:
       - name: Cora
         reader: graph(dgl)_reader
-        data_source: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\data.bin
+        data_source: graph.bin
         annotation_conversion:
           converter: DGL_converter
-          graph_path: C:\Users\Atikin\Desktop\Programming\data_for_dl_benchmark\data.bin
+          graph_path: graph.bin
         metrics:
           - name: node_accuracy_name
             type: node_accuracy

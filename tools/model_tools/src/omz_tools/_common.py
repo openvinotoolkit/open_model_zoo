@@ -38,7 +38,7 @@ KNOWN_FRAMEWORKS = {
     'onnx': None,
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
-    'dgl_pytorch': 'pytorch_to_onnx.py',
+    'dgl_pytorch': None,
 }
 KNOWN_PRECISIONS = {
     'FP16', 'FP16-INT1', 'FP16-INT8',
