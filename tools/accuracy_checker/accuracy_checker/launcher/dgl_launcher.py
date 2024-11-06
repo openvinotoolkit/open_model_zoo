@@ -36,8 +36,6 @@ class DGLLauncher(Launcher):
                 )
             )
 
-        print(config_entry)
-
         self.validate_config(config_entry)
         self.device = self._get_device_to_infer(config_entry.get('device'))  # конфиг это параметры launchers из accuracy-check.yml
 

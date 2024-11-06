@@ -20,7 +20,6 @@ class DGLGraphReader(BaseReader):
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
-        print('\nread data')
         
         graph = dgl.data.utils.load_graphs(Path(data_path).__str__())
         g = graph[0][0]

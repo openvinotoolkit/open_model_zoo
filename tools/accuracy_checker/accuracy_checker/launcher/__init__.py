@@ -92,7 +92,7 @@ except ImportError as import_error:
     )
 
 try:
-    from .dgl_launchar import DGLLauncher
+    from .dgl_launcher import DGLLauncher
 except ImportError as import_error:
     DGLLauncher = unsupported_launcher(
         'dgl', "DGL isn't installed. Please, install it before using. \n{}".format(import_error.msg)

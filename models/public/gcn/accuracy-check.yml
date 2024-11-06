@@ -1,7 +1,5 @@
 models:
 - name: GCN
-  # module: custom_evaluators.dgl_evaluator.DGLEvaluator
-  # module_config:
   launchers:
     - framework: DGL
       adapter: node_classification

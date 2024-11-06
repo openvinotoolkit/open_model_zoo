@@ -71,7 +71,6 @@ def main():
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
-            print('Evaluator: ', evaluator)
             details.update(evaluator.send_processing_info(tm))
             metric_types = details.get('metrics', [])
             if args.profile:
