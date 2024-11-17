@@ -146,6 +146,8 @@ from .time_series import QuantilesPredictorAdapter
 
 from .palm_detection import PalmDetectionAdapter
 
+from .graphs import GraphNodeClassificationAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -298,5 +300,7 @@ __all__ = [
 
     'ImageBackgroundMattingAdapter',
 
-    'PalmDetectionAdapter'
+    'PalmDetectionAdapter',
+
+    'GraphNodeClassificationAdapter'
 ]
