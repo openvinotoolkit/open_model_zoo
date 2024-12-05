@@ -18,16 +18,20 @@ from ..base_evaluator import BaseEvaluator
 from ...progress_reporters import ProgressReporter
 from ..quantization_model_evaluator import create_dataset_attributes
 from ...launcher import create_launcher
-
+from ...postprocessor import PostprocessingExecutor
+from ...preprocessor import PreprocessingExecutor
 
 # base class for custom evaluators
 class BaseCustomEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, orig_config):
+    def __init__(self, dataset_config, launcher, orig_config,
+                 preprocessor=None, postprocessor=None):
         self.dataset_config = dataset_config
         self.dataset = None
+        self.input_feeder = None
+        self.adapter = None
         self.preprocessing_executor = None
-        self.preprocessor = None
-        self.postprocessor = None
+        self.preprocessor = preprocessor
+        self.postprocessor = postprocessor
         self.metric_executor = None
         self.launcher = launcher
         self._metrics_results = []
@@ -46,6 +50,30 @@ class BaseCustomEvaluator(BaseEvaluator):
             launcher_config['device'] = 'CPU'
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         return dataset_config, launcher, launcher_config
+
+    @classmethod
+    def get_evaluator_init_info(cls, model_config, delayed_annotation_loading=False):
+        launcher_config = model_config['launchers'][0]
+        datasets = model_config['datasets']
+        dataset_config = datasets[0]
+        dataset_name = dataset_config['name']
+
+        runtime_framework = launcher_config['framework']
+        enable_runtime_preprocessing = False
+        if runtime_framework in ['dlsdk', 'openvino']:
+            enable_runtime_preprocessing = dataset_config.get('_ie_preprocessing', False)
+        preprocessor = PreprocessingExecutor(
+            dataset_config.get('preprocessing'), dataset_name,
+            enable_runtime_preprocessing=enable_runtime_preprocessing, runtime_framework=runtime_framework
+        )
+
+        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
+            launcher_config['device'] = 'CPU'
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
+        dataset_metadata = {}
+        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
+
+        return datasets, launcher, preprocessor, postprocessor
 
     def process_dataset(self, subset=None, num_images=None, check_progress=False, dataset_tag='',
                         output_callback=None, allow_pairwise_subset=False, dump_prediction_to_annotation=False,
@@ -164,7 +192,7 @@ class BaseCustomEvaluator(BaseEvaluator):
         elif isinstance(metric_config, dict):
             self.metric_executor.register_metric(metric_config)
         else:
-            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
+            raise ValueError(f'Unsupported metric configuration type {type(metric_config)}')
 
     def get_metrics_attributes(self):
         if not self.metric_executor:
