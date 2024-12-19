@@ -118,32 +118,6 @@ class GenAI_WhisperPipeline(WhisperPipeline):
         return self.pipeline.generate(data[0]).texts[0]
 
 
-class OptimumIntelPipeline(WhisperPipeline):
-    def _initialize_pipeline(self, config):
-        try:
-            from optimum.intel.openvino import \
-                OVModelForSpeechSeq2Seq  # pylint: disable=C0415
-        except ImportError as import_err:
-            UnsupportedPackage("optimum.intel.openvino", import_err.msg).raise_error(self.__class__.__name__)
-
-        device = config.get("_device", "CPU")
-        model_dir = config.get("_models", [None])[0]
-        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
-        ov_processor = AutoProcessor.from_pretrained(str(model_dir))
-
-        pipeline = AutomaticSpeechRecognitionPipeline(
-            model=ov_model,
-            tokenizer=ov_processor.tokenizer,
-            feature_extractor=ov_processor.feature_extractor
-        )
-        return pipeline
-
-    def _get_predictions(self, data, identifiers, input_meta):
-        sampling_rate = input_meta[0].get("sample_rate")
-        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
-        return self.pipeline(sample)["text"]
-
-
 class TransformersAsrPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
@@ -173,3 +147,31 @@ class TransformersAsrPipeline(WhisperPipeline):
         sampling_rate = input_meta[0].get("sample_rate")
         sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
         return self.pipeline(sample)["text"]
+
+
+class OptimumIntelPipeline(WhisperPipeline):
+    def _initialize_pipeline(self, config):
+        try:
+            from optimum.intel.openvino import \
+                OVModelForSpeechSeq2Seq  # pylint: disable=C0415
+        except ImportError as import_err:
+            UnsupportedPackage("optimum.intel.openvino", import_err.msg).raise_error(self.__class__.__name__)
+
+        device = config.get("_device", "CPU")
+        model_dir = config.get("_models", [None])[0]
+        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir))
+        ov_processor = AutoProcessor.from_pretrained(str(model_dir))
+
+        pipeline = AutomaticSpeechRecognitionPipeline(
+            model=ov_model,
+            tokenizer=ov_processor.tokenizer,
+            feature_extractor=ov_processor.feature_extractor,
+            device=device,
+        )
+        return pipeline
+
+    def _get_predictions(self, data, identifiers, input_meta):
+        sampling_rate = input_meta[0].get("sample_rate")
+        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
+        return self.pipeline(sample)["text"]
+    
