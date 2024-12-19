@@ -165,8 +165,7 @@ class OptimumIntelPipeline(WhisperPipeline):
         pipeline = AutomaticSpeechRecognitionPipeline(
             model=ov_model,
             tokenizer=ov_processor.tokenizer,
-            feature_extractor=ov_processor.feature_extractor,
-            device=device,
+            feature_extractor=ov_processor.feature_extractor
         )
         return pipeline
 
