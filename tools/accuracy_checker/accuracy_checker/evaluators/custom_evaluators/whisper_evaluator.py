@@ -13,9 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import os
 import re
 
 import openvino_genai as ov_genai
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+from transformers.pipelines.automatic_speech_recognition import \
+    AutomaticSpeechRecognitionPipeline
 
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
@@ -28,21 +32,29 @@ except ImportError as import_err:
 
 
 class WhisperEvaluator(BaseCustomEvaluator):
+    VALID_PIPELINE_CLASSES = [
+        "GenAI_WhisperPipeline",
+        "TransformersAsrPipeline",
+        "OptimumIntelPipeline"
+    ]
+
     def __init__(self, dataset_config, pipe, orig_config):
         super().__init__(dataset_config, None, orig_config)
         self.pipe = pipe
-        if hasattr(self.pipe, 'adapter'):
+        if hasattr(self.pipe, "adapter"):
             self.adapter_type = self.pipe.adapter.__provider__
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
-        dataset_config = config['datasets']
+        dataset_config = config["datasets"]
+        pipeline_class_name = config["pipeline_class"]
 
-        framework = config['launchers'][0]['framework']
-        if framework == 'openvino':
-            pipe = GenAI_WhisperPipeline(config)
-        else:
-            pipe = TransformersAsrPipeline(config)
+        if pipeline_class_name not in cls.VALID_PIPELINE_CLASSES:
+            raise ValueError(f"Invalid pipeline class name: {pipeline_class_name}. "
+                             f"Must be one of {cls.VALID_PIPELINE_CLASSES}")
+
+        pipeline_class = globals()[pipeline_class_name]
+        pipe = pipeline_class(config)
         return cls(dataset_config, pipe, orig_config)
 
     def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
@@ -68,15 +80,13 @@ def normalize_transcription(engine, text):
     # Convert numbers to words
     tokens = (engine.number_to_words(token) if token.isdigit() else token for token in text.split())
     # Remove punctuation except for apostrophes that are in the middle of words
-    text = re.sub(r"\b'\b|[^\w\s]", '', ' '.join(tokens))
+    text = re.sub(r"\b'\b|[^\w\s]", "", " ".join(tokens))
     # Remove leading, trailing, and multiple consecutive spaces, and convert to uppercase
-    return ' '.join(text.upper().split())
+    return " ".join(text.upper().split())
 
 
 class WhisperPipeline:
     def __init__(self, config):
-        if isinstance(inflect,UnsupportedPackage):
-            UnsupportedPackage("inflect", inflect.msg).raise_error(self.__class__.__name__)
         self.engine = inflect.engine()
         self.pipeline = self._initialize_pipeline(config)
 
@@ -99,9 +109,8 @@ class WhisperPipeline:
 
 class GenAI_WhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
-        models_dirs = config.get('_models', [])
-        device = config.get('_device', 'CPU')
-        model_dir = models_dirs[0]
+        model_dir = config.get("_models", [None])[0]
+        device = config.get("_device", "CPU")
         pipeline = ov_genai.WhisperPipeline(str(model_dir), device=device)
         return pipeline
 
@@ -109,26 +118,41 @@ class GenAI_WhisperPipeline(WhisperPipeline):
         return self.pipeline.generate(data[0]).texts[0]
 
 
-class TransformersAsrPipeline(WhisperPipeline):
+class OptimumIntelPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
-            from transformers import (  # pylint: disable=C0415
-                AutoModelForSpeechSeq2Seq, AutoProcessor)
-            from transformers.pipelines.automatic_speech_recognition import \
-                AutomaticSpeechRecognitionPipeline  # pylint: disable=C0415
+            from optimum.intel.openvino import \
+                OVModelForSpeechSeq2Seq  # pylint: disable=C0415
         except ImportError as import_err:
-            UnsupportedPackage("transformers", import_err.msg).raise_error(self.__class__.__name__)
+            UnsupportedPackage("optimum.intel.openvino", import_err.msg).raise_error(self.__class__.__name__)
 
+        device = config.get("_device", "CPU")
+        model_dir = config.get("_models", [None])[0]
+        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
+        ov_processor = AutoProcessor.from_pretrained(str(model_dir))
+
+        pipeline = AutomaticSpeechRecognitionPipeline(
+            model=ov_model,
+            tokenizer=ov_processor.tokenizer,
+            feature_extractor=ov_processor.feature_extractor
+        )
+        return pipeline
+
+    def _get_predictions(self, data, identifiers, input_meta):
+        sampling_rate = input_meta[0].get("sample_rate")
+        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
+        return self.pipeline(sample)["text"]
+
+
+class TransformersAsrPipeline(WhisperPipeline):
+    def _initialize_pipeline(self, config):
         try:
             import torch  # pylint: disable=C0415
         except ImportError as import_err:
             UnsupportedPackage("torch", import_err.msg).raise_error(self.__class__.__name__)
 
-        model_id = config.get('model_id')
+        model_id = config.get("model_id")
         device = "cpu"
-
-        # The following code is based on the implementation found at:
-        # https://huggingface.co/openai/whisper-large-v3
         torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True
@@ -146,6 +170,6 @@ class TransformersAsrPipeline(WhisperPipeline):
         return pipeline
 
     def _get_predictions(self, data, identifiers, input_meta):
-        sampling_rate = input_meta[0].get('sample_rate')
-        sample = {'path': identifiers[0], 'array': data[0], 'sampling_rate': sampling_rate}
+        sampling_rate = input_meta[0].get("sample_rate")
+        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
         return self.pipeline(sample)["text"]
