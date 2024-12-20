@@ -7,3 +7,4 @@ pytest-mock~=2.0
 # will not include atomicwrites and thus will not work on Windows.
 # So as a workaround, make the atomicwrites dependency unconditional.
 atomicwrites
+datasets
