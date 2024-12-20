@@ -13,17 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import os
 import re
-
-import openvino_genai as ov_genai
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-from transformers.pipelines.automatic_speech_recognition import \
-    AutomaticSpeechRecognitionPipeline
 
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
 from .base_custom_evaluator import BaseCustomEvaluator
+
+try:
+    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+except ImportError as import_err:
+    AutoModelForSpeechSeq2Seq = UnsupportedPackage("transformers", import_err.msg)
+    AutoProcessor = UnsupportedPackage("transformers", import_err.msg)
+
+try:
+    from transformers.pipelines.automatic_speech_recognition import \
+        AutomaticSpeechRecognitionPipeline
+except ImportError as import_err:
+    AutomaticSpeechRecognitionPipeline = UnsupportedPackage("transformers", import_err.msg)
 
 try:
     import inflect
@@ -33,9 +39,9 @@ except ImportError as import_err:
 
 class WhisperEvaluator(BaseCustomEvaluator):
     VALID_PIPELINE_CLASSES = [
-        "GenAI_WhisperPipeline",
-        "TransformersAsrPipeline",
-        "OptimumIntelPipeline"
+        "GenAIWhisperPipeline",
+        "HFWhisperPipeline",
+        "OptimumWhisperPipeline"
     ]
 
     def __init__(self, dataset_config, pipe, orig_config):
@@ -48,6 +54,8 @@ class WhisperEvaluator(BaseCustomEvaluator):
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config["datasets"]
         pipeline_class_name = config["pipeline_class"]
+        if 'device' in config['launchers'][0]:
+            config["_device"] = config['launchers'][0]['device']
 
         if pipeline_class_name not in cls.VALID_PIPELINE_CLASSES:
             raise ValueError(f"Invalid pipeline class name: {pipeline_class_name}. "
@@ -107,18 +115,23 @@ class WhisperPipeline:
         return [], outputs
 
 
-class GenAI_WhisperPipeline(WhisperPipeline):
+class GenAIWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
+        try:
+            import openvino_genai as ov_genai  # pylint: disable=C0415
+        except ImportError as import_err:
+            UnsupportedPackage("openvino_genai", import_err.msg).raise_error(self.__class__.__name__)
+
         model_dir = config.get("_models", [None])[0]
         device = config.get("_device", "CPU")
         pipeline = ov_genai.WhisperPipeline(str(model_dir), device=device)
         return pipeline
 
     def _get_predictions(self, data, identifiers, input_meta):
-        return self.pipeline.generate(data[0]).texts[0]
+        return self.pipeline.generate(data[0], return_timestamps=True).texts[0]
 
 
-class TransformersAsrPipeline(WhisperPipeline):
+class HFWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
             import torch  # pylint: disable=C0415
@@ -146,10 +159,10 @@ class TransformersAsrPipeline(WhisperPipeline):
     def _get_predictions(self, data, identifiers, input_meta):
         sampling_rate = input_meta[0].get("sample_rate")
         sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
-        return self.pipeline(sample)["text"]
+        return self.pipeline(sample, return_timestamps=True)["text"]
 
 
-class OptimumIntelPipeline(WhisperPipeline):
+class OptimumWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
             from optimum.intel.openvino import \
@@ -159,7 +172,7 @@ class OptimumIntelPipeline(WhisperPipeline):
 
         device = config.get("_device", "CPU")
         model_dir = config.get("_models", [None])[0]
-        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir))
+        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
         ov_processor = AutoProcessor.from_pretrained(str(model_dir))
 
         pipeline = AutomaticSpeechRecognitionPipeline(
@@ -172,5 +185,4 @@ class OptimumIntelPipeline(WhisperPipeline):
     def _get_predictions(self, data, identifiers, input_meta):
         sampling_rate = input_meta[0].get("sample_rate")
         sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
-        return self.pipeline(sample)["text"]
-    
+        return self.pipeline(sample, return_timestamps=True)["text"]
