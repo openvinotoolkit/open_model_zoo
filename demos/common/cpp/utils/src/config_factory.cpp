@@ -48,7 +48,7 @@ ModelConfig ConfigFactory::getUserConfig(const std::string& flags_d,
             if (flags_nthreads != 0)
                 config.compiledModelConfig.emplace(ov::inference_num_threads.name(), flags_nthreads);
 
-            config.compiledModelConfig.emplace(ov::hint::enable_cpu_pinning.name(), "NO");
+            config.compiledModelConfig.emplace(ov::hint::enable_cpu_pinning.name(), false);
 
             ov::streams::Num nstreams =
                 deviceNstreams.count(device) > 0 ? ov::streams::Num(deviceNstreams[device]) : ov::streams::AUTO;
