@@ -29,7 +29,7 @@ static inline size_t roundUp(size_t enumerator, size_t denominator) {
 
 static inline std::queue<ov::InferRequest> compile(std::shared_ptr<ov::Model>&& model, const std::string& modelPath,
         const std::string& device, size_t performanceHintNumRequests, ov::Core& core) {
-    core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
+    core.set_property("CPU", ov::hint::enable_cpu_pinning(false));
     ov::CompiledModel compiled = core.compile_model(model, device, {
         {ov::hint::performance_mode(ov::hint::PerformanceMode::THROUGHPUT)},
         {ov::hint::num_requests(performanceHintNumRequests)}});
