@@ -1,5 +1,5 @@
 """
-Copyright (c) 2024-2025 Intel Corporation
+Copyright (c) 2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@ except ImportError as import_err:
     AutoProcessor = UnsupportedPackage("transformers", import_err.msg)
 
 try:
-    from transformers.pipelines.automatic_speech_recognition import \
-        AutomaticSpeechRecognitionPipeline
+    from transformers.pipelines.automatic_speech_recognition import AutomaticSpeechRecognitionPipeline
 except ImportError as import_err:
     AutomaticSpeechRecognitionPipeline = UnsupportedPackage("transformers", import_err.msg)
 
@@ -119,8 +118,8 @@ class GenAIWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
             import openvino_genai as ov_genai  # pylint: disable=C0415
-        except ImportError as import_err:
-            UnsupportedPackage("openvino_genai", import_err.msg).raise_error(self.__class__.__name__)
+        except ImportError as import_error:
+            UnsupportedPackage("openvino_genai", import_error.msg).raise_error(self.__class__.__name__)
 
         model_dir = config.get("_models", [None])[0]
         device = config.get("_device", "CPU")
@@ -135,8 +134,8 @@ class HFWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
             import torch  # pylint: disable=C0415
-        except ImportError as import_err:
-            UnsupportedPackage("torch", import_err.msg).raise_error(self.__class__.__name__)
+        except ImportError as import_error:
+            UnsupportedPackage("torch", import_error.msg).raise_error(self.__class__.__name__)
 
         model_id = config.get("model_id")
         device = "cpu"
@@ -165,10 +164,9 @@ class HFWhisperPipeline(WhisperPipeline):
 class OptimumWhisperPipeline(WhisperPipeline):
     def _initialize_pipeline(self, config):
         try:
-            from optimum.intel.openvino import \
-                OVModelForSpeechSeq2Seq  # pylint: disable=C0415
-        except ImportError as import_err:
-            UnsupportedPackage("optimum.intel.openvino", import_err.msg).raise_error(self.__class__.__name__)
+            from optimum.intel.openvino import OVModelForSpeechSeq2Seq  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("optimum.intel.openvino", import_error.msg).raise_error(self.__class__.__name__)
 
         device = config.get("_device", "CPU")
         model_dir = config.get("_models", [None])[0]
