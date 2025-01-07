@@ -1,5 +1,5 @@
 """
-Copyright (c) 2024 Intel Corporation
+Copyright (c) 2024-2025 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,18 +20,23 @@ from unittest.mock import MagicMock, patch
 import pytest
 from accuracy_checker.evaluators.custom_evaluators.whisper_evaluator import (
     GenAIWhisperPipeline, HFWhisperPipeline, OptimumWhisperPipeline,
-    WhisperEvaluator, normalize_transcription)
+    WhisperEvaluator)
 from datasets import load_dataset
-from optimum.exporters.openvino.convert import export_tokenizer
-from optimum.intel.openvino import OVModelForSpeechSeq2Seq
-from transformers import AutoProcessor, AutoTokenizer
+
+AutoProcessor = pytest.importorskip("transformers", reason="transformers is not available").AutoProcessor
+AutoTokenizer = pytest.importorskip("transformers", reason="transformers is not available").AutoTokenizer
+export_tokenizer = pytest.importorskip("optimum.exporters.openvino.convert", reason="optimum.exporters.openvino.convert is not available").export_tokenizer
+OVModelForSpeechSeq2Seq = pytest.importorskip("optimum.intel.openvino", reason="optimum.intel.openvino is not available").OVModelForSpeechSeq2Seq
+
 
 model_id = "openai/whisper-tiny"
 model_dir = Path("/tmp/whisper-tiny")
 
 def setup_module(module):
+    # Setup code here
     global input_data, input_meta, identifiers
 
+    # Load a single sample from the dataset
     dataset = load_dataset("openslr/librispeech_asr", "clean", split="validation", streaming=True, trust_remote_code=True)
     sample = next(iter(dataset))
     input_data = [sample["audio"]["array"]]
@@ -39,6 +44,7 @@ def setup_module(module):
     identifiers = [sample["id"]]
 
 def teardown_module(module):
+    # Cleanup code here
     if model_dir.exists():
         for item in model_dir.iterdir():
             if item.is_file():
@@ -55,6 +61,7 @@ def test_optimum_convert_model_to_ir():
     tokenizer.save_pretrained(model_dir)
     processor.save_pretrained(model_dir)
     export_tokenizer(tokenizer, model_dir)
+
     assert base_model.__class__.__module__.startswith('optimum.intel.openvino')
 
 class TestWhisperEvaluator:
@@ -66,7 +73,7 @@ class TestWhisperEvaluator:
         result = evaluator.pipe._get_predictions(input_data, identifiers, input_meta)
         assert isinstance(result, str)
 
-    @pytest.mark.dependency(depends=["test_base_model"])
+    @pytest.mark.dependency(depends=["test_optimum_convert_model_to_ir"])
     def test_genai_whisper_pipeline(self):
         config = {"_models": [model_dir], "_device": "CPU"}
         pipeline = GenAIWhisperPipeline(config)
@@ -75,7 +82,7 @@ class TestWhisperEvaluator:
         result = evaluator.pipe._get_predictions(input_data, identifiers, input_meta)
         assert isinstance(result, str)
 
-    @pytest.mark.dependency(depends=["test_base_model"])
+    @pytest.mark.dependency(depends=["test_optimum_convert_model_to_ir"])
     def test_optimum_whisper_pipeline(self):
         config = {"_models": [model_dir], "_device": "CPU"}
         pipeline = OptimumWhisperPipeline(config)
