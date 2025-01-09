@@ -1,5 +1,5 @@
 """
-Copyright (c) 2024 Intel Corporation
+Copyright (c) 2024-2025 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class WhisperEvaluator(BaseCustomEvaluator):
         dataset_config = config["datasets"]
         pipeline_class_name = config["pipeline_class"]
         if 'device' in config['launchers'][0]:
-            config["_device"] = config['launchers'][0]['device']
+            config["_device"] = config['launchers'][0]['device'].upper()
 
         if pipeline_class_name not in cls.VALID_PIPELINE_CLASSES:
             raise ValueError(f"Invalid pipeline class name: {pipeline_class_name}. "
