@@ -718,7 +718,7 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_nthreads != 0) {
                     core.set_property("CPU", ov::inference_num_threads(FLAGS_nthreads));
                 }
-                core.set_property("CPU", ov::affinity(ov::Affinity::NONE));
+                core.set_property("CPU", ov::hint::enable_cpu_pinning(false));
                 core.set_property("CPU", ov::streams::num((device_nstreams.count("CPU") > 0 ? ov::streams::Num(device_nstreams["CPU"]) : ov::streams::AUTO)));
 
                 device_nstreams["CPU"] = core.get_property("CPU", ov::streams::num);
