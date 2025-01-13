@@ -273,6 +273,7 @@ class YoloV2Adapter(Adapter):
         predictions = predictions[self.output_blob]
         out_precision = frame_meta[0].get('output_precision', {})
         out_layout = frame_meta[0].get('output_layout', {})
+
         if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
             predictions = predictions.view(out_precision[self.output_blob])
         if self.output_blob in out_layout and out_layout[self.output_blob] == 'NHWC':
@@ -517,6 +518,11 @@ class YoloV3Adapter(Adapter):
             if blob in out_layout and out_layout[blob] == 'NHWC':
                 shape = out_blob.shape
                 out_blob = np.transpose(out_blob, (0, 3, 1, 2)).reshape(shape)
+
+            if out_blob.shape[1] == out_blob.shape[2]:
+                # layout is NHWC turn it to NCHW
+                out_blob = np.transpose(out_blob, (0, 3, 1, 2))
+
             if batch == 1 and out_blob.shape[0] != batch:
                 out_blob = np.expand_dims(out_blob, 0)
 
