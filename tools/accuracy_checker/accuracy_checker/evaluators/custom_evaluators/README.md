@@ -54,10 +54,15 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sr_evaluator.py`.
 
 * **Tacotron2 Evaluator** demonstrates how to evaluate custom Tacotron2 model for text to speech task.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/tacotron2_evaluator.py`
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/tacotron2_evaluator.py`.
 
 * **Open-NMT Evaluator** demonstrates how to evaluate Open-NMT model for text translation task.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/opennmt_encoder_decoder_generator_evaluator.py`
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/opennmt_encoder_decoder_generator_evaluator.py`.
 
 * **StableDiffusion Evaluator** demonstrates how to evaluate image generation for Stable Diffusion models family.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/stable_diffusion_evaluator.py`
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/stable_diffusion_evaluator.py`.
+
+* **Whisper Evaluator** demonstrates how to evaluate Whisper family models with various pipeline classes, including GenAIWhisperPipeline, HFWhisperPipeline, and OptimumWhisperPipeline.
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/whisper_evaluator.py`. 
+
+
