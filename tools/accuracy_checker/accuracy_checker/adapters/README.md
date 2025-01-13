@@ -68,6 +68,7 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names.
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
+  * `output_layout` - setting output layout - channel first (`NCHW`)(default), channel last (`NHWC`).
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
   * `transpose` - transpose output tensor to specified format (optional).

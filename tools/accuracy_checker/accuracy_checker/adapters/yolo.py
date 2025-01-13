@@ -371,6 +371,10 @@ class YoloV3Adapter(Adapter):
                 choices=['BHW', 'HWB'], optional=True,
                 description="Set output layer format", default='BHW',
             ),
+            'output_layout': StringField(
+                choices=['NCHW', 'NHWC'], optional=True, default='NCHW',
+                description="Set output layout format"
+            ),
             'multiple_labels': BoolField(
                 optional=True, default=False,
                 description="Allow multiple labels for detection objects"
@@ -421,6 +425,7 @@ class YoloV3Adapter(Adapter):
 
         self.raw_output = self.get_value_from_config('raw_output')
         self.output_format = self.get_value_from_config('output_format')
+        self.output_layout = self.get_value_from_config('output_layout')
         if self.raw_output:
             self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
@@ -518,8 +523,7 @@ class YoloV3Adapter(Adapter):
             if blob in out_layout and out_layout[blob] == 'NHWC':
                 shape = out_blob.shape
                 out_blob = np.transpose(out_blob, (0, 3, 1, 2)).reshape(shape)
-
-            if out_blob.shape[1] == out_blob.shape[2]:
+            elif  self.output_layout == 'NHWC' and len(out_blob.shape) == 4:
                 # layout is NHWC turn it to NCHW
                 out_blob = np.transpose(out_blob, (0, 3, 1, 2))
 
