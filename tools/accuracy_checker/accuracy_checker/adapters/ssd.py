@@ -33,8 +33,19 @@ class SSDAdapter(Adapter):
     __provider__ = 'ssd'
     prediction_types = (DetectionPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'custom_output_order': BoolField(
+                optional=True, default=False,
+                description='Use custom output data order: bbox, score, label')
+        })
+        return parameters
+
     def configure(self):
         super().configure()
+        self.custom_output_order = self.get_value_from_config('custom_output_order')
         self.outputs_verified = False
 
     def select_output_blob(self, outputs):
@@ -62,7 +73,12 @@ class SSDAdapter(Adapter):
             prediction_mask = np.where(prediction_batch[:, 0] == batch_index)
             detections = prediction_batch[prediction_mask]
             detections = detections[:, 1::]
-            result.append(DetectionPrediction(identifier, *zip(*detections)))
+            if self.custom_output_order:
+                y_mins, x_mins, y_maxs, x_maxs, scores, labels = detections.T
+            else:
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = detections.T
+
+            result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
 
