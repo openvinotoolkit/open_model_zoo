@@ -107,6 +107,7 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file with recognition symbols for decoding.
   * `remove_duplicates` - allow removing of duplicated symbols (Optional, default value - `True`).
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
+  * `custom_output_order` - Use custom output data order: bbox, score, label (Optional, default `False`).
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
   * `scores_out` - name of output layer with bounding boxes scores.
