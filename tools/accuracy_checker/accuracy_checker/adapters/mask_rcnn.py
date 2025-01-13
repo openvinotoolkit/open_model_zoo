@@ -84,7 +84,6 @@ class MaskRCNNAdapter(Adapter):
             for elem in box_outputs:
                 if not config.get(elem):
                     return False
-
             return True
 
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
@@ -92,6 +91,7 @@ class MaskRCNNAdapter(Adapter):
             raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
 
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
+        self.outputs_verified = False
 
         if is_detection_out(self.launcher_config):
             self.detection_out = self.get_value_from_config('detection_out')
@@ -106,12 +106,28 @@ class MaskRCNNAdapter(Adapter):
                 if not is_box_outputs(self.launcher_config, box_outputs):
                     raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
                 self.realisation = self._process_tf_obj_detection_api_outputs
+                self.outputs_verified = False
                 return
 
             self.realisation = self._process_pytorch_outputs
-        self.outputs_verified = False
+
+    def assign_matching_outputs_names(self, outputs):
+        def _get_matching_output(name):
+            return [output for output in outputs if name in output][0]
+
+        self.num_detections_out = _get_matching_output('num_detections')
+        self.boxes_out = _get_matching_output('boxes')
+        self.raw_masks_out = _get_matching_output('masks')
+        self.scores_out = _get_matching_output('scores')
+        self.classes_out = _get_matching_output('classes')
 
     def select_output_blob(self, outputs):
+        # handle case where config has detection_out and raw_masks_out but model has different outputs
+        if hasattr(self, 'detection_out') and len(outputs) == 5:
+            self.assign_matching_outputs_names(outputs)
+            self.realisation = self._process_tf_obj_detection_api_outputs
+            self.outputs_verified = True
+            return
         if self.raw_masks_out:
             self.raw_masks_out = self.check_output_name(self.raw_masks_out, outputs)
         if hasattr(self, 'detection_out'):
