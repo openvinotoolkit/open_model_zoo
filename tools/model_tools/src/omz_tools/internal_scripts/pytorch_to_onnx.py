@@ -144,7 +144,7 @@ def load_model(model_name, weights, model_paths, module_name, model_params):
 
         try:
             if weights:
-                model.load_state_dict(torch.load(weights, map_location='cpu'))
+                model.load_state_dict(torch.load(weights, map_location='cpu', weights_only=False))
         except RuntimeError as err:
             print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
                 weights, model_name))
