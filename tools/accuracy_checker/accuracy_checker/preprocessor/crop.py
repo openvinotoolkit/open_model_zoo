@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import math
 import cv2
 import numpy as np
 from PIL import Image
@@ -741,9 +742,9 @@ class ObjectCropWithScale(Preprocessor):
         height, width = img.shape[:2]
         sf = scale * 200.0 / self.dst_width
         if sf >= 2:
-            new_size = int(np.math.floor(max(height, width) / sf))
-            new_height = int(np.math.floor(height / sf))
-            new_width = int(np.math.floor(width / sf))
+            new_size = int(math.floor(max(height, width) / sf))
+            new_height = int(math.floor(height / sf))
+            new_width = int(math.floor(width / sf))
             if new_size < 2:
                 return (
                     np.zeros((self.dst_width, self.dst_height, img.shape[2]), dtype=np.float32) if len(img.shape) > 2
