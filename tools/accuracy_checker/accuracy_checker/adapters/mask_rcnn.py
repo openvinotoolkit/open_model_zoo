@@ -167,6 +167,18 @@ class MaskRCNNAdapter(Adapter):
             im_scores = im_scores[:num_valid_detections]
             im_boxes = im_boxes[:num_valid_detections]
             im_raw_masks = im_raw_masks[:num_valid_detections]
+            invalid_scores = np.logical_or(im_scores > 1, im_scores <= 0)
+            if np.sum(invalid_scores) > 0:
+                warnings.warn(
+                    f"Output for {identifier} consist invalid scores and boxes!\nScores: {im_scores[invalid_scores]}\nBoxes: {im_boxes[invalid_scores]}!"
+                )
+                im_classes = im_classes[~invalid_scores]
+                im_scores = im_scores[~invalid_scores]
+                im_boxes = im_boxes[~invalid_scores]
+                im_raw_masks = im_raw_masks[~invalid_scores]
+                if len(im_classes) == 0:
+                    continue
+            
             original_image_size = image_meta['image_size'][:2]
             im_boxes[:, 1::2] *= original_image_size[1]
             im_boxes[:, 0::2] *= original_image_size[0]
@@ -190,7 +202,7 @@ class MaskRCNNAdapter(Adapter):
                 'segmentation_prediction': instance_segmentation_prediction
             }))
 
-            return results
+        return results
 
     def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
         if self.boxes_out not in raw_outputs:
