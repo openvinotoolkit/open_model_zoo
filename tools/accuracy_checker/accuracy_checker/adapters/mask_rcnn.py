@@ -170,7 +170,7 @@ class MaskRCNNAdapter(Adapter):
             invalid_scores = np.logical_or(im_scores > 1, im_scores <= 0)
             if np.sum(invalid_scores) > 0:
                 warnings.warn(
-                    f"Output for {identifier} consist invalid scores and boxes!\n"
+                    f"Output for {identifier} contains invalid scores and boxes!\n"
                     f"Scores: {im_scores[ivalid_boxes]}\n"
                     f"Boxes: {im_boxes[ivalid_boxes]}!"
                 )
