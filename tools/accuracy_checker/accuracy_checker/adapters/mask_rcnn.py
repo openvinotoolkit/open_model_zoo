@@ -170,7 +170,9 @@ class MaskRCNNAdapter(Adapter):
             invalid_scores = np.logical_or(im_scores > 1, im_scores <= 0)
             if np.sum(invalid_scores) > 0:
                 warnings.warn(
-                    f"Output for {identifier} consist invalid scores and boxes!\nScores: {im_scores[invalid_scores]}\nBoxes: {im_boxes[invalid_scores]}!"
+                    f"Output for {identifier} consist invalid scores and boxes!\n"
+                    f"Scores: {im_scores[ivalid_boxes]}\n"
+                    f"Boxes: {im_boxes[ivalid_boxes]}!"
                 )
                 im_classes = im_classes[~invalid_scores]
                 im_scores = im_scores[~invalid_scores]
@@ -178,7 +180,7 @@ class MaskRCNNAdapter(Adapter):
                 im_raw_masks = im_raw_masks[~invalid_scores]
                 if len(im_classes) == 0:
                     continue
-            
+
             original_image_size = image_meta['image_size'][:2]
             im_boxes[:, 1::2] *= original_image_size[1]
             im_boxes[:, 0::2] *= original_image_size[0]
