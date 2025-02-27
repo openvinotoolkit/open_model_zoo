@@ -41,7 +41,7 @@ except ImportError as transformers_error:
 
 try:
     import torch
-    import torch.nn.functional as F    
+    import torch.nn.functional as F
 except ImportError as torch_error:
     torch = UnsupportedPackage("torch", torch_error.msg)
 
