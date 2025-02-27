@@ -16,8 +16,6 @@ limitations under the License.
 import os
 import numpy as np
 from PIL import Image
-from scipy.special import softmax
-
 from .base_custom_evaluator import BaseCustomEvaluator
 from .base_models import BaseCascadeModel
 from ...config import ConfigError
@@ -43,6 +41,7 @@ except ImportError as transformers_error:
 
 try:
     import torch
+    import torch.nn.functional as F    
 except ImportError as torch_error:
     torch = UnsupportedPackage("torch", torch_error.msg)
 
@@ -332,7 +331,8 @@ class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
                 temp_simularity.append(emb1 @ emb2)
             simularity.append(temp_simularity)
 
-        logits = 100. * softmax(simularity)
+        simularity_tensor = torch.tensor(simularity)
+        logits = 100. * F.softmax(simularity_tensor, dim=-1).numpy()
         return logits
 
     def get_class_embeddings(self, texts, params):
