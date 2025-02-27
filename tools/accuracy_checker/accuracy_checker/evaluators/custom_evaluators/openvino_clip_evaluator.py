@@ -1,18 +1,4 @@
-"""
-Copyright (c) 2024-2025 Intel Corporation
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
 import os
 import numpy as np
 from PIL import Image
@@ -324,15 +310,15 @@ class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
 
     def get_logits(self, image_features, zeroshot_weights):
         text_embeddings = np.squeeze(zeroshot_weights)
-        simularity = []
+        similarity = []
         for emb1 in image_features:
-            temp_simularity = []
+            temp_similarity = []
             for emb2 in text_embeddings:
-                temp_simularity.append(emb1 @ emb2)
-            simularity.append(temp_simularity)
+                temp_similarity.append(emb1 @ emb2)
+            similarity.append(temp_similarity)
 
-        simularity_tensor = torch.tensor(simularity)
-        logits = 100. * F.softmax(simularity_tensor, dim=-1).numpy()
+        similarity_tensor = torch.tensor(similarity)
+        logits = 100. * F.softmax(similarity_tensor, dim=-1).numpy()
         return logits
 
     def get_class_embeddings(self, texts, params):
