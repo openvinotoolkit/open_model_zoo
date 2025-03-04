@@ -256,7 +256,8 @@ class BaseCustomEvaluator(BaseEvaluator):
 
     def release(self):
         self._release_model()
-        self.launcher.release()
+        if self.launcher:
+            self.launcher.release()
 
     def _release_model(self):
         if self.model:
