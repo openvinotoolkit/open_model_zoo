@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2024 Intel Corporation
+Copyright (c) 2018-2025 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -271,6 +271,13 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         'tflite': 'tflite',
     }
 
+
+    def get_model_by_name(model_name, model_list):
+        models = [model for model in model_list if model.name == '{}.xml'.format(model_name)]
+        if not models:
+            models = [model for model in model_list if model.name == 'openvino_model.xml']
+        return models
+
     def get_model_by_suffix(model_name, model_dir, suffix):
         model_list = list(Path(model_dir).glob('{}.{}'.format(model_name, suffix)))
         if not model_list:
@@ -296,7 +303,9 @@ def automatic_model_search(model_name, model_cfg, weights_cfg, model_type=None):
         if not model_list:
             raise ConfigError('suitable model is not found')
         if len(model_list) != 1:
-            raise ConfigError('More than one model matched, please specify explicitly')
+            model_list = get_model_by_name(model_name, model_list)
+            if len(model_list) != 1:
+                raise ConfigError('More than one model matched, please specify explicitly')
         model = model_list[0]
         print_info('Found model {}'.format(model))
         return model, model.suffix == '.blob'
