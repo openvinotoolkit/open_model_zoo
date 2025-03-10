@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 # Multi config generators such as Visual Studio ignore CMAKE_BUILD_TYPE. Multi config generators are configured with
 # CMAKE_CONFIGURATION_TYPES, but limiting options in it completely removes such build options
