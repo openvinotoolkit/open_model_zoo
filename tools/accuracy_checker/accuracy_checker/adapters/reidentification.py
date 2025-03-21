@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2024 Intel Corporation
+Copyright (c) 2018-2025 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ class ReidAdapter(Adapter):
                 choices=['sum', 'concatenation']
             ),
             'target_out': StringField(optional=True, description='Target output layer name'),
-            'keep_shape': BoolField(optional=True, default=False, description='keep output embedding shape')
+            'keep_shape': BoolField(optional=True, default=False, description='keep output embedding shape'),
+            'mean_pooling': BoolField(optional=True, default=False,
+                                      description='Average the embeddings of all tokens for last_hidden_state')
         })
 
         return parameters
@@ -54,6 +56,7 @@ class ReidAdapter(Adapter):
         self.joining_method = self.get_value_from_config('joining_method')
         self.target_out = self.get_value_from_config('target_out')
         self.keep_shape = self.get_value_from_config('keep_shape')
+        self.mean_pooling = self.get_value_from_config('mean_pooling')        
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -67,6 +70,10 @@ class ReidAdapter(Adapter):
         raw_prediction = self._extract_predictions(raw, frame_meta)
         prediction = raw_prediction[self.output_blob]
 
+        if self.mean_pooling:
+            # Shape: (1, 128, 768) -> (1, 768)
+            prediction = np.mean(prediction, axis=1)
+            
         if self.grn_workaround:
             # workaround: GRN layer
             prediction = self._grn_layer(prediction)
