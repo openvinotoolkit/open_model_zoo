@@ -56,7 +56,7 @@ class ReidAdapter(Adapter):
         self.joining_method = self.get_value_from_config('joining_method')
         self.target_out = self.get_value_from_config('target_out')
         self.keep_shape = self.get_value_from_config('keep_shape')
-        self.mean_pooling = self.get_value_from_config('mean_pooling')        
+        self.mean_pooling = self.get_value_from_config('mean_pooling')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -73,7 +73,7 @@ class ReidAdapter(Adapter):
         if self.mean_pooling:
             # Shape: (1, 128, 768) -> (1, 768)
             prediction = np.mean(prediction, axis=1)
-            
+
         if self.grn_workaround:
             # workaround: GRN layer
             prediction = self._grn_layer(prediction)
