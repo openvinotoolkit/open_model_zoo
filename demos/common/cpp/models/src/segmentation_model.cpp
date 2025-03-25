@@ -116,7 +116,7 @@ void SegmentationModel::prepareInputsOutputs(std::shared_ptr<ov::Model>& model) 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
     ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
-    const auto& outTensor = infResult.getFirstOutputTensor();
+    auto outTensor = infResult.getFirstOutputTensor();
 
     result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
 

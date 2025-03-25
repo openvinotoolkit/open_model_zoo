@@ -223,7 +223,7 @@ std::vector<cv::RotatedRect> TextDetector::postProcess(
         ov::Shape link_shape = output_tensors.at(kLocOutputName).get_shape();
         size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
 
-        float* link_data_pointer = output_tensors.at(kLocOutputName).data<float>();
+        auto link_data_pointer = output_tensors.at(kLocOutputName).data<float>();
 
         std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);;
         if (m_modelLayout == ov::Layout("NCHW")) {
@@ -243,7 +243,7 @@ std::vector<cv::RotatedRect> TextDetector::postProcess(
         ov::Shape cls_shape = output_tensors.at(kClsOutputName).get_shape();
         size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
 
-        float* cls_data_pointer = output_tensors.at(kClsOutputName).data<float>();
+        auto cls_data_pointer = output_tensors.at(kClsOutputName).data<float>();
 
         std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
         if (m_modelLayout == ov::Layout("NCHW")) {

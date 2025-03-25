@@ -153,19 +153,19 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
-    const auto& aembds = infResult.outputsData[embeddingsTensorName];
+    auto &aembds = infResult.outputsData[embeddingsTensorName];
     const ov::Shape& aembdsShape = aembds.get_shape();
     float* const aembdsMapped = aembds.data<float>();
     std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsShape);
 
-    const auto& heats = infResult.outputsData[heatmapsTensorName];
+    auto &heats = infResult.outputsData[heatmapsTensorName];
     const ov::Shape& heatMapsShape = heats.get_shape();
     float* const heatMapsMapped = heats.data<float>();
     std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsShape);
 
     std::vector<cv::Mat> nmsHeatMaps = heatMaps;
     if (nmsHeatmapsTensorName != heatmapsTensorName) {
-        const auto& nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
+        auto& nmsHeats = infResult.outputsData[nmsHeatmapsTensorName];
         const ov::Shape& nmsHeatMapsShape = nmsHeats.get_shape();
         float* const nmsHeatMapsMapped = nmsHeats.data<float>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsShape);
