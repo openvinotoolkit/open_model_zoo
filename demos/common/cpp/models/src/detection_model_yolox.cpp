@@ -127,7 +127,7 @@ std::unique_ptr<ResultBase> ModelYoloX::postprocess(InferenceResult& infResult) 
     const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
 
     // Get output tensor
-    const ov::Tensor& output = infResult.outputsData[outputsNames[0]];
+    ov::Tensor &output = infResult.outputsData[outputsNames[0]];
     const auto& outputShape = output.get_shape();
     float* outputPtr = output.data<float>();
 

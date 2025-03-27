@@ -74,7 +74,8 @@ void CnnDLSDKBase::InferBatch(
     size_t c = m_modelShape[ov::layout::channels_idx(m_desired_layout)];
     std::cout << m_in_tensor.get_shape() << ' ' << num_imgs << ' ' << m_modelShape << '\n';
     for (size_t i = 0; i < num_imgs; i++) {
-        resize2tensor(frames[i], ov::Tensor{ m_in_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} });
+        ov::Tensor t{ m_in_tensor, {i, 0, 0, 0}, {i + 1, h, w, c} };
+        resize2tensor(frames[i], t);
     }
     m_infer_request.set_input_tensor(ov::Tensor{ m_in_tensor, { 0, 0, 0, 0 }, {num_imgs, h, w, c} });
 

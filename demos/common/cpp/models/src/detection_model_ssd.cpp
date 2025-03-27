@@ -42,7 +42,7 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, ov::InferRequest& request) {
     if (inputsNames.size() > 1) {
-        const auto& imageInfoTensor = request.get_tensor(inputsNames[1]);
+        auto imageInfoTensor = request.get_tensor(inputsNames[1]);
         const auto info = imageInfoTensor.data<float>();
         info[0] = static_cast<float>(netInputHeight);
         info[1] = static_cast<float>(netInputWidth);

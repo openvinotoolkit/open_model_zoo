@@ -203,7 +203,10 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
     if (!enabled()) {
         return;
     }
-    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    ov::Tensor t{inTensor,
+                 {enquedFaces, 0, 0, 0},
+                 {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}};
+    resize2tensor(face, t);
     enquedFaces++;
 }
 
@@ -253,7 +256,8 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    ov::Tensor t{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}};
+    resize2tensor(face, t);
     enquedFaces++;
 }
 
@@ -309,7 +313,8 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    ov::Tensor t{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}};
+    resize2tensor(face, t);
     enquedFaces++;
 }
 
@@ -364,7 +369,8 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    ov::Tensor t{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}};
+    resize2tensor(face, t);
     enquedFaces++;
 }
 
@@ -381,7 +387,7 @@ std::map<std::string, float> EmotionsDetection::operator[](int idx) {
                                "to used emotions vector size (" +
                                std::to_string(emotionsVecSize) + ")");
     }
-    float* emotionsValues = tensor.data<float>();
+    auto emotionsValues = tensor.data<float>();
     auto outputIdxPos = emotionsValues + idx * emotionsVecSize;
     std::map<std::string, float> emotions;
 
@@ -440,7 +446,8 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
     if (!enabled()) {
         return;
     }
-    resize2tensor(face, ov::Tensor{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}});
+    ov::Tensor t{inTensor, {enquedFaces, 0, 0, 0}, {enquedFaces + 1, inShape[1], inShape[2], inShape[3]}};
+    resize2tensor(face, t);
     enquedFaces++;
 }
 

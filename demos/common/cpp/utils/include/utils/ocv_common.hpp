@@ -35,7 +35,8 @@ const T getMatValue(const cv::Mat& mat, size_t h, size_t w, size_t c) {
 * @param tensor - Tensor object which to be filled by an image data.
 * @param batchIndex - batch index of an image inside of the blob.
 */
-static UNUSED void matToTensor(const cv::Mat& mat, const ov::Tensor& tensor, int batchIndex = 0) {
+static UNUSED void matToTensor(const cv::Mat &mat, ov::Tensor &tensor,
+                               int batchIndex = 0) {
     ov::Shape tensorShape = tensor.get_shape();
     static const ov::Layout layout("NCHW");
     const size_t width = tensorShape[ov::layout::width_idx(layout)];
@@ -99,7 +100,7 @@ static UNUSED ov::Tensor wrapMat2Tensor(const cv::Mat& mat) {
     return ov::Tensor(precision, ov::Shape{ 1, height, width, channels }, SharedMatAllocator{mat});
 }
 
-static inline void resize2tensor(const cv::Mat& mat, const ov::Tensor& tensor) {
+static inline void resize2tensor(const cv::Mat &mat, ov::Tensor &tensor) {
     static const ov::Layout layout{"NHWC"};
     const ov::Shape& shape = tensor.get_shape();
     cv::Size size{int(shape[ov::layout::width_idx(layout)]), int(shape[ov::layout::height_idx(layout)])};

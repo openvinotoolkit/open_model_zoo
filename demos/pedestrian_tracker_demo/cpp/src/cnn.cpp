@@ -60,7 +60,7 @@ void BaseModel::Load() {
 }
 
 void BaseModel::InferBatch(const std::vector<cv::Mat>& frames,
-                           const std::function<void(const ov::Tensor&, size_t)>& fetch_results) const {
+                           const std::function<void(ov::Tensor, size_t)>& fetch_results) const {
     size_t num_imgs = frames.size();
     input_tensor.set_shape(input_shape);
     for (size_t batch_i = 0; batch_i < num_imgs;) {
@@ -97,7 +97,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         return;
     }
     vectors->clear();
-    auto results_fetcher = [vectors](const ov::Tensor& tensor, size_t batch_size) {
+    auto results_fetcher = [vectors](ov::Tensor tensor, size_t batch_size) {
         ov::Shape shape = tensor.get_shape();
         std::vector<int> tensor_sizes(shape.size(), 0);
         for (size_t i = 0; i < tensor_sizes.size(); ++i) {
