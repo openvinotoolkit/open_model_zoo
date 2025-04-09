@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import re
+import os
 
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
@@ -121,7 +122,7 @@ class GenAIWhisperPipeline(WhisperPipeline):
         except ImportError as import_error:
             UnsupportedPackage("openvino_genai", import_error.msg).raise_error(self.__class__.__name__)
 
-        model_dir = config.get("_models", [None])[0]
+        model_dir = get_model_dir(config)
         device = config.get("_device", "CPU")
         pipeline = ov_genai.WhisperPipeline(str(model_dir), device=device)
         return pipeline
@@ -169,7 +170,7 @@ class OptimumWhisperPipeline(WhisperPipeline):
             UnsupportedPackage("optimum.intel.openvino", import_error.msg).raise_error(self.__class__.__name__)
 
         device = config.get("_device", "CPU")
-        model_dir = config.get("_models", [None])[0]
+        model_dir = get_model_dir(config)
         ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
         ov_processor = AutoProcessor.from_pretrained(str(model_dir))
 
@@ -184,3 +185,12 @@ class OptimumWhisperPipeline(WhisperPipeline):
         sampling_rate = input_meta[0].get("sample_rate")
         sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
         return self.pipeline(sample, return_timestamps=True)["text"]
+
+
+
+def get_model_dir(config):
+    model_path = config.get("_models", [None])[0]
+
+    if os.path.isfile(model_path):
+        return os.path.dirname(model_path)
+    return model_path
