@@ -241,8 +241,6 @@ int main(int argc, char* argv[]) {
                 } else {
                     presenter.handleKey(key);
                 }
-            } else {
-                cv::imwrite("./background-substr-out.jpg", output);
             }
         }
         slog::info << "Metrics report:" << slog::endl;
