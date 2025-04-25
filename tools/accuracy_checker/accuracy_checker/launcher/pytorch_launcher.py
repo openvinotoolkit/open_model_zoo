@@ -20,9 +20,7 @@ import os
 import importlib
 import urllib
 import re
-import transformers
 from collections import OrderedDict
-from transformers import AutoConfig
 import numpy as np
 from ..config import PathField, StringField, DictField, NumberField, ListField, BoolField
 from .launcher import Launcher
@@ -179,7 +177,7 @@ class PyTorchLauncher(Launcher):
             return self.prepare_module(module, model_cls)
 
     def load_tranformers_module(self, pretrained_name):
-
+        import transformers # pylint: disable=C0415
         model_class = getattr(transformers, self.tranformers_class)
         module = model_class.from_pretrained(pretrained_name)
 
