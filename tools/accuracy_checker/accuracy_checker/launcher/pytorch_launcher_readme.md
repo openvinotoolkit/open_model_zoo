@@ -17,6 +17,8 @@ For enabling PyTorch launcher you need to add `framework: pytorch` in launchers 
 * `batch` - batch size for running model (Optional, default 1).
 * `use_torch_compile` - boolean, use torch.compile to optimize the module code (Optional, default `False`)
 * `torch_compile_kwargs` - dictionary of keyword arguments to pass to torch.compile (Optional, default `{}`)
+* `transformers_class` - transformers class name to load pre-trained model with `module` name. (Optional).
+
 
 In turn if you model has several inputs you need to specify them in config, using specific parameter: `inputs`.
 Each input description should has following info:

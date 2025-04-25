@@ -16,15 +16,18 @@ limitations under the License.
 
 from contextlib import contextmanager
 import sys
+import os
 import importlib
 import urllib
 import re
+import transformers
 from collections import OrderedDict
-
+from transformers import AutoConfig
 import numpy as np
 from ..config import PathField, StringField, DictField, NumberField, ListField, BoolField
 from .launcher import Launcher
 
+CLASS_REGEX = r'(?:\w+)'
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
 CHECKPOINT_URL_REGEX = r'^https?://.*\.pth(\?.*)?(#.*)?$'
@@ -67,6 +70,9 @@ class PyTorchLauncher(Launcher):
             'torch_compile_kwargs': DictField(
                 key_type=str, validate_values=False, optional=True, default={},
                 description="dictionary of keyword arguments passed to torch.compile"
+            ),
+            'transformers_class': StringField(
+                optional=True, regex=CLASS_REGEX, description='Transformers class name to load pre-trained module.'
             )
         })
         return parameters
@@ -84,6 +90,7 @@ class PyTorchLauncher(Launcher):
         self.validate_config(config_entry)
         self.use_torch_compile = config_entry.get('use_torch_compile', False)
         self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
+        self.tranformers_class = config_entry.get('transformers_class', None)
         backend = self.compile_kwargs.get('backend', None)
         if self.use_torch_compile and backend == 'openvino':
             try:
@@ -96,17 +103,24 @@ class PyTorchLauncher(Launcher):
         self.device = self.get_value_from_config('device')
         self.cuda = 'cuda' in self.device
         checkpoint = config_entry.get('checkpoint')
-        if checkpoint is None:
-            checkpoint = config_entry.get('checkpoint_url')
-        self.module = self.load_module(
-            config_entry['module'],
-            module_args,
-            module_kwargs,
-            checkpoint,
-            config_entry.get('state_key'),
-            config_entry.get("python_path"),
-            config_entry.get("init_method")
-        )
+        if self.tranformers_class:
+            self.module = self.load_tranformers_module(
+                config_entry['module']
+            )
+        else:
+            if checkpoint is None:
+                checkpoint = config_entry.get('checkpoint_url')
+
+            self.module = self.load_module(
+                config_entry['module'],
+                module_args,
+                module_kwargs,
+                checkpoint,
+                config_entry.get('state_key'),
+                config_entry.get("python_path"),
+                config_entry.get("init_method")
+            )
+
 
         self._batch = self.get_value_from_config('batch')
         # torch modules does not have input information
@@ -161,15 +175,27 @@ class PyTorchLauncher(Launcher):
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
-            module.to('cuda' if self.cuda else 'cpu')
-            module.eval()
 
-            if self.use_torch_compile:
-                if hasattr(model_cls, 'compile'):
-                    module.compile()
-                module = self._torch.compile(module, **self.compile_kwargs)
+            return self.prepare_module(module, model_cls)
 
-            return module
+    def load_tranformers_module(self, pretrained_name):
+
+        model_class = getattr(transformers, self.tranformers_class)
+        module = model_class.from_pretrained(pretrained_name)
+
+        return self.prepare_module(module, model_class)
+
+
+    def prepare_module(self, module, model_class):
+        module.to('cuda' if self.cuda else 'cpu')
+        module.eval()
+
+        if self.use_torch_compile:
+            if hasattr(model_class, 'compile'):
+                module.compile()
+            module = self._torch.compile(module, **self.compile_kwargs)
+        return module
+
 
     def _convert_to_tensor(self, value, precision):
         if isinstance(value, self._torch.Tensor):
@@ -193,6 +219,7 @@ class PyTorchLauncher(Launcher):
 
         if layout is not None:
             data = np.transpose(data, layout)
+
         tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
         tensor = tensor.to(self.device)
         return tensor
@@ -213,7 +240,15 @@ class PyTorchLauncher(Launcher):
                 if metadata[0].get('input_is_dict_type'):
                     outputs = self.module(batch_input['input'])
                 else:
-                    outputs = list(self.module(*batch_input.values()))
+                    output = self.module(*batch_input.values())
+
+                    if 'logits' in self.output_names:
+                        result_dict = { 'logits': output.logits.detach().cpu().numpy() }
+                        results.append(result_dict)
+                        continue
+                    else:
+                        outputs = list(output)
+
                     for meta_ in metadata:
                         meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
 
