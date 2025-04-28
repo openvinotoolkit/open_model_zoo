@@ -16,7 +16,6 @@ limitations under the License.
 
 from contextlib import contextmanager
 import sys
-import os
 import importlib
 import urllib
 import re
@@ -244,8 +243,7 @@ class PyTorchLauncher(Launcher):
                         result_dict = { 'logits': output.logits.detach().cpu().numpy() }
                         results.append(result_dict)
                         continue
-                    else:
-                        outputs = list(output)
+                    outputs = list(output)
 
                     for meta_ in metadata:
                         meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
