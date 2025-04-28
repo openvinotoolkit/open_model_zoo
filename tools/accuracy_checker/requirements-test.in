@@ -8,3 +8,4 @@ pytest-mock~=2.0
 # So as a workaround, make the atomicwrites dependency unconditional.
 atomicwrites
 datasets
+transformers>=4.5 
