@@ -263,7 +263,8 @@ class Launcher(ClassProvider):
 
         return meta
 
-    def fit_to_input(self, data, layer_name, layout, precision, template=None):
+    @staticmethod
+    def fit_to_input(data, layer_name, layout, precision, template=None):
         layout_used = False
         if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
