@@ -156,8 +156,8 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
                 segment_ids.append(SEG_ID_CLS)
         else:
             if example.text_b:
-                tokens = self.tokenizer.tokenize((example.text_a, example.text_b), add_special_tokens=True)
-                len_tokens_a = len(self.tokenizer.tokenize(example.text_a, add_special_tokens=True))
+                tokens = self.tokenizer.tokenize((example.text_a, example.text_b))
+                len_tokens_a = len(self.tokenizer.tokenize(example.text_a))
                 segment_ids = [SEG_ID_A] * len_tokens_a + [SEG_ID_B] * (len(tokens) - len_tokens_a)
             else:
                 tokens = self.tokenizer.tokenize(example.text_a)

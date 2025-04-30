@@ -156,7 +156,7 @@ class PyTorchLauncher(Launcher):
         model_cls = module_parts[-1]
         model_path = ".".join(module_parts[:-1])
         with append_to_path(python_path):
-            model_cls = importlib.import_module(model_path).__getattribute__(model_cls)
+            model_cls = getattr(importlib.import_module(model_path), model_cls)
             module = model_cls(*module_args, **module_kwargs)
             if init_method is not None:
                 if hasattr(model_cls, init_method):
@@ -247,7 +247,7 @@ class PyTorchLauncher(Launcher):
     def forward(self, outputs):
         if hasattr(outputs, 'logits') and 'logits' in self.output_names:
             return {'logits': outputs.logits}
-        elif hasattr(outputs, 'last_hidden_state') and 'last_hidden_state' in self.output_names:
+        if hasattr(outputs, 'last_hidden_state') and 'last_hidden_state' in self.output_names:
             return {'last_hidden_state': outputs.last_hidden_state}
         return list(outputs)
 
@@ -255,8 +255,7 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if metadata[0].get('input_is_dict_type') or \
-                    (isinstance(batch_input, dict) and 'input' in batch_input):
+                if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
                     outputs = self.module(batch_input['input'])
                 else:
                     outputs = self.module(**batch_input)
