@@ -210,7 +210,7 @@ class PyTorchLauncher(Launcher):
         if isinstance(value, self._torch.Tensor):
             return value
         if precision is None:
-            precision =  np.float32
+            precision = np.float32
 
         return self._torch.from_numpy(value.astype(precision)).to(self.device)
 
