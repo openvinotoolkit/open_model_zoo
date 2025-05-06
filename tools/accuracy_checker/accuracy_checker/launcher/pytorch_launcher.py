@@ -22,7 +22,12 @@ import re
 from collections import OrderedDict
 import numpy as np
 from ..config import PathField, StringField, DictField, NumberField, ListField, BoolField
+from ..utils import UnsupportedPackage
 from .launcher import Launcher
+try:
+    import transformers
+except ImportError as transformers_error:
+    transformers = UnsupportedPackage('transformers', transformers_error.msg)
 
 CLASS_REGEX = r'(?:\w+)'
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
@@ -180,7 +185,9 @@ class PyTorchLauncher(Launcher):
 
     def load_tranformers_module(self, pretrained_name, python_path):
         with append_to_path(python_path):
-            import transformers # pylint: disable=C0415
+            if isinstance(transformers, UnsupportedPackage):
+                transformers.raise_error(self.__class__.__name__)
+
             model_class = getattr(transformers, self.tranformers_class)
             pretrained_model = python_path if python_path else pretrained_name
             module = model_class.from_pretrained(pretrained_model)
