@@ -96,7 +96,7 @@ class PyTorchLauncher(Launcher):
         backend = self.compile_kwargs.get('backend', None)
         if self.use_torch_compile and backend == 'openvino':
             try:
-                import openvino.torch # pylint: disable=C0415, W0611
+                importlib.import_module('openvino.torch')  # pylint: disable=C0415, W0611
             except ImportError as import_error:
                 raise ValueError("torch.compile is supported from OpenVINO 2023.1\n{}".format(
                     import_error.msg)) from import_error
@@ -172,7 +172,7 @@ class PyTorchLauncher(Launcher):
 
             if checkpoint:
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
-                    checkpoint = urllib.request.urlretrieve(checkpoint)[0]
+                    checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
                 checkpoint = self._torch.load(
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
                 )
