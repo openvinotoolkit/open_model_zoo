@@ -34,16 +34,18 @@ except ImportError as clip_error:
     open_clip = UnsupportedPackage('open_clip', clip_error.msg)
 
 try:
-    from transformers import AutoModel, AutoTokenizer
+    from transformers import AutoModel, AutoTokenizer, AutoProcessor
 except ImportError as transformers_error:
     AutoModel = UnsupportedPackage('AutoModel', transformers_error.msg)
     AutoTokenizer = UnsupportedPackage('AutoTokenizer', transformers_error.msg)
+    AutoProcessor = UnsupportedPackage('AutoProcessor', transformers_error.msg)
 
 try:
     import torch
     import torch.nn.functional as F
 except ImportError as torch_error:
     torch = UnsupportedPackage("torch", torch_error.msg)
+
 
 class OpenVinoClipEvaluator(BaseCustomEvaluator):
     def __init__(self, dataset_config, launcher, model, orig_config):
@@ -53,11 +55,25 @@ class OpenVinoClipEvaluator(BaseCustomEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config, launcher, _ = cls.get_dataset_and_launcher_info(config)
-        model = OpenVinoClipVitModel(
-            config.get('network_info', {}), launcher, config.get('_models', []),
-            config.get('_model_is_blob'),
-            delayed_model_loading, config
+        model_classes = {
+            'openvino_model': OptimumIntelModel,
+            'text_vision': OpenvinoTextVisionModel,
+            'default': OpenVinoClipVitModel
+        }
+
+        network_info = config.get('network_info', {})
+        if 'openvino_model' in network_info.keys():
+            model_class = model_classes['openvino_model']
+        elif 'text' in network_info.keys() and 'vision' in network_info.keys():
+            model_class = model_classes['text_vision']
+        else:
+            model_class = model_classes['default']
+
+        model = model_class(
+            network_info, launcher, config.get('_models', []),
+            config.get('_model_is_blob'), delayed_model_loading, config
         )
+
         return cls(dataset_config, launcher, model, orig_config)
 
     def _process(self, output_callback, calculate_metrics, progress_reporter, metric_config, csv_file):
@@ -78,7 +94,6 @@ class OpenVinoClipEvaluator(BaseCustomEvaluator):
                                 element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             self._update_progress(progress_reporter, metric_config, batch_id, len(batch_prediction), csv_file)
 
-
 class OpenVinoJinaClipEvaluator(OpenVinoClipEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
@@ -96,6 +111,20 @@ class OpenVinoJinaClipEvaluator(OpenVinoClipEvaluator):
         return cls(dataset_config, launcher, model, orig_config)
 
 
+class TransformersClipEvaluator(OpenVinoClipEvaluator):
+    @classmethod
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
+        dataset_config, launcher = config["datasets"], None
+        delayed_model_loading = False
+
+        model = TransformersClipModel(
+            config.get('network_info', {}), launcher, config.get('_models', []),
+            config.get('_model_is_blob'),
+            delayed_model_loading, config
+        )
+        return cls(dataset_config, launcher, model, orig_config)
+
+
 class BaseOpenVinoClipModel(BaseCascadeModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False, config=None):
         super().__init__(network_info, launcher, delayed_model_loading)
@@ -104,7 +133,7 @@ class BaseOpenVinoClipModel(BaseCascadeModel):
         self.config = config or {}
         self.templates_file = None
         self.parameters_file = None
-        self.templates = ["a photo of a {classname}"]
+        self.templates = ["a photo of a {c}"]
         self.parts = network_info.keys()
         if launcher:
             network_info = self.fill_part_with_model(network_info, self.parts,
@@ -115,9 +144,6 @@ class BaseOpenVinoClipModel(BaseCascadeModel):
             self.create_pipeline(launcher, network_info)
 
     def create_pipeline(self, launcher, network_info):
-        raise NotImplementedError("Subclasses should implement this method")
-
-    def get_logits(self, image_features, zeroshot_weights):
         raise NotImplementedError("Subclasses should implement this method")
 
     def predict(self, identifiers, input_data, zeroshot_weights):
@@ -154,8 +180,17 @@ class BaseOpenVinoClipModel(BaseCascadeModel):
         params['beta'] = open_clip_params['beta']
         return params
 
+    def get_logits(self, image_features, zeroshot_weights):
+        image_features = self.normalize(image_features, axis=-1)
+        logits = 100. * image_features @ zeroshot_weights
+        return logits
+
     def get_class_embeddings(self, texts, params):
-        raise NotImplementedError("Subclasses should implement this method")
+        class_embeddings = self.encode_text(texts)
+        class_embedding = self.normalize(class_embeddings, axis=-1)
+        class_embedding = np.mean(class_embedding, axis=0)
+        class_embedding /= np.linalg.norm(class_embedding, ord=2)
+        return class_embedding
 
     def zero_shot_classifier(self, data_source):
         classnames = read_json(os.path.join(data_source, self.classnames_file))
@@ -176,7 +211,7 @@ class BaseOpenVinoClipModel(BaseCascadeModel):
             iterator = tqdm(classnames, mininterval=2)
 
         for classname in iterator:
-            texts = [template.format(classname=classname) for template in templates]
+            texts = [template.format(c=classname) for template in templates]
             class_embeddings = self.get_class_embeddings(texts, params)
             zeroshot_weights.append(class_embeddings)
         return np.stack(zeroshot_weights, axis=1)
@@ -244,11 +279,6 @@ class OpenVinoClipVitModel(BaseOpenVinoClipModel):
         self.parameters_file = self.config.get("pretrained_model_params", None)
         self.tokenizer = open_clip.get_tokenizer(orig_model_name)
 
-    def get_logits(self, image_features, zeroshot_weights):
-        image_features = self.normalize(image_features, axis=-1)
-        logits = 100. * image_features @ zeroshot_weights
-        return logits
-
     def encode_image(self, image_data):
         image = np.expand_dims(image_data, axis=0)
         features = self.image_encoder(image)
@@ -268,26 +298,114 @@ class OpenVinoClipVitModel(BaseOpenVinoClipModel):
         x = x[np.arange(x.shape[0]), np.argmax(indices, axis=-1)] @ params['text_projection']
         return x
 
-    def get_class_embeddings(self, texts, params):
-        class_embeddings = self.encode_text(texts, params)
-        class_embedding = self.normalize(class_embeddings, axis=-1)
-        class_embedding = np.mean(class_embedding, axis=0)
-        class_embedding /= np.linalg.norm(class_embedding, ord=2)
-        return class_embedding
-
-
-class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
-    def create_pipeline(self, launcher, network_info):
+class TransformersClipModel(BaseOpenVinoClipModel):
+    def setup_transformers_part(self, check_point):
         if isinstance(AutoTokenizer, UnsupportedPackage):
             AutoTokenizer.raise_error(self.__class__.__name__)
-        if isinstance(AutoModel, UnsupportedPackage):
-            AutoModel.raise_error(self.__class__.__name__)
+        if isinstance(AutoProcessor, UnsupportedPackage):
+            AutoProcessor.raise_error(self.__class__.__name__)
         if isinstance(torch, UnsupportedPackage):
             torch.raise_error(self.__class__.__name__)
 
-        orig_model_name = self.config.get("orig_model_name", "jinaai/jina-clip-v1")
+        self.processor = AutoProcessor.from_pretrained(check_point, trust_remote_code=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(check_point, trust_remote_code=True)
 
-        model = AutoModel.from_pretrained(orig_model_name, trust_remote_code=True)
+    def create_pipeline(self, launcher, network_info):
+        check_point = self.config.get("orig_model_name", "jinaai/jina-clip-v1")
+        self.classnames_file = self.config.get("classnames", "classnames.json")
+        self.setup_transformers_part(check_point)
+
+        self.model = AutoModel.from_pretrained(check_point, trust_remote_code=True)
+        self.model.eval()
+
+    def encode_text(self, texts):
+        texts = self.tokenizer(texts).to('cpu')  # tokenize
+        with torch.no_grad():
+            text_embeddings = self.model.get_text_features(**texts).detach().numpy()
+        return text_embeddings
+
+    def encode_image(self, image_data):
+        image = Image.fromarray(image_data)
+        inputs = self.processor(images=[image], return_tensors="pt")
+        with torch.no_grad():
+            image_embeddings = self.model.get_image_features(**inputs).detach().numpy()
+
+        return image_embeddings
+
+class OptimumIntelModel(TransformersClipModel):
+    def create_pipeline(self, launcher, network_info):
+        check_point = self.config.get("orig_model_name", "jinaai/jina-clip-v1")
+        self.classnames_file = self.config.get("classnames", "classnames.json")
+        self.setup_transformers_part(check_point)
+
+        self.load_models(network_info, launcher, True)
+        self.model = launcher.ie_core.compile_model(self.openvino_model_model, launcher.device)
+
+        image_array = np.random.randint(0, 256, (224, 224, 3), dtype=np.uint8)
+        image = Image.fromarray(image_array)
+        text_descriptions = ["This is a random noise image"]
+        self.inputs = self.processor(text=text_descriptions, images=[image], return_tensors="pt", padding=True)
+
+
+    def encode_text(self, texts):
+        texts = self.tokenizer(texts).to('cpu')
+        input_dict = {k: v.cpu() for k, v in texts.items()}
+        if "pixel_values" not in input_dict:
+            input_dict["pixel_values"] = self.inputs["pixel_values"]
+        text_embeddings = self.model(input_dict)[2]
+        return text_embeddings
+
+    def encode_image(self, image_data):
+        image = Image.fromarray(image_data)
+        inputs = self.processor(images=[image], return_tensors="pt").to("cpu")
+        input_dict = {k: v.squeeze(1).cpu() for k, v in inputs.items()}
+        if "input_ids" not in input_dict:
+            input_dict["input_ids"] = self.inputs["input_ids"]
+        if "attention_mask" not in input_dict:
+            input_dict["attention_mask"] = self.inputs["attention_mask"]
+
+        image_embeddings = self.model(input_dict)[3]
+        return image_embeddings
+
+class OpenvinoTextVisionModel(TransformersClipModel):
+    def create_pipeline(self, launcher, network_info):
+        check_point = self.config.get("orig_model_name", None)
+        self.classnames_file = self.config.get("classnames", "classnames.json")
+        self.setup_transformers_part(check_point)
+
+        self.load_models(network_info, launcher, True)
+        self.text_encoder = launcher.ie_core.compile_model(self.text_model, launcher.device)
+        self.vision_encoder = launcher.ie_core.compile_model(self.vision_model, launcher.device)
+
+    def encode_text(self, texts):
+        text_input = self.tokenizer(texts).to("cpu")
+        text_embeddings = self.text_encoder(text_input["input_ids"])
+        if isinstance(text_embeddings, torch.Tensor):
+            text_embeddings = text_embeddings.detach().numpy()
+        else:
+            text_embeddings = text_embeddings[0]
+        return text_embeddings
+
+    def encode_image(self, image_data):
+        image = Image.fromarray(image_data)
+        vision_input = self.processor(images=[image], return_tensors="pt")
+        image_embeddings = self.vision_encoder(vision_input["pixel_values"])
+        if isinstance(image_embeddings, torch.Tensor):
+            image_embeddings = image_embeddings.detach().numpy()
+        else:
+            image_embeddings = image_embeddings[0]
+        return image_embeddings
+
+class OpenVinoJinaClipModel(OpenvinoTextVisionModel):
+    def create_pipeline(self, launcher, network_info):
+        if isinstance(AutoModel, UnsupportedPackage):
+            AutoModel.raise_error(self.__class__.__name__)
+        check_point = self.config.get("orig_model_name", None)
+        self.classnames_file = self.config.get("classnames", "classnames.json")
+        self.setup_transformers_part(check_point)
+        self.tokenizer = AutoTokenizer.from_pretrained(check_point, trust_remote_code=True)
+
+        model = AutoModel.from_pretrained(check_point, trust_remote_code=True)
         if launcher:
             self.load_models(network_info, launcher, True)
             self.text_encoder = launcher.ie_core.compile_model(self.text_model, launcher.device)
@@ -296,31 +414,17 @@ class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
             self.text_encoder = model.text_model
             self.vision_encoder = model.vision_model
 
-        self.templates = ["{classname}"]
-        self.classnames_file = self.config.get("classnames", "classnames.json")
-        self.tokenizer = AutoTokenizer.from_pretrained(orig_model_name, trust_remote_code=True)
-        self.processor = model.get_preprocess()
+    def encode_text(self, texts):
+        text_input = self.tokenizer(texts, return_tensors="pt", padding="max_length",
+                                    max_length=512, truncation=True).to("cpu")
 
-    def encode_image(self, image_data):
-        image = Image.fromarray(image_data)
-        vision_input = self.processor(images=[image], return_tensors="pt")
-        image_embeddings = self.vision_encoder(vision_input["pixel_values"])
-
-        if isinstance(image_embeddings, torch.Tensor):
-            image_embeddings = image_embeddings.detach().numpy()
-        else:
-            image_embeddings = image_embeddings[0]
-
-        return image_embeddings
-
-    def encode_text(self, text_input):
         text_embeddings = self.text_encoder(text_input["input_ids"])
-
         if isinstance(text_embeddings, torch.Tensor):
             text_embeddings = text_embeddings.detach().numpy()
         else:
             text_embeddings = text_embeddings[0]
         return text_embeddings
+
 
     def get_logits(self, image_features, zeroshot_weights):
         text_embeddings = np.squeeze(zeroshot_weights)
@@ -336,6 +440,4 @@ class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
         return logits
 
     def get_class_embeddings(self, texts, params):
-        text_input = self.tokenizer(texts, return_tensors="pt", padding="max_length",
-                                    max_length=512, truncation=True).to("cpu")
-        return self.encode_text(text_input)
+        return self.encode_text(texts)
