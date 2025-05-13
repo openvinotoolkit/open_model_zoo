@@ -186,7 +186,7 @@ class BaseOpenVinoClipModel(BaseCascadeModel):
         return logits
 
     def get_class_embeddings(self, texts, params):
-        class_embeddings = self.encode_text(texts)
+        class_embeddings = self.encode_text(texts, params)
         class_embedding = self.normalize(class_embeddings, axis=-1)
         class_embedding = np.mean(class_embedding, axis=0)
         class_embedding /= np.linalg.norm(class_embedding, ord=2)
@@ -298,6 +298,79 @@ class OpenVinoClipVitModel(BaseOpenVinoClipModel):
         x = x[np.arange(x.shape[0]), np.argmax(indices, axis=-1)] @ params['text_projection']
         return x
 
+    def get_class_embeddings(self, texts, params):
+        class_embeddings = self.encode_text(texts, params)
+        class_embedding = self.normalize(class_embeddings, axis=-1)
+        class_embedding = np.mean(class_embedding, axis=0)
+        class_embedding /= np.linalg.norm(class_embedding, ord=2)
+        return class_embedding
+
+class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
+    def create_pipeline(self, launcher, network_info):
+        if isinstance(AutoTokenizer, UnsupportedPackage):
+            AutoTokenizer.raise_error(self.__class__.__name__)
+        if isinstance(AutoModel, UnsupportedPackage):
+            AutoModel.raise_error(self.__class__.__name__)
+        if isinstance(torch, UnsupportedPackage):
+            torch.raise_error(self.__class__.__name__)
+
+        orig_model_name = self.config.get("orig_model_name", "jinaai/jina-clip-v1")
+
+        model = AutoModel.from_pretrained(orig_model_name, trust_remote_code=True)
+        if launcher:
+            self.load_models(network_info, launcher, True)
+            self.text_encoder = launcher.ie_core.compile_model(self.text_model, launcher.device)
+            self.vision_encoder = launcher.ie_core.compile_model(self.vision_model, launcher.device)
+        else:
+            self.text_encoder = model.text_model
+            self.vision_encoder = model.vision_model
+
+        self.templates = ["{classname}"]
+        self.classnames_file = self.config.get("classnames", "classnames.json")
+        self.tokenizer = AutoTokenizer.from_pretrained(orig_model_name, trust_remote_code=True)
+        self.processor = model.get_preprocess()
+
+    def encode_image(self, image_data):
+        image = Image.fromarray(image_data)
+        vision_input = self.processor(images=[image], return_tensors="pt")
+        image_embeddings = self.vision_encoder(vision_input["pixel_values"])
+
+        if isinstance(image_embeddings, torch.Tensor):
+            image_embeddings = image_embeddings.detach().numpy()
+        else:
+            image_embeddings = image_embeddings[0]
+
+        return image_embeddings
+
+    def encode_text(self, texts, params=None):
+        text_input = self.tokenizer(texts, return_tensors="pt", padding="max_length",
+                                    max_length=512, truncation=True).to("cpu")
+
+        text_embeddings = self.text_encoder(text_input["input_ids"])
+
+        if isinstance(text_embeddings, torch.Tensor):
+            text_embeddings = text_embeddings.detach().numpy()
+        else:
+            text_embeddings = text_embeddings[0]
+        return text_embeddings
+
+    def get_logits(self, image_features, zeroshot_weights):
+        text_embeddings = np.squeeze(zeroshot_weights)
+        similarity = []
+        for emb1 in image_features:
+            temp_similarity = []
+            for emb2 in text_embeddings:
+                temp_similarity.append(emb1 @ emb2)
+            similarity.append(temp_similarity)
+
+        similarity_tensor = torch.tensor(similarity)
+        logits = 100. * F.softmax(similarity_tensor, dim=-1).numpy()
+        return logits
+
+    def get_class_embeddings(self, texts, params):
+        class_embeddings = self.encode_text(texts, params)
+        return class_embeddings
+
 class TransformersClipModel(BaseOpenVinoClipModel):
     def setup_transformers_part(self, check_point):
         if isinstance(AutoTokenizer, UnsupportedPackage):
@@ -308,7 +381,9 @@ class TransformersClipModel(BaseOpenVinoClipModel):
             torch.raise_error(self.__class__.__name__)
 
         self.processor = AutoProcessor.from_pretrained(check_point, trust_remote_code=True)
-        self.tokenizer = AutoTokenizer.from_pretrained(check_point, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(check_point, trust_remote_code=True)
+        self.tokenizer = lambda text: self.processor(text=text, padding="max_length",
+                                                     max_length=tokenizer.model_max_length, return_tensors="pt")
 
     def create_pipeline(self, launcher, network_info):
         check_point = self.config.get("orig_model_name", "jinaai/jina-clip-v1")
@@ -318,7 +393,7 @@ class TransformersClipModel(BaseOpenVinoClipModel):
         self.model = AutoModel.from_pretrained(check_point, trust_remote_code=True)
         self.model.eval()
 
-    def encode_text(self, texts):
+    def encode_text(self, texts, params=None):
         texts = self.tokenizer(texts).to('cpu')  # tokenize
         with torch.no_grad():
             text_embeddings = self.model.get_text_features(**texts).detach().numpy()
@@ -347,7 +422,7 @@ class OptimumIntelModel(TransformersClipModel):
         self.inputs = self.processor(text=text_descriptions, images=[image], return_tensors="pt", padding=True)
 
 
-    def encode_text(self, texts):
+    def encode_text(self, texts, params=None):
         texts = self.tokenizer(texts).to('cpu')
         input_dict = {k: v.cpu() for k, v in texts.items()}
         if "pixel_values" not in input_dict:
@@ -377,7 +452,7 @@ class OpenvinoTextVisionModel(TransformersClipModel):
         self.text_encoder = launcher.ie_core.compile_model(self.text_model, launcher.device)
         self.vision_encoder = launcher.ie_core.compile_model(self.vision_model, launcher.device)
 
-    def encode_text(self, texts):
+    def encode_text(self, texts, params=None):
         text_input = self.tokenizer(texts).to("cpu")
         text_embeddings = self.text_encoder(text_input["input_ids"])
         if isinstance(text_embeddings, torch.Tensor):
@@ -395,49 +470,3 @@ class OpenvinoTextVisionModel(TransformersClipModel):
         else:
             image_embeddings = image_embeddings[0]
         return image_embeddings
-
-class OpenVinoJinaClipModel(OpenvinoTextVisionModel):
-    def create_pipeline(self, launcher, network_info):
-        if isinstance(AutoModel, UnsupportedPackage):
-            AutoModel.raise_error(self.__class__.__name__)
-        check_point = self.config.get("orig_model_name", None)
-        self.classnames_file = self.config.get("classnames", "classnames.json")
-        self.setup_transformers_part(check_point)
-        self.tokenizer = AutoTokenizer.from_pretrained(check_point, trust_remote_code=True)
-
-        model = AutoModel.from_pretrained(check_point, trust_remote_code=True)
-        if launcher:
-            self.load_models(network_info, launcher, True)
-            self.text_encoder = launcher.ie_core.compile_model(self.text_model, launcher.device)
-            self.vision_encoder = launcher.ie_core.compile_model(self.vision_model, launcher.device)
-        else:
-            self.text_encoder = model.text_model
-            self.vision_encoder = model.vision_model
-
-    def encode_text(self, texts):
-        text_input = self.tokenizer(texts, return_tensors="pt", padding="max_length",
-                                    max_length=512, truncation=True).to("cpu")
-
-        text_embeddings = self.text_encoder(text_input["input_ids"])
-        if isinstance(text_embeddings, torch.Tensor):
-            text_embeddings = text_embeddings.detach().numpy()
-        else:
-            text_embeddings = text_embeddings[0]
-        return text_embeddings
-
-
-    def get_logits(self, image_features, zeroshot_weights):
-        text_embeddings = np.squeeze(zeroshot_weights)
-        similarity = []
-        for emb1 in image_features:
-            temp_similarity = []
-            for emb2 in text_embeddings:
-                temp_similarity.append(emb1 @ emb2)
-            similarity.append(temp_similarity)
-
-        similarity_tensor = torch.tensor(similarity)
-        logits = 100. * F.softmax(similarity_tensor, dim=-1).numpy()
-        return logits
-
-    def get_class_embeddings(self, texts, params):
-        return self.encode_text(texts)
