@@ -325,7 +325,6 @@ class OpenVinoJinaClipModel(BaseOpenVinoClipModel):
             self.text_encoder = model.text_model
             self.vision_encoder = model.vision_model
 
-        self.templates = ["{classname}"]
         self.classnames_file = self.config.get("classnames", "classnames.json")
         self.tokenizer = AutoTokenizer.from_pretrained(orig_model_name, trust_remote_code=True)
         self.processor = model.get_preprocess()
