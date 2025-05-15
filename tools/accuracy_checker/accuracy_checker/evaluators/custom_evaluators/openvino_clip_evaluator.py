@@ -419,7 +419,11 @@ class OptimumIntelModel(TransformersClipModel):
         image = Image.fromarray(image_array)
         text_descriptions = ["This is a random noise image"]
         self.inputs = self.processor(text=text_descriptions, images=[image], return_tensors="pt", padding=True)
-
+        # Update inputs with data shape matching tokenizer model_max_length
+        texts = self.tokenizer(text_descriptions).to('cpu')
+        input_dict = {k: v.cpu() for k, v in texts.items()}
+        self.inputs["input_ids"] = input_dict["input_ids"]
+        self.inputs["attention_mask"] = input_dict["attention_mask"]
 
     def encode_text(self, texts, params=None):
         texts = self.tokenizer(texts).to('cpu')
