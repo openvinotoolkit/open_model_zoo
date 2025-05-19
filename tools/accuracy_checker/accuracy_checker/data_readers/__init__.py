@@ -53,6 +53,7 @@ from .image_readers import (
     RawpyReader
 )
 from .text_readers import JSONReader
+from .dgl_graph_reader import DGLGraphReader
 
 __all__ = [
     'BaseReader',
@@ -93,6 +94,7 @@ __all__ = [
     'LMDBReader',
     'KaldiARKReader',
     'JSONReader',
+    'DGLGraphReader'
 
     'create_reader',
     'REQUIRES_ANNOTATIONS',

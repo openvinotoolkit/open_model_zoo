@@ -38,7 +38,7 @@ class ModelFile:
     @classmethod
     def deserialize(cls, file):
         name = validation.validate_relative_path('"name"', file['name'])
-
+        
         with validation.deserialization_context('In file "{}"'.format(name)):
             size = validation.validate_nonnegative_int('"size"', file['size'])
 
