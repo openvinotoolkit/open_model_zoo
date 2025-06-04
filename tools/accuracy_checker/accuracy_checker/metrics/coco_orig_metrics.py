@@ -156,6 +156,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         meta = self.dataset.metadata
 
         coco = COCO(str(annotation_file))
+        if 'info' not in coco.dataset:
+            coco.dataset['info'] = {}
         assert 0 not in coco.cats.keys()
         coco_cat_name_to_id = {v['name']: k for k, v in coco.cats.items()}
         if has_background:
