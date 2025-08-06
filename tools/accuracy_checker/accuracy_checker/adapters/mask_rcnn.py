@@ -171,8 +171,8 @@ class MaskRCNNAdapter(Adapter):
             if np.sum(invalid_scores) > 0:
                 warnings.warn(
                     f"Output for {identifier} contains invalid scores and boxes!\n"
-                    f"Scores: {im_scores[ivalid_boxes]}\n"
-                    f"Boxes: {im_boxes[ivalid_boxes]}!"
+                    f"Scores: {im_scores[invalid_scores]}\n"
+                    f"Boxes: {im_boxes[invalid_scores]}!"
                 )
                 im_classes = im_classes[~invalid_scores]
                 im_scores = im_scores[~invalid_scores]
