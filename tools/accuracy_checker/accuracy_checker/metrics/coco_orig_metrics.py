@@ -234,7 +234,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_num = len(labels)
             assert len(scores) == cur_num
 
-            coco_cats = [map_pred_label_id_to_coco_cat_id[lbl] for lbl in labels]
+            coco_cats = [map_pred_label_id_to_coco_cat_id[round(lbl)] for lbl in labels]
 
             for (s, cur_cat) in zip(scores, coco_cats):
                 prediction_data_to_store.append({
