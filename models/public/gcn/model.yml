@@ -1,0 +1,22 @@
+description: >-
+  Tmp
+task_type: node_classification
+files:
+  - name: gcn_model.pt
+    size: 94635
+    source: https://raw.githubusercontent.com/itlab-vision/itlab-vision-dl-benchmark-models/main/dgl/models/classification/GCN/gcn_model.pt
+    checksum: abceacb966cf92ce225e6b7e9b29b1a165e6283f0a780a1617344405d5661bd74ff4e3f7c6d7d0c14fbb44f486d24c2f
+  - name: GCN.py
+    size: 736
+    source: https://raw.githubusercontent.com/itlab-vision/itlab-vision-dl-benchmark-models/main/dgl/models/classification/GCN/GCN.py
+    checksum: a8cf92d876d5c4f495c8fc9c0354a1c337e60038c4c35b11959d5e56105c2f85d60378a41ba2436c7176dd9e708f761c
+  - name: graph.bin
+    size: 50908
+    source: https://raw.githubusercontent.com/itlab-vision/dl-benchmark/master/tests/smoke_test/test_graph/dgl/default_graph.bin
+    checksum: 7cf6911b0bd1a7dfd1aa5dc03193f3d0b805774ffd5aff6289763902568cbfd742bae87f6110c320e90ded6344850c9d
+model_optimizer_args:
+  - --input=$dl_dir/graph.bin
+  - --input_model=$dl_dir/gcn_model.pt
+  - --model_class=$dl_dir/GCN.py
+framework: dgl_pytorch
+license: https://raw.githubusercontent.com/itlab-vision/itlab-vision-dl-benchmark-models/main/LICENSE
