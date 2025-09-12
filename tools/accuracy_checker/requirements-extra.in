@@ -3,7 +3,7 @@ tqdm>=4.54.1
 
 # image reading and preprocessing
 # nncf's upperbound: https://github.com/openvinotoolkit/nncf/blob/1de67217adf60a29afa310edf4a5f4d36314446a/setup.py#L104
-networkx<=3.6
+networkx<3.6
 scikit-image>=0.19.2
 
 imagecodecs~=2022.2.22;python_version<="3.10"
