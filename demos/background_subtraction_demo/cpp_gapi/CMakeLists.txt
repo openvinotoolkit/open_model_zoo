@@ -7,11 +7,6 @@ if (NOT TARGET utils_gapi)
     return()
 endif()
 
-if(OpenVINO_VERSION_MAJOR VERSION_GREATER_EQUAL 2024)
-    message(WARNING "background_subtraction_demo_gapi skipped. G-API is not compatible with OpenVINO 2024.0.")
-    return()
-endif()
-
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
