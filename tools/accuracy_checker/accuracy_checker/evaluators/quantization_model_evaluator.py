@@ -472,7 +472,8 @@ class ModelEvaluator:
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             if threshold_callback:
-                metric_result = metric_result._replace(rel_threshold=threshold_callback(metric_result))
+                abs_threshold, rel_threshold = threshold_callback(metric_result)
+                metric_result = metric_result._replace(abs_threshold=abs_threshold, rel_threshold=rel_threshold)
             result, metadata = presenter.extract_result(metric_result)
             if isinstance(result, list):
                 extracted_results.extend(result)
