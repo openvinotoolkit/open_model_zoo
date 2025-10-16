@@ -51,9 +51,9 @@ class ModuleEvaluator(BaseEvaluator):
         self._internal_module.print_metrics(ignore_results_formatting, ignore_metric_reference)
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+                                ignore_metric_reference=False, threshold_callback=None):
         return self._internal_module.extract_metrics_results(print_results, ignore_results_formatting,
-                                                             ignore_metric_reference)
+                                                             ignore_metric_reference, threshold_callback)
 
     def release(self):
         self._internal_module.release()
