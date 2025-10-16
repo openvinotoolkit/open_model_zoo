@@ -464,13 +464,16 @@ class ModelEvaluator:
             presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+                                ignore_metric_reference=False, threshold_callback=None):
         if not self._metrics_results:
             self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            if threshold_callback:
+                abs_threshold, rel_threshold = threshold_callback(metric_result)
+                metric_result = metric_result._replace(abs_threshold=abs_threshold, rel_threshold=rel_threshold)
             result, metadata = presenter.extract_result(metric_result)
             if isinstance(result, list):
                 extracted_results.extend(result)

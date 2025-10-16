@@ -50,7 +50,7 @@ from .attributes_recognition import (
     PRNetAdapter
 )
 
-from .reidentification import ReidAdapter
+from .reidentification import ReidAdapter, BertEmbeddingsAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
     ClassAgnosticDetectionAdapter,
@@ -208,6 +208,7 @@ __all__ = [
     'AnomalySegmentationAdapter',
 
     'ReidAdapter',
+    'BertEmbeddingsAdapter',
 
     'ImageProcessingAdapter',
     'SuperResolutionAdapter',
