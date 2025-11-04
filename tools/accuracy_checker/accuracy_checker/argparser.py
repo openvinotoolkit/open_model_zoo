@@ -226,6 +226,11 @@ def add_tool_settings_args(parser):
         help='file for additional logging results',
         required=False
     )
+    tool_settings_args.add_argument(
+        '--dump_infer_data_path',
+        help='path where model inference data will be dumped. For development purposes only',
+        required=False
+    )
 
 
 def add_openvino_specific_args(parser):
