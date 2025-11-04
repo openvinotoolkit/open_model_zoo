@@ -19,8 +19,10 @@ limitations under the License.
 import io
 import multiprocessing
 from pathlib import Path
+from collections import namedtuple
 import re
 import numpy as np
+import pickle  # nosec B403  # disable import-pickle check
 from openvino import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
@@ -56,6 +58,7 @@ PRECISION_STR_TO_TYPE = {
     'I32': Type.i32, 'I64': Type.i64, 'BOOL': Type.boolean, 'INT8': Type.u8, 'BF16': Type.bf16
 }
 
+InferData = namedtuple('InferData', ['input', 'output'])
 
 class OpenVINOLauncher(Launcher):
     __provider__ = 'openvino'
@@ -115,6 +118,9 @@ class OpenVINOLauncher(Launcher):
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
         self.reset_memory_state = self.get_value_from_config('reset_memory_state')
+        self._dump_first_infer_data = self.config.get('_dump_first_infer_data', None)
+        if self._dump_first_infer_data is not None:
+            self.async_mode = False
 
     @classmethod
     def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
@@ -181,7 +187,9 @@ class OpenVINOLauncher(Launcher):
             feed_dict = {self.input_to_tensor_name[layer_name]: data for layer_name, data in infer_inputs.items()}
             outputs = self.infer_request.infer(inputs=feed_dict)
             raw_results.append(outputs)
-            results.append({out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()})
+            friendly_outputs = {out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()}
+            self._dump_first_inference(InferData(feed_dict, friendly_outputs))
+            results.append(friendly_outputs)
         if self.reset_memory_state:
             for state in self.infer_request.query_state():
                 state.reset()
@@ -205,6 +213,7 @@ class OpenVINOLauncher(Launcher):
             out_tensors = self.infer_request.infer(infer_inputs)
             output_result = {
                 out_node.get_node().friendly_name: out_tensor for out_node, out_tensor in out_tensors.items()}
+            self._dump_first_inference(InferData(infer_inputs, output_result))
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
             if return_raw:
@@ -1030,3 +1039,11 @@ class OpenVINOLauncher(Launcher):
             del self.exec_network
         if 'ie_core' in self.__dict__:
             del self.ie_core
+
+    def _dump_first_inference(self, infer_data):
+        if not self._dump_first_infer_data:
+            return
+        with open(self._dump_first_infer_data, 'wb') as file:
+            pickle.dump(infer_data, file)
+        self._dump_first_infer_data = None
+

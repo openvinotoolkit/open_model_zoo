@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import pickle  # nosec B403  # disable import-pickle check
 from ..base_evaluator import BaseEvaluator
 from ...progress_reporters import ProgressReporter
 from ..quantization_model_evaluator import create_dataset_attributes
 from ...launcher import create_launcher
+from ...launcher.loaders import InferDataBatch
 from ...postprocessor import PostprocessingExecutor
 from ...preprocessor import PreprocessingExecutor
 
@@ -91,10 +93,22 @@ class BaseCustomEvaluator(BaseEvaluator):
                 check_progress, self.dataset.size
             )
 
+        dump_infer_data = kwargs.get('_dump_first_infer_data', None)
+        if dump_infer_data:
+            self._dump_first_infer_data(dump_infer_data)
+
         self._process(output_callback, calculate_metrics, _progress_reporter, metric_config, kwargs.get('csv_result'))
 
         if _progress_reporter:
             _progress_reporter.finish()
+
+    def _dump_first_infer_data(self, dump_infer_data):
+        _, batch_annotation, batch_input, batch_identifiers = self.dataset[0]
+        batch_input = self.preprocessor.process(batch_input, batch_annotation)
+        batch_meta = [rep.metadata for rep in batch_input]
+        data_to_store = InferDataBatch(batch_annotation, batch_identifiers, batch_meta)
+        with open(dump_infer_data, 'wb') as content:
+            pickle.dump(data_to_store, content)
 
     def _prepare_dataset(self, dataset_tag=''):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
@@ -169,15 +183,12 @@ class BaseCustomEvaluator(BaseEvaluator):
             presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False, threshold_callback=None):
+                                ignore_metric_reference=False):
         if not self._metrics_results:
             self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            if threshold_callback:
-                abs_threshold, rel_threshold = threshold_callback(metric_result)
-                metric_result = metric_result._replace(abs_threshold=abs_threshold, rel_threshold=rel_threshold)
             result, metadata = presenter.extract_result(metric_result)
             if isinstance(result, list):
                 extracted_results.extend(result)

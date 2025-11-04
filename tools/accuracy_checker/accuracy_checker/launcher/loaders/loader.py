@@ -21,7 +21,7 @@ from ...dependency import ClassProvider
 
 
 StoredPredictionBatch = namedtuple('StoredPredictionBatch', ['raw_predictions', 'identifiers', 'meta'])
-
+InferDataBatch = namedtuple('InferDataBatch', ['annotations', 'identifiers', 'meta'])
 
 class Loader(ClassProvider):
     """

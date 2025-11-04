@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from pathlib import Path
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 import numpy as np
-
+import pickle  # nosec B403  # disable import-pickle check
 from ...config import ConfigError
 from ...utils import get_path, parse_partial_shape, contains_any
 from ...logging import print_info
 
+InferData = namedtuple('InferData', ['input', 'output'])
 
 def create_model(model_config, launcher, launcher_model_mapping, suffix=None, delayed_model_loading=False):
     framework = launcher.config['framework']
@@ -137,6 +138,7 @@ class BaseDLSDKModel:
             self.input_blob = None
         self.with_prefix = False
         self.is_dynamic = False
+        self._dump_first_infer_data = network_info.get('_dump_first_infer_data', False)
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -406,6 +408,10 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         feed_dict = {tensors_mapping[name]: data for name, data in input_data.items()}
         outputs = self.infer_request.infer(feed_dict)
         res_outputs = {out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()}
+        if self._dump_first_infer_data:
+            with open(self._dump_first_infer_data, 'wb') as file:
+                pickle.dump(InferData(feed_dict, res_outputs), file)
+                self._dump_first_infer_data = False
         if raw_results:
             return res_outputs, outputs
         return res_outputs
