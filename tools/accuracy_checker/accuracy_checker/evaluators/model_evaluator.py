@@ -36,6 +36,7 @@ from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
 
+
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
@@ -670,7 +671,7 @@ class ModelEvaluator(BaseEvaluator):
     @staticmethod
     def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
-        with open(stored_predictions, 'ab') as content:
+        with open(stored_predictions, "ab") as content:
             pickle.dump(predictions, content)
 
     @staticmethod
