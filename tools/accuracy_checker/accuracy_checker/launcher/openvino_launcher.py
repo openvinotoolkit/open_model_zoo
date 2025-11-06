@@ -19,7 +19,6 @@ limitations under the License.
 import io
 import multiprocessing
 from pathlib import Path
-from collections import namedtuple
 import re
 import numpy as np
 import pickle  # nosec B403  # disable import-pickle check
@@ -58,7 +57,6 @@ PRECISION_STR_TO_TYPE = {
     'I32': Type.i32, 'I64': Type.i64, 'BOOL': Type.boolean, 'INT8': Type.u8, 'BF16': Type.bf16
 }
 
-InferData = namedtuple('InferData', ['input', 'output'])
 
 class OpenVINOLauncher(Launcher):
     __provider__ = 'openvino'
@@ -188,8 +186,9 @@ class OpenVINOLauncher(Launcher):
             outputs = self.infer_request.infer(inputs=feed_dict)
             raw_results.append(outputs)
             friendly_outputs = {out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()}
-            self._dump_first_inference(InferData(feed_dict, friendly_outputs))
             results.append(friendly_outputs)
+            self._dump_first_inference(feed_dict, friendly_outputs)
+
         if self.reset_memory_state:
             for state in self.infer_request.query_state():
                 state.reset()
@@ -213,7 +212,7 @@ class OpenVINOLauncher(Launcher):
             out_tensors = self.infer_request.infer(infer_inputs)
             output_result = {
                 out_node.get_node().friendly_name: out_tensor for out_node, out_tensor in out_tensors.items()}
-            self._dump_first_inference(InferData(infer_inputs, output_result))
+            self._dump_first_inference(infer_inputs, output_result)
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
             if return_raw:
@@ -1040,10 +1039,12 @@ class OpenVINOLauncher(Launcher):
         if 'ie_core' in self.__dict__:
             del self.ie_core
 
-    def _dump_first_inference(self, infer_data):
+    def _dump_first_inference(self, input_data, output_data):
         if not self._dump_first_infer_data:
             return
+        print_info(f'Storing first inference data to {self._dump_first_infer_data}')
+        dump_inf_data = {'input': input_data, 'output': output_data}
         with open(self._dump_first_infer_data, 'wb') as file:
-            pickle.dump(infer_data, file)
+            pickle.dump(dump_inf_data, file)
         self._dump_first_infer_data = None
 

@@ -23,7 +23,7 @@ import numpy as np
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder, Launcher
-from ..launcher.loaders import StoredPredictionBatch, InferDataBatch
+from ..launcher.loaders import StoredPredictionBatch
 from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
 from ..presenters import generate_csv_report
@@ -35,7 +35,7 @@ from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
-
+from ..representation.base_representation import detach_representation
 
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
@@ -412,7 +412,7 @@ class ModelEvaluator(BaseEvaluator):
         self._resolve_undefined_shapes()
         dump_first_infer_data = kwargs.get('_dump_first_infer_data', None)
         if dump_first_infer_data:
-            self._store_first_infer_data(dump_first_infer_data)
+            self.dataset.store_first_annotation(dump_first_infer_data)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
@@ -632,13 +632,6 @@ class ModelEvaluator(BaseEvaluator):
     def prepare_prediction_to_store(self, batch_predictions, batch_identifiers, batch_meta, stored_predictions):
         prediction_to_store = StoredPredictionBatch(batch_predictions, batch_identifiers, batch_meta)
         self.store_predictions(stored_predictions, prediction_to_store)
-
-    def _store_first_infer_data(self, dump_infer_data_path):
-        _, batch_annotation, batch_input, batch_identifiers = self.dataset[0]
-        batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        batch_meta = [rep.metadata for rep in batch_input]
-        data_to_store = InferDataBatch(batch_annotation, batch_identifiers, batch_meta)
-        self.store_predictions(dump_infer_data_path, data_to_store, mode='wb')
 
     @property
     def metrics_results(self):

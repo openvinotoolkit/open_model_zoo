@@ -410,7 +410,9 @@ class BaseOpenVINOModel(BaseDLSDKModel):
         res_outputs = {out_node.get_node().friendly_name: out_res for out_node, out_res in outputs.items()}
         if self._dump_first_infer_data:
             with open(self._dump_first_infer_data, 'wb') as file:
-                pickle.dump(InferData(feed_dict, res_outputs), file)
+                print_info(f'Storing first inference data to {self._dump_first_infer_data}')
+                dump_inf_data = {'input': feed_dict, 'output': res_outputs}
+                pickle.dump(dump_inf_data, file)
                 self._dump_first_infer_data = False
         if raw_results:
             return res_outputs, outputs

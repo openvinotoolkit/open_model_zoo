@@ -19,9 +19,9 @@ from ..base_evaluator import BaseEvaluator
 from ...progress_reporters import ProgressReporter
 from ..quantization_model_evaluator import create_dataset_attributes
 from ...launcher import create_launcher
-from ...launcher.loaders import InferDataBatch
 from ...postprocessor import PostprocessingExecutor
 from ...preprocessor import PreprocessingExecutor
+from ...representation.base_representation import detach_representation
 
 # base class for custom evaluators
 class BaseCustomEvaluator(BaseEvaluator):
@@ -95,18 +95,18 @@ class BaseCustomEvaluator(BaseEvaluator):
 
         dump_infer_data = kwargs.get('_dump_first_infer_data', None)
         if dump_infer_data:
-            self._dump_first_infer_data(dump_infer_data)
+            self.dataset.store_first_annotation(dump_infer_data)
 
         self._process(output_callback, calculate_metrics, _progress_reporter, metric_config, kwargs.get('csv_result'))
 
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def _dump_first_infer_data(self, dump_infer_data):
-        _, batch_annotation, batch_input, batch_identifiers = self.dataset[0]
-        batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        batch_meta = [rep.metadata for rep in batch_input]
-        data_to_store = InferDataBatch(batch_annotation, batch_identifiers, batch_meta)
+    def _dump_first_annotation_data(self, dump_infer_data):
+        _, batch_annotations, _, batch_identifiers = self.dataset[0]
+        data_annotations = detach_representation(batch_annotations[0])
+        data_to_store = {'annotations': data_annotations, 'identifiers': batch_identifiers[0]}
+        print("Storing first infer annotation data to {}".format(dump_infer_data))
         with open(dump_infer_data, 'wb') as content:
             pickle.dump(data_to_store, content)
 

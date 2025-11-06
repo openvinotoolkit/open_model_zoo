@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .loader import Loader, StoredPredictionBatch, InferDataBatch
+from .loader import Loader, StoredPredictionBatch
 
 from .pickle_loader import PickleLoader  # nosec B403  # disable import-pickle check
 from .xml_loader import XMLLoader
@@ -27,5 +27,4 @@ __all__ = [
     'JSONLoader',
 
     'StoredPredictionBatch',
-    'InferDataBatch'
 ]
