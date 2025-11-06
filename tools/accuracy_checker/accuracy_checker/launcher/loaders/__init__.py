@@ -26,5 +26,5 @@ __all__ = [
     'XMLLoader',
     'JSONLoader',
 
-    'StoredPredictionBatch',
+    'StoredPredictionBatch'
 ]
