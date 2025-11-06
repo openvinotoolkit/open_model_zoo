@@ -35,7 +35,6 @@ from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
-from ..representation.base_representation import detach_representation
 
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
@@ -669,9 +668,9 @@ class ModelEvaluator(BaseEvaluator):
                 ignore_metric_reference)
 
     @staticmethod
-    def store_predictions(stored_predictions, predictions, mode='ab'):
+    def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
-        with open(stored_predictions, mode) as content:
+        with open(stored_predictions, 'ab') as content:
             pickle.dump(predictions, content)
 
     @staticmethod
