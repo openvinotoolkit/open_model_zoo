@@ -119,6 +119,10 @@ class OpenVINOLauncher(Launcher):
         self._dump_first_infer_data = self.config.get('_dump_first_infer_data', None)
         if self._dump_first_infer_data:
             self.async_mode = False
+            warning(
+                "Async mode has been disabled because inference data dumping is enabled "
+                "(_dump_first_infer_data is set). This may affect performance results."
+            )
 
     @classmethod
     def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
