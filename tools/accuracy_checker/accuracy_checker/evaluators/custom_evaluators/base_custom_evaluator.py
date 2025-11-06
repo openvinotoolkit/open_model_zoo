@@ -21,7 +21,6 @@ from ..quantization_model_evaluator import create_dataset_attributes
 from ...launcher import create_launcher
 from ...postprocessor import PostprocessingExecutor
 from ...preprocessor import PreprocessingExecutor
-from ...representation.base_representation import detach_representation
 
 # base class for custom evaluators
 class BaseCustomEvaluator(BaseEvaluator):
