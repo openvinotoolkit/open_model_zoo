@@ -22,6 +22,7 @@ from ...dependency import ClassProvider
 
 StoredPredictionBatch = namedtuple('StoredPredictionBatch', ['raw_predictions', 'identifiers', 'meta'])
 
+
 class Loader(ClassProvider):
     """
     Interface that describes loading output from another tool.
