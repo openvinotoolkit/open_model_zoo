@@ -227,6 +227,7 @@ def add_tool_settings_args(parser):
         required=False
     )
 
+
 def add_openvino_specific_args(parser):
     openvino_specific_args = parser.add_argument_group('OpenVINO specific arguments')
     openvino_specific_args.add_argument(
