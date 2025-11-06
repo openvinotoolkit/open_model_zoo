@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from pathlib import Path
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 import numpy as np
 import pickle  # nosec B403  # disable import-pickle check
 from ...config import ConfigError
 from ...utils import get_path, parse_partial_shape, contains_any
 from ...logging import print_info
 
-InferData = namedtuple('InferData', ['input', 'output'])
 
 def create_model(model_config, launcher, launcher_model_mapping, suffix=None, delayed_model_loading=False):
     framework = launcher.config['framework']
