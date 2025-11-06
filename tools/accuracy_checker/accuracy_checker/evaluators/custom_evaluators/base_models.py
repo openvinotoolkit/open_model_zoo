@@ -137,7 +137,7 @@ class BaseDLSDKModel:
             self.input_blob = None
         self.with_prefix = False
         self.is_dynamic = False
-        self._dump_first_infer_data = network_info.get('_dump_first_infer_data', False)
+        self._dump_first_infer_data = network_info.get('_dump_first_infer_data', None)
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -412,7 +412,7 @@ class BaseOpenVINOModel(BaseDLSDKModel):
                 print_info(f'Storing first inference data to {self._dump_first_infer_data}')
                 dump_inf_data = {'input': feed_dict, 'output': res_outputs}
                 pickle.dump(dump_inf_data, file)
-                self._dump_first_infer_data = False
+                self._dump_first_infer_data = None
         if raw_results:
             return res_outputs, outputs
         return res_outputs
