@@ -117,7 +117,7 @@ class OpenVINOLauncher(Launcher):
             self._configure_lstm_inputs()
         self.reset_memory_state = self.get_value_from_config('reset_memory_state')
         self._dump_first_infer_data = self.config.get('_dump_first_infer_data', None)
-        if self._dump_first_infer_data is not None:
+        if self._dump_first_infer_data:
             self.async_mode = False
 
     @classmethod
