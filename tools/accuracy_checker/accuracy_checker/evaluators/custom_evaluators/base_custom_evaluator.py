@@ -91,6 +91,10 @@ class BaseCustomEvaluator(BaseEvaluator):
                 check_progress, self.dataset.size
             )
 
+        dump_infer_data = kwargs.get('_dump_first_infer_data', None)
+        if dump_infer_data:
+            self.dataset.store_first_annotation(dump_infer_data)
+
         self._process(output_callback, calculate_metrics, _progress_reporter, metric_config, kwargs.get('csv_result'))
 
         if _progress_reporter:
@@ -178,6 +182,7 @@ class BaseCustomEvaluator(BaseEvaluator):
             if threshold_callback:
                 abs_threshold, rel_threshold = threshold_callback(metric_result)
                 metric_result = metric_result._replace(abs_threshold=abs_threshold, rel_threshold=rel_threshold)
+
             result, metadata = presenter.extract_result(metric_result)
             if isinstance(result, list):
                 extracted_results.extend(result)

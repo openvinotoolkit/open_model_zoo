@@ -207,18 +207,20 @@ def write_scalar_result(
     message = '{}: {}{}'.format(display_name, display_result, postfix)
 
     if diff_with_ref and (diff_with_ref[0] or diff_with_ref[1]):
-        abs_error = diff_with_ref[0] * scale
-        rel_error = diff_with_ref[1]
-        error_text = "abs error = {:.4} | relative error = {:.4}".format(abs_error, rel_error)
-
-        if not abs_threshold or not rel_threshold:
-            result_message = "[RESULT:  {}]".format(error_text)
+        if abs_threshold is None:
+            result_message = "[abs error = {:.4} | relative error = {:.4}]".format(
+                diff_with_ref[0] * scale, diff_with_ref[1]
+            )
             message = "{} {}".format(message, result_message)
-        elif abs_threshold <= diff_with_ref[0] or rel_threshold <= diff_with_ref[1]:
-            fail_message = "[FAILED:  {}]".format(error_text)
+        elif abs_threshold <= diff_with_ref[0] or (rel_threshold and rel_threshold <= diff_with_ref[1]):
+            fail_message = "FAILED: [abs error = {:.4} | relative error = {:.4}]".format(
+                diff_with_ref[0] * scale, diff_with_ref[1]
+            )
             message = "{} {}".format(message, color_format(fail_message, Color.FAILED))
         else:
-            pass_message = "[PASS:  {}]".format(error_text)
+            pass_message = "PASSED: [abs error = {:.4} | relative error = {:.4}]".format(
+                diff_with_ref[0] * scale, diff_with_ref[1]
+            )
             message = "{} {}".format(message, color_format(pass_message, Color.PASSED))
 
     print_info(message)

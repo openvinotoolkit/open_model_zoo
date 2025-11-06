@@ -410,6 +410,10 @@ class ModelEvaluator(BaseEvaluator):
         (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
         self._resolve_undefined_shapes()
+        dump_first_infer_data = kwargs.get('_dump_first_infer_data', None)
+        if dump_first_infer_data:
+            self.dataset.store_first_annotation(dump_first_infer_data)
+
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
