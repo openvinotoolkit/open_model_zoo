@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle  # nosec B403  # disable import-pickle check
 from ..base_evaluator import BaseEvaluator
 from ...progress_reporters import ProgressReporter
 from ..quantization_model_evaluator import create_dataset_attributes
