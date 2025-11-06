@@ -100,14 +100,6 @@ class BaseCustomEvaluator(BaseEvaluator):
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def _dump_first_annotation_data(self, dump_infer_data):
-        _, batch_annotations, _, batch_identifiers = self.dataset[0]
-        data_annotations = detach_representation(batch_annotations[0])
-        data_to_store = {'annotations': data_annotations, 'identifiers': batch_identifiers[0]}
-        print("Storing first infer annotation data to {}".format(dump_infer_data))
-        with open(dump_infer_data, 'wb') as content:
-            pickle.dump(data_to_store, content)
-
     def _prepare_dataset(self, dataset_tag=''):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
