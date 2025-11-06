@@ -207,7 +207,7 @@ def write_scalar_result(
     message = '{}: {}{}'.format(display_name, display_result, postfix)
 
     if diff_with_ref and (diff_with_ref[0] or diff_with_ref[1]):
-        if not abs_threshold:
+        if abs_threshold is None:
             result_message = "[abs error = {:.4} | relative error = {:.4}]".format(
                 diff_with_ref[0] * scale, diff_with_ref[1]
             )
