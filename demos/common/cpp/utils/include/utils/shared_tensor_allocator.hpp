@@ -21,6 +21,6 @@
 struct SharedMatAllocator {
     const cv::Mat mat;
     void* allocate(size_t bytes, size_t) {return bytes <= mat.rows * mat.step[0] ? mat.data : nullptr;}
-    void deallocate(void*, size_t, size_t) {}
+    void deallocate(void*, size_t, size_t) noexcept {}
     bool is_equal(const SharedMatAllocator& other) const noexcept {return this == &other;}
 };
