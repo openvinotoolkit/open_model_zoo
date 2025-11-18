@@ -70,9 +70,9 @@ def convert_to_onnx(reporter, model, output_dir, args, template_variables):
 
     return success
 
-def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
+def convert(reporter, model, output_dir, args, ovc_props, requested_precisions):
     telemetry = _common.Telemetry()
-    if model.mo_args is None:
+    if model.ovc_args is None:
         reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
         reporter.print()
         return True
@@ -92,16 +92,16 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         return False
 
     model_format = model.framework
-    mo_extension_dir = mo_props.base_dir / 'extensions'
-    if not mo_extension_dir.exists():
-        mo_extension_dir = mo_props.base_dir
+    ovc_extension_dir = ovc_props.base_dir / 'extensions'
+    if not ovc_extension_dir.exists():
+        ovc_extension_dir = ovc_props.base_dir
 
     template_variables = {
         'config_dir': _common.MODEL_ROOT / model.subdirectory,
         'conv_dir': output_dir / model.subdirectory,
         'dl_dir': args.download_dir / model.subdirectory,
-        'mo_dir': mo_props.base_dir,
-        'mo_ext_dir':  mo_extension_dir,
+        'ovc_dir': ovc_props.base_dir,
+        'ovc_ext_dir':  ovc_extension_dir,
     }
 
     if model.conversion_to_onnx_args:
@@ -112,52 +112,54 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             return False
         model_format = 'onnx'
 
-    expanded_mo_args = [
+    custom_ovc_args = [
         string.Template(arg).substitute(template_variables)
-        for arg in model.mo_args]
+        for arg in model.ovc_args]
+    
+    expanded_ovc_args = []
+    input_model = ''
+    for arg in custom_ovc_args:
+        if 'input_model' in arg:
+            input_model = arg.split('=')[-1]
+            reporter.print(f'Model {input_model}')
+        # if 'output' in arg:
+        #     expanded_ovc_args.append(arg)
 
     for model_precision in sorted(model_precisions):
         data_type = model_precision.split('-')[0]
-        layout_string = ','.join(
-            '{}({})'.format(input.name, input.layout) for input in model.input_info if input.layout
-        )
-        shape_string = ','.join(str(input.shape) for input in model.input_info if input.shape)
+        shape_string = ','.join(str(input.shape).replace(" ", "") for input in model.input_info if input.shape)
 
-        if layout_string:
-            expanded_mo_args.append('--layout={}'.format(layout_string))
         if shape_string:
-            expanded_mo_args.append('--input_shape={}'.format(shape_string))
+            expanded_ovc_args.append('--input={}'.format(shape_string))
         if data_type == "FP16":
-            expanded_mo_args.append("--compress_to_fp16=True")
+            expanded_ovc_args.append("--compress_to_fp16=True")
         else:
-            expanded_mo_args.append("--compress_to_fp16=False")
+            expanded_ovc_args.append("--compress_to_fp16=False")
 
-        mo_output_dir = output_dir / model.subdirectory / model_precision
-        mo_cmd = [*mo_props.cmd_prefix,
-            '--framework={}'.format(model_format),
-            f'--output_dir={mo_output_dir}',
-            '--model_name={}'.format(model.name),
-            '--input={}'.format(','.join(input.name for input in model.input_info)),
-            *expanded_mo_args, *mo_props.extra_args]
+        ovc_output_dir = output_dir / model.subdirectory / model_precision
+        ovc_cmd = [*ovc_props.cmd_prefix,
+            input_model,
+            f'--output_model={str(Path(ovc_output_dir, model.name + ".xml"))}',
+            *expanded_ovc_args]
 
         reporter.print_section_heading('{}Converting {} to IR ({})',
             '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-        reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
+        reporter.print('Conversion command: {}', _common.command_string(ovc_cmd))
 
         if not args.dry_run:
             reporter.print(flush=True)
 
-            if not reporter.job_context.subprocess(mo_cmd):
+            if not reporter.job_context.subprocess(ovc_cmd):
                 telemetry.send_event('md', 'converter_failed_models', model.name)
                 telemetry.send_event('md', 'converter_error',
-                    json.dumps({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
+                    json.dumps({'error': 'ovc-failed', 'model': model.name, 'precision': model_precision}))
                 return False
 
         reporter.print()
         core = Core()
         core.set_property({"ENABLE_MMAP": False})
-        rt_model = core.read_model(str(mo_output_dir / model.name) + '.xml')
+        rt_model = core.read_model(str(ovc_output_dir / model.name) + '.xml')
         try:
             val = validation.validate_string('model_type', model.model_info['model_type'])
             rt_model.set_rt_info(val, ['model_info', 'model_type'])
@@ -193,7 +195,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             rt_model.set_rt_info(val, ['model_info', 'labels'])
         except KeyError:
             pass
-        save_model(rt_model, str(mo_output_dir / model.name) + '.xml', "FP16" == data_type)
+        save_model(rt_model, str(ovc_output_dir / model.name) + '.xml', "FP16" == data_type)
     return True
 
 def num_jobs_arg(value_str):
@@ -223,18 +225,20 @@ def converter(argv):
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
         help='run only conversions that produce models with the specified precisions')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
-        help='Python executable to run Model Optimizer with')
-    parser.add_argument('--mo', type=Path, metavar='MO.PY',
-        help='Model Optimizer entry point script')
-    parser.add_argument('--add_mo_arg', dest='extra_mo_args', metavar='ARG', action='append',
-        help='Extra argument to pass to Model Optimizer')
+        help='Python executable to run OVC Converter with')
+    parser.add_argument('--add_ovc_arg', dest='extra_ovc_args', metavar='ARG', action='append',
+        help='Extra argument to pass to OVC Converter')
     parser.add_argument('--dry_run', action='store_true',
         help='Print the conversion commands without running them')
     parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
         help='number of conversions to run concurrently')
 
     # aliases for backwards compatibility
-    parser.add_argument('--add-mo-arg', dest='extra_mo_args', action='append', help=argparse.SUPPRESS)
+    parser.add_argument('--mo', type=Path, metavar='MO.PY',
+        help='OVC Converter entry point script')
+    parser.add_argument('--add_mo_arg', dest='extra_ovc_args', metavar='ARG', action='append',
+        help='Extra argument to pass to OVC Converter')
+    parser.add_argument('--add-mo-arg', dest='extra_ovc_args', action='append', help=argparse.SUPPRESS)
     parser.add_argument('--dry-run', action='store_true', help=argparse.SUPPRESS)
 
     args = parser.parse_args(argv)
@@ -268,47 +272,47 @@ def converter(argv):
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-        mo_path = args.mo
+        ovc_path = args.mo
 
-        if mo_path is None:
-            mo_executable = shutil.which('mo')
+        if ovc_path is None:
+            ovc_executable = shutil.which('ovc')
 
-            if mo_executable:
-                mo_path = Path(mo_executable)
+            if ovc_executable:
+                ovc_path = Path(ovc_executable)
             else:
                 try:
-                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/mo/openvino/tools/mo/mo.py'
-                    if not mo_path.exists():
-                        mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/model_optimizer/mo.py'
+                    # ovc_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/mo/openvino/tools/mo/mo.py'
+                    # if not ovc_path.exists():
+                    ovc_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'tools/ovc/ovc.py'
                 except KeyError:
-                    sys.exit('Unable to locate Model Optimizer. '
-                        + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+                    sys.exit('Unable to locate OVC Converter. '
+                        + 'Use --ovc or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-        if mo_path is not None:
-            mo_path = mo_path.resolve()
-            mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
+        if ovc_path is not None:
+            ovc_path = ovc_path.resolve()
+            ovc_cmd_prefix = [str(args.python), '--', str(ovc_path)]
 
-            if str(mo_path).lower().endswith('.py'):
-                mo_dir = mo_path.parent
+            if str(ovc_path).lower().endswith('.py'):
+                ovc_dir = ovc_path.parent
             else:
-                mo_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.mo')
-                mo_dir = mo_package_path
+                ovc_package_path, stderr = _common.get_package_path(args.python, 'openvino.tools.ovc')
+                ovc_dir = ovc_package_path
 
-                if mo_package_path is None:
-                    mo_package_path, stderr = _common.get_package_path(args.python, 'mo')
-                    if mo_package_path is None:
+                if ovc_package_path is None:
+                    ovc_package_path, stderr = _common.get_package_path(args.python, 'ovc')
+                    if ovc_package_path is None:
                         sys.exit('Unable to load Model Optimizer. Errors occurred: {}'.format(stderr))
-                    mo_dir = mo_package_path.parent
+                    ovc_dir = ovc_package_path.parent
 
         output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
         reporter = _reporting.Reporter(_reporting.DirectOutputContext())
-        mo_props = ModelOptimizerProperties(
-            cmd_prefix=mo_cmd_prefix,
-            extra_args=args.extra_mo_args or [],
-            base_dir=mo_dir,
+        ovc_props = ModelOptimizerProperties(
+            cmd_prefix=ovc_cmd_prefix,
+            extra_args=args.extra_ovc_args or [],
+            base_dir=ovc_dir,
         )
-        shared_convert_args = (output_dir, args, mo_props, requested_precisions)
+        shared_convert_args = (output_dir, args, ovc_props, requested_precisions)
 
         def convert_model(model, reporter):
             if model.model_stages:
