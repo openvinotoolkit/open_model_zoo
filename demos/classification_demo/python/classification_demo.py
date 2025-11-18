@@ -34,6 +34,7 @@ from model_api.adapters import create_core, OpenvinoAdapter, OVMSAdapter
 import monitors
 from images_capture import open_images_capture
 from helpers import resolution, log_latency_per_stage
+from video_writer import LazyVideoWriter
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -187,7 +188,7 @@ def main():
     render_metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
-    video_writer = cv2.VideoWriter()
+    video_writer = LazyVideoWriter()
     ESC_KEY = 27
     key = -1
     while True:
@@ -209,8 +210,7 @@ def main():
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+            video_writer.write(frame)
             next_frame_id_to_show += 1
 
             if not args.no_show:
@@ -239,7 +239,7 @@ def main():
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
                                                (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), output_resolution):
+                                                         cap.fps(), args.output_limit, output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             async_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -270,8 +270,7 @@ def main():
                 render_metrics.update(rendering_start_time)
                 metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+            video_writer.write(frame)
 
             if not args.no_show:
                 cv2.imshow('Classification Results', frame)
