@@ -42,7 +42,7 @@ class BaseEvaluator:
 
     # extract metrics results values prepared for printing
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
-                                ignore_metric_reference=False):
+                                ignore_metric_reference=False, threshold_callback=None):
         raise NotImplementedError
 
     # destruction for entity, which can not be deleted automatically

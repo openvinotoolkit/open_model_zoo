@@ -106,3 +106,22 @@ class ReidAdapter(Adapter):
             self.output_blob = self.check_output_name(self.target_out, outputs)
         if self.output_blob is None:
             self.output_blob = next(iter(outputs))
+
+
+class BertEmbeddingsAdapter(ReidAdapter):
+    __provider__ = 'bert_sentence_embedding'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super(ReidAdapter, cls).parameters()
+        parameters.update({
+            'target_out': StringField(optional=True, description='Target output layer name')
+        })
+        return parameters
+
+    def configure(self):
+        self.joining_method = 'sum'
+        self.target_out = self.get_value_from_config('target_out')
+        self.keep_shape = True
+        self.mean_pooling = False # use 'sentence_similarity_pooling' postprocessor for proper mean pooling with attention to the input_mask
+        self.grn_workaround = False

@@ -373,6 +373,10 @@ class Dataset:
         })
         return [scheme]
 
+    def store_first_annotation(self, dump_infer_data_path):
+        if self.data_provider:
+            self.data_provider.store_first_annotation(dump_infer_data_path)
+
     @property
     def metadata(self):
         return self.data_provider.metadata
@@ -594,6 +598,18 @@ class AnnotationProvider:
             subsample_set |= pairs_set
 
         return list(subsample_set)
+
+    def store_first_annotation(self, annotation, identifier, dump_infer_data_path):
+        plain_annotation = {
+            'class_name': annotation.__class__.__name__,
+            **{
+                key: value.tolist() if isinstance(value, np.ndarray) else value
+                for key, value in annotation.__dict__.items()
+            },
+        }
+        print_info(f"Storing first annotation to {dump_infer_data_path}")
+        with open(dump_infer_data_path, mode='wb') as content:
+            pickle.dump({'annotation': plain_annotation, 'identifier': identifier}, content)
 
     @property
     def metadata(self):
@@ -833,6 +849,16 @@ class DataProvider:
         info['convert_annotation'] = convert_annotation
 
         return info
+
+    def store_first_annotation(self, dump_infer_data_path):
+        if not self.annotation_provider or self.size == 0:
+            return
+        _, batch_annotations, _, batch_identifiers = self[0]
+        if not batch_annotations:
+            raise ConfigError('first dataset item does not contain annotations')
+        self.annotation_provider.store_first_annotation(
+            batch_annotations[0], batch_identifiers[0], dump_infer_data_path
+        )
 
 
 class DatasetWrapper(DataProvider):
