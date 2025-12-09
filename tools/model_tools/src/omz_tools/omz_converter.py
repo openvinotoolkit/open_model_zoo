@@ -72,7 +72,7 @@ def convert_to_onnx(reporter, model, output_dir, args, template_variables):
 
 def convert(reporter, model, output_dir, args, ovc_props, requested_precisions):
     telemetry = _common.Telemetry()
-    if model.ovc_args is None:
+    if model.mo_args is None:
         reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
         reporter.print()
         return True
