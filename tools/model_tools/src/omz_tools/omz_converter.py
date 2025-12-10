@@ -114,7 +114,7 @@ def convert(reporter, model, output_dir, args, ovc_props, requested_precisions):
 
     custom_ovc_args = [
         string.Template(arg).substitute(template_variables)
-        for arg in model.ovc_args]
+        for arg in model.mo_args]
     
     expanded_ovc_args = []
     input_model = ''
