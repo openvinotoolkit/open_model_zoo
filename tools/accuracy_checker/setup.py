@@ -21,7 +21,7 @@ import sys
 import warnings
 import platform
 import subprocess  # nosec B404  # disable import-subprocess check
-from distutils.version import LooseVersion
+from packaging.version import Version
 from pathlib import Path
 from setuptools import find_packages, setup # pylint:disable=W9902
 from setuptools.command.test import test as test_command # pylint:disable=W9902
@@ -55,7 +55,7 @@ def read(*path):
 def check_and_update_numpy(min_acceptable='1.15'):
     try:
         import numpy as np # pylint:disable=C0415
-        update_required = LooseVersion(np.__version__) < LooseVersion(min_acceptable)
+        update_required = Version(np.__version__) < Version(min_acceptable)
     except ImportError:
         update_required = True
     if update_required:
@@ -106,6 +106,12 @@ except ImportError as opencv_import_error:
         check_and_update_numpy()
 
 
+
+_extras = _extras + ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile', "torchmetrics", "diffusers"]
+if sys.version_info.major == 3 and sys.version_info.minor < 12:
+    _extras.append('crf_beam;platform_system=="Linux"')
+    _extras.append('kenlm @ git+https://github.com/kpu/kenlm.git@4cb443e60b7bf2c0ddf3c745378f76cb59e254e5#egg=kenlm')
+
 setup(
     name="accuracy_checker",
     description="Deep Learning Accuracy validation framework",
@@ -121,6 +127,5 @@ setup(
     install_requires=_requirements,
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': _extras + ['pycocotools>=2.0.2', 'crf_beam;platform_system=="Linux"', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips', 'soundfile', "torchmetrics", "diffusers",
-                              'kenlm @ git+https://github.com/kpu/kenlm.git@4cb443e60b7bf2c0ddf3c745378f76cb59e254e5#egg=kenlm']}
+    extras_require={'extra': _extras}
 )
