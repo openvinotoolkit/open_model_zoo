@@ -100,8 +100,8 @@ def convert(reporter, model, output_dir, args, ovc_props, requested_precisions):
         'config_dir': _common.MODEL_ROOT / model.subdirectory,
         'conv_dir': output_dir / model.subdirectory,
         'dl_dir': args.download_dir / model.subdirectory,
-        'ovc_dir': ovc_props.base_dir,
-        'ovc_ext_dir':  ovc_extension_dir,
+        'mo_dir': ovc_props.base_dir,
+        'mo_ext_dir':  ovc_extension_dir,
     }
 
     if model.conversion_to_onnx_args:
