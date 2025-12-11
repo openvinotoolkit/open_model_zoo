@@ -1,6 +1,8 @@
 # core components
 defusedxml>=0.7.1
-numpy>=1.16.6,<2.1.0
+numpy>=1.16.6,<2.1.0;python_version<"3.12"
+numpy>=1.26.0,<2.3.0;python_version>="3.12"
 openvino-telemetry>=2023.2.1
 PyYAML>=5.4.1
 pillow>=8.1.2
+packaging

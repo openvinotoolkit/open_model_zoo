@@ -2,9 +2,12 @@
 tqdm>=4.54.1
 
 # image reading and preprocessing
+opencv-python==4.5.4.60;python_version<"3.12"
+opencv-python==4.10.0.84;python_version>="3.12"
 # nncf's upperbound: https://github.com/openvinotoolkit/nncf/blob/1de67217adf60a29afa310edf4a5f4d36314446a/setup.py#L104
 networkx<3.6
-scikit-image>=0.19.2
+scikit-image==0.18.3;python_version<"3.12"
+scikit-image==0.24.0;python_version>="3.12"
 
 imagecodecs~=2022.2.22;python_version<="3.10"
 imagecodecs~=2024.6.1;python_version>="3.11"
@@ -38,7 +41,6 @@ nltk>=3.5
 # DNA sequence matching
 parasail>=1.2.4;platform_system!="Windows"
 parasail~=1.2.4;platform_system=="Windows"
-fast-ctc-decode>=0.2.5;python_version<"3.11"
 
 # raw image formats processing
 rawpy>=0.17.1
@@ -47,7 +49,11 @@ rawpy>=0.17.1
 lmdb>=1.2.1
 
 # pandas datasets support
-pandas>=1.1.5,<2.1
+pandas>=1.1.5,<2.3
 
 # word-based representations of numbers
-inflect>=7.4.0
+inflect>=7.3.0
+
+# visualization
+matplotlib==3.8.4;python_version<"3.12"
+matplotlib==3.9.3;python_version>="3.12"
