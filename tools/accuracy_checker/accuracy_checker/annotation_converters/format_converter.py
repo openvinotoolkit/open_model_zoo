@@ -145,6 +145,22 @@ class DirectoryBasedAnnotationConverter(BaseFormatConverter):
         pass
 
 
+class GraphFileBasedAnnotationConverter(BaseFormatConverter):
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'graph_path': PathField(is_directory=False, description="Path to graph data.")
+        })
+        return parameters
+
+    def configure(self):
+        self.graph_path = self.get_value_from_config('graph_path')
+
+    def convert(self, check_content=False, **kwargs):
+        pass
+
+
 def verify_label_map(label_map):
     valid_label_map = {}
     for class_id, class_name in label_map.items():

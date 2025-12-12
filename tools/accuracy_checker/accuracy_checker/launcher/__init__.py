@@ -91,6 +91,13 @@ except ImportError as import_error:
         'paddle_paddle', "PaddlePaddle isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
+try:
+    from .dgl_launcher import DGLLauncher
+except ImportError as import_error:
+    DGLLauncher = unsupported_launcher(
+        'dgl', "DGL isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
 from .pytorch_launcher import PyTorchLauncher
 
 __all__ = [
@@ -107,5 +114,6 @@ __all__ = [
     'PyTorchLauncher',
     'PaddlePaddleLauncher',
     'DummyLauncher',
-    'InputFeeder'
+    'InputFeeder',
+    'DGLLauncher'
 ]
