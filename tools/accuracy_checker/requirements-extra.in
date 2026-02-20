@@ -47,7 +47,7 @@ rawpy>=0.17.1
 lmdb>=1.2.1
 
 # pandas datasets support
-pandas>=1.1.5,<3.1
+pandas>=1.1.5,<2.4
 
 # word-based representations of numbers
 inflect>=7.3.0
