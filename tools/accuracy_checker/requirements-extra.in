@@ -2,8 +2,7 @@
 tqdm>=4.54.1
 
 # image reading and preprocessing
-opencv-python==4.6.0.66;python_version<"3.12"
-opencv-python==4.10.0.84;python_version>="3.12"
+opencv-python==4.10.0.84
 # nncf's upperbound: https://github.com/openvinotoolkit/nncf/blob/1de67217adf60a29afa310edf4a5f4d36314446a/setup.py#L104
 networkx<3.6
 scikit-image==0.18.3;python_version<"3.12"
