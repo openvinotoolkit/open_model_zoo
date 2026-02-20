@@ -1,0 +1,24 @@
+models:
+- name: GCN
+  launchers:
+    - framework: DGL
+      adapter: node_classification
+      device: CPU
+      model: gcn_model.pt
+      module: GCN.py
+      module_name: GCN
+      batch: 32
+      output_names:
+          - logits
+
+  datasets:
+      - name: Cora
+        reader: graph(dgl)_reader
+        data_source: graph.bin
+        annotation_conversion:
+          converter: DGL_converter
+          graph_path: graph.bin
+        metrics:
+          - name: node_accuracy_name
+            type: node_accuracy
+            reference: 0.778

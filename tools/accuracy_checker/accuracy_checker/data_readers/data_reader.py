@@ -18,6 +18,7 @@ import re
 from collections import OrderedDict, namedtuple
 from functools import singledispatch
 from pathlib import Path
+import dgl
 
 import numpy as np
 
@@ -41,6 +42,8 @@ class DataRepresentation:
         self.metadata = meta or {}
 
         if self.metadata.get('input_is_dict_type'):
+            return
+        if isinstance(data, dgl.DGLGraph):
             return
         if np.isscalar(data):
             self.metadata['image_size'] = 1

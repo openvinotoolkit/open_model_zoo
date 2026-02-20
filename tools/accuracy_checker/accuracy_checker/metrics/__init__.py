@@ -131,6 +131,8 @@ from .distance import editdistance_eval
 from .clip_score import ClipScore
 from .matches_homography import MatchesHomography
 
+from .graph import ClassificationGraphAccuracy
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -266,5 +268,7 @@ __all__ = [
     'MeanSquaredErrorWithMask',
 
     'ClipScore',
-    'MatchesHomography'
+    'MatchesHomography',
+
+    'ClassificationGraphAccuracy'
 ]
