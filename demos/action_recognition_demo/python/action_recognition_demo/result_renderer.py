@@ -152,6 +152,6 @@ def decode_output(probs, labels, top_k=None, label_postprocessing=None):
 
         top_ind = [postproc.get() for postproc in label_postprocessing]
 
-    decoded_labels = [labels[i] if labels else str(i) for i in top_ind]
+    decoded_labels = [labels[i] if labels and i < len(labels) else str(i) for i in top_ind]
     probs = [probs[i] for i in top_ind]
     return decoded_labels, probs
