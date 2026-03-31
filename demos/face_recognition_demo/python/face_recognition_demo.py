@@ -210,6 +210,10 @@ def center_crop(frame, crop_size):
 def main():
     args = build_argparser().parse_args()
 
+    for arg_name, device in [('-d_fd', args.d_fd), ('-d_lm', args.d_lm), ('-d_reid', args.d_reid)]:
+        if device == 'HETERO':
+            raise ValueError('{} requires sub-devices, e.g. HETERO:GPU,CPU'.format(arg_name))
+
     cap = open_images_capture(args.input, args.loop)
     frame_processor = FrameProcessor(args)
 
