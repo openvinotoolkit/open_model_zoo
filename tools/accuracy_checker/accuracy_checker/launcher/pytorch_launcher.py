@@ -193,13 +193,37 @@ class PyTorchLauncher(Launcher):
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
                 checkpoint = self._torch.load(
-                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
+                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu'), weights_only=False
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
+                
+                # Handle ultralytics-style checkpoint dict (keys: 'model', 'ema', 'epoch', ...)
+                if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
+                    loaded_model = state['model']
+                    return self.prepare_module(loaded_model, model_cls)
+                
+                # Handle case where checkpoint is a model object instead of state_dict
+                if not isinstance(state, dict):
+                    if hasattr(state, 'state_dict') and callable(state.state_dict):
+                        state = state.state_dict()
+                    else:
+                        # Model was loaded directly as an object, use it as the module
+                        return self.prepare_module(state, model_cls)
+                
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
 
+            # Special handling for YOLO models - extract the raw model if ultralytics_raw_output is True
+            # Note: only extract if module is a pure YOLO wrapper (has no detectionmodel loaded),
+            # not a DetectionModel itself (which has its own forward with skip connections)
+            if (self.ultralytics_raw_output
+                    and hasattr(module, 'model')
+                    and isinstance(getattr(module, 'model', None), self._torch.nn.Module)
+                    and hasattr(module, 'predict') and hasattr(module, 'task')):
+                # Module is a YOLO high-level wrapper, extract the DetectionModel
+                module = module.model
+                
             return self.prepare_module(module, model_cls)
 
     def load_tranformers_module(self, pretrained_name, python_path):
@@ -215,6 +239,9 @@ class PyTorchLauncher(Launcher):
 
     def prepare_module(self, module, model_class):
         module.to('cuda' if self.cuda else 'cpu')
+        # Convert to float32 for CPU inference (models are sometimes saved as float16)
+        if not self.cuda:
+            module = module.float()
         module.eval()
 
         if self.use_torch_compile:
@@ -408,9 +435,18 @@ class PyTorchLauncher(Launcher):
             return None
 
         # Decode head branch boxes to image-scale boxes when possible.
-        yolo_wrapper = getattr(self.module, 'model', None)
-        detect_head = getattr(yolo_wrapper, 'model', None)
-        detect_head = detect_head[-1] if detect_head is not None and len(detect_head) else None
+        # self.module can be a DetectionModel (with .model Sequential) or a YOLO wrapper
+        detect_head = None
+        module_model = getattr(self.module, 'model', None)
+        if isinstance(module_model, self._torch.nn.Sequential) and len(module_model):
+            # self.module is a DetectionModel — its .model is the Sequential of layers
+            detect_head = module_model[-1]
+        elif module_model is not None:
+            # self.module is a YOLO wrapper — try to get the inner DetectionModel's layers
+            inner_model = getattr(module_model, 'model', None)
+            if isinstance(inner_model, self._torch.nn.Sequential) and len(inner_model):
+                detect_head = inner_model[-1]
+
         if detect_head is not None and hasattr(detect_head, '_get_decode_boxes') and 'feats' in branch:
             decoded = detect_head._get_decode_boxes(branch)
             if isinstance(decoded, self._torch.Tensor):
@@ -424,8 +460,8 @@ class PyTorchLauncher(Launcher):
             wh = x2y2 - x1y1
             boxes = self._torch.cat((c_xy, wh), dim=1)
 
-        if self.ultralytics_raw_scores_sigmoid:
-            scores = scores.sigmoid()
+        # Always apply sigmoid to branch scores (they are raw logits)
+        scores = scores.sigmoid()
 
         return self._torch.cat((boxes, scores), dim=1)
 
@@ -462,18 +498,56 @@ class PyTorchLauncher(Launcher):
             candidate = batch_input
 
         if isinstance(candidate, np.ndarray):
+            # Ensure float32 dtype for numpy arrays
+            if candidate.dtype != np.float32:
+                candidate = candidate.astype(np.float32)
             candidate = self._torch.from_numpy(candidate)
         if not isinstance(candidate, self._torch.Tensor):
             raise ValueError(f'Unsupported Ultralytics raw input type: {type(candidate)}')
 
+        # Ensure float32 dtype
+        if candidate.dtype != self._torch.float32:
+            candidate = candidate.to(self._torch.float32)
+            
         return candidate.to(self.device)
 
     def _predict_ultralytics_raw(self, batch_input):
-        raw_model = getattr(self.module, 'model', None)
-        if raw_model is None:
-            raise ValueError('ultralytics_raw_output requires a module with .model attribute.')
-        input_tensor = self._extract_ultralytics_input_tensor(batch_input)
-        return raw_model(input_tensor)
+        # Use self.module directly - should be a DetectionModel with proper _predict_once forward
+        # Do NOT extract self.module.model (the bare Sequential) since it bypasses skip connections
+        raw_model = self.module
+        
+        # Disable oneDNN if running on CPU - it has compatibility issues with some YOLO architectures
+        original_mkldnn_enabled = None
+        if not self.cuda:
+            try:
+                original_mkldnn_enabled = self._torch.backends.mkldnn.enabled
+                self._torch.backends.mkldnn.enabled = False
+            except Exception:
+                pass  # oneDNN might not be available
+        
+        try:
+            input_tensor = self._extract_ultralytics_input_tensor(batch_input)
+            
+            # Ensure tensor is on correct device and dtype
+            try:
+                model_dtype = next(raw_model.parameters()).dtype
+                model_device = next(raw_model.parameters()).device
+            except StopIteration:
+                model_dtype = self._torch.float32
+                model_device = self.device
+            
+            input_tensor = input_tensor.to(device=model_device, dtype=model_dtype)
+            
+            if not input_tensor.is_contiguous():
+                input_tensor = input_tensor.contiguous()
+            
+            return raw_model(input_tensor)
+        finally:
+            if original_mkldnn_enabled is not None:
+                try:
+                    self._torch.backends.mkldnn.enabled = original_mkldnn_enabled
+                except Exception:
+                    pass
 
 
     def forward(self, outputs):
@@ -527,9 +601,16 @@ class PyTorchLauncher(Launcher):
 @contextmanager
 def append_to_path(path):
     if path:
-        sys.path.append(str(path))
+        sys.path.insert(0, str(path))
+        # Remove any cached ultralytics modules so the path-prepended version is imported
+        cached_keys = [k for k in sys.modules if k == 'ultralytics' or k.startswith('ultralytics.')]
+        removed = {k: sys.modules.pop(k) for k in cached_keys}
+    else:
+        removed = {}
 
     yield
 
     if path:
         sys.path.remove(str(path))
+        # Restore previously cached modules
+        sys.modules.update(removed)
