@@ -599,7 +599,8 @@ class AnnotationProvider:
 
         return list(subsample_set)
 
-    def store_first_annotation(self, annotation, identifier, dump_infer_data_path):
+    @staticmethod
+    def store_first_annotation(annotation, identifier, dump_infer_data_path):
         plain_annotation = {
             'class_name': annotation.__class__.__name__,
             **{

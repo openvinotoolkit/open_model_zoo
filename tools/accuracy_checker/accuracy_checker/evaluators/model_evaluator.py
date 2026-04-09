@@ -343,8 +343,7 @@ class ModelEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.finish()
 
-        if stored_predictions:
-            print_info("prediction objects are save to {}".format(stored_predictions))
+        self.stored_prediction_info(stored_predictions)
 
     def process_dataset_async_infer_queue(
         self, dataset_iterator, metric_config, progress_reporter, stored_predictions, **kwargs):
@@ -386,8 +385,7 @@ class ModelEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.finish()
 
-        if stored_predictions:
-            print_info("prediction objects are save to {}".format(stored_predictions))
+        self.stored_prediction_info(stored_predictions)
 
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
         if self.dataset is None:
@@ -434,8 +432,7 @@ class ModelEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.finish()
 
-        if stored_predictions:
-            print_info("prediction objects are save to {}".format(stored_predictions))
+        self.stored_prediction_info(stored_predictions)
         return self._annotations, self._predictions
 
     def _process_batch_results(
@@ -633,9 +630,14 @@ class ModelEvaluator(BaseEvaluator):
         prediction_to_store = StoredPredictionBatch(batch_predictions, batch_identifiers, batch_meta)
         self.store_predictions(stored_predictions, prediction_to_store)
 
+    @staticmethod
+    def stored_prediction_info(stored_predictions):
+        if stored_predictions:
+            print_info("prediction objects are save to {}".format(stored_predictions))
+
     @property
     def metrics_results(self):
-        if not self.metrics_results:
+        if not self._metrics_results:
             self.compute_metrics(print_results=False)
         computed_metrics = copy.deepcopy(self._metrics_results)
         return computed_metrics

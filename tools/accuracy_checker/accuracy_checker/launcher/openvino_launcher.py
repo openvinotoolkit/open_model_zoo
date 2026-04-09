@@ -20,8 +20,8 @@ import io
 import multiprocessing
 from pathlib import Path
 import re
-import numpy as np
 import pickle  # nosec B403  # disable import-pickle check
+import numpy as np
 from openvino import Core, AsyncInferQueue, get_version, PartialShape, Type, Dimension
 from openvino.preprocess import PrePostProcessor
 from .dlsdk_launcher_config import (
@@ -1051,4 +1051,3 @@ class OpenVINOLauncher(Launcher):
         with open(self._dump_first_infer_data, 'wb') as file:
             pickle.dump(dump_inf_data, file)
         self._dump_first_infer_data = None
-

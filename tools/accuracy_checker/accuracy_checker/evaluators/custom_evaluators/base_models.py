@@ -15,8 +15,8 @@ limitations under the License.
 """
 from pathlib import Path
 from collections import OrderedDict
-import numpy as np
 import pickle  # nosec B403  # disable import-pickle check
+import numpy as np
 from ...config import ConfigError
 from ...utils import get_path, parse_partial_shape, contains_any
 from ...logging import print_info
