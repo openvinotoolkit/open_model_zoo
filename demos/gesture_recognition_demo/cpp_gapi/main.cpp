@@ -26,6 +26,7 @@
 #include <opencv2/gapi/gstreaming.hpp>
 #include <opencv2/gapi/infer.hpp>
 #include <opencv2/gapi/infer/ie.hpp>
+#include <opencv2/gapi/infer/ov.hpp>
 #include <opencv2/gapi/streaming/source.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -135,7 +136,7 @@ int main(int argc, char* argv[]) {
         /** Configure networks **/
         // clang-format off
         auto person_detection =
-            cv::gapi::ie::Params<nets::PersonDetection>{
+            cv::gapi::ov::Params<nets::PersonDetection>{
                 FLAGS_m_d,  // path to model
                 fileNameNoExt(FLAGS_m_d) + ".bin",  // path to weights
                 FLAGS_d_d  // device to use
@@ -148,7 +149,7 @@ int main(int argc, char* argv[]) {
 
         // clang-format off
         auto action_recognition =
-            cv::gapi::ie::Params<nets::ActionRecognition>{
+            cv::gapi::ov::Params<nets::ActionRecognition>{
                 FLAGS_m_a,  // path to model
                 fileNameNoExt(FLAGS_m_a) + ".bin",  // path to weights
                 FLAGS_d_a  // device to use
