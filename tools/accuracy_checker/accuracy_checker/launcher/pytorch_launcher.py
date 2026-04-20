@@ -32,7 +32,7 @@ except ImportError as transformers_error:
 CLASS_REGEX = r'(?:\w+)'
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
-CHECKPOINT_URL_REGEX = r'^https?://.*\.pth(\?.*)?(#.*)?$'
+CHECKPOINT_URL_REGEX = r'^https?://.*\.pth?(\?.*)?(#.*)?$'
 SCALAR_INPUTS = ('input_ids', 'input_mask', 'segment_ids', 'attention_mask', 'token_type_ids')
 
 class PyTorchLauncher(Launcher):
@@ -81,11 +81,6 @@ class PyTorchLauncher(Launcher):
                 default=False,
                 description='Run underlying Ultralytics torch module directly and pass raw head output to adapter.'
             ),
-            'ultralytics_raw_scores_sigmoid': BoolField(
-                optional=True,
-                default=True,
-                description='Apply sigmoid to class scores when building raw Ultralytics outputs for detection adapter.'
-            ),
             'ultralytics_raw_branch': StringField(
                 optional=True,
                 default='one2one',
@@ -110,7 +105,6 @@ class PyTorchLauncher(Launcher):
         self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
         self.tranformers_class = config_entry.get('transformers_class', None)
         self.ultralytics_raw_output = config_entry.get('ultralytics_raw_output', False)
-        self.ultralytics_raw_scores_sigmoid = config_entry.get('ultralytics_raw_scores_sigmoid', True)
         self.ultralytics_raw_branch = config_entry.get('ultralytics_raw_branch', 'one2one')
         backend = self.compile_kwargs.get('backend', None)
         if self.use_torch_compile and backend == 'openvino':
@@ -601,16 +595,9 @@ class PyTorchLauncher(Launcher):
 @contextmanager
 def append_to_path(path):
     if path:
-        sys.path.insert(0, str(path))
-        # Remove any cached ultralytics modules so the path-prepended version is imported
-        cached_keys = [k for k in sys.modules if k == 'ultralytics' or k.startswith('ultralytics.')]
-        removed = {k: sys.modules.pop(k) for k in cached_keys}
-    else:
-        removed = {}
+        sys.path.append(str(path))
 
     yield
 
     if path:
         sys.path.remove(str(path))
-        # Restore previously cached modules
-        sys.modules.update(removed)

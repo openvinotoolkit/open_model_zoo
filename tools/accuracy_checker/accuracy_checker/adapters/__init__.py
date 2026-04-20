@@ -54,7 +54,6 @@ from .reidentification import ReidAdapter, BertEmbeddingsAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
     ClassAgnosticDetectionAdapter,
-    UltralyticsEndToEndDetectionAdapter,
     FaceBoxesAdapter,
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
@@ -161,7 +160,6 @@ __all__ = [
     'RetinaNetAdapter',
     'RetinaNetTF2',
     'ClassAgnosticDetectionAdapter',
-    'UltralyticsEndToEndDetectionAdapter',
     'RetinaFaceAdapter',
     'RetinaFacePyTorchAdapter',
     'FaceBoxesAdapter',
