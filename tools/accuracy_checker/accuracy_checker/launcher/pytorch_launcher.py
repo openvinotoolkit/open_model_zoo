@@ -195,29 +195,11 @@ class PyTorchLauncher(Launcher):
                 if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
                     loaded_model = state['model']
                     return self.prepare_module(loaded_model, model_cls)
-                
-                # Handle case where checkpoint is a model object instead of state_dict
-                if not isinstance(state, dict):
-                    if hasattr(state, 'state_dict') and callable(state.state_dict):
-                        state = state.state_dict()
-                    else:
-                        # Model was loaded directly as an object, use it as the module
-                        return self.prepare_module(state, model_cls)
-                
+                               
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
 
-            # Special handling for YOLO models - extract the raw model if ultralytics_raw_output is True
-            # Note: only extract if module is a pure YOLO wrapper (has no detectionmodel loaded),
-            # not a DetectionModel itself (which has its own forward with skip connections)
-            if (self.ultralytics_raw_output
-                    and hasattr(module, 'model')
-                    and isinstance(getattr(module, 'model', None), self._torch.nn.Module)
-                    and hasattr(module, 'predict') and hasattr(module, 'task')):
-                # Module is a YOLO high-level wrapper, extract the DetectionModel
-                module = module.model
-                
             return self.prepare_module(module, model_cls)
 
     def load_tranformers_module(self, pretrained_name, python_path):
@@ -303,11 +285,6 @@ class PyTorchLauncher(Launcher):
     def _is_ultralytics_result(value):
         return hasattr(value, 'boxes')
 
-    def _is_ultralytics_results(self, outputs):
-        if self._is_ultralytics_result(outputs):
-            return True
-        return isinstance(outputs, (list, tuple)) and bool(outputs) and self._is_ultralytics_result(outputs[0])
-
     def _infer_num_classes(self, result):
         names = getattr(result, 'names', None)
         if isinstance(names, dict):
@@ -372,38 +349,6 @@ class PyTorchLauncher(Launcher):
 
         return batch
 
-    def _extract_ultralytics_raw_tensor(self, value):
-        if isinstance(value, self._torch.Tensor):
-            return value
-        if isinstance(value, np.ndarray):
-            return self._torch.from_numpy(value)
-
-        if isinstance(value, dict):
-            for key in ('one2many', 'one2one', 'preds', 'pred', 'output', 'outputs'):
-                if key in value:
-                    tensor = self._extract_ultralytics_raw_tensor(value[key])
-                    if tensor is not None:
-                        return tensor
-            for item in value.values():
-                tensor = self._extract_ultralytics_raw_tensor(item)
-                if tensor is not None:
-                    return tensor
-            return None
-
-        if isinstance(value, (list, tuple)):
-            fallback = None
-            for item in value:
-                tensor = self._extract_ultralytics_raw_tensor(item)
-                if tensor is None:
-                    continue
-                if tensor.ndim >= 3:
-                    return tensor
-                if fallback is None:
-                    fallback = tensor
-            return fallback
-
-        return None
-
     def _convert_ultralytics_end2end_outputs(self, outputs):
         if not isinstance(outputs, (list, tuple)) or len(outputs) < 2 or not isinstance(outputs[1], dict):
             return None
@@ -462,21 +407,10 @@ class PyTorchLauncher(Launcher):
     def _convert_ultralytics_raw_outputs(self, outputs):
         tensor = self._convert_ultralytics_end2end_outputs(outputs)
         if tensor is None:
-            tensor = self._extract_ultralytics_raw_tensor(outputs)
-        if tensor is None:
             raise ValueError('Failed to extract raw tensor from Ultralytics output.')
-
-        if tensor.ndim == 2:
-            tensor = tensor.unsqueeze(0)
-        elif tensor.ndim == 4:
-            tensor = tensor.reshape(tensor.shape[0], tensor.shape[1], -1)
 
         if tensor.ndim != 3:
             raise ValueError(f'Unexpected raw Ultralytics tensor rank: {tensor.ndim}')
-
-        # Normalize to [batch, channels, boxes] expected by yolov8_detection adapter.
-        if tensor.shape[1] > tensor.shape[2] and tensor.shape[2] <= 512:
-            tensor = tensor.transpose(1, 2)
 
         return tensor.detach().cpu().numpy()
 
@@ -574,8 +508,6 @@ class PyTorchLauncher(Launcher):
                     result_dict = {self.output_names[0]: self._convert_ultralytics_raw_outputs(outputs)}
                 elif metadata[0].get('output_is_dict_type') or isinstance(outputs, dict):
                     result_dict = self._convert_to_numpy(outputs)
-                elif self._is_ultralytics_results(outputs):
-                    result_dict = {self.output_names[0]: self._convert_ultralytics_results(outputs)}
                 else:
                     result_dict = {
                         output_name: self._value_to_numpy(res)
