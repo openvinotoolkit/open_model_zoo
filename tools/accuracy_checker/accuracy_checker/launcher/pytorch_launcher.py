@@ -271,16 +271,7 @@ class PyTorchLauncher(Launcher):
                 numpy_dict[key] = value
         return numpy_dict
 
-    def _value_to_numpy(self, value):
-        if isinstance(value, self._torch.Tensor):
-            return value.detach().cpu().numpy()
-        if isinstance(value, np.ndarray):
-            return value
-        if hasattr(value, 'numpy'):
-            return value.numpy()
-        return np.array(value)
-
-    def _convert_ultralytics_end2end_outputs(self, outputs):
+    def _convert_ultralytics_raw_outputs(self, outputs):
         if not isinstance(outputs, (list, tuple)) or len(outputs) < 2 or not isinstance(outputs[1], dict):
             return None
 
@@ -332,17 +323,7 @@ class PyTorchLauncher(Launcher):
 
         # Always apply sigmoid to branch scores (they are raw logits)
         scores = scores.sigmoid()
-
-        return self._torch.cat((boxes, scores), dim=1)
-
-    def _convert_ultralytics_raw_outputs(self, outputs):
-        tensor = self._convert_ultralytics_end2end_outputs(outputs)
-        if tensor is None:
-            raise ValueError('Failed to extract raw tensor from Ultralytics output.')
-
-        if tensor.ndim != 3:
-            raise ValueError(f'Unexpected raw Ultralytics tensor rank: {tensor.ndim}')
-
+        tensor = self._torch.cat((boxes, scores), dim=1)
         return tensor.detach().cpu().numpy()
 
     def _extract_ultralytics_input_tensor(self, batch_input):
@@ -415,7 +396,7 @@ class PyTorchLauncher(Launcher):
                     result_dict = self._convert_to_numpy(outputs)
                 else:
                     result_dict = {
-                        output_name: self._value_to_numpy(res)
+                        output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
                         for output_name, res in zip(self.output_names, outputs)
                     }
                 results.append(result_dict)
