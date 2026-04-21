@@ -191,7 +191,6 @@ class PyTorchLauncher(Launcher):
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
                 
-                # Handle ultralytics-style checkpoint dict (keys: 'model', 'ema', 'epoch', ...)
                 if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
                     loaded_model = state['model']
                     return self.prepare_module(loaded_model, model_cls)
@@ -281,74 +280,6 @@ class PyTorchLauncher(Launcher):
             return value.numpy()
         return np.array(value)
 
-    @staticmethod
-    def _is_ultralytics_result(value):
-        return hasattr(value, 'boxes')
-
-    def _infer_num_classes(self, result):
-        names = getattr(result, 'names', None)
-        if isinstance(names, dict):
-            return max(len(names), 1)
-        if isinstance(names, (list, tuple)):
-            return max(len(names), 1)
-
-        boxes = getattr(result, 'boxes', None)
-        if boxes is not None and hasattr(boxes, 'cls'):
-            cls_ids = self._value_to_numpy(boxes.cls).astype(np.int64).reshape(-1)
-            if cls_ids.size:
-                return int(np.max(cls_ids)) + 1
-
-        return 1
-
-    def _ultralytics_result_to_numpy(self, result, num_classes):
-        boxes = getattr(result, 'boxes', None)
-        if boxes is None or not hasattr(boxes, 'xywh'):
-            return np.zeros((4 + num_classes, 0), dtype=np.float32)
-
-        xywh = self._value_to_numpy(boxes.xywh).astype(np.float32)
-        if xywh.ndim == 1:
-            xywh = np.expand_dims(xywh, 0)
-        if xywh.size == 0:
-            return np.zeros((4 + num_classes, 0), dtype=np.float32)
-
-        num_boxes = xywh.shape[0]
-        if hasattr(boxes, 'conf'):
-            conf = self._value_to_numpy(boxes.conf).astype(np.float32).reshape(-1)
-        else:
-            conf = np.ones((num_boxes,), dtype=np.float32)
-        if hasattr(boxes, 'cls'):
-            cls_ids = self._value_to_numpy(boxes.cls).astype(np.int64).reshape(-1)
-        else:
-            cls_ids = np.zeros((num_boxes,), dtype=np.int64)
-
-        if conf.size < num_boxes:
-            conf = np.pad(conf, (0, num_boxes - conf.size), constant_values=1.0)
-        if cls_ids.size < num_boxes:
-            cls_ids = np.pad(cls_ids, (0, num_boxes - cls_ids.size), constant_values=0)
-        conf = conf[:num_boxes]
-        cls_ids = np.clip(cls_ids[:num_boxes], 0, num_classes - 1)
-
-        class_scores = np.zeros((num_boxes, num_classes), dtype=np.float32)
-        class_scores[np.arange(num_boxes), cls_ids] = conf
-
-        return np.concatenate((xywh, class_scores), axis=1).T
-
-    def _convert_ultralytics_results(self, outputs):
-        results_list = outputs if isinstance(outputs, (list, tuple)) else [outputs]
-        if not results_list:
-            return np.zeros((0, 0, 0), dtype=np.float32)
-
-        num_classes = max(self._infer_num_classes(result) for result in results_list)
-        prepared = [self._ultralytics_result_to_numpy(result, num_classes) for result in results_list]
-
-        max_boxes = max((item.shape[1] for item in prepared), default=0)
-        batch = np.zeros((len(prepared), 4 + num_classes, max_boxes), dtype=np.float32)
-        for idx, item in enumerate(prepared):
-            if item.size:
-                batch[idx, :, :item.shape[1]] = item
-
-        return batch
-
     def _convert_ultralytics_end2end_outputs(self, outputs):
         if not isinstance(outputs, (list, tuple)) or len(outputs) < 2 or not isinstance(outputs[1], dict):
             return None
@@ -418,18 +349,11 @@ class PyTorchLauncher(Launcher):
         if isinstance(batch_input, dict):
             if 'input' in batch_input and not isinstance(batch_input['input'], dict):
                 candidate = batch_input['input']
-            elif len(batch_input) == 1:
-                candidate = next(iter(batch_input.values()))
             else:
                 candidate = next(iter(batch_input.values()))
         else:
             candidate = batch_input
 
-        if isinstance(candidate, np.ndarray):
-            # Ensure float32 dtype for numpy arrays
-            if candidate.dtype != np.float32:
-                candidate = candidate.astype(np.float32)
-            candidate = self._torch.from_numpy(candidate)
         if not isinstance(candidate, self._torch.Tensor):
             raise ValueError(f'Unsupported Ultralytics raw input type: {type(candidate)}')
 
@@ -440,42 +364,23 @@ class PyTorchLauncher(Launcher):
         return candidate.to(self.device)
 
     def _predict_ultralytics_raw(self, batch_input):
-        # Use self.module directly - should be a DetectionModel with proper _predict_once forward
-        # Do NOT extract self.module.model (the bare Sequential) since it bypasses skip connections
-        raw_model = self.module
+        raw_model = self.module          
+        input_tensor = self._extract_ultralytics_input_tensor(batch_input)
         
-        # Disable oneDNN if running on CPU - it has compatibility issues with some YOLO architectures
-        original_mkldnn_enabled = None
-        if not self.cuda:
-            try:
-                original_mkldnn_enabled = self._torch.backends.mkldnn.enabled
-                self._torch.backends.mkldnn.enabled = False
-            except Exception:
-                pass  # oneDNN might not be available
-        
+        # Ensure tensor is on correct device and dtype
         try:
-            input_tensor = self._extract_ultralytics_input_tensor(batch_input)
-            
-            # Ensure tensor is on correct device and dtype
-            try:
-                model_dtype = next(raw_model.parameters()).dtype
-                model_device = next(raw_model.parameters()).device
-            except StopIteration:
-                model_dtype = self._torch.float32
-                model_device = self.device
-            
-            input_tensor = input_tensor.to(device=model_device, dtype=model_dtype)
-            
-            if not input_tensor.is_contiguous():
-                input_tensor = input_tensor.contiguous()
-            
-            return raw_model(input_tensor)
-        finally:
-            if original_mkldnn_enabled is not None:
-                try:
-                    self._torch.backends.mkldnn.enabled = original_mkldnn_enabled
-                except Exception:
-                    pass
+            model_dtype = next(raw_model.parameters()).dtype
+            model_device = next(raw_model.parameters()).device
+        except StopIteration:
+            model_dtype = self._torch.float32
+            model_device = self.device
+        
+        input_tensor = input_tensor.to(device=model_device, dtype=model_dtype)
+        
+        if not input_tensor.is_contiguous():
+            input_tensor = input_tensor.contiguous()
+        
+        return raw_model(input_tensor)
 
 
     def forward(self, outputs):
