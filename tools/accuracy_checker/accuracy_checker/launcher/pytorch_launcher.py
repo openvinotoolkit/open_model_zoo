@@ -283,10 +283,9 @@ class PyTorchLauncher(Launcher):
             elif self.ultralytics_raw_branch == 'one2many':
                 branch = branches.get('one2many')
             else:
-                # Auto mode defaults to end2end inference branch.
+                # Auto mode
                 branch = branches.get('one2one') or branches.get('one2many')
-        if branch is None and isinstance(branches, dict):
-            branch = branches.get('one2one') or branches.get('one2many')
+
         if not isinstance(branch, dict):
             return None
 
@@ -295,25 +294,17 @@ class PyTorchLauncher(Launcher):
         if not isinstance(boxes, self._torch.Tensor) or not isinstance(scores, self._torch.Tensor):
             return None
 
-        # Decode head branch boxes to image-scale boxes when possible.
-        # self.module can be a DetectionModel (with .model Sequential) or a YOLO wrapper
         detect_head = None
         module_model = getattr(self.module, 'model', None)
         if isinstance(module_model, self._torch.nn.Sequential) and len(module_model):
-            # self.module is a DetectionModel — its .model is the Sequential of layers
             detect_head = module_model[-1]
-        elif module_model is not None:
-            # self.module is a YOLO wrapper — try to get the inner DetectionModel's layers
-            inner_model = getattr(module_model, 'model', None)
-            if isinstance(inner_model, self._torch.nn.Sequential) and len(inner_model):
-                detect_head = inner_model[-1]
 
         if detect_head is not None and hasattr(detect_head, '_get_decode_boxes') and 'feats' in branch:
             decoded = detect_head._get_decode_boxes(branch)
             if isinstance(decoded, self._torch.Tensor):
                 boxes = decoded
 
-        # End2end branches provide xyxy boxes; convert to xywh to match yolov8_detection adapter expectations.
+        # xyxy boxes convert to xywh
         if boxes.shape[1] == 4:
             x1y1 = boxes[:, :2, :]
             x2y2 = boxes[:, 2:4, :]
@@ -321,48 +312,10 @@ class PyTorchLauncher(Launcher):
             wh = x2y2 - x1y1
             boxes = self._torch.cat((c_xy, wh), dim=1)
 
-        # Always apply sigmoid to branch scores (they are raw logits)
+        # Apply sigmoid to branch scores (they are raw logits)
         scores = scores.sigmoid()
         tensor = self._torch.cat((boxes, scores), dim=1)
         return tensor.detach().cpu().numpy()
-
-    def _extract_ultralytics_input_tensor(self, batch_input):
-        if isinstance(batch_input, dict):
-            if 'input' in batch_input and not isinstance(batch_input['input'], dict):
-                candidate = batch_input['input']
-            else:
-                candidate = next(iter(batch_input.values()))
-        else:
-            candidate = batch_input
-
-        if not isinstance(candidate, self._torch.Tensor):
-            raise ValueError(f'Unsupported Ultralytics raw input type: {type(candidate)}')
-
-        # Ensure float32 dtype
-        if candidate.dtype != self._torch.float32:
-            candidate = candidate.to(self._torch.float32)
-            
-        return candidate.to(self.device)
-
-    def _predict_ultralytics_raw(self, batch_input):
-        raw_model = self.module          
-        input_tensor = self._extract_ultralytics_input_tensor(batch_input)
-        
-        # Ensure tensor is on correct device and dtype
-        try:
-            model_dtype = next(raw_model.parameters()).dtype
-            model_device = next(raw_model.parameters()).device
-        except StopIteration:
-            model_dtype = self._torch.float32
-            model_device = self.device
-        
-        input_tensor = input_tensor.to(device=model_device, dtype=model_dtype)
-        
-        if not input_tensor.is_contiguous():
-            input_tensor = input_tensor.contiguous()
-        
-        return raw_model(input_tensor)
-
 
     def forward(self, outputs):
         if hasattr(outputs, 'logits') and 'logits' in self.output_names:
@@ -375,14 +328,7 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if self.ultralytics_raw_output:
-                    outputs = self._predict_ultralytics_raw(batch_input)
-                    for meta_ in metadata:
-                        if isinstance(batch_input, dict):
-                            meta_['input_shape'] = {
-                                key: list(data.shape) for key, data in batch_input.items() if hasattr(data, 'shape')
-                            }
-                elif metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
+                if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
                     outputs = self.module(batch_input['input'])
                 else:
                     outputs = self.module(**batch_input)
