@@ -27,8 +27,6 @@ class BaseCustomEvaluator(BaseEvaluator):
                  preprocessor=None, postprocessor=None):
         self.dataset_config = dataset_config
         self.dataset = None
-        self.input_feeder = None
-        self.adapter = None
         self.preprocessing_executor = None
         self.preprocessor = preprocessor
         self.postprocessor = postprocessor
