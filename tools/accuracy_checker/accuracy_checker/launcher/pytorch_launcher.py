@@ -199,6 +199,7 @@ class PyTorchLauncher(Launcher):
 
         return self.prepare_module(module, model_class)
 
+
     def prepare_module(self, module, model_class):
         module.to('cuda' if self.cuda else 'cpu')
         # Convert to float32 for CPU inference (models are sometimes saved as float16)
@@ -212,6 +213,7 @@ class PyTorchLauncher(Launcher):
             module = self._torch.compile(module, **self.compile_kwargs)
 
         return module
+
 
     def _convert_to_tensor(self, value, precision):
         if isinstance(value, self._torch.Tensor):
