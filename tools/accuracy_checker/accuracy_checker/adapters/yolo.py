@@ -964,8 +964,8 @@ class YoloV8DetectionAdapter(Adapter):
             result.append(DetectionPrediction(identifier, labels, conf, *box.T, meta))
         return result
 
-class Yolo26DetectionAdapter(Adapter):
-    __provider__ = "yolo26_detection"
+class Yolo26Adapter(Adapter):
+    __provider__ = "yolo26"
 
     @classmethod
     def parameters(cls):
