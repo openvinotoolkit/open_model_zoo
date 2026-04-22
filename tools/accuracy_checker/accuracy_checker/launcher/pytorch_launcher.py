@@ -259,6 +259,7 @@ class PyTorchLauncher(Launcher):
                 numpy_dict[key] = value
         return numpy_dict
 
+
     def forward(self, outputs):
         if hasattr(outputs, 'logits') and 'logits' in self.output_names:
             return {'logits': outputs.logits}
