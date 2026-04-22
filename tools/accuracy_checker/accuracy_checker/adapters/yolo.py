@@ -986,8 +986,8 @@ class Yolo26Adapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         prediction = raw_outputs[self.output_blob]
         
-        # expected output format is box[x1, y1, x2, y2], confidence, class_id for each detected object
-        if len(prediction.shape)!= 3 and prediction.shape[1] != 6:
+        # expected output format is box(x1, y1, x2, y2), confidence, class_id for each detected object
+        if len(prediction.shape) != 3 and prediction.shape[1] != 6:
             raise ValueError("Output format should have 3 dimensions where the second dimension is 6, " \
             "but found shape {}".format(prediction.shape))
 
