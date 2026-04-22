@@ -213,7 +213,6 @@ class PyTorchLauncher(Launcher):
 
         return module
 
-
     def _convert_to_tensor(self, value, precision):
         if isinstance(value, self._torch.Tensor):
             return value
