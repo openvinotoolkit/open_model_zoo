@@ -965,50 +965,23 @@ class YoloV8DetectionAdapter(Adapter):
         return result
 
 class Yolo26DetectionAdapter(Adapter):
-    """
-    class adapter for yolo26, this class is for object detection.
-    Adapter is base class for all adapters. Each new adapter should be registered in ../adapter/__init__.py
-    """
-    # provider is required field for all entities in accuracy checker, it defines how object called on config level
     __provider__ = "yolo26_detection"
 
     @classmethod
     def parameters(cls):
-        """
-        parameters declares additional configuration parameters for adapter.
-        It is classmethod for extraction parameters without object creation
-        """
-        # get parent parameters if any
         params = super().parameters()
-        # update configuration for specific adapter
         params.update(
            {
             "conf_threshold": NumberField(value_type=float, optional=True, min_value=0, default=0.25,
-                                     description="Minimal score value for valid detections."),
-            "multi_label": BoolField(optional=True, default=True, description="Use multiple labels per box")
+                                     description="Minimal score value for valid detections.")
            }
         )
         return params
 
     def configure(self):
-        """
-        configure method used for parsing and initialization configuration parameters.
-        It called in __init__
-        """
         self.conf_threshold = self.get_value_from_config("conf_threshold")
-        self.multi_label = self.get_value_from_config("multi_label")
 
     def process(self, raw, identifiers, frame_meta):
-        """
-        the main processing method for adapters.
-        Parameters:
-          raw: dict or list of dicts with raw model outputs from launcher
-          identifiers: unique identifier which input data this prediction belongs (usually file name)
-          frame_meta: list of metadata for input data per input frame in batch,
-          may contains useful info for postprocessing e.g. order of preprocessing ops and input size.
-        Return:
-          list of Prediction object for batch.
-        """
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         prediction = raw_outputs[self.output_blob]
@@ -1027,6 +1000,6 @@ class Yolo26DetectionAdapter(Adapter):
             boxes = boxes[min_conf]
             confidences = confidences[min_conf]
             classes = classes[min_conf]
-            
+
             result.append(DetectionPrediction(identifier, classes, confidences, *boxes.T, meta))
         return result
