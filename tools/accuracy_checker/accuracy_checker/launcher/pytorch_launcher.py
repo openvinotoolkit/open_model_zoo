@@ -75,17 +75,6 @@ class PyTorchLauncher(Launcher):
             ),
             'transformers_class': StringField(
                 optional=True, regex=CLASS_REGEX, description='Transformers class name to load pre-trained module.'
-            ),
-            'ultralytics_raw_output': BoolField(
-                optional=True,
-                default=False,
-                description='Run underlying Ultralytics torch module directly and pass raw head output to adapter.'
-            ),
-            'ultralytics_raw_branch': StringField(
-                optional=True,
-                default='one2one',
-                regex=r'one2one|one2many|auto',
-                description='Select end2end branch for Ultralytics raw output conversion.'
             )
         })
         return parameters
@@ -104,8 +93,6 @@ class PyTorchLauncher(Launcher):
         self.use_torch_compile = config_entry.get('use_torch_compile', False)
         self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
         self.tranformers_class = config_entry.get('transformers_class', None)
-        self.ultralytics_raw_output = config_entry.get('ultralytics_raw_output', False)
-        self.ultralytics_raw_branch = config_entry.get('ultralytics_raw_branch', 'one2one')
         backend = self.compile_kwargs.get('backend', None)
         if self.use_torch_compile and backend == 'openvino':
             try:
@@ -271,52 +258,6 @@ class PyTorchLauncher(Launcher):
                 numpy_dict[key] = value
         return numpy_dict
 
-    def _convert_ultralytics_raw_outputs(self, outputs):
-        if not isinstance(outputs, (list, tuple)) or len(outputs) < 2 or not isinstance(outputs[1], dict):
-            return None
-
-        branches = outputs[1]
-        branch = None
-        if isinstance(branches, dict):
-            if self.ultralytics_raw_branch == 'one2one':
-                branch = branches.get('one2one')
-            elif self.ultralytics_raw_branch == 'one2many':
-                branch = branches.get('one2many')
-            else:
-                # Auto mode
-                branch = branches.get('one2one') or branches.get('one2many')
-
-        if not isinstance(branch, dict):
-            return None
-
-        boxes = branch.get('boxes')
-        scores = branch.get('scores')
-        if not isinstance(boxes, self._torch.Tensor) or not isinstance(scores, self._torch.Tensor):
-            return None
-
-        detect_head = None
-        module_model = getattr(self.module, 'model', None)
-        if isinstance(module_model, self._torch.nn.Sequential) and len(module_model):
-            detect_head = module_model[-1]
-
-        if detect_head is not None and hasattr(detect_head, '_get_decode_boxes') and 'feats' in branch:
-            decoded = detect_head._get_decode_boxes(branch)
-            if isinstance(decoded, self._torch.Tensor):
-                boxes = decoded
-
-        # xyxy boxes convert to xywh
-        if boxes.shape[1] == 4:
-            x1y1 = boxes[:, :2, :]
-            x2y2 = boxes[:, 2:4, :]
-            c_xy = (x1y1 + x2y2) / 2
-            wh = x2y2 - x1y1
-            boxes = self._torch.cat((c_xy, wh), dim=1)
-
-        # Apply sigmoid to branch scores (they are raw logits)
-        scores = scores.sigmoid()
-        tensor = self._torch.cat((boxes, scores), dim=1)
-        return tensor.detach().cpu().numpy()
-
     def forward(self, outputs):
         if hasattr(outputs, 'logits') and 'logits' in self.output_names:
             return {'logits': outputs.logits}
@@ -336,9 +277,7 @@ class PyTorchLauncher(Launcher):
                     for meta_ in metadata:
                         meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
 
-                if self.ultralytics_raw_output:
-                    result_dict = {self.output_names[0]: self._convert_ultralytics_raw_outputs(outputs)}
-                elif metadata[0].get('output_is_dict_type') or isinstance(outputs, dict):
+                if metadata[0].get('output_is_dict_type') or isinstance(outputs, dict):
                     result_dict = self._convert_to_numpy(outputs)
                 else:
                     result_dict = {

@@ -963,3 +963,70 @@ class YoloV8DetectionAdapter(Adapter):
             # DetectionPrediction(identifier, label, score, x_mins, y_mins, x_maxs, y_maxs, meta)
             result.append(DetectionPrediction(identifier, labels, conf, *box.T, meta))
         return result
+
+class Yolo26DetectionAdapter(Adapter):
+    """
+    class adapter for yolo26, this class is for object detection.
+    Adapter is base class for all adapters. Each new adapter should be registered in ../adapter/__init__.py
+    """
+    # provider is required field for all entities in accuracy checker, it defines how object called on config level
+    __provider__ = "yolo26_detection"
+
+    @classmethod
+    def parameters(cls):
+        """
+        parameters declares additional configuration parameters for adapter.
+        It is classmethod for extraction parameters without object creation
+        """
+        # get parent parameters if any
+        params = super().parameters()
+        # update configuration for specific adapter
+        params.update(
+           {
+            "conf_threshold": NumberField(value_type=float, optional=True, min_value=0, default=0.25,
+                                     description="Minimal score value for valid detections."),
+            "multi_label": BoolField(optional=True, default=True, description="Use multiple labels per box")
+           }
+        )
+        return params
+
+    def configure(self):
+        """
+        configure method used for parsing and initialization configuration parameters.
+        It called in __init__
+        """
+        self.conf_threshold = self.get_value_from_config("conf_threshold")
+        self.multi_label = self.get_value_from_config("multi_label")
+
+    def process(self, raw, identifiers, frame_meta):
+        """
+        the main processing method for adapters.
+        Parameters:
+          raw: dict or list of dicts with raw model outputs from launcher
+          identifiers: unique identifier which input data this prediction belongs (usually file name)
+          frame_meta: list of metadata for input data per input frame in batch,
+          may contains useful info for postprocessing e.g. order of preprocessing ops and input size.
+        Return:
+          list of Prediction object for batch.
+        """
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        prediction = raw_outputs[self.output_blob]
+        
+        # expected output format is box[x1, y1, x2, y2], confidence, class_id for each detected object
+        if len(prediction.shape)!= 3 and prediction.shape[1] != 6:
+            raise ValueError("Output format should have 3 dimensions where the second dimension is 6, " \
+            "but found shape {}".format(prediction.shape))
+
+        for identifier, output, meta in zip(identifiers, prediction, frame_meta):
+            boxes = output[:, :4]
+            confidences = output[:, 4]
+            classes = output[:, 5]
+            
+            min_conf = confidences.reshape(-1) > self.conf_threshold
+            boxes = boxes[min_conf]
+            confidences = confidences[min_conf]
+            classes = classes[min_conf]
+            
+            result.append(DetectionPrediction(identifier, classes, confidences, *boxes.T, meta))
+        return result

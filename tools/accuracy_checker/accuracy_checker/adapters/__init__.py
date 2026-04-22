@@ -188,6 +188,7 @@ __all__ = [
     'YoloxsAdapter',
     'YolofAdapter',
     'YoloV8DetectionAdapter',
+    'Yolo26DetectionAdapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',
