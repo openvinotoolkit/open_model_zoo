@@ -206,7 +206,7 @@ class PyTorchLauncher(Launcher):
         if self.use_torch_compile:
             if hasattr(model_class, 'compile'):
                 module.compile()
-            module.parameters().dtypemodule = self._torch.compile(module, **self.compile_kwargs)
+            module = self._torch.compile(module, **self.compile_kwargs)
 
         return module
 
