@@ -265,12 +265,12 @@ class PyTorchLauncher(Launcher):
 
     def predict(self, inputs, metadata=None, **kwargs):
         results = []
-        with self._torch.no_grad():            
+        with self._torch.no_grad():
             for batch_input in inputs:
                 if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
-                    inp = batch_input['input']
-                    if inp.dtype != next(self.module.parameters()).dtype:
-                        batch_input['input'] = inp.to(next(self.module.parameters()).dtype)
+                    input = batch_input['input']
+                    if input.dtype != next(self.module.parameters()).dtype:
+                        batch_input['input'] = input.to(next(self.module.parameters()).dtype)
 
                     outputs = self.module(batch_input['input'])
                 else:
