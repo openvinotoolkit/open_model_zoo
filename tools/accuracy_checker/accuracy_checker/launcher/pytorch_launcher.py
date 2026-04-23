@@ -201,15 +201,12 @@ class PyTorchLauncher(Launcher):
 
     def prepare_module(self, module, model_class):
         module.to('cuda' if self.cuda else 'cpu')
-        # Convert to float32 for CPU inference (models are sometimes saved as float16)
-        if not self.cuda:
-            module = module.float()
         module.eval()
 
         if self.use_torch_compile:
             if hasattr(model_class, 'compile'):
                 module.compile()
-            module = self._torch.compile(module, **self.compile_kwargs)
+            module.parameters().dtypemodule = self._torch.compile(module, **self.compile_kwargs)
 
         return module
 
@@ -268,9 +265,13 @@ class PyTorchLauncher(Launcher):
 
     def predict(self, inputs, metadata=None, **kwargs):
         results = []
-        with self._torch.no_grad():
+        with self._torch.no_grad():            
             for batch_input in inputs:
                 if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
+                    inp = batch_input['input']
+                    if inp.dtype != next(self.module.parameters()).dtype:
+                        batch_input['input'] = inp.to(next(self.module.parameters()).dtype)
+
                     outputs = self.module(batch_input['input'])
                 else:
                     outputs = self.module(**batch_input)
