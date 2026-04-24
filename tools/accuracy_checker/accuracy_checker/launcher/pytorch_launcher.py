@@ -49,6 +49,9 @@ class PyTorchLauncher(Launcher):
             'checkpoint_url': StringField(
                 optional=True, regex=CHECKPOINT_URL_REGEX, description='Url link to pre-trained model checkpoint.'
             ),
+            'checkpoint_weights_only': BoolField(
+                optional=True, default=True, description='Model checkpoint stored as weights only.'
+            ),
             'state_key': StringField(optional=True, regex=r'\w+', description='pre-trained model checkpoint state key'),
             'python_path': PathField(
                 check_exists=True, is_directory=True, optional=True,
@@ -108,6 +111,7 @@ class PyTorchLauncher(Launcher):
         checkpoint = config_entry.get('checkpoint')
         if checkpoint is None:
             checkpoint = config_entry.get('checkpoint_url')
+        self.checkpoint_weights_only = config_entry.get('checkpoint_weights_only', True)
 
         python_path = config_entry.get("python_path")
 
@@ -174,13 +178,14 @@ class PyTorchLauncher(Launcher):
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
                 checkpoint = self._torch.load(
-                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu'), weights_only=False
+                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu'), weights_only=self.checkpoint_weights_only
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
                 
-                if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
-                    loaded_model = state['model']
-                    return self.prepare_module(loaded_model, model_cls)
+                if not self.checkpoint_weights_only:
+                    if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
+                        loaded_model = state['model']
+                        return self.prepare_module(loaded_model, model_cls)
                                
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
