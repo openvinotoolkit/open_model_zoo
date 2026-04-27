@@ -178,12 +178,21 @@ class PyTorchLauncher(Launcher):
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
                 checkpoint = self._torch.load(
-                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu'), weights_only=self.checkpoint_weights_only
+                    checkpoint,
+                    map_location=None if self.cuda else self._torch.device('cpu'),
+                    weights_only=self.checkpoint_weights_only
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
 
                 if not self.checkpoint_weights_only:
-                    if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
+
+                    state_dict_contains_model = (
+                        isinstance(state, dict) and
+                        'model' in state and
+                        isinstance(state['model'], self._torch.nn.Module)
+                    )
+
+                    if state_dict_contains_model:
                         loaded_model = state['model']
                         return self.prepare_module(loaded_model, model_cls)
 
