@@ -181,12 +181,12 @@ class PyTorchLauncher(Launcher):
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu'), weights_only=self.checkpoint_weights_only
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
-                
+
                 if not self.checkpoint_weights_only:
                     if isinstance(state, dict) and 'model' in state and isinstance(state['model'], self._torch.nn.Module):
                         loaded_model = state['model']
                         return self.prepare_module(loaded_model, model_cls)
-                               
+
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
@@ -272,11 +272,12 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if (metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict))) and 'input' in batch_input:
-                    input = batch_input['input']
+                is_input_as_dict = metadata[0].get('input_is_dict_type') or isinstance(batch_input, dict)
+                if is_input_as_dict and 'input' in batch_input:
+                    inp = batch_input['input']
                     model_dtype = next(self.module.parameters()).dtype
-                    if input.dtype != model_dtype:
-                        batch_input['input'] = input.to(model_dtype)
+                    if inp.dtype != model_dtype:
+                        batch_input['input'] = inp.to(model_dtype)
 
                     outputs = self.module(batch_input['input'])
                 else:
