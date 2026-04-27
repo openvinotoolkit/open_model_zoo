@@ -272,10 +272,11 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
+                if (metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict))) and 'input' in batch_input:
                     input = batch_input['input']
-                    if input.dtype != next(self.module.parameters()).dtype:
-                        batch_input['input'] = input.to(next(self.module.parameters()).dtype)
+                    model_dtype = next(self.module.parameters()).dtype
+                    if input.dtype != model_dtype:
+                        batch_input['input'] = input.to(model_dtype)
 
                     outputs = self.module(batch_input['input'])
                 else:

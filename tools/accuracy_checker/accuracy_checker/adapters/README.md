@@ -99,6 +99,8 @@ AccuracyChecker supports following set of adapters:
 * `yolo_v8_detection` - converting output of YOLO v8 family pretrained for object detection to `DetectionPrediction`.
   * `conf_threshold` - minimal confidence for filtering valid detections (Optional, default 0.25).
   * `multi_label` - allow to use multiple labels for the same box coordinates (Optional, default True).
+* `yolo26` - converting output of YOLO26 model to `DetectionPrediction` representation.
+  * `conf_threshold` - minimal confidence for filtering valid detections (Optional, default 0.25).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
   * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).

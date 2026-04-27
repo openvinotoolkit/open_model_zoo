@@ -973,7 +973,7 @@ class Yolo26Adapter(Adapter):
         params.update(
            {
             "conf_threshold": NumberField(value_type=float, optional=True, min_value=0, default=0.25,
-                                     description="Minimal score value for valid detections.")
+                                     description="Minimal confidence value for valid detections.")
            }
         )
         return params
