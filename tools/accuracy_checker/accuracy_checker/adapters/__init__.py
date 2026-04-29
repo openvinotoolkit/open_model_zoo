@@ -88,7 +88,8 @@ from .yolo import (
     YoloxsAdapter,
     YolofAdapter,
     # for adapter registration, it should be imported and added to __all__ list
-    YoloV8DetectionAdapter
+    YoloV8DetectionAdapter,
+    Yolo26Adapter
 )
 from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
@@ -188,6 +189,7 @@ __all__ = [
     'YoloxsAdapter',
     'YolofAdapter',
     'YoloV8DetectionAdapter',
+    'Yolo26Adapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',

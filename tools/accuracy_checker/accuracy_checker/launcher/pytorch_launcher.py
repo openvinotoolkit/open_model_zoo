@@ -32,7 +32,7 @@ except ImportError as transformers_error:
 CLASS_REGEX = r'(?:\w+)'
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
-CHECKPOINT_URL_REGEX = r'^https?://.*\.pth(\?.*)?(#.*)?$'
+CHECKPOINT_URL_REGEX = r'^https?://.*\.pth?(\?.*)?(#.*)?$'
 SCALAR_INPUTS = ('input_ids', 'input_mask', 'segment_ids', 'attention_mask', 'token_type_ids')
 
 class PyTorchLauncher(Launcher):
@@ -48,6 +48,9 @@ class PyTorchLauncher(Launcher):
             ),
             'checkpoint_url': StringField(
                 optional=True, regex=CHECKPOINT_URL_REGEX, description='Url link to pre-trained model checkpoint.'
+            ),
+            'checkpoint_weights_only': BoolField(
+                optional=True, default=True, description='Model checkpoint stored as weights only.'
             ),
             'state_key': StringField(optional=True, regex=r'\w+', description='pre-trained model checkpoint state key'),
             'python_path': PathField(
@@ -108,6 +111,7 @@ class PyTorchLauncher(Launcher):
         checkpoint = config_entry.get('checkpoint')
         if checkpoint is None:
             checkpoint = config_entry.get('checkpoint_url')
+        self.checkpoint_weights_only = config_entry.get('checkpoint_weights_only', True)
 
         python_path = config_entry.get("python_path")
 
@@ -174,9 +178,24 @@ class PyTorchLauncher(Launcher):
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
                 checkpoint = self._torch.load(
-                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
+                    checkpoint,
+                    map_location=None if self.cuda else self._torch.device('cpu'),
+                    weights_only=self.checkpoint_weights_only
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
+
+                if not self.checkpoint_weights_only:
+
+                    state_dict_contains_model = (
+                        isinstance(state, dict) and
+                        'model' in state and
+                        isinstance(state['model'], self._torch.nn.Module)
+                    )
+
+                    if state_dict_contains_model:
+                        loaded_model = state['model']
+                        return self.prepare_module(loaded_model, model_cls)
+
                 if all(key.startswith('module.') for key in state):
                     module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
@@ -262,7 +281,13 @@ class PyTorchLauncher(Launcher):
         results = []
         with self._torch.no_grad():
             for batch_input in inputs:
-                if metadata[0].get('input_is_dict_type') or (isinstance(batch_input, dict) and 'input' in batch_input):
+                is_input_as_dict = metadata[0].get('input_is_dict_type') or isinstance(batch_input, dict)
+                if is_input_as_dict and 'input' in batch_input:
+                    inp = batch_input['input']
+                    model_dtype = next(self.module.parameters()).dtype
+                    if inp.dtype != model_dtype:
+                        batch_input['input'] = inp.to(model_dtype)
+
                     outputs = self.module(batch_input['input'])
                 else:
                     outputs = self.module(**batch_input)

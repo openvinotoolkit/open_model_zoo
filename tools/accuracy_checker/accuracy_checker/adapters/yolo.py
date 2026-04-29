@@ -963,3 +963,38 @@ class YoloV8DetectionAdapter(Adapter):
             # DetectionPrediction(identifier, label, score, x_mins, y_mins, x_maxs, y_maxs, meta)
             result.append(DetectionPrediction(identifier, labels, conf, *box.T, meta))
         return result
+
+class Yolo26Adapter(Adapter):
+    __provider__ = "yolo26"
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({"conf_threshold": NumberField(value_type=float, optional=True, min_value=0, default=0.25,
+                                                     description="Minimal confidence value for valid detections.")})
+        return params
+
+    def configure(self):
+        self.conf_threshold = self.get_value_from_config("conf_threshold")
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        prediction = raw_outputs[self.output_blob]
+
+        # expected output format is box(x1, y1, x2, y2), confidence, class_id for each detected object
+        if len(prediction.shape) != 3 and prediction.shape[1] != 6:
+            raise ValueError("Output format should have 3 dimensions where the second dimension is 6, "
+                             "but found shape {}".format(prediction.shape))
+
+        for identifier, output, meta in zip(identifiers, prediction, frame_meta):
+            boxes = output[:, :4]
+            confidences = output[:, 4]
+            classes = output[:, 5]
+
+            min_conf = confidences.reshape(-1) > self.conf_threshold
+            boxes = boxes[min_conf]
+            confidences = confidences[min_conf]
+            classes = classes[min_conf]
+            result.append(DetectionPrediction(identifier, classes, confidences, *boxes.T, meta))
+        return result
