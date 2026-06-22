@@ -110,6 +110,7 @@ from .pose_estimation_3d import HumanPose3dAdapter
 from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
+from .detectron2 import Detectron2Adapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 from .yolact import YolactAdapter
 
@@ -177,6 +178,8 @@ __all__ = [
     'NanoDetAdapter',
     'FacialLandmarksAdapter',
     'MTCNNPAdapter',
+
+    'Detectron2Adapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
