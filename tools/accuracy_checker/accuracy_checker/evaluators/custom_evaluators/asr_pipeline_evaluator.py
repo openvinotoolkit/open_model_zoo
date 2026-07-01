@@ -213,7 +213,8 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
         )[0]
         return self.parse_asr_output(full_text)["text"]
 
-    def parse_asr_output(self, raw_text):
+    @staticmethod
+    def parse_asr_output(raw_text):
         """Parse the raw ASR output to extract language and transcription text."""
         language_match = re.search(r"<\|([a-z]{2,3})\|>", raw_text)
         text_match = re.search(
