@@ -17,9 +17,6 @@ limitations under the License.
 import importlib
 import re
 
-from optimum.intel.openvino import OVModelForSpeechSeq2Seq
-from transformers import AutoProcessor
-
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
 from .base_custom_evaluator import BaseCustomEvaluator
@@ -158,6 +155,20 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
             importlib.import_module("qwen_asr")
         except ImportError as import_error:
             UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        try:
+            from optimum.intel.openvino import OVModelForSpeechSeq2Seq  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("optimum.intel.openvino", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        try:
+            from transformers import AutoProcessor  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("transformers", import_error.msg).raise_error(
                 self.__class__.__name__
             )
 
