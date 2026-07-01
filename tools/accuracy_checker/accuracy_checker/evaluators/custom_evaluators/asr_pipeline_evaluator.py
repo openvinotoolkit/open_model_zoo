@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import importlib
+import re
+
+from optimum.intel.openvino import OVModelForSpeechSeq2Seq
+from transformers import AutoProcessor
+
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
 from .base_custom_evaluator import BaseCustomEvaluator
@@ -26,7 +32,10 @@ except ImportError as import_err:
 
 
 class ASRPipelineEvaluator(BaseCustomEvaluator):
-    VALID_PIPELINE_CLASSES = ["GenAIASRPipeline", "HFASRPipeline", "OptimumASRPipeline"]
+    VALID_PIPELINE_CLASSES = [
+        "GenAIASRPipeline",
+        "Qwen3ASROptimumPipeline",
+    ]
 
     def __init__(self, dataset_config, pipe, orig_config):
         super().__init__(dataset_config, None, orig_config)
@@ -133,3 +142,74 @@ class GenAIASRPipeline(ASRPipeline):
             data[0],
             return_timestamps=True,
         ).texts[0]
+
+
+class Qwen3ASROptimumPipeline(ASRPipeline):
+    SAMPLE_RATE = 16000
+    EOS_TOKEN_IDS = [151643, 151645]
+
+    def __init__(self, config):
+        self.max_new_tokens = config.get("max_new_tokens", 1000)
+        self.language = config.get("language")
+        super().__init__(config)
+
+    def _initialize_pipeline(self, config):
+        try:
+            importlib.import_module("qwen_asr")
+        except ImportError as import_error:
+            UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        model_dir = get_model_dir(config)
+        device = config.get("_device", "CPU")
+        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
+        ov_processor = AutoProcessor.from_pretrained(str(model_dir))
+        return ov_model, ov_processor
+
+    def _get_predictions(self, data, identifier, input_meta):
+        ov_model, ov_processor = self.pipeline
+        messages = [
+            {"role": "system", "content": ""},
+            {"role": "user", "content": [{"type": "audio", "audio": ""}]},
+        ]
+        text_prompt = ov_processor.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=False,
+        )
+        if self.language:
+            text_prompt += f"language {self.language}<asr_text>"
+
+        inputs = ov_processor(
+            text=text_prompt,
+            audio=data[0],
+            sampling_rate=self.SAMPLE_RATE,
+            return_tensors="pt",
+        )
+
+        output_ids = ov_model.generate(
+            input_features=inputs["input_features"],
+            decoder_input_ids=inputs["input_ids"],
+            eos_token_id=self.EOS_TOKEN_IDS,
+            max_new_tokens=self.max_new_tokens,
+        )
+
+        prompt_len = inputs["input_ids"].shape[1]
+        generated_only = output_ids[:, prompt_len:]
+        full_text = ov_processor.batch_decode(
+            generated_only, skip_special_tokens=False
+        )[0]
+        return self.parse_asr_output(full_text)["text"]
+
+    def parse_asr_output(self, raw_text):
+        """Parse the raw ASR output to extract language and transcription text."""
+        language_match = re.search(r"<\|([a-z]{2,3})\|>", raw_text)
+        text_match = re.search(
+            r"<asr_text>(.*?)(?:<\||$)", raw_text.replace("<|asr_text|>", "<asr_text>")
+        )
+
+        return {
+            "language": language_match.group(1) if language_match else None,
+            "text": text_match.group(1).strip() if text_match else raw_text.strip(),
+        }
