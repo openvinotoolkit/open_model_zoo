@@ -98,7 +98,8 @@ except ImportError as opencv_import_error:
         warnings.warn(
             "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
         )
-        _requirements.append('opencv-python')
+        _requirements.append('opencv-python==4.6.0.66;python_version<"3.12"')
+        _requirements.append('opencv-python==4.10.0.84;python_version>="3.12"')
     else:
         warnings.warn(
             "Problem with cv2 import: \n{}".format(opencv_import_error)
