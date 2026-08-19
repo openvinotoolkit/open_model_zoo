@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 
 from .mask_rcnn import MaskRCNNAdapter
+from ..config import ConfigError
 from ..representation import CoCoInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 
 
@@ -126,11 +127,13 @@ class Detectron2Adapter(MaskRCNNAdapter):
         if pred_masks is not None:
             pred_masks = pred_masks[valid_detections_mask]
 
+        classes = classes.astype(np.uint32)
+
         results = []
 
         for identifier, image_meta in zip(identifiers, frame_meta):
             original_image_size = image_meta['image_size'][:2]
-            
+
             # Rescale boxes to original image space using parent's logic
             if 'scale_x' in image_meta and 'scale_y' in image_meta:
                 im_scale_x = image_meta['scale_x']
@@ -146,19 +149,14 @@ class Detectron2Adapter(MaskRCNNAdapter):
                     processed_image_size = image_input[1:3]
                 im_scale_y = processed_image_size[0] / original_image_size[0]
                 im_scale_x = processed_image_size[1] / original_image_size[1]
-            
+
             boxes[:, 0::2] /= im_scale_x
             boxes[:, 1::2] /= im_scale_y
-            
-            classes = classes.astype(np.int32)
-            # Some exported pipelines emit 1-based classes; COCO 80cl in this setup is 0-based.
-            if classes.size and np.min(classes) >= 1:
-                classes = classes - 1
-            classes = classes.astype(np.uint32)
 
             masks = []
             if pred_masks is not None:
-                if self._is_roi_masks(pred_masks):
+                is_roi = self._is_roi_masks(pred_masks)
+                if is_roi:
                     masks = self._process_masks_pytorch(boxes, pred_masks, identifiers, original_image_size, classes)
                 else:
                     masks = self._process_detectron2_masks(pred_masks, original_image_size)
@@ -173,7 +171,7 @@ class Detectron2Adapter(MaskRCNNAdapter):
                 'segmentation_prediction': instance_segmentation_prediction
             }))
 
-            return results
+        return results
 
     def _process_detectron2_masks(self, pred_masks, original_image_size):
         masks = []
