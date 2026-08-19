@@ -43,6 +43,10 @@ class PyTorchLauncher(Launcher):
         parameters = super().parameters()
         parameters.update({
             'module': StringField(regex=MODULE_REGEX, description='Network module for loading'),
+            'use_detectron2_wrapper': BoolField(
+                optional=True, default=False,
+                description='Wrap Detectron2 models in a compatibility adapter for dict-based image inputs.'
+            ),
             'checkpoint': PathField(
                 check_exists=True, is_directory=False, optional=True, description='pre-trained model checkpoint'
             ),
@@ -95,6 +99,7 @@ class PyTorchLauncher(Launcher):
         self.validate_config(config_entry)
         self.use_torch_compile = config_entry.get('use_torch_compile', False)
         self.compile_kwargs = config_entry.get('torch_compile_kwargs', {})
+        self.use_detectron2_wrapper = config_entry.get('use_detectron2_wrapper', False)
         self.tranformers_class = config_entry.get('transformers_class', None)
         backend = self.compile_kwargs.get('backend', None)
         if self.use_torch_compile and backend == 'openvino':
@@ -103,6 +108,13 @@ class PyTorchLauncher(Launcher):
             except ImportError as import_error:
                 raise ValueError("torch.compile is supported from OpenVINO 2023.1\n{}".format(
                     import_error.msg)) from import_error
+        if self.use_detectron2_wrapper:
+            try:
+                from .detectron2_wrapper import Detectron2Wrapper  # pylint: disable=C0415
+            except ImportError as import_error:
+                raise ValueError("Detectron2 wrapper is unavailable.\n{}".format(
+                    import_error.msg)) from import_error
+            self._detectron2_wrapper = Detectron2Wrapper
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
         self.device = self.get_value_from_config('device')
@@ -162,10 +174,18 @@ class PyTorchLauncher(Launcher):
                     init_method=None
     ):
         module_parts = model_cls.split(".")
-        model_cls = module_parts[-1]
+        model_cls_name = module_parts[-1]
         model_path = ".".join(module_parts[:-1])
+
+        if self.use_detectron2_wrapper and checkpoint:
+            preloaded_module = self._detectron2_wrapper.load_prebuilt_checkpoint(
+                self, checkpoint, model_cls_name, python_path
+            )
+            if preloaded_module is not None:
+                return preloaded_module
+
         with append_to_path(python_path):
-            model_cls = getattr(importlib.import_module(model_path), model_cls)
+            model_cls = getattr(importlib.import_module(model_path), model_cls_name)
             module = model_cls(*module_args, **module_kwargs)
             if init_method is not None:
                 if hasattr(model_cls, init_method):
@@ -177,14 +197,23 @@ class PyTorchLauncher(Launcher):
             if checkpoint:
                 if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                     checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
+
+                use_weights_only = self.checkpoint_weights_only
+                if self.use_detectron2_wrapper:
+                    use_weights_only = False
+
                 checkpoint = self._torch.load(
                     checkpoint,
                     map_location=None if self.cuda else self._torch.device('cpu'),
-                    weights_only=self.checkpoint_weights_only
+                    weights_only=use_weights_only
                 )
+
+                if isinstance(checkpoint, self._torch.nn.Module):
+                    return self.prepare_module(checkpoint, model_cls)
+
                 state = checkpoint if not state_key else checkpoint[state_key]
 
-                if not self.checkpoint_weights_only:
+                if not use_weights_only:
 
                     state_dict_contains_model = (
                         isinstance(state, dict) and
@@ -196,9 +225,12 @@ class PyTorchLauncher(Launcher):
                         loaded_model = state['model']
                         return self.prepare_module(loaded_model, model_cls)
 
-                if all(key.startswith('module.') for key in state):
-                    module = self._torch.nn.DataParallel(module)
-                module.load_state_dict(state, strict=False)
+                if isinstance(state, dict):
+                    if all(key.startswith('module.') for key in state):
+                        module = self._torch.nn.DataParallel(module)
+                    module.load_state_dict(state, strict=False)
+                elif isinstance(state, self._torch.nn.Module):
+                    return self.prepare_module(state, model_cls)
 
             return self.prepare_module(module, model_cls)
 
@@ -214,10 +246,13 @@ class PyTorchLauncher(Launcher):
         return self.prepare_module(module, model_class)
 
     def prepare_module(self, module, model_class):
+        if self.use_detectron2_wrapper:
+            return self._detectron2_wrapper.prepare_module(self, module, model_class)
+
         module.to('cuda' if self.cuda else 'cpu')
         module.eval()
-
         if self.use_torch_compile:
+
             if hasattr(model_class, 'compile'):
                 module.compile()
             module = self._torch.compile(module, **self.compile_kwargs)
@@ -277,6 +312,24 @@ class PyTorchLauncher(Launcher):
             return {'last_hidden_state': outputs.last_hidden_state}
         return list(outputs)
 
+    def _fill_meta(self, metadata, batch_input=None):
+        if metadata is None:
+            return
+
+        for meta_ in metadata:
+            if batch_input is None:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+                continue
+
+            if isinstance(batch_input, dict) and 'input' in batch_input:
+                inp = batch_input['input']
+                input_shape = list(inp.shape)
+                if len(input_shape) == 3:
+                    input_shape = [1] + input_shape
+                meta_['input_shape'] = {'input': input_shape}
+            else:
+                meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
+
     def predict(self, inputs, metadata=None, **kwargs):
         results = []
         with self._torch.no_grad():
@@ -287,13 +340,13 @@ class PyTorchLauncher(Launcher):
                     model_dtype = next(self.module.parameters()).dtype
                     if inp.dtype != model_dtype:
                         batch_input['input'] = inp.to(model_dtype)
+                        inp = batch_input['input']
 
+                    self._fill_meta(metadata, batch_input)
                     outputs = self.module(batch_input['input'])
                 else:
                     outputs = self.module(**batch_input)
-
-                    for meta_ in metadata:
-                        meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
+                    self._fill_meta(metadata, batch_input)
 
                 if metadata[0].get('output_is_dict_type') or isinstance(outputs, dict):
                     result_dict = self._convert_to_numpy(outputs)
