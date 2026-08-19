@@ -175,11 +175,8 @@ class Dataset:
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
 
-        sub_evaluation = config.get('sub_evaluation', False) and not ignore_subset_settings(config)
-
-        if sub_evaluation:
-            if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
-                _save_annotation()
+        if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
+            _save_annotation()
 
         no_recursion = (meta or {}).get('no_recursion', False)
         annotation = _create_subset(annotation, config, no_recursion)
@@ -187,10 +184,6 @@ class Dataset:
 
         if dataset_analysis:
             meta = _run_dataset_analysis(meta)
-
-        if not sub_evaluation:
-            if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
-                _save_annotation()
 
         return annotation, meta
 
