@@ -245,7 +245,7 @@ class BaseReader(ClassProvider):
                 optional=True, default=0.4, min_value=0,
                 description='Initial delay in seconds between read retries. Doubled after every failed retry '
                             'and kept at that level for subsequent reads, so it settles at a value that works. '
-                            'With default read_total_retries, worst case delay is initial_retry_delay * 2^(read_total_retries - 1).'
+                            'Worst case delay is initial_retry_delay * 2^(read_total_retries - 1).'
             ),
             'data_layout': StringField(optional=True, description='data layout after reading')
         }
@@ -333,9 +333,7 @@ class BaseReader(ClassProvider):
                     if self._retry_delay:
                         time.sleep(self._retry_delay)
                         self._retry_delay *= 2
-
-            if last_error is not None:
-                raise last_error
+            raise last_error
 
         return wrapper
 
