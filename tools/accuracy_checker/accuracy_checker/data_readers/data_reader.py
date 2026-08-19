@@ -234,12 +234,18 @@ class BaseReader(ClassProvider):
                 default=False, optional=True, description='Allows multi infer.'
             ),
             'read_retry_attempts': NumberField(
-                optional=True, default=1, value_type=int, min_value=1,
-                description='Number of attempts for transient read failures.'
+                optional=True, default=4, value_type=int, min_value=1,
+                description='Number of attempts for transient read failures for a single read.'
             ),
-            'read_retry_delay': NumberField(
-                optional=True, default=0.1, min_value=0,
-                description='Delay in seconds between read retries.'
+            'read_total_retries': NumberField(
+                optional=True, default=8, value_type=int, min_value=0,
+                description='Total number of retries allowed across the whole dataset read, decremented on every retry.'
+            ),
+            'initial_retry_delay': NumberField(
+                optional=True, default=0.4, min_value=0,
+                description='Initial delay in seconds between read retries. Doubled after every failed retry '
+                            'and kept at that level for subsequent reads, so it settles at a value that works. '
+                            'With default read_total_retries, worst case delay is initial_retry_delay * 2^(read_total_retries - 1).'
             ),
             'data_layout': StringField(optional=True, description='data layout after reading')
         }
@@ -309,7 +315,10 @@ class BaseReader(ClassProvider):
 
     def _retry_read_dispatcher(self, read_dispatcher):
         attempts = self.get_value_from_config('read_retry_attempts')
-        delay = self.get_value_from_config('read_retry_delay')
+        # kept on self (not local to wrapper) so the delay keeps escalating across reads instead of
+        # restarting from initial_retry_delay every time, letting it settle at a value that works
+        self._retry_delay = self.get_value_from_config('initial_retry_delay')
+        self._remaining_total_retries = self.get_value_from_config('read_total_retries')
 
         def wrapper(data_id):
             last_error = None
@@ -318,10 +327,12 @@ class BaseReader(ClassProvider):
                     return read_dispatcher(data_id)
                 except OSError as error:
                     last_error = error
-                    if attempt + 1 >= attempts:
+                    if attempt + 1 >= attempts or self._remaining_total_retries <= 0:
                         raise
-                    if delay:
-                        time.sleep(delay)
+                    self._remaining_total_retries -= 1
+                    if self._retry_delay:
+                        time.sleep(self._retry_delay)
+                        self._retry_delay *= 2
 
             if last_error is not None:
                 raise last_error

@@ -34,15 +34,19 @@ reader:
 
 ## Retrying Transient Read Errors
 
-All data readers support automatic retrying of reads that fail with an `OSError` (e.g. a transient I/O error on a network share or removable media). This is controlled by 2 optional parameters, available for any reader:
-* `read_retry_attempts` - number of attempts to perform before giving up and re-raising the error (Optional, default `1`, i.e. no retry).
-* `read_retry_delay` - delay in seconds between retry attempts (Optional, default `0.1`).
+All data readers support automatic retrying of reads that fail with an `OSError` (e.g. a transient I/O error on a network share or removable media). This is controlled by 3 optional parameters, available for any reader:
+* `read_retry_attempts` - number of attempts to perform for a single read before giving up and re-raising the error (Optional, default `4`).
+* `read_total_retries` - total number of retries allowed across the whole dataset read (shared budget, decremented on every retry); once exhausted, further failures are raised immediately (Optional, default `8`).
+* `initial_retry_delay` - delay in seconds before the first retry; doubled after each subsequent failed retry and kept at that level for later reads, so it settles at a value that works (Optional, default `0.4`).
+
+The retry delay is not reset between reads, so in the worst case (every retry across the whole dataset failing) it escalates up to `initial_retry_delay * 2^(read_total_retries - 1)`. With the defaults above that is `0.4 * 2^7 = 51.2` seconds.
 
 ```yml
 reader:
   type: opencv_imread
-  read_retry_attempts: 3
-  read_retry_delay: 0.5
+  read_retry_attempts: 4
+  read_total_retries: 8
+  initial_retry_delay: 0.4
 ```
 
 ## Supported Data Readers
