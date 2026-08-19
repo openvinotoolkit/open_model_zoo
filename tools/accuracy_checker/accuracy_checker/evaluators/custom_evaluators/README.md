@@ -63,6 +63,7 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/stable_diffusion_evaluator.py`.
 
 * **Whisper Evaluator** demonstrates how to evaluate Whisper family models with various pipeline classes, including GenAIWhisperPipeline, HFWhisperPipeline, and OptimumWhisperPipeline.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/whisper_evaluator.py`. 
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/whisper_evaluator.py`.
 
-
+* **ASR Pipeline Evaluator** demonstrates how to evaluate automatic speech recognition models with various pipeline classes, including GenAIASRPipeline, Qwen3ASROptimumPipeline
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_pipeline_evaluator.py`.

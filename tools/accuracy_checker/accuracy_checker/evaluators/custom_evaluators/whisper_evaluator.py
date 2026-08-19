@@ -128,7 +128,10 @@ class GenAIWhisperPipeline(WhisperPipeline):
         return pipeline
 
     def _get_predictions(self, data, identifiers, input_meta):
-        return self.pipeline.generate(data[0], return_timestamps=True).texts[0]
+        return self.pipeline.generate(
+            data[0],
+            return_timestamps=True,
+        ).texts[0]
 
 
 class HFWhisperPipeline(WhisperPipeline):
@@ -158,8 +161,18 @@ class HFWhisperPipeline(WhisperPipeline):
 
     def _get_predictions(self, data, identifiers, input_meta):
         sampling_rate = input_meta[0].get("sample_rate")
-        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
-        return self.pipeline(sample, return_timestamps=True)["text"]
+        sample = {
+            "path": identifiers[0],
+            "array": data[0],
+            "sampling_rate": sampling_rate,
+        }
+        return self.pipeline(
+            sample,
+            return_timestamps=True,
+            generate_kwargs={
+                "num_beams": 1,
+            },
+        )["text"]
 
 
 class OptimumWhisperPipeline(WhisperPipeline):
@@ -183,8 +196,18 @@ class OptimumWhisperPipeline(WhisperPipeline):
 
     def _get_predictions(self, data, identifiers, input_meta):
         sampling_rate = input_meta[0].get("sample_rate")
-        sample = {"path": identifiers[0], "array": data[0], "sampling_rate": sampling_rate}
-        return self.pipeline(sample, return_timestamps=True)["text"]
+        sample = {
+            "path": identifiers[0],
+            "array": data[0],
+            "sampling_rate": sampling_rate,
+        }
+        return self.pipeline(
+            sample,
+            return_timestamps=True,
+            generate_kwargs={
+                "num_beams": 1,
+            },
+        )["text"]
 
 
 
