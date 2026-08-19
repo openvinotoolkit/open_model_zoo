@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import re
+import time
 from collections import OrderedDict, namedtuple
 from functools import singledispatch
 from pathlib import Path
@@ -26,7 +27,7 @@ from ..utils import (
 )
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import (
-    BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField
+    BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField, NumberField
 )
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor' ,'disk_features_extractor' ]
@@ -204,15 +205,16 @@ class BaseReader(ClassProvider):
         self.config = config or {}
         self._postpone_data_source = postpone_data_source
         self.data_source = data_source
-        self.read_dispatcher = singledispatch(self.read)
-        self.read_dispatcher.register(list, self._read_list)
-        self.read_dispatcher.register(ClipIdentifier, self._read_clip)
-        self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
-        self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
-        self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
-        self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
-        self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
-        self.read_dispatcher.register(VideoFrameIdentifier, self._read_video_frame)
+        read_dispatcher = singledispatch(self.read)
+        read_dispatcher.register(list, self._read_list)
+        read_dispatcher.register(ClipIdentifier, self._read_clip)
+        read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
+        read_dispatcher.register(ImagePairIdentifier, self._read_pair)
+        read_dispatcher.register(ListIdentifier, self._read_list_ids)
+        read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
+        read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
+        read_dispatcher.register(VideoFrameIdentifier, self._read_video_frame)
+        self.read_dispatcher = self._retry_read_dispatcher(read_dispatcher)
         self.multi_infer = False
         self.data_layout = None
 
@@ -230,6 +232,14 @@ class BaseReader(ClassProvider):
             ),
             'multi_infer': BoolField(
                 default=False, optional=True, description='Allows multi infer.'
+            ),
+            'read_retry_attempts': NumberField(
+                optional=True, default=1, value_type=int, min_value=1,
+                description='Number of attempts for transient read failures.'
+            ),
+            'read_retry_delay': NumberField(
+                optional=True, default=0.1, min_value=0,
+                description='Delay in seconds between read retries.'
             ),
             'data_layout': StringField(optional=True, description='data layout after reading')
         }
@@ -297,8 +307,29 @@ class BaseReader(ClassProvider):
     def read(self, data_id):
         raise NotImplementedError
 
+    def _retry_read_dispatcher(self, read_dispatcher):
+        attempts = self.get_value_from_config('read_retry_attempts')
+        delay = self.get_value_from_config('read_retry_delay')
+
+        def wrapper(data_id):
+            last_error = None
+            for attempt in range(attempts):
+                try:
+                    return read_dispatcher(data_id)
+                except OSError as error:
+                    last_error = error
+                    if attempt + 1 >= attempts:
+                        raise
+                    if delay:
+                        time.sleep(delay)
+
+            if last_error is not None:
+                raise last_error
+
+        return wrapper
+
     def _read_list(self, data_id):
-        return [self.read(identifier) for identifier in data_id]
+        return [self.read_dispatcher(identifier) for identifier in data_id]
 
     def _read_list_ids(self, data_id):
         return self.read_dispatcher(list(data_id.values))

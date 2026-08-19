@@ -19,6 +19,7 @@ from pathlib import Path
 from unittest.mock import ANY
 
 import pytest
+import numpy as np
 from accuracy_checker.config.config_validator import (
     ConfigError,
     ConfigValidator,
@@ -292,6 +293,29 @@ class TestPathField:
             prefix_path = Path(prefix)
             file_field = PathField(is_directory=False, check_exists=False)
             file_field.validate(prefix_path / 'foo' / 'bar')
+
+
+class TestBaseReaderRetry:
+    def test_retry_transient_read_error(self):
+        class FlakyReader(BaseReader):
+            __provider__ = 'flaky_reader'
+
+            def __init__(self, *args, **kwargs):
+                self.read_attempts = 0
+                super().__init__(*args, **kwargs)
+
+            def read(self, data_id):
+                self.read_attempts += 1
+                if self.read_attempts < 2:
+                    raise OSError('temporary network error')
+                return np.array([data_id])
+
+        reader = FlakyReader(None, config={'read_retry_attempts': 2, 'read_retry_delay': 0}, postpone_data_source=True)
+
+        data_representation = reader(7)
+
+        assert np.array_equal(data_representation.data, np.array([7]))
+        assert reader.read_attempts == 2
 
 
 class TestConfigValidator:
