@@ -32,6 +32,19 @@ reader:
     *.jpeg: opencv_imread
 ```
 
+## Retrying Transient Read Errors
+
+All data readers support automatic retrying of reads that fail with an `OSError` (e.g. a transient I/O error on a network share or removable media). This is controlled by 2 optional parameters, available for any reader:
+* `read_retry_attempts` - number of attempts to perform before giving up and re-raising the error (Optional, default `1`, i.e. no retry).
+* `read_retry_delay` - delay in seconds between retry attempts (Optional, default `0.1`).
+
+```yml
+reader:
+  type: opencv_imread
+  read_retry_attempts: 3
+  read_retry_delay: 0.5
+```
+
 ## Supported Data Readers
 
 AccuracyChecker supports following list of data readers:
