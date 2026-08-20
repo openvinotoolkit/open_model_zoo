@@ -98,6 +98,31 @@ class Detectron2Adapter(MaskRCNNAdapter):
         self.scores_out = scores_name
         self.raw_masks_out = masks_name
 
+    @staticmethod
+    def _get_image_scales(image_meta, original_image_size):
+        if 'scale_x' in image_meta and 'scale_y' in image_meta:
+            return image_meta['scale_x'], image_meta['scale_y']
+
+        image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
+        assert image_input, "image input not found"
+        assert len(image_input) == 1, 'several input images detected'
+        image_input = image_input[0]
+        if image_input[1] == 3:
+            processed_image_size = image_input[2:]
+        else:
+            processed_image_size = image_input[1:3]
+        return (
+            processed_image_size[1] / original_image_size[1],
+            processed_image_size[0] / original_image_size[0]
+        )
+
+    def _process_masks(self, boxes, pred_masks, identifiers, original_image_size, classes):
+        if pred_masks is None:
+            return []
+        if self._is_roi_masks(pred_masks):
+            return self._process_masks_pytorch(boxes, pred_masks, identifiers, original_image_size, classes)
+        return self._process_detectron2_masks(pred_masks, original_image_size)
+
     def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
         self._auto_resolve_outputs(raw_outputs)
 
@@ -133,33 +158,11 @@ class Detectron2Adapter(MaskRCNNAdapter):
 
         for identifier, image_meta in zip(identifiers, frame_meta):
             original_image_size = image_meta['image_size'][:2]
-
-            # Rescale boxes to original image space using parent's logic
-            if 'scale_x' in image_meta and 'scale_y' in image_meta:
-                im_scale_x = image_meta['scale_x']
-                im_scale_y = image_meta['scale_y']
-            else:
-                image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
-                assert image_input, "image input not found"
-                assert len(image_input) == 1, 'several input images detected'
-                image_input = image_input[0]
-                if image_input[1] == 3:
-                    processed_image_size = image_input[2:]
-                else:
-                    processed_image_size = image_input[1:3]
-                im_scale_y = processed_image_size[0] / original_image_size[0]
-                im_scale_x = processed_image_size[1] / original_image_size[1]
+            im_scale_x, im_scale_y = self._get_image_scales(image_meta, original_image_size)
 
             boxes[:, 0::2] /= im_scale_x
             boxes[:, 1::2] /= im_scale_y
-
-            masks = []
-            if pred_masks is not None:
-                is_roi = self._is_roi_masks(pred_masks)
-                if is_roi:
-                    masks = self._process_masks_pytorch(boxes, pred_masks, identifiers, original_image_size, classes)
-                else:
-                    masks = self._process_detectron2_masks(pred_masks, original_image_size)
+            masks = self._process_masks(boxes, pred_masks, identifiers, original_image_size, classes)
 
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)

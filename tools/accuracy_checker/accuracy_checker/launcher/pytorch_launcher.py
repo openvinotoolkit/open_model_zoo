@@ -170,6 +170,35 @@ class PyTorchLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.output_names))
 
+    def _load_checkpoint(self, module, model_class, checkpoint, state_key):
+        if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
+            checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
+
+        use_weights_only = self.checkpoint_weights_only and not self.use_detectron2_wrapper
+        checkpoint = self._torch.load(
+            checkpoint,
+            map_location=None if self.cuda else self._torch.device('cpu'),
+            weights_only=use_weights_only
+        )
+
+        if isinstance(checkpoint, self._torch.nn.Module):
+            return self.prepare_module(checkpoint, model_class), True
+
+        state = checkpoint if not state_key else checkpoint[state_key]
+        if not use_weights_only and isinstance(state, dict) and 'model' in state:
+            loaded_model = state['model']
+            if isinstance(loaded_model, self._torch.nn.Module):
+                return self.prepare_module(loaded_model, model_class), True
+
+        if isinstance(state, dict):
+            if all(key.startswith('module.') for key in state):
+                module = self._torch.nn.DataParallel(module)
+            module.load_state_dict(state, strict=False)
+        elif isinstance(state, self._torch.nn.Module):
+            return self.prepare_module(state, model_class), True
+
+        return module, False
+
     def load_module(self, model_cls, module_args, module_kwargs, checkpoint=None, state_key=None, python_path=None,
                     init_method=None
     ):
@@ -195,42 +224,9 @@ class PyTorchLauncher(Launcher):
                     raise ValueError(f'Could not call the method {init_method} in the module {model_cls}.')
 
             if checkpoint:
-                if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
-                    checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310  # disable urllib-urlopen check
-
-                use_weights_only = self.checkpoint_weights_only
-                if self.use_detectron2_wrapper:
-                    use_weights_only = False
-
-                checkpoint = self._torch.load(
-                    checkpoint,
-                    map_location=None if self.cuda else self._torch.device('cpu'),
-                    weights_only=use_weights_only
-                )
-
-                if isinstance(checkpoint, self._torch.nn.Module):
-                    return self.prepare_module(checkpoint, model_cls)
-
-                state = checkpoint if not state_key else checkpoint[state_key]
-
-                if not use_weights_only:
-
-                    state_dict_contains_model = (
-                        isinstance(state, dict) and
-                        'model' in state and
-                        isinstance(state['model'], self._torch.nn.Module)
-                    )
-
-                    if state_dict_contains_model:
-                        loaded_model = state['model']
-                        return self.prepare_module(loaded_model, model_cls)
-
-                if isinstance(state, dict):
-                    if all(key.startswith('module.') for key in state):
-                        module = self._torch.nn.DataParallel(module)
-                    module.load_state_dict(state, strict=False)
-                elif isinstance(state, self._torch.nn.Module):
-                    return self.prepare_module(state, model_cls)
+                module, is_prepared = self._load_checkpoint(module, model_cls, checkpoint, state_key)
+                if is_prepared:
+                    return module
 
             return self.prepare_module(module, model_cls)
 

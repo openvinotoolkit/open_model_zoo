@@ -15,12 +15,18 @@ limitations under the License.
 """
 import re
 import urllib.request
-import torch
-import torch.nn as nn
+from ..utils import UnsupportedPackage
 from .pytorch_launcher import append_to_path, CHECKPOINT_URL_REGEX
 
+try:
+    import torch
+    from torch import nn
+except ImportError as torch_error:
+    torch = UnsupportedPackage('torch', torch_error.msg)
+    nn = None
 
-class Detectron2Wrapper(nn.Module):
+
+class Detectron2Wrapper(nn.Module if nn else object):
     """
     Wraps a Detectron2 GeneralizedRCNN model to adapt it for accuracy_checker.
 
@@ -36,51 +42,53 @@ class Detectron2Wrapper(nn.Module):
     """
 
     @staticmethod
+    def _raise_if_torch_unavailable():
+        if nn is None:
+            torch.raise_error(Detectron2Wrapper.__name__)
+
+    @staticmethod
     def load_prebuilt_checkpoint(torch_launcher, checkpoint, model_cls_name, python_path):
         # Detectron2 checkpoints can contain a fully constructed model object;
         # load it directly to avoid calling the GeneralizedRCNN constructor.
+        Detectron2Wrapper._raise_if_torch_unavailable()
         with append_to_path(python_path):
             if isinstance(checkpoint, str) and re.match(CHECKPOINT_URL_REGEX, checkpoint):
                 checkpoint = urllib.request.urlretrieve(checkpoint)[0]  # nosec B310
 
-            checkpoint_obj = torch_launcher._torch.load(
+            checkpoint_obj = torch.load(
                 checkpoint,
-                map_location=None if torch_launcher.cuda else torch_launcher._torch.device('cpu'),
+                map_location=None if torch_launcher.cuda else torch.device('cpu'),
                 weights_only=False
             )
 
-            if isinstance(checkpoint_obj, torch_launcher._torch.nn.Module):
+            if isinstance(checkpoint_obj, nn.Module):
                 return torch_launcher.prepare_module(checkpoint_obj, model_cls_name)
 
         return None
 
     @staticmethod
     def prepare_module(torch_launcher, module, model_class):
+        Detectron2Wrapper._raise_if_torch_unavailable()
         wrapped_module = Detectron2Wrapper(module)
         wrapped_module.model.to('cuda' if torch_launcher.cuda else 'cpu')
         wrapped_module.model.eval()
         if torch_launcher.use_torch_compile:
             if hasattr(model_class, 'compile'):
                 wrapped_module.model.compile()
-            wrapped_module.model = torch_launcher._torch.compile(
+            wrapped_module.model = torch.compile(
                 wrapped_module.model,
                 **torch_launcher.compile_kwargs
             )
         return wrapped_module
 
     def __init__(self, model):
+        self._raise_if_torch_unavailable()
         super().__init__()
         self.model = model
 
-    def forward(self, batched_inputs):
-        """
-        Args:
-            batched_inputs: Tensor of shape [B, C, H, W] or [C, H, W]
-
-        Returns:
-            Dict with extracted predictions or list of dicts if batch > 1
-        """
-        # Normalize layout to NCHW/CHW when the channel axis is not in the expected position.
+    @staticmethod
+    def _normalize_input_layout(batched_inputs):
+        Detectron2Wrapper._raise_if_torch_unavailable()
         if isinstance(batched_inputs, torch.Tensor):
             if batched_inputs.dim() == 4 and batched_inputs.shape[1] != 3:
                 if batched_inputs.shape[-1] == 3:
@@ -92,26 +100,31 @@ class Detectron2Wrapper(nn.Module):
                     batched_inputs = batched_inputs.permute(2, 0, 1).contiguous()
                 elif batched_inputs.shape[1] == 3:
                     batched_inputs = batched_inputs.permute(1, 0, 2).contiguous()
+        return batched_inputs
 
-        # Convert batched tensor to detectron2 format
-        # If input is already a list of dicts (from some adapters), use as-is
+    @staticmethod
+    def _to_detectron_inputs(batched_inputs):
         if isinstance(batched_inputs, (list, tuple)) and len(batched_inputs) > 0:
             if isinstance(batched_inputs[0], dict):
-                # Already in detectron2 format
-                detectron_inputs = batched_inputs
-            else:
-                # List of tensors - convert to list of dicts
-                detectron_inputs = [{"image": img} for img in batched_inputs]
-        else:
-            # Single tensor input [B, C, H, W]
-            if batched_inputs.dim() == 4:
-                # Split batch into list of [C, H, W]
-                detectron_inputs = [{"image": img} for img in batched_inputs]
-            elif batched_inputs.dim() == 3:
-                # Single image [C, H, W]
-                detectron_inputs = [{"image": batched_inputs}]
-            else:
-                raise ValueError(f"Unexpected input shape: {batched_inputs.shape}")
+                return batched_inputs
+            return [{"image": image} for image in batched_inputs]
+        if batched_inputs.dim() == 4:
+            return [{"image": image} for image in batched_inputs]
+        if batched_inputs.dim() == 3:
+            return [{"image": batched_inputs}]
+        raise ValueError(f"Unexpected input shape: {batched_inputs.shape}")
+
+    def forward(self, batched_inputs):
+        """
+        Args:
+            batched_inputs: Tensor of shape [B, C, H, W] or [C, H, W]
+
+        Returns:
+            Dict with extracted predictions or list of dicts if batch > 1
+        """
+        self._raise_if_torch_unavailable()
+        batched_inputs = self._normalize_input_layout(batched_inputs)
+        detectron_inputs = self._to_detectron_inputs(batched_inputs)
 
         # Call detectron2 model
         with torch.no_grad():
