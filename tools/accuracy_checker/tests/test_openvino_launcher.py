@@ -22,12 +22,13 @@ pytest.importorskip('accuracy_checker.launcher.openvino_launcher')
 from accuracy_checker.launcher.openvino_launcher import OpenVINOLauncher
 
 
-def test_npu_initializes_unbounded_dynamic_shape_before_compilation(mocker):
+def test_bounded_initializes_unbounded_shape_before_compilation(mocker):
     launcher = OpenVINOLauncher.__new__(OpenVINOLauncher)
     launcher._device = 'NPU'
     launcher._partial_shapes = {'pixel_values': '[-1,3,-1,-1]'}
-    launcher.dynamic_shapes_policy = 'dynamic'
+    launcher.dynamic_shapes_policy = 'bounded'
     launcher.is_dynamic = True
+    launcher.dyn_input_layers = []
     launcher._reshape_input = mocker.Mock()
 
     launcher.initialize_undefined_shapes([{'pixel_values': np.zeros((1, 3, 224, 224), dtype=np.float32)}])
@@ -36,11 +37,11 @@ def test_npu_initializes_unbounded_dynamic_shape_before_compilation(mocker):
     assert not launcher.is_dynamic
 
 
-def test_npu_keeps_bounded_dynamic_shape_initialization(mocker):
+def test_bounded_keeps_bounded_shape_initialization(mocker):
     launcher = OpenVINOLauncher.__new__(OpenVINOLauncher)
     launcher._device = 'NPU'
     launcher._partial_shapes = {'pixel_values': '[1..4,3,224..512,224..512]'}
-    launcher.dynamic_shapes_policy = 'dynamic'
+    launcher.dynamic_shapes_policy = 'bounded'
     launcher.is_dynamic = True
     launcher.load_network = mocker.Mock()
     launcher.exec_network = mocker.Mock()

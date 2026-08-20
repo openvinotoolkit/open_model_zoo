@@ -768,15 +768,15 @@ class OpenVINOLauncher(Launcher):
         return self._lstm_inputs
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
-        if self._npu_requires_bounded_input_shapes():
+        if self._should_resolve_unbounded_dynamic_shapes():
             warning(
-                'NPU device does not support unbounded dynamic input shapes. '
+                'Unbounded dynamic input shapes are not supported by the selected policy. '
                 'Input shapes will be resolved before model compilation.'
             )
-            self.is_dynamic = False
             self._reshape_input(self._get_shapes_for_input_data(input_data, template_shapes))
+            self.is_dynamic = bool(self.dyn_input_layers)
             return
-        if self.dynamic_shapes_policy in ['default', 'dynamic']:
+        if self.dynamic_shapes_policy in ['default', 'dynamic', 'bounded']:
             try:
                 if template_shapes:
                     input_shapes = {layer_name: template_shapes.get(layer_name, data.shape)
@@ -796,8 +796,8 @@ class OpenVINOLauncher(Launcher):
                 self.is_dynamic = False
         self._reshape_input({layer_name: data.shape for layer_name, data in input_data[0].items()})
 
-    def _npu_requires_bounded_input_shapes(self):
-        if 'NPU' not in self._devices_list():
+    def _should_resolve_unbounded_dynamic_shapes(self):
+        if self.dynamic_shapes_policy != 'bounded':
             return False
         for partial_shape in self._partial_shapes.values():
             if -1 in parse_partial_shape(partial_shape):

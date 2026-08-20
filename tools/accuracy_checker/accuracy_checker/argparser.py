@@ -302,11 +302,12 @@ def add_openvino_specific_args(parser):
         required=False
     )
     openvino_specific_args.add_argument(
-        '--undefined_shapes_resolving_policy', choices=['default', 'dynamic', 'static'],
+        '--undefined_shapes_resolving_policy', choices=['default', 'dynamic', 'static', 'bounded'],
         help='Policy how to make deal with undefined shapes in network: '
              'default - try to run as default, if does not work switch to static, '
              'dynamic - enforce network execution with dynamic shapes, '
-             'static - convert undefined shapes to static before execution',
+             'static - convert undefined shapes to static before execution, '
+             'bounded - bound unbounded dynamic shapes before execution, use default policy otherwise',
         required=False, default='default'
     )
     openvino_specific_args.add_argument(
