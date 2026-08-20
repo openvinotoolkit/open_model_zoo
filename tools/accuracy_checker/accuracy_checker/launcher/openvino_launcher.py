@@ -769,9 +769,9 @@ class OpenVINOLauncher(Launcher):
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
         if self._should_resolve_unbounded_dynamic_shapes():
-            warning(
-                'Unbounded dynamic input shapes are not supported by the selected policy. '
-                'Input shapes will be resolved before model compilation.'
+            print_info(
+                'Unbounded dynamic input shapes will be resolved before model compilation '
+                'because bounded undefined shapes resolving policy is selected.'
             )
             self._reshape_input(self._get_shapes_for_input_data(input_data, template_shapes))
             self.is_dynamic = bool(self.dyn_input_layers)
@@ -793,6 +793,10 @@ class OpenVINOLauncher(Launcher):
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
                     raise e
+                warning(
+                    'Dynamic input shape initialization failed. Accuracy Checker will resolve input shapes '
+                    'from prepared data and retry model compilation. Original error: {}'.format(e)
+                )
                 self.is_dynamic = False
         self._reshape_input({layer_name: data.shape for layer_name, data in input_data[0].items()})
 
