@@ -682,6 +682,14 @@ class DLSDKLauncher(Launcher):
         return input_shapes
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
+        if self._npu_requires_bounded_input_shapes():
+            warning(
+                'NPU device does not support unbounded dynamic input shapes. '
+                'Input shapes will be resolved before model compilation.'
+            )
+            self.is_dynamic = False
+            self._reshape_input(self._get_shapes_for_input_data(input_data, template_shapes))
+            return
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
             try:
                 if template_shapes:
@@ -703,6 +711,25 @@ class DLSDKLauncher(Launcher):
                 self.is_dynamic = False
         input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
         self._reshape_input(input_shapes)
+
+    def _npu_requires_bounded_input_shapes(self):
+        if 'NPU' not in self._devices_list():
+            return False
+        for partial_shape in self._partial_shapes.values():
+            shape = (
+                partial_shape if isinstance(partial_shape, (list, tuple)) else parse_partial_shape(partial_shape)
+            )
+            if -1 in shape:
+                return True
+        return False
+
+    @staticmethod
+    def _get_shapes_for_input_data(input_data, template_shapes=None):
+        if not template_shapes:
+            return {layer_name: data.shape for layer_name, data in input_data[0].items()}
+        return {
+            layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in input_data[0].items()
+        }
 
     def resolve_undefined_batch(self):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
