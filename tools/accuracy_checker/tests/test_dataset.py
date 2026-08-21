@@ -308,7 +308,7 @@ class TestAnnotationConversion:
         annotation, _ = Dataset.load_annotation(config)
         assert annotation == [converted_annotation[0]]
 
-    def test_annotation_conversion_save_subset(self, mocker):
+    def test_annotation_conversion_save_full_annotation_with_subset(self, mocker):
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
             'annotation': Path('custom'),
@@ -326,7 +326,7 @@ class TestAnnotationConversion:
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         Dataset(config)
-        annotation_saver_mock.assert_called_once_with([converted_annotation[1]], None, Path('custom'), None, config)
+        annotation_saver_mock.assert_called_once_with(converted_annotation, None, Path('custom'), None, config)
 
     def test_annotation_conversion_subset_with_disabled_shuffle(self, mocker):
         addition_options = {

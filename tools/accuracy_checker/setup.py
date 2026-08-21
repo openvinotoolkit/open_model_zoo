@@ -98,7 +98,8 @@ except ImportError as opencv_import_error:
         warnings.warn(
             "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
         )
-        _requirements.append('opencv-python')
+        # 4.6.0.66 is incompatible with numpy>=2.0 (core requirements allow numpy<2.1.0)
+        _requirements.append('opencv-python==4.10.0.84')
     else:
         warnings.warn(
             "Problem with cv2 import: \n{}".format(opencv_import_error)
