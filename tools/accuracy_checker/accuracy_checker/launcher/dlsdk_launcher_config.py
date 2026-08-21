@@ -191,11 +191,12 @@ DLSDK_LAUNCHER_PARAMETERS = {
     ),
     '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
     '_undefined_shapes_resolving_policy': StringField(
-        optional=True, default='default', choices=['default', 'dynamic', 'static'],
+        optional=True, default='default', choices=['default', 'dynamic', 'static', 'bounded'],
         description='Policy how to make deal with undefined shapes in network: '
                     'default - try to run as default, if does not work switch to static, '
                     'dynamic - enforce network execution with dynamic shapes, '
-                    'static - convert undefined shapes to static before execution'
+                    'static - convert undefined shapes to static before execution, '
+                    'bounded - bound unbounded dynamic shapes before execution, use default policy otherwise'
     ),
     '_model_type': StringField(
         choices=['xml', 'blob', 'onnx', 'paddle', 'tf', 'tflite'],

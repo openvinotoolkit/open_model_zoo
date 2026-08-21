@@ -120,6 +120,36 @@ def get_onnx_test_model(model_dir, config_update=None):
     return create_launcher(config)
 
 
+def test_bounded_initializes_unbounded_shape_before_dlsdk_load(mocker):
+    launcher = DLSDKLauncher.__new__(DLSDKLauncher)
+    launcher._device = 'NPU'
+    launcher._partial_shapes = {'pixel_values': [-1, 3, -1, -1]}
+    launcher.dynamic_shapes_policy = 'bounded'
+    launcher.is_dynamic = True
+    launcher.dyn_input_layers = []
+    launcher._reshape_input = mocker.Mock()
+
+    launcher.initialize_undefined_shapes([{'pixel_values': np.zeros((1, 3, 224, 224), dtype=np.float32)}])
+
+    launcher._reshape_input.assert_called_once_with({'pixel_values': (1, 3, 224, 224)})
+    assert not launcher.is_dynamic
+
+
+def test_bounded_keeps_bounded_shape_dlsdk_initialization(mocker):
+    launcher = DLSDKLauncher.__new__(DLSDKLauncher)
+    launcher._device = 'NPU'
+    launcher._partial_shapes = {'pixel_values': [(1, 4), 3, (224, 512), (224, 512)]}
+    launcher.dynamic_shapes_policy = 'bounded'
+    launcher.is_dynamic = True
+    launcher.load_network = mocker.Mock()
+    launcher.exec_network = mocker.Mock()
+
+    launcher.initialize_undefined_shapes([{'pixel_values': np.zeros((1, 3, 224, 224), dtype=np.float32)}])
+
+    launcher.load_network.assert_not_called()
+    launcher.exec_network.infer.assert_called_once()
+
+
 def get_image(image_path, input_shape):
     _, _, h, w = input_shape
     img_raw = cv2.imread(str(image_path))
@@ -190,7 +220,6 @@ class TestDLSDKLauncherAffinity:
             affinity_map.update({
                 'conv1/Dims294/copy_const': 'GPU'
             })
-
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )

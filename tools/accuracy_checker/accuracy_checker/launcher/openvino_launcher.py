@@ -768,7 +768,15 @@ class OpenVINOLauncher(Launcher):
         return self._lstm_inputs
 
     def initialize_undefined_shapes(self, input_data, template_shapes=None):
-        if self.dynamic_shapes_policy in ['default', 'dynamic']:
+        if self._should_resolve_unbounded_dynamic_shapes():
+            print_info(
+                'Unbounded dynamic input shapes will be resolved before model compilation '
+                'because bounded undefined shapes resolving policy is selected.'
+            )
+            self._reshape_input(self._get_shapes_for_input_data(input_data, template_shapes))
+            self.is_dynamic = bool(self.dyn_input_layers)
+            return
+        if self.dynamic_shapes_policy in ['default', 'dynamic', 'bounded']:
             try:
                 if template_shapes:
                     input_shapes = {layer_name: template_shapes.get(layer_name, data.shape)
@@ -785,8 +793,28 @@ class OpenVINOLauncher(Launcher):
             except RuntimeError as e:
                 if self.dynamic_shapes_policy == 'dynamic':
                     raise e
+                warning(
+                    'Dynamic input shape initialization failed. Accuracy Checker will resolve input shapes '
+                    'from prepared data and retry model compilation. Original error: {}'.format(e)
+                )
                 self.is_dynamic = False
         self._reshape_input({layer_name: data.shape for layer_name, data in input_data[0].items()})
+
+    def _should_resolve_unbounded_dynamic_shapes(self):
+        if self.dynamic_shapes_policy != 'bounded':
+            return False
+        for partial_shape in self._partial_shapes.values():
+            if -1 in parse_partial_shape(partial_shape):
+                return True
+        return False
+
+    @staticmethod
+    def _get_shapes_for_input_data(input_data, template_shapes=None):
+        if not template_shapes:
+            return {layer_name: data.shape for layer_name, data in input_data[0].items()}
+        return {
+            layer_name: template_shapes.get(layer_name, data.shape) for layer_name, data in input_data[0].items()
+        }
 
     def resolve_undefined_batch(self):
         if self.dynamic_shapes_policy in ['default', 'dynamic']:
