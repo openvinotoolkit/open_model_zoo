@@ -3,7 +3,7 @@ pytest==8.4.1; python_version >= '3.10'
 pytest-mock~=2.0
 
 # OpenCV 5 removed the Caffe importer used by the launcher tests.
-opencv-python==4.6.0.66;python_version<"3.12"
+opencv-python==4.10.0.84;python_version<"3.12"
 opencv-python==4.10.0.84;python_version>="3.12"
 
 # pytest depends on atomicwrites, but only on Windows.
