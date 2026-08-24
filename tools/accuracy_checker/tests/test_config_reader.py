@@ -259,6 +259,35 @@ class TestConfigReader:
 
             assert config['models'][0]['datasets'][0] == expected
 
+    def test_expand_imagenet_annotation_file_to_dataset_directory_when_source_file_is_missing(self, mocker):
+        local_config = {'models': [{
+            'name': 'model',
+            'launchers': [{'framework': 'caffe'}],
+            'datasets': [{
+                'name': 'ImageNet2012',
+                'annotation_conversion': {
+                    'converter': 'imagenet',
+                    'annotation_file': 'val.txt'
+                },
+                'data_source': 'ILSVRC2012_img_val'
+            }]
+        }]}
+
+        mocker.patch(self.module + '._read_configs', return_value=(
+            None, local_config
+        ))
+        with mock_filesystem(['source/', 'annotations/']) as prefix:
+            arguments = copy.deepcopy(self.arguments)
+            arguments.extensions = None
+            arguments.source = prefix / self.arguments.source
+            arguments.annotations = prefix / self.arguments.annotations
+
+            config = ConfigReader.merge(arguments)[0]
+
+            dataset = config['models'][0]['datasets'][0]
+            assert dataset['annotation_conversion']['annotation_file'] == prefix / 'source/ImageNet2012/val.txt'
+            assert dataset['data_source'] == prefix / 'source/ILSVRC2012_img_val'
+
     def test_expand_relative_paths_in_datasets_config_using_env_variable(self, mocker):
         local_config = {'models': [{
             'name': 'model',

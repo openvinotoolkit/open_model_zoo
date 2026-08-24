@@ -697,16 +697,45 @@ def process_config(
     config_item, entries_paths, args, dataset_identifier='datasets',
     launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
+    def resolve_imagenet_annotation_file(dataset_config, original_conversion_paths):
+        conversion_config = dataset_config.get('annotation_conversion')
+        if not conversion_config or conversion_config.get('converter') != 'imagenet':
+            return
+
+        annotation_file = original_conversion_paths.get('annotation_file')
+        if not annotation_file:
+            return
+
+        annotation_file = Path(annotation_file)
+        if annotation_file.is_absolute() or annotation_file.parent != Path('.'):
+            return
+
+        source = args.get('source')
+        dataset_name = dataset_config.get('name')
+        if not source or not dataset_name:
+            return
+
+        source_path = select_arg_path(source, 0, 'source')
+        resolved_annotation_file = Path(conversion_config['annotation_file'])
+        if resolved_annotation_file.exists():
+            return
+
+        conversion_config['annotation_file'] = source_path / dataset_name / annotation_file
+        if '_command_line_mapping' in dataset_config:
+            dataset_config['_command_line_mapping']['annotation_file'] = source_path / dataset_name
+
     def process_dataset(datasets_configs):
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
+                original_conversion_paths = annotation_conversion_config.copy()
                 command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
                                                                        'source', ANNOTATION_CONVERSION_PATHS))
                 datasets_config['_command_line_mapping'] = prepare_commandline_conversion_mapping(
                     command_line_conversion, args
                 )
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
+                resolve_imagenet_annotation_file(datasets_config, original_conversion_paths)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
                     merge_entry_paths(create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS),
