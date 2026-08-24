@@ -16,6 +16,10 @@ Open Model Zoo also supports models already in the ONNX format.
 To contribute to OMZ, create a pull request (PR) in this repository using the `master` branch.
 Pull requests are strictly formalized and are reviewed by the OMZ maintainers for consistence and legal compliance.
 
+To install the local Accuracy Checker Pylint check run `python3 tools/accuracy_checker/configure_pylint_hook.py`.
+The hook runs on commits that change Python files under `tools/accuracy_checker`, using the same Pylint version and
+configuration as CI.
+
 Each PR contributing a model must contain:
 * [configuration file `model.yml`](#configuration-file)
 * [documentation of model in markdown format](#documentation)

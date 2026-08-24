@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: accuracy-checker-pylint
+        name: accuracy checker pylint
+        entry: >-
+          bash -c 'cd tools/accuracy_checker && PYTHONPATH=. python3 -m pylint
+          --rcfile=.pylintrc "${@#tools/accuracy_checker/}"' --
+        language: system
+        files: ^tools/accuracy_checker/(?!tests/|build/).*\.py$

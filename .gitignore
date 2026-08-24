@@ -1,1 +1,2 @@
 *.pyc
+tools/accuracy_checker/build/*

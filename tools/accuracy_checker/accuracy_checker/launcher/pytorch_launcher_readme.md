@@ -19,6 +19,7 @@ For enabling PyTorch launcher you need to add `framework: pytorch` in launchers 
 * `use_torch_compile` - boolean, use torch.compile to optimize the module code (Optional, default `False`)
 * `torch_compile_kwargs` - dictionary of keyword arguments to pass to torch.compile (Optional, default `{}`)
 * `transformers_class` - transformers class name to load pre-trained model with `module` name. (Optional).
+* `use_detectron2_wrapper` - boolean, wrap Detectron2 models in a compatibility adapter that converts between accuracy_checker's tensor-based inputs/outputs and Detectron2's dict-based interface, and loads fully-built model checkpoints without invoking the module constructor (Optional, default `False`). See [Detectron2 wrapper](#detectron2-wrapper) section below for details.
 
 In turn if you model has several inputs you need to specify them in config, using specific parameter: `inputs`.
 Each input description should has following info:
@@ -55,5 +56,27 @@ launchers:
         device : cpu
 
     adapter: classification
+```
+
+## Detectron2 wrapper
+
+[Detectron2](https://github.com/facebookresearch/detectron2) models (e.g. `detectron2.modeling.GeneralizedRCNN`) take a list of dicts with an `image` key as input and return `Instances` objects, which is incompatible with the tensor-in/tensor-out interface the generic PyTorch launcher expects. Setting `use_detectron2_wrapper: True` wraps the loaded module in `Detectron2Wrapper`, which:
+* converts batched tensor input into the `[{"image": tensor}, ...]` format expected by Detectron2 models;
+* calls the wrapped model and extracts `pred_boxes`, `pred_classes`, `pred_masks` and `scores` from the returned `Instances` objects into plain tensors;
+* loads checkpoints that contain a fully constructed model object directly, without calling the `module` constructor (some Detectron2 checkpoints, e.g. `.pth` files produced by `torch.save(model, ...)`, contain such prebuilt model objects instead of a state dict).
+
+PyTorch launcher config example (demonstrates how to run a Detectron2 Mask R-CNN model):
+
+```yml
+launchers:
+  - framework: pytorch
+    device: CPU
+    module: detectron2.modeling.GeneralizedRCNN
+    python_path: /path/to/detectron2
+    checkpoint: /path/to/model.pth
+    checkpoint_weights_only: False
+    use_detectron2_wrapper: True
+
+    adapter: detectron2
 ```
 
