@@ -31,6 +31,7 @@ except ImportError as import_err:
 class ASRPipelineEvaluator(BaseCustomEvaluator):
     VALID_PIPELINE_CLASSES = [
         "GenAIASRPipeline",
+        "HFASRPipeline",
         "Qwen3ASROptimumPipeline",
     ]
 
@@ -225,3 +226,81 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
             "language": language_match.group(1) if language_match else None,
             "text": text_match.group(1).strip() if text_match else raw_text.strip(),
         }
+
+
+class HFASRPipeline(ASRPipeline):
+    def __init__(self, config):
+        self.language = config.get("language")
+        self.max_new_tokens = config.get("max_new_tokens", 1000)
+        super().__init__(config)
+
+    def _initialize_pipeline(self, config):
+        model_id = config.get("model_id")
+
+        try:
+            from qwen_asr import Qwen3ASRModel  # pylint: disable=C0415
+        except ImportError:
+            Qwen3ASRModel = None
+
+        if Qwen3ASRModel is not None:
+            return Qwen3ASRModel.from_pretrained(
+                model_id,
+                max_inference_batch_size=1,
+                max_new_tokens=self.max_new_tokens,
+            )
+
+        try:
+            import torch  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("torch", import_error.msg).raise_error(self.__class__.__name__)
+
+        try:
+            from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor  # pylint: disable=C0415
+            from transformers.pipelines.automatic_speech_recognition import (  # pylint: disable=C0415
+                AutomaticSpeechRecognitionPipeline,
+            )
+        except ImportError as import_error:
+            UnsupportedPackage("transformers", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        device = "cpu"
+        torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True
+        ).to(device)
+
+        processor = AutoProcessor.from_pretrained(model_id)
+
+        pipeline = AutomaticSpeechRecognitionPipeline(
+            model=model,
+            tokenizer=processor.tokenizer,
+            feature_extractor=processor.feature_extractor,
+            torch_dtype=torch_dtype,
+            device=device,
+        )
+        return pipeline
+
+    def _get_predictions(self, data, identifiers, input_meta):
+        sampling_rate = input_meta[0].get("sample_rate")
+        if hasattr(self.pipeline, "transcribe"):
+            result = self.pipeline.transcribe(
+                (data[0], sampling_rate),
+                context=identifiers[0],
+                language=self.language,
+                return_time_stamps=False,
+            )
+            return result[0].text
+
+        sample = {
+            "path": identifiers[0],
+            "array": data[0],
+            "sampling_rate": sampling_rate,
+        }
+        return self.pipeline(
+            sample,
+            return_timestamps=True,
+            generate_kwargs={
+                "num_beams": 1,
+            },
+        )["text"]
