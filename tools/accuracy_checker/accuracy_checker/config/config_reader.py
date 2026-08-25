@@ -706,19 +706,19 @@ def resolve_imagenet_annotation_file(dataset_config, original_conversion_paths, 
     if annotation_file.is_absolute() or annotation_file.parent != Path('.'):
         return
 
+    data_source = dataset_config.get('data_source')
     source = args.get('source')
-    dataset_name = dataset_config.get('name')
-    if not source or not dataset_name:
+    if not data_source or not source:
         return
 
-    source_path = select_arg_path(source, 0, 'source')
     resolved_annotation_file = Path(conversion_config['annotation_file'])
     if resolved_annotation_file.exists():
         return
 
-    conversion_config['annotation_file'] = source_path / dataset_name / annotation_file
+    data_source = select_arg_path(source, 0, 'source') / data_source
+    conversion_config['annotation_file'] = data_source / annotation_file
     if '_command_line_mapping' in dataset_config:
-        dataset_config['_command_line_mapping']['annotation_file'] = source_path / dataset_name
+        dataset_config['_command_line_mapping']['annotation_file'] = data_source
 
 
 def process_dataset(datasets_configs, args):
