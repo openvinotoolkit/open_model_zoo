@@ -693,55 +693,88 @@ def filter_modules(config, target_devices, args):
     config['evaluations'] = filtered_evals
 
 
+def resolve_imagenet_annotation_file(dataset_config, original_conversion_paths, args):
+    conversion_config = dataset_config.get('annotation_conversion')
+    if not conversion_config or conversion_config.get('converter') != 'imagenet':
+        return
+
+    annotation_file = original_conversion_paths.get('annotation_file')
+    if not annotation_file:
+        return
+
+    annotation_file = Path(annotation_file)
+    if annotation_file.is_absolute() or annotation_file.parent != Path('.'):
+        return
+
+    data_source = dataset_config.get('data_source')
+    source = args.get('source')
+    if not data_source or not source:
+        return
+
+    resolved_annotation_file = Path(conversion_config['annotation_file'])
+    if resolved_annotation_file.exists():
+        return
+
+    data_source = select_arg_path(source, 0, 'source') / data_source
+    conversion_config['annotation_file'] = data_source / annotation_file
+    if '_command_line_mapping' in dataset_config:
+        dataset_config['_command_line_mapping']['annotation_file'] = data_source
+
+
+def process_dataset(datasets_configs, args):
+    for datasets_config in datasets_configs:
+        annotation_conversion_config = datasets_config.get('annotation_conversion')
+        if annotation_conversion_config:
+            original_conversion_paths = annotation_conversion_config.copy()
+            command_line_conversion = create_command_line_mapping(
+                annotation_conversion_config, 'source', ANNOTATION_CONVERSION_PATHS
+            )
+            datasets_config['_command_line_mapping'] = prepare_commandline_conversion_mapping(
+                command_line_conversion, args
+            )
+            merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
+            resolve_imagenet_annotation_file(datasets_config, original_conversion_paths, args)
+        if 'preprocessing' in datasets_config:
+            for preprocessor in datasets_config['preprocessing']:
+                merge_entry_paths(create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS),
+                                  preprocessor, args)
+
+
+def process_launchers(launchers_configs, args):
+    if not isinstance(launchers_configs, list):
+        launchers_configs = [launchers_configs]
+
+    updated_launchers = []
+    for launcher_config in launchers_configs:
+        if ('models' not in args or not args['models']) and not isinstance(launcher_config.get('adapter'), dict):
+            updated_launchers.append(launcher_config)
+            continue
+        models = args.get('models')
+        if isinstance(models, list):
+            for model_id, _ in enumerate(models):
+                new_launcher = copy.deepcopy(launcher_config)
+                merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
+                adapter_config = new_launcher.get('adapter')
+                if isinstance(adapter_config, dict):
+                    command_line_adapter = create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS)
+                    merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
+                if not updated_launchers or new_launcher != updated_launchers[-1]:
+                    updated_launchers.append(new_launcher)
+        else:
+            merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
+            adapter_config = launcher_config.get('adapter')
+            if isinstance(adapter_config, dict):
+                command_line_adapter = create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS)
+                merge_entry_paths(command_line_adapter, adapter_config, args)
+            updated_launchers.append(launcher_config)
+
+    return updated_launchers
+
+
 def process_config(
     config_item, entries_paths, args, dataset_identifier='datasets',
     launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
-    def process_dataset(datasets_configs):
-        for datasets_config in datasets_configs:
-            annotation_conversion_config = datasets_config.get('annotation_conversion')
-            if annotation_conversion_config:
-                command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
-                                                                       'source', ANNOTATION_CONVERSION_PATHS))
-                datasets_config['_command_line_mapping'] = prepare_commandline_conversion_mapping(
-                    command_line_conversion, args
-                )
-                merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
-            if 'preprocessing' in datasets_config:
-                for preprocessor in datasets_config['preprocessing']:
-                    merge_entry_paths(create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS),
-                                      preprocessor, args)
-
-    def process_launchers(launchers_configs):
-        if not isinstance(launchers_configs, list):
-            launchers_configs = [launchers_configs]
-
-        updated_launchers = []
-        for launcher_config in launchers_configs:
-            if ('models' not in args or not args['models']) and not isinstance(launcher_config.get('adapter'), dict):
-                updated_launchers.append(launcher_config)
-                continue
-            models = args.get('models')
-            if isinstance(models, list):
-                for model_id, _ in enumerate(models):
-                    new_launcher = copy.deepcopy(launcher_config)
-                    merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
-                    adapter_config = new_launcher.get('adapter')
-                    if isinstance(adapter_config, dict):
-                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
-                        merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
-                    if not updated_launchers or new_launcher != updated_launchers[-1]:
-                        updated_launchers.append(new_launcher)
-            else:
-                merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
-                adapter_config = launcher_config.get('adapter')
-                if isinstance(adapter_config, dict):
-                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
-                    merge_entry_paths(command_line_adapter, adapter_config, args)
-                updated_launchers.append(launcher_config)
-
-        return updated_launchers
-
     for entry, command_line_arg in entries_paths.items():
         entry_id = entry if not identifiers_mapping else identifiers_mapping[entry]
         if entry_id not in config_item:
@@ -755,14 +788,14 @@ def process_config(
             )
             if not isinstance(dataset_processing_config, list):
                 dataset_processing_config = [dataset_processing_config]
-            process_dataset(dataset_processing_config)
+            process_dataset(dataset_processing_config, args)
             for config_entry in dataset_processing_config:
                 merge_entry_paths(command_line_arg, config_entry, args)
             continue
 
         if entry_id == launchers_identifier:
             launchers_configs = config_item[entry_id]
-            processed_launcher = process_launchers(launchers_configs)
+            processed_launcher = process_launchers(launchers_configs, args)
             config_item[entry_id] = processed_launcher if not pipeline else processed_launcher[0]
 
         config_entries = config_item[entry_id]
