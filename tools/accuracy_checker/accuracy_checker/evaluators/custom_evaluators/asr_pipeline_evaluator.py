@@ -281,19 +281,19 @@ class HFASRPipeline(ASRPipeline):
         )
         return pipeline
 
-    def _get_predictions(self, data, identifiers, input_meta):
+    def _get_predictions(self, data, identifier, input_meta):
         sampling_rate = input_meta[0].get("sample_rate")
         if hasattr(self.pipeline, "transcribe"):
             result = self.pipeline.transcribe(
                 (data[0], sampling_rate),
-                context=identifiers[0],
+                context=identifier,
                 language=self.language,
                 return_time_stamps=False,
             )
             return result[0].text
 
         sample = {
-            "path": identifiers[0],
+            "path": identifier,
             "array": data[0],
             "sampling_rate": sampling_rate,
         }
