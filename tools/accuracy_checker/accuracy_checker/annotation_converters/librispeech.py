@@ -19,6 +19,7 @@ import re
 import json
 import wave
 import numpy as np
+import soundfile as sf
 
 from ..representation import CharacterRecognitionAnnotation
 from ..config import PathField, NumberField, BoolField
@@ -74,8 +75,12 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                         continue
 
                     if self.max_duration > 0 and not self.annotation_file:
-                        with wave.open(str(fname), "rb") as wav:
-                            duration = wav.getnframes() / wav.getframerate()
+                        if self.flac_files:
+                            info = sf.info(str(fname))
+                            duration = info.frames / info.samplerate
+                        else:
+                            with wave.open(str(fname), "rb") as wav:
+                                duration = wav.getnframes() / wav.getframerate()
                         if duration > self.max_duration:
                             continue
 
