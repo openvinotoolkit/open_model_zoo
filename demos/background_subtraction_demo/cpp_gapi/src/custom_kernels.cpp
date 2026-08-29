@@ -10,9 +10,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include <ie_core.hpp>
-#include <ie_data.h>
-#include <ie_layouts.h>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/gapi/gscalar.hpp>
@@ -137,16 +134,16 @@ GAPI_OCV_KERNEL(OCVCalculateMaskRCNNBGMask, custom::GCalculateMaskRCNNBGMask) {
 // clang-format on
 
 custom::NNBGReplacer::NNBGReplacer(const std::string& model_path) {
-    IE::Core core;
-    m_cnn_network = core.ReadNetwork(model_path);
-    m_tag = m_cnn_network.getName();
-    m_inputs = m_cnn_network.getInputsInfo();
-    m_outputs = m_cnn_network.getOutputsInfo();
+    ov::Core core;
+    model = core.read_model(model_path);
+    m_tag = model->get_name();
+    m_inputs = model->inputs();
+    m_outputs = model->outputs();
 }
 
 custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path) : custom::NNBGReplacer(model_path) {
     for (const auto& p : m_outputs) {
-        const auto& layer_name = p.first;
+        const auto& layer_name = p.get_any_name();
         if (layer_name.rfind("TopK") != std::string::npos) {
             continue;
         }
@@ -154,9 +151,9 @@ custom::MaskRCNNBGReplacer::MaskRCNNBGReplacer(const std::string& model_path) : 
         if (m_inputs.size() != 1) {
             throw std::logic_error("Supported only single input MaskRCNN models!");
         }
-        m_input_name = m_inputs.begin()->first;
+        m_input_name = m_inputs[0].get_any_name();
 
-        const auto dims_size = p.second->getTensorDesc().getDims().size();
+        const auto dims_size = p.get_partial_shape().size();
         if (dims_size == 1) {
             m_labels_name = layer_name;
         } else if (dims_size == 2) {
@@ -177,7 +174,7 @@ cv::GMat custom::MaskRCNNBGReplacer::replace(cv::GFrame in, cv::GMat bgr, const 
     auto boxes = outputs.at(m_boxes_name);
     auto masks = outputs.at(m_masks_name);
 
-    const auto& dims = m_inputs.at(m_input_name)->getTensorDesc().getDims();
+    const auto& dims = model->input(m_input_name).get_partial_shape().get_max_shape();
     GAPI_Assert(dims.size() == 4u);
     auto mask = custom::GCalculateMaskRCNNBGMask::on(in_size, cv::Size(dims[3], dims[2]), labels, boxes, masks);
     auto mask3ch = cv::gapi::medianBlur(cv::gapi::merge3(mask, mask, mask), 11);
@@ -188,12 +185,12 @@ custom::BGMattingReplacer::BGMattingReplacer(const std::string& model_path) : NN
     if (m_inputs.size() != 1) {
         throw std::logic_error("Supported only single input background matting models!");
     }
-    m_input_name = m_inputs.begin()->first;
+    m_input_name = m_inputs[0].get_any_name();
 
     if (m_outputs.size() != 1) {
         throw std::logic_error("Supported only single output background matting models!");
     }
-    m_output_name = m_outputs.begin()->first;
+    m_output_name = m_outputs[0].get_any_name();
 }
 
 cv::GMat custom::BGMattingReplacer::replace(cv::GFrame in, cv::GMat bgr, const cv::Size& in_size, cv::GMat background) {
