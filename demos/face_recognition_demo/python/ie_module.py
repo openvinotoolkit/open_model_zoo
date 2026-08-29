@@ -30,7 +30,8 @@ class Module:
 
     def deploy(self, device, max_requests=1):
         self.max_requests = max_requests
-        compiled_model = self.core.compile_model(self.model, device)
+        config = {"PERFORMANCE_HINT": "THROUGHPUT"} if device.startswith('AUTO') else {}
+        compiled_model = self.core.compile_model(self.model, device, config)
         self.output_tensor = compiled_model.outputs[0]
         self.infer_queue = AsyncInferQueue(compiled_model, self.max_requests)
         self.infer_queue.set_callback(self.completion_callback)
