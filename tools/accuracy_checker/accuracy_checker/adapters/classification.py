@@ -72,7 +72,8 @@ class ClassificationAdapter(Adapter):
     def select_output_blob(self, outputs):
         self.output_verified = True
         if self.classification_out:
-            self.classification_out = self.check_output_name(self.classification_out, outputs)
+            self.output_blob = self.check_output_name(self.classification_out, outputs)
+            self.classification_out = self.output_blob
             return
         super().select_output_blob(outputs)
         self.classification_out = self.output_blob
