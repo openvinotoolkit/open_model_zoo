@@ -19,11 +19,16 @@ import re
 import json
 import wave
 import numpy as np
-import soundfile as sf
 
 from ..representation import CharacterRecognitionAnnotation
 from ..config import PathField, NumberField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
+from ..utils import UnsupportedPackage
+
+try:
+    import soundfile as sf
+except (ImportError, OSError) as import_error:
+    sf = UnsupportedPackage('soundfile', str(import_error))
 
 
 class LibrispeechConverter(DirectoryBasedAnnotationConverter):
