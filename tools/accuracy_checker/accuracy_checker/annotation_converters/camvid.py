@@ -157,7 +157,7 @@ class CamVid32DatasetConverter(BaseFormatConverter):
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        label_files = list(self.labels_dir.glob('*.png'))
+        label_files = sorted(self.labels_dir.glob('*.png'))
         annotations = []
         val_subset_size = int(len(label_files) * self.val_subset_ratio)
         val_labels = label_files[len(label_files)-val_subset_size:]

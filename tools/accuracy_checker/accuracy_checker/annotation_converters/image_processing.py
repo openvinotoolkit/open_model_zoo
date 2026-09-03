@@ -19,6 +19,7 @@ from ..representation import ImageProcessingAnnotation
 from ..representation.image_processing import GTLoader
 from ..utils import check_file_existence
 from ..data_readers import ParametricImageIdentifier
+from ..logging import warning
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 LOADERS_MAPPING = {
@@ -72,9 +73,9 @@ class ImageProcessingConverter(BaseFormatConverter):
         content_errors = [] if check_content else None
         file_list_in = []
         if self.recursive:
-            data_dir_files = [file for file in self.data_dir.rglob('*') if file.is_file()]
+            data_dir_files = sorted(file for file in self.data_dir.rglob('*') if file.is_file())
         else:
-            data_dir_files = self.data_dir.iterdir()
+            data_dir_files = sorted(self.data_dir.iterdir())
         for file_in_dir in data_dir_files:
             if self.in_suffix in file_in_dir.parts[-1]:
                 file_list_in.append(file_in_dir)
@@ -126,6 +127,7 @@ class ParametricImageProcessing(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_pairs = self.get_image_pairs()
+        self.warn_missing_pairs(image_pairs)
         annotations = []
         for image, params, gt in image_pairs:
             identifier = ParametricImageIdentifier(image, params)
@@ -135,10 +137,24 @@ class ParametricImageProcessing(BaseFormatConverter):
 
     def get_image_pairs(self):
         data = []
-        for ref_img in self.reference_dir.glob('*.png'):
+        for ref_img in sorted(self.reference_dir.glob('*.png')):
             params = ref_img.stem.split('_')
             name = params[0]
             parameters = [float(param) * self.param_scale for param in params[1:]]
             source_img = name + '.png'
             data.append((source_img, parameters, ref_img.name))
         return data
+
+    def warn_missing_pairs(self, image_pairs):
+        # detects source images from input_dir that got zero variants in reference_dir (e.g. share got truncated)
+        source_images = {file.name for file in self.input_dir.glob('*.png')}
+        paired_images = {image for image, _, _ in image_pairs}
+        missing_images = sorted(source_images - paired_images)
+        if missing_images:
+            warning(
+                '{} of {} images from {} have no reference pairs in {}: {}'.format(
+                    len(missing_images), len(source_images), self.input_dir, self.reference_dir,
+                    ', '.join(missing_images)
+                ),
+                raise_warning=False
+            )
