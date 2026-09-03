@@ -60,7 +60,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         pattern = re.compile(r'([0-9\-]+)\s+(.+)')
         annotations = []
         data_folder = Path(self.data_dir)
-        txts = list(data_folder.glob('**/*.txt'))
+        txts = sorted(data_folder.glob('**/*.txt'))
         for txt in txts:
             content = txt.open().readlines()
             for line in content:
