@@ -346,7 +346,7 @@ class SQUADConverter(BaseFormatConverter):
         else:
             p_mask[-len(span["tokens"]): -(tr_q_len + sequence_added_tokens)] = 0
 
-        pad_token_indices = np.where(span["input_ids"] == self.tokenizer.pad_token_id)
+        pad_token_indices = np.where(np.asarray(span["input_ids"]) == self.tokenizer.pad_token_id)
         special_token_indices = np.asarray(
             self.tokenizer.get_special_tokens_mask(span["input_ids"], already_has_special_tokens=True)
         ).nonzero()
