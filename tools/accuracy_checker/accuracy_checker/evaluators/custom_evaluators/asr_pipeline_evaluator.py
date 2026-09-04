@@ -237,17 +237,18 @@ class HFASRPipeline(ASRPipeline):
     def _initialize_pipeline(self, config):
         model_id = config.get("model_id")
 
-        try:
-            from qwen_asr import Qwen3ASRModel  # pylint: disable=C0415
-        except ImportError:
-            Qwen3ASRModel = None
+        if "qwen3" in str(model_id).lower() and "asr" in str(model_id).lower():
+            try:
+                from qwen_asr import Qwen3ASRModel  # pylint: disable=C0415
+            except ImportError:
+                Qwen3ASRModel = None
 
-        if Qwen3ASRModel is not None:
-            return Qwen3ASRModel.from_pretrained(
-                model_id,
-                max_inference_batch_size=1,
-                max_new_tokens=self.max_new_tokens,
-            )
+            if Qwen3ASRModel is not None:
+                return Qwen3ASRModel.from_pretrained(
+                    model_id,
+                    max_inference_batch_size=1,
+                    max_new_tokens=self.max_new_tokens,
+                )
 
         try:
             import torch  # pylint: disable=C0415
@@ -264,11 +265,11 @@ class HFASRPipeline(ASRPipeline):
                 self.__class__.__name__
             )
 
-        device = "cpu"
+        device = config.get("_device", "cpu")
         torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True
-        ).to(device)
+        ).to(device.lower())
 
         processor = AutoProcessor.from_pretrained(model_id)
 
@@ -277,7 +278,7 @@ class HFASRPipeline(ASRPipeline):
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
             torch_dtype=torch_dtype,
-            device=device,
+            device=device.lower(),
         )
         return pipeline
 
