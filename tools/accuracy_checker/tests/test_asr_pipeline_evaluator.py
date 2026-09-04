@@ -20,6 +20,7 @@ import pytest
 from accuracy_checker.evaluators.custom_evaluators.asr_pipeline_evaluator import (
     ASRPipelineEvaluator,
     GenAIASRPipeline,
+    HFASRPipeline
 )
 from datasets import load_dataset
 
@@ -86,6 +87,22 @@ class TestASRPipelineEvaluator:
     def test_genai_asr_pipeline(self):
         config = {"_models": [model_dir], "_device": "CPU"}
         pipeline = GenAIASRPipeline(config)
+        evaluator = ASRPipelineEvaluator(None, pipeline, None)
+
+        result = evaluator.pipe._get_predictions(input_data, identifiers[0], input_meta)
+        assert isinstance(result, str)
+
+    def test_hf_asr_pipeline_qwen3_asr(self):
+        config = {"_device": "CPU", "model_id": "Qwen/Qwen3-ASR-0.6B"}
+        pipeline = HFASRPipeline(config)
+        evaluator = ASRPipelineEvaluator(None, pipeline, None)
+
+        result = evaluator.pipe._get_predictions(input_data, identifiers[0], input_meta)
+        assert isinstance(result, str)
+
+    def test_hf_asr_pipeline_whisper_tiny(self):
+        config = {"_device": "CPU", "model_id": "openai/whisper-tiny"}
+        pipeline = HFASRPipeline(config)
         evaluator = ASRPipelineEvaluator(None, pipeline, None)
 
         result = evaluator.pipe._get_predictions(input_data, identifiers[0], input_meta)

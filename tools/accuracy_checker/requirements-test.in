@@ -11,3 +11,4 @@ opencv-python==4.10.0.84
 # So as a workaround, make the atomicwrites dependency unconditional.
 atomicwrites
 datasets
+soundfile
