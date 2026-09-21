@@ -170,15 +170,18 @@ def single_option_cases(key, *args):
 
 
 DEMOS = [
-    # CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None, '-at': 'maskrcnn',
-    #         **MONITORS,
-    #         '-i': DataPatternArg('coco128-subset-480x640x3'),
-    #     }),
-    #     single_option_cases('-m',
-    #         ModelArg('instance-segmentation-person-0007'),
-    #         ModelArg('instance-segmentation-security-0091')),
-    # )),
+    CppDemo(name='background_subtraction_demo', device_keys=['-d'], implementation='cpp_gapi', test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '-at': 'maskrcnn',
+            **MONITORS,
+        }),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-person-0007'),
+            ModelArg('instance-segmentation-security-0091')),
+        single_option_cases(
+            '-i',
+            DataPatternArg('coco128-every-480x640x3'),
+            str('video.mp4')),
+    )),
 
     CppDemo('classification_benchmark_demo', 'cpp_gapi', test_cases=combine_cases(
         single_option_cases(
@@ -251,8 +254,8 @@ DEMOS = [
             ModelArg('face-detection-retail-0004')),
         single_option_cases(
             '-i',
-            str('video.mp4'),
-            DataPatternArg('coco128-every-480x640x3')),
+            DataPatternArg('coco128-every-480x640x3'),
+            str('video.mp4')),
     )),
 
     # TODO: https://github.com/DariaMityagina is to fix the demo
