@@ -36,13 +36,6 @@ class FacesDatabase:
 
         @staticmethod
         def cosine_dist(x, y):
-            # cosine() returns 1 - cosine_similarity. cosine_similarity
-            # belongs to the interval
-            # [-1, 1] (https://en.wikipedia.org/wiki/Cosine_similarity).
-            # (1 - cosine_similarity) belongs to the interval [0, 2].
-            # To provide a probability like interpretation of the
-            # similarity measure, the interval is scaled down by the
-            # factor of two.
             return cosine(x, y) * 0.5
 
     def __init__(self, path, face_identifier, landmarks_detector, face_detector=None, no_show=False):
@@ -140,7 +133,7 @@ class FacesDatabase:
             if k == 8: #backspace
                 name = name[:-1]
                 continue
-            else:
+            elif 32 <= k <= 0x10FFFF:
                 name += chr(k)
                 continue
 
@@ -158,17 +151,15 @@ class FacesDatabase:
                 distances[i][j] = dist[np.argmin(dist)]
 
         matches = []
-        # if user specify MIN_DIST for face matching, face with minium cosine distance will be selected.
         if match_algo == 'MIN_DIST':
             for i in range(len(descriptors)):
                 id = np.argmin(distances[i])
                 min_dist = distances[i][id]
                 matches.append((id, min_dist))
         else:
-            # Find best assignments, prevent repeats, assuming faces can not repeat
             _, assignments = linear_sum_assignment(distances)
             for i in range(len(descriptors)):
-                if len(assignments) <= i: # assignment failure, too many faces
+                if len(assignments) <= i:
                     matches.append((0, 1.0))
                     continue
 
