@@ -861,7 +861,7 @@ class OpenVINOLauncher(Launcher):
             data = np.expand_dims(data, 0)
             data_shape = np.shape(data)
             if template is not None:
-                template = [1].extend(template)
+                template = [1] + template
         if len(data_shape) - layer_rang == 1 and data_shape[0] == 1:
             if len(data_shape) == len(layout):
                 data = np.transpose(data, layout)
