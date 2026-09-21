@@ -216,5 +216,5 @@ class Detector:
                 [side_bboxes, side_cls_ids, side_labels, side_scores], \
                 frame_index
 
-    async def inference_async(self, img_top, img_side):
-        return await self.inference_multithread(img_top, img_side)
+    def inference_async(self, img_top, img_side, frame_index):
+        return self.inference_multithread(img_top, img_side, frame_index)
