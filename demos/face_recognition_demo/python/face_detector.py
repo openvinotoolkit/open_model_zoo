@@ -14,12 +14,13 @@
  limitations under the License.
 """
 
+import logging as log
 import numpy as np
 
 from ie_module import Module
 from utils import resize_input
 
-from openvino import PartialShape
+from openvino import PartialShape, AsyncInferQueue
 
 
 class FaceDetector(Module):
@@ -64,7 +65,6 @@ class FaceDetector(Module):
             raise ValueError("Both input height and width should be positive for Face Detector reshape")
 
         self.input_shape = self.model.inputs[0].shape
-        self.nchw_layout = self.input_shape[1] == 3
         self.output_shape = self.model.outputs[0].shape
         if len(self.output_shape) != 4 or self.output_shape[3] != self.Result.OUTPUT_SIZE:
             raise RuntimeError("The model expects output shape with {} outputs".format(self.Result.OUTPUT_SIZE))
@@ -76,6 +76,16 @@ class FaceDetector(Module):
 
         self.confidence_threshold = confidence_threshold
         self.roi_scale_factor = roi_scale_factor
+
+    def deploy(self, device, max_requests=1):
+        self.max_requests = max_requests
+        compiled_model = self.core.compile_model(self.model, device)
+        self.output_tensor = compiled_model.outputs[0]
+        self.infer_queue = AsyncInferQueue(compiled_model, self.max_requests)
+        self.infer_queue.set_callback(self.completion_callback)
+        compiled_input_shape = compiled_model.inputs[0].shape
+        self.nchw_layout = compiled_input_shape[1] == 3
+        log.info('The {} model {} is loaded to {}'.format(self.model_type, self.model_path, device))
 
     def preprocess(self, frame):
         self.input_size = frame.shape
