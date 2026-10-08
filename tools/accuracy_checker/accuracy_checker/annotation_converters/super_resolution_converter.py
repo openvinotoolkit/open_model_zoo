@@ -213,7 +213,7 @@ class SRConverter(BaseFormatConverter):
 
     def get_lr_list(self):
         file_list_lr = []
-        for file_in_dir in self.lr_dir.iterdir():
+        for file_in_dir in sorted(self.lr_dir.iterdir()):
             if self.lr_suffix in file_in_dir.parts[-1] or self.ignore_suffixes:
                 file_list_lr.append(file_in_dir)
         return file_list_lr

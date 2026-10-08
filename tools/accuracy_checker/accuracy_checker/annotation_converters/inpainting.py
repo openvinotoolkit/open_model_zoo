@@ -48,15 +48,15 @@ class InpaintingConverter(BaseFormatConverter):
         content_check_errors = [] if check_content else None
 
         annotations = []
-        images = [
+        images = sorted(
             im for im in self.image_dir.iterdir()
             if im.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))
-        ]
+        )
         if self.masks_dir is not None:
-            masks = [
+            masks = sorted(
                 mask for mask in self.masks_dir.iterdir()
                 if mask.name.endswith('.npy')
-            ]
+            )
             if len(masks) < len(images):
                 warning('Number of masks is smaller than number of images.'
                         'Only {} first images will be used'.format(len(masks)))

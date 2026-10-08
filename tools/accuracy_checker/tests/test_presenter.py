@@ -18,7 +18,9 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock, call # noqa: F401
 from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.presenters import ScalarPrintPresenter, VectorPrintPresenter, EvaluationResult
+from accuracy_checker.presenters import (
+    ScalarPrintPresenter, VectorPrintPresenter, EvaluationResult, write_scalar_result, compare_with_ref
+)
 from accuracy_checker.representation import ClassificationAnnotation, ClassificationPrediction
 
 
@@ -80,7 +82,8 @@ class TestPresenter:
             None,
             postfix='%',
             scale=100,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_scalar_presenter_with_vector_data(self, mocker):
@@ -105,7 +108,8 @@ class TestPresenter:
             None,
             postfix='%',
             scale=100,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_default_format_for_scalar_presenter_with_ignore_formatting(self, mocker):
@@ -130,7 +134,8 @@ class TestPresenter:
             None,
             postfix=' ',
             scale=1,
-            result_format='{}'
+            result_format='{}',
+            meta=result.meta
         )
 
     def test_reference_value_for_scalar_presenter(self, mocker):
@@ -155,7 +160,8 @@ class TestPresenter:
             (0.0, 0.0),
             postfix='%',
             scale=100,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_reference_value_for_scalar_presenter_with_ignore_results_formatting(self, mocker):
@@ -180,7 +186,8 @@ class TestPresenter:
             (0.0, 0.0),
             postfix=' ',
             scale=1,
-            result_format='{}'
+            result_format='{}',
+            meta=result.meta
         )
 
     def test_reference_value_for_scalar_presenter_with_ref_values_dict(self, mocker):
@@ -205,7 +212,8 @@ class TestPresenter:
             (0.0, 0.0),
             postfix='%',
             scale=100,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_reference_value_for_scalar_presenter_with_ref_values_dict_no_value(self, mocker):
@@ -230,7 +238,8 @@ class TestPresenter:
             None,
             postfix='%',
             scale=100,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_specific_format_for_scalar_presenter(self, mocker):
@@ -255,7 +264,8 @@ class TestPresenter:
             result.rel_threshold,
             postfix='km/h',
             scale=0.5,
-            result_format='{:.4f}'
+            result_format='{:.4f}',
+            meta=result.meta
         )
 
     def test_specific_format_for_scalar_presenter_with_ignore_formatting(self, mocker):
@@ -280,7 +290,8 @@ class TestPresenter:
             result.rel_threshold,
             postfix=' ',
             scale=1,
-            result_format='{}'
+            result_format='{}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_scaler_data(self, mocker):
@@ -306,7 +317,8 @@ class TestPresenter:
             postfix='%',
             scale=100,
             value_name=None,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_scaler_data_compare_with_reference(self, mocker):
@@ -328,11 +340,12 @@ class TestPresenter:
             result.name,
             result.abs_threshold,
             result.rel_threshold,
-            (2.0, 0.047619047619047616),
+            (-2.0, -0.047619047619047616),
             postfix='%',
             scale=100,
             value_name=None,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_scaler_data_compare_with_reference_ignore_formatting(self, mocker):
@@ -354,11 +367,12 @@ class TestPresenter:
             result.name,
             result.abs_threshold,
             result.rel_threshold,
-            (2.0, 0.047619047619047616),
+            (-2.0, -0.047619047619047616),
             postfix=' ',
             scale=1,
             value_name=None,
-            result_format='{}'
+            result_format='{}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element(self, mocker):
@@ -384,7 +398,8 @@ class TestPresenter:
             postfix='%',
             scale=100,
             value_name=result.meta['names'][0],
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element_compare_with_reference(self, mocker):
@@ -406,11 +421,12 @@ class TestPresenter:
             result.name,
             result.abs_threshold,
             result.rel_threshold,
-            (2.0, 0.047619047619047616),
+            (-2.0, -0.047619047619047616),
             postfix='%',
             scale=100,
             value_name=None,
-            result_format='{:.2f}'
+            result_format='{:.2f}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_vector_data_contain_one_element_compare_with_reference_ignore_formatting(self, mocker):
@@ -432,11 +448,12 @@ class TestPresenter:
             result.name,
             result.abs_threshold,
             result.rel_threshold,
-            (2.0, 0.047619047619047616),
+            (-2.0, -0.047619047619047616),
             postfix=' ',
             scale=1,
             value_name=None,
-            result_format='{}'
+            result_format='{}',
+            meta=result.meta
         )
 
     def test_vector_presenter_with_vector_data_with_default_postfix_and_scale(self, mocker):
@@ -456,15 +473,18 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
-                None, value_name='mean', postfix='%', scale=100, result_format='{:.2f}'
+                None, value_name='mean', postfix='%', scale=100, result_format='{:.2f}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -486,15 +506,18 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold, None,
-                value_name='mean', postfix=' ', scale=1, result_format='{}'
+                value_name='mean', postfix=' ', scale=1, result_format='{}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -516,15 +539,18 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
-                (1.0, 0.02040816326530612), value_name='mean', postfix='%', scale=100, result_format='{:.2f}'
+                (1.0, 0.02040816326530612), value_name='mean', postfix='%', scale=100, result_format='{:.2f}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -546,16 +572,19 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, result.abs_threshold, result.rel_threshold,
                 (1.0, 0.02040816326530612),
-                value_name='mean', postfix=' ', scale=1, result_format='{}'
+                value_name='mean', postfix=' ', scale=1, result_format='{}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -577,16 +606,19 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
+                postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, result.reference_value,
                 result.abs_threshold, result.rel_threshold,
-                value_name='mean', postfix=' ', scale=1, result_format='{}'
+                value_name='mean', postfix=' ', scale=1, result_format='{}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -607,15 +639,18 @@ class TestPresenter:
         presenter.write_result(result)
         calls = [
             call(result.evaluated_value[0], result.name, None, None, None,
-                 postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
+                 postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][0], result_format='{:.2f}',
+                     meta=result.meta
                  ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][1], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name,
-                result.abs_threshold, result.rel_threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=100, result_format='{:.2f}'
+                result.abs_threshold, result.rel_threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=100, result_format='{:.2f}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -637,16 +672,19 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][0], result_format='{:.2f}'
+                postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][0], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None,
-                postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][1], result_format='{:.2f}',
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name, None,
                 result.abs_threshold, result.rel_threshold,
-                value_name='mean', postfix='%', scale=10, result_format='{:.2f}'
+                value_name='mean', postfix='%', scale=10, result_format='{:.2f}',
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -668,16 +706,19 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
+                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0],
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None, postfix='%',
-                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
+                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1],
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name,
                 result.abs_threshold, result.rel_threshold,
-                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
+                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1,
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -699,11 +740,13 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, (0, 0),
-                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
+                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0],
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, (1, 0.2), postfix='%',
-                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
+                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1],
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -725,16 +768,19 @@ class TestPresenter:
         calls = [
             call(
                 result.evaluated_value[0], result.name, None, None, None,
-                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
+                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0],
+                meta=result.meta
             ),
             call(
                 result.evaluated_value[1], result.name, None, None, None, postfix='%',
-                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
+                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1],
+                meta=result.meta
             ),
             call(
                 np.mean(result.evaluated_value), result.name,
                 result.abs_threshold, result.rel_threshold,
-                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
+                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1,
+                meta=result.meta
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
