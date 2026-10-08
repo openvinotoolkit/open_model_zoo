@@ -28,6 +28,7 @@ from ..utils import read_txt
 kenlm = None
 # Will import ctcdecode_numpy later if necessary
 ctcdecode_numpy = None
+pyctcdecode = None
 
 
 def require_kenlm():
@@ -57,6 +58,18 @@ def require_ctcdecode_numpy():
                 "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
             ) from impoer_err
         ctcdecode_numpy = ctcdecode_numpy_imported
+
+
+def require_pyctcdecode():
+    global pyctcdecode  # pylint: disable=global-statement
+    if pyctcdecode is None:
+        try:
+            import pyctcdecode as pyctcdecode_imported  # pylint: disable=import-outside-toplevel
+        except ImportError as import_err:
+            raise ValueError(
+                "To use pyctc_beam_search_decoder adapter install pyctcdecode."
+            ) from import_err
+        pyctcdecode = pyctcdecode_imported
 
 
 class CTCBeamSearchDecoder(Adapter):
@@ -290,6 +303,76 @@ class CTCGreedyDecoder(Adapter):
                 previous = p
             hypotheses.append(''.join(decoded_prediction))
         return hypotheses
+
+
+class PyCTCBeamSearchDecoder(Adapter):
+    """CTC beam-search decoder without an external language model."""
+    __provider__ = 'pyctc_beam_search_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'beam_size': NumberField(
+                optional=True, value_type=int, min_value=1, default=10,
+                description="Size of the beam to use during decoding"
+            ),
+            'logarithmic_prob': BoolField(
+                optional=True, default=False, description=
+                "Set to True when network output contains natural-logarithmic probabilities."
+            ),
+            'probability_out': StringField(
+                optional=False, description="Name of the network output with character probabilities"
+            ),
+            'alphabet': ListField(
+                optional=True, default=None, value_type=str, allow_empty=False, description=
+                "Alphabet as list of strings. Include an empty string for the CTC blank symbol."
+            ),
+        })
+        return parameters
+
+    def configure(self):
+        require_pyctcdecode()
+        self.beam_size = self.get_value_from_config('beam_size')
+        self.logarithmic_prob = self.get_value_from_config('logarithmic_prob')
+        self.probability_out = self.get_value_from_config('probability_out')
+        self.alphabet = self.get_value_from_config('alphabet')
+        if self.alphabet is None:
+            self.alphabet = list(' ' + string.ascii_lowercase + "'") + ['']
+        if '' not in self.alphabet:
+            raise ValueError("alphabet must contain an empty string for the CTC blank character")
+        self.decoder = pyctcdecode.build_ctcdecoder(labels=self.alphabet)
+        self.output_verified = False
+
+    def select_output_blob(self, outputs):
+        self.output_verified = True
+        self.probability_out = self.check_output_name(self.probability_out, outputs)
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        if not self.output_verified:
+            self.select_output_blob(raw)
+        log_prob = self._extract_predictions(raw, frame_meta)
+        log_prob = np.concatenate(list(log_prob))
+        if not self.logarithmic_prob:
+            log_prob = np.log(log_prob.clip(min=np.finfo(log_prob.dtype).tiny))
+        if len(log_prob.shape) == 3:
+            log_prob = log_prob.squeeze(axis=1)
+        elif len(log_prob.shape) != 2:
+            raise ValueError(
+                "Expected shape frames x 1 x alphabet or frames x alphabet from probability_out, got "
+                + str(tuple(log_prob.shape))
+            )
+        decoded = self.decoder.decode(log_prob, beam_width=self.beam_size).upper()
+        return [CharacterRecognitionPrediction(identifiers[0], decoded)]
+
+    def _extract_predictions(self, outputs_list, meta):
+        is_multi_infer = meta[-1].get('multi_infer', False) if meta else False
+        if isinstance(outputs_list, dict):
+            outputs_list = [outputs_list]
+        if not is_multi_infer:
+            return [outputs_list[0][self.probability_out]]
+        return [output[self.probability_out] for output in outputs_list]
 
 
 class CTCBeamSearchDecoderWithLm(Adapter):

@@ -1,6 +1,9 @@
 # progress bar
 tqdm>=4.54.1
 
+# CTC beam search without an external language model
+pyctcdecode>=0.5.0
+
 # image reading and preprocessing
 # 4.6.0.66 is incompatible with numpy>=2.0 (numpy is allowed up to <2.1.0 by requirements-core.in)
 opencv-python==4.10.0.84

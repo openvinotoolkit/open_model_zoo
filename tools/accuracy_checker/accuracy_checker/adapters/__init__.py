@@ -130,6 +130,7 @@ from .attribute_classification import AttributeClassificationAdapter
 from .audio_recognition import (
     CTCBeamSearchDecoder,
     CTCGreedyDecoder,
+    PyCTCBeamSearchDecoder,
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm,
     Wav2VecDecoder
@@ -279,6 +280,7 @@ __all__ = [
 
     'CTCBeamSearchDecoder',
     'CTCGreedyDecoder',
+    'PyCTCBeamSearchDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
     'KaldiLatGenDecoder',
