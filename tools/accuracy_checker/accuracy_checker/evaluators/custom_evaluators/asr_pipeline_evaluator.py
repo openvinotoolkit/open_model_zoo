@@ -17,6 +17,8 @@ limitations under the License.
 import importlib
 import re
 
+import numpy as np
+
 from ...representation import CharacterRecognitionPrediction
 from ...utils import UnsupportedPackage, extract_image_representations
 from .base_custom_evaluator import BaseCustomEvaluator
@@ -329,8 +331,11 @@ class HfFunAsrPipeline(ASRPipeline):
         return model
 
     def _get_predictions(self, data, identifier, input_meta):
+        import torch
+
+        audio = torch.from_numpy(np.ascontiguousarray(data[0], dtype=np.float32)).flatten()
         res = self.pipeline.generate(
-            input=[data[0].astype("float32")],
+            input=[audio],
             cache={},
             hotwords=[],
             language=self.language,
