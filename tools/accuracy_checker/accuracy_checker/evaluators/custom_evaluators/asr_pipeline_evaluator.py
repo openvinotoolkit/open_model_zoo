@@ -155,12 +155,23 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
         super().__init__(config)
 
     def _initialize_pipeline(self, config):
-        try:
-            importlib.import_module("qwen_asr")
-        except ImportError as import_error:
-            UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
-                self.__class__.__name__
-            )
+        model_id = config.get("model_id")
+        if "qwen" in str(model_id).lower() and "asr" in str(model_id).lower():
+            try:
+                importlib.import_module("qwen_asr")
+            except ImportError as import_error:
+                UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
+                    self.__class__.__name__
+                )
+        elif "fun" in str(model_id).lower() and "asr" in str(model_id).lower():
+            try:
+                importlib.import_module("fun_asr")
+            except ImportError as import_error:
+                UnsupportedPackage("fun-asr", import_error.msg).raise_error(
+                    self.__class__.__name__
+                )
+        else:
+            raise ValueError(f"Unsupported model_id: {model_id}")
 
         try:
             from optimum.intel.openvino import OVModelForSpeechSeq2Seq  # pylint: disable=C0415
