@@ -34,9 +34,9 @@ class ASRPipelineEvaluator(BaseCustomEvaluator):
     VALID_PIPELINE_CLASSES = [
         "GenAIASRPipeline",
         "HFASRPipeline",
-        "HfFunAsrPipeline",
+        "HFFunASRPipeline",
         "Qwen3ASROptimumPipeline",
-        "FunAsrOptimumPipeline",
+        "FunASROptimumPipeline",
     ]
 
     def __init__(self, dataset_config, pipe, orig_config):
@@ -238,7 +238,7 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
         }
 
 
-class FunAsrOptimumPipeline(ASRPipeline):
+class FunASROptimumPipeline(ASRPipeline):
     SAMPLE_RATE = 16000
     EOS_TOKEN_IDS = [151643, 151645]
 
@@ -370,7 +370,7 @@ class HFASRPipeline(ASRPipeline):
             },
         )["text"]
 
-class HfFunAsrPipeline(ASRPipeline):
+class HFFunASRPipeline(ASRPipeline):
     def __init__(self, config):
         self.device = config.get("_device", "cpu").lower()
         # FunASR prompt language name, e.g. "英文" (English), "中文" (Chinese)
