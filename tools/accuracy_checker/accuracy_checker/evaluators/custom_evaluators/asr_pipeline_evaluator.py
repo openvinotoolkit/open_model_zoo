@@ -119,25 +119,16 @@ class ASRPipeline:
         predictions = []
         outputs = []
         for identifier, data in zip(identifiers, input_data):
-            data = self._normalize_audio(data)
             transcription = self._get_predictions(data, identifier, input_meta)
             prediction_text = normalize_transcription(self.engine, transcription)
             predictions.append(transcription)
             outputs.append(CharacterRecognitionPrediction(identifier, prediction_text))
         return predictions, outputs
 
-    @staticmethod
-    def _normalize_audio(data):
-        data = np.asarray(data)
-        if np.issubdtype(data.dtype, np.integer):
-            return data.astype(np.float32) / -np.iinfo(data.dtype).min
-        return data
-
 
 class GenAIASRPipeline(ASRPipeline):
     def __init__(self, config):
         self.language = config.get("language")
-        self.return_timestamps = config.get("return_timestamps", False)
         super().__init__(config)
 
     def _initialize_pipeline(self, config):
@@ -153,7 +144,7 @@ class GenAIASRPipeline(ASRPipeline):
         return ov_genai.ASRPipeline(str(model_dir), device=device)
 
     def _get_predictions(self, data, identifier, input_meta):
-        kwargs = {"return_timestamps": self.return_timestamps}
+        kwargs = {}
         if self.language:
             kwargs["language"] = self.language
         return self.pipeline.generate(data[0], **kwargs).texts[0]
