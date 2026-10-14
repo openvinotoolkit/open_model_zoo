@@ -66,5 +66,5 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/whisper_evaluator.py`.
 
 * **ASR Pipeline Evaluator** demonstrates how to evaluate automatic speech recognition models with various ASR pipeline classes, including GenAIASRPipeline,
-Qwen3ASROptimumPipeline and FunAsrOptimumPipeline
+Qwen3ASROptimumPipeline and FunASROptimumPipeline
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_pipeline_evaluator.py`.
