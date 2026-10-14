@@ -53,3 +53,9 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
     }
     return dst;
 }
+
+bool is_aspect_ratio_equal(const std::tuple<int, int> &lhs_res, const std::tuple<int, int> &rhs_res) {
+    float leftAspectRation = std::get<0>(lhs_res) / static_cast<float>(std::get<1>(lhs_res));
+    float rightAspectRation = std::get<0>(rhs_res) / static_cast<float>(std::get<1>(rhs_res));
+    return fabs(leftAspectRation - rightAspectRation) <= std::numeric_limits<float>::epsilon();
+}

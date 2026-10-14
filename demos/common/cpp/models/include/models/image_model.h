@@ -44,6 +44,8 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
+    size_t netOutputHeight = 0;
+    size_t netOutputWidth = 0;
     cv::InterpolationFlags interpolationMode = cv::INTER_LINEAR;
     RESIZE_MODE resizeMode = RESIZE_FILL;
 };
