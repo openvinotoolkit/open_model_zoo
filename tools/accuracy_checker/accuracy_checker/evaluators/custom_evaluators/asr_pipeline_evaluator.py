@@ -127,10 +127,6 @@ class ASRPipeline:
 
 
 class GenAIASRPipeline(ASRPipeline):
-    def __init__(self, config):
-        self.language = config.get("language")
-        super().__init__(config)
-
     def _initialize_pipeline(self, config):
         try:
             import openvino_genai as ov_genai  # pylint: disable=C0415
@@ -144,10 +140,10 @@ class GenAIASRPipeline(ASRPipeline):
         return ov_genai.ASRPipeline(str(model_dir), device=device)
 
     def _get_predictions(self, data, identifier, input_meta):
-        kwargs = {}
-        if self.language:
-            kwargs["language"] = self.language
-        return self.pipeline.generate(data[0], **kwargs).texts[0]
+        return self.pipeline.generate(
+            data[0],
+            return_timestamps=True,
+        ).texts[0]
 
 
 class Qwen3ASROptimumPipeline(ASRPipeline):
@@ -160,23 +156,12 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
         super().__init__(config)
 
     def _initialize_pipeline(self, config):
-        model_id = config.get("model_id")
-        if "qwen" in str(model_id).lower() and "asr" in str(model_id).lower():
-            try:
-                importlib.import_module("qwen_asr")
-            except ImportError as import_error:
-                UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
-                    self.__class__.__name__
-                )
-        elif "fun" in str(model_id).lower() and "asr" in str(model_id).lower():
-            try:
-                importlib.import_module("fun_asr")
-            except ImportError as import_error:
-                UnsupportedPackage("fun-asr", import_error.msg).raise_error(
-                    self.__class__.__name__
-                )
-        else:
-            raise ValueError(f"Unsupported model_id: {model_id}")
+        try:
+            importlib.import_module("qwen_asr")
+        except ImportError as import_error:
+            UnsupportedPackage("qwen-asr", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
 
         try:
             from optimum.intel.openvino import OVModelForSpeechSeq2Seq  # pylint: disable=C0415
