@@ -36,6 +36,7 @@ class ASRPipelineEvaluator(BaseCustomEvaluator):
         "HFASRPipeline",
         "HfFunAsrPipeline",
         "Qwen3ASROptimumPipeline",
+        "FunAsrOptimumPipeline",
     ]
 
     def __init__(self, dataset_config, pipe, orig_config):
@@ -240,6 +241,60 @@ class Qwen3ASROptimumPipeline(ASRPipeline):
             "language": language_match.group(1) if language_match else None,
             "text": text_match.group(1).strip() if text_match else raw_text.strip(),
         }
+
+
+class FunAsrOptimumPipeline(ASRPipeline):
+    SAMPLE_RATE = 16000
+    EOS_TOKEN_IDS = [151643, 151645]
+
+    def __init__(self, config):
+        self.max_new_tokens = config.get("max_new_tokens", 1000)
+        # FunASR prompt language name, e.g. "英文" (English), "中文" (Chinese)
+        self.language = config.get("language", "英文")
+        self.itn = config.get("itn", True)
+        super().__init__(config)
+
+    def _initialize_pipeline(self, config):
+        try:
+            from optimum.intel.openvino import OVModelForSpeechSeq2Seq  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("optimum.intel.openvino", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        try:
+            from transformers import AutoTokenizer  # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("transformers", import_error.msg).raise_error(
+                self.__class__.__name__
+            )
+
+        model_dir = get_model_dir(config)
+        device = config.get("_device", "CPU")
+        ov_model = OVModelForSpeechSeq2Seq.from_pretrained(str(model_dir)).to(device)
+        tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
+        return ov_model, tokenizer
+
+    def _get_predictions(self, data, identifier, input_meta):
+        ov_model, tokenizer = self.pipeline
+        sampling_rate = input_meta[0].get("sample_rate", self.SAMPLE_RATE)
+        audio = np.ascontiguousarray(data[0], dtype=np.float32).flatten()
+        inputs = ov_model.preprocess_input(
+            audio, sampling_rate=sampling_rate, language=self.language, itn=self.itn
+        )
+
+        output_ids = ov_model.generate(
+            input_features=inputs["input_features"],
+            decoder_input_ids=inputs["decoder_input_ids"],
+            decoder_attention_mask=inputs["decoder_attention_mask"],
+            eos_token_id=self.EOS_TOKEN_IDS,
+            max_new_tokens=self.max_new_tokens,
+        )
+
+        prompt_len = inputs["decoder_input_ids"].shape[1]
+        return tokenizer.batch_decode(
+            output_ids[:, prompt_len:], skip_special_tokens=True
+        )[0].strip()
 
 
 class HFASRPipeline(ASRPipeline):
