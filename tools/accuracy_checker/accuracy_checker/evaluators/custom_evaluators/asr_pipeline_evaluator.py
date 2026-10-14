@@ -127,6 +127,10 @@ class ASRPipeline:
 
 
 class GenAIASRPipeline(ASRPipeline):
+    def __init__(self, config):
+        self.language = config.get("language")
+        super().__init__(config)
+
     def _initialize_pipeline(self, config):
         try:
             import openvino_genai as ov_genai  # pylint: disable=C0415
@@ -140,9 +144,11 @@ class GenAIASRPipeline(ASRPipeline):
         return ov_genai.ASRPipeline(str(model_dir), device=device)
 
     def _get_predictions(self, data, identifier, input_meta):
+        kwargs = {"language": self.language} if self.language else {}
         return self.pipeline.generate(
             data[0],
             return_timestamps=True,
+            **kwargs,
         ).texts[0]
 
 
