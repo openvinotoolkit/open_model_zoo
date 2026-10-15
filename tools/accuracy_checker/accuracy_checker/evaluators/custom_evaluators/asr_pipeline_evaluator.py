@@ -380,7 +380,7 @@ class HFFunASRPipeline(ASRPipeline):
 
     def _initialize_pipeline(self, config):
         try:
-            from funasr import AutoModel
+            from funasr import AutoModel  # pylint: disable=C0415
         except ImportError as ie:
             UnsupportedPackage("funasr", ie.msg).raise_error(self.__class__.__name__)
 
@@ -394,7 +394,10 @@ class HFFunASRPipeline(ASRPipeline):
         return model
 
     def _get_predictions(self, data, identifier, input_meta):
-        import torch
+        try:
+            import torch  # pylint: disable=C0415
+        except ImportError as ie:
+            UnsupportedPackage("torch", ie.msg).raise_error(self.__class__.__name__)
 
         audio = torch.from_numpy(np.ascontiguousarray(data[0], dtype=np.float32)).flatten()
         res = self.pipeline.generate(
