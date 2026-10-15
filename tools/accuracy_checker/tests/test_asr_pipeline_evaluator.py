@@ -20,7 +20,8 @@ import pytest
 from accuracy_checker.evaluators.custom_evaluators.asr_pipeline_evaluator import (
     ASRPipelineEvaluator,
     GenAIASRPipeline,
-    HFASRPipeline
+    HFASRPipeline,
+    HFFunASRPipeline,
 )
 from datasets import load_dataset
 
@@ -103,6 +104,14 @@ class TestASRPipelineEvaluator:
     def test_hf_asr_pipeline_whisper_tiny(self):
         config = {"_device": "CPU", "model_id": "openai/whisper-tiny"}
         pipeline = HFASRPipeline(config)
+        evaluator = ASRPipelineEvaluator(None, pipeline, None)
+
+        result = evaluator.pipe._get_predictions(input_data, identifiers[0], input_meta)
+        assert isinstance(result, str)
+
+    def test_hf_fun_asr_pipeline(self):
+        config = {"_device": "CPU", "model_id": "FunAudioLLM/Fun-ASR-Nano-2512", "language": "英文"}
+        pipeline = HFFunASRPipeline(config)
         evaluator = ASRPipelineEvaluator(None, pipeline, None)
 
         result = evaluator.pipe._get_predictions(input_data, identifiers[0], input_meta)
