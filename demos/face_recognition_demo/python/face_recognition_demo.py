@@ -43,7 +43,7 @@ from model_api.performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
-DEVICE_KINDS = ['CPU', 'GPU', 'HETERO']
+DEVICE_KINDS = ['CPU', 'GPU', 'NPU', 'AUTO', 'HETERO']
 
 
 def build_argparser():
@@ -94,15 +94,18 @@ def build_argparser():
                              'reshaping. Example: 500 700.')
 
     infer = parser.add_argument_group('Inference options')
-    infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
+    infer.add_argument('-d_fd', default='CPU',
                        help='Optional. Target device for Face Detection model. '
-                            'Default value is CPU.')
-    infer.add_argument('-d_lm', default='CPU', choices=DEVICE_KINDS,
+                            'Default value is CPU. Use HETERO:<dev1>,<dev2> or '
+                            'AUTO:<dev1>,<dev2> for heterogeneous/automatic execution.')
+    infer.add_argument('-d_lm', default='CPU',
                        help='Optional. Target device for Facial Landmarks Detection '
-                            'model. Default value is CPU.')
-    infer.add_argument('-d_reid', default='CPU', choices=DEVICE_KINDS,
+                            'model. Default value is CPU. Use HETERO:<dev1>,<dev2> or '
+                            'AUTO:<dev1>,<dev2> for heterogeneous/automatic execution.')
+    infer.add_argument('-d_reid', default='CPU',
                        help='Optional. Target device for Face Reidentification '
-                            'model. Default value is CPU.')
+                            'model. Default value is CPU. Use HETERO:<dev1>,<dev2> or '
+                            'AUTO:<dev1>,<dev2> for heterogeneous/automatic execution.')
     infer.add_argument('-v', '--verbose', action='store_true',
                        help='Optional. Be more verbose.')
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
@@ -206,6 +209,10 @@ def center_crop(frame, crop_size):
 
 def main():
     args = build_argparser().parse_args()
+
+    for arg_name, device in [('-d_fd', args.d_fd), ('-d_lm', args.d_lm), ('-d_reid', args.d_reid)]:
+        if device == 'HETERO':
+            raise ValueError('{} requires sub-devices, e.g. HETERO:GPU,CPU'.format(arg_name))
 
     cap = open_images_capture(args.input, args.loop)
     frame_processor = FrameProcessor(args)
