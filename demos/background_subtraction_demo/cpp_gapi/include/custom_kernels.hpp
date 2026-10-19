@@ -7,15 +7,11 @@
 #include <string>
 #include <vector>
 
-#include <cpp/ie_cnn_network.h>
-#include <ie_allocator.hpp>
-#include <ie_common.h>
-#include <ie_input_info.hpp>
+#include <openvino/openvino.hpp>
+
 #include <opencv2/core.hpp>
 #include <opencv2/gapi/gkernel.hpp>
 #include <opencv2/gapi/gmat.hpp>
-
-namespace IE = InferenceEngine;
 
 namespace custom {
 // clang-format off
@@ -49,10 +45,10 @@ public:
     }
 
 protected:
-    IE::CNNNetwork m_cnn_network;
+    std::shared_ptr<const ov::Model> model;
     std::string m_tag;
-    IE::InputsDataMap m_inputs;
-    IE::OutputsDataMap m_outputs;
+    std::vector<ov::Output<const ov::Node>> m_inputs;
+    std::vector<ov::Output<const ov::Node>> m_outputs;
 };
 
 class MaskRCNNBGReplacer : public NNBGReplacer {
