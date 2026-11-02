@@ -51,3 +51,6 @@ class BaseRepresentation(abc.ABC):
 
     def set_dataset_metadata(self, source):
         self.metadata['dataset_meta'] = source
+
+    def release(self):
+        pass

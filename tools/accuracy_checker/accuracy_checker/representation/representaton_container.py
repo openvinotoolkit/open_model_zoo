@@ -47,6 +47,10 @@ class ContainerRepresentation(BaseRepresentation):
     def values(self):
         return list(self.representations.values())
 
+    def release(self):
+        for representation in self.representations.values():
+            representation.release()
+
     @property
     def identifier(self):
         if self._identifier:
