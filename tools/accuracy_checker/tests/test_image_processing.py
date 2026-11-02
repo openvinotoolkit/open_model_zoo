@@ -17,6 +17,7 @@ def test_image_cache_evicts_least_recently_used_above_half_of_ram(monkeypatch):
     second.value = np.zeros(25, dtype=np.uint8)
     assert not ImageProcessingAnnotation.release_cache_if_needed()
     assert sum(cache.values()) == 50
+    # Reading .value marks first as most recently used, making second the eviction candidate.
     assert first.value is not None
 
     third = ImageProcessingAnnotation('third', 'third.png')
