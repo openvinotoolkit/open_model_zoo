@@ -32,6 +32,7 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
+from ..representation.image_processing import ImageProcessingAnnotation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
@@ -461,6 +462,7 @@ class ModelEvaluator(BaseEvaluator):
         if self.metric_executor.need_store_predictions:
             self._annotations.extend(annotations)
             self._predictions.extend(predictions)
+        ImageProcessingAnnotation.release_cache_if_needed()
 
     @staticmethod
     def _is_stored(stored_predictions=None):

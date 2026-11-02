@@ -14,11 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from collections import OrderedDict
 from enum import Enum
+import ctypes
+import os
+import weakref
+
 import numpy as np
 
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
+
+
+def _get_total_memory():
+    if os.name == 'nt':
+        class MemoryStatus(ctypes.Structure):
+            _fields_ = [
+                ('dwLength', ctypes.c_ulong),
+                ('dwMemoryLoad', ctypes.c_ulong),
+                ('ullTotalPhys', ctypes.c_ulonglong),
+                ('ullAvailPhys', ctypes.c_ulonglong),
+                ('ullTotalPageFile', ctypes.c_ulonglong),
+                ('ullAvailPageFile', ctypes.c_ulonglong),
+                ('ullTotalVirtual', ctypes.c_ulonglong),
+                ('ullAvailVirtual', ctypes.c_ulonglong),
+                ('ullAvailExtendedVirtual', ctypes.c_ulonglong),
+            ]
+
+        status = MemoryStatus()
+        status.dwLength = ctypes.sizeof(status)
+        if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+            raise ctypes.WinError()
+        return status.ullTotalPhys
+
+    return os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 
 
 class GTLoader(Enum):
@@ -36,6 +65,9 @@ class ImageProcessingRepresentation(BaseRepresentation):
 
 
 class ImageProcessingAnnotation(ImageProcessingRepresentation):
+    _cached_annotations = OrderedDict()
+    _cache_memory_threshold = 0.5
+
     LOADERS = {
         GTLoader.PILLOW: 'pillow_imread',
         GTLoader.OPENCV: 'opencv_imread',
@@ -72,11 +104,45 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
             gt = loader.read(self._image_path)
             self._value = gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy',
                                                                          'numpy_reader'] else gt
+        self._set_cached_value(self._value)
         return self._value
 
     @value.setter
     def value(self, value):
+        self._set_cached_value(value)
+
+    def _set_cached_value(self, value):
         self._value = value
+        cache = ImageProcessingAnnotation._cached_annotations
+        reference = weakref.ref(self, ImageProcessingAnnotation._remove_cached_annotation)
+        if value is None:
+            cache.pop(reference, None)
+        else:
+            cache[reference] = value.nbytes
+            cache.move_to_end(reference)
+
+    @classmethod
+    def _remove_cached_annotation(cls, reference):
+        cls._cached_annotations.pop(reference, None)
+
+    def release(self):
+        self._set_cached_value(None)
+
+    @classmethod
+    def release_cache_if_needed(cls):
+        cached_bytes = sum(cls._cached_annotations.values())
+        if not cached_bytes:
+            return False
+        limit = _get_total_memory() * cls._cache_memory_threshold
+        released = False
+        while cached_bytes > limit:
+            reference, size = cls._cached_annotations.popitem(last=False)
+            annotation = reference()
+            if annotation is not None:
+                annotation.release()
+            cached_bytes -= size
+            released = True
+        return released
 
 
 class ImageProcessingPrediction(ImageProcessingRepresentation):
