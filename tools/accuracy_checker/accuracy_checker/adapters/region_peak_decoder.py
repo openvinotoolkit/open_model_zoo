@@ -24,14 +24,14 @@ def find_peaks_and_plateaus(heatmap, all_peaks, prev_peak_counter):
     Accepts a non-empty 2D heatmap. Modifies it in place: sets NaNs
     and values below the existing 0.1 threshold to zero.
     For each accepted region, selects the actual pixel nearest its
-    centroid. Then applies the original NMS to all selected peaks.
+    centroid. Then applies NMS, giving higher heatmap scores priority.
 
     Appends a list of [x, y, value, id] entries to all_peaks.
     Returns the number of points appended after NMS.
     """
     _prepare_heatmap(heatmap)
     coordinates = _find_peak_coordinates(heatmap)
-    coordinates = _suppress_close_peaks(coordinates)
+    coordinates = _suppress_close_peaks(coordinates, heatmap)
 
     peaks = [
         [x, y, heatmap[y, x], prev_peak_counter + index]
@@ -200,17 +200,16 @@ def _region_has_higher_pixel(heatmap, ys, xs):
     return False
 
 
-def _suppress_close_peaks(coordinates):
-    """Keep the original NMS as a separate step after selecting regions.
+def _suppress_close_peaks(coordinates, heatmap):
+    """Suppress nearby peaks in descending heatmap score order.
 
-    Processes sorted (x, y) coordinates, not heatmap scores.
-    Rejects a later point if it is less than 6 pixels from any accepted
-    point.
-    A distance of exactly 6 is allowed. Returns a new list.
+    Equal scores retain the input (x, y) order. A point less than 6
+    pixels from an accepted peak is rejected. Return the survivors in
+    (x, y) order to preserve peak numbering order for pose grouping.
     """
     accepted = []
-    for x, y in coordinates:
+    for x, y in sorted(coordinates, key=lambda point: heatmap[point[1], point[0]], reverse=True):
         if any((x - px) ** 2 + (y - py) ** 2 < 36 for px, py in accepted):
             continue
         accepted.append((x, y))
-    return accepted
+    return sorted(accepted)

@@ -45,3 +45,20 @@ def test_rejects_flat_shoulder_next_to_higher_peak():
 
     assert find_peaks_and_plateaus(heatmap, all_peaks, 0) == 1
     assert all_peaks == [[[10, 1, np.float32(0.5), 0]]]
+
+
+def test_nms_prefers_higher_peak_but_keeps_spatial_output_order():
+    heatmap = np.zeros((1, 13), dtype=np.float32)
+    heatmap[0, [0, 7, 12]] = [0.25, 0.5, 0.75]
+    all_peaks = []
+
+    assert find_peaks_and_plateaus(heatmap, all_peaks, 7) == 2
+    assert all_peaks == [[[0, 0, 0.25, 7], [12, 0, 0.75, 8]]]
+
+
+def test_nms_breaks_equal_scores_by_spatial_order():
+    heatmap = np.array([[0.5, 0, 0, 0, 0, 0.5]], dtype=np.float32)
+    all_peaks = []
+
+    assert find_peaks_and_plateaus(heatmap, all_peaks, 7) == 1
+    assert all_peaks == [[[0, 0, 0.5, 7]]]
