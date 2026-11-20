@@ -21,6 +21,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..adapters.pose_estimation import HumanPoseAdapter
+from .region_peak_decoder import find_peaks_and_plateaus
 from ..config import ConfigValidator, StringField
 from ..representation import PoseEstimationPrediction, PoseEstimation3dPrediction
 
@@ -142,7 +143,7 @@ class HumanPose3dAdapter(Adapter):
         peak_counter = 0
         all_peaks = []
         for part in range(0, 18):  # 19th for bg
-            peak_counter += self.pose_adapter.find_peaks(heatmap_avg[:, :, part], all_peaks, peak_counter)
+            peak_counter += find_peaks_and_plateaus(heatmap_avg[:, :, part], all_peaks, peak_counter)
 
         subset, candidate = self.pose_adapter.group_peaks(all_peaks, paf_avg)
         poses_2d = PoseEstimationPrediction(identifier, *HumanPose3dAdapter._get_poses(subset, candidate))
