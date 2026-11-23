@@ -18,6 +18,7 @@ from collections import OrderedDict
 from enum import Enum
 import ctypes
 import os
+import threading
 import weakref
 
 import numpy as np
@@ -68,6 +69,8 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
     _cached_annotations = OrderedDict()
     _cached_bytes = 0
     _cache_memory_threshold = 0.5
+    # Reentrant: eviction calls release(), and GC may run weakref cleanup while the lock is held.
+    _cache_lock = threading.RLock()
 
     LOADERS = {
         GTLoader.PILLOW: 'pillow_imread',
@@ -116,37 +119,41 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         # A view would keep its whole base array alive while only its own nbytes are counted.
         if isinstance(value, np.ndarray) and value.base is not None:
             value = value.copy()
-        self._value = value
         # Shared cache state lives on the base class, so subclasses must not shadow it via cls/self.
-        cache = ImageProcessingAnnotation._cached_annotations
-        reference = weakref.ref(self, ImageProcessingAnnotation._remove_cached_annotation)
-        ImageProcessingAnnotation._cached_bytes -= cache.pop(reference, 0)
-        if value is not None:
-            cache[reference] = value.nbytes
-            ImageProcessingAnnotation._cached_bytes += value.nbytes
+        with ImageProcessingAnnotation._cache_lock:
+            self._value = value
+            cache = ImageProcessingAnnotation._cached_annotations
+            reference = weakref.ref(self, ImageProcessingAnnotation._remove_cached_annotation)
+            ImageProcessingAnnotation._cached_bytes -= cache.pop(reference, 0)
+            if value is not None:
+                cache[reference] = value.nbytes
+                ImageProcessingAnnotation._cached_bytes += value.nbytes
 
     @staticmethod
     def _remove_cached_annotation(reference):
-        ImageProcessingAnnotation._cached_bytes -= ImageProcessingAnnotation._cached_annotations.pop(reference, 0)
+        with ImageProcessingAnnotation._cache_lock:
+            ImageProcessingAnnotation._cached_bytes -= ImageProcessingAnnotation._cached_annotations.pop(reference, 0)
 
     def release(self):
         self._set_cached_value(None)
 
     @staticmethod
     def release_cache_if_needed():
-        if not ImageProcessingAnnotation._cached_bytes:
-            return False
-        limit = _get_total_memory() * ImageProcessingAnnotation._cache_memory_threshold
-        released = False
-        while ImageProcessingAnnotation._cached_bytes > limit:
-            reference, size = ImageProcessingAnnotation._cached_annotations.popitem(last=False)
-            ImageProcessingAnnotation._cached_bytes -= size
-            annotation = reference()
-            if annotation is not None:
-                # The entry is already popped, so release() does not subtract its size again.
-                annotation.release()
-            released = True
-        return released
+        with ImageProcessingAnnotation._cache_lock:
+            if not ImageProcessingAnnotation._cached_bytes:
+                return False
+            limit = _get_total_memory() * ImageProcessingAnnotation._cache_memory_threshold
+            cache = ImageProcessingAnnotation._cached_annotations
+            released = False
+            while cache and ImageProcessingAnnotation._cached_bytes > limit:
+                reference, size = cache.popitem(last=False)
+                ImageProcessingAnnotation._cached_bytes -= size
+                annotation = reference()
+                if annotation is not None:
+                    # The entry is already popped, so release() does not subtract its size again.
+                    annotation.release()
+                released = True
+            return released
 
 
 class ImageProcessingPrediction(ImageProcessingRepresentation):

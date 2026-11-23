@@ -1,5 +1,7 @@
 from collections import OrderedDict
 import gc
+import sys
+import threading
 
 import numpy as np
 
@@ -67,3 +69,39 @@ def test_image_cache_byte_counter_tracks_cached_sizes(monkeypatch):
     del second
     gc.collect()
     assert ImageProcessingAnnotation._cached_bytes == sum(cache.values()) == 0
+
+
+def test_image_cache_accounting_is_thread_safe(monkeypatch):
+    monkeypatch.setattr(image_processing, '_get_total_memory', lambda: 100)
+    cache = OrderedDict()
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_bytes', 0)
+    switch_interval = sys.getswitchinterval()
+    sys.setswitchinterval(1e-6)
+    errors = []
+
+    def worker():
+        try:
+            kept = []
+            for i in range(500):
+                annotation = ImageProcessingAnnotation(str(i), 'image.png')
+                annotation.value = np.zeros(10, dtype=np.uint8)
+                if i % 2:
+                    kept.append(annotation)
+                ImageProcessingAnnotation.release_cache_if_needed()
+        except Exception as error:  # pylint: disable=broad-except
+            errors.append(error)
+
+    try:
+        threads = [threading.Thread(target=worker) for _ in range(8)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+    finally:
+        sys.setswitchinterval(switch_interval)
+
+    gc.collect()
+    assert not errors
+    assert ImageProcessingAnnotation._cached_bytes == sum(cache.values())
+    assert ImageProcessingAnnotation._cached_bytes <= 50
