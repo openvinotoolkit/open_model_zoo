@@ -117,32 +117,30 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         if isinstance(value, np.ndarray) and value.base is not None:
             value = value.copy()
         self._value = value
-        owner = ImageProcessingAnnotation
-        cache = owner._cached_annotations
-        reference = weakref.ref(self, owner._remove_cached_annotation)
-        owner._cached_bytes -= cache.pop(reference, 0)
+        # Shared cache state lives on the base class, so subclasses must not shadow it via cls/self.
+        cache = ImageProcessingAnnotation._cached_annotations
+        reference = weakref.ref(self, ImageProcessingAnnotation._remove_cached_annotation)
+        ImageProcessingAnnotation._cached_bytes -= cache.pop(reference, 0)
         if value is not None:
             cache[reference] = value.nbytes
-            owner._cached_bytes += value.nbytes
+            ImageProcessingAnnotation._cached_bytes += value.nbytes
 
     @staticmethod
     def _remove_cached_annotation(reference):
-        owner = ImageProcessingAnnotation
-        owner._cached_bytes -= owner._cached_annotations.pop(reference, 0)
+        ImageProcessingAnnotation._cached_bytes -= ImageProcessingAnnotation._cached_annotations.pop(reference, 0)
 
     def release(self):
         self._set_cached_value(None)
 
     @staticmethod
     def release_cache_if_needed():
-        owner = ImageProcessingAnnotation
-        if not owner._cached_bytes:
+        if not ImageProcessingAnnotation._cached_bytes:
             return False
-        limit = _get_total_memory() * owner._cache_memory_threshold
+        limit = _get_total_memory() * ImageProcessingAnnotation._cache_memory_threshold
         released = False
-        while owner._cached_bytes > limit:
-            reference, size = owner._cached_annotations.popitem(last=False)
-            owner._cached_bytes -= size
+        while ImageProcessingAnnotation._cached_bytes > limit:
+            reference, size = ImageProcessingAnnotation._cached_annotations.popitem(last=False)
+            ImageProcessingAnnotation._cached_bytes -= size
             annotation = reference()
             if annotation is not None:
                 # The entry is already popped, so release() does not subtract its size again.
