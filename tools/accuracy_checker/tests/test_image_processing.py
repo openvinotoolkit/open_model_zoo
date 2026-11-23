@@ -32,6 +32,21 @@ def test_image_cache_evicts_least_recently_used_above_half_of_ram(monkeypatch):
     assert ImageProcessingAnnotation._cached_bytes == 50
 
 
+def test_image_cache_copies_array_views(monkeypatch):
+    cache = OrderedDict()
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_bytes', 0)
+
+    full = np.arange(100, dtype=np.uint8).reshape(10, 10)
+    crop = full[2:4, 3:6]
+    annotation = ImageProcessingAnnotation('crop', 'crop.png')
+    annotation.value = crop
+
+    assert annotation._value.base is None
+    np.testing.assert_array_equal(annotation._value, crop)
+    assert sum(cache.values()) == ImageProcessingAnnotation._cached_bytes == crop.nbytes
+
+
 def test_image_cache_byte_counter_tracks_cached_sizes(monkeypatch):
     cache = OrderedDict()
     monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)

@@ -113,6 +113,9 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         self._set_cached_value(value)
 
     def _set_cached_value(self, value):
+        # A view would keep its whole base array alive while only its own nbytes are counted.
+        if isinstance(value, np.ndarray) and value.base is not None:
+            value = value.copy()
         self._value = value
         owner = ImageProcessingAnnotation
         cache = owner._cached_annotations
