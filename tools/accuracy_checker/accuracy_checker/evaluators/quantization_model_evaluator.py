@@ -28,6 +28,7 @@ from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
+from ..representation.image_processing import ImageProcessingAnnotation
 from .module_evaluator import ModuleEvaluator
 
 
@@ -183,6 +184,7 @@ class ModelEvaluator:
                     if self.metric_executor.need_store_predictions:
                         self._annotations.extend(annotations)
                         self._predictions.extend(predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
 
             if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
                 batch_raw_predictions = batch_raw_predictions[0]
@@ -301,6 +303,7 @@ class ModelEvaluator:
                     if self.metric_executor.need_store_predictions:
                         self._annotations.extend(annotations)
                         self._predictions.extend(predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
 
             if output_callback:
                 if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
