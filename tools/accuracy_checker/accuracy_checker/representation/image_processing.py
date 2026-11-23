@@ -66,6 +66,7 @@ class ImageProcessingRepresentation(BaseRepresentation):
 
 class ImageProcessingAnnotation(ImageProcessingRepresentation):
     _cached_annotations = OrderedDict()
+    _cached_bytes = 0
     _cache_memory_threshold = 0.5
 
     LOADERS = {
@@ -113,34 +114,36 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
 
     def _set_cached_value(self, value):
         self._value = value
-        cache = ImageProcessingAnnotation._cached_annotations
-        reference = weakref.ref(self, ImageProcessingAnnotation._remove_cached_annotation)
-        if value is None:
-            cache.pop(reference, None)
-        else:
+        owner = ImageProcessingAnnotation
+        cache = owner._cached_annotations
+        reference = weakref.ref(self, owner._remove_cached_annotation)
+        owner._cached_bytes -= cache.pop(reference, 0)
+        if value is not None:
             cache[reference] = value.nbytes
-            cache.move_to_end(reference)
+            owner._cached_bytes += value.nbytes
 
-    @classmethod
-    def _remove_cached_annotation(cls, reference):
-        cls._cached_annotations.pop(reference, None)
+    @staticmethod
+    def _remove_cached_annotation(reference):
+        owner = ImageProcessingAnnotation
+        owner._cached_bytes -= owner._cached_annotations.pop(reference, 0)
 
     def release(self):
         self._set_cached_value(None)
 
-    @classmethod
-    def release_cache_if_needed(cls):
-        cached_bytes = sum(cls._cached_annotations.values())
-        if not cached_bytes:
+    @staticmethod
+    def release_cache_if_needed():
+        owner = ImageProcessingAnnotation
+        if not owner._cached_bytes:
             return False
-        limit = _get_total_memory() * cls._cache_memory_threshold
+        limit = _get_total_memory() * owner._cache_memory_threshold
         released = False
-        while cached_bytes > limit:
-            reference, size = cls._cached_annotations.popitem(last=False)
+        while owner._cached_bytes > limit:
+            reference, size = owner._cached_annotations.popitem(last=False)
+            owner._cached_bytes -= size
             annotation = reference()
             if annotation is not None:
+                # The entry is already popped, so release() does not subtract its size again.
                 annotation.release()
-            cached_bytes -= size
             released = True
         return released
 

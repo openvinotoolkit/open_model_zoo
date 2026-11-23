@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import gc
 
 import numpy as np
 
@@ -10,6 +11,7 @@ def test_image_cache_evicts_least_recently_used_above_half_of_ram(monkeypatch):
     monkeypatch.setattr(image_processing, '_get_total_memory', lambda: 100)
     cache = OrderedDict()
     monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_bytes', 0)
 
     first = ImageProcessingAnnotation('first', 'first.png')
     second = ImageProcessingAnnotation('second', 'second.png')
@@ -27,3 +29,26 @@ def test_image_cache_evicts_least_recently_used_above_half_of_ram(monkeypatch):
     assert second._value is None
     assert third._value is not None
     assert sum(cache.values()) == 50
+    assert ImageProcessingAnnotation._cached_bytes == 50
+
+
+def test_image_cache_byte_counter_tracks_cached_sizes(monkeypatch):
+    cache = OrderedDict()
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_bytes', 0)
+
+    first = ImageProcessingAnnotation('first', 'first.png')
+    second = ImageProcessingAnnotation('second', 'second.png')
+    first.value = np.zeros(10, dtype=np.uint8)
+    second.value = np.zeros(20, dtype=np.uint8)
+    assert ImageProcessingAnnotation._cached_bytes == sum(cache.values()) == 30
+
+    first.value = np.zeros(15, dtype=np.uint8)
+    assert ImageProcessingAnnotation._cached_bytes == sum(cache.values()) == 35
+
+    first.release()
+    assert ImageProcessingAnnotation._cached_bytes == sum(cache.values()) == 20
+
+    del second
+    gc.collect()
+    assert ImageProcessingAnnotation._cached_bytes == sum(cache.values()) == 0
