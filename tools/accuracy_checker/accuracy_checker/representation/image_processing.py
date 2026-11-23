@@ -98,18 +98,28 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
 
     @property
     def value(self):
-        if self._value is None:
-            data_source = self.metadata.get('additional_data_source')
-            if not data_source:
-                data_source = self.metadata['data_source']
-            loader = BaseReader.provide(self._gt_loader, data_source)
-            if self._gt_loader == self.LOADERS[GTLoader.PILLOW]:
-                loader.convert_to_rgb = self._pillow_to_rgb if hasattr(self, '_pillow_to_rgb') else False
-            gt = loader.read(self._image_path)
-            self._value = gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy',
-                                                                         'numpy_reader'] else gt
-        self._set_cached_value(self._value)
-        return self._value
+        with ImageProcessingAnnotation._cache_lock:
+            value = self._value
+            if value is not None:
+                self._set_cached_value(value)
+                return value
+
+        data_source = self.metadata.get('additional_data_source')
+        if not data_source:
+            data_source = self.metadata['data_source']
+        loader = BaseReader.provide(self._gt_loader, data_source)
+        if self._gt_loader == self.LOADERS[GTLoader.PILLOW]:
+            loader.convert_to_rgb = self._pillow_to_rgb if hasattr(self, '_pillow_to_rgb') else False
+        gt = loader.read(self._image_path)
+        value = gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy', 'numpy_reader'] else gt
+        if isinstance(value, np.ndarray) and value.base is not None:
+            value = value.copy()
+
+        with ImageProcessingAnnotation._cache_lock:
+            if self._value is not None:
+                value = self._value
+            self._set_cached_value(value)
+        return value
 
     @value.setter
     def value(self, value):
