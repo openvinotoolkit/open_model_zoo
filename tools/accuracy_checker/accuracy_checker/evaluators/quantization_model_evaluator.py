@@ -28,6 +28,7 @@ from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
+from ..representation.image_processing import ImageProcessingAnnotation, pinned_annotations
 from .module_evaluator import ModuleEvaluator
 
 
@@ -165,24 +166,26 @@ class ModelEvaluator:
             )
             metrics_result = None
             if calculate_metrics:
-                annotations, predictions = self.postprocessor.process_batch(
-                    batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-                )
-                if dump_prediction_to_annotation:
-                    threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                    annotations = []
-                    for prediction in predictions:
-                        generated_annotation = prediction.to_annotation(threshold=threshold)
-                        if generated_annotation:
-                            annotations.append(generated_annotation)
-                            self._dumped_annotations.extend(annotations)
-                if self.metric_executor:
-                    metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                        batch_input_ids, annotations, predictions
+                with pinned_annotations(batch_annotation):
+                    annotations, predictions = self.postprocessor.process_batch(
+                        batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                     )
-                    if self.metric_executor.need_store_predictions:
-                        self._annotations.extend(annotations)
-                        self._predictions.extend(predictions)
+                    if dump_prediction_to_annotation:
+                        threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                        annotations = []
+                        for prediction in predictions:
+                            generated_annotation = prediction.to_annotation(threshold=threshold)
+                            if generated_annotation:
+                                annotations.append(generated_annotation)
+                                self._dumped_annotations.extend(annotations)
+                    if self.metric_executor:
+                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                            batch_input_ids, annotations, predictions
+                        )
+                        if self.metric_executor.need_store_predictions:
+                            self._annotations.extend(annotations)
+                            self._predictions.extend(predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
 
             if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
                 batch_raw_predictions = batch_raw_predictions[0]
@@ -282,25 +285,27 @@ class ModelEvaluator:
 
             metrics_result = None
             if calculate_metrics:
-                annotations, predictions = self.postprocessor.process_batch(
-                    batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-                )
-                if dump_prediction_to_annotation:
-                    threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                    annotations = []
-                    for prediction in predictions:
-                        generated_annotation = prediction.to_annotation(threshold=threshold)
-                        if generated_annotation:
-                            annotations.append(generated_annotation)
-                    self._dumped_annotations.extend(annotations)
-
-                if self.metric_executor:
-                    metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                        batch_input_ids, annotations, predictions
+                with pinned_annotations(batch_annotation):
+                    annotations, predictions = self.postprocessor.process_batch(
+                        batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                     )
-                    if self.metric_executor.need_store_predictions:
-                        self._annotations.extend(annotations)
-                        self._predictions.extend(predictions)
+                    if dump_prediction_to_annotation:
+                        threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                        annotations = []
+                        for prediction in predictions:
+                            generated_annotation = prediction.to_annotation(threshold=threshold)
+                            if generated_annotation:
+                                annotations.append(generated_annotation)
+                        self._dumped_annotations.extend(annotations)
+
+                    if self.metric_executor:
+                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                            batch_input_ids, annotations, predictions
+                        )
+                        if self.metric_executor.need_store_predictions:
+                            self._annotations.extend(annotations)
+                            self._predictions.extend(predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
 
             if output_callback:
                 if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:

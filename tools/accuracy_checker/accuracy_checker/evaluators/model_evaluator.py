@@ -32,6 +32,7 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
+from ..representation.image_processing import ImageProcessingAnnotation, pinned_annotations
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
@@ -39,6 +40,8 @@ from ..metrics.metric_profiler import write_summary_result
 
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
+    _STORED_PREDICTIONS_BATCH_SIZE = 32
+
     def __init__(
             self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode, config
     ):
@@ -438,6 +441,15 @@ class ModelEvaluator(BaseEvaluator):
     def _process_batch_results(
             self, batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
             enable_profiling=False, output_callback=None):
+        with pinned_annotations(batch_annotations):
+            self._process_pinned_batch_results(
+                batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
+                enable_profiling, output_callback)
+        ImageProcessingAnnotation.release_cache_if_needed()
+
+    def _process_pinned_batch_results(
+            self, batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
+            enable_profiling=False, output_callback=None):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
@@ -479,14 +491,39 @@ class ModelEvaluator(BaseEvaluator):
         if self.postprocessor.has_processors:
             print_info("Postprocess results:")
             self.dataset.provide_data_info(annotations, progress_reporter)
+        if self.postprocessor.has_dataset_processors:
+            # Dataset-level postprocessors need all items at once, so eviction is only possible afterwards.
             annotations, predictions = self.postprocessor.full_process(annotations, predictions)
-        self.metric_executor.update_metrics_on_batch(
-            range(len(annotations)), annotations, predictions
-        )
+            self.metric_executor.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
+        else:
+            annotations, predictions = self._process_stored_in_batches(annotations, predictions)
         if self.metric_executor.need_store_predictions:
             self._annotations = annotations
             self._predictions = predictions
 
+        return annotations, predictions
+
+    def _process_stored_in_batches(self, annotations, predictions):
+        batch_size = self._STORED_PREDICTIONS_BATCH_SIZE
+        if self.postprocessor.has_processors:
+            self.postprocessor.postprocessing_applyed = True
+        processed_annotations, processed_predictions = [], []
+        for start in range(0, len(annotations), batch_size):
+            batch_annotations = annotations[start:start + batch_size]
+            batch_predictions = predictions[start:start + batch_size]
+            with pinned_annotations(batch_annotations):
+                if self.postprocessor.has_processors:
+                    batch_annotations, batch_predictions = self.postprocessor.process_batch(
+                        batch_annotations, batch_predictions)
+                self.metric_executor.update_metrics_on_batch(
+                    range(start, start + len(batch_annotations)), batch_annotations, batch_predictions)
+            if self.metric_executor.need_store_predictions:
+                processed_annotations.extend(batch_annotations)
+                processed_predictions.extend(batch_predictions)
+            ImageProcessingAnnotation.release_cache_if_needed()
+        if self.metric_executor.need_store_predictions:
+            return processed_annotations, processed_predictions
         return annotations, predictions
 
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
