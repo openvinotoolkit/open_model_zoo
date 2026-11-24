@@ -54,3 +54,9 @@ class BaseRepresentation(abc.ABC):
 
     def release(self):
         pass
+
+    def pin(self):
+        pass
+
+    def unpin(self):
+        pass

@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from collections import OrderedDict
+from contextlib import contextmanager
 from enum import Enum
 import ctypes
 import os
@@ -147,23 +148,49 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
     def release(self):
         self._set_cached_value(None)
 
+    def pin(self):
+        with ImageProcessingAnnotation._cache_lock:
+            self._pin_count = getattr(self, '_pin_count', 0) + 1
+
+    def unpin(self):
+        with ImageProcessingAnnotation._cache_lock:
+            self._pin_count = max(getattr(self, '_pin_count', 0) - 1, 0)
+
     @staticmethod
     def release_cache_if_needed():
+        """Evict least recently used annotations over the memory limit, skipping pinned (in-use) ones."""
         with ImageProcessingAnnotation._cache_lock:
             if not ImageProcessingAnnotation._cached_bytes:
                 return False
             limit = _get_total_memory() * ImageProcessingAnnotation._cache_memory_threshold
             cache = ImageProcessingAnnotation._cached_annotations
             released = False
-            while cache and ImageProcessingAnnotation._cached_bytes > limit:
-                reference, size = cache.popitem(last=False)
-                ImageProcessingAnnotation._cached_bytes -= size
+            for reference in list(cache):
+                if ImageProcessingAnnotation._cached_bytes <= limit:
+                    break
                 annotation = reference()
+                if annotation is not None and getattr(annotation, '_pin_count', 0) > 0:
+                    continue
+                size = cache.pop(reference)
+                ImageProcessingAnnotation._cached_bytes -= size
                 if annotation is not None:
                     # The entry is already popped, so release() does not subtract its size again.
                     annotation.release()
                 released = True
             return released
+
+
+@contextmanager
+def pinned_annotations(annotations):
+    """Keep annotations from being evicted from the image cache while they are in use."""
+    annotations = list(annotations or [])
+    for annotation in annotations:
+        annotation.pin()
+    try:
+        yield
+    finally:
+        for annotation in annotations:
+            annotation.unpin()
 
 
 class ImageProcessingPrediction(ImageProcessingRepresentation):

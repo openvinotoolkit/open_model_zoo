@@ -34,6 +34,28 @@ def test_image_cache_evicts_least_recently_used_above_half_of_ram(monkeypatch):
     assert ImageProcessingAnnotation._cached_bytes == 50
 
 
+def test_image_cache_does_not_evict_pinned_annotations(monkeypatch):
+    monkeypatch.setattr(image_processing, '_get_total_memory', lambda: 100)
+    cache = OrderedDict()
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)
+    monkeypatch.setattr(ImageProcessingAnnotation, '_cached_bytes', 0)
+
+    first = ImageProcessingAnnotation('first', 'first.png')
+    second = ImageProcessingAnnotation('second', 'second.png')
+    first.value = np.zeros(40, dtype=np.uint8)
+    second.value = np.zeros(40, dtype=np.uint8)
+
+    with image_processing.pinned_annotations([first]):
+        assert ImageProcessingAnnotation.release_cache_if_needed()
+        assert first._value is not None
+        assert second._value is None
+
+    assert first._pin_count == 0
+    second.value = np.zeros(40, dtype=np.uint8)
+    assert ImageProcessingAnnotation.release_cache_if_needed()
+    assert first._value is None
+
+
 def test_image_cache_copies_array_views(monkeypatch):
     cache = OrderedDict()
     monkeypatch.setattr(ImageProcessingAnnotation, '_cached_annotations', cache)

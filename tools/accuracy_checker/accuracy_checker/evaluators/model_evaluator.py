@@ -32,7 +32,7 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
-from ..representation.image_processing import ImageProcessingAnnotation
+from ..representation.image_processing import ImageProcessingAnnotation, pinned_annotations
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 from ..metrics.metric_profiler import write_summary_result
@@ -439,6 +439,15 @@ class ModelEvaluator(BaseEvaluator):
     def _process_batch_results(
             self, batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
             enable_profiling=False, output_callback=None):
+        with pinned_annotations(batch_annotations):
+            self._process_pinned_batch_results(
+                batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
+                enable_profiling, output_callback)
+        ImageProcessingAnnotation.release_cache_if_needed()
+
+    def _process_pinned_batch_results(
+            self, batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
+            enable_profiling=False, output_callback=None):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             self.adapter.additional_output_mapping = self.launcher.additional_output_mapping
@@ -462,7 +471,6 @@ class ModelEvaluator(BaseEvaluator):
         if self.metric_executor.need_store_predictions:
             self._annotations.extend(annotations)
             self._predictions.extend(predictions)
-        ImageProcessingAnnotation.release_cache_if_needed()
 
     @staticmethod
     def _is_stored(stored_predictions=None):
@@ -489,6 +497,7 @@ class ModelEvaluator(BaseEvaluator):
             self._annotations = annotations
             self._predictions = predictions
 
+        ImageProcessingAnnotation.release_cache_if_needed()
         return annotations, predictions
 
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
