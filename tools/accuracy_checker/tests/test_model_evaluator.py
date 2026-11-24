@@ -118,15 +118,18 @@ class TestModelEvaluator:
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
+        self.dataset.annotation = [MagicMock(), MagicMock()]
+        self.evaluator.load = Mock(return_value=[MagicMock(), MagicMock()])
+        self.postprocessor.process_batch = Mock(return_value=([MagicMock()], [MagicMock()]))
 
         self.evaluator.process_dataset('path', None)
 
         assert self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert not self.postprocessor.process_batch.called
+        assert self.postprocessor.process_batch.call_count == 1
         assert self.metric.update_metrics_on_batch.call_count == 1
         assert not self.postprocessor.process_dataset.called
-        assert self.postprocessor.full_process.called
+        assert not self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_with_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
@@ -285,16 +288,19 @@ class TestModelEvaluatorAsync:
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
+        self.dataset.annotation = [MagicMock(), MagicMock()]
+        self.evaluator.load = Mock(return_value=[MagicMock(), MagicMock()])
+        self.postprocessor.process_batch = Mock(return_value=([MagicMock()], [MagicMock()]))
 
         self.evaluator.process_dataset('path', None)
 
         assert self.evaluator.load.called
         assert not self.launcher.predict.called
         assert not self.launcher.predict_async.called
-        assert not self.postprocessor.process_batch.called
+        assert self.postprocessor.process_batch.call_count == 1
         assert self.metric.update_metrics_on_batch.call_count == 1
         assert not self.postprocessor.process_dataset.called
-        assert self.postprocessor.full_process.called
+        assert not self.postprocessor.full_process.called
 
     def test_switch_to_sync_predict_if_need_reshaping(self):
         self.postprocessor.has_dataset_processors = False
