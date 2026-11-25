@@ -59,6 +59,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         self._gt_loader = self.LOADERS.get(gt_loader)
         self._pillow_to_rgb = gt_loader == GTLoader.PILLOW_RGB
         self._value = None
+        self._loaded_lazily = False
 
     @property
     def value(self):
@@ -72,11 +73,19 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
             gt = loader.read(self._image_path)
             self._value = gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy',
                                                                          'numpy_reader'] else gt
+            self._loaded_lazily = True
         return self._value
 
     @value.setter
     def value(self, value):
         self._value = value
+        self._loaded_lazily = False
+
+    def release_cached_value(self):
+        """Drop the ground truth image that was read lazily from disk; it is read again on the next access."""
+        if self._loaded_lazily:
+            self._value = None
+            self._loaded_lazily = False
 
 
 class ImageProcessingPrediction(ImageProcessingRepresentation):
