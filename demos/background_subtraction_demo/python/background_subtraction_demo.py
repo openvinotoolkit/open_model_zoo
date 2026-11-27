@@ -321,7 +321,7 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         if args.raw_output_message:
-            print_raw_results(objects, next_frame_id_to_show, model.labels)
+            print_raw_results(objects, next_frame_id_to_show)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
