@@ -356,8 +356,7 @@ def main():
                                 exit_msg = f'Exit code: {e.returncode}\n'
                             elif isinstance(e, subprocess.TimeoutExpired):
                                 exit_msg = f'Command timed out after {e.timeout} seconds\n'
-                            output += exit_msg
-                            print(output)
+                            print('{}\n{}'.format(output, exit_msg))
                             failed_tests.append(test_descr + '\n' + exit_msg)
                             num_failures += 1
                             execution_time = -1
