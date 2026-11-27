@@ -461,6 +461,17 @@ class ModelEvaluator(BaseEvaluator):
         if self.metric_executor.need_store_predictions:
             self._annotations.extend(annotations)
             self._predictions.extend(predictions)
+        else:
+            self._release_cached_annotations(batch_annotations, annotations)
+
+    @staticmethod
+    def _release_cached_annotations(*annotation_batches):
+        # lazily read ground truth images would otherwise stay in memory for the whole dataset
+        for batch in annotation_batches:
+            for annotation in batch or ():
+                release = getattr(annotation, 'release_cached_value', None)
+                if release is not None:
+                    release()
 
     @staticmethod
     def _is_stored(stored_predictions=None):
