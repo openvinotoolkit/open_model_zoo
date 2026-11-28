@@ -134,6 +134,8 @@ class MultiLabelAccuracy(MultiLabelMetric):
     def evaluate(self, annotations, predictions):
         tp_tn = np.add(self.tp, self.tn, dtype=float)
         per_class = np.divide(tp_tn, self.counter, out=np.zeros_like(tp_tn, dtype=float), where=self.counter != 0)
+        if not self.calculate_average:
+            return per_class
         average = np.sum(tp_tn) / np.sum(self.counter)
 
         return [*per_class, average]
@@ -230,9 +232,11 @@ class F1Score(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         precisions = self.precision.evaluate(annotations, predictions)
         recalls = self.recall.evaluate(annotations, predictions)
+        # precision and recall share this config, so they only end with an average if calculate_average is set
+        num_classes = len(self.labels)
 
-        precision_add = np.add(precisions[:-1], recalls[:-1], dtype=float)
-        precision_multiply = np.multiply(precisions[:-1], recalls[:-1], dtype=float)
+        precision_add = np.add(precisions[:num_classes], recalls[:num_classes], dtype=float)
+        precision_multiply = np.multiply(precisions[:num_classes], recalls[:num_classes], dtype=float)
 
         per_class = 2 * np.divide(
             precision_multiply, precision_add, out=np.zeros_like(precision_multiply, dtype=float),
