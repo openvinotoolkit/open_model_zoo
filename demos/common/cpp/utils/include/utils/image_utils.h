@@ -15,6 +15,7 @@
 */
 
 #pragma once
+#include <tuple>
 
 #include <opencv2/opencv.hpp>
 
@@ -27,3 +28,6 @@ enum RESIZE_MODE {
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode = RESIZE_FILL,
                        cv::InterpolationFlags interpolationMode = cv::INTER_LINEAR, cv::Rect* roi = nullptr,
                        cv::Scalar BorderConstant = cv::Scalar(0, 0, 0));
+
+
+bool is_aspect_ratio_equal(const std::tuple<int, int> &lhs_res,const std::tuple<int, int> &rhs_res);
