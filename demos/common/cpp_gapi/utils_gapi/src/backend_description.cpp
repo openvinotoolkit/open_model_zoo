@@ -6,6 +6,7 @@
 #include "utils_gapi/backend_description.hpp"
 #include "utils_gapi/kernel_package.hpp"
 
+
 BackendDescription BackendDescription::parseFromArgs(const std::string &arg, char sep) {
     std::vector<std::string> splitted_line = split(arg, sep);
     if (splitted_line.empty()) {
